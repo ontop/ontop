@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -55,8 +54,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.*;
@@ -842,32 +839,6 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	// return the SQL data type
-    // TODO: get rid of it
-    @Deprecated
-	private int getDataType(ImmutableTerm term) {
-		if (term instanceof ImmutableFunctionalTerm){
-			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-			return Optional.of(functionalTerm)
-					.flatMap(ImmutableFunctionalTerm::inferType)
-					.flatMap(TermTypeInference::getTermType)
-					.map(jdbcTypeMapper::getSQLType)
-					.orElse(Types.VARCHAR);
-		}
-        else if (term instanceof Variable) {
-            throw new RuntimeException("Cannot return the SQL type for: " + term);
-        }
-		/*
-		 * Boolean constant
-		 */
-		else if (term.equals(termFactory.getDBBooleanConstant(false))
-				 || term.equals(termFactory.getDBBooleanConstant(true))) {
-			return Types.BOOLEAN;
-		}
-
-		return Types.VARCHAR;
-	}
-
 	// Use string instead
 	@Deprecated
 	private static final class SignatureVariable {
@@ -912,71 +883,6 @@ public class OneShotSQLGeneratorEngine {
 	private String getMainColumnForSELECT(ImmutableTerm ht, AliasIndex index) {
 
 		return getSQLString(ht, index, false);
-	}
-
-
-	// TODO: move to SQLAdapter
-	private String getStringConcatenation(String[] params) {
-		String toReturn = sqladapter.strConcat(params);
-		if (sqladapter instanceof DB2SQLDialectAdapter) {
-			/*
-			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use
-			 * of a string column, host variable, constant, or function name.
-			 * http
-			 * ://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic
-			 * =%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
-			 */
-			if (isDistinct || isOrderBy) {
-				return sqladapter.sqlCast(toReturn, Types.VARCHAR);
-			}
-		}
-		return toReturn;
-	}
-
-	private boolean isStringColType(ImmutableTerm term, AliasIndex index) {
-		if (term instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
-			FunctionSymbol functionSymbol = function.getFunctionSymbol();
-			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-				/*
-				 * A URI function always returns a string, thus it is a string
-				 * column type.
-				 */
-				return !hasIRIDictionary();
-			}
-			else {
-				if (functionSymbol.getArity() == 1) {
-					if (functionSymbol.getName().equals("Count")) {
-						return false;
-					}
-					/*
-					 * Update the term with the parent term's first parameter.
-					 * Note: this method is confusing :(
-					 */
-					term = function.getTerm(0);
-					return isStringColType(term, index);
-				}
-			}
-		}
-		else if (term instanceof Variable) {
-			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
-			QualifiedAttributeID column0 = columns.iterator().next();
-
-			RelationDefinition relation = index.relationsForAliases.get(column0.getRelation());
-			if (relation != null) {
-				QuotedID columnId = column0.getAttribute();
-				for (Attribute a : relation.getAttributes()) {
-					if (a.getID().equals(columnId)) {
-						// TODO: check if it is ok to treat non-typed columns as string
-						// (was the previous behavior)
-						return !a.getTermType()
-								.filter(t -> !t.isString())
-								.isPresent();
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
