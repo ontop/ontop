@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.UUID;
+import java.util.function.Function;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -278,6 +282,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
         return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    protected String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(YEAR FROM %s)", termConverter.apply(terms.get(0)));
     }
 
     @Override

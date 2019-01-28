@@ -521,7 +521,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(uuid));
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBYear(), dbDatetimeTerm);
+    }
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

@@ -818,7 +818,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * Datetime functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", YEAR)
                     .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", DAY)
                     .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", MONTH)
                     .put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", HOURS)

@@ -13,11 +13,10 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-/**
- *
- */
+
 public class SimpleUnarySPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
 
+    private final RDFTermType inputType;
     private final RDFTermType targetType;
     private final boolean isAlwaysInjective;
     private final BiFunction<TermFactory, ImmutableTerm, ImmutableFunctionalTerm> dbFunctionalTermFct;
@@ -27,6 +26,7 @@ public class SimpleUnarySPARQLFunctionSymbolImpl extends ReduciblePositiveArityS
                                                   boolean isAlwaysInjective,
                                                   BiFunction<TermFactory, ImmutableTerm, ImmutableFunctionalTerm> dbFunctionalTermFct) {
         super(name, functionIRI, ImmutableList.of(inputType));
+        this.inputType = inputType;
         this.targetType = targetType;
         this.isAlwaysInjective = isAlwaysInjective;
         this.dbFunctionalTermFct = dbFunctionalTermFct;
@@ -53,7 +53,7 @@ public class SimpleUnarySPARQLFunctionSymbolImpl extends ReduciblePositiveArityS
         return termFactory.getConversion2RDFLexical(
                 dbFunctionalTermFct.apply(
                         termFactory,
-                        termFactory.getConversionFromRDFLexical2DB(subLexicalTerms.get(0), targetType)),
+                        termFactory.getConversionFromRDFLexical2DB(subLexicalTerms.get(0), inputType)),
                 targetType);
     }
 

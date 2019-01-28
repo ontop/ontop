@@ -521,4 +521,6 @@ public interface TermFactory {
 	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
 
 	ImmutableFunctionalTerm getDBRand(UUID uuid);
+
+	ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm);
 }

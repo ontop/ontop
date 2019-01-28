@@ -90,6 +90,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
         ObjectRDFType iriType = typeFactory.getIRITermType();
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
 
         DBTermType dbBoolean = typeFactory.getDBTypeFactory().getDBBooleanType();
@@ -142,7 +143,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_FLOOR", XPathFunction.NUMERIC_FLOOR, abstractNumericType,
                         dbFunctionSymbolFactory::getFloor),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ROUND", XPathFunction.NUMERIC_ROUND, abstractNumericType,
-                        dbFunctionSymbolFactory::getRound)
+                        dbFunctionSymbolFactory::getRound),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_YEAR", XPathFunction.YEAR_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBYear)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

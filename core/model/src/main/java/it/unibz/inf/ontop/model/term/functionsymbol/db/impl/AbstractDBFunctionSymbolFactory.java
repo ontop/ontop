@@ -59,6 +59,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Lazy
     @Nullable
     private DBFunctionSymbol sha512FunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol yearFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -132,6 +135,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
+    private final DBTermType dbIntegerType;
 
     /**
      * Name (in the DB dialect), arity -> predefined DBFunctionSymbol
@@ -171,6 +175,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
+        this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.predefinedFunctionTable = defaultRegularFunctionTable;
@@ -539,7 +544,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return dbFunctionSymbol;
     }
 
-
+    @Override
+    public DBFunctionSymbol getDBYear() {
+        if (yearFunctionSymbol == null)
+            yearFunctionSymbol = createYearFunctionSymbol();
+        return yearFunctionSymbol;
+    }
 
 
     /**
@@ -610,6 +620,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
+    }
+
+    protected DBFunctionSymbol createYearFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
+                this::serializeYear);
     }
 
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
@@ -690,6 +705,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                             TermFactory termFactory);
 
     protected abstract String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
