@@ -24,7 +24,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 
 	/* Numeric operations */
 
-	MINUS("minus", TermTypeInferenceRules.STANDARD_NUMERIC_RULE, ONTOP_NUMERIC_DT, false), // TODO (ROMAN): check -- never used
 	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE, false),
 
 	/* SPARQL Functions on Dates and Times */

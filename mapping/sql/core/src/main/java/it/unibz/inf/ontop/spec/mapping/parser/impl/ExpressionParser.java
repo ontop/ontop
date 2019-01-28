@@ -869,7 +869,10 @@ public class ExpressionParser {
             Term arg = getTerm(expression.getExpression());
             switch (expression.getSign()) {
                 case '-' :
-                    result = termFactory.getFunction(ExpressionOperation.MINUS, arg);
+                    result = termFactory.getFunction(
+                            dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
+                            termFactory.getDBConstant("-1", dbTypeFactory.getDBLargeIntegerType()),
+                            arg);
                     break;
                 case '+':
                     result = arg;

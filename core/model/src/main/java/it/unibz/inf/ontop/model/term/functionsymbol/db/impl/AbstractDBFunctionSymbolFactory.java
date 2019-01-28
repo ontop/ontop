@@ -717,8 +717,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         ABS,
         CEIL,
         FLOOR,
-        ROUND,
-        MINUS
+        ROUND
     }
 
 }

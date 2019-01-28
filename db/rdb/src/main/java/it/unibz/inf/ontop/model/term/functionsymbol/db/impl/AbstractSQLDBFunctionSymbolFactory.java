@@ -30,7 +30,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CEIL_STR = "CEIL";
     protected static final String ROUND_STR = "ROUND";
     protected static final String FLOOR_STR = "FLOOR";
-    protected static final String MINUS_STR = "MINUS";
 
 
     private final DBTypeFactory dbTypeFactory;
