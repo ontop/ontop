@@ -15,11 +15,11 @@ import java.util.function.Function;
 
 public class UnaryLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
 
-    private final Function<RDFTermType, DBFunctionSymbol> dbFunctionSymbolFct;
+    private final Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct;
     private final DBTermType dbStringType;
 
     protected UnaryLexicalFunctionSymbolImpl(DBTermType dbStringType, MetaRDFTermType metaRDFTermType,
-                                             Function<RDFTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+                                             Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         super("LATELY_TYPE_" + dbFunctionSymbolFct, ImmutableList.of(dbStringType, metaRDFTermType));
         this.dbFunctionSymbolFct = dbFunctionSymbolFct;
         this.dbStringType = dbStringType;
@@ -62,7 +62,7 @@ public class UnaryLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
             DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
 
             ImmutableFunctionalTerm dbTerm = termFactory.getImmutableFunctionalTerm(
-                    dbFunctionSymbolFct.apply(rdfType),
+                    dbFunctionSymbolFct.apply(dbType),
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(0), rdfType));
 
             return termFactory.getConversion2RDFLexical(dbType, dbTerm, rdfType)

@@ -503,7 +503,7 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
-			java.util.function.Function<RDFTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
 
 	/**
 	 * Using the SPARQL "=" operator

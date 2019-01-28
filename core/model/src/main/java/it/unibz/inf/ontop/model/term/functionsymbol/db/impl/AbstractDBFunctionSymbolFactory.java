@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBFunctionSymbolFactory.UnaryNumericLabel.*;
+
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private static final String BNODE_PREFIX = "_:ontop-bnode-";
@@ -91,6 +93,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
 
+    private final Table<UnaryNumericLabel, DBTermType, DBFunctionSymbol> unaryNumericTable;
     private final Table<String, DBTermType, DBMathBinaryOperator> binaryMathTable;
     private final Map<String, DBMathBinaryOperator> untypedBinaryMathMap;
 
@@ -161,6 +164,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.castTable = HashBasedTable.create();
         this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
+        this.unaryNumericTable = HashBasedTable.create();
         this.binaryMathTable = HashBasedTable.create();
         this.untypedBinaryMathMap = new HashMap<>();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -494,6 +498,49 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return newOperator;
     }
 
+    @Override
+    public DBFunctionSymbol getAbs(DBTermType dbTermType) {
+        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(ABS, dbTermType);
+        if (existingFunctionSymbol != null)
+            return existingFunctionSymbol;
+        DBFunctionSymbol dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
+        unaryNumericTable.put(ABS, dbTermType, dbFunctionSymbol);
+        return dbFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getCeil(DBTermType dbTermType) {
+        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(CEIL, dbTermType);
+        if (existingFunctionSymbol != null)
+            return existingFunctionSymbol;
+        DBFunctionSymbol dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
+        unaryNumericTable.put(CEIL, dbTermType, dbFunctionSymbol);
+        return dbFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getFloor(DBTermType dbTermType) {
+        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(FLOOR, dbTermType);
+        if (existingFunctionSymbol != null)
+            return existingFunctionSymbol;
+        DBFunctionSymbol dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
+        unaryNumericTable.put(FLOOR, dbTermType, dbFunctionSymbol);
+        return dbFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getRound(DBTermType dbTermType) {
+        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(ROUND, dbTermType);
+        if (existingFunctionSymbol != null)
+            return existingFunctionSymbol;
+        DBFunctionSymbol dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
+        unaryNumericTable.put(ROUND, dbTermType, dbFunctionSymbol);
+        return dbFunctionSymbol;
+    }
+
+
+
+
     /**
      * Can be overridden
      */
@@ -611,6 +658,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createR2RMLIRISafeEncode();
 
+    protected abstract DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType);
+    protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
+    protected abstract DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType);
+    protected abstract DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType);
+
+
     protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter,
                                      TermFactory termFactory);
@@ -659,4 +712,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 // Fallback to simple cast
                 .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
+
+    enum UnaryNumericLabel {
+        ABS,
+        CEIL,
+        FLOOR,
+        ROUND,
+        MINUS
+    }
+
 }

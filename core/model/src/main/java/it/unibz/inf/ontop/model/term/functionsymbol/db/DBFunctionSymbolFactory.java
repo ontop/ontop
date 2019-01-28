@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import org.mapdb.DB;
+
 
 /**
  * Factory for DBFunctionSymbols
@@ -161,4 +160,10 @@ public interface DBFunctionSymbolFactory {
      * Please use getDBMathBinaryOperator(...) if you know the type
      */
     DBMathBinaryOperator getUntypedDBMathBinaryOperator(String dbMathOperatorName);
+
+    DBFunctionSymbol getAbs(DBTermType dbTermType);
+    DBFunctionSymbol getCeil(DBTermType dbTermType);
+    DBFunctionSymbol getFloor(DBTermType dbTermType);
+    DBFunctionSymbol getRound(DBTermType dbTermType);
+
 }

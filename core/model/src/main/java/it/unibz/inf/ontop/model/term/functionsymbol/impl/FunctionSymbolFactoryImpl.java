@@ -59,7 +59,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
-        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory);
+        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
         this.commonDenominatorMap = new HashMap<>();
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
@@ -79,7 +79,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            TypeFactory typeFactory) {
+            TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
@@ -132,7 +132,15 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
-                new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean)
+                new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
+                new UnaryNumericSPARQLFunctionSymbolImpl("SP_ABS", XPathFunction.NUMERIC_ABS, abstractNumericType,
+                        dbFunctionSymbolFactory::getAbs),
+                new UnaryNumericSPARQLFunctionSymbolImpl("SP_CEIL", XPathFunction.NUMERIC_CEIL, abstractNumericType,
+                        dbFunctionSymbolFactory::getCeil),
+                new UnaryNumericSPARQLFunctionSymbolImpl("SP_FLOOR", XPathFunction.NUMERIC_FLOOR, abstractNumericType,
+                        dbFunctionSymbolFactory::getFloor),
+                new UnaryNumericSPARQLFunctionSymbolImpl("SP_ROUND", XPathFunction.NUMERIC_ROUND, abstractNumericType,
+                        dbFunctionSymbolFactory::getRound)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -257,7 +265,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<RDFTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+    public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
     }
 }

@@ -20,6 +20,10 @@ public class XPathFunction {
     public static final IRI SUBSTRING_BEFORE;
     public static final IRI SUBSTRING_AFTER;
     public static final IRI NOT;
+    public static final IRI NUMERIC_ABS;
+    public static final IRI NUMERIC_ROUND;
+    public static final IRI NUMERIC_FLOOR;
+    public static final IRI NUMERIC_CEIL;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -36,5 +40,9 @@ public class XPathFunction {
         SUBSTRING_BEFORE = factory.createIRI(PREFIX + "substring-before");
         SUBSTRING_AFTER = factory.createIRI(PREFIX + "substring-after");
         NOT = factory.createIRI(PREFIX + "not");
+        NUMERIC_ABS = factory.createIRI(PREFIX + "numeric-abs");
+        NUMERIC_ROUND = factory.createIRI(PREFIX + "numeric-round");
+        NUMERIC_FLOOR = factory.createIRI(PREFIX + "numeric-floor");
+        NUMERIC_CEIL = factory.createIRI(PREFIX + "numeric-ceil");
     }
 }

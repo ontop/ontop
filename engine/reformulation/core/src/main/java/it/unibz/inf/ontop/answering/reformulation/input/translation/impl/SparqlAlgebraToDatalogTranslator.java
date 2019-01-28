@@ -818,10 +818,6 @@ public class SparqlAlgebraToDatalogTranslator {
                     /*
                      * Numerical functions
                      */
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-abs", ABS)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-ceil", CEIL)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-floor", FLOOR)
-                    .put("http://www.w3.org/2005/xpath-functions#numeric-round", ROUND)
                     .put("RAND", RAND)
                     /*
                      * Datetime functions
