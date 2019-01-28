@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -31,15 +32,11 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbStringType = dbTypeFactory.getDBStringType();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
-        DBFunctionSymbol uiidFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(UUID_STR, 0, dbStringType,
-                false, abstractRootDBType);
-        table.put(UUID_STR, 0, uiidFunctionSymbol);
 
         DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
                 abstractRootDBType);
@@ -110,11 +107,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
-        return getRegularDBFunctionSymbol(UUID_STR, 0);
-    }
-
-    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
     }
@@ -122,5 +114,10 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
+    }
+
+    @Override
+    protected String getUUIDNameInDialect() {
+        return UUID_STR;
     }
 }

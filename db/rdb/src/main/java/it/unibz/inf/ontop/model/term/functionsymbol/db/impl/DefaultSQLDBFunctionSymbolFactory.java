@@ -6,8 +6,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -65,17 +67,17 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
-    }
-
-    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
+    protected String getUUIDNameInDialect() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 }

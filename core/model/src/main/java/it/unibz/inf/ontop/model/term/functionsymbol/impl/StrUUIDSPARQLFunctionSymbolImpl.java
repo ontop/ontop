@@ -12,13 +12,16 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class StrUUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements SPARQLFunctionSymbol {
 
+    private final UUID uuid;
     private final RDFDatatype xsdStringType;
 
-    protected StrUUIDSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType) {
+    protected StrUUIDSPARQLFunctionSymbolImpl(UUID uuid, RDFDatatype xsdStringType) {
         super("SP_STRUUID", ImmutableList.of());
+        this.uuid = uuid;
         this.xsdStringType = xsdStringType;
     }
 
@@ -56,7 +59,7 @@ public class StrUUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implemen
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableFunctionalTerm lexicalTerm = termFactory.getDBUUID();
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getDBUUID(uuid);
         return termFactory.getRDFFunctionalTerm(lexicalTerm, termFactory.getRDFTermTypeConstant(xsdStringType));
     }
 

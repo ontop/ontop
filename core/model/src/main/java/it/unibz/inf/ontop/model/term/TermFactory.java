@@ -38,6 +38,7 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public interface TermFactory {
@@ -469,7 +470,7 @@ public interface TermFactory {
 
     ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
 
-	ImmutableFunctionalTerm getDBUUID();
+	ImmutableFunctionalTerm getDBUUID(UUID uuid);
 
 	ImmutableFunctionalTerm getDBStrBefore(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
@@ -519,4 +520,5 @@ public interface TermFactory {
 
 	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
 
+	ImmutableFunctionalTerm getDBRand(UUID uuid);
 }

@@ -22,10 +22,6 @@ import static it.unibz.inf.ontop.model.type.impl.TermTypeInferenceRules.*;
 
 public enum ExpressionOperation implements FunctionSymbol {
 
-	/* Numeric operations */
-
-	RAND("RAND", TermTypeInferenceRules.PREDEFINED_DOUBLE_RULE, false),
-
 	/* SPARQL Functions on Dates and Times */
 
 	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE, true),

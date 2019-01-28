@@ -412,8 +412,8 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
-	public ImmutableFunctionalTerm getDBUUID() {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUUIDFunctionSymbol());
+	public ImmutableFunctionalTerm getDBUUID(UUID uuid) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUUID(uuid));
 	}
 
 	@Override
@@ -514,6 +514,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalEBVFunctionSymbol(), lexicalTerm, rdfDatatypeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBRand(UUID uuid) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(uuid));
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
@@ -110,8 +111,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new IsBlankSPARQLFunctionSymbolImpl(bnodeType, abstractRDFType, xsdBoolean),
                 new IsLiteralSPARQLFunctionSymbolImpl(rdfsLiteral, abstractRDFType, xsdBoolean),
                 new IsNumericSPARQLFunctionSymbolImpl(abstractNumericType, abstractRDFType, xsdBoolean),
-                new UUIDSPARQLFunctionSymbolImpl(iriType),
-                new StrUUIDSPARQLFunctionSymbolImpl(xsdString),
                 new ReplaceSPARQLFunctionSymbolImpl(3, xsdString),
                 new ReplaceSPARQLFunctionSymbolImpl(4, xsdString),
                 new RegexSPARQLFunctionSymbolImpl(2, xsdString, xsdBoolean),
@@ -211,9 +210,18 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity) {
-        return officialName.equals(XPathFunction.CONCAT.getIRIString())
-                ? getSPARQLConcatFunctionSymbol(arity)
-                : Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
+        switch (officialName) {
+            case "http://www.w3.org/2005/xpath-functions#concat":
+                return getSPARQLConcatFunctionSymbol(arity);
+            case SPARQL.RAND:
+                return Optional.of(createSPARQLRandFunctionSymbol());
+            case SPARQL.UUID:
+                return Optional.of(createSPARQLUUIDFunctionSymbol());
+            case SPARQL.STRUUID:
+                return Optional.of(createSPARQLStrUUIDFunctionSymbol());
+            default:
+                return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
+        }
     }
 
     @Override
@@ -229,6 +237,27 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(concatMap
                         .computeIfAbsent(arity, a -> new ConcatSPARQLFunctionSymbolImpl(a, typeFactory.getXsdStringDatatype())));
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because RAND is non-deterministic.
+     */
+    protected SPARQLFunctionSymbol createSPARQLRandFunctionSymbol() {
+        return new RandSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getXsdDoubleDatatype());
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because UUID is non-deterministic.
+     */
+    protected SPARQLFunctionSymbol createSPARQLUUIDFunctionSymbol() {
+        return new UUIDSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getIRITermType());
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because STRUUID is non-deterministic.
+     */
+    protected SPARQLFunctionSymbol createSPARQLStrUUIDFunctionSymbol() {
+        return new StrUUIDSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getXsdStringDatatype());
     }
 
     @Override
