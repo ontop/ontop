@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import org.mapdb.DB;
 
 import java.util.UUID;
 
@@ -172,4 +170,9 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getRound(DBTermType dbTermType);
 
     DBFunctionSymbol getDBYear();
+    DBFunctionSymbol getDBMonth();
+    DBFunctionSymbol getDBDay();
+    DBFunctionSymbol getDBHours();
+    DBFunctionSymbol getDBMinutes();
+    DBFunctionSymbol getDBSeconds();
 }

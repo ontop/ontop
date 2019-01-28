@@ -291,6 +291,39 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MONTH FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(HOUR FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MINUTE FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * TODO: is it returning an integer or a decimal?
+     */
+    @Override
+    protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(SECOND FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
     protected DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType) {
         return new DefaultTypedDBMathBinaryOperator(MULTIPLY_STR, dbNumericType);
     }

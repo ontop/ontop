@@ -527,6 +527,31 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableFunctionalTerm getDBMonth(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMonth(), dbDatetimeTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBDay(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDay(), dbDatetimeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBHours(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBHours(), dbDatetimeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMinutes(), dbDatetimeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSeconds(), dbDatetimeTerm);
+	}
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

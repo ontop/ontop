@@ -1081,26 +1081,6 @@ public class OneShotSQLGeneratorEngine {
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 		}
-		if (functionSymbol == ExpressionOperation.MINUTES) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateMinutes(literal);
-		}
-		if (functionSymbol == ExpressionOperation.DAY) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateDay(literal);
-		}
-		if (functionSymbol == ExpressionOperation.MONTH) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateMonth(literal);
-		}
-		if (functionSymbol == ExpressionOperation.SECONDS) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateSeconds(literal);
-		}
-		if (functionSymbol == ExpressionOperation.HOURS) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateHours(literal);
-		}
 		if (functionSymbol == ExpressionOperation.TZ) {
 			String literal = getSQLString(function.getTerm(0), index, false);
 			return sqladapter.dateTZ(literal);

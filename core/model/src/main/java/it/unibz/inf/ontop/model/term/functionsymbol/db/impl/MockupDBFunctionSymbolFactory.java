@@ -248,6 +248,36 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return new MockupDBIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }

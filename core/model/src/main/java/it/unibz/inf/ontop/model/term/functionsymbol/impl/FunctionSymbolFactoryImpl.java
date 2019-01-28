@@ -145,7 +145,17 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ROUND", XPathFunction.NUMERIC_ROUND, abstractNumericType,
                         dbFunctionSymbolFactory::getRound),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_YEAR", XPathFunction.YEAR_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBYear)
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBYear),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_MONTH", XPathFunction.MONTH_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBMonth),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_DAY", XPathFunction.DAY_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBDay),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_HOURS", XPathFunction.HOURS_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBHours),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_MINUTES", XPathFunction.MINUTES_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBMinutes),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_SECONDS", XPathFunction.SECONDS_FROM_DATETIME,
+                        xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

@@ -523,4 +523,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBRand(UUID uuid);
 
 	ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMonth(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBDay(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBHours(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 }
