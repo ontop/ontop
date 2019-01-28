@@ -816,10 +816,6 @@ public class SparqlAlgebraToDatalogTranslator {
     private static final ImmutableMap<String, FunctionSymbol> XPathFunctions =
             new ImmutableMap.Builder<String, FunctionSymbol>()
                     /*
-                     * Numerical functions
-                     */
-                    .put("RAND", RAND)
-                    /*
                      * Datetime functions
                      */
                     .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", YEAR)

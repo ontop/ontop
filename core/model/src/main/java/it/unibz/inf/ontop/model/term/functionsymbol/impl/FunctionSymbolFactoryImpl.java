@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
@@ -211,9 +212,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public Optional<SPARQLFunctionSymbol> getSPARQLFunctionSymbol(String officialName, int arity) {
-        return officialName.equals(XPathFunction.CONCAT.getIRIString())
-                ? getSPARQLConcatFunctionSymbol(arity)
-                : Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
+        switch (officialName) {
+            case "http://www.w3.org/2005/xpath-functions#concat":
+                return getSPARQLConcatFunctionSymbol(arity);
+            case SPARQL.RAND:
+                return Optional.of(createSPARQLRandFunctionSymbol());
+            default:
+                return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
+        }
     }
 
     @Override
@@ -229,6 +235,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(concatMap
                         .computeIfAbsent(arity, a -> new ConcatSPARQLFunctionSymbolImpl(a, typeFactory.getXsdStringDatatype())));
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because RAND is non-deterministic.
+     * TODO: explain it further
+     */
+    protected SPARQLFunctionSymbol createSPARQLRandFunctionSymbol() {
+        return new RandSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getXsdDoubleDatatype());
     }
 
     @Override

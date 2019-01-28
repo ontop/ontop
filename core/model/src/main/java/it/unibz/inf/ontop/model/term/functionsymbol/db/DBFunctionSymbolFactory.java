@@ -4,6 +4,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 
+import java.util.UUID;
+
 
 /**
  * Factory for DBFunctionSymbols
@@ -166,4 +168,5 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getFloor(DBTermType dbTermType);
     DBFunctionSymbol getRound(DBTermType dbTermType);
 
+    NonDeterministicDBFunctionSymbol getDBRand(UUID uuid);
 }

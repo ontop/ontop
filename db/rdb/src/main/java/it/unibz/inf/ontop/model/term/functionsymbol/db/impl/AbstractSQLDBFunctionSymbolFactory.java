@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.UUID;
+
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
     protected static final String UPPER_STR = "UPPER";
@@ -30,11 +32,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CEIL_STR = "CEIL";
     protected static final String ROUND_STR = "ROUND";
     protected static final String FLOOR_STR = "FLOOR";
+    protected static final String RAND_STR = "RAND";
 
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
+    private final DBTermType dbDoubleType;
     private final DBTermType abstractRootDBType;
     private final TermType abstractRootType;
     private final DBFunctionSymbol ifThenElse;
@@ -51,6 +55,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
+        this.dbDoubleType = dbTypeFactory.getDBDoubleType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
         this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
@@ -445,6 +450,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBBooleanFunctionSymbol getIsTrue() {
         return isTrue;
+    }
+
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
+        return new DefaultDBRandFunctionSymbol(getRandNameInDialect(), uuid, dbDoubleType);
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected String getRandNameInDialect() {
+        return RAND_STR;
     }
 
 }
