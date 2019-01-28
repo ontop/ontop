@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -96,7 +97,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
-                new EncodeForUriAbstractUnaryStringSPARQLFunctionSymbolImpl(xsdString),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_ENCODE_FOR_URI", XPathFunction.ENCODE_FOR_URI,
+                        xsdString, xsdString, true,
+                        TermFactory::getR2RMLIRISafeEncodeFunctionalTerm),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),

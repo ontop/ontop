@@ -50,38 +50,6 @@ public enum ExpressionOperation implements FunctionSymbol {
 		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1));
 		this.isInjective = isInjective;
 	}
-	// binary operations
-    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull TermType arg1, @Nonnull TermType arg2, boolean isInjective) {
-		this.name = name;
-		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2));
-		this.isInjective = isInjective;
-	}
-	// ternary operations
-    ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull TermType arg1, @Nonnull TermType arg2, @Nonnull TermType arg3, boolean isInjective) {
-		this.name = name;
-		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2, arg3));
-		this.isInjective = isInjective;
-	}
-	// Quad operations
-	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule, @Nonnull TermType arg1,
-						@Nonnull TermType arg2, @Nonnull TermType arg3, @Nonnull TermType arg4, boolean isInjective) {
-		this.name = name;
-		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argumentValidator = new SimpleArgumentValidator(ImmutableList.of(arg1, arg2, arg3, arg4));
-		this.isInjective = isInjective;
-	}
-
-	ExpressionOperation(@Nonnull String name, @Nonnull TermTypeInferenceRule termTypeInferenceRule,
-						@Nonnull ArgumentValidator argumentValidator, boolean isInjective) {
-		this.name = name;
-		this.termTypeInferenceRule = termTypeInferenceRule;
-		this.argumentValidator = argumentValidator;
-		this.isInjective = isInjective;
-	}
 
 	private final String name;
 	private final TermTypeInferenceRule termTypeInferenceRule;
