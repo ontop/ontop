@@ -458,7 +458,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     /**
-     * Can be overridden
+     * Can be overridden.
+     *
+     * Not an official SQL function
      */
     protected String getRandNameInDialect() {
         return RAND_STR;

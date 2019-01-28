@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
@@ -32,6 +31,7 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
@@ -1187,7 +1187,7 @@ public class ExpressionParser {
     private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {
             case 0:
-                return termFactory.getFunction(ExpressionOperation.RAND);
+                return termFactory.getFunction(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
         }
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
