@@ -103,8 +103,6 @@ public class OneShotSQLGeneratorEngine {
 	@Nullable
 	private final IRIDictionary uriRefIds;
 
-	private final ImmutableMap<FunctionSymbol, String> operations;
-
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
 	private final Relation2Predicate relation2Predicate;
@@ -170,7 +168,6 @@ public class OneShotSQLGeneratorEngine {
 		this.metadata = (RDBMetadata)metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, this.metadata.getDbmsVersion(), settings);
-		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
 		this.uriRefIds = iriDictionary;
@@ -183,7 +180,6 @@ public class OneShotSQLGeneratorEngine {
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
 									  boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-									  ImmutableMap<FunctionSymbol, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
@@ -199,7 +195,6 @@ public class OneShotSQLGeneratorEngine {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
-		this.operations = operations;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
@@ -222,14 +217,6 @@ public class OneShotSQLGeneratorEngine {
 		this.rdfTypeLifter = rdfTypeLifter;
 	}
 
-	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
-		ImmutableMap.Builder<FunctionSymbol, String> builder = new ImmutableMap.Builder<FunctionSymbol, String>()
-				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
-				.put(ExpressionOperation.NOW, sqladapter.dateNow());
-		
-		return builder.build();
-	}
-
 	/**
 	 * SQLGenerator must not be shared between threads but CLONED.
 	 *
@@ -241,7 +228,7 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
-				distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
+				distinctResultSet, uriRefIds, jdbcTypeMapper, iq2DatalogTranslator,
                 relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory,
 				optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter,
@@ -622,29 +609,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLCondition(ImmutableFunctionalTerm atom, AliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
-		if (operations.containsKey(functionSymbol)) {
-			String expressionFormat = operations.get(functionSymbol);
-			if (functionSymbol.getArity() == 1) {
-				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
-				ImmutableTerm term = atom.getTerm(0);
-				final String arg;
-				// TODO: avoid this test!
-				if (functionSymbol instanceof DBNotFunctionSymbol) {
-					arg = getSQLString(term, index, false);
-				}
-				else {
-					arg = getSQLString(term, index, false);
-				}
-				return String.format(expressionFormat, arg);
-			}
-			else if (functionSymbol.getArity() == 2) {
-				// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
-				String left = getSQLString(atom.getTerm(0), index, true);
-				String right = getSQLString(atom.getTerm(1), index, true);
-				return String.format(inBrackets(expressionFormat), left, right);
-			}
-		}
-		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
+		if (functionSymbol instanceof DBBooleanFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(atom.getTerms(),
 					// TODO: try to get rid of useBrackets
 					t -> getSQLString(t, index, false), termFactory);
@@ -1062,29 +1027,6 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
 
-		if (operations.containsKey(functionSymbol)) {
-			String expressionFormat = operations.get(functionSymbol);
-			switch (function.getArity()) {
-				case 0:
-					return expressionFormat;
-				case 1:
-					// for unary functions, e.g., NOT, IS NULL, IS NOT NULL
-					String arg = getSQLString(function.getTerm(0), index, true);
-					return String.format(expressionFormat, arg);
-				case 2:
-					// for binary functions, e.g., AND, OR, EQ, NEQ, GT etc.
-					String left = getSQLString(function.getTerm(0), index, true);
-					String right = getSQLString(function.getTerm(1), index, true);
-					String result = String.format(expressionFormat, left, right);
-					return useBrackets ? inBrackets(result) : result;
-				default:
-					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
-			}
-		}
-
-		/*
-		 * New approach
-		 */
 		if (functionSymbol instanceof DBFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(
 					function.getTerms(),
