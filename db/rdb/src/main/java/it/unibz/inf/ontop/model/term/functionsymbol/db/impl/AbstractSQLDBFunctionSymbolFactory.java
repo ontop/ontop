@@ -26,6 +26,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String DIVIDE_STR = "/";
     protected static final String ADD_STR = "+";
     protected static final String SUBSTRACT_STR = "-";
+    protected static final String ABS_STR = "ABS";
+    protected static final String CEIL_STR = "CEIL";
+    protected static final String ROUND_STR = "ROUND";
+    protected static final String FLOOR_STR = "FLOOR";
+
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
@@ -248,6 +253,26 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ABS_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEIL_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(FLOOR_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
     }
 
     @Override

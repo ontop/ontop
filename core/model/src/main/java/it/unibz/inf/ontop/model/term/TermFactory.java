@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -500,6 +501,10 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
+	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
+			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
+			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
 	/**
 	 * Using the SPARQL "=" operator
 	 *
@@ -513,4 +518,5 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getSPARQLEffectiveBooleanValue(ImmutableTerm rdfTerm);
 
 	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
+
 }

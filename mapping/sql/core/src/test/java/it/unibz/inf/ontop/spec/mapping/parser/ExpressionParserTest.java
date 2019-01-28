@@ -1057,7 +1057,10 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(MINUS, v), translation);
+        assertEquals(TERM_FACTORY.getFunction(
+                DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
+                TERM_FACTORY.getDBConstant("-1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType()),
+                v), translation);
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)

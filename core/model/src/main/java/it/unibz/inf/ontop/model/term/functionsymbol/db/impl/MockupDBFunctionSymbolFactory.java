@@ -178,6 +178,26 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBFunctionSymbol createAbsFunctionSymbol(DBTermType dbTermType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> immutableTerms,
                                        Function<ImmutableTerm, String> immutableTermStringFunction,
                                        TermFactory termFactory) {

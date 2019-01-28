@@ -224,10 +224,6 @@ public class OneShotSQLGeneratorEngine {
 
 	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
 		ImmutableMap.Builder<FunctionSymbol, String> builder = new ImmutableMap.Builder<FunctionSymbol, String>()
-				.put(ExpressionOperation.ABS, "ABS(%s)")
-				.put(ExpressionOperation.CEIL, sqladapter.ceil())
-				.put(ExpressionOperation.FLOOR, "FLOOR(%s)")
-				.put(ExpressionOperation.ROUND, sqladapter.round())
 				.put(ExpressionOperation.RAND, sqladapter.rand())
 				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
 				.put(ExpressionOperation.NOW, sqladapter.dateNow());
