@@ -557,6 +557,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableFunctionalTerm getDBNow() {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNow());
+    }
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

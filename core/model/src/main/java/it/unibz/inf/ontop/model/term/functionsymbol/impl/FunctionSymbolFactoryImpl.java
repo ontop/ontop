@@ -157,7 +157,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_SECONDS", XPathFunction.SECONDS_FROM_DATETIME,
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
-                xsdDatetime, xsdString, false, TermFactory::getDBTz)
+                xsdDatetime, xsdString, false, TermFactory::getDBTz),
+                new NowSPARQLFunctionSymbolImpl(xsdDatetime)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

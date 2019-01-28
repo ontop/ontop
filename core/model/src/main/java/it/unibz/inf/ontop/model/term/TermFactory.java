@@ -529,4 +529,5 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBNow();
 }

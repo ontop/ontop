@@ -176,4 +176,5 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMinutes();
     DBFunctionSymbol getDBSeconds();
     DBFunctionSymbol getDBTz();
+    DBFunctionSymbol getNow();
 }

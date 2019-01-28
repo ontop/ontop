@@ -37,6 +37,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ROUND_STR = "ROUND";
     protected static final String FLOOR_STR = "FLOOR";
     protected static final String RAND_STR = "RAND";
+    protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
     private final DBTypeFactory dbTypeFactory;
@@ -113,6 +114,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
@@ -161,6 +163,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
         //TODO: move away this synonym as it is non-standard
         builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+
+        DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
+                dbDateTimestamp, true, abstractRootDBType);
+        builder.put(CURRENT_TIMESTAMP_STR, 1, nowFunctionSymbol);
 
 
         return builder.build();
@@ -503,6 +509,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(getUUIDNameInDialect(), uuid, dbStringType);
+    }
+
+    @Override
+    public DBFunctionSymbol getNow() {
+        return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0);
     }
 
     /**
