@@ -454,7 +454,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
-        return new DefaultDBRandFunctionSymbol(getRandNameInDialect(), uuid, dbDoubleType);
+        return new DefaultNonDeterministicNullaryFunctionSymbol(getRandNameInDialect(), uuid, dbDoubleType);
+    }
+
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(getUUIDNameInDialect(), uuid, dbStringType);
     }
 
     /**
@@ -465,5 +470,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected String getRandNameInDialect() {
         return RAND_STR;
     }
+
+    protected abstract String getUUIDNameInDialect();
 
 }

@@ -9,13 +9,13 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class DefaultDBRandFunctionSymbol extends AbstractTypedDBFunctionSymbol implements NonDeterministicDBFunctionSymbol {
+public class DefaultNonDeterministicNullaryFunctionSymbol extends AbstractTypedDBFunctionSymbol implements NonDeterministicDBFunctionSymbol {
 
     private final String nameInDialect;
     private final UUID uuid;
 
-    protected DefaultDBRandFunctionSymbol(String nameInDialect, UUID uuid, DBTermType dbDoubleType) {
-        super(nameInDialect + uuid, ImmutableList.of(), dbDoubleType);
+    protected DefaultNonDeterministicNullaryFunctionSymbol(String nameInDialect, UUID uuid, DBTermType targetType) {
+        super(nameInDialect + uuid, ImmutableList.of(), targetType);
         this.nameInDialect = nameInDialect;
         this.uuid = uuid;
     }

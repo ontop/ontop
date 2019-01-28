@@ -412,8 +412,8 @@ public class TermFactoryImpl implements TermFactory {
     }
 
 	@Override
-	public ImmutableFunctionalTerm getDBUUID() {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUUIDFunctionSymbol());
+	public ImmutableFunctionalTerm getDBUUID(UUID uuid) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBUUID(uuid));
 	}
 
 	@Override

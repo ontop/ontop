@@ -374,7 +374,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getDBUUIDFunctionSymbol() {
+    public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

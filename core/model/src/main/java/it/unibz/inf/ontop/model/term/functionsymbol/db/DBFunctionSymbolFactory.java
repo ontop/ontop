@@ -141,7 +141,8 @@ public interface DBFunctionSymbolFactory {
      */
     DBBooleanFunctionSymbol getDBContains();
 
-    DBFunctionSymbol getDBUUIDFunctionSymbol();
+    NonDeterministicDBFunctionSymbol getDBRand(UUID uuid);
+    NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid);
 
     DBBooleanFunctionSymbol getDBRegexpMatches2();
     DBBooleanFunctionSymbol getDBRegexpMatches3();
@@ -167,6 +168,4 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getCeil(DBTermType dbTermType);
     DBFunctionSymbol getFloor(DBTermType dbTermType);
     DBFunctionSymbol getRound(DBTermType dbTermType);
-
-    NonDeterministicDBFunctionSymbol getDBRand(UUID uuid);
 }

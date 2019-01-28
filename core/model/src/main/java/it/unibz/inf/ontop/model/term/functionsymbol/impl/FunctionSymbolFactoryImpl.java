@@ -111,8 +111,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new IsBlankSPARQLFunctionSymbolImpl(bnodeType, abstractRDFType, xsdBoolean),
                 new IsLiteralSPARQLFunctionSymbolImpl(rdfsLiteral, abstractRDFType, xsdBoolean),
                 new IsNumericSPARQLFunctionSymbolImpl(abstractNumericType, abstractRDFType, xsdBoolean),
-                new UUIDSPARQLFunctionSymbolImpl(iriType),
-                new StrUUIDSPARQLFunctionSymbolImpl(xsdString),
                 new ReplaceSPARQLFunctionSymbolImpl(3, xsdString),
                 new ReplaceSPARQLFunctionSymbolImpl(4, xsdString),
                 new RegexSPARQLFunctionSymbolImpl(2, xsdString, xsdBoolean),
@@ -217,6 +215,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 return getSPARQLConcatFunctionSymbol(arity);
             case SPARQL.RAND:
                 return Optional.of(createSPARQLRandFunctionSymbol());
+            case SPARQL.UUID:
+                return Optional.of(createSPARQLUUIDFunctionSymbol());
+            case SPARQL.STRUUID:
+                return Optional.of(createSPARQLStrUUIDFunctionSymbol());
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
@@ -239,10 +241,23 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     /**
      * Freshly created on the fly with a UUID because RAND is non-deterministic.
-     * TODO: explain it further
      */
     protected SPARQLFunctionSymbol createSPARQLRandFunctionSymbol() {
         return new RandSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getXsdDoubleDatatype());
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because UUID is non-deterministic.
+     */
+    protected SPARQLFunctionSymbol createSPARQLUUIDFunctionSymbol() {
+        return new UUIDSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getIRITermType());
+    }
+
+    /**
+     * Freshly created on the fly with a UUID because STRUUID is non-deterministic.
+     */
+    protected SPARQLFunctionSymbol createSPARQLStrUUIDFunctionSymbol() {
+        return new StrUUIDSPARQLFunctionSymbolImpl(UUID.randomUUID(), typeFactory.getXsdStringDatatype());
     }
 
     @Override

@@ -470,7 +470,7 @@ public interface TermFactory {
 
     ImmutableFunctionalTerm getRDFDatatypeStringFunctionalTerm(ImmutableTerm rdfTypeTerm);
 
-	ImmutableFunctionalTerm getDBUUID();
+	ImmutableFunctionalTerm getDBUUID(UUID uuid);
 
 	ImmutableFunctionalTerm getDBStrBefore(ImmutableTerm arg1, ImmutableTerm arg2);
 	ImmutableFunctionalTerm getDBStrAfter(ImmutableTerm arg1, ImmutableTerm arg2);
