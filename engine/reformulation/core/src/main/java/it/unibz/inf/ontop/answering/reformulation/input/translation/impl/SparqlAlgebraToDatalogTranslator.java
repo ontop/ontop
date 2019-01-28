@@ -819,7 +819,6 @@ public class SparqlAlgebraToDatalogTranslator {
                      * Datetime functions
                      */
                     .put("NOW", NOW)
-                    .put("TZ", TZ)
                     .build();
 
 	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =

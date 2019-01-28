@@ -552,6 +552,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBTz(), dbDatetimeTerm);
+    }
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

@@ -67,6 +67,12 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
+                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }

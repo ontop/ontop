@@ -24,8 +24,7 @@ public enum ExpressionOperation implements FunctionSymbol {
 
 	/* SPARQL Functions on Dates and Times */
 
-	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE, true),
-	TZ("TZ", TermTypeInferenceRules.PREDEFINED_STRING_RULE, XSD_DATETIME_DT, false);
+	NOW("NOW", TermTypeInferenceRules.PREDEFINED_DATETIME_RULE, true);
 
 
 	// 0-ary operations

@@ -32,6 +32,17 @@ public class SimpleUnarySPARQLFunctionSymbolImpl extends ReduciblePositiveArityS
         this.dbFunctionalTermFct = dbFunctionalTermFct;
     }
 
+    protected SimpleUnarySPARQLFunctionSymbolImpl(@Nonnull String name, String officialName,
+                                                  RDFTermType inputType, RDFTermType targetType,
+                                                  boolean isAlwaysInjective,
+                                                  BiFunction<TermFactory, ImmutableTerm, ImmutableFunctionalTerm> dbFunctionalTermFct) {
+        super(name, officialName, ImmutableList.of(inputType));
+        this.inputType = inputType;
+        this.targetType = targetType;
+        this.isAlwaysInjective = isAlwaysInjective;
+        this.dbFunctionalTermFct = dbFunctionalTermFct;
+    }
+
     /**
      * If the child type is xsd:string or a language tag, then returns it.
      *

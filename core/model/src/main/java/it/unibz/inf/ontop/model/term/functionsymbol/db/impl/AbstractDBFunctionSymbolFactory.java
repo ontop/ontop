@@ -77,7 +77,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Lazy
     @Nullable
     private DBFunctionSymbol secondsFunctionSymbol;
-
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol tzFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -604,6 +606,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return secondsFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBTz() {
+        if (tzFunctionSymbol == null)
+            tzFunctionSymbol = createTzFunctionSymbol();
+        return tzFunctionSymbol;
+    }
+
     /**
      * Can be overridden
      */
@@ -702,6 +711,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected DBFunctionSymbol createSecondsFunctionSymbol() {
         return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
                 this::serializeSeconds);
+    }
+
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbStringType, false,
+                this::serializeTz);
     }
 
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
@@ -808,6 +822,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
+
+    protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
 
 
     @Override

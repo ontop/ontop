@@ -1081,10 +1081,6 @@ public class OneShotSQLGeneratorEngine {
 					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
 			}
 		}
-		if (functionSymbol == ExpressionOperation.TZ) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateTZ(literal);
-		}
 
 		/*
 		 * New approach
