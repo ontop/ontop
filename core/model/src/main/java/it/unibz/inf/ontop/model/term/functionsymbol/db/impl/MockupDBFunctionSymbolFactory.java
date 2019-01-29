@@ -32,13 +32,14 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
     private final DBTermType dbStringType;
+    private final DBTypeFactory dbTypeFactory;
 
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDefaultDenormalizationTable(typeFactory),
                 createDefaultRegularFunctionTable(typeFactory), typeFactory);
         abstractRootType = typeFactory.getAbstractAtomicTermType();
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
         abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         dbStringType = dbTypeFactory.getDBStringType();
@@ -131,14 +132,20 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
     }
 
+    /**
+     * Too simplistic!
+     */
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBDateTimestampType(), dbStringType);
     }
 
+    /**
+     * Too simplistic!
+     */
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBBooleanType(), dbStringType);
     }
 
     @Override
