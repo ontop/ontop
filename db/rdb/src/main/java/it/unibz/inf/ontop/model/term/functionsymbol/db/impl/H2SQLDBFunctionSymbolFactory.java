@@ -122,10 +122,13 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
+    /**
+     * Asks the timezone to be included
+     */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: serialize date time norm for H2");
+        return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSZ'), ' ', 'T')", termConverter.apply(terms.get(0)));
     }
 
     @Override
