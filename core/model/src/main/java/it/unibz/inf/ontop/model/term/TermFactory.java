@@ -521,4 +521,13 @@ public interface TermFactory {
 	ImmutableExpression getLexicalEffectiveBooleanValue(ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm);
 
 	ImmutableFunctionalTerm getDBRand(UUID uuid);
+
+	ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMonth(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBDay(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBHours(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBNow();
 }

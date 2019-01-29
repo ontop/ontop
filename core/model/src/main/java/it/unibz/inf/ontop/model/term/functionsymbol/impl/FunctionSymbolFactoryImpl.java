@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -89,6 +90,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
         ObjectRDFType bnodeType = typeFactory.getBlankNodeType();
         ObjectRDFType iriType = typeFactory.getIRITermType();
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
 
         DBTermType dbBoolean = typeFactory.getDBTypeFactory().getDBBooleanType();
@@ -96,7 +98,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
                 new LcaseSPARQLFunctionSymbolImpl(xsdString),
-                new EncodeForUriAbstractUnaryStringSPARQLFunctionSymbolImpl(xsdString),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_ENCODE_FOR_URI", XPathFunction.ENCODE_FOR_URI,
+                        xsdString, xsdString, true,
+                        TermFactory::getR2RMLIRISafeEncodeFunctionalTerm),
                 new StartsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new EndsWithSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
                 new ContainsSPARQLFunctionSymbolImpl(xsdString, xsdBoolean),
@@ -139,7 +143,22 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_FLOOR", XPathFunction.NUMERIC_FLOOR, abstractNumericType,
                         dbFunctionSymbolFactory::getFloor),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ROUND", XPathFunction.NUMERIC_ROUND, abstractNumericType,
-                        dbFunctionSymbolFactory::getRound)
+                        dbFunctionSymbolFactory::getRound),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_YEAR", XPathFunction.YEAR_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBYear),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_MONTH", XPathFunction.MONTH_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBMonth),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_DAY", XPathFunction.DAY_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBDay),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_HOURS", XPathFunction.HOURS_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBHours),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_MINUTES", XPathFunction.MINUTES_FROM_DATETIME,
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBMinutes),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_SECONDS", XPathFunction.SECONDS_FROM_DATETIME,
+                        xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
+                new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
+                xsdDatetime, xsdString, false, TermFactory::getDBTz),
+                new NowSPARQLFunctionSymbolImpl(xsdDatetime)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();

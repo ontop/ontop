@@ -32,23 +32,17 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     private final DBTermType dbBooleanType;
     private final DBTermType abstractRootDBType;
     private final DBTermType dbStringType;
+    private final DBTypeFactory dbTypeFactory;
 
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory),
-                createDefaultDenormalizationTable(typeFactory),
+        super(createDefaultDenormalizationTable(typeFactory),
                 createDefaultRegularFunctionTable(typeFactory), typeFactory);
         abstractRootType = typeFactory.getAbstractAtomicTermType();
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
         abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         dbStringType = dbTypeFactory.getDBStringType();
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
-            TypeFactory typeFactory) {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        return builder.build();
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
@@ -136,6 +130,22 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    /**
+     * Too simplistic!
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBDateTimestampType(), dbStringType);
+    }
+
+    /**
+     * Too simplistic!
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBBooleanType(), dbStringType);
     }
 
     @Override
@@ -238,6 +248,47 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
@@ -385,6 +436,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    public DBFunctionSymbol getNow() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 

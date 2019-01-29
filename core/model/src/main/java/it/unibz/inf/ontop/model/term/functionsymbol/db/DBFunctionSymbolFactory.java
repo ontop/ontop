@@ -168,4 +168,13 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getCeil(DBTermType dbTermType);
     DBFunctionSymbol getFloor(DBTermType dbTermType);
     DBFunctionSymbol getRound(DBTermType dbTermType);
+
+    DBFunctionSymbol getDBYear();
+    DBFunctionSymbol getDBMonth();
+    DBFunctionSymbol getDBDay();
+    DBFunctionSymbol getDBHours();
+    DBFunctionSymbol getDBMinutes();
+    DBFunctionSymbol getDBSeconds();
+    DBFunctionSymbol getDBTz();
+    DBFunctionSymbol getNow();
 }

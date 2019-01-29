@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.DB2SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -55,8 +54,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.model.type.*;
@@ -102,8 +99,6 @@ public class OneShotSQLGeneratorEngine {
 
 	@Nullable
 	private final IRIDictionary uriRefIds;
-
-	private final ImmutableMap<FunctionSymbol, String> operations;
 
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(OneShotSQLGeneratorEngine.class);
 	private final JdbcTypeMapper jdbcTypeMapper;
@@ -170,7 +165,6 @@ public class OneShotSQLGeneratorEngine {
 		this.metadata = (RDBMetadata)metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, this.metadata.getDbmsVersion(), settings);
-		this.operations = buildOperations(sqladapter);
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
 		this.uriRefIds = iriDictionary;
@@ -183,7 +177,6 @@ public class OneShotSQLGeneratorEngine {
 	private OneShotSQLGeneratorEngine(RDBMetadata metadata, SQLDialectAdapter sqlAdapter,
 									  boolean distinctResultSet,
 									  IRIDictionary uriRefIds, JdbcTypeMapper jdbcTypeMapper,
-									  ImmutableMap<FunctionSymbol, String> operations,
 									  IQ2DatalogTranslator iq2DatalogTranslator, Relation2Predicate relation2Predicate,
 									  DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
 									  TypeFactory typeFactory, TermFactory termFactory, IQConverter iqConverter,
@@ -199,7 +192,6 @@ public class OneShotSQLGeneratorEngine {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
-		this.operations = operations;
 		this.distinctResultSet = distinctResultSet;
 		this.uriRefIds = uriRefIds;
 		this.jdbcTypeMapper = jdbcTypeMapper;
@@ -222,14 +214,6 @@ public class OneShotSQLGeneratorEngine {
 		this.rdfTypeLifter = rdfTypeLifter;
 	}
 
-	private static ImmutableMap<FunctionSymbol, String> buildOperations(SQLDialectAdapter sqladapter) {
-		ImmutableMap.Builder<FunctionSymbol, String> builder = new ImmutableMap.Builder<FunctionSymbol, String>()
-				//.put(ExpressionOperation.IS_TRUE, "%s IS TRUE")
-				.put(ExpressionOperation.NOW, sqladapter.dateNow());
-		
-		return builder.build();
-	}
-
 	/**
 	 * SQLGenerator must not be shared between threads but CLONED.
 	 *
@@ -241,7 +225,7 @@ public class OneShotSQLGeneratorEngine {
 	@Override
 	public OneShotSQLGeneratorEngine clone() {
 		return new OneShotSQLGeneratorEngine(metadata, sqladapter,
-				distinctResultSet, uriRefIds, jdbcTypeMapper, operations, iq2DatalogTranslator,
+				distinctResultSet, uriRefIds, jdbcTypeMapper, iq2DatalogTranslator,
                 relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory,
 				optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter,
@@ -622,29 +606,7 @@ public class OneShotSQLGeneratorEngine {
 	 */
 	private String getSQLCondition(ImmutableFunctionalTerm atom, AliasIndex index) {
 		Predicate functionSymbol = atom.getFunctionSymbol();
-		if (operations.containsKey(functionSymbol)) {
-			String expressionFormat = operations.get(functionSymbol);
-			if (functionSymbol.getArity() == 1) {
-				// For unary boolean operators, e.g., NOT, IS NULL, IS NOT NULL.
-				ImmutableTerm term = atom.getTerm(0);
-				final String arg;
-				// TODO: avoid this test!
-				if (functionSymbol instanceof DBNotFunctionSymbol) {
-					arg = getSQLString(term, index, false);
-				}
-				else {
-					arg = getSQLString(term, index, false);
-				}
-				return String.format(expressionFormat, arg);
-			}
-			else if (functionSymbol.getArity() == 2) {
-				// For binary boolean operators, e.g., AND, OR, EQ, GT, LT, etc.
-				String left = getSQLString(atom.getTerm(0), index, true);
-				String right = getSQLString(atom.getTerm(1), index, true);
-				return String.format(inBrackets(expressionFormat), left, right);
-			}
-		}
-		else if (functionSymbol instanceof DBBooleanFunctionSymbol) {
+		if (functionSymbol instanceof DBBooleanFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(atom.getTerms(),
 					// TODO: try to get rid of useBrackets
 					t -> getSQLString(t, index, false), termFactory);
@@ -877,32 +839,6 @@ public class OneShotSQLGeneratorEngine {
 		return equalities;
 	}
 
-	// return the SQL data type
-    // TODO: get rid of it
-    @Deprecated
-	private int getDataType(ImmutableTerm term) {
-		if (term instanceof ImmutableFunctionalTerm){
-			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-			return Optional.of(functionalTerm)
-					.flatMap(ImmutableFunctionalTerm::inferType)
-					.flatMap(TermTypeInference::getTermType)
-					.map(jdbcTypeMapper::getSQLType)
-					.orElse(Types.VARCHAR);
-		}
-        else if (term instanceof Variable) {
-            throw new RuntimeException("Cannot return the SQL type for: " + term);
-        }
-		/*
-		 * Boolean constant
-		 */
-		else if (term.equals(termFactory.getDBBooleanConstant(false))
-				 || term.equals(termFactory.getDBBooleanConstant(true))) {
-			return Types.BOOLEAN;
-		}
-
-		return Types.VARCHAR;
-	}
-
 	// Use string instead
 	@Deprecated
 	private static final class SignatureVariable {
@@ -947,71 +883,6 @@ public class OneShotSQLGeneratorEngine {
 	private String getMainColumnForSELECT(ImmutableTerm ht, AliasIndex index) {
 
 		return getSQLString(ht, index, false);
-	}
-
-
-	// TODO: move to SQLAdapter
-	private String getStringConcatenation(String[] params) {
-		String toReturn = sqladapter.strConcat(params);
-		if (sqladapter instanceof DB2SQLDialectAdapter) {
-			/*
-			 * A work around to handle DB2 (>9.1) issue SQL0134N: Improper use
-			 * of a string column, host variable, constant, or function name.
-			 * http
-			 * ://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic
-			 * =%2Fcom.ibm.db2.luw.messages.sql.doc%2Fdoc%2Fmsql00134n.html
-			 */
-			if (isDistinct || isOrderBy) {
-				return sqladapter.sqlCast(toReturn, Types.VARCHAR);
-			}
-		}
-		return toReturn;
-	}
-
-	private boolean isStringColType(ImmutableTerm term, AliasIndex index) {
-		if (term instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
-			FunctionSymbol functionSymbol = function.getFunctionSymbol();
-			if (functionSymbol instanceof IRIStringTemplateFunctionSymbol) {
-				/*
-				 * A URI function always returns a string, thus it is a string
-				 * column type.
-				 */
-				return !hasIRIDictionary();
-			}
-			else {
-				if (functionSymbol.getArity() == 1) {
-					if (functionSymbol.getName().equals("Count")) {
-						return false;
-					}
-					/*
-					 * Update the term with the parent term's first parameter.
-					 * Note: this method is confusing :(
-					 */
-					term = function.getTerm(0);
-					return isStringColType(term, index);
-				}
-			}
-		}
-		else if (term instanceof Variable) {
-			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
-			QualifiedAttributeID column0 = columns.iterator().next();
-
-			RelationDefinition relation = index.relationsForAliases.get(column0.getRelation());
-			if (relation != null) {
-				QuotedID columnId = column0.getAttribute();
-				for (Attribute a : relation.getAttributes()) {
-					if (a.getID().equals(columnId)) {
-						// TODO: check if it is ok to treat non-typed columns as string
-						// (was the previous behavior)
-						return !a.getTermType()
-								.filter(t -> !t.isString())
-								.isPresent();
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -1062,57 +933,6 @@ public class OneShotSQLGeneratorEngine {
 		ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
 		Predicate functionSymbol = function.getFunctionSymbol();
 
-		if (operations.containsKey(functionSymbol)) {
-			String expressionFormat = operations.get(functionSymbol);
-			switch (function.getArity()) {
-				case 0:
-					return expressionFormat;
-				case 1:
-					// for unary functions, e.g., NOT, IS NULL, IS NOT NULL
-					String arg = getSQLString(function.getTerm(0), index, true);
-					return String.format(expressionFormat, arg);
-				case 2:
-					// for binary functions, e.g., AND, OR, EQ, NEQ, GT etc.
-					String left = getSQLString(function.getTerm(0), index, true);
-					String right = getSQLString(function.getTerm(1), index, true);
-					String result = String.format(expressionFormat, left, right);
-					return useBrackets ? inBrackets(result) : result;
-				default:
-					throw new RuntimeException("Cannot translate boolean function: " + functionSymbol);
-			}
-		}
-		if (functionSymbol == ExpressionOperation.YEAR) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateYear(literal);
-		}
-		if (functionSymbol == ExpressionOperation.MINUTES) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateMinutes(literal);
-		}
-		if (functionSymbol == ExpressionOperation.DAY) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateDay(literal);
-		}
-		if (functionSymbol == ExpressionOperation.MONTH) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateMonth(literal);
-		}
-		if (functionSymbol == ExpressionOperation.SECONDS) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateSeconds(literal);
-		}
-		if (functionSymbol == ExpressionOperation.HOURS) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateHours(literal);
-		}
-		if (functionSymbol == ExpressionOperation.TZ) {
-			String literal = getSQLString(function.getTerm(0), index, false);
-			return sqladapter.dateTZ(literal);
-		}
-
-		/*
-		 * New approach
-		 */
 		if (functionSymbol instanceof DBFunctionSymbol) {
 			return ((DBFunctionSymbol) functionSymbol).getNativeDBString(
 					function.getTerms(),

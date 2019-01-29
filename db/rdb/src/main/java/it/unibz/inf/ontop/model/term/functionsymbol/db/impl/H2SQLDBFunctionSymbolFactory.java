@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.util.UUID;
 import java.util.function.Function;
 
 public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -25,7 +24,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory),createDefaultDenormalizationTable(typeFactory),
+        super(createDefaultDenormalizationTable(typeFactory),
                 createH2RegularFunctionTable(typeFactory), typeFactory);
     }
 
@@ -107,6 +106,13 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
+                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        // TODO: throw a better exception
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
     }
@@ -114,6 +120,15 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
+    }
+
+    /**
+     * Asks the timezone to be included
+     */
+    @Override
+    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSZ'), ' ', 'T')", termConverter.apply(terms.get(0)));
     }
 
     @Override

@@ -24,6 +24,13 @@ public class XPathFunction {
     public static final IRI NUMERIC_ROUND;
     public static final IRI NUMERIC_FLOOR;
     public static final IRI NUMERIC_CEIL;
+    public static final IRI YEAR_FROM_DATETIME;
+    public static final IRI MONTH_FROM_DATETIME;
+    public static final IRI DAY_FROM_DATETIME;
+    public static final IRI HOURS_FROM_DATETIME;
+    public static final IRI MINUTES_FROM_DATETIME;
+    public static final IRI SECONDS_FROM_DATETIME;
+    public static final IRI TIMEZONE_FROM_DATETIME;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -44,5 +51,12 @@ public class XPathFunction {
         NUMERIC_ROUND = factory.createIRI(PREFIX + "numeric-round");
         NUMERIC_FLOOR = factory.createIRI(PREFIX + "numeric-floor");
         NUMERIC_CEIL = factory.createIRI(PREFIX + "numeric-ceil");
+        YEAR_FROM_DATETIME = factory.createIRI(PREFIX + "year-from-dateTime");
+        MONTH_FROM_DATETIME = factory.createIRI(PREFIX + "month-from-dateTime");
+        DAY_FROM_DATETIME = factory.createIRI(PREFIX + "day-from-dateTime");
+        HOURS_FROM_DATETIME = factory.createIRI(PREFIX + "hours-from-dateTime");
+        MINUTES_FROM_DATETIME = factory.createIRI(PREFIX + "minutes-from-dateTime");
+        SECONDS_FROM_DATETIME = factory.createIRI(PREFIX + "seconds-from-dateTime");
+        TIMEZONE_FROM_DATETIME = factory.createIRI(PREFIX + "timezone-from-dateTime");
     }
 }

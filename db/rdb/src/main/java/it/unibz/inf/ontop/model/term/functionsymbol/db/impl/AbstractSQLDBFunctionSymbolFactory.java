@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.UUID;
+import java.util.function.Function;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
 
@@ -33,6 +37,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String ROUND_STR = "ROUND";
     protected static final String FLOOR_STR = "FLOOR";
     protected static final String RAND_STR = "RAND";
+    protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
     private final DBTypeFactory dbTypeFactory;
@@ -47,11 +52,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBBooleanFunctionSymbol isNotNull;
     private final DBBooleanFunctionSymbol isTrue;
 
-    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
-                                                 ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
+    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
-        super(normalizationTable, deNormalizationTable, regularFunctionTable, typeFactory);
+        super(deNormalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
@@ -63,26 +67,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
         this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
         this.isTrue = createDBIsTrue(dbBooleanType);
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
-            TypeFactory typeFactory) {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        DBTermType stringType = dbTypeFactory.getDBStringType();
-        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
-
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        // Date time
-        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
-                new DefaultSQLTimestampISONormFunctionSymbol(timestampType, stringType));
-        // Boolean
-        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultSQLBooleanNormFunctionSymbol(booleanType, stringType));
-
-        return builder.build();
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
@@ -109,6 +93,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
@@ -157,6 +142,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
         //TODO: move away this synonym as it is non-standard
         builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+
+        DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
+                dbDateTimestamp, true, abstractRootDBType);
+        builder.put(CURRENT_TIMESTAMP_STR, 1, nowFunctionSymbol);
 
 
         return builder.build();
@@ -278,6 +267,62 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
         return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(ROUND_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    protected String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(YEAR FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MONTH FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(DAY FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(HOUR FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(MINUTE FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * TODO: is it returning an integer or a decimal?
+     */
+    @Override
+    protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
+                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("EXTRACT(SECOND FROM %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+        return new DefaultSQLTimestampISONormFunctionSymbol(
+                dbTypeFactory.getDBDateTimestampType(),
+                dbStringType,
+                this::serializeDateTimeNorm);
+    }
+
+
+    protected abstract String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
+        return new DefaultSQLBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
     }
 
     @Override
@@ -460,6 +505,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(getUUIDNameInDialect(), uuid, dbStringType);
+    }
+
+    @Override
+    public DBFunctionSymbol getNow() {
+        return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0);
     }
 
     /**

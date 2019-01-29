@@ -59,8 +59,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
-
 
 /***
  * Translate a SPARQL algebra expression into a Datalog program that has the
@@ -785,23 +783,11 @@ public class SparqlAlgebraToDatalogTranslator {
             for (ValueExpr a : f.getArgs())
                 terms.add(getExpression(a, variables));
 
-            // New approach
             Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
                     f.getURI(), terms.size());
 
             if (optionalFunctionSymbol.isPresent()) {
                 return termFactory.getFunction(optionalFunctionSymbol.get(), terms);
-            }
-
-            // Old approach
-            FunctionSymbol p = XPathFunctions.get(f.getURI());
-            if (p != null) {
-                if (arity != p.getArity())
-                    throw new OntopInvalidInputQueryException(
-                            "Wrong number of arguments (found " + terms.size() + ", only " +
-                                    p.getArity() + "supported) for SPARQL " + f.getURI() + "function");
-
-                return termFactory.getFunction(p, terms);
             }
 		}
         // other subclasses
@@ -811,22 +797,6 @@ public class SparqlAlgebraToDatalogTranslator {
         // NAryValueOperator (ListMemberOperator and Coalesce)
 		throw new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!");
 	}
-
-    // XPath 1.0 functions (XPath 1.1 has variants with more arguments)
-    private static final ImmutableMap<String, FunctionSymbol> XPathFunctions =
-            new ImmutableMap.Builder<String, FunctionSymbol>()
-                    /*
-                     * Datetime functions
-                     */
-                    .put("http://www.w3.org/2005/xpath-functions#year-from-dateTime", YEAR)
-                    .put("http://www.w3.org/2005/xpath-functions#day-from-dateTime", DAY)
-                    .put("http://www.w3.org/2005/xpath-functions#month-from-dateTime", MONTH)
-                    .put("http://www.w3.org/2005/xpath-functions#hours-from-dateTime", HOURS)
-                    .put("http://www.w3.org/2005/xpath-functions#minutes-from-dateTime", MINUTES)
-                    .put("http://www.w3.org/2005/xpath-functions#seconds-from-dateTime", SECONDS)
-                    .put("NOW", NOW)
-                    .put("TZ", TZ)
-                    .build();
 
 	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, String>()

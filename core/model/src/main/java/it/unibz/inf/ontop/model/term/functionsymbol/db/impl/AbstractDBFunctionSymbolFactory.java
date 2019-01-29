@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -59,6 +58,27 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Lazy
     @Nullable
     private DBFunctionSymbol sha512FunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol yearFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol monthFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol dayFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol hoursFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol minutesFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol secondsFunctionSymbol;
+    // Lazy
+    @Nullable
+    private DBFunctionSymbol tzFunctionSymbol;
 
     // Lazy
     @Nullable
@@ -80,8 +100,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBTypeConversionFunctionSymbol> castMap;
     /**
      *  For conversion function symbols that implies a NORMALIZATION as RDF lexical term
+     *
+     *  LAZY
      */
-    private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
+    @Nullable
+    private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
 
     /**
      *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
@@ -132,6 +155,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
+    private final DBTermType dbIntegerType;
+    private final DBTermType dbDecimalType;
 
     /**
      * Name (in the DB dialect), arity -> predefined DBFunctionSymbol
@@ -157,13 +182,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
 
-    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
-                                              ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                               ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
-        this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
         this.unaryNumericTable = HashBasedTable.create();
         this.binaryMathTable = HashBasedTable.create();
@@ -171,6 +194,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
+        this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
+        this.dbDecimalType = dbTypeFactory.getDBDecimalType();
         this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbStringType);
         this.predefinedFunctionTable = defaultRegularFunctionTable;
@@ -206,7 +231,25 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.stringInequalityMap = new HashMap<>();
         this.datetimeInequalityMap = new HashMap<>();
         this.defaultInequalityMap = new HashMap<>();
+        this.normalizationTable = null;
     }
+
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        builder.put(dbTypeFactory.getDBDateTimestampType(),
+                typeFactory.getXsdDatetimeDatatype(), createDateTimeNormFunctionSymbol());
+        // Boolean
+        builder.put(dbTypeFactory.getDBBooleanType(),
+                typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
+
+        return builder.build();
+    }
+
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
 
     @Override
     public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
@@ -539,8 +582,54 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return dbFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getDBYear() {
+        if (yearFunctionSymbol == null)
+            yearFunctionSymbol = createYearFunctionSymbol();
+        return yearFunctionSymbol;
+    }
 
+    @Override
+    public DBFunctionSymbol getDBMonth() {
+        if (monthFunctionSymbol == null)
+            monthFunctionSymbol = createMonthFunctionSymbol();
+        return monthFunctionSymbol;
+    }
 
+    @Override
+    public DBFunctionSymbol getDBDay() {
+        if (dayFunctionSymbol == null)
+            dayFunctionSymbol = createDayFunctionSymbol();
+        return dayFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBHours() {
+        if (hoursFunctionSymbol == null)
+            hoursFunctionSymbol = createHoursFunctionSymbol();
+        return hoursFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMinutes() {
+        if (minutesFunctionSymbol == null)
+            minutesFunctionSymbol = createMinutesFunctionSymbol();
+        return minutesFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSeconds() {
+        if (secondsFunctionSymbol == null)
+            secondsFunctionSymbol = createSecondsFunctionSymbol();
+        return secondsFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBTz() {
+        if (tzFunctionSymbol == null)
+            tzFunctionSymbol = createTzFunctionSymbol();
+        return tzFunctionSymbol;
+    }
 
     /**
      * Can be overridden
@@ -610,6 +699,41 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createSHA512FunctionSymbol() {
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
+    }
+
+    protected DBFunctionSymbol createYearFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
+                this::serializeYear);
+    }
+
+    protected DBFunctionSymbol createMonthFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_MONTH", rootDBType, dbIntegerType, false,
+                this::serializeMonth);
+    }
+
+    protected DBFunctionSymbol createDayFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_DAY", rootDBType, dbIntegerType, false,
+                this::serializeDay);
+    }
+
+    protected DBFunctionSymbol createHoursFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_HOURS", rootDBType, dbIntegerType, false,
+                this::serializeHours);
+    }
+
+    protected DBFunctionSymbol createMinutesFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_MINUTES", rootDBType, dbIntegerType, false,
+                this::serializeMinutes);
+    }
+
+    protected DBFunctionSymbol createSecondsFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
+                this::serializeSeconds);
+    }
+
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbStringType, false,
+                this::serializeTz);
     }
 
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
@@ -693,8 +817,40 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
+    protected abstract String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms,
+                                            Function<ImmutableTerm, String> termConverter,
+                                            TermFactory termFactory);
+
+    protected abstract String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter,
+                                               TermFactory termFactory);
+
+
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
+        if (normalizationTable == null)
+            normalizationTable = createNormalizationTable();
+
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)

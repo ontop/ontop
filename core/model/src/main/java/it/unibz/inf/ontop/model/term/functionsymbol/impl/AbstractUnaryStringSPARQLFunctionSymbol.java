@@ -36,7 +36,9 @@ public abstract class AbstractUnaryStringSPARQLFunctionSymbol extends ReducibleP
     }
 
     @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, VariableNullability variableNullability) {
+    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
+                                            ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
+                                            VariableNullability variableNullability) {
         return typeTerms.get(0);
     }
 }
