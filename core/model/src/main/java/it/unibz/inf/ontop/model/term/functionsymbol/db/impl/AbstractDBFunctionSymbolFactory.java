@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -101,8 +100,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBTypeConversionFunctionSymbol> castMap;
     /**
      *  For conversion function symbols that implies a NORMALIZATION as RDF lexical term
+     *
+     *  LAZY
      */
-    private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
+    @Nullable
+    private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
 
     /**
      *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
@@ -180,13 +182,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
 
-    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable,
-                                              ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                               ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
-        this.normalizationTable = normalizationTable;
         this.deNormalizationTable = deNormalizationTable;
         this.unaryNumericTable = HashBasedTable.create();
         this.binaryMathTable = HashBasedTable.create();
@@ -231,7 +231,25 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.stringInequalityMap = new HashMap<>();
         this.datetimeInequalityMap = new HashMap<>();
         this.defaultInequalityMap = new HashMap<>();
+        this.normalizationTable = null;
     }
+
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        builder.put(dbTypeFactory.getDBDateTimestampType(),
+                typeFactory.getXsdDatetimeDatatype(), createDateTimeNormFunctionSymbol());
+        // Boolean
+        builder.put(dbTypeFactory.getDBBooleanType(),
+                typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
+
+        return builder.build();
+    }
+
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
 
     @Override
     public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
@@ -830,6 +848,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
+        if (normalizationTable == null)
+            normalizationTable = createNormalizationTable();
+
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)

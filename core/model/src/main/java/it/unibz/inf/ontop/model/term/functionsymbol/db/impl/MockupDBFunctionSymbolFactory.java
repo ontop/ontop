@@ -35,20 +35,13 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory),
-                createDefaultDenormalizationTable(typeFactory),
+        super(createDefaultDenormalizationTable(typeFactory),
                 createDefaultRegularFunctionTable(typeFactory), typeFactory);
         abstractRootType = typeFactory.getAbstractAtomicTermType();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
         abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         dbStringType = dbTypeFactory.getDBStringType();
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultNormalizationTable(
-            TypeFactory typeFactory) {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        return builder.build();
     }
 
     protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
@@ -136,6 +129,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new MockupR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override

@@ -24,7 +24,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultNormalizationTable(typeFactory),createDefaultDenormalizationTable(typeFactory),
+        super(createDefaultDenormalizationTable(typeFactory),
                 createH2RegularFunctionTable(typeFactory), typeFactory);
     }
 
@@ -120,6 +120,12 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
+    }
+
+    @Override
+    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new RuntimeException("TODO: serialize date time norm for H2");
     }
 
     @Override
