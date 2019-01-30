@@ -97,26 +97,6 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
     }
 
     @Override
-    public String sqlOrderBy(List<OrderCondition> conditions, String viewname) {
-        String sql = "";
-        if(!conditions.isEmpty()) {
-            sql = "ORDER BY ";
-            boolean needComma = false;
-            for (OrderCondition c : conditions) {
-                if (needComma) {
-                    sql += ", ";
-                }
-                sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
-                if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
-                    sql += " DESC";
-                }
-                needComma = true;
-            }
-        }
-        return sql;
-    }
-
-    @Override
     public String sqlCast(String value, int type) {
         String strType = null;
         if (type == Types.VARCHAR) {

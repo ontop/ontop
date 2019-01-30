@@ -62,7 +62,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.sql.Types;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
