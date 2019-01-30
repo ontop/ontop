@@ -307,7 +307,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
                 needComma = true;
             }
         }
-        return sql;
+        return sql + " NULLS FIRST";
     }
 
     @Override
