@@ -32,7 +32,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +64,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
 	private final IntermediateQueryFactory iqFactory;
+	private final OrderBySimplifier orderBySimplifier;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -80,7 +80,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 								EQNormalizer eqNormalizer,
 								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
 								IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter,
-								TermFactory termFactory, AtomFactory atomFactory, IntermediateQueryFactory iqFactory) {
+								TermFactory termFactory, AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
+								OrderBySimplifier orderBySimplifier) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -95,6 +96,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.termFactory = termFactory;
 		this.atomFactory = atomFactory;
 		this.iqFactory = iqFactory;
+		this.orderBySimplifier = orderBySimplifier;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 
@@ -198,7 +200,9 @@ public class QuestQueryProcessor implements QueryReformulator {
                 intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
                 log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
-				IQ executableQuery = generateExecutableQuery(iqConverter.convert(intermediateQuery));
+				IQ optimizedQuery = orderBySimplifier.optimize(iqConverter.convert(intermediateQuery));
+
+				IQ executableQuery = generateExecutableQuery(optimizedQuery);
 				queryCache.put(inputQuery, executableQuery);
 				return executableQuery;
 
