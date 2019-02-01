@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transformer.LevelUpTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,7 +26,8 @@ public class LevelUpTransformerImpl implements LevelUpTransformer {
                 tree;
     }
 
-    private IQTree unfoldRelation(IQTree tree, DatabaseRelationDefinition databaseRelationDefinition) {
+    private IQTree unfoldRelation(IQTree tree, DatabaseRelationDefinition dR) {
+
     }
 
     private Optional<DatabaseRelationDefinition> selectLeafRelation(IQTree tree) {
@@ -37,6 +39,9 @@ public class LevelUpTransformerImpl implements LevelUpTransformer {
     }
 
     private Stream<DatabaseRelationDefinition> retrieveAllRelations(Stream<DatabaseRelationDefinition> rDefs, IQTree tree) {
+        if(tree instanceof LeafIQTree){
+            return Stream.of();
+        }
         if(tree instanceof ExtensionalDataNode){
             DatabaseRelationDefinition rDef = ((DatabaseRelationDefinition)((ExtensionalDataNode) tree).getDataAtom().getPredicate().getRelationDefinition());
             return Stream.concat(
@@ -44,7 +49,10 @@ public class LevelUpTransformerImpl implements LevelUpTransformer {
                     getAncestorRelations(Optional.of(rDef))
             );
         }
-        return Stream.of();
+        for(IQTree child: tree.getChildren()){
+            rDefs = retrieveAllRelations(rDefs, child);
+        }
+        return rDefs;
     }
 
     // includes the input relation
