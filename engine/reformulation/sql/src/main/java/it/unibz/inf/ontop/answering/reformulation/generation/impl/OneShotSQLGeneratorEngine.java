@@ -24,13 +24,13 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
@@ -39,9 +39,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.node.SliceNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
@@ -121,6 +119,7 @@ public class OneShotSQLGeneratorEngine {
 
 	// the only two mutable (query-dependent) fields
 	private boolean isDistinct = false;
+	private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
 
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
@@ -136,7 +135,7 @@ public class OneShotSQLGeneratorEngine {
 							  IntermediateQueryFactory iqFactory, OptimizerFactory optimizerFactory,
 							  PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer, ImmutabilityTools immutabilityTools,
 							  UniqueTermTypeExtractor uniqueTermTypeExtractor, PostProcessingProjectionSplitter projectionSplitter,
-							  TermTypeTermLifter rdfTypeLifter) {
+							  TermTypeTermLifter rdfTypeLifter, IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator) {
 		this.relation2Predicate = relation2Predicate;
 		this.datalogNormalizer = datalogNormalizer;
 		this.datalogFactory = datalogFactory;
@@ -153,6 +152,7 @@ public class OneShotSQLGeneratorEngine {
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
 		this.projectionSplitter = projectionSplitter;
 		this.rdfTypeLifter = rdfTypeLifter;
+		this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
 
 		String driverURI = settings.getJdbcDriver();
 
@@ -185,8 +185,8 @@ public class OneShotSQLGeneratorEngine {
 									  ImmutabilityTools immutabilityTools,
 									  UniqueTermTypeExtractor uniqueTermTypeExtractor,
 									  PostProcessingProjectionSplitter projectionSplitter,
-									  TermTypeTermLifter rdfTypeLifter
-									  ) {
+									  TermTypeTermLifter rdfTypeLifter,
+									  IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator) {
 		this.metadata = metadata;
 		this.idFactory = metadata.getQuotedIDFactory();
 		this.sqladapter = sqlAdapter;
@@ -210,6 +210,7 @@ public class OneShotSQLGeneratorEngine {
 		this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
 		this.projectionSplitter = projectionSplitter;
 		this.rdfTypeLifter = rdfTypeLifter;
+		this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
 	}
 
 	/**
@@ -227,19 +228,13 @@ public class OneShotSQLGeneratorEngine {
                 relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener, pushDownExpressionOptimizer, iqFactory,
 				optimizerFactory, pullUpExpressionOptimizer, immutabilityTools, uniqueTermTypeExtractor, projectionSplitter,
-				rdfTypeLifter);
+				rdfTypeLifter, defaultIQTree2NativeNodeGenerator);
 	}
 
 	/**
-	 * Generates and SQL query ready to be executed by Quest. Each query is a
-	 * SELECT FROM WHERE query. To know more about each of these see the inner
-	 * method descriptions.
-	 * Observe that the SQL is produced by {@link #generateQuery}
-	 *
-	 * @param initialIQ
+	 * TODO: explain the split between legacy and new-gen SQL generation
 	 */
-	public IQ generateSourceQuery(IQ initialIQ, ExecutorRegistry executorRegistry)
-			throws OntopReformulationException {
+	public IQ generateSourceQuery(IQ initialIQ, ExecutorRegistry executorRegistry) {
 
 		IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(initialIQ);
 
@@ -247,73 +242,134 @@ public class OneShotSQLGeneratorEngine {
 
 		PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(rdfTypeLiftedIQ);
 
-		/*
-		 * Only the SUB-tree is translated into SQL
-		 */
 		IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), executorRegistry);
-		ImmutableSortedSet<Variable> childSignature = ImmutableSortedSet.copyOf(normalizedSubTree.getVariables());
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(normalizedSubTree, ImmutableList.copyOf(childSignature));
+		QueryModifierSplit queryModifierSplit = splitQueryModifiers(normalizedSubTree);
+
+		ImmutableSortedSet<Variable> datalogSignature = ImmutableSortedSet.copyOf(
+				queryModifierSplit.treeToConvertInDatalog.getVariables());
+
+		String datalogSQLString = generateDatalogSQLQuery(queryModifierSplit.treeToConvertInDatalog, datalogSignature);
+
+		NativeNode nativeNode = generateMainNativeNode(queryModifierSplit.ancestors, datalogSignature, datalogSQLString,
+				extractVariableTypeMap(queryModifierSplit.treeToConvertInDatalog),
+				queryModifierSplit.treeToConvertInDatalog.getVariableNullability());
+
+//		if (queryModifiers.hasModifiers()) {
+//			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
+//			// if (!groupby.isEmpty()) {
+//			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
+//			// havingStr + "\n";
+//			// }
+//			// List<OrderCondition> conditions =
+//			// query.getQueryModifiers().getSortConditions();
+//
+//			long limit = queryModifiers.getLimit();
+//			long offset = queryModifiers.getOffset();
+//			List<OrderCondition> conditions = queryModifiers.getSortConditions();
+//
+//			final String modifier;
+//			if (!conditions.isEmpty()) {
+//				modifier = sqladapter.sqlOrderByAndSlice(conditions, OUTER_VIEW_NAME, limit, offset) + "\n";
+//			}
+//			else if (limit != -1 || offset != -1) {
+//				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
+//			}
+//			else {
+//				modifier = "";
+//			}
+//
+//			resultingQuery = "SELECT *\n" +
+//					"FROM " + inBrackets("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
+//					modifier;
+//		}
+//		else {
+//			resultingQuery = queryString;
+//		}
+
+		UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
+
+		return iqFactory.createIQ(initialIQ.getProjectionAtom(), newTree);
+	}
+
+	private String generateDatalogSQLQuery(IQTree iqTree, ImmutableSortedSet<Variable> signature) {
+		DatalogProgram queryProgram = iq2DatalogTranslator.translate(iqTree, ImmutableList.copyOf(signature));
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.addMinimalEqualityToLeftOrNestedInnerJoin(cq);
 		}
 		log.debug("Program normalized for SQL translation:\n" + queryProgram);
 
-		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
-		isDistinct = queryModifiers.hasModifiers() && queryModifiers.isDistinct();
+//		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
+//		isDistinct = queryModifiers.hasModifiers() && queryModifiers.isDistinct();
 
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram.getRules());
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 
-		final String resultingQuery;
-		String queryString = generateQuery(childSignature.stream()
-				.map(Variable::getName)
-				.collect(ImmutableCollectors.toList()),
+		return generateQuery(signature.stream()
+						.map(Variable::getName)
+						.collect(ImmutableCollectors.toList()),
 				ruleIndex, predicatesInBottomUp, extensionalPredicates);
-		if (queryModifiers.hasModifiers()) {
-			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
-			// if (!groupby.isEmpty()) {
-			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
-			// havingStr + "\n";
-			// }
-			// List<OrderCondition> conditions =
-			// query.getQueryModifiers().getSortConditions();
-
-			long limit = queryModifiers.getLimit();
-			long offset = queryModifiers.getOffset();
-			List<OrderCondition> conditions = queryModifiers.getSortConditions();
-
-			final String modifier;
-			if (!conditions.isEmpty()) {
-				modifier = sqladapter.sqlOrderByAndSlice(conditions, OUTER_VIEW_NAME, limit, offset) + "\n";
-			}
-			else if (limit != -1 || offset != -1) {
-				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
-			}
-			else {
-				modifier = "";
-			}
-
-			resultingQuery = "SELECT *\n" +
-					"FROM " + inBrackets("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
-					modifier;
-		}
-		else {
-			resultingQuery = queryString;
-		}
-
-		ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(normalizedSubTree);
-
-		NativeNode nativeNode = iqFactory.createNativeNode(childSignature, variableTypeMap, resultingQuery,
-				normalizedSubTree.getVariableNullability());
-		UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
-
-		return iqFactory.createIQ(initialIQ.getProjectionAtom(), newTree);
 	}
 
+	private NativeNode generateMainNativeNode(ImmutableList<UnaryOperatorNode> ancestors,
+										  ImmutableSortedSet<Variable> datalogSignature,
+										  String datalogSQLString, ImmutableMap<Variable, DBTermType> datalogVariableTypeMap,
+										  VariableNullability datalogVariableNullability) {
+
+		NativeNode nativeNode = iqFactory.createNativeNode(datalogSignature, datalogVariableTypeMap, datalogSQLString,
+				datalogVariableNullability);
+
+		if (ancestors.isEmpty())
+			return nativeNode;
+
+		IQTree tree = ancestors.reverse().stream()
+				.reduce((IQTree) nativeNode,
+						(t, n) -> iqFactory.createUnaryIQTree(n, t),
+						(t1, t2) -> {
+					throw new MinorOntopInternalBugException("No combination expected");
+				});
+
+		return defaultIQTree2NativeNodeGenerator.generate(tree);
+
+	}
+
+	/**
+	 * Ancestors:  "top" query modifiers from the tree, including the first construction node if followed by an OrderBy.
+	 */
+	private QueryModifierSplit splitQueryModifiers(IQTree tree) {
+		ImmutableList.Builder<UnaryOperatorNode> ancestorBuilder = ImmutableList.builder();
+
+		//Non-final
+		IQTree currentTree = tree;
+		do {
+			QueryNode rootNode = currentTree.getRootNode();
+			if (rootNode instanceof QueryModifierNode) {
+				ancestorBuilder.add((UnaryOperatorNode) rootNode);
+				currentTree = ((UnaryIQTree) currentTree).getChild();
+			}
+			else if (rootNode instanceof ConstructionNode) {
+				IQTree child = ((UnaryIQTree) currentTree).getChild();
+				if (child.getRootNode() instanceof QueryModifierNode) {
+					ancestorBuilder.add((UnaryOperatorNode) rootNode);
+					currentTree = child;
+				}
+				else
+					break;
+			}
+			else break;
+		} while (true);
+
+		// TODO: shall we try to create a construction for projecting away variables?
+		return new QueryModifierSplit(ancestorBuilder.build(), currentTree);
+	}
+
+	/**
+	 * TODO: what about the distinct?
+	 * TODO: move the distinct and slice lifting to the post-processing splitter
+	 */
 	private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator, ExecutorRegistry executorRegistry) {
 
 	    IQTree sliceLiftedTree = liftSlice(subTree);
@@ -390,7 +446,7 @@ public class OneShotSQLGeneratorEngine {
 
 
 	/**
-	 * Generates the full SQL query.
+	 * Generates the main part of SQL query (except top query modifiers and perhaps an additional projection).
 	 * An important part of this program is {@link #generateQueryFromRules}
 	 * that will create a view for every ans predicate in the input Datalog program.
 	 *
@@ -403,7 +459,7 @@ public class OneShotSQLGeneratorEngine {
 	private String generateQuery(List<String> signature,
 								 Multimap<Predicate, CQIE> ruleIndex,
 								 List<Predicate> predicatesInBottomUp,
-								 List<Predicate> extensionalPredicates) throws OntopReformulationException {
+								 List<Predicate> extensionalPredicates) {
 
 		AtomicInteger viewCounter = new AtomicInteger(0);
 
@@ -1111,5 +1167,20 @@ public class OneShotSQLGeneratorEngine {
 
 	private static String inBrackets(String s) {
 		return "(" + s + ")";
+	}
+
+	/**
+	 * Temporary class
+	 */
+	private static class QueryModifierSplit {
+
+		final ImmutableList<UnaryOperatorNode> ancestors;
+		final IQTree treeToConvertInDatalog;
+
+		private QueryModifierSplit(ImmutableList<UnaryOperatorNode> ancestors,
+								   IQTree treeToConvertInDatalog) {
+			this.ancestors = ancestors;
+			this.treeToConvertInDatalog = treeToConvertInDatalog;
+		}
 	}
 }

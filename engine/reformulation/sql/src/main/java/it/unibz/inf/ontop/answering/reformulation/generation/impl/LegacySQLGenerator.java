@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
@@ -58,14 +59,14 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
                                ImmutabilityTools immutabilityTools, UniqueTermTypeExtractor uniqueTermTypeExtractor,
                                PostProcessingProjectionSplitter projectionSplitter,
-                               TermTypeTermLifter metaTypeLifter)
+                               TermTypeTermLifter metaTypeLifter, IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator)
     {
 
         originalEngine = new OneShotSQLGeneratorEngine(metadata, iriDictionary, settings, jdbcTypeMapper,
                 iq2DatalogTranslator, relation2Predicate, datalogNormalizer, datalogFactory,
                 typeFactory, termFactory, iqConverter, atomFactory, unionFlattener,
                 pushDownExpressionOptimizer, iqFactory, optimizerFactory, pullUpExpressionOptimizer, immutabilityTools,
-                uniqueTermTypeExtractor, projectionSplitter, metaTypeLifter);
+                uniqueTermTypeExtractor, projectionSplitter, metaTypeLifter, defaultIQTree2NativeNodeGenerator);
     }
 
     @Override
