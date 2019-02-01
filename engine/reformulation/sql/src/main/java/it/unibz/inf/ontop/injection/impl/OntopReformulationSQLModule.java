@@ -6,6 +6,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhere;
+import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 
@@ -21,6 +22,8 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
     @Override
     protected void configure() {
         bind(OntopReformulationSQLSettings.class).toInstance(settings);
+
+        bindFromSettings(SelectFromWhereSerializer.class);
 
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(
