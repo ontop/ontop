@@ -121,7 +121,6 @@ public class OneShotSQLGeneratorEngine {
 
 	// the only two mutable (query-dependent) fields
 	private boolean isDistinct = false;
-	private boolean isOrderBy = false;
 
 
 	OneShotSQLGeneratorEngine(DBMetadata metadata,
@@ -263,7 +262,6 @@ public class OneShotSQLGeneratorEngine {
 
 		MutableQueryModifiers queryModifiers = queryProgram.getQueryModifiers();
 		isDistinct = queryModifiers.hasModifiers() && queryModifiers.isDistinct();
-		isOrderBy = queryModifiers.hasModifiers() && !queryModifiers.getSortConditions().isEmpty();
 
 		DatalogDependencyGraphGenerator depGraph = new DatalogDependencyGraphGenerator(queryProgram.getRules());
 		Multimap<Predicate, CQIE> ruleIndex = depGraph.getRuleIndex();
