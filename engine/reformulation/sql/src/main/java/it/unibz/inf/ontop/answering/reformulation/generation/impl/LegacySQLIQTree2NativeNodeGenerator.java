@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
@@ -51,16 +52,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * This class generates an SQLExecutableQuery from the datalog program coming from the
- * unfolder.
+ * LEGACY
  *
- * This class is NOT thread-safe (attributes values are query-dependent).
- * Thus, an instance of this class should NOT BE SHARED between QuestStatements but be DUPLICATED.
- *
+ * Expects the IQTree to be normalized.
  *
  * @author mrezk, mariano, guohui, roman
  *
  */
+@Singleton
 public class LegacySQLIQTree2NativeNodeGenerator {
 
 	/**

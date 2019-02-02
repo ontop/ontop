@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
 
+import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.model.term.Variable;
 
 public interface IQTree2SelectFromWhereConverter {
 
-    SelectFromWhere convert(IQTree iqTree);
+    /**
+     * TODO: explicit the assumptions on how the iqTree is supposed to be normalized
+     */
+    SelectFromWhere convert(IQTree iqTree, ImmutableSortedSet<Variable> signature);
 }

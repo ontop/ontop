@@ -39,7 +39,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
     public NativeNode generate(IQTree iqTree) {
         ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(iqTree.getVariables());
 
-        SelectFromWhere selectFromWhere = converter.convert(iqTree);
+        SelectFromWhere selectFromWhere = converter.convert(iqTree, signature);
         String sqlQuery = serializer.serialize(selectFromWhere);
 
         ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(iqTree);
