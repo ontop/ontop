@@ -118,8 +118,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     private ImmutableList<? extends SQLRelation> convertIntoFromRelations(IQTree tree) {
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof NativeNode) {
-            String sqlQuery = ((NativeNode) rootNode).getNativeQueryString();
-            return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery));
+            NativeNode nativeNode = (NativeNode) rootNode;
+            String sqlQuery = nativeNode.getNativeQueryString();
+            return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getVariableNames()));
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

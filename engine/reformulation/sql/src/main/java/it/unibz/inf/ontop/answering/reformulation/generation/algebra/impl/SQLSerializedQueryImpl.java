@@ -1,22 +1,31 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
+import it.unibz.inf.ontop.model.term.Variable;
 
 public class SQLSerializedQueryImpl implements SQLSerializedQuery {
 
     private final String sqlQueryString;
+    private final ImmutableMap<Variable, String> variableNames;
 
     @AssistedInject
-    private SQLSerializedQueryImpl(@Assisted String sqlString) {
+    private SQLSerializedQueryImpl(@Assisted String sqlString, @Assisted ImmutableMap<Variable, String> variableNames) {
         this.sqlQueryString = sqlString;
+        this.variableNames = variableNames;
     }
 
     @Override
     public String getSQLString() {
         return sqlQueryString;
+    }
+
+    @Override
+    public ImmutableMap<Variable, String> getVariableNames() {
+        return variableNames;
     }
 
     @Override

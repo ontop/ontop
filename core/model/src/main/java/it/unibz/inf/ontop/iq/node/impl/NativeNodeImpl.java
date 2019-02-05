@@ -35,10 +35,12 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
     private final ImmutableSortedSet<Variable> variables;
+    private final ImmutableMap<Variable, String> variableNames;
 
     @AssistedInject
     private NativeNodeImpl(@Assisted ImmutableSortedSet<Variable> variables,
-                           @Assisted ImmutableMap<Variable, DBTermType> variableTypeMap,
+                           @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
+                           @Assisted("variableNames") ImmutableMap<Variable, String> variableNames,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
@@ -48,6 +50,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;
         this.variableTypeMap = variableTypeMap;
+        this.variableNames = variableNames;
 
         if (settings.isTestModeEnabled()) {
             if (!variables.equals(variableTypeMap.keySet()))
@@ -121,6 +124,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public ImmutableSortedSet<Variable> getVariables() {
         return variables;
+    }
+
+    @Override
+    public ImmutableMap<Variable, String> getVariableNames() {
+        return variableNames;
     }
 
     @Override

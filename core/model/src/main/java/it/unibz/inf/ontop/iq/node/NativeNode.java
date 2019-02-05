@@ -22,5 +22,7 @@ public interface NativeNode extends LeafIQTree {
     @Override
     ImmutableSortedSet<Variable> getVariables();
 
+    ImmutableMap<Variable, String> getVariableNames();
+
     String getNativeQueryString();
 }

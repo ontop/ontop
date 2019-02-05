@@ -50,6 +50,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * LEGACY
@@ -124,17 +125,6 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 		SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, metadata.getDbmsVersion(),
 				settings);
 
-		String datalogSQLString = generateDatalogSQLQuery(iqTree, signature, sqladapter, metadata);
-
-		return iqFactory.createNativeNode(
-				signature,
-				extractVariableTypeMap(iqTree),
-				datalogSQLString,
-				iqTree.getVariableNullability());
-	}
-
-	private String generateDatalogSQLQuery(IQTree iqTree, ImmutableSortedSet<Variable> signature,
-										   SQLDialectAdapter sqladapter, RDBMetadata metadata) {
 		DatalogProgram queryProgram = iq2DatalogTranslator.translate(iqTree, ImmutableList.copyOf(signature));
 
 		for (CQIE cq : queryProgram.getRules()) {
@@ -150,10 +140,25 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 		List<Predicate> predicatesInBottomUp = depGraph.getPredicatesInBottomUp();
 		List<Predicate> extensionalPredicates = depGraph.getExtensionalPredicates();
 
-		return generateQuery(signature.stream()
+		SQLAndColumnNames sqlAndColumnNames = generateQuery(signature.stream()
 						.map(Variable::getName)
 						.collect(ImmutableCollectors.toList()),
 				ruleIndex, predicatesInBottomUp, extensionalPredicates, sqladapter, metadata);
+
+		ImmutableList<Variable> signatureList = ImmutableList.copyOf(signature);
+
+		ImmutableMap<Variable, String> variableNames = IntStream.range(0, signature.size())
+				.boxed()
+				.collect(ImmutableCollectors.toMap(
+						signatureList::get,
+						sqlAndColumnNames.columnNames::get));
+
+		return iqFactory.createNativeNode(
+				signature,
+				extractVariableTypeMap(iqTree),
+				variableNames,
+				sqlAndColumnNames.string,
+				iqTree.getVariableNullability());
 	}
 
     private ImmutableMap<Variable, DBTermType> extractVariableTypeMap(IQTree normalizedSubTree) {
@@ -186,10 +191,11 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 	 * @param metadata
 	 * @return
 	 */
-	private String generateQuery(List<String> signature,
-								 Multimap<Predicate, CQIE> ruleIndex,
-								 List<Predicate> predicatesInBottomUp,
-								 List<Predicate> extensionalPredicates, SQLDialectAdapter sqladapter, RDBMetadata metadata) {
+	private SQLAndColumnNames generateQuery(List<String> signature,
+											Multimap<Predicate, CQIE> ruleIndex,
+											List<Predicate> predicatesInBottomUp,
+											List<Predicate> extensionalPredicates, SQLDialectAdapter sqladapter,
+											RDBMetadata metadata) {
 
 		AtomicInteger viewCounter = new AtomicInteger(0);
 
@@ -230,8 +236,9 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 				ImmutableList<SignatureVariable> s = createSignature(varListBuilder.build(), sqladapter);
 
 				// Creates the body of the subquery
-				String subQuery = generateQueryFromRules(ruleIndex.get(pred), s,
+				SQLAndColumnNames subSqlAndColumnNames = generateQueryFromRules(ruleIndex.get(pred), s,
 						subQueryDefinitionsBuilder.build(), false, viewCounter, sqladapter, metadata);
+				String subQuery = subSqlAndColumnNames.string;
 
 
 				RelationID subQueryAlias = createAlias(pred.getName(), VIEW_ANS_SUFFIX, usedAliases, sqladapter,
@@ -269,11 +276,11 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 	 * @param sqladapter
 	 * @param metadata
 	 */
-	private String generateQueryFromRules(Collection<CQIE> cqs,
-										  ImmutableList<SignatureVariable> signature,
-										  ImmutableMap<Predicate, FromItem> subQueryDefinitions,
-										  boolean unionNoDuplicates, AtomicInteger viewCounter,
-										  SQLDialectAdapter sqladapter, DBMetadata metadata) {
+	private SQLAndColumnNames generateQueryFromRules(Collection<CQIE> cqs,
+													 ImmutableList<SignatureVariable> signature,
+													 ImmutableMap<Predicate, FromItem> subQueryDefinitions,
+													 boolean unionNoDuplicates, AtomicInteger viewCounter,
+													 SQLDialectAdapter sqladapter, DBMetadata metadata) {
 
 		List<String> sqls = Lists.newArrayListWithExpectedSize(cqs.size());
 		for (CQIE cq : cqs) {
@@ -332,9 +339,12 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 			sqls.add(sb.toString());
 		}
-		return sqls.size() == 1
+		String sql = sqls.size() == 1
 				? sqls.get(0)
 				: inBrackets(Joiner.on(")\n " + (unionNoDuplicates ? "UNION" : "UNION ALL") + "\n (").join(sqls));
+		return new SQLAndColumnNames(sql, signature.stream()
+				.map(e -> e.columnAlias)
+				.collect(ImmutableCollectors.toList()));
 	}
 
 
@@ -912,5 +922,16 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 	private static String inBrackets(String s) {
 		return "(" + s + ")";
+	}
+
+	private static class SQLAndColumnNames {
+
+		private final String string;
+		private final ImmutableList<String> columnNames;
+
+		private SQLAndColumnNames(String string, ImmutableList<String> columnNames) {
+			this.string = string;
+			this.columnNames = columnNames;
+		}
 	}
 }
