@@ -15,5 +15,16 @@ mappingId	spouse
 target		<http://example.com/person/{id}> :hasSpouse <http://example.com/person/{spouse}> . 
 source		SELECT *
 			FROM "person"
+
+mappingId	musician
+target		<http://example.com/person/{mid}> a :Musician ; :playsInstrument {instrument}^^xsd:string .
+source		SELECT *
+			FROM "musician"
+
+mappingId	emptyElement
+target		<http://example.com/empty/{eid}> a :EmptyElement ; :emptyProperty {emptyField}^^xsd:integer .
+source		SELECT *
+			FROM "emptyTable"
+
 ]]
 

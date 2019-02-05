@@ -43,11 +43,6 @@ public class CQIEImpl implements CQIE, ListListener {
 	private Function head = null;
 	private EventGeneratingList<Function> body = null;
 
-	private int hash = -1;
-	private boolean rehash = true;
-
-	private String string = null;
-
 	private static final String SPACE = " ";
 	private static final String COMMA = ",";
 	private static final String INV_IMPLIES = ":-";
@@ -120,37 +115,28 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public int hashCode() {
-		if (rehash) {
-			string = toString();
-			hash = string.hashCode();
-			rehash = false;
-		}
-		return hash;
+		return toString().hashCode();
 	}
 
 	@Override
 	public String toString() {
-		/* expensive, so only compute the string if necessary */
-		if (string == null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(head.toString());
-			sb.append(SPACE);
-			sb.append(INV_IMPLIES);
-			sb.append(SPACE);
+		StringBuilder sb = new StringBuilder();
+		sb.append(head.toString());
+		sb.append(SPACE);
+		sb.append(INV_IMPLIES);
+		sb.append(SPACE);
 
-			Iterator<Function> bit = body.iterator();
-			while (bit.hasNext()) {
-				Function atom = bit.next();
-				sb.append(atom.toString());
+		Iterator<Function> bit = body.iterator();
+		while (bit.hasNext()) {
+			Function atom = bit.next();
+			sb.append(atom.toString());
 
-				if (bit.hasNext()) { // if there is a next atom.
-					sb.append(COMMA);
-					sb.append(SPACE); // print ", "
-				}
+			if (bit.hasNext()) { // if there is a next atom.
+				sb.append(COMMA);
+				sb.append(SPACE); // print ", "
 			}
-			string = sb.toString();
 		}
-		return string;
+		return sb.toString();
 	}
 
 	@Override
@@ -164,12 +150,7 @@ public class CQIEImpl implements CQIE, ListListener {
 			}
 		}
 		
-		CQIEImpl newquery = new CQIEImpl(copyHead, copyBody);
-		newquery.rehash = this.rehash;
-		newquery.string = null;
-		newquery.hash = this.hash;
-
-		return newquery;
+		return new CQIEImpl(copyHead, copyBody);
 	}
 
 	@Override
@@ -183,7 +164,5 @@ public class CQIEImpl implements CQIE, ListListener {
 
 	@Override
 	public void listChanged() {
-		rehash = true;
-		string = null;
 	}
 }

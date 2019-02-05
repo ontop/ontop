@@ -105,11 +105,11 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-sparql-compliance</artifactId>
-            <type>war</type>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.rdf4j</groupId>-->
+            <!--<artifactId>rdf4j-sparql-compliance</artifactId>-->
+            <!--<type>war</type>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-sparql-testsuite</artifactId>

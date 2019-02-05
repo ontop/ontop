@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.datalog.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -17,14 +14,17 @@ import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Converts a datalog program into an intermediate query
@@ -37,6 +37,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
+    private final QueryTransformerFactory queryTransformerFactory;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
@@ -44,13 +45,15 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                               DatalogRule2QueryConverter datalogRuleConverter,
                                               SubstitutionFactory substitutionFactory,
                                               CoreUtilsFactory coreUtilsFactory,
-                                              QueryTransformerFactory transformerFactory) {
+                                              QueryTransformerFactory transformerFactory,
+                                              QueryTransformerFactory queryTransformerFactory) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
+        this.queryTransformerFactory = queryTransformerFactory;
     }
 
 
@@ -75,13 +78,10 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         }
     }
 
-    /**
-     * TODO: explain
-     *
-     */
     @Override
-    public IQ convertDatalogProgram(DatalogProgram queryProgram, Collection<Predicate> tablePredicates)
-            throws InvalidDatalogProgramException, EmptyQueryException {
+    public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+                                    ImmutableList<Variable> signature) throws EmptyQueryException {
+
         List<CQIE> rules = queryProgram.getRules();
 
         DatalogDependencyGraphGenerator dependencyGraph = new DatalogDependencyGraphGenerator(rules);
@@ -121,7 +121,36 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
             }
         }
 
-        return iq;
+        return enforceSignature(iq, signature);
+    }
+
+    /**
+     * Hacked logic: because of ORDER conditions that are expected to use signature variables,
+     * this method DOES NOT look for conflicts between signature variables and variables only appearing in the sub-tree.
+     *
+     * See the history for a better logic breaking this ugly hack.
+     *
+     * TODO: after getting rid of Datalog for encoding SPARQL queries, could try to clean it
+     */
+    private IQ enforceSignature(IQ iq, ImmutableList<Variable> signature) {
+
+        ImmutableList<Variable> projectedVariables = iq.getProjectionAtom().getArguments();
+
+        if (projectedVariables.equals(signature))
+            return iq;
+
+        if (projectedVariables.size() != signature.size())
+            throw new IllegalArgumentException("The arity of the signature does not match the iq");
+
+        InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
+                IntStream.range(0, projectedVariables.size())
+                        .boxed()
+                        .map(i -> Maps.immutableEntry(projectedVariables.get(i), signature.get(i)))
+                        .filter(e -> !e.getKey().equals(e.getValue()))
+                        .collect(ImmutableCollectors.toMap()));
+
+        return queryTransformerFactory.createRenamer(renamingSubstitution)
+                .transform(iq);
     }
 
 

@@ -96,29 +96,30 @@ public class DatalogNormalizer {
 	 * correct LeftJoins in SQL.
 	 */
 
-    public void addMinimalEqualityToLeftJoin(CQIE query) {
+    public void addMinimalEqualityToLeftOrNestedInnerJoin(CQIE query) {
         for (Function f : query.getBody()) {
             if (f.isAlgebraFunction()) {
-                addMinimalEqualityToLeftJoin(f);
+                addMinimalEqualityToLeftOrNestedInnerJoin(f);
             }
         }
     }
 
-    private void addMinimalEqualityToLeftJoin(Function leftJoin) {
+    private void addMinimalEqualityToLeftOrNestedInnerJoin(Function algebraFunctionalTerm) {
 		int booleanAtoms = 0;
-		for (Term term : leftJoin.getTerms()) {
+		for (Term term : algebraFunctionalTerm.getTerms()) {
 			Function f = (Function) term;
 			if (f.isAlgebraFunction()) {
-				addMinimalEqualityToLeftJoin(f);
+				addMinimalEqualityToLeftOrNestedInnerJoin(f);
 			}
 			if (f.isOperation())
 				booleanAtoms++;
 		}
-		if (leftJoin.isAlgebraFunction() && booleanAtoms == 0) {
+		if (algebraFunctionalTerm.isAlgebraFunction()
+				&& booleanAtoms == 0) {
 			Function trivialEquality = termFactory.getFunctionEQ(
 			        termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()),
 					termFactory.getConstantLiteral("1", typeFactory.getXsdIntegerDatatype()));
-			leftJoin.getTerms().add(trivialEquality);
+			algebraFunctionalTerm.getTerms().add(trivialEquality);
 		}
 	}
 
