@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 /**
  * Already serialized
  */
-public interface SQLSerializedQuery extends SQLRelation {
+public interface SQLSerializedQuery extends SQLExpression {
 
     String getSQLString();
 

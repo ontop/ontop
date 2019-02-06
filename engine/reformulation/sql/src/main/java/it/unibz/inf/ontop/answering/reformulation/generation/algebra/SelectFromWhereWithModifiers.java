@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * TODO: find a better name
  */
-public interface SelectFromWhere extends SQLRelation {
+public interface SelectFromWhereWithModifiers extends SQLExpression {
 
     ImmutableSortedSet<Variable> getProjectedVariables();
 
@@ -22,7 +22,7 @@ public interface SelectFromWhere extends SQLRelation {
     /**
      * Implicit inner join between them
      */
-    ImmutableList<? extends SQLRelation> getFromRelations();
+    ImmutableList<? extends SQLExpression> getFromExpressions();
 
     Optional<ImmutableExpression> getWhereExpression();
 

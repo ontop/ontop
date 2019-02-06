@@ -9,5 +9,5 @@ public interface IQTree2SelectFromWhereConverter {
     /**
      * TODO: explicit the assumptions on how the iqTree is supposed to be normalized
      */
-    SelectFromWhere convert(IQTree iqTree, ImmutableSortedSet<Variable> signature);
+    SelectFromWhereWithModifiers convert(IQTree iqTree, ImmutableSortedSet<Variable> signature);
 }

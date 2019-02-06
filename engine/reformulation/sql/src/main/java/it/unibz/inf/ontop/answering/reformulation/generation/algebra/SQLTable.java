@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 /**
  * TODO: find a better name
  */
-public interface SQLTable extends SQLRelation {
+public interface SQLTable extends SQLExpression {
 
     DataAtom<RelationPredicate> getAtom();
 

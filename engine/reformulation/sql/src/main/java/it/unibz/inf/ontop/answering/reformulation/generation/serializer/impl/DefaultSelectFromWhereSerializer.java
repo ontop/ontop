@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhere;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -17,7 +17,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     }
 
     @Override
-    public QuerySerialization serialize(SelectFromWhere selectFromWhere) {
+    public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere) {
         return selectFromWhere.acceptVisitor(
                 new DefaultSQLRelationVisitingSerializer());
     }
@@ -28,7 +28,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
         @Override
-        public QuerySerialization visit(SelectFromWhere selectFromWhere) {
+        public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
             throw new RuntimeException("TODO: implement the serialization of a SelectFromWhere");
             //		if (queryModifiers.hasModifiers()) {
 //			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
@@ -73,11 +73,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected static class QuerySerializationImpl implements QuerySerialization {
 
         private final String string;
-        private final ImmutableMap<Variable, String> variableNames;
+        private final ImmutableMap<Variable, String> columnNames;
 
-        public QuerySerializationImpl(String string, ImmutableMap<Variable, String> variableNames) {
+        public QuerySerializationImpl(String string, ImmutableMap<Variable, String> columnNames) {
             this.string = string;
-            this.variableNames = variableNames;
+            this.columnNames = columnNames;
         }
 
         @Override
@@ -86,8 +86,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         @Override
-        public ImmutableMap<Variable, String> getVariableNames() {
-            return variableNames;
+        public ImmutableMap<Variable, String> getColumnNames() {
+            return columnNames;
         }
     }
 

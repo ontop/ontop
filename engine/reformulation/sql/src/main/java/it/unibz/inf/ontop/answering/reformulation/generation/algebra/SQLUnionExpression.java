@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
 
 import com.google.common.collect.ImmutableList;
 
-public interface SQLUnionRelation extends SQLRelation {
+public interface SQLUnionExpression extends SQLExpression {
 
-    ImmutableList<? extends SQLRelation> getSubRelations();
+    ImmutableList<? extends SQLExpression> getSubExpressions();
 }

@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelation;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhere;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -30,7 +30,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     @Override
-    public SelectFromWhere convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
+    public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
 
         QueryNode rootNode = tree.getRootNode();
         Optional<SliceNode> sliceNode = Optional.of(rootNode)
@@ -81,7 +81,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .map(ConstructionNode::getSubstitution)
                 .orElseGet(substitutionFactory::getSubstitution);
 
-        ImmutableList<? extends SQLRelation> fromRelations = convertIntoFromRelations(
+        ImmutableList<? extends SQLExpression> fromRelations = convertIntoFromRelations(
                 firstNonSliceDistinctConstructionOrderByTree);
 
         /*
@@ -113,7 +113,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
      * as this expression will be used as WHERE expression instead.
      *
      */
-    private ImmutableList<? extends SQLRelation> convertIntoFromRelations(IQTree tree) {
+    private ImmutableList<? extends SQLExpression> convertIntoFromRelations(IQTree tree) {
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof NativeNode) {
             NativeNode nativeNode = (NativeNode) rootNode;

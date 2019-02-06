@@ -18,17 +18,14 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface SQLAlgebraFactory {
 
-    SelectFromWhere createSelectFromWhere(ImmutableSortedSet<Variable> projectedVariables,
-                                          ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                          @Assisted("fromRelations")
-                                          ImmutableList<? extends SQLRelation> fromRelations,
-                                          @Assisted("whereExpression")
-                                          Optional<ImmutableExpression> whereExpression,
-                                          boolean isDistinct,
-                                          @Assisted("limit") Optional<Long> limit,
-                                          @Assisted("offset") Optional<Long> offset,
-                                          @Assisted("sortConditions")
-                                          ImmutableList<OrderByNode.OrderComparator> sortConditions);
+    SelectFromWhereWithModifiers createSelectFromWhere(ImmutableSortedSet<Variable> projectedVariables,
+                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                                       @Assisted("fromRelations") ImmutableList<? extends SQLExpression> fromRelations,
+                                                       @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
+                                                       boolean isDistinct,
+                                                       @Assisted("limit") Optional<Long> limit,
+                                                       @Assisted("offset") Optional<Long> offset,
+                                                       @Assisted("sortConditions") ImmutableList<OrderByNode.OrderComparator> sortConditions);
 
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
 

@@ -7,10 +7,10 @@ import java.util.Optional;
 /**
  * Abstraction for LeftJoinRelation and explicit InnerJoinRelation
  */
-public interface BinaryJoinRelation extends SQLRelation {
+public interface BinaryJoinExpression extends SQLExpression {
 
-    SQLRelation getLeft();
-    SQLRelation getRight();
+    SQLExpression getLeft();
+    SQLExpression getRight();
 
     Optional<ImmutableExpression> getFilterCondition();
 

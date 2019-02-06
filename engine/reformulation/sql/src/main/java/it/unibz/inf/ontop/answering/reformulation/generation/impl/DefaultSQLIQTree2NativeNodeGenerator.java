@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhere;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -39,12 +39,12 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
     public NativeNode generate(IQTree iqTree) {
         ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(iqTree.getVariables());
 
-        SelectFromWhere selectFromWhere = converter.convert(iqTree, signature);
+        SelectFromWhereWithModifiers selectFromWhere = converter.convert(iqTree, signature);
         SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere);
 
         ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(iqTree);
 
-        return iqFactory.createNativeNode(signature, variableTypeMap, serializedQuery.getVariableNames(),
+        return iqFactory.createNativeNode(signature, variableTypeMap, serializedQuery.getColumnNames(),
                 serializedQuery.getString(), iqTree.getVariableNullability());
     }
 
