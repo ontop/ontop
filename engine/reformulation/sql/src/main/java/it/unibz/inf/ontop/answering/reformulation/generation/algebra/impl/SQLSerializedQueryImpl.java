@@ -10,12 +10,12 @@ import it.unibz.inf.ontop.model.term.Variable;
 public class SQLSerializedQueryImpl implements SQLSerializedQuery {
 
     private final String sqlQueryString;
-    private final ImmutableMap<Variable, String> variableNames;
+    private final ImmutableMap<Variable, String> columnNames;
 
     @AssistedInject
-    private SQLSerializedQueryImpl(@Assisted String sqlString, @Assisted ImmutableMap<Variable, String> variableNames) {
+    private SQLSerializedQueryImpl(@Assisted String sqlString, @Assisted ImmutableMap<Variable, String> columnNames) {
         this.sqlQueryString = sqlString;
-        this.variableNames = variableNames;
+        this.columnNames = columnNames;
     }
 
     @Override
@@ -24,8 +24,8 @@ public class SQLSerializedQueryImpl implements SQLSerializedQuery {
     }
 
     @Override
-    public ImmutableMap<Variable, String> getVariableNames() {
-        return variableNames;
+    public ImmutableMap<Variable, String> getColumnNames() {
+        return columnNames;
     }
 
     @Override

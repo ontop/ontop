@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
-import java.util.SortedSet;
-
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
@@ -35,12 +33,12 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
     private final ImmutableSortedSet<Variable> variables;
-    private final ImmutableMap<Variable, String> variableNames;
+    private final ImmutableMap<Variable, String> columnNames;
 
     @AssistedInject
     private NativeNodeImpl(@Assisted ImmutableSortedSet<Variable> variables,
                            @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
-                           @Assisted("variableNames") ImmutableMap<Variable, String> variableNames,
+                           @Assisted("columnNames") ImmutableMap<Variable, String> columnNames,
                            @Assisted String nativeQueryString,
                            @Assisted VariableNullability variableNullability,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
@@ -50,7 +48,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
         this.nativeQueryString = nativeQueryString;
         this.variableNullability = variableNullability;
         this.variableTypeMap = variableTypeMap;
-        this.variableNames = variableNames;
+        this.columnNames = columnNames;
 
         if (settings.isTestModeEnabled()) {
             if (!variables.equals(variableTypeMap.keySet()))
@@ -127,8 +125,8 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
-    public ImmutableMap<Variable, String> getVariableNames() {
-        return variableNames;
+    public ImmutableMap<Variable, String> getColumnNames() {
+        return columnNames;
     }
 
     @Override

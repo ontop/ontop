@@ -22,7 +22,11 @@ public interface NativeNode extends LeafIQTree {
     @Override
     ImmutableSortedSet<Variable> getVariables();
 
-    ImmutableMap<Variable, String> getVariableNames();
+    /**
+     * Needed because certain DBs like Oracle impose constraints on the length of a column name,
+     * so the column name may differ from the variable name.
+     */
+    ImmutableMap<Variable, String> getColumnNames();
 
     String getNativeQueryString();
 }

@@ -7,8 +7,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2Sele
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelation;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhere;
-import it.unibz.inf.ontop.datalog.MutableQueryModifiers;
-import it.unibz.inf.ontop.datalog.impl.MutableQueryModifiersImpl;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -120,7 +118,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         if (rootNode instanceof NativeNode) {
             NativeNode nativeNode = (NativeNode) rootNode;
             String sqlQuery = nativeNode.getNativeQueryString();
-            return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getVariableNames()));
+            return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames()));
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

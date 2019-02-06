@@ -65,7 +65,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
-            return new QuerySerializationImpl(sqlSerializedQuery.getSQLString(), sqlSerializedQuery.getVariableNames());
+            return new QuerySerializationImpl(sqlSerializedQuery.getSQLString(), sqlSerializedQuery.getColumnNames());
         }
     }
 

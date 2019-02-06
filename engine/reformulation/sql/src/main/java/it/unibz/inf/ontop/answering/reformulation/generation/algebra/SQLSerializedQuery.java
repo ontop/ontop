@@ -10,5 +10,5 @@ public interface SQLSerializedQuery extends SQLRelation {
 
     String getSQLString();
 
-    ImmutableMap<Variable, String> getVariableNames();
+    ImmutableMap<Variable, String> getColumnNames();
 }

@@ -30,6 +30,6 @@ public interface SQLAlgebraFactory {
                                           @Assisted("sortConditions")
                                           ImmutableList<OrderByNode.OrderComparator> sortConditions);
 
-    SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> variableNames);
+    SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
 
 }
