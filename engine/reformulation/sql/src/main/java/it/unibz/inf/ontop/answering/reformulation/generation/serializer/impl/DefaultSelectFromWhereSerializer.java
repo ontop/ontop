@@ -1,13 +1,25 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -27,8 +39,37 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
      */
     protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
+        protected static final String VIEW_PREFIX = "v";
+        private final AtomicInteger viewCounter;
+
+        protected DefaultSQLRelationVisitingSerializer() {
+            this.viewCounter = new AtomicInteger(0);
+        }
+
         @Override
         public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
+
+            ImmutableList<Map.Entry<RelationID, QuerySerialization>> serializedFromEntries =
+                    selectFromWhere.getFromSQLExpressions().stream()
+                            .map(e -> e.acceptVisitor(this))
+                            .map(s -> Maps.immutableEntry(generateFreshViewAlias(), s))
+                            .collect(ImmutableCollectors.toList());
+
+            ImmutableMap<RelationID, QuerySerialization> fromMap = serializedFromEntries.stream()
+                    .collect(ImmutableCollectors.toMap());
+
+            // Assumes that from expressions all use different variables
+            ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap = fromMap.entrySet().stream()
+                    .flatMap(fromE -> fromE.getValue().getColumnNames().entrySet().stream()
+                            .map(e -> Maps.immutableEntry(e.getKey(), createQualifiedAttributeId(fromE.getKey(), e.getValue()))))
+                    .collect(ImmutableCollectors.toMap());
+
+            ImmutableMap<Variable, QuotedID> projectionColumnMap = extractProjectionColumnMap(
+                    selectFromWhere.getProjectedVariables(), fromColumnMap);
+
+            Optional<String> whereString = selectFromWhere.getWhereExpression()
+                    .map(e -> serializeBooleanExpression(e, fromColumnMap));
+
             throw new RuntimeException("TODO: implement the serialization of a SelectFromWhere");
             //		if (queryModifiers.hasModifiers()) {
 //			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
@@ -61,6 +102,24 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 //		else {
 //			resultingQuery = queryString;
 //		}
+        }
+
+        protected RelationID generateFreshViewAlias() {
+            throw new RuntimeException("TODO: implement generateFreshViewAlias");
+        }
+
+        private QualifiedAttributeID createQualifiedAttributeId(RelationID relationID, String columnName) {
+            throw new RuntimeException("TODO: implement createQualifiedAttributeId");
+        }
+
+        private String serializeBooleanExpression(ImmutableExpression expression,
+                                                  ImmutableMap<Variable, QualifiedAttributeID> columnMap) {
+            throw new RuntimeException("TODO: implement serializeBooleanExpression");
+        }
+
+        private ImmutableMap<Variable, QuotedID> extractProjectionColumnMap(
+                ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            throw new RuntimeException("TODO: implement extractProjectionColumnMap");
         }
 
         @Override
