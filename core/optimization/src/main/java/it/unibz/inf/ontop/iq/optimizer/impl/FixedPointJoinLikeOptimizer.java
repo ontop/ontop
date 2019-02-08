@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.JoinLikeOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinOptimizer;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.transformer.LevelUpTransformer;
+import it.unibz.inf.ontop.iq.optimizer.LevelUpOptimizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
     @Inject
     private FixedPointJoinLikeOptimizer(InnerJoinOptimizer joinOptimizer, LeftJoinOptimizer leftJoinOptimizer,
-                                        IQConverter iqConverter, LevelUpTransformer levelUpTransformer, FlattenLifter flattenLifter){
+                                        IQConverter iqConverter, LevelUpOptimizer levelUpOptimizer, FlattenLifter flattenLifter){
         this.joinOptimizer = joinOptimizer;
         this.leftJoinOptimizer = leftJoinOptimizer;
         this.iqConverter = iqConverter;

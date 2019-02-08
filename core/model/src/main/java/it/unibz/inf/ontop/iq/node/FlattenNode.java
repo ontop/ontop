@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -26,18 +25,12 @@ public interface FlattenNode<P extends FlattenNode> extends DataAtomQueryNode<Re
      */
     P newNode(Variable arrayVariable,
               int arrayIndexIndex,
-              DataAtom<RelationPredicate> dataAtom,
-              ImmutableList<Boolean> argumentNullability);
+              DataAtom<RelationPredicate> dataAtom);
 
     int getArrayIndexIndex();
 
     @Override
     P clone();
 
-    /**
-     * TODO: to be generalize to each QueryNode
-     */
-//    FlattenNode rename(InjectiveVar2VarSubstitution renamingSubstitution);
-
-    public ImmutableList<Boolean> getArgumentNullability();
+   // public ImmutableList<Boolean> getArgumentNullability();
 }

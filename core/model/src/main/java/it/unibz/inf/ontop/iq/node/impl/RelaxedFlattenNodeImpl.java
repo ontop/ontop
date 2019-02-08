@@ -37,12 +37,12 @@ public class RelaxedFlattenNodeImpl extends FlattenNodeImpl<RelaxedFlattenNode> 
                     && getDataAtom().equals(flattenNode.getDataAtom()))) {
                 return false;
             }
-            else if (flattenNode instanceof RelaxedFlattenNodeImpl) {
-                return argumentNullability.equals(((RelaxedFlattenNodeImpl)flattenNode).argumentNullability);
-            }
-            else {
-                throw new RuntimeException("TODO: check the nullabilityMap against another implementation of RelaxedFlattenNode");
-            }
+//            else if (flattenNode instanceof RelaxedFlattenNodeImpl) {
+//                return argumentNullability.equals(((RelaxedFlattenNodeImpl)flattenNode).argumentNullability);
+//            }
+//            else {
+//                throw new RuntimeException("TODO: check the nullabilityMap against another implementation of RelaxedFlattenNode");
+//            }
         }
         return false;
     }
@@ -58,8 +58,6 @@ public class RelaxedFlattenNodeImpl extends FlattenNodeImpl<RelaxedFlattenNode> 
         if(queryNode instanceof RelaxedFlattenNode){
             RelaxedFlattenNode castNode = (RelaxedFlattenNode) queryNode;
             return castNode.getArrayVariable().equals(getArrayVariable()) &&
-                    castNode.getArrayIndexTerm().equals(getArrayIndexTerm()) &&
-                    castNode.getArgumentNullability().equals(getArgumentNullability()) &&
                     castNode.getDataAtom().equals(getDataAtom());
         }
         return false;
@@ -67,7 +65,7 @@ public class RelaxedFlattenNodeImpl extends FlattenNodeImpl<RelaxedFlattenNode> 
 
     @Override
     public RelaxedFlattenNode clone() {
-        return iqFactory.createRelaxedFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
+        return iqFactory.createRelaxedFlattenNode(arrayVariable, arrayIndexIndex, dataAtom);
     }
 
     @Override
@@ -76,8 +74,8 @@ public class RelaxedFlattenNodeImpl extends FlattenNodeImpl<RelaxedFlattenNode> 
     }
 
     @Override
-    public RelaxedFlattenNode newNode(Variable arrayVariable, int arrayIndexIndex, DataAtom dataAtom, ImmutableList argumentNullability) {
-        return iqFactory.createRelaxedFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
+    public RelaxedFlattenNode newNode(Variable arrayVariable, int arrayIndexIndex, DataAtom dataAtom) {
+        return iqFactory.createRelaxedFlattenNode(arrayVariable, arrayIndexIndex, dataAtom);
     }
 
     @Override

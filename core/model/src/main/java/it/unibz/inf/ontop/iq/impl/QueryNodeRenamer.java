@@ -80,8 +80,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return iqFactory.createStrictFlattenNode(
                 getNewArrayTerm(flattenNode),
                 flattenNode.getArrayIndexIndex(),
-                getNewAtom(flattenNode),
-                flattenNode.getArgumentNullability()
+                getNewAtom(flattenNode)
         );
     }
 
@@ -90,8 +89,7 @@ public class QueryNodeRenamer implements HomogeneousQueryNodeTransformer {
         return iqFactory.createRelaxedFlattenNode(
                 getNewArrayTerm(flattenNode),
                 flattenNode.getArrayIndexIndex(),
-                getNewAtom(flattenNode),
-                flattenNode.getArgumentNullability()
+                getNewAtom(flattenNode)
         );
     }
 

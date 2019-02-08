@@ -43,29 +43,12 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	private final TypeMapper typeMapper;
 	private UniqueConstraint pk;
 
-	private final Optional<DatabaseRelationDefinition> parentRelation;
-	private final Optional<Integer> indexInParentRelation;
-
 	/**
 	 * used only in DBMetadata
 	 */
 	protected DatabaseRelationDefinition(RelationID name, TypeMapper typeMapper) {
 		super(name);
 		this.typeMapper = typeMapper;
-		parentRelation = Optional.empty();
-		indexInParentRelation = Optional.empty();
-	}
-
-	/**
-	 * Constructor for nested views
-	 *
-	 * Used only in DBMetadata
-	 */
-	protected DatabaseRelationDefinition(RelationID name, TypeMapper typeMapper, DatabaseRelationDefinition parentRelation, Integer indexInParentRelation) {
-		super(name);
-		this.typeMapper = typeMapper;
-		this.parentRelation = Optional.of(parentRelation);
-		this.indexInParentRelation = Optional.of(indexInParentRelation);
 	}
 
 	/**
@@ -76,7 +59,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @param typeName
 	 * @param canNull
 	 */
-	
 	public Attribute addAttribute(QuotedID id, int type, String typeName, boolean canNull) {
 		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id),
 				attributes.size() + 1, type, typeName, canNull,
@@ -198,18 +180,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 		return ImmutableList.copyOf(fks);
 	}
 
-	public Optional<DatabaseRelationDefinition> getParentRelation() {
-		return parentRelation;
-	}
-
-	public Optional<Integer> getIndexInParentRelation() {
-		return indexInParentRelation;
-	}
-
-	public boolean isNestedView() {
-		return parentRelation.isPresent();
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder bf = new StringBuilder();
@@ -218,5 +188,4 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 		bf.append("\n)");
 		return bf.toString();
 	}
-
 }

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -76,12 +77,15 @@ public class BasicDBMetadata implements DBMetadata {
         return table;
     }
 
-    public DatabaseRelationDefinition createNestedView(RelationID id, DatabaseRelationDefinition parentRelation,
-                                                       Integer indexInParentRelation) {
+    public NestedView createNestedView(RelationID id, DatabaseRelationDefinition parentRelation,
+                                       FlattenNodeRelationDefinition nestedRelation,
+                                       Integer indexInParentRelation,
+                                       ImmutableBiMap<Integer, Integer> view2ParentRelationIndexMap) {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition relation = new DatabaseRelationDefinition(id, typeMapper, parentRelation, indexInParentRelation);
+        NestedView relation = new NestedView(id, typeMapper, parentRelation, nestedRelation, indexInParentRelation,
+                view2ParentRelationIndexMap);
         add(relation, relations);
         return relation;
     }

@@ -286,8 +286,7 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                                     node.newNode(
                                             node.getArrayVariable(),
                                             node.getArrayIndexIndex(),
-                                            atom,
-                                            node.getArgumentNullability()),
+                                            atom),
                                     child
             )));
         }

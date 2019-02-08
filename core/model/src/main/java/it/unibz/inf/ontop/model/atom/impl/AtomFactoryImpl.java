@@ -137,12 +137,12 @@ public class AtomFactoryImpl implements AtomFactory {
     }
 
     @Override
-    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, ImmutableList<Variable> variables) {
-        return getDataAtom(pred, variables);
+    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, ImmutableList<? extends VariableOrGroundTerm> args) {
+        return getDataAtom(pred, args);
     }
 
     @Override
-    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, Variable... variables) {
-        return getFlattenNodeDataAtom(pred, ImmutableList.copyOf(variables));
+    public DataAtom<RelationPredicate> getFlattenNodeDataAtom(RelationPredicate pred, VariableOrGroundTerm... args) {
+        return getFlattenNodeDataAtom(pred, ImmutableList.copyOf(args));
     }
 }

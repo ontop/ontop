@@ -43,19 +43,11 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     }
 
     @Override
-    public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        if (node instanceof StrictFlattenNode) {
-            StrictFlattenNode flattenNode = (StrictFlattenNode) node;
-            if (!(getArrayVariable().equals(flattenNode.getArrayVariable())
-                    && getDataAtom().equals(flattenNode.getDataAtom()))) {
-                return false;
-            }
-            else if (flattenNode instanceof StrictFlattenNodeImpl) {
-                return argumentNullability.equals(((StrictFlattenNodeImpl)flattenNode).argumentNullability);
-            }
-            else {
-                throw new RuntimeException("TODO: check the nullabilityMap against another implementation of StrictFlattenNode");
-            }
+    public boolean isSyntacticallyEquivalentTo(QueryNode queryNode) {
+        if(queryNode instanceof StrictFlattenNode){
+            StrictFlattenNode castNode = (StrictFlattenNode) queryNode;
+            return castNode.getArrayVariable().equals(getArrayVariable()) &&
+                    castNode.getDataAtom().equals(getDataAtom());
         }
         return false;
     }
@@ -68,19 +60,12 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        if(queryNode instanceof StrictFlattenNode){
-            StrictFlattenNode castNode = (StrictFlattenNode) queryNode;
-            return castNode.getArrayVariable().equals(getArrayVariable()) &&
-            castNode.getArrayIndexTerm().equals(getArrayIndexTerm()) &&
-            castNode.getArgumentNullability().equals(getArgumentNullability()) &&
-            castNode.getDataAtom().equals(getDataAtom());
-        }
-        return false;
+        return isSyntacticallyEquivalentTo(queryNode);
     }
 
     @Override
     public StrictFlattenNode clone() {
-        return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
+        return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom);
     }
 
     @Override
@@ -89,43 +74,12 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     }
 
     @Override
-    public StrictFlattenNode newNode(Variable arrayVariable, int arrayIndexIndex, DataAtom dataAtom, ImmutableList argumentNullability) {
-        return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability);
+    public StrictFlattenNode newNode(Variable arrayVariable, int arrayIndexIndex, DataAtom dataAtom) {
+        return iqFactory.createStrictFlattenNode(arrayVariable, arrayIndexIndex, dataAtom);
     }
 
     @Override
     public String toString() {
         return toString(STRICT_FLATTEN_PREFIX);
-    }
-
-    @Override
-    public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        ImmutableList<? extends VariableOrGroundTerm> atomArguments = getDataAtom().getArguments();
-        if (variable.equals(getArrayVariable()))
-            return false;
-        else if (atomArguments.contains(variable)) {
-            /*Look for a second occurrence among the variables projected by the child --> implicit filter condition and thus not nullable */
-            if(query.getVariables(query.getFirstChild(this)
-                    .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child")))
-                .contains(variable))
-                return false;
-
-            /*
-             *Look for a second occurrence of the variable in the array --> implicit filter condition and thus not nullable
-             */
-            int firstIndex = atomArguments.indexOf(variable);
-            if (!argumentNullability.get(firstIndex))
-                return false;
-            int arity = atomArguments.size();
-            if (firstIndex >= (arity - 1))
-                return true;
-            int secondIndex = atomArguments.subList(firstIndex + 1, arity).indexOf(variable);
-            return secondIndex < 0;
-        }
-        else {
-            return query.getFirstChild(this)
-                    .orElseThrow(() -> new InvalidIntermediateQueryException("A FlattenNode must have a child"))
-                    .isVariableNullable(query, variable);
-        }
     }
 }

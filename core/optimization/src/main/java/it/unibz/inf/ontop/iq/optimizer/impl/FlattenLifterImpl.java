@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -248,7 +249,7 @@ public class FlattenLifterImpl implements FlattenLifter {
                     .map(t -> discardRootFlattenNodes(t, it.next().iterator()))
                     .collect(ImmutableCollectors.toList());
             ImmutableList flattens = flattenLists.stream()
-                    .flatMap(l -> l.stream())
+                    .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toList());
 
             if (join.getOptionalFilterCondition().isPresent()) {
@@ -498,8 +499,7 @@ public class FlattenLifterImpl implements FlattenLifter {
             return flattenNode.newNode(
                     arrayVar,
                     flattenNode.getArrayIndexIndex(),
-                    flattenNode.getDataAtom(),
-                    flattenNode.getArgumentNullability()
+                    flattenNode.getDataAtom()
             );
         }
 

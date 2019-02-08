@@ -45,13 +45,11 @@ public interface IntermediateQueryFactory {
 
     StrictFlattenNode createStrictFlattenNode(Variable arrayVariable,
                                               int arrayIndexIndex,
-                                              DataAtom<RelationPredicate> dataAtom,
-                                              ImmutableList<Boolean> argumentNullability);
+                                              DataAtom<RelationPredicate> dataAtom);
 
     RelaxedFlattenNode createRelaxedFlattenNode(Variable newArrayTerm,
                                                 int arrayIndexIndex,
-                                                DataAtom<RelationPredicate> newAtom,
-                                                ImmutableList<Boolean> argumentNullability);
+                                                DataAtom<RelationPredicate> dataAtom);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);

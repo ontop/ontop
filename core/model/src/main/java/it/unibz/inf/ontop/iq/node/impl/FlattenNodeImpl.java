@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
+import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -10,10 +12,8 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -31,7 +32,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
     protected final int arrayIndexIndex;
     protected final DataAtom<RelationPredicate> dataAtom;
     // True iff the argument is nullable (regardless of implicit equalities)
-    protected final ImmutableList<Boolean> argumentNullability;
+    //protected final ImmutableList<Boolean> argumentNullability;
 
     protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<RelationPredicate> dataAtom,
                               ImmutableList<Boolean> argumentNullability, SubstitutionFactory substitutionFactory,
@@ -44,13 +45,13 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
         if ((arrayIndexIndex >= dataAtom.getArguments().size())
                 || arrayIndexIndex < 0)
             throw new InvalidQueryNodeException("The array index index must correspond to an argument of the data atom");
-        this.argumentNullability = argumentNullability;
+//        this.argumentNullability = argumentNullability;
 
-        if (argumentNullability.size() != dataAtom.getArity())
-            throw new InvalidQueryNodeException("A nullability entry must be provided for each argument in the atom");
-
-        if (this.argumentNullability.get(arrayIndexIndex))
-            throw new InvalidQueryNodeException("The array index term must not be nullable");
+//        if (argumentNullability.size() != dataAtom.getArity())
+//            throw new InvalidQueryNodeException("A nullability entry must be provided for each argument in the atom");
+//
+//        if (this.argumentNullability.get(arrayIndexIndex))
+//            throw new InvalidQueryNodeException("The array index term must not be nullable");
     }
 
     @Override
@@ -98,7 +99,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
         ImmutableTerm newArrayTerm = substitution.apply(getArrayVariable());
         if (!(newArrayTerm instanceof Variable))
             throw new InvalidIntermediateQueryException("The array of a FlattenNode must remain a variable");
-        return newNode((Variable) newArrayTerm, arrayIndexIndex, newAtom, argumentNullability);
+        return newNode((Variable) newArrayTerm, arrayIndexIndex, newAtom);
     }
 
     @Override
@@ -111,10 +112,10 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
         return ImmutableSet.of(arrayVariable);
     }
 
-    @Override
-    public ImmutableList<Boolean> getArgumentNullability() {
-        return argumentNullability;
-    }
+//    @Override
+//    public ImmutableList<Boolean> getArgumentNullability() {
+//        return argumentNullability;
+//    }
 
     @Override
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint, IQTree child) {
@@ -213,8 +214,8 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
 
         ImmutableSet<Variable> childVariables = child.getVariables();
         Stream<Variable> nullableLocalVars = localVars.stream()
-                .filter(v -> !v.equals(arrayVariable) && !isRepeatedIn(v, dataAtom) && !childVariables.contains(v) ||
-                        !isDeclaredNonNullable(v, atomArguments));
+                .filter(v -> !v.equals(arrayVariable) && !isRepeatedIn(v, dataAtom) && !childVariables.contains(v) &&
+                        canNull(v, atomArguments));
 
         return new VariableNullabilityImpl(Stream.concat(
                 child.getVariableNullability().getNullableGroups().stream()
@@ -225,8 +226,18 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
         );
     }
 
-    private boolean isDeclaredNonNullable(Variable v, ImmutableList<? extends VariableOrGroundTerm> atomArguments) {
-        return !argumentNullability.get(atomArguments.indexOf(v));
+    private boolean canNull(Variable v, ImmutableList<? extends VariableOrGroundTerm> atomArguments) {
+        return canNull(v, atomArguments.iterator(), 0, dataAtom.getPredicate().getRelationDefinition().getAttributes());
+    }
+
+    private boolean canNull(Variable v, UnmodifiableIterator<? extends VariableOrGroundTerm> it, int i, List<Attribute> attributes) {
+        if(it.hasNext()){
+            if(it.next().equals(v) && !attributes.get(i).canNull()){
+                return false;
+            }
+            return canNull(v, it,i+1, attributes);
+        }
+        return true;
     }
 
     private boolean isRepeatedIn(Variable v, DataAtom<RelationPredicate> dataAtom) {
@@ -277,7 +288,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
              *Look for a second occurrence of the variable in the array --> implicit filter condition and thus not nullable
              */
             int firstIndex = atomArguments.indexOf(variable);
-            if (!argumentNullability.get(firstIndex))
+            if (!dataAtom.getPredicate().getRelationDefinition().getAttributes().get(firstIndex).canNull())
                 return false;
             int arity = atomArguments.size();
             if (firstIndex >= (arity - 1))
