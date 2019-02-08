@@ -9,12 +9,15 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -24,14 +27,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
+    private final SQLTermSerializer sqlTermSerializer;
+
     @Inject
-    private DefaultSelectFromWhereSerializer() {
+    private DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
+        this.sqlTermSerializer = sqlTermSerializer;
     }
 
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSQLRelationVisitingSerializer());
+                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer));
     }
 
     /**
@@ -40,9 +46,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
         protected static final String VIEW_PREFIX = "v";
+        private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
         private final AtomicInteger viewCounter;
+        private final SQLTermSerializer sqlTermSerializer;
 
-        protected DefaultSQLRelationVisitingSerializer() {
+        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer) {
+            this.sqlTermSerializer = sqlTermSerializer;
             this.viewCounter = new AtomicInteger(0);
         }
 
@@ -64,13 +73,28 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .map(e -> Maps.immutableEntry(e.getKey(), createQualifiedAttributeId(fromE.getKey(), e.getValue()))))
                     .collect(ImmutableCollectors.toMap());
 
-            ImmutableMap<Variable, QuotedID> projectionColumnMap = extractProjectionColumnMap(
+            ImmutableMap<Variable, String> projectedColumnMap = extractProjectionColumnMap(
                     selectFromWhere.getProjectedVariables(), fromColumnMap);
 
-            Optional<String> whereString = selectFromWhere.getWhereExpression()
-                    .map(e -> serializeBooleanExpression(e, fromColumnMap));
+            String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
-            throw new RuntimeException("TODO: implement the serialization of a SelectFromWhere");
+            String projectionString = serializeProjection(projectedColumnMap, selectFromWhere.getSubstitution());
+
+            String fromString = serializeFrom(fromMap);
+
+            String whereString = selectFromWhere.getWhereExpression()
+                    .map(e -> serializeBooleanExpression(e, fromColumnMap))
+                    .map(s -> String.format("WHERE %s\n", s))
+                    .orElse("");
+
+            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), fromColumnMap);
+            String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
+
+            String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
+                    fromString, whereString, orderByString, sliceString);
+
+            return new QuerySerializationImpl(sql, projectedColumnMap);
+
             //		if (queryModifiers.hasModifiers()) {
 //			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
 //			// if (!groupby.isEmpty()) {
@@ -112,12 +136,39 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             throw new RuntimeException("TODO: implement createQualifiedAttributeId");
         }
 
+
+        protected String serializeProjection(ImmutableMap<Variable, String> projectedColumnMap,
+                                             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+            throw new RuntimeException("TODO: implement serializeProjection");
+
+        }
+
+        protected String serializeFrom(ImmutableMap<RelationID, QuerySerialization> fromMap) {
+            throw new RuntimeException("TODO: implement serializeFrom");
+        }
+
+        /**
+         * TODO: implement seriously
+         */
+        private String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,
+                                        ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            return "";
+        }
+
+        /**
+         * TODO: implement seriously
+         */
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
+            return "";
+        }
+
         private String serializeBooleanExpression(ImmutableExpression expression,
                                                   ImmutableMap<Variable, QualifiedAttributeID> columnMap) {
             throw new RuntimeException("TODO: implement serializeBooleanExpression");
         }
 
-        private ImmutableMap<Variable, QuotedID> extractProjectionColumnMap(
+        private ImmutableMap<Variable, String> extractProjectionColumnMap(
                 ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             throw new RuntimeException("TODO: implement extractProjectionColumnMap");
         }
