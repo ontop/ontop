@@ -58,7 +58,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     }
 
     @Override
-    public ImmutableList<? extends SQLExpression> getFromExpressions() {
+    public ImmutableList<? extends SQLExpression> getFromSQLExpressions() {
         return fromRelations;
     }
 
