@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -82,9 +83,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
-            String projectionString = serializeProjection(projectedColumnMap, selectFromWhere.getSubstitution());
+            String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
+                    projectedColumnMap, selectFromWhere.getSubstitution(), fromColumnMap);
 
-            String fromString = serializeFrom(fromMap);
+            String fromString = serializeFrom(serializedFromEntries);
 
             String whereString = selectFromWhere.getWhereExpression()
                     .map(e -> serializeBooleanExpression(e, fromColumnMap))
@@ -133,22 +135,38 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected RelationID generateFreshViewAlias() {
-            throw new RuntimeException("TODO: implement generateFreshViewAlias");
+            return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
         private QualifiedAttributeID createQualifiedAttributeId(RelationID relationID, String columnName) {
-            throw new RuntimeException("TODO: implement createQualifiedAttributeId");
+            return new QualifiedAttributeID(relationID, idFactory.createAttributeID(columnName));
+        }
+
+        private ImmutableMap<Variable, String> extractProjectionColumnMap(
+                ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            return projectedVariables.stream()
+                    .collect(ImmutableCollectors.toMap(
+                            v -> v,
+                            v -> sqlTermSerializer.serialize(v, fromColumnMap)));
         }
 
 
-        protected String serializeProjection(ImmutableMap<Variable, String> projectedColumnMap,
-                                             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
-            throw new RuntimeException("TODO: implement serializeProjection");
-
+        protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables,
+                                             ImmutableMap<Variable, String> projectedColumnMap,
+                                             ImmutableSubstitution<? extends ImmutableTerm> substitution,
+                                             ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            return projectedVariables.stream()
+                    .map(v -> Optional.ofNullable(substitution.get(v))
+                            .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
+                            .map(s -> s + " AS " + projectedColumnMap.get(v))
+                            .orElseGet(() -> projectedColumnMap.get(v)))
+                    .collect(Collectors.joining(", "));
         }
 
-        protected String serializeFrom(ImmutableMap<RelationID, QuerySerialization> fromMap) {
-            throw new RuntimeException("TODO: implement serializeFrom");
+        protected String serializeFrom(ImmutableList<Map.Entry<RelationID, QuerySerialization>> serializedFromEntries) {
+            return serializedFromEntries.stream()
+                    .map(e -> String.format("(%s) %s", e.getValue().getString(), e.getKey().getSQLRendering()))
+                    .collect(Collectors.joining(",\n"));
         }
 
         /**
@@ -172,10 +190,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             throw new RuntimeException("TODO: implement serializeBooleanExpression");
         }
 
-        private ImmutableMap<Variable, String> extractProjectionColumnMap(
-                ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            throw new RuntimeException("TODO: implement extractProjectionColumnMap");
-        }
 
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
