@@ -94,7 +94,7 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitNative(NativeNode nativeNode) {
-            return Optional.empty();
+            return Optional.ofNullable(nativeNode.getTypeMap().get(variable));
         }
 
         @Override
