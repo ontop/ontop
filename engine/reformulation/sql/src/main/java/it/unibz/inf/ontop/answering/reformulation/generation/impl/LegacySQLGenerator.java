@@ -175,7 +175,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                             throw new MinorOntopInternalBugException("No combination expected");
                         });
 
-        return defaultIQTree2NativeNodeGenerator.generate(tree);
+        return defaultIQTree2NativeNodeGenerator.generate(tree, metadata.getDBParameters());
 
     }
 

@@ -40,6 +40,10 @@ public interface DBMetadata extends Serializable {
     ImmutableMultimap<RelationPredicate,ImmutableList<Integer>> getUniqueConstraints();
 
 
+    /**
+     * Use DBParameters.getQuotedIDFactory() instead
+     */
+    @Deprecated
     QuotedIDFactory getQuotedIDFactory();
 
     /**
@@ -85,4 +89,11 @@ public interface DBMetadata extends Serializable {
      */
     @Deprecated
     ImmutableMap<RelationID, RelationDefinition> copyRelations();
+
+    /**
+     * New-gen interface
+     *
+     * TODO: stop using the DBMetadata object in most of the code but DBParameters instead when needed
+     */
+    DBParameters getDBParameters();
 }

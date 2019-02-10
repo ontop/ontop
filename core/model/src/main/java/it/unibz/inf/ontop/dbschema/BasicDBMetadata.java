@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public class BasicDBMetadata implements DBMetadata {
     private final String databaseProductName;
     private final String databaseVersion;
     private final QuotedIDFactory idfac;
+    private final DBParameters dbParameters;
     private boolean isStillMutable;
 
     @Nullable
@@ -52,6 +54,7 @@ public class BasicDBMetadata implements DBMetadata {
         this.listOfTables = listOfTables;
         this.isStillMutable = true;
         this.uniqueConstraints = null;
+        this.dbParameters = new BasicDBParametersImpl(idfac);
     }
 
     /**
@@ -238,6 +241,11 @@ public class BasicDBMetadata implements DBMetadata {
     @Override
     public ImmutableMap<RelationID, RelationDefinition> copyRelations() {
         return ImmutableMap.copyOf(relations);
+    }
+
+    @Override
+    public DBParameters getDBParameters() {
+        return dbParameters;
     }
 
 }

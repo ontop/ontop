@@ -11,7 +11,9 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializ
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -35,9 +37,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     }
 
     @Override
-    public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere) {
+    public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer));
+                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer, dbParameters.getQuotedIDFactory()));
     }
 
     /**
@@ -49,9 +51,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
         private final AtomicInteger viewCounter;
         private final SQLTermSerializer sqlTermSerializer;
+        private final QuotedIDFactory idFactory;
 
-        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer) {
+        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer, QuotedIDFactory idFactory) {
             this.sqlTermSerializer = sqlTermSerializer;
+            this.idFactory = idFactory;
             this.viewCounter = new AtomicInteger(0);
         }
 

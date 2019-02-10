@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGe
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -36,11 +37,11 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
 
 
     @Override
-    public NativeNode generate(IQTree iqTree) {
+    public NativeNode generate(IQTree iqTree, DBParameters dbParameters) {
         ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(iqTree.getVariables());
 
         SelectFromWhereWithModifiers selectFromWhere = converter.convert(iqTree, signature);
-        SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere);
+        SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere, dbParameters);
 
         ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(iqTree);
 
