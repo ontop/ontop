@@ -180,8 +180,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "";
 
             String conditionString = sortConditions.stream()
-                    .map(OrderByNode.OrderComparator::getTerm)
-                    .map(t -> sqlTermSerializer.serialize(t, fromColumnMap))
+                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap)
+                            + (c.isAscending() ? "" : " DESC"))
                     .collect(Collectors.joining(", "));
 
             return String.format("ORDER BY %s NULLS FIRST\n", conditionString);
