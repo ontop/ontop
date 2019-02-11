@@ -34,8 +34,6 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationPredicate TABLE1_AR4;
 
-    public static final RelationPredicate TABLE1_AR2_NESTED;
-
     public static final RelationPredicate NESTED_REL_PRED_AR1;
     public static final RelationPredicate NESTED_REL_PRED_AR2;
     public static final RelationPredicate NESTED_REL_PRED_AR3;
@@ -47,24 +45,6 @@ public class NoDependencyTestDBMetadata {
                                                              int tableNumber, int arity) {
         DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 "TABLE" + tableNumber + "AR" + arity));
-        for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), TYPE_FACTORY.getUnderspecifiedDBType(), null, false);
-        }
-        return tableDef.getAtomPredicate();
-    }
-
-    private static RelationPredicate createNestedRelationPredicate(BasicDBMetadata dbMetadata,
-                                                                   DatabaseRelationDefinition parentRelation,
-                                                                   Integer indexInParentRelation,
-                                                                   QuotedIDFactory idFactory,
-                                                                   int tableNumber, int arity) {
-        DatabaseRelationDefinition tableDef = dbMetadata.createNestedView(
-                idFactory.createRelationID(
-                        null,
-                        "TABLE" + tableNumber + "AR" + arity),
-                parentRelation,
-                indexInParentRelation
-        );
         for (int i=1 ; i <= arity; i++) {
             tableDef.addAttribute(idFactory.createAttributeID("col" + i), TYPE_FACTORY.getUnderspecifiedDBType(), null, false);
         }
@@ -113,9 +93,6 @@ public class NoDependencyTestDBMetadata {
         TABLE6_AR3 = createRelationPredicate(dbMetadata, idFactory, 6, 3);
 
         TABLE1_AR4 = createRelationPredicate(dbMetadata, idFactory, 1, 4);
-
-        TABLE1_AR2_NESTED = createNestedRelationPredicate(dbMetadata, (DatabaseRelationDefinition) TABLE1_AR2.getRelationDefinition(),
-                2, idFactory, 1, 2);
 
         NESTED_REL_PRED_AR1 = createFlattenNodePredicate(idFactory, 1);
         NESTED_REL_PRED_AR2 = createFlattenNodePredicate(idFactory, 2);

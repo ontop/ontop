@@ -35,7 +35,7 @@ public abstract class FlattenNodeImpl<N extends FlattenNode> extends CompositeQu
     //protected final ImmutableList<Boolean> argumentNullability;
 
     protected FlattenNodeImpl(Variable arrayVariable, int arrayIndexIndex, DataAtom<RelationPredicate> dataAtom,
-                              ImmutableList<Boolean> argumentNullability, SubstitutionFactory substitutionFactory,
+                              SubstitutionFactory substitutionFactory,
                               IntermediateQueryFactory iqFactory) {
         super(substitutionFactory, iqFactory);
         this.arrayVariable = arrayVariable;

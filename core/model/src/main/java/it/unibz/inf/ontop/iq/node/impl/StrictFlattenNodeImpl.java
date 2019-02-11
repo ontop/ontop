@@ -36,10 +36,9 @@ public class StrictFlattenNodeImpl extends FlattenNodeImpl<StrictFlattenNode> im
     private StrictFlattenNodeImpl(@Assisted Variable arrayVariable,
                                   @Assisted int arrayIndexIndex,
                                   @Assisted DataAtom<RelationPredicate> dataAtom,
-                                  @Assisted ImmutableList<Boolean> argumentNullability,
                                   SubstitutionFactory substitutionFactory,
                                   IntermediateQueryFactory intermediateQueryFactory) {
-        super(arrayVariable, arrayIndexIndex, dataAtom, argumentNullability, substitutionFactory, intermediateQueryFactory);
+        super(arrayVariable, arrayIndexIndex, dataAtom, substitutionFactory, intermediateQueryFactory);
     }
 
     @Override

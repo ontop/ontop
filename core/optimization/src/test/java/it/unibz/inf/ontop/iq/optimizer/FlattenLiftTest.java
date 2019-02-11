@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -13,19 +12,17 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.junit.Test;
 
 import java.sql.Types;
 
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.NESTED_REL_PRED_AR2;
+import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.NESTED_REL_PRED_AR3;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.EQ;
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.LT;
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.*;
 import static junit.framework.TestCase.assertTrue;
 
 public class FlattenLiftTest {
@@ -119,8 +116,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(joinNode, leftDataNode);
 
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(joinNode, flattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -158,8 +154,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(joinNode, leftDataNode);
 
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(joinNode, flattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -197,8 +192,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(joinNode, leftDataNode);
 
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(joinNode, flattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -241,13 +235,11 @@ public class FlattenLiftTest {
         queryBuilder.addChild(joinNode, leftDataNode);
 
         StrictFlattenNode level2FlattenNode = IQ_FACTORY.createStrictFlattenNode(E,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Y, G),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Y, G));
         queryBuilder.addChild(joinNode, level2FlattenNode);
 
         StrictFlattenNode level1FlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, D, E, F),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, D, E, F));
         queryBuilder.addChild(level2FlattenNode, level1FlattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -291,8 +283,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(joinNode, leftFlattenNode);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -300,8 +291,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, rightNestedVariable),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, rightNestedVariable));
         queryBuilder.addChild(joinNode, rightFlattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -342,8 +332,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, joinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, C),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, C));
         queryBuilder.addChild(joinNode, leftFlattenNode);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -351,8 +340,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F));
         queryBuilder.addChild(joinNode, rightFlattenNode);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -388,8 +376,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -397,8 +384,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -443,8 +429,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -452,8 +437,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, v1),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, v1));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -478,8 +462,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, C),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, C));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -487,8 +470,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, C),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, C));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -523,8 +505,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -532,8 +513,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -584,32 +564,27 @@ public class FlattenLiftTest {
         StrictFlattenNode flatten1 = IQ_FACTORY.createStrictFlattenNode(
                 A,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2)
         );
         StrictFlattenNode flatten2 = IQ_FACTORY.createStrictFlattenNode(
                 B,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2)
         );
         StrictFlattenNode flatten3 = IQ_FACTORY.createStrictFlattenNode(
                 C1,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4)
         );
         StrictFlattenNode flatten4 = IQ_FACTORY.createStrictFlattenNode(
                 D,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2)
         );
         StrictFlattenNode flatten5 = IQ_FACTORY.createStrictFlattenNode(
                 C,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2)
         );
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -658,32 +633,27 @@ public class FlattenLiftTest {
         StrictFlattenNode flatten1 = IQ_FACTORY.createStrictFlattenNode(
                 A,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, A1, A2)
         );
         StrictFlattenNode flatten2 = IQ_FACTORY.createStrictFlattenNode(
                 B,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B1, B2)
         );
         StrictFlattenNode flatten3 = IQ_FACTORY.createStrictFlattenNode(
                 C1,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C3, C4)
         );
         StrictFlattenNode flatten4 = IQ_FACTORY.createStrictFlattenNode(
                 D,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, D1, D2)
         );
         StrictFlattenNode flatten5 = IQ_FACTORY.createStrictFlattenNode(
                 C,
                 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2),
-                ImmutableList.of(false, true)
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, C1, C2)
         );
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -729,8 +699,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(rootNode, leftJoinNode);
 
         StrictFlattenNode leftFlattenNode = IQ_FACTORY.createStrictFlattenNode(A,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E),
-                ImmutableList.of(false, true, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR3, Y, D, E));
         queryBuilder.addChild(leftJoinNode, leftFlattenNode, LEFT);
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -738,8 +707,7 @@ public class FlattenLiftTest {
         queryBuilder.addChild(leftFlattenNode, leftDataNode);
 
         StrictFlattenNode rightFlattenNode = IQ_FACTORY.createStrictFlattenNode(B,0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F),
-                ImmutableList.of(false, true));
+                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, Z, F));
         queryBuilder.addChild(leftJoinNode, rightFlattenNode, RIGHT);
 
         ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
