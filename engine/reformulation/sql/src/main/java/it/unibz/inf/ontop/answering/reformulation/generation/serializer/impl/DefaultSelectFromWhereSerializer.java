@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -16,7 +17,6 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -31,16 +31,18 @@ import java.util.stream.Collectors;
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     private final SQLTermSerializer sqlTermSerializer;
+    private final SQLDialectAdapter dialectAdapter;
 
     @Inject
-    private DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
+    private DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
         this.sqlTermSerializer = sqlTermSerializer;
+        this.dialectAdapter = dialectAdapter;
     }
 
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer, dbParameters.getQuotedIDFactory()));
+                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer, dialectAdapter, dbParameters.getQuotedIDFactory()));
     }
 
     /**
@@ -52,10 +54,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
         private final AtomicInteger viewCounter;
         private final SQLTermSerializer sqlTermSerializer;
+        private final SQLDialectAdapter dialectAdapter;
         private final QuotedIDFactory idFactory;
 
-        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer, QuotedIDFactory idFactory) {
+        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter,
+                                                       QuotedIDFactory idFactory) {
             this.sqlTermSerializer = sqlTermSerializer;
+            this.dialectAdapter = dialectAdapter;
             this.idFactory = idFactory;
             this.viewCounter = new AtomicInteger(0);
         }
@@ -89,7 +94,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String fromString = serializeFrom(serializedFromEntries);
 
             String whereString = selectFromWhere.getWhereExpression()
-                    .map(e -> serializeBooleanExpression(e, fromColumnMap))
+                    .map(e -> sqlTermSerializer.serialize(e, fromColumnMap))
                     .map(s -> String.format("WHERE %s\n", s))
                     .orElse("");
 
@@ -169,25 +174,22 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .collect(Collectors.joining(",\n"));
         }
 
-        /**
-         * TODO: implement seriously
-         */
-        private String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,
+        protected String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,
                                         ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            return "";
+            if (sortConditions.isEmpty())
+                return "";
+
+            String conditionString = sortConditions.stream()
+                    .map(OrderByNode.OrderComparator::getTerm)
+                    .map(t -> sqlTermSerializer.serialize(t, fromColumnMap))
+                    .collect(Collectors.joining(", "));
+
+            return String.format("ORDER BY %s NULLS FIRST\n", conditionString);
         }
 
-        /**
-         * TODO: implement seriously
-         */
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
-            return "";
-        }
-
-        private String serializeBooleanExpression(ImmutableExpression expression,
-                                                  ImmutableMap<Variable, QualifiedAttributeID> columnMap) {
-            throw new RuntimeException("TODO: implement serializeBooleanExpression");
+            return dialectAdapter.sqlSlice(limit.orElse(-1L), offset.orElse(-1L));
         }
 
 
