@@ -160,6 +160,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                                              ImmutableMap<Variable, String> projectedColumnMap,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            // Mainly for ASK queries
+            if (projectedVariables.isEmpty())
+                return "TRUE AS uselessVariable";
+
             return projectedVariables.stream()
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
@@ -181,10 +185,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String conditionString = sortConditions.stream()
                     .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap)
-                            + (c.isAscending() ? "" : " DESC"))
+                            + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST"))
                     .collect(Collectors.joining(", "));
 
-            return String.format("ORDER BY %s NULLS FIRST\n", conditionString);
+            return String.format("ORDER BY %s\n", conditionString);
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
