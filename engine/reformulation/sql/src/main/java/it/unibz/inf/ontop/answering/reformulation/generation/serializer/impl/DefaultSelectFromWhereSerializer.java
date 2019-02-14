@@ -105,38 +105,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     fromString, whereString, orderByString, sliceString);
 
             return new QuerySerializationImpl(sql, projectedColumnMap);
-
-            //		if (queryModifiers.hasModifiers()) {
-//			//List<Variable> groupby = queryProgram.getQueryModifiers().getGroupConditions();
-//			// if (!groupby.isEmpty()) {
-//			// subquery += "\n" + sqladapter.sqlGroupBy(groupby, "") + " " +
-//			// havingStr + "\n";
-//			// }
-//			// List<OrderCondition> conditions =
-//			// query.getQueryModifiers().getSortConditions();
-//
-//			long limit = queryModifiers.getLimit();
-//			long offset = queryModifiers.getOffset();
-//			List<OrderCondition> conditions = queryModifiers.getSortConditions();
-//
-//			final String modifier;
-//			if (!conditions.isEmpty()) {
-//				modifier = sqladapter.sqlOrderByAndSlice(conditions, OUTER_VIEW_NAME, limit, offset) + "\n";
-//			}
-//			else if (limit != -1 || offset != -1) {
-//				modifier = sqladapter.sqlSlice(limit, offset) + "\n";
-//			}
-//			else {
-//				modifier = "";
-//			}
-//
-//			resultingQuery = "SELECT *\n" +
-//					"FROM " + inBrackets("\n" + queryString + "\n") + " " + OUTER_VIEW_NAME + "\n" +
-//					modifier;
-//		}
-//		else {
-//			resultingQuery = queryString;
-//		}
         }
 
         protected RelationID generateFreshViewAlias() {
