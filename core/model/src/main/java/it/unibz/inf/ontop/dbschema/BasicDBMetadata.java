@@ -77,6 +77,21 @@ public class BasicDBMetadata implements DBMetadata {
         return table;
     }
 
+    public FlattenNodeRelationDefinition createFlattenNodeRelation(RelationID id, ImmutableList<QuotedID> attributeIds, ImmutableList<Integer> types, ImmutableList<Boolean> canNull) {
+        if (!isStillMutable) {
+            throw new IllegalStateException("Too late, cannot create a DB relation");
+        }
+        FlattenNodeRelationDefinition relation = new FlattenNodeRelationDefinition(
+                id,
+                attributeIds,
+                types,
+                canNull,
+                typeMapper
+        );
+        add(relation, relations);
+        return relation;
+    }
+
     public NestedView createNestedView(RelationID id, DatabaseRelationDefinition parentRelation,
                                        FlattenNodeRelationDefinition nestedRelation,
                                        Integer indexInParentRelation,
@@ -86,6 +101,7 @@ public class BasicDBMetadata implements DBMetadata {
         }
         NestedView relation = new NestedView(id, typeMapper, parentRelation, nestedRelation, indexInParentRelation,
                 view2ParentRelationIndexMap);
+        add(relation, tables);
         add(relation, relations);
         return relation;
     }

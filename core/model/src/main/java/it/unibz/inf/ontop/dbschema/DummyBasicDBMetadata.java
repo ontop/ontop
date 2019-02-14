@@ -30,7 +30,7 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
         }
 
         @Override
-        public TermType getTermType(int typeCode, String typeName) {
+        public TermType getTermType(int typeCode) {
             return defaultType;
         }
     }

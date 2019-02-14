@@ -68,7 +68,7 @@ public interface TypeFactory {
 	/**
 	 * Default solution for attribute type in relations of:
 	 * . parser views
-	 * . FlattenNode data atoms
+	 * . (some) FlattenNode data atoms
 	 */
 	default RDFDatatype getDefaultRDFDatatype() {
 		return getDatatype(XSD.STRING);

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.atom.FlattenNodePredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -34,10 +35,10 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationPredicate TABLE1_AR4;
 
-    public static final RelationPredicate NESTED_REL_PRED_AR1;
-    public static final RelationPredicate NESTED_REL_PRED_AR2;
-    public static final RelationPredicate NESTED_REL_PRED_AR3;
-    public static final RelationPredicate NESTED_REL_PRED_AR4;
+    public static final FlattenNodePredicate NESTED_REL_PRED_AR1;
+    public static final FlattenNodePredicate NESTED_REL_PRED_AR2;
+    public static final FlattenNodePredicate NESTED_REL_PRED_AR3;
+    public static final FlattenNodePredicate NESTED_REL_PRED_AR4;
 
     public static final BasicDBMetadata DB_METADATA;
 
@@ -51,15 +52,22 @@ public class NoDependencyTestDBMetadata {
         return tableDef.getAtomPredicate();
     }
 
-    private static RelationPredicate createFlattenNodePredicate(QuotedIDFactory idFac, int arity){
-        RelationID id = idFac.createRelationID(null, String.format("nestedRel_arity_%s", arity));
-        ImmutableList<QuotedID> attributeIds = createAttributeIds(idFac, arity);
-        return new FlattenNodeRelationDefinition(
-                id,
-                attributeIds,
-                TYPE_FACTORY.getUnderspecifiedDBType(),
-                TYPE_FACTORY.getDefaultRDFDatatype()
-        ).getAtomPredicate();
+    private static FlattenNodePredicate createFlattenNodePredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory, int arity){
+        return dbMetadata.createFlattenNodeRelation(
+                idFactory.createRelationID(
+                        null,
+                        String.format(
+                                "nestedRel_arity_%s",
+                                arity
+                        )),
+                createAttributeIds(idFactory, arity),
+                IntStream.range(0, arity)
+                        .mapToObj(i -> TYPE_FACTORY.getUnderspecifiedDBType())
+                        .collect(ImmutableCollectors.toList()),
+                IntStream.range(0, arity)
+                        .mapToObj(i -> true)
+                        .collect(ImmutableCollectors.toList())
+                ).getAtomPredicate();
     }
 
     private static ImmutableList<QuotedID> createAttributeIds(QuotedIDFactory idFac, int arity) {
@@ -94,10 +102,10 @@ public class NoDependencyTestDBMetadata {
 
         TABLE1_AR4 = createRelationPredicate(dbMetadata, idFactory, 1, 4);
 
-        NESTED_REL_PRED_AR1 = createFlattenNodePredicate(idFactory, 1);
-        NESTED_REL_PRED_AR2 = createFlattenNodePredicate(idFactory, 2);
-        NESTED_REL_PRED_AR3 = createFlattenNodePredicate(idFactory, 3);
-        NESTED_REL_PRED_AR4 = createFlattenNodePredicate(idFactory, 4);
+        NESTED_REL_PRED_AR1 = createFlattenNodePredicate(dbMetadata, idFactory, 1);
+        NESTED_REL_PRED_AR2 = createFlattenNodePredicate(dbMetadata, idFactory, 2);
+        NESTED_REL_PRED_AR3 = createFlattenNodePredicate(dbMetadata, idFactory, 3);
+        NESTED_REL_PRED_AR4 = createFlattenNodePredicate(dbMetadata, idFactory, 4);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;

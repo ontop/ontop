@@ -91,7 +91,7 @@ public class JdbcTypeMapper implements TypeMapper {
 	}
 
 	@Override
-	public TermType getTermType(int sqlType, String typeName) {
+	public TermType getTermType(int sqlType) {
 		return Optional.ofNullable(sqlToTermTypeMap.get(sqlType))
 				// TODO: use another default type
 				.orElse(typeFactory.getXsdStringDatatype());
