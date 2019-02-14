@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraF
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraTreeNormalizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLConfiguration;
@@ -30,6 +31,7 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
         bindFromSettings(SelectFromWhereSerializer.class);
         bindFromSettings(IQTree2SelectFromWhereConverter.class);
         bindFromSettings(SQLTermSerializer.class);
+        bindFromSettings(DialectExtraTreeNormalizer.class);
 
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(

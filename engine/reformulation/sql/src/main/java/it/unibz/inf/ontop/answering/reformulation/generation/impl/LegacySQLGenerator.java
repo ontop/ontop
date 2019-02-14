@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
+import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraTreeNormalizer;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
@@ -48,6 +49,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     private final TermTypeTermLifter rdfTypeLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
     private final LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator;
+    private final DialectExtraTreeNormalizer extraNormalizer;
 
     @AssistedInject
     private LegacySQLGenerator(@Assisted DBMetadata metadata,
@@ -58,8 +60,10 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
                                PostProcessingProjectionSplitter projectionSplitter,
                                TermTypeTermLifter rdfTypeLifter, IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
-                               LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator)
+                               LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator,
+                               DialectExtraTreeNormalizer extraNormalizer)
     {
+        this.extraNormalizer = extraNormalizer;
         if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Not a DBMetadata!");
         }
@@ -133,7 +137,8 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
             IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(pushedDownQuery);
             log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullUp);
 
-            return iqConverter.convert(queryAfterPullUp).getTree();
+            // Dialect specific
+            return extraNormalizer.transform(iqConverter.convert(queryAfterPullUp).getTree());
         } catch (EmptyQueryException e) {
             // Not expected
             throw new MinorOntopInternalBugException(e.getMessage());
