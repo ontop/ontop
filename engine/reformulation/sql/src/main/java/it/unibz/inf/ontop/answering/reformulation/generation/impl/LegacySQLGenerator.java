@@ -7,7 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraTreeNormalizer;
+import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadata;
@@ -49,7 +49,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     private final TermTypeTermLifter rdfTypeLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
     private final LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator;
-    private final DialectExtraTreeNormalizer extraNormalizer;
+    private final DialectExtraNormalizer extraNormalizer;
 
     @AssistedInject
     private LegacySQLGenerator(@Assisted DBMetadata metadata,
@@ -61,7 +61,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                PostProcessingProjectionSplitter projectionSplitter,
                                TermTypeTermLifter rdfTypeLifter, IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                                LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator,
-                               DialectExtraTreeNormalizer extraNormalizer)
+                               DialectExtraNormalizer extraNormalizer)
     {
         this.extraNormalizer = extraNormalizer;
         if (!(metadata instanceof RDBMetadata)) {
@@ -138,7 +138,10 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
             log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullUp);
 
             // Dialect specific
-            return extraNormalizer.transform(iqConverter.convert(queryAfterPullUp).getTree());
+            IQTree afterDialectNormalization = extraNormalizer.transform(iqConverter.convert(queryAfterPullUp).getTree(), variableGenerator);
+            log.debug("New query after the dialect-specific extra normalization: \n" + afterDialectNormalization);
+            return afterDialectNormalization;
+
         } catch (EmptyQueryException e) {
             // Not expected
             throw new MinorOntopInternalBugException(e.getMessage());

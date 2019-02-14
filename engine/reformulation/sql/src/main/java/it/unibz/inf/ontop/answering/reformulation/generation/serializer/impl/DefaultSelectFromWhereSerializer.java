@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -115,12 +116,27 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QualifiedAttributeID(relationID, idFactory.createAttributeID(columnName));
         }
 
+        /**
+         * TODO: simplify it
+         */
         private ImmutableMap<Variable, String> extractProjectionColumnMap(
                 ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            // Mutable, initialized with the column names projected by the "from" relations
+            Set<String> quotedColumnNames = fromColumnMap.values().stream()
+                    .map(QualifiedAttributeID::getSQLRendering)
+                    .collect(Collectors.toSet());
+
             return projectedVariables.stream()
                     .collect(ImmutableCollectors.toMap(
                             v -> v,
-                            v -> sqlTermSerializer.serialize(v, fromColumnMap)));
+                            v -> {
+                                if (fromColumnMap.containsKey(v))
+                                    return sqlTermSerializer.serialize(v, fromColumnMap);
+
+                                String newColumnName = dialectAdapter.nameTopVariable(v.getName(), quotedColumnNames);
+                                quotedColumnNames.add(newColumnName);
+                                return newColumnName;
+                            }));
         }
 
 

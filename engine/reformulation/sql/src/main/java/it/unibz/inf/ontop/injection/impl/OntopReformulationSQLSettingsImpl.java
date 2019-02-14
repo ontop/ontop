@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraTreeNormalizer;
+import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
@@ -58,7 +58,7 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
          * Dialect normalizer
          */
         String normalizerKey = jdbcDriver + DIALECT_NORMALIZER_SUFFIX;
-        String normalizerName = DialectExtraTreeNormalizer.class.getCanonicalName();
+        String normalizerName = DialectExtraNormalizer.class.getCanonicalName();
         Optional.ofNullable(properties.getProperty(normalizerKey))
                 .filter(v -> !userProperties.containsKey(normalizerName))
                 .ifPresent(v -> properties.setProperty(normalizerName, v));
