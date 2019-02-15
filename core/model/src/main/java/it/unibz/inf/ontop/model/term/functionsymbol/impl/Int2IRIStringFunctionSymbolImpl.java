@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -69,5 +67,18 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
             }
         }
         return termFactory.getImmutableFunctionalTerm(this, newTerm);
+    }
+
+    @Override
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
+        ImmutableTerm subTerm = terms.get(0);
+        return Optional.ofNullable(iriDictionary.getId(otherTerm.getValue()))
+                .filter(id -> id >= 0)
+                .map(termFactory::getDBIntegerConstant)
+                .map(i -> termFactory.getStrictEquality(subTerm, i))
+                .map(IncrementalEvaluation::declareSimplifiedExpression)
+                .orElseGet(IncrementalEvaluation::declareIsFalse);
     }
 }
