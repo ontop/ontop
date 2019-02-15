@@ -62,6 +62,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PushDownBooleanExpressionOptimizer.class);
         bindFromSettings(PushUpBooleanExpressionOptimizer.class);
         bindFromSettings(TermTypeTermLifter.class);
+        bindFromSettings(OrderBySimplifier.class);
 
         Module optimizerModule = buildFactory(ImmutableList.of(
                 ExplicitEqualityTransformer.class,

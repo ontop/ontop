@@ -54,7 +54,9 @@ public interface IntermediateQueryFactory {
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
-    NativeNode createNativeNode(ImmutableSortedSet<Variable> variables, ImmutableMap<Variable, DBTermType> variableTypeMap,
+    NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
+                                @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
+                                @Assisted("columnNames") ImmutableMap<Variable, String> columnNames,
                                 String nativeQueryString, VariableNullability variableNullability);
 
     TrueNode createTrueNode();

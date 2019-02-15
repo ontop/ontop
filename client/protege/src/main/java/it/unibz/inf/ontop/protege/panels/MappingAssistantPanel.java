@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectA
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -1002,14 +1003,10 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					// Execute the sql query
 					try {
 						// Construct the sql query
-						final String dbType = selectedSource.getParameter(RDBMSourceParameterConstants.DATABASE_DRIVER);
-
 						OWLOntology activeOntology = owlModelManager.getActiveOntology();
-						OntopStandaloneSQLSettings settings = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology)
-								.getSettings();
+						OntopSQLOWLAPIConfiguration configuration = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology);
 
-						SQLDialectAdapter sqlDialect = SQLAdapterFactory.getSQLDialectAdapter(dbType, "",
-								settings);
+						SQLDialectAdapter sqlDialect = configuration.getInjector().getInstance(SQLDialectAdapter.class);
 						String sqlString = txtQueryEditor.getText();
 
 						int rowCount = fetchSize();

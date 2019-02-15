@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -10,6 +15,8 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
         implements OntopReformulationSQLSettings {
 
     private static final String DEFAULT_FILE = "reformulation-sql-default.properties";
+    private static final String DIALECT_ADAPTER_SUFFIX = "-adapter";
+    private static final String DIALECT_NORMALIZER_SUFFIX = "-normalizer";
     private final OntopSQLCoreSettings sqlSettings;
 
     OntopReformulationSQLSettingsImpl(Properties userProperties) {
@@ -20,6 +27,41 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultQASQLProperties();
         properties.putAll(userProperties);
+
+        String jdbcUrl = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_URL))
+                .orElseThrow(() -> new InvalidOntopConfigurationException(OntopSQLCoreSettings.JDBC_URL + " is required"));
+
+        String jdbcDriver = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_DRIVER))
+                .orElseGet(() -> {
+                    try {
+                        return DriverManager.getDriver(jdbcUrl).getClass().getCanonicalName();
+                    } catch (SQLException e) {
+                        throw new InvalidOntopConfigurationException("Impossible to get the JDBC driver. Reason: "
+                                + e.getMessage());
+                    }
+                });
+
+        properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
+        properties.putAll(userProperties);
+
+        /*
+         * Dialect adapter
+         */
+        String adapterKey = jdbcDriver + DIALECT_ADAPTER_SUFFIX;
+        String adapterName = SQLDialectAdapter.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(adapterKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(adapterName))
+                .ifPresent(v -> properties.setProperty(adapterName, v));
+
+        /*
+         * Dialect normalizer
+         */
+        String normalizerKey = jdbcDriver + DIALECT_NORMALIZER_SUFFIX;
+        String normalizerName = DialectExtraNormalizer.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(normalizerKey))
+                .filter(v -> !userProperties.containsKey(normalizerName))
+                .ifPresent(v -> properties.setProperty(normalizerName, v));
 
         return OntopSQLCoreSettingsImpl.loadSQLCoreProperties(properties);
     }

@@ -37,6 +37,8 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     @Override
     protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm,
                                                         TermFactory termFactory) {
+        if ((inputType != null) && inputType.equals(getTargetType()))
+            return subTerm;
 
         if (subTerm.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol) {
             DBTypeConversionFunctionSymbol functionSymbol =

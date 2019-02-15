@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.function.Function;
@@ -33,6 +34,26 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
             // TODO: make it more efficient?
             if (expression.equals(termFactory.getDBIsNotNull(possibleValue)))
                 return possibleValue;
+        }
+        else if (possibleValue instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) possibleValue;
+            if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+                ImmutableExpression condition = (ImmutableExpression) terms.get(0);
+
+                return termFactory.getRDFFunctionalTerm(
+                        termFactory.getIfElseNull(condition, functionalTerm.getTerm(0)),
+                        termFactory.getIfElseNull(condition, functionalTerm.getTerm(1)))
+                        .simplify(variableNullability);
+            }
+        }
+        else if (possibleValue instanceof RDFConstant) {
+            RDFConstant constant = (RDFConstant) possibleValue;
+            ImmutableExpression condition = (ImmutableExpression) terms.get(0);
+
+            return termFactory.getRDFFunctionalTerm(
+                    termFactory.getIfElseNull(condition, termFactory.getDBStringConstant(constant.getValue())),
+                    termFactory.getIfElseNull(condition, termFactory.getRDFTermTypeConstant(constant.getType())))
+                    .simplify(variableNullability);
         }
         return super.simplify(terms, termFactory, variableNullability);
     }

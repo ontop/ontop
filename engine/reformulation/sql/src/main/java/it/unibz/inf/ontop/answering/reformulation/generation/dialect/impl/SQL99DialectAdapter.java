@@ -302,7 +302,10 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
                 }
                 sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
                 if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
-                    sql += " DESC";
+                    sql += " DESC NULLS LAST";
+                }
+                else {
+                    sql += " NULLS FIRST";
                 }
                 needComma = true;
             }
