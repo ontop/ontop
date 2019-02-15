@@ -100,6 +100,11 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         }
     }
 
+    @Override
+    public String toString() {
+        return ontopBindingSet.toString();
+    }
+
     private OWLPropertyAssertionObject translate(Constant c) {
         if (c instanceof ObjectConstant)
             return translator.translate((ObjectConstant) c);

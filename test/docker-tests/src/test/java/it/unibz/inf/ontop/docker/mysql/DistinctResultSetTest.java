@@ -143,7 +143,8 @@ public class DistinctResultSetTest { //
             final OWLBindingSet bindingSet = rs.next();
             count++;
             for (int i = 1; i <= rs.getColumnCount(); i++) {
-                log.debug(rs.getSignature().get(i-1) + "=" + bindingSet.getOWLObject(i));
+                String bindingName = rs.getSignature().get(i - 1);
+                log.debug(bindingName + "=" + bindingSet.getOWLObject(bindingName));
             }
 
         }

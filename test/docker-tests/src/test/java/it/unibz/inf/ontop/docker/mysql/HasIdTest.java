@@ -43,9 +43,9 @@ public class HasIdTest extends AbstractVirtualModeTest {
         // At least one result
         assertTrue(results.hasNext());
         final OWLBindingSet bindingSet = results.next();
-        assertEquals(bindingSet.getOWLIndividual(1).toString(), "<http://example.com/persons/3>");
-        assertEquals(bindingSet.getOWLLiteral(2), null);
-        assertEquals(bindingSet.getOWLLiteral(3), null);
+        assertEquals(bindingSet.getOWLIndividual("p").toString(), "<http://example.com/persons/3>");
+        assertNull(bindingSet.getOWLLiteral("firstName"));
+        assertNull(bindingSet.getOWLLiteral("lastName"));
         assertFalse(results.hasNext());
     }
 }

@@ -279,7 +279,7 @@ public class SameAsOntowisTest {
                 .ontologyFile(owlfile)
                 .nativeOntopMappingFile(obdaFile)
                 .sameAsMappings(true)
-                .enableIRISafeEncoding(false)
+                //.enableIRISafeEncoding(false)
                 .build();
 
 
@@ -317,17 +317,9 @@ public class SameAsOntowisTest {
                 //for (int i=0; i<nRuns; ++i){
                 long t1 = System.currentTimeMillis();
                 TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-                int columnSize = rs.getColumnCount();
                 count = 0;
                 while (rs.hasNext()) {
                     count ++;
-                    for (int idx = 1; idx <= columnSize; idx++) {
-                        final OWLBindingSet bindingSet = rs.next();
-                        @SuppressWarnings("unused")
-                        OWLObject binding = bindingSet.getOWLObject(idx);
-//                        System.out.print(binding.toString() + ", ");
-                    }
-//                    System.out.print("\n");
                 }
                 long t2 = System.currentTimeMillis();
                 //time = time + (t2-t1);
