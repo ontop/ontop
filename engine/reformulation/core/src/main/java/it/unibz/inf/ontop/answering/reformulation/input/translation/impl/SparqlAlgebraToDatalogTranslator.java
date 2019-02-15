@@ -577,7 +577,8 @@ public class SparqlAlgebraToDatalogTranslator {
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
                 return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
             else
-                return immutabilityTools.convertToMutableFunction(termFactory.getEncodedIRIFunctionalTerm(id, uriRef));
+                return immutabilityTools.convertToMutableFunction(termFactory.getEncodedIRIFunctionalTerm(
+                        termFactory.getDBIntegerConstant(id), uriRef));
         }
         else {
             return termFactory.getConstantIRI(rdfFactory.createIRI(uri));

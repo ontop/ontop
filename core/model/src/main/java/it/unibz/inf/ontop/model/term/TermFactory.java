@@ -321,7 +321,7 @@ public interface TermFactory {
 	/**
 	 * When IRIs are encoded into numbers using a dictionary
 	 */
-	ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(int encodedIRI, IRIDictionary iriDictionary);
+	ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm, IRIDictionary iriDictionary);
 
 	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
