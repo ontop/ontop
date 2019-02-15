@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -893,7 +892,7 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm classTerm, ObjectRDFType type) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
@@ -911,7 +910,7 @@ public class RDBMSSIRepositoryManager {
 	}
 	
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm iriTerm, ObjectRDFType type1,
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1,
 																		RDFTermType type2) {
 
 		Variable X = termFactory.getVariable("X");
