@@ -1649,7 +1649,7 @@ public class BindingLiftTest {
 
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
-                        X, generateIRIWithTemplate1(ONE))));
+                        X, generateIRIWithTemplate1(ONE_STR))));
 
         if (trueNodeOnTheLeft) {
             queryBuilder.addChild(joinNode, constructionNode2);
@@ -1672,11 +1672,11 @@ public class BindingLiftTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         ImmutableMap.of(
-                                X, generateIRIWithTemplate1(ONE),
+                                X, generateIRIWithTemplate1(ONE_STR).simplify(),
                                 Y, generateURI2(B))));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(DATA_NODE_1.getProjectionAtom().getPredicate(), ONE, B));
+                ATOM_FACTORY.getDataAtom(DATA_NODE_1.getProjectionAtom().getPredicate(), ONE_STR, B));
         expectedQueryBuilder.addChild(newConstructionNode, newLeftDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

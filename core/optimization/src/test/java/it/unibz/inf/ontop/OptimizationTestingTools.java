@@ -89,7 +89,7 @@ public class OptimizationTestingTools {
     public static final Variable L;
     public static final Variable M;
     public static final Variable N;
-    public static final Constant ONE, TWO;
+    public static final DBConstant ONE, TWO, ONE_STR, TWO_STR;
 
     public static final AtomPredicate ANS1_AR0_PREDICATE, ANS1_AR1_PREDICATE, ANS1_AR2_PREDICATE, ANS1_AR3_PREDICATE,
             ANS1_AR4_PREDICATE, ANS1_AR5_PREDICATE;
@@ -168,8 +168,10 @@ public class OptimizationTestingTools {
         L = TERM_FACTORY.getVariable("l");
         M = TERM_FACTORY.getVariable("m");
         N = TERM_FACTORY.getVariable("n");
-        ONE = TERM_FACTORY.getRDFLiteralConstant("1", XSD.INTEGER);
-        TWO = TERM_FACTORY.getRDFLiteralConstant("2", XSD.INTEGER);
+        ONE = TERM_FACTORY.getDBIntegerConstant(1);
+        TWO = TERM_FACTORY.getDBIntegerConstant(2);
+        ONE_STR = TERM_FACTORY.getDBStringConstant("1");
+        TWO_STR = TERM_FACTORY.getDBStringConstant("2");
 
         ANS1_AR0_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(0);
         ANS1_AR1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);

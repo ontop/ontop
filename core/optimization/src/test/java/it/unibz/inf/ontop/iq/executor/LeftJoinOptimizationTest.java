@@ -860,9 +860,11 @@ public class LeftJoinOptimizationTest {
         ImmutableExpression o1IsNotNull = TERM_FACTORY.getDBIsNotNull(O1);
         FilterNode rightFilterNode = IQ_FACTORY.createFilterNode(o1IsNotNull);
 
+        ImmutableFunctionalTerm uri1O1Term = generateURI1(O1);
+
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, N1, O1));
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(M1, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(Y, generateURI1(O1)));
+                SUBSTITUTION_FACTORY.getSubstitution(Y, uri1O1Term));
 
         queryBuilder.addChild(leftJoinNode, dataNode1, LEFT);
         queryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
@@ -877,9 +879,13 @@ public class LeftJoinOptimizationTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M1),
-                        Y, TERM_FACTORY.getIfElseNull(
-                                o1IsNotNull,
-                                generateURI1(O1))));
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getIfElseNull(
+                                        o1IsNotNull,
+                                        uri1O1Term.getTerm(0)),
+                                TERM_FACTORY.getIfElseNull(
+                                        o1IsNotNull,
+                                        uri1O1Term.getTerm(1)))));
         expectedQueryBuilder.init(projectionAtom1, constructionNode1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -970,10 +976,12 @@ public class LeftJoinOptimizationTest {
         ImmutableExpression o1IsNotNull = TERM_FACTORY.getDBIsNotNull(O1);
         FilterNode rightFilterNode = IQ_FACTORY.createFilterNode(o1IsNotNull);
 
+        ImmutableFunctionalTerm uri1O1Term = generateURI1(O1);
+
         ExtensionalDataNode dataNode2 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, N, N, O1));
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(M, N, Z),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        Z, generateURI1(O1),
+                        Z, uri1O1Term,
                         M, N));
 
         queryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
@@ -994,9 +1002,13 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M),
                         Y, generateURI1(N),
-                        Z, TERM_FACTORY.getIfElseNull(
-                                zCondition,
-                                generateURI1(O1))));
+                        Z, TERM_FACTORY.getRDFFunctionalTerm(
+                            TERM_FACTORY.getIfElseNull(
+                                    zCondition,
+                                    uri1O1Term.getTerm(0)),
+                            TERM_FACTORY.getIfElseNull(
+                                    zCondition,
+                                    uri1O1Term.getTerm(1)))));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
