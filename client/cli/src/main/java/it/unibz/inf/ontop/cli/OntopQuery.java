@@ -27,6 +27,7 @@ import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.help.BashCompletion;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.github.rvesse.airline.help.cli.bash.CompletionBehaviour;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -44,6 +45,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 
@@ -133,10 +135,11 @@ public class OntopQuery extends OntopReasoningCommandBase {
 		/*
          * Printing the header
 		 */
+        List<String> signature = result.getSignature();
 
         int columns = result.getColumnCount();
         for (int c = 0; c < columns; c++) {
-            String value = result.getSignature().get(c);
+            String value = signature.get(c);
             wr.append(value);
             if (c + 1 < columns)
                 wr.append(",");
@@ -145,12 +148,12 @@ public class OntopQuery extends OntopReasoningCommandBase {
 
         while (result.hasNext()) {
             final OWLBindingSet bindingSet = result.next();
-            for (int c = 0; c < columns; c++) {
-                String value = ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(c + 1));
-                wr.append(value);
-                if (c + 1 < columns)
-                    wr.append(",");
+            ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
+            for (String columnName : signature) {
+                // TODO: make it robust to NULLs
+                valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
             }
+            wr.append(String.join(",", valueListBuilder.build()));
             wr.newLine();
         }
         wr.flush();
