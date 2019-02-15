@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
  */
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
@@ -578,7 +577,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
                 return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
             else
-                return immutabilityTools.convertToMutableFunction(termFactory.getRDFFunctionalTerm(id));
+                return immutabilityTools.convertToMutableFunction(termFactory.getEncodedIRIFunctionalTerm(id, uriRef));
         }
         else {
             return termFactory.getConstantIRI(rdfFactory.createIRI(uri));

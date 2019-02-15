@@ -97,4 +97,10 @@ public interface FunctionSymbolFactory {
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
 
     FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
+    /**
+     * Dictionary-based, transforms integer into full IRI strings.
+     *
+     */
+    FunctionSymbol getInt2IRIStringFunctionSymbol(IRIDictionary iriDictionary);
 }

@@ -714,9 +714,10 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI) {
-		// TODO: use an int-to-string casting function
-		DBConstant lexicalValue = getDBStringConstant(String.valueOf(encodedIRI));
+	public ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(int encodedIRI, IRIDictionary iriDictionary) {
+		ImmutableFunctionalTerm lexicalValue = getImmutableFunctionalTerm(
+				functionSymbolFactory.getInt2IRIStringFunctionSymbol(iriDictionary),
+				getDBIntegerConstant(encodedIRI));
 		return getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 

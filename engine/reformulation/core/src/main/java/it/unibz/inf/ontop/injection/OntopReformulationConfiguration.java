@@ -1,10 +1,10 @@
 package it.unibz.inf.ontop.injection;
 
 
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;

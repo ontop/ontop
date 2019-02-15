@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.si.repository.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
 
 import java.util.HashMap;
 
@@ -38,5 +38,10 @@ public class SemanticIndexURIMap implements IRIDictionary {
 	@Override
 	public String getURI(Integer id) {
 		return uriMap2.get(id);
+	}
+
+	@Override
+	public String toString() {
+		return "si-dict";
 	}
 }

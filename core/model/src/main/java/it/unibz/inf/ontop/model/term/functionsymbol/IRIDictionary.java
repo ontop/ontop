@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation;
+package it.unibz.inf.ontop.model.term.functionsymbol;
 
 
 public interface IRIDictionary {
