@@ -37,16 +37,26 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
 
     @Override
     public PostProcessingSplit split(IQ initialIQ) {
-        UnaryIQTree initialTree = Optional.of(initialIQ.getTree())
+
+        IQTree topTree = initialIQ.getTree();
+        VariableGenerator variableGenerator = initialIQ.getVariableGenerator();
+
+        return Optional.of(topTree)
                 .filter(t -> t.getRootNode() instanceof ConstructionNode)
                 .map(t -> (UnaryIQTree) t)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "The iq to be split is not starting with a construction node.\n" + initialIQ));
+                .map(t -> split(t, variableGenerator))
+                .orElseGet(() -> new PostProcessingSplitImpl(
+                        // "Useless" construction node --> no post-processing
+                        iqFactory.createConstructionNode(topTree.getVariables(), substitutionFactory.getSubstitution()),
+                        topTree,
+                        variableGenerator));
+    }
+
+
+    private PostProcessingSplit split(UnaryIQTree initialTree, VariableGenerator variableGenerator) {
 
         ConstructionNode initialRootNode = (ConstructionNode) initialTree.getRootNode();
         IQTree initialSubTree = initialTree.getChild();
-
-        VariableGenerator variableGenerator = initialIQ.getVariableGenerator();
 
         ProjectionDecomposition decomposition = decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
 
