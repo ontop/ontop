@@ -79,6 +79,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								FlattenUnionOptimizer flattenUnionOptimizer,
 								EQNormalizer eqNormalizer,
 								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+								InputQueryTranslator inputQueryTranslator,
 								IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter,
 								TermFactory termFactory, AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
 								OrderBySimplifier orderBySimplifier) {
@@ -113,8 +114,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
-		this.inputQueryTranslator = translationFactory.createInputQueryTranslator(saturatedMapping.getMetadata()
-				.getUriTemplateMatcher());
+		this.inputQueryTranslator = inputQueryTranslator;
 		this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;

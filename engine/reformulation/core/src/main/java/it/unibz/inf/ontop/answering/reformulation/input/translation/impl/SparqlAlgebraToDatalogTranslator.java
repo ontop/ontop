@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
@@ -51,7 +50,6 @@ import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -70,7 +68,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
-	private final UriTemplateMatcher uriTemplateMatcher;
 	private final IRIDictionary uriRef;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
@@ -85,7 +82,6 @@ public class SparqlAlgebraToDatalogTranslator {
     private final ImmutabilityTools immutabilityTools;
 
     /**
-     * @param uriTemplateMatcher matches URIs to templates (comes from mappings)
      * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      * @param termFactory
      * @param typeFactory
@@ -94,13 +90,11 @@ public class SparqlAlgebraToDatalogTranslator {
      * @param immutabilityTools
      *
 	 */
-	SparqlAlgebraToDatalogTranslator(@Nonnull UriTemplateMatcher uriTemplateMatcher,
-                                     @Nullable IRIDictionary iriDictionary,
+	SparqlAlgebraToDatalogTranslator(@Nullable IRIDictionary iriDictionary,
                                      AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
                                      FunctionSymbolFactory functionSymbolFactory, DatalogFactory datalogFactory,
                                      ImmutabilityTools immutabilityTools,
                                      org.apache.commons.rdf.api.RDF rdfFactory) {
-		this.uriTemplateMatcher = uriTemplateMatcher;
 		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
