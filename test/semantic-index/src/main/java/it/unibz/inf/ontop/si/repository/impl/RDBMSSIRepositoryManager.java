@@ -27,7 +27,9 @@ import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeCo
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -239,7 +241,7 @@ public class RDBMSSIRepositoryManager {
 		ATTRIBUTE_TABLE_MAP = datatypeTableMapBuilder.build();
 	}
 	
-	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
+	private final SemanticIndexURIMap uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
 
@@ -248,6 +250,8 @@ public class RDBMSSIRepositoryManager {
 	private final SemanticIndexViewsManager views;
 	private final TermFactory termFactory;
 	private final TargetAtomFactory targetAtomFactory;
+	private final FunctionSymbol int2IRIStringFunctionSymbol;
+	private final RDFTermTypeConstant iriTypeConstant;
 
 	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag,
 									TermFactory termFactory, TypeFactory typeFactory,
@@ -258,6 +262,12 @@ public class RDBMSSIRepositoryManager {
         cacheSI = new SemanticIndexCache(reasonerDag);
 		this.targetAtomFactory = targetAtomFactory;
 		cacheSI.buildSemanticIndexFromReasoner();
+		uriMap = new SemanticIndexURIMap();
+
+		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+		int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
+				dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType(), uriMap);
+		iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
 
@@ -852,7 +862,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
-						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1(), getUriMap());
+						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);
 			}
@@ -893,14 +903,13 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type,
-														   IRIDictionary iriDictionary) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = termFactory.getEncodedIRIFunctionalTerm(X, iriDictionary);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -920,7 +929,7 @@ public class RDBMSSIRepositoryManager {
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = termFactory.getEncodedIRIFunctionalTerm(X, iriDictionary);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -929,7 +938,7 @@ public class RDBMSSIRepositoryManager {
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
 					? termFactory.getFreshBnodeFunctionalTerm(Y)
-					: termFactory.getEncodedIRIFunctionalTerm(Y, iriDictionary);
+					: getEncodedIRIFunctionalTerm(Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;
@@ -945,6 +954,12 @@ public class RDBMSSIRepositoryManager {
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm,iriTerm,objectTerm);
 
 		return ImmutableList.of(targetAtom);
+	}
+
+	public ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm) {
+		ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
+				int2IRIStringFunctionSymbol, dbIntegerTerm);
+		return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	

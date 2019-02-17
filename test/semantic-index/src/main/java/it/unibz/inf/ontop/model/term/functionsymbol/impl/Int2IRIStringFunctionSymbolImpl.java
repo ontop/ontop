@@ -19,7 +19,7 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
     private final DBTermType dbStringType;
     private final IRIDictionary iriDictionary;
 
-    protected Int2IRIStringFunctionSymbolImpl(@Nonnull DBTermType integerType, @Nonnull DBTermType dbStringType,
+    public Int2IRIStringFunctionSymbolImpl(@Nonnull DBTermType integerType, @Nonnull DBTermType dbStringType,
                                               @Nonnull IRIDictionary iriDictionary) {
         super("int2IRIString-" + iriDictionary.toString(), ImmutableList.of(integerType));
         this.dbStringType = dbStringType;

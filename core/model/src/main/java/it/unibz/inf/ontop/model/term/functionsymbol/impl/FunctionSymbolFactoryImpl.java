@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +35,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
-    private final Map<IRIDictionary, FunctionSymbol> int2IRIStringFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
     private final FunctionSymbol langTypeFunctionSymbol;
     private final FunctionSymbol rdfDatatypeFunctionSymbol;
@@ -69,7 +67,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.concatMap = new HashMap<>();
         this.isAMap = new HashMap<>();
         this.lexicalInequalityFunctionSymbolMap = new HashMap<>();
-        this.int2IRIStringFunctionSymbolMap = new HashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
@@ -321,12 +318,5 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
         return new UnaryLexicalFunctionSymbolImpl(dbStringType, metaRDFType, dbFunctionSymbolFct);
-    }
-
-    @Override
-    public FunctionSymbol getInt2IRIStringFunctionSymbol(IRIDictionary iriDictionary) {
-        return int2IRIStringFunctionSymbolMap
-                .computeIfAbsent(iriDictionary, d -> new Int2IRIStringFunctionSymbolImpl(
-                        typeFactory.getDBTypeFactory().getDBLargeIntegerType(), dbStringType, d));
     }
 }

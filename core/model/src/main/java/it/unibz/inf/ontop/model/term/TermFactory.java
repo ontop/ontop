@@ -319,11 +319,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
-	 * When IRIs are encoded into numbers using a dictionary
-	 */
-	ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm, IRIDictionary iriDictionary);
-
-	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
