@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingMerger;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
@@ -60,8 +59,7 @@ public class MappingMergerImpl implements MappingMerger {
     private MappingMetadata mergeMetadata(ImmutableSet<Mapping> mappings) {
 
         PrefixManager prefixManager = mergePrefixManagers(mappings);
-        UriTemplateMatcher uriTemplateMatcher = mergeURITemplateMatchers(mappings);
-        return specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
+        return specificationFactory.createMetadata(prefixManager);
     }
 
     private PrefixManager mergePrefixManagers(ImmutableSet<Mapping> mappings) {
@@ -83,14 +81,6 @@ public class MappingMergerImpl implements MappingMerger {
             return uris.iterator().next();
         }
         throw new MappingMergingException("Conflicting URIs for prefix " + prefix + ": " + uris);
-    }
-
-    private UriTemplateMatcher mergeURITemplateMatchers(ImmutableSet<Mapping> mappings) {
-        return UriTemplateMatcher.merge(
-                mappings.stream()
-                        .map(m -> m.getMetadata().getUriTemplateMatcher()),
-                termFactory
-        );
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingPropertyTables(ImmutableSet<Mapping> mappings) {

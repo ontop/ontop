@@ -26,8 +26,6 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
 
-import java.sql.Types;
-import java.util.stream.Stream;
 
 public class MappingTestingTools {
 
@@ -59,7 +57,6 @@ public class MappingTestingTools {
     public static final IQ2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSaturator MAPPING_SATURATOR;
 
-    public static final UriTemplateMatcher EMPTY_URI_TEMPLATE_MATCHER;
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
     public static final MappingMetadata EMPTY_MAPPING_METADATA;
     public static final UnionFlattener UNION_FLATTENER;
@@ -104,9 +101,8 @@ public class MappingTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
 
-        EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
-        EMPTY_MAPPING_METADATA = MAPPING_FACTORY.createMetadata(EMPTY_PREFIX_MANAGER, EMPTY_URI_TEMPLATE_MATCHER);
+        EMPTY_MAPPING_METADATA = MAPPING_FACTORY.createMetadata(EMPTY_PREFIX_MANAGER);
 
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

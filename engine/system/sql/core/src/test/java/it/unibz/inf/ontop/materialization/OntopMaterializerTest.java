@@ -48,7 +48,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
@@ -240,15 +239,8 @@ public class OntopMaterializerTest {
 
 		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
 
-		UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-				body.stream()
-						.flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-						.filter(t -> t instanceof ImmutableFunctionalTerm)
-						.map(t -> (ImmutableFunctionalTerm) t),
-				termFactory, typeFactory);
-
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
+		MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), mappingMetadata);
 	}
 

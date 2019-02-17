@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.answering.reformulation.input.translation.impl;
 import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.eclipse.rdf4j.query.parser.QueryParser;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
-
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
 

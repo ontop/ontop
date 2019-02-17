@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.SemanticIndexException;
@@ -19,7 +16,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +23,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.UUID;
 
 /**
  * Wrapper for RDBMSSIRepositoryManager
@@ -93,16 +88,9 @@ public class SIRepository {
 
         ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t), termFactory, typeFactory);
-
         try {
             return new SQLPPMappingImpl(mappingAxioms,
-                    specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
+                    specificationFactory.createMetadata(prefixManager));
         }
         catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());

@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -146,8 +145,8 @@ public class MappingTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY));
+        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
+                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
 
         Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
                 propertyMapBuilder.build()), transformIntoTable(classMap));
@@ -210,8 +209,8 @@ public class MappingTest {
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()),
-                UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY));
+        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
+                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
         MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
                 transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
         );

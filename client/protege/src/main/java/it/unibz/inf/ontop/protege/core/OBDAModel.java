@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -27,7 +26,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -127,18 +125,9 @@ public class OBDAModel {
         ImmutableList<SQLPPTriplesMap> triplesMaps = ImmutableList.copyOf(triplesMapMap.values());
 
         try {
-            UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                    triplesMaps.stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream())
-                            .flatMap(targetAtom -> targetAtom.getSubstitution().getImmutableMap().values().stream())
-                            .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t),
-                    termFactory, typeFactory);
-
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
-                    specificationFactory.createMetadata(prefixManager,
-                            uriTemplateMatcher));
+                    specificationFactory.createMetadata(prefixManager));
             /**
              * No mapping so should never happen
              */

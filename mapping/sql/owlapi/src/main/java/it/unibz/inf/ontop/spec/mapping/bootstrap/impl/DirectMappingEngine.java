@@ -42,7 +42,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.*;
@@ -215,8 +214,7 @@ public class DirectMappingEngine {
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
             it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager,
-					UriTemplateMatcher.create(Stream.empty(), termFactory, typeFactory));
+            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
             mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
         }
         else
