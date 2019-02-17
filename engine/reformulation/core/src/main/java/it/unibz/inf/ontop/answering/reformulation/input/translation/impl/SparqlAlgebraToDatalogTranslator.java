@@ -317,7 +317,7 @@ public class SparqlAlgebraToDatalogTranslator {
 
             ValueExpr expr = lj.getCondition();
             if (expr != null) {
-                Function f = getFilterExpression(expr, vars);
+                Function f = immutabilityTools.convertToMutableBooleanExpression(getFilterExpression(expr, vars));
                 body.getTerms().add(f);
             }
 
@@ -338,7 +338,8 @@ public class SparqlAlgebraToDatalogTranslator {
             Filter filter = (Filter) node;
             TranslationResult a = translate(filter.getArg());
 
-            Function f = getFilterExpression(filter.getCondition(), a.variables);
+            ImmutableExpression expression = getFilterExpression(filter.getCondition(), a.variables);
+            Function f = immutabilityTools.convertToMutableBooleanExpression(expression);
             ImmutableList<Function> atoms = ImmutableList.<Function>builder().addAll(a.atoms).add(f).build();
             // TODO: split ANDs in the FILTER?
 
@@ -428,7 +429,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return
      */
 
-    private Expression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
+    private ImmutableExpression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         ImmutableTerm term = immutabilityTools.convertIntoImmutableTerm(getExpression(expr, variables));
@@ -443,7 +444,17 @@ public class SparqlAlgebraToDatalogTranslator {
 
         ImmutableExpression expression = termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm);
 
-        return immutabilityTools.convertToMutableBooleanExpression(expression);
+        /*
+         * Here the evaluation mostly aims at reducing sameTerm expressions into regular strict equalities
+         * so that they can be recognized by the Datalog-based query rewriters.
+         *
+         * TEMPORARY
+         */
+        IncrementalEvaluation evaluation = expression.evaluate(
+                termFactory.createDummyVariableNullability(expression), true);
+
+        return evaluation.getNewExpression()
+                .orElse(expression);
     }
 
 	private TranslationResult translateTriplePattern(StatementPattern triple) throws OntopUnsupportedInputQueryException {
