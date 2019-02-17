@@ -698,7 +698,9 @@ public class SparqlAlgebraToDatalogTranslator {
             else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)
                 // Corresponds to the STRICT equality (same lexical value, same type)
-                return termFactory.getFunctionStrictEQ(term1, term2);
+                return termFactory.getFunction(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.SAME_TERM, 2),
+                        term1, term2);
             }
             else if (expr instanceof Regex) {
                 // REGEX (Sec 17.4.3.14)

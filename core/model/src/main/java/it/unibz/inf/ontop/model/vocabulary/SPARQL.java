@@ -32,4 +32,5 @@ public class SPARQL {
     public static final String RAND = "RAND";
     public static final String TZ = "TZ";
     public static final String NOW = "NOW";
+    public static final String SAME_TERM = "sameTerm";
 }
