@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.connection.impl;
  */
 
 import java.sql.Connection;
-import java.util.Optional;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
@@ -52,7 +51,6 @@ public class SQLConnection implements OntopConnection {
 
 	private final QueryReformulator queryProcessor;
 	private Connection conn;
-	private final Optional<IRIDictionary> iriDictionary;
 	private final DBMetadata dbMetadata;
 	private final InputQueryFactory inputQueryFactory;
 	private final TermFactory termFactory;
@@ -66,13 +64,12 @@ public class SQLConnection implements OntopConnection {
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
-						 Optional<IRIDictionary> iriDictionary, DBMetadata dbMetadata,
+						 DBMetadata dbMetadata,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
 						 RDF rdfFactory, SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
-		this.iriDictionary = iriDictionary;
 		this.dbMetadata = dbMetadata;
 		this.inputQueryFactory = inputQueryFactory;
 		this.termFactory = termFactory;

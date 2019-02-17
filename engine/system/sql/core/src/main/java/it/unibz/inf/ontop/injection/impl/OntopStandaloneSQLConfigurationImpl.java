@@ -14,11 +14,9 @@ import it.unibz.inf.ontop.injection.impl.OntopReformulationConfigurationImpl.Def
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.DefaultOntopReformulationSQLBuilderFragment;
 import it.unibz.inf.ontop.injection.impl.OntopReformulationSQLConfigurationImpl.OntopReformulationSQLOptions;
 import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
-import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -39,11 +37,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     @Override
     public OntopStandaloneSQLSettings getSettings() {
         return settings;
-    }
-
-    @Override
-    public Optional<IRIDictionary> getIRIDictionary() {
-        return systemConfiguration.getIRIDictionary();
     }
 
     @Override
@@ -108,11 +101,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         @Override
         public B enableExistentialReasoning(boolean enable) {
             return translationFragmentBuilder.enableExistentialReasoning(enable);
-        }
-
-        @Override
-        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
-            return translationFragmentBuilder.iriDictionary(iriDictionary);
         }
 
         @Override
