@@ -50,7 +50,6 @@ import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,7 +67,6 @@ public class SparqlAlgebraToDatalogTranslator {
 
     private static final Logger log = LoggerFactory.getLogger(SparqlAlgebraToDatalogTranslator.class);
 
-	private final IRIDictionary uriRef;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
@@ -82,7 +80,6 @@ public class SparqlAlgebraToDatalogTranslator {
     private final ImmutabilityTools immutabilityTools;
 
     /**
-     * @param iriDictionary maps URIs to their integer identifiers (used only in the Semantic Index mode)
      * @param termFactory
      * @param typeFactory
      * @param functionSymbolFactory
@@ -90,12 +87,10 @@ public class SparqlAlgebraToDatalogTranslator {
      * @param immutabilityTools
      *
 	 */
-	SparqlAlgebraToDatalogTranslator(@Nullable IRIDictionary iriDictionary,
-                                     AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
+	SparqlAlgebraToDatalogTranslator(AtomFactory atomFactory, TermFactory termFactory, TypeFactory typeFactory,
                                      FunctionSymbolFactory functionSymbolFactory, DatalogFactory datalogFactory,
                                      ImmutabilityTools immutabilityTools,
                                      org.apache.commons.rdf.api.RDF rdfFactory) {
-		this.uriRef = iriDictionary;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
@@ -519,7 +514,7 @@ public class SparqlAlgebraToDatalogTranslator {
         if (v instanceof Literal)
             return getTermForLiteral((Literal) v);
         else if (v instanceof IRI)
-            return getTermForIri((IRI)v, false);
+            return getTermForIri((IRI)v);
 
         throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
     }
@@ -565,29 +560,16 @@ public class SparqlAlgebraToDatalogTranslator {
     /**
      *
      * @param v URI object
-     * @param unknownUrisToTemplates - the URIs are treated differently in triple patterns
-     *                               and filter expressions (this will be normalised later)
      * @return term (URI template)
      */
 
-    private Term getTermForIri(IRI v, boolean unknownUrisToTemplates) {
+    private Term getTermForIri(IRI v) {
 
         // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
         // string of an IRI might be a part of an IRI template, but not from database value.
          String uri = R2RMLIRISafeEncoder.decode(v.stringValue());
         //String uri = v.stringValue();
-
-        if (uriRef != null) {  // if in the Semantic Index mode
-            int id = uriRef.getId(uri);
-            if (id < 0 && unknownUrisToTemplates)  // URI is not found and need to wrap it in a template
-                return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
-            else
-                return immutabilityTools.convertToMutableFunction(termFactory.getEncodedIRIFunctionalTerm(
-                        termFactory.getDBIntegerConstant(id), uriRef));
-        }
-        else {
-            return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
-        }
+        return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
     }
 
     /**
@@ -614,7 +596,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (v instanceof Literal)
                 return getTermForLiteral((Literal) v);
             else if (v instanceof IRI)
-                return getTermForIri((IRI)v, true);
+                return getTermForIri((IRI)v);
 
             throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
         }
