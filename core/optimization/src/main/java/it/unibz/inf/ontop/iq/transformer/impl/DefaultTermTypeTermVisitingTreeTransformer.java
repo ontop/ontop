@@ -63,9 +63,6 @@ public class DefaultTermTypeTermVisitingTreeTransformer
     }
 
 
-    /**
-     * TODO: implement it seriously
-     */
     @Override
     public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
         // Recursive
