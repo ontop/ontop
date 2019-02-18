@@ -174,4 +174,9 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     protected boolean tolerateNulls() {
         return true;
     }
+
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
+    }
 }

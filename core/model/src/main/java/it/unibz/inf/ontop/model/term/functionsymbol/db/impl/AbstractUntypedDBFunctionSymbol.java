@@ -68,4 +68,12 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     protected boolean tolerateNulls() {
         return false;
     }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
+    }
 }

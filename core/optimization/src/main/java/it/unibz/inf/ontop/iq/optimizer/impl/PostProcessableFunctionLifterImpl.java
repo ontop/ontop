@@ -146,9 +146,10 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
          */
         protected boolean shouldBeLifted(ImmutableFunctionalTerm functionalTerm) {
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-            if (!(functionSymbol instanceof DBFunctionSymbol))
+            if (!(functionSymbol instanceof DBFunctionSymbol)
+                || ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked())
                 return true;
-            // TODO: consider DBFunctionSymbol that prefer to be post-processed
+            
             return functionalTerm.getTerms().stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
                     .map(t -> (ImmutableFunctionalTerm) t)

@@ -37,4 +37,12 @@ public abstract class AbstractTypedDBFunctionSymbol extends FunctionSymbolImpl i
     protected boolean tolerateNulls() {
         return false;
     }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
+    }
 }

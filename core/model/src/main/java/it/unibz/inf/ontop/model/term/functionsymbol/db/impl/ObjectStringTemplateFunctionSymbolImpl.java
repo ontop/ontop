@@ -221,4 +221,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
     }
+
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return true;
+    }
 }

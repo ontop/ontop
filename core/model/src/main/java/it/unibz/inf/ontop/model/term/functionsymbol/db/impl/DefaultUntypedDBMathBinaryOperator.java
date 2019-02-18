@@ -58,4 +58,12 @@ public class DefaultUntypedDBMathBinaryOperator extends FunctionSymbolImpl imple
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
     }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
+    }
 }
