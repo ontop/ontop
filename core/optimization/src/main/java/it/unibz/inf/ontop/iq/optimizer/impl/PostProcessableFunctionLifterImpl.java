@@ -149,7 +149,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             if (!(functionSymbol instanceof DBFunctionSymbol)
                 || ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked())
                 return true;
-            
+
             return functionalTerm.getTerms().stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
                     .map(t -> (ImmutableFunctionalTerm) t)
@@ -283,7 +283,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     Stream.concat(
                             unionVariables.stream(),
                             Stream.of(idVariable)),
-                    renamingSubstitution.getImmutableMap().keySet().stream())
+                    originalDefinition.getVariableStream())
                     .filter(v -> !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
