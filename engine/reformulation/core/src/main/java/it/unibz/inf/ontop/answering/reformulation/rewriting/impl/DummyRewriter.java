@@ -25,8 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.constraints.ChaseTools;
-import it.unibz.inf.ontop.constraints.ImmutableLinearInclusionDependency;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -34,7 +33,6 @@ import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
 
@@ -44,18 +42,15 @@ import java.util.*;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> sigma;
+    private LinearInclusionDependencies<AtomPredicate> sigma;
 
     protected final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
-    protected final ChaseTools chaseTools;
     protected final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
-                            ChaseTools chaseTools,
                             IntermediateQueryFactory iqFactory) {
         this.inclusionDependencyTools = inclusionDependencyTools;
-        this.chaseTools = chaseTools;
         this.iqFactory = iqFactory;
     }
 
@@ -64,7 +59,7 @@ public class DummyRewriter implements QueryRewriter {
         sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
     }
 
-    protected ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> getSigma() {
+    protected LinearInclusionDependencies<AtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -79,7 +74,7 @@ public class DummyRewriter implements QueryRewriter {
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    ImmutableSet<DataAtom> derived = chaseTools.chaseAtom(list.get(i).getProjectionAtom(), sigma);
+                    ImmutableSet<DataAtom> derived = sigma.chaseAtom(list.get(i).getProjectionAtom());
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
                             // TODO: careful with variables that occur only in atom j

@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.constraints.impl;
 
 import com.google.common.collect.*;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.constraints.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -15,22 +13,12 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
 
     private final Map<ImmutableList<DataAtom>, ImmutableSet<DataAtom>> chaseCache = new HashMap<>();
 
-    private final Optional<ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>>> dependencies;
+    private final LinearInclusionDependencies<AtomPredicate> dependencies;
 
-    private final ChaseTools chaseTools;
-
-    @Inject
-    public ImmutableCQContainmentCheckUnderLIDs(@Assisted ImmutableList<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies,
-                                                ChaseTools chaseTools) {
-        this.dependencies = Optional.of(dependencies);
-        this.chaseTools = chaseTools;
+    public ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies) {
+        this.dependencies = dependencies;
     }
 
-    @Inject
-    public ImmutableCQContainmentCheckUnderLIDs(ChaseTools chaseTools) {
-        this.dependencies = Optional.empty();
-        this.chaseTools = chaseTools;
-    }
 
     @Override
     public boolean isContainedIn(ImmutableCQ cq1, ImmutableCQ cq2) {
@@ -45,9 +33,7 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
     private ImmutableSet<DataAtom> getChase(ImmutableList<DataAtom> atoms) {
         ImmutableSet<DataAtom> result = chaseCache.get(atoms);
         if (result == null) {
-            result = !dependencies.isPresent()
-                    ? ImmutableSet.copyOf(atoms)
-                    : chaseTools.chaseAllAtoms(atoms, dependencies.get());
+            result = dependencies.chaseAllAtoms(atoms);
             chaseCache.put(atoms, result);
         }
         return result;
