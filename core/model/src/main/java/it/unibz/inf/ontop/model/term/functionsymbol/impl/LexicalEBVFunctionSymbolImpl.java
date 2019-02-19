@@ -53,18 +53,20 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        if ((newTerms.get(0) instanceof DBConstant) && (newTerms.get(1) instanceof RDFTermTypeConstant)) {
-            DBConstant lexicalConstant = (DBConstant) newTerms.get(0);
-            RDFTermType rdfTermType = ((RDFTermTypeConstant) newTerms.get(1)).getRDFTermType();
+        ImmutableTerm lexicalTerm = newTerms.get(0);
+        ImmutableTerm typeTerm = newTerms.get(1);
 
-            return computeEBV(lexicalConstant, rdfTermType, termFactory)
+        if (typeTerm instanceof RDFTermTypeConstant) {
+            RDFTermType rdfTermType = ((RDFTermTypeConstant) typeTerm).getRDFTermType();
+
+            return computeEBV(lexicalTerm, rdfTermType, termFactory)
                     .simplify(variableNullability);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
-    private ImmutableTerm computeEBV(DBConstant lexicalConstant, RDFTermType rdfTermType, TermFactory termFactory) {
+    private ImmutableTerm computeEBV(ImmutableTerm lexicalTerm, RDFTermType rdfTermType, TermFactory termFactory) {
         TypeFactory typeFactory = termFactory.getTypeFactory();
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype abstractNumeric = typeFactory.getAbstractOntopNumericDatatype();
@@ -73,24 +75,24 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         if (rdfTermType.isA(xsdString)) {
-            return computeStringEBV(lexicalConstant, termFactory);
+            return computeStringEBV(lexicalTerm, termFactory);
         }
         else if (rdfTermType.isA(xsdFloat) || rdfTermType.isA(xsdDouble))
-            return computeFloatOrDoubleEBV(lexicalConstant, rdfTermType, termFactory);
+            return computeFloatOrDoubleEBV(lexicalTerm, rdfTermType, termFactory);
         else if (rdfTermType.isA(abstractNumeric)) {
-            return computeOtherNumericEBV(lexicalConstant, rdfTermType, termFactory);
+            return computeOtherNumericEBV(lexicalTerm, rdfTermType, termFactory);
         }
         else if (rdfTermType.isA(xsdBoolean))
-            return computeBooleanEBV(lexicalConstant, rdfTermType, termFactory);
+            return computeBooleanEBV(lexicalTerm, rdfTermType, termFactory);
         else
             return termFactory.getNullConstant();
     }
 
-    private ImmutableTerm computeStringEBV(DBConstant lexicalConstant, TermFactory termFactory) {
+    private ImmutableTerm computeStringEBV(ImmutableTerm lexicalConstant, TermFactory termFactory) {
         return termFactory.getDBNot(termFactory.getDBIsStringEmpty(lexicalConstant));
     }
 
-    private ImmutableExpression computeFloatOrDoubleEBV(DBConstant lexicalConstant, RDFTermType rdfTermType,
+    private ImmutableExpression computeFloatOrDoubleEBV(ImmutableTerm lexicalConstant, RDFTermType rdfTermType,
                                                   TermFactory termFactory) {
         ImmutableFunctionalTerm dbNumericTerm = termFactory.getConversionFromRDFLexical2DB(lexicalConstant, rdfTermType);
 
@@ -102,7 +104,7 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
                 termFactory.getDBNot(notANumberCondition));
     }
 
-    private ImmutableExpression computeOtherNumericEBV(DBConstant lexicalConstant, RDFTermType rdfTermType,
+    private ImmutableExpression computeOtherNumericEBV(ImmutableTerm lexicalConstant, RDFTermType rdfTermType,
                                                  TermFactory termFactory) {
         ImmutableFunctionalTerm dbNumericTerm = termFactory.getConversionFromRDFLexical2DB(lexicalConstant, rdfTermType);
 
@@ -110,7 +112,7 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
                 termFactory.getDBNonStrictNumericEquality(dbNumericTerm, termFactory.getDBIntegerConstant(0)));
     }
 
-    private ImmutableTerm computeBooleanEBV(DBConstant lexicalConstant, RDFTermType rdfTermType, TermFactory termFactory) {
+    private ImmutableTerm computeBooleanEBV(ImmutableTerm lexicalConstant, RDFTermType rdfTermType, TermFactory termFactory) {
         return termFactory.getConversionFromRDFLexical2DB(lexicalConstant, rdfTermType);
     }
 }
