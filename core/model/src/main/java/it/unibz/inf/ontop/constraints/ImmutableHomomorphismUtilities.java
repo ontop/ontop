@@ -73,7 +73,7 @@ public class ImmutableHomomorphismUtilities {
      * @return
      */
 
-    public static <P> boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
+    public static boolean hasSomeHomomorphism(Map<Variable, VariableOrGroundTerm> map, ImmutableList<DataAtom> from, ImmutableSet<DataAtom> to) {
 
         ListIterator<DataAtom> iterator = from.listIterator();
         if (!iterator.hasNext())

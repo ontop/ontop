@@ -76,7 +76,7 @@ public class DummyRewriter implements QueryRewriter {
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    ImmutableSet<DataAtom> derived = sigma.chaseAtom(list.get(i).getProjectionAtom()).stream().collect(ImmutableCollectors.toSet());
+                    ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(list.get(i).getProjectionAtom());
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
                             // TODO: careful with variables that occur only in atom j

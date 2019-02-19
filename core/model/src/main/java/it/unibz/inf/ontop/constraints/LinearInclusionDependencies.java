@@ -126,7 +126,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
             return this;
         }
 
-        public LinearInclusionDependencies build() {
+        public LinearInclusionDependencies<P> build() {
             return new LinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, builder.build());
         }
     }

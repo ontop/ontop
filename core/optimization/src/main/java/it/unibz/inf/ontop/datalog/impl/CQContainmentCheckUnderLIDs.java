@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class CQContainmentCheckUnderLIDs {
@@ -24,8 +22,6 @@ public class CQContainmentCheckUnderLIDs {
 	private final LinearInclusionDependencies<AtomPredicate> dependencies;
 	private final DatalogFactory datalogFactory;
 	private final AtomFactory atomFactory;
-	private final UnifierUtilities unifierUtilities;
-	private final SubstitutionUtilities substitutionUtilities;
 	private final TermFactory termFactory;
 	private final ImmutabilityTools immutabilityTools;
 
@@ -34,39 +30,17 @@ public class CQContainmentCheckUnderLIDs {
 	 * A set of ABox dependencies
 	 */
 	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies, DatalogFactory datalogFactory,
-									   AtomFactory atomFactory, UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-									   TermFactory termFactory, ImmutabilityTools immutabilityTools) {
+									   AtomFactory atomFactory, TermFactory termFactory, ImmutabilityTools immutabilityTools) {
 	    // index dependencies
 		this.dependencies = dependencies;
 		this.datalogFactory = datalogFactory;
 		this.atomFactory = atomFactory;
-		this.unifierUtilities = unifierUtilities;
-		this.substitutionUtilities = substitutionUtilities;
 		this.termFactory = termFactory;
 		this.immutabilityTools = immutabilityTools;
 	}
 
 
 
-    /**
-	 * This method is used to chase foreign key constraint rule in which the rule
-	 * has only one atom in the body.
-	 * 
-	 * IMPORTANT: each rule is applied only ONCE to each atom
-	 * 
-	 * @param atoms
-	 * @return set of atoms
-	 */
-	private Set<Function> chaseAtoms(Collection<Function> atoms) {
-
-		ImmutableList<DataAtom<AtomPredicate>> matoms = atoms.stream()
-				.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
-						a.getTerms().stream()
-								.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t)).collect(ImmutableCollectors.toList()))).collect(ImmutableCollectors.toList());
-		return dependencies.chaseAllAtoms(matoms).stream()
-				.map(immutabilityTools::convertToMutableFunction)
-				.collect(ImmutableCollectors.toSet());
-	}
 
 
 	public final class IndexedCQ {
@@ -97,7 +71,7 @@ public class CQContainmentCheckUnderLIDs {
 					Predicate pred = atom.getFunctionSymbol();
 					List<Function> facts = factMap.get(pred);
 					if (facts == null) {
-						facts = new LinkedList<Function>();
+						facts = new LinkedList<>();
 						factMap.put(pred, facts);
 					}
 					facts.add(atom);
@@ -126,12 +100,17 @@ public class CQContainmentCheckUnderLIDs {
 
         IndexedCQ indexedQ1 = indexedCQcache.get(q1);
         if (indexedQ1 == null) {
-        	Collection<Function> q1body = q1.getBody();
-        	if (dependencies != null)
-        		q1body = chaseAtoms(q1body);
+			ImmutableList<DataAtom<AtomPredicate>> matoms = q1.getBody().stream()
+					.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
+							a.getTerms().stream()
+									.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
+									.collect(ImmutableCollectors.toList())))
+					.collect(ImmutableCollectors.toList());
 
-			//immutabilityTools.convertToMutableFunction(
-        	
+			Collection<Function> q1body = dependencies.chaseAllAtoms(matoms).stream()
+					.map(immutabilityTools::convertToMutableFunction)
+					.collect(ImmutableCollectors.toSet());
+
         	indexedQ1 = new IndexedCQ(q1.getHead(), q1body);
     		indexedCQcache.put(q1, indexedQ1);
         }
