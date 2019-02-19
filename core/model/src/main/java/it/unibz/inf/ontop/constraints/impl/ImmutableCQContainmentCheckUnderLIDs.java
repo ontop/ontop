@@ -6,16 +6,17 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
-public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainmentCheck {
+public class ImmutableCQContainmentCheckUnderLIDs<P extends  AtomPredicate> implements ImmutableCQContainmentCheck {
 
     private final Map<ImmutableList<DataAtom>, ImmutableSet<DataAtom>> chaseCache = new HashMap<>();
 
-    private final LinearInclusionDependencies<AtomPredicate> dependencies;
+    private final LinearInclusionDependencies<P> dependencies;
 
-    public ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies) {
+    public ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies<P> dependencies) {
         this.dependencies = dependencies;
     }
 
@@ -33,7 +34,8 @@ public class ImmutableCQContainmentCheckUnderLIDs implements ImmutableCQContainm
     private ImmutableSet<DataAtom> getChase(ImmutableList<DataAtom> atoms) {
         ImmutableSet<DataAtom> result = chaseCache.get(atoms);
         if (result == null) {
-            result = dependencies.chaseAllAtoms(atoms);
+            ImmutableList<DataAtom<P>> ats = atoms.stream().map(a -> (DataAtom<P>)a).collect(ImmutableCollectors.toList());
+            result = dependencies.chaseAllAtoms(ats).stream().collect(ImmutableCollectors.toSet());
             chaseCache.put(atoms, result);
         }
         return result;

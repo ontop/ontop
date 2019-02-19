@@ -3,10 +3,11 @@ package it.unibz.inf.ontop.datalog.impl;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.constraints.ImmutableLinearInclusionDependency;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -20,8 +21,9 @@ public class CQContainmentCheckUnderLIDs {
 
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final ImmutableMultimap<Predicate, ImmutableLinearInclusionDependency> dependencies;
+	private final LinearInclusionDependencies<AtomPredicate> dependencies;
 	private final DatalogFactory datalogFactory;
+	private final AtomFactory atomFactory;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final TermFactory termFactory;
@@ -31,15 +33,13 @@ public class CQContainmentCheckUnderLIDs {
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(ImmutableList<ImmutableLinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
-									   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies, DatalogFactory datalogFactory,
+									   AtomFactory atomFactory, UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
 									   TermFactory termFactory, ImmutabilityTools immutabilityTools) {
 	    // index dependencies
-		this.dependencies = dependencies.stream()
-				.collect(ImmutableCollectors.toMultimap(
-						d -> d.getHead().getPredicate(),
-						d -> d));
+		this.dependencies = dependencies;
 		this.datalogFactory = datalogFactory;
+		this.atomFactory = atomFactory;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.termFactory = termFactory;
@@ -59,28 +59,16 @@ public class CQContainmentCheckUnderLIDs {
 	 */
 	private Set<Function> chaseAtoms(Collection<Function> atoms) {
 
-		Set<Function> derivedAtoms = new HashSet<>();
-		for (Function fact : atoms) {
-			derivedAtoms.add(fact);
-			for (ImmutableLinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
-				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(
-						immutabilityTools.convertToMutableFunction(d.getHead()),
-						immutabilityTools.convertToMutableFunction(d.getBody())));
-				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
-				if (theta != null && !theta.isEmpty()) {
-					Function ruleHead = rule.getHead();
-					Function newFact = (Function)ruleHead.clone();
-					// unify to get fact is needed because the dependencies are not necessarily full
-					// (in other words, they may contain existentials in the head)
-					substitutionUtilities.applySubstitution(newFact, theta);
-					derivedAtoms.add(newFact);
-				}
-			}
-		}
-		return derivedAtoms;
+		ImmutableList<DataAtom<AtomPredicate>> matoms = atoms.stream()
+				.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
+						a.getTerms().stream()
+								.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t)).collect(ImmutableCollectors.toList()))).collect(ImmutableCollectors.toList());
+		return dependencies.chaseAllAtoms(matoms).stream()
+				.map(immutabilityTools::convertToMutableFunction)
+				.collect(ImmutableCollectors.toSet());
 	}
-	
+
+
 	public final class IndexedCQ {
 		
 		private final Function head;
@@ -141,6 +129,8 @@ public class CQContainmentCheckUnderLIDs {
         	Collection<Function> q1body = q1.getBody();
         	if (dependencies != null)
         		q1body = chaseAtoms(q1body);
+
+			//immutabilityTools.convertToMutableFunction(
         	
         	indexedQ1 = new IndexedCQ(q1.getHead(), q1body);
     		indexedCQcache.put(q1, indexedQ1);

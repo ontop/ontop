@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.constraints;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -39,13 +40,13 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         public String toString() { return head + " :- " + body; }
     }
 
-    protected final ImmutableList<LinearInclusionDependency> dependencies;
+    protected final ImmutableList<LinearInclusionDependency<P>> dependencies;
     private final VariableGenerator variableGenerator;
 
     protected LinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
                                         CoreUtilsFactory coreUtilsFactory,
                                         SubstitutionFactory substitutionFactory,
-                                        ImmutableList<LinearInclusionDependency> dependencies) {
+                                        ImmutableList<LinearInclusionDependency<P>> dependencies) {
         this.immutableUnificationTools = immutableUnificationTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
@@ -69,11 +70,11 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
      * @return set of atoms
      */
 
-    public ImmutableSet<DataAtom> chaseAtom(DataAtom atom) {
+    public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
         // TODO: register variables
         return dependencies.stream()
                 .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
-                        .map(theta -> theta.applyToDataAtom(
+                        .map(theta -> (DataAtom<P>)theta.applyToDataAtom(
                                 freshLabelledNulls(dependency)
                                         .applyToDataAtom(dependency.getHead()))))
                 .filter(Optional::isPresent)
@@ -89,7 +90,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
                 .collect(ImmutableCollectors.toMap(Function.identity(), variableGenerator::generateNewVariableFromVar)));
     }
 
-    public ImmutableSet<DataAtom> chaseAllAtoms(ImmutableList<DataAtom> atoms) {
+    public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
         Stream<Variable> s = atoms.stream().flatMap(a -> a.getVariables().stream());
         ImmutableSet<Variable> v = s.collect(ImmutableCollectors.toSet());
         variableGenerator.registerAdditionalVariables(v);

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.constraints;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -22,7 +23,7 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
     private FullLinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
                                         CoreUtilsFactory coreUtilsFactory,
                                         SubstitutionFactory substitutionFactory,
-                                        ImmutableList<LinearInclusionDependency> dependencies) {
+                                        ImmutableList<LinearInclusionDependency<P>> dependencies) {
         super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, dependencies);
     }
 
@@ -37,17 +38,17 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
      * @return
      */
     @Override
-    public ImmutableSet<DataAtom> chaseAtom(DataAtom atom) {
+    public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
         return dependencies.stream()
                 .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
-                        .map(theta -> theta.applyToDataAtom(dependency.getHead())))
+                        .map(theta -> (DataAtom<P>)theta.applyToDataAtom(dependency.getHead())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toSet());
     }
 
     @Override
-    public ImmutableSet<DataAtom> chaseAllAtoms(ImmutableList<DataAtom> atoms) {
+    public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
         return Stream.concat(
                 atoms.stream(),
                 atoms.stream()

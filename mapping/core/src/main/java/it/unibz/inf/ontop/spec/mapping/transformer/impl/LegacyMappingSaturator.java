@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.constraints.ImmutableLinearInclusionDependency;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -19,8 +20,11 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
@@ -37,43 +41,49 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final DatalogFactory datalogFactory;
     private final UnifierUtilities unifierUtilities;
     private final SubstitutionUtilities substitutionUtilities;
+    private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final CoreUtilsFactory coreUtilsFactory;
+    private final ImmutableUnificationTools immutableUnificationTools;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    TermFactory termFactory,
                                    TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
                                    UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-                                   AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+                                   SubstitutionFactory substitutionFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, CoreUtilsFactory coreUtilsFactory, ImmutableUnificationTools immutableUnificationTools) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
         this.datalogFactory = datalogFactory;
         this.unifierUtilities = unifierUtilities;
         this.substitutionUtilities = substitutionUtilities;
+        this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.immutableUnificationTools = immutableUnificationTools;
     }
 
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        ImmutableList<ImmutableLinearInclusionDependency> foreignKeyRules =
-                dbMetadata.getDatabaseRelations().stream()
-                    .map(r -> r.getForeignKeys())
-                    .flatMap(List::stream)
-                    .map(fk -> getLinearInclusionDependency(fk))
-                    .collect(ImmutableCollectors.toList());
+        LinearInclusionDependencies.Builder<AtomPredicate> b = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
-                unifierUtilities, substitutionUtilities, termFactory, immutabilityTools);
+        dbMetadata.getDatabaseRelations().stream()
+                .map(r -> r.getForeignKeys())
+                .flatMap(List::stream)
+                .forEach(fk -> getLinearInclusionDependency(b, fk));
+
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(b.build(), datalogFactory,
+                atomFactory, unifierUtilities, substitutionUtilities, termFactory, immutabilityTools);
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig);
     }
 
 
-    private ImmutableLinearInclusionDependency getLinearInclusionDependency(ForeignKeyConstraint fk) {
+    private void getLinearInclusionDependency(LinearInclusionDependencies.Builder<AtomPredicate> b, ForeignKeyConstraint fk) {
 
         DatabaseRelationDefinition def1 = fk.getRelation();
         VariableOrGroundTerm[] terms1 = new VariableOrGroundTerm[def1.getAttributes().size()];
@@ -91,7 +101,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
         DataAtom<AtomPredicate> head = atomFactory.getDataAtom(def2.getAtomPredicate(), ImmutableList.copyOf(terms2));
         DataAtom<AtomPredicate> body = atomFactory.getDataAtom(def1.getAtomPredicate(), ImmutableList.copyOf(terms1));
 
-        return new ImmutableLinearInclusionDependency<>(head, body);
+        b.add(head, body);
     }
 
 }

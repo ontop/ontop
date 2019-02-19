@@ -33,8 +33,10 @@ import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /***
  * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
@@ -74,7 +76,7 @@ public class DummyRewriter implements QueryRewriter {
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    ImmutableSet<DataAtom> derived = sigma.chaseAtom(list.get(i).getProjectionAtom());
+                    ImmutableSet<DataAtom> derived = sigma.chaseAtom(list.get(i).getProjectionAtom()).stream().collect(ImmutableCollectors.toSet());
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
                             // TODO: careful with variables that occur only in atom j
