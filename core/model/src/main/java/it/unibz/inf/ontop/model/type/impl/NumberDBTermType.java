@@ -40,4 +40,13 @@ public class NumberDBTermType extends DBTermTypeImpl {
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.ofNullable(rdfDatatype);
     }
+
+    /**
+     * False by default as the vast majority of number formats are not sensible to IRI safe encoding.
+     * In theory rationals would pose problems if they use the "/" character, but I have so far never seen them in a DB.
+     */
+    @Override
+    public boolean isNeedingIRISafeEncoding() {
+        return false;
+    }
 }

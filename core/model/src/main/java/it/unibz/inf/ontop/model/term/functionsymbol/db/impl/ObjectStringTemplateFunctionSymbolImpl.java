@@ -140,7 +140,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         ImmutableList<ImmutableTerm> termsToConcatenate = IntStream.range(0, templateCsts.size())
                 .boxed()
                 .flatMap(i -> (i < terms.size())
-                        ? Stream.of(templateCsts.get(i), termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)))
+                        ? Stream.of(
+                                templateCsts.get(i),
+                                termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i))
+                                        // Avoids the encoding when possible
+                                        .simplify())
                         : Stream.of(templateCsts.get(i)))
                 .collect(ImmutableCollectors.toList());
 

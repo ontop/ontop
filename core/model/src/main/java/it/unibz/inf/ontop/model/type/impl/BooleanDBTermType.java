@@ -34,4 +34,9 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.of(xsdBooleanDatatype);
     }
+
+    @Override
+    public boolean isNeedingIRISafeEncoding() {
+        return false;
+    }
 }

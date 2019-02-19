@@ -19,4 +19,9 @@ public interface DBTermType extends TermType {
     boolean isBoolean();
 
     Optional<RDFDatatype> getNaturalRDFDatatype();
+
+    /**
+     * Returns true if some values in its value space may need an IRI safe encoding
+     */
+    boolean isNeedingIRISafeEncoding();
 }

@@ -33,4 +33,9 @@ public class StringDBTermType extends DBTermTypeImpl {
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.of(xsdStringDatatype);
     }
+
+    @Override
+    public boolean isNeedingIRISafeEncoding() {
+        return true;
+    }
 }
