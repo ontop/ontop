@@ -25,8 +25,8 @@ public class DefaultSQLCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol
         String whenClauseString = IntStream.range(0, terms.size() / 2)
                 .boxed()
                 .map(i -> String.format(WHEN_THEN_TEMPLATE,
-                        termConverter.apply(terms.get(i)),
-                        termConverter.apply(terms.get(i + 1))))
+                        termConverter.apply(terms.get(2*i)),
+                        termConverter.apply(terms.get(2*i + 1))))
                 .collect(Collectors.joining());
 
         return String.format(FULL_TEMPLATE, whenClauseString,
