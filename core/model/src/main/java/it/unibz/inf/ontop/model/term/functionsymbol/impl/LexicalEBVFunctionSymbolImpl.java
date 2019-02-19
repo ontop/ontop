@@ -1,9 +1,15 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+
+import java.util.stream.Stream;
 
 /**
  * https://www.w3.org/TR/sparql11-query/#ebv
@@ -60,6 +66,23 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
             RDFTermType rdfTermType = ((RDFTermTypeConstant) typeTerm).getRDFTermType();
 
             return computeEBV(lexicalTerm, rdfTermType, termFactory)
+                    .simplify(variableNullability);
+        }
+        else if ((typeTerm instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) typeTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
+            ImmutableFunctionalTerm functionalTypeTerm = (ImmutableFunctionalTerm) typeTerm;
+            ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap =
+                    ((RDFTermTypeFunctionSymbol) functionalTypeTerm.getFunctionSymbol()).getConversionMap();
+            ImmutableTerm magicNumberTerm = functionalTypeTerm.getTerm(0);
+
+            return termFactory.getDisjunction(
+                    Stream.concat(
+                            conversionMap.entrySet().stream()
+                                    .map(e -> termFactory.getConjunction(
+                                        termFactory.getStrictEquality(magicNumberTerm, e.getKey()),
+                                        termFactory.getImmutableExpression(this, lexicalTerm, e.getValue()))),
+                            Stream.of(termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(magicNumberTerm))))))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty disjunction"))
                     .simplify(variableNullability);
         }
         else
