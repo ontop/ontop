@@ -4,10 +4,12 @@ import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.constraints.ImmutableLinearInclusionDependency;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -18,28 +20,30 @@ public class CQContainmentCheckUnderLIDs {
 
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies;
+	private final ImmutableMultimap<Predicate, ImmutableLinearInclusionDependency> dependencies;
 	private final DatalogFactory datalogFactory;
 	private final UnifierUtilities unifierUtilities;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final TermFactory termFactory;
+	private final ImmutabilityTools immutabilityTools;
 
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(ImmutableList<LinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
-                                       UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-                                       TermFactory termFactory) {
+	public CQContainmentCheckUnderLIDs(ImmutableList<ImmutableLinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
+									   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+									   TermFactory termFactory, ImmutabilityTools immutabilityTools) {
 	    // index dependencies
 		this.dependencies = dependencies.stream()
 				.collect(ImmutableCollectors.toMultimap(
-						d -> d.getHead().getFunctionSymbol(),
+						d -> d.getHead().getPredicate(),
 						d -> d));
 		this.datalogFactory = datalogFactory;
 		this.unifierUtilities = unifierUtilities;
 		this.substitutionUtilities = substitutionUtilities;
 		this.termFactory = termFactory;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 
@@ -58,8 +62,10 @@ public class CQContainmentCheckUnderLIDs {
 		Set<Function> derivedAtoms = new HashSet<>();
 		for (Function fact : atoms) {
 			derivedAtoms.add(fact);
-			for (LinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
-				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(d.getHead(), d.getBody()));
+			for (ImmutableLinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
+				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(
+						immutabilityTools.convertToMutableFunction(d.getHead()),
+						immutabilityTools.convertToMutableFunction(d.getBody())));
 				Function ruleBody = rule.getBody().get(0);
 				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
 				if (theta != null && !theta.isEmpty()) {
@@ -223,9 +229,6 @@ public class CQContainmentCheckUnderLIDs {
 		
 		return "(empty)";
 	}
-
-	public ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies() { return dependencies; }
-
 
 
 

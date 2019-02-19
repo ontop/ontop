@@ -1,17 +1,20 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.constraints.ImmutableLinearInclusionDependency;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
@@ -20,7 +23,6 @@ import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,24 +37,29 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final DatalogFactory datalogFactory;
     private final UnifierUtilities unifierUtilities;
     private final SubstitutionUtilities substitutionUtilities;
+    private final AtomFactory atomFactory;
+    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    TermFactory termFactory,
                                    TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
-                                   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities) {
+                                   UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
+                                   AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
         this.datalogFactory = datalogFactory;
         this.unifierUtilities = unifierUtilities;
         this.substitutionUtilities = substitutionUtilities;
+        this.atomFactory = atomFactory;
+        this.immutabilityTools = immutabilityTools;
     }
 
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        ImmutableList<LinearInclusionDependency> foreignKeyRules =
+        ImmutableList<ImmutableLinearInclusionDependency> foreignKeyRules =
                 dbMetadata.getDatabaseRelations().stream()
                     .map(r -> r.getForeignKeys())
                     .flatMap(List::stream)
@@ -60,40 +67,31 @@ public class LegacyMappingSaturator implements MappingSaturator {
                     .collect(ImmutableCollectors.toList());
 
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(foreignKeyRules, datalogFactory,
-                unifierUtilities, substitutionUtilities, termFactory);
+                unifierUtilities, substitutionUtilities, termFactory, immutabilityTools);
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig);
     }
 
 
-    private LinearInclusionDependency getLinearInclusionDependency(ForeignKeyConstraint fk) {
-        DatabaseRelationDefinition def = fk.getRelation();
+    private ImmutableLinearInclusionDependency getLinearInclusionDependency(ForeignKeyConstraint fk) {
+
+        DatabaseRelationDefinition def1 = fk.getRelation();
+        VariableOrGroundTerm[] terms1 = new VariableOrGroundTerm[def1.getAttributes().size()];
+        for (int i = 0; i < terms1.length; i++)
+            terms1[i] = termFactory.getVariable("t" + i);
+
         DatabaseRelationDefinition def2 = fk.getReferencedRelation();
+        VariableOrGroundTerm[] terms2 = new VariableOrGroundTerm[def2.getAttributes().size()];
+        for (int i = 0; i < terms2.length; i++)
+            terms2[i] = termFactory.getVariable("p" + i);
 
-        // create variables for the current table
-        int len1 = def.getAttributes().size();
-        List<Term> terms1 = new ArrayList<>(len1);
-        for (int i = 1; i <= len1; i++)
-            terms1.add(termFactory.getVariable("t" + i));
+        for (ForeignKeyConstraint.Component comp : fk.getComponents())
+            terms1[comp.getAttribute().getIndex() - 1] = terms2[comp.getReference().getIndex() - 1]; // indexes start at 1
 
-        // create variables for the referenced table
-        int len2 = def2.getAttributes().size();
-        List<Term> terms2 = new ArrayList<>(len2);
-        for (int i = 1; i <= len2; i++)
-            terms2.add(termFactory.getVariable("p" + i));
+        DataAtom<AtomPredicate> head = atomFactory.getDataAtom(def2.getAtomPredicate(), ImmutableList.copyOf(terms2));
+        DataAtom<AtomPredicate> body = atomFactory.getDataAtom(def1.getAtomPredicate(), ImmutableList.copyOf(terms1));
 
-        for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-            // indexes start at 1
-            int pos1 = comp.getAttribute().getIndex() - 1; // current column (1)
-            int pos2 = comp.getReference().getIndex() - 1; // referenced column (2)
-
-            terms1.set(pos1, terms2.get(pos2));
-        }
-
-        Function head = termFactory.getFunction(def2.getAtomPredicate(), terms2);
-        Function body = termFactory.getFunction(def.getAtomPredicate(), terms1);
-
-        return new LinearInclusionDependency(head, body);
+        return new ImmutableLinearInclusionDependency<>(head, body);
     }
 
 }
