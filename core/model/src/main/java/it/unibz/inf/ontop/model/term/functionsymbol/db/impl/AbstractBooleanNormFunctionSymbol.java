@@ -2,15 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBTypeConversionFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public abstract class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -56,6 +55,20 @@ public abstract class AbstractBooleanNormFunctionSymbol extends AbstractDBTypeCo
 
     protected String normalizeValue(String value) {
         return value.toLowerCase();
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        ImmutableTerm term = terms.get(0);
+        ImmutableFunctionalTerm newFunctionalTerm = termFactory.getDBCase(Stream.of(
+                Maps.immutableEntry(termFactory.getStrictEquality(term, termFactory.getDBBooleanConstant(true)),
+                        termFactory.getDBStringConstant("true")),
+                Maps.immutableEntry(termFactory.getStrictEquality(term, termFactory.getDBBooleanConstant(false)),
+                        termFactory.getDBStringConstant("false"))),
+                termFactory.getNullConstant());
+
+        return termConverter.apply(newFunctionalTerm);
     }
 
 }
