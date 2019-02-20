@@ -71,6 +71,8 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
             return termFactory.getNegativeEvaluation();
         else if (newTerm.equals(termFactory.getNullConstant()))
             return termFactory.getNullEvaluation();
+        else if (newTerm instanceof NonFunctionalTerm)
+            return termFactory.getEvaluation(termFactory.getIsTrue((NonFunctionalTerm) newTerm));
 
         throw new IncorrectExpressionSimplificationBugException(this, newTerm);
     }
