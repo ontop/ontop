@@ -223,7 +223,15 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
+	/**
+	 * Returns a DB boolean constant
+	 */
 	DBConstant getDBBooleanConstant(boolean value);
+
+	/**
+	 * Returns a DB string constant
+	 */
+	DBConstant getXsdBooleanLexicalConstant(boolean value);
 
 	Constant getNullConstant();
 

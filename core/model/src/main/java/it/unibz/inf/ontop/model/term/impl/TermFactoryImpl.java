@@ -50,8 +50,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 	private final CoreUtilsFactory coreUtilsFactory;
-	private final DBConstant valueTrue;
-	private final DBConstant valueFalse;
+	private final DBConstant valueTrue, valueFalse, lexicalTrue, lexicalFalse;
 	private final Constant valueNull;
 	private final DBConstant doubleNaN;
 	// TODO: make it be a DBConstant
@@ -79,6 +78,8 @@ public class TermFactoryImpl implements TermFactory {
 		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
+		this.lexicalTrue = getDBStringConstant("true");
+		this.lexicalFalse = getDBStringConstant("false");
 		this.valueNull = new NullConstantImpl(dbTypeFactory.getNullLexicalValue());
 		this.doubleNaN = new DBConstantImpl(dbTypeFactory.getDBNaNLexicalValue(), dbTypeFactory.getDBDoubleType());
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
@@ -658,6 +659,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public DBConstant getDBBooleanConstant(boolean value) {
 		return value ? valueTrue : valueFalse;
+	}
+
+	@Override
+	public DBConstant getXsdBooleanLexicalConstant(boolean value) {
+		return value ? lexicalTrue : lexicalFalse;
 	}
 
 	@Override

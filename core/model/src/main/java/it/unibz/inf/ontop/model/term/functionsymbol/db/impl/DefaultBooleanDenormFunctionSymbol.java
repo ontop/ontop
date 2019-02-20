@@ -1,19 +1,22 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public abstract class AbstractBooleanDenormFunctionSymbol
+public class DefaultBooleanDenormFunctionSymbol
         extends AbstractDBTypeConversionFunctionSymbolImpl implements DBBooleanFunctionSymbol {
 
     private final DBTermType dbStringType;
 
-    protected AbstractBooleanDenormFunctionSymbol(DBTermType booleanType, DBTermType dbStringType) {
+    protected DefaultBooleanDenormFunctionSymbol(DBTermType booleanType, DBTermType dbStringType) {
         super("booleanLexicalDenorm", dbStringType, booleanType);
         this.dbStringType = dbStringType;
     }
@@ -48,18 +51,16 @@ public abstract class AbstractBooleanDenormFunctionSymbol
 
     @Override
     protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        return termFactory.getDBConstant(deNormalizeValue(constant.getValue()), getTargetType());
-    }
+        ImmutableTerm newTerm = transformIntoDBCase(constant, termFactory)
+                .simplify();
+        if (newTerm instanceof DBConstant)
+            return (DBConstant) newTerm;
 
-    /**
-     * Can be overridden
-     */
-    protected String deNormalizeValue(String value) {
-        return value.toUpperCase();
+        throw new DBTypeConversionException("Problem while de-normalizing " + constant + "(value: " + newTerm + ")");
     }
 
     protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory) {
-        if (subTerm.getFunctionSymbol() instanceof AbstractBooleanNormFunctionSymbol) {
+        if (subTerm.getFunctionSymbol() instanceof DefaultBooleanNormFunctionSymbol) {
             return subTerm.getTerm(0);
         }
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
@@ -73,5 +74,26 @@ public abstract class AbstractBooleanDenormFunctionSymbol
     @Override
     public ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        ImmutableFunctionalTerm newFunctionalTerm = transformIntoDBCase(terms.get(0), termFactory);
+        return termConverter.apply(newFunctionalTerm);
+    }
+
+    protected ImmutableFunctionalTerm transformIntoDBCase(ImmutableTerm subTerm, TermFactory termFactory) {
+        return termFactory.getDBCase(Stream.of(
+                buildEntry(subTerm, true, termFactory),
+                buildEntry(subTerm, false, termFactory)),
+                termFactory.getNullConstant());
+    }
+
+
+    private Map.Entry<ImmutableExpression, ? extends ImmutableTerm> buildEntry(ImmutableTerm term, boolean b,
+                                                                               TermFactory termFactory) {
+        return Maps.immutableEntry(termFactory.getStrictEquality(term, termFactory.getXsdBooleanLexicalConstant(b)),
+                termFactory.getDBBooleanConstant(b));
     }
 }

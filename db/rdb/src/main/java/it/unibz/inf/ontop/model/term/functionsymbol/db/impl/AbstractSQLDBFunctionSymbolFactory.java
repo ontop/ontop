@@ -84,7 +84,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultSQLBooleanDenormFunctionSymbol(booleanType, stringType));
+                new DefaultBooleanDenormFunctionSymbol(booleanType, stringType));
 
         return builder.build();
     }
@@ -322,7 +322,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
-        return new DefaultSQLBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
+        return new DefaultBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
     }
 
     @Override
