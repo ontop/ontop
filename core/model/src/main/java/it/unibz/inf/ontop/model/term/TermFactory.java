@@ -237,7 +237,10 @@ public interface TermFactory {
 
 	DBConstant getDBIntegerConstant(int value);
 
-	DBConstant getDoubleNaN();
+	/**
+	 * Is empty if the DB does not support (and therefore does not store) not-a-number values
+	 */
+	Optional<DBConstant> getDoubleNaN();
 
 	/**
 	 * TODO: explain

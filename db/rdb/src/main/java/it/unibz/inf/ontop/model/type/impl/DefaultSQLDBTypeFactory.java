@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -167,8 +168,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
-    public String getDBNaNLexicalValue() {
-        return "NaN";
+    public Optional<String> getDBNaNLexicalValue() {
+        return Optional.of("NaN");
     }
 
     /**

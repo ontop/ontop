@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -52,6 +53,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final CoreUtilsFactory coreUtilsFactory;
 	private final DBConstant valueTrue, valueFalse, lexicalTrue, lexicalFalse;
 	private final Constant valueNull;
+	@Nullable
 	private final DBConstant doubleNaN;
 	// TODO: make it be a DBConstant
 	private final RDFLiteralConstant provenanceConstant;
@@ -81,7 +83,9 @@ public class TermFactoryImpl implements TermFactory {
 		this.lexicalTrue = getDBStringConstant("true");
 		this.lexicalFalse = getDBStringConstant("false");
 		this.valueNull = new NullConstantImpl(dbTypeFactory.getNullLexicalValue());
-		this.doubleNaN = new DBConstantImpl(dbTypeFactory.getDBNaNLexicalValue(), dbTypeFactory.getDBDoubleType());
+		this.doubleNaN = dbTypeFactory.getDBNaNLexicalValue()
+				.map(v -> new DBConstantImpl(v, dbTypeFactory.getDBDoubleType()))
+				.orElse(null);
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
@@ -677,8 +681,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public DBConstant getDoubleNaN() {
-		return doubleNaN;
+	public Optional<DBConstant> getDoubleNaN() {
+		return Optional.ofNullable(doubleNaN);
 	}
 
 	@Override

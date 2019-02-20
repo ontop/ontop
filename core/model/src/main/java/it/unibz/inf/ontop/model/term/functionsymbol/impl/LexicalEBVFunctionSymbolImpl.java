@@ -119,12 +119,14 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
                                                   TermFactory termFactory) {
         ImmutableFunctionalTerm dbNumericTerm = termFactory.getConversionFromRDFLexical2DB(lexicalConstant, rdfTermType);
 
-        ImmutableExpression notANumberCondition = termFactory.getDBNonStrictNumericEquality(dbNumericTerm,
-                termFactory.getDoubleNaN());
+        ImmutableExpression standardNumericEBVCondition = computeOtherNumericEBV(lexicalConstant, rdfTermType, termFactory);
 
-        return termFactory.getConjunction(
-                computeOtherNumericEBV(lexicalConstant, rdfTermType, termFactory),
-                termFactory.getDBNot(notANumberCondition));
+        return termFactory.getDoubleNaN()
+                .map(nan -> termFactory.getDBNonStrictNumericEquality(dbNumericTerm, nan))
+                .map(notANumberCondition -> termFactory.getConjunction(
+                        standardNumericEBVCondition,
+                        termFactory.getDBNot(notANumberCondition)))
+                .orElse(standardNumericEBVCondition);
     }
 
     private ImmutableExpression computeOtherNumericEBV(ImmutableTerm lexicalConstant, RDFTermType rdfTermType,

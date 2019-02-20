@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.model.type;
 
+import java.util.Optional;
+
 /**
  * For DB-dependent types
  */
@@ -36,7 +38,11 @@ public interface DBTypeFactory {
     String getDBTrueLexicalValue();
     String getDBFalseLexicalValue();
     String getNullLexicalValue();
-    String getDBNaNLexicalValue();
+
+    /**
+     * Is empty if the DB does not support (and therefore does not store) not-a-number values
+     */
+    Optional<String> getDBNaNLexicalValue();
 
 
 

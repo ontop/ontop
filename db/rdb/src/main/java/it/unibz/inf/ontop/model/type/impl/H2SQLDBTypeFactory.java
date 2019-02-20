@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -24,5 +25,10 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     private static ImmutableMap<DefaultTypeCode, String> createH2SQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public Optional<String> getDBNaNLexicalValue() {
+        return Optional.empty();
     }
 }
