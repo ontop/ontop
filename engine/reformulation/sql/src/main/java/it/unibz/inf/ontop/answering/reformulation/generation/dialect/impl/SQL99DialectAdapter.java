@@ -500,6 +500,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         DBTermType dbType = constant.getType();
 
         return (dbType.isNumber() || dbType.isBoolean())
+                // TODO: handle the special case of not-a-number!
                 ? constant.getValue()
                 : getSQLLexicalFormString(constant.getValue());
     }
