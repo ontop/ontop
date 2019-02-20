@@ -2,9 +2,12 @@ package it.unibz.inf.ontop.iq.executor.expression;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.IllegalTreeUpdateException;
@@ -104,7 +107,26 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
 
     private Optional<JoinOrFilterNode> generateNewJoinOrFilterNode(JoinOrFilterNode formerNode,
                                                                           ImmutableList<ImmutableExpression> newExpressions) {
-        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(newExpressions.stream());
+        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(newExpressions.stream())
+                .flatMap(e -> {
+                    // TODO: consider proper variable nullability
+                    IncrementalEvaluation evaluation = e.evaluate(termFactory.createDummyVariableNullability(e), true);
+                    switch(evaluation.getStatus()) {
+                        case SAME_EXPRESSION:
+                            throw new MinorOntopInternalBugException("Was not expecting to get the same expression");
+                        case SIMPLIFIED_EXPRESSION:
+                            return evaluation.getNewExpression();
+                        // TODO: improve
+                        case IS_NULL:
+                            return Optional.of(termFactory.getIsTrue(termFactory.getNullConstant()));
+                        // TODO: improve
+                        case IS_FALSE:
+                            return Optional.of(termFactory.getIsTrue(termFactory.getDBBooleanConstant(false)));
+                        case IS_TRUE:
+                        default:
+                            return Optional.empty();
+                    }
+                });
 
         if (formerNode instanceof JoinLikeNode) {
             JoinOrFilterNode newNode = ((JoinLikeNode)formerNode).changeOptionalFilterCondition(optionalExpression);
