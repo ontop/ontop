@@ -37,7 +37,8 @@ public class DefaultDBNonStrictStringEqOperator extends AbstractDBNonStrictEqOpe
                         .filter(t::equals)
                         .isPresent())
                 .isPresent())
-            return termFactory.getStrictEquality(newTerms);
+            return termFactory.getStrictEquality(newTerms)
+                    .simplify(variableNullability);
         else
             return termFactory.getImmutableExpression(this, newTerms);
     }
