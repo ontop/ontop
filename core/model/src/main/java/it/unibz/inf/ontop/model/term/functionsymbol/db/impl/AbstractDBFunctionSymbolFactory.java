@@ -31,7 +31,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
-    private final DBFunctionSymbol ifElseNullFunctionSymbol;
+    private final DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
     private final DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
     private final DBNotFunctionSymbol dbNotFunctionSymbol;
 
@@ -352,7 +352,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBIfElseNull() {
+    public DBIfElseNullFunctionSymbol getDBIfElseNull() {
         return ifElseNullFunctionSymbol;
     }
 

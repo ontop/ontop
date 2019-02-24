@@ -26,7 +26,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
         return (subTerm instanceof DBConstant)
                 ? convertDBConstant((DBConstant) subTerm, termFactory)
                 : (subTerm instanceof ImmutableFunctionalTerm)
-                    ? buildTermFromFunctionalTerm((ImmutableFunctionalTerm) subTerm, termFactory)
+                    ? buildTermFromFunctionalTerm((ImmutableFunctionalTerm) subTerm, termFactory, variableNullability)
                     : termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
@@ -34,7 +34,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
      * Default implementation
      *
      */
-    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory) {
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 

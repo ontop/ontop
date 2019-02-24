@@ -314,6 +314,28 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
+    @Test
+    public void testNotEqOrUnboundCondition() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?v . \n" +
+                "   ?p :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :nickname ?n\n" +
+                "  }\n" +
+                "  FILTER ((?n != \"Rog\") || !bound(?n))\n" +
+                "}" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+               "John", "Mary"
+        );
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
     @Ignore("Support preferences")
     @Test
     public void testPreferences() throws Exception {

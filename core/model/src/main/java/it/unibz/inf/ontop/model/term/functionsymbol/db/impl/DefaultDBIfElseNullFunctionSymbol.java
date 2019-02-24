@@ -3,12 +3,15 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.Optional;
 import java.util.function.Function;
 
-public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
+public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol implements DBIfElseNullFunctionSymbol {
 
     protected DefaultDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         this("IF_ELSE_NULL", dbBooleanType, rootDBTermType);
@@ -80,5 +83,25 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                         (ImmutableExpression) terms.get(0),
                         terms.get(1),
                         termFactory.getNullConstant()));
+    }
+
+    @Override
+    public ImmutableExpression liftUnaryBooleanFunctionSymbol(ImmutableList<? extends ImmutableTerm> ifElseNullTerms,
+                                                              BooleanFunctionSymbol unaryBooleanFunctionSymbol,
+                                                              TermFactory termFactory) {
+        if (unaryBooleanFunctionSymbol.getArity() != 1)
+            throw new IllegalArgumentException("unaryBooleanFunctionSymbol was expected to be unary");
+
+        if (ifElseNullTerms.size() != 2)
+            throw new IllegalArgumentException("ifElseNullTerms was expected to have 2 values");
+
+        ImmutableExpression condition = Optional.of(ifElseNullTerms.get(0))
+                .filter(c -> c instanceof ImmutableExpression)
+                .map(c -> (ImmutableExpression) c)
+                .orElseThrow(() -> new IllegalArgumentException("The first term in ifElseNullTerms was expected " +
+                        "to be an ImmutableExpression"));
+
+        return termFactory.getBooleanIfElseNull(condition,
+                termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, ifElseNullTerms.get(1)));
     }
 }

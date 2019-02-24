@@ -2,8 +2,11 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Map;
@@ -59,10 +62,17 @@ public class DefaultBooleanDenormFunctionSymbol
         throw new DBTypeConversionException("Problem while de-normalizing " + constant + "(value: " + newTerm + ")");
     }
 
-    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory) {
-        if (subTerm.getFunctionSymbol() instanceof DefaultBooleanNormFunctionSymbol) {
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory,
+                                                        VariableNullability variableNullability) {
+        FunctionSymbol subFunctionSymbol = subTerm.getFunctionSymbol();
+        // TODO: use an interface
+        if (subFunctionSymbol instanceof DefaultBooleanNormFunctionSymbol) {
             return subTerm.getTerm(0);
         }
+        else if (subFunctionSymbol instanceof DBIfElseNullFunctionSymbol)
+            return ((DBIfElseNullFunctionSymbol) subFunctionSymbol).liftUnaryBooleanFunctionSymbol(
+                    subTerm.getTerms(), this, termFactory)
+                    .simplify(variableNullability);
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 

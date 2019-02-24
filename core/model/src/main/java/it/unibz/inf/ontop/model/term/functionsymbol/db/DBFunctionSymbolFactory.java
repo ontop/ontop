@@ -67,7 +67,7 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCase(int arity);
 
-    DBFunctionSymbol getDBIfElseNull();
+    DBIfElseNullFunctionSymbol getDBIfElseNull();
 
     DBBooleanFunctionSymbol getDBBooleanIfElseNull();
 
