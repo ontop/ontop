@@ -805,7 +805,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfElseNull(), condition, term);
 	}
 
-    @Override
+	@Override
+	public ImmutableExpression getBooleanIfElseNull(ImmutableExpression condition, ImmutableExpression thenExpression) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanIfElseNull(), condition, thenExpression);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfThenElse(), condition, thenTerm, elseTerm);
     }

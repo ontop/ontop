@@ -11,7 +11,11 @@ import java.util.function.Function;
 public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
 
     protected DefaultDBIfElseNullFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super("IF_ELSE_NULL", 2, dbBooleanType, rootDBTermType);
+        this("IF_ELSE_NULL", dbBooleanType, rootDBTermType);
+    }
+
+    protected DefaultDBIfElseNullFunctionSymbol(String name, DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        super(name, 2, dbBooleanType, rootDBTermType);
     }
 
     @Override

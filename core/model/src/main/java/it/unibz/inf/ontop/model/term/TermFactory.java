@@ -378,6 +378,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
 
+	ImmutableExpression getBooleanIfElseNull(ImmutableExpression condition, ImmutableExpression thenExpression);
+
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 
 	/**

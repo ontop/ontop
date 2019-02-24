@@ -69,6 +69,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBIfElseNull();
 
+    DBBooleanFunctionSymbol getDBBooleanIfElseNull();
+
     DBFunctionSymbol getDBIfThenElse();
 
     DBFunctionSymbol getDBUpper();
