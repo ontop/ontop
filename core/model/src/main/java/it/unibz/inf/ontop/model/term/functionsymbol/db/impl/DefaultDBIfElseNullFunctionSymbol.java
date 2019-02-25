@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -31,7 +34,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm newPossibleValue = terms.get(1).simplify(variableNullability);
 
-        if (newPossibleValue.equals(termFactory.getNullConstant()))
+        if (newPossibleValue.isNull())
             return newPossibleValue;
 
         // TODO: evaluate in 2-value logic
@@ -84,19 +87,47 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     /**
-     * TODO: refactor
+     * When the condition is only composed of IS_NOT_NULL expressions, see if the IF_ELSE_NULL(...) can be replaced
+     * by its "then" value
      */
     protected boolean canBeReplacedByValue(ImmutableExpression conditionExpression, ImmutableTerm possibleValue,
                                            TermFactory termFactory) {
-        /*
-         * Optimizes the special case IF_ELSE_NULL(IS_NOT_NULL(x),x) === x
-         */
-        if (possibleValue instanceof Variable) {
-            // TODO: make it more efficient?
-            if (conditionExpression.equals(termFactory.getDBIsNotNull(possibleValue)))
-                return true;
+        ImmutableList<ImmutableExpression> conjuncts = conditionExpression.flattenAND()
+                .collect(ImmutableCollectors.toList());
+
+        if (conjuncts.stream().allMatch(c ->
+                (c.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
+                && !((DBIsNullOrNotFunctionSymbol) c.getFunctionSymbol()).isTrueWhenNull())) {
+            ImmutableSet<ImmutableTerm> notNullTerms = conjuncts.stream()
+                    .map(c -> c.getTerm(0))
+                    .collect(ImmutableCollectors.toSet());
+
+            return nullify(possibleValue, notNullTerms, termFactory)
+                    .simplify()
+                    .isNull();
         }
         return false;
+    }
+
+    /**
+     * Recursive
+     */
+    private ImmutableTerm nullify(ImmutableTerm term,
+                                  ImmutableSet<ImmutableTerm> termsToReplaceByNulls,
+                                  TermFactory termFactory) {
+        if (termsToReplaceByNulls.contains(term))
+            return termFactory.getNullConstant();
+        else if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+            return termFactory.getImmutableFunctionalTerm(
+                    functionalTerm.getFunctionSymbol(),
+                    functionalTerm.getTerms().stream()
+                            // Recursive
+                        .map(t -> nullify(t, termsToReplaceByNulls, termFactory))
+                        .collect(ImmutableCollectors.toList()));
+        }
+        else
+            return term;
     }
 
     /**

@@ -79,7 +79,7 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
     }
 
     @Override
-    public boolean isNull() {
+    public boolean isTrueWhenNull() {
         return isNull;
     }
 }

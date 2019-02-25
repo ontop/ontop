@@ -51,7 +51,7 @@ public class BooleanDBIfElseNullFunctionSymbolImpl extends DefaultDBIfElseNullFu
             else
                 throw new MinorOntopInternalBugException("Was expecting the constant to be boolean");
         }
-        else if ((newThenValue instanceof Constant) && newThenValue.isNull())
+        else if (newThenValue.isNull())
             return newThenValue;
         else
             throw new MinorOntopInternalBugException("Unexpected new \"then\" value for a boolean IF_ELSE_NULL: "
