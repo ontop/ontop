@@ -108,8 +108,8 @@ public interface DBFunctionSymbolFactory {
 
     DBNotFunctionSymbol getDBNot();
 
-    DBBooleanFunctionSymbol getDBIsNull();
-    DBBooleanFunctionSymbol getDBIsNotNull();
+    DBIsNullOrNotFunctionSymbol getDBIsNull();
+    DBIsNullOrNotFunctionSymbol getDBIsNotNull();
 
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 

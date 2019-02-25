@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
@@ -28,41 +29,74 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
-        ImmutableTerm possibleValue = terms.get(1);
+        ImmutableTerm newPossibleValue = terms.get(1).simplify(variableNullability);
 
-        if (possibleValue.equals(termFactory.getNullConstant()))
-            return possibleValue;
+        if (newPossibleValue.equals(termFactory.getNullConstant()))
+            return newPossibleValue;
 
+        // TODO: evaluate in 2-value logic
+        ImmutableExpression.Evaluation conditionEvaluation = ((ImmutableExpression) terms.get(0)).evaluate(variableNullability);
+
+        Optional<ImmutableTerm> optionalSimplifiedTerm = conditionEvaluation.getValue()
+                .map(v -> {
+                    switch (v) {
+                        case TRUE:
+                            return newPossibleValue;
+                        case FALSE:
+                        case NULL:
+                        default:
+                            return termFactory.getNullConstant();
+                    }
+                });
+        if (optionalSimplifiedTerm.isPresent())
+            return optionalSimplifiedTerm.get();
+
+        ImmutableExpression newCondition = conditionEvaluation.getExpression()
+                .orElseThrow(() -> new MinorOntopInternalBugException("Inconsistent evaluation"));
+        return simplify(newCondition, newPossibleValue, termFactory, variableNullability);
+    }
+
+    protected ImmutableTerm simplify(ImmutableExpression newCondition, ImmutableTerm newThenValue, TermFactory termFactory,
+                                     VariableNullability variableNullability) {
+        if (canBeReplacedByValue(newCondition, newThenValue, termFactory)) {
+            return newThenValue;
+        }
+
+        if (newThenValue instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newThenValue;
+            if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+
+                return termFactory.getRDFFunctionalTerm(
+                        termFactory.getIfElseNull(newCondition, functionalTerm.getTerm(0)),
+                        termFactory.getIfElseNull(newCondition, functionalTerm.getTerm(1)))
+                        .simplify(variableNullability);
+            }
+        }
+        else if (newThenValue instanceof RDFConstant) {
+            RDFConstant constant = (RDFConstant) newThenValue;
+
+            return termFactory.getRDFFunctionalTerm(
+                    termFactory.getIfElseNull(newCondition, termFactory.getDBStringConstant(constant.getValue())),
+                    termFactory.getIfElseNull(newCondition, termFactory.getRDFTermTypeConstant(constant.getType())))
+                    .simplify(variableNullability);
+        }
+        return termFactory.getImmutableFunctionalTerm(this, newCondition, newThenValue);
+    }
+
+    /**
+     * TODO: refactor
+     */
+    protected boolean canBeReplacedByValue(ImmutableExpression conditionExpression, ImmutableTerm possibleValue,
+                                           TermFactory termFactory) {
         /*
          * Optimizes the special case IF_ELSE_NULL(IS_NOT_NULL(x),x) === x
          */
         if (possibleValue instanceof Variable) {
-            ImmutableExpression expression = (ImmutableExpression) terms.get(0);
             // TODO: make it more efficient?
-            if (expression.equals(termFactory.getDBIsNotNull(possibleValue)))
-                return possibleValue;
+            if (conditionExpression.equals(termFactory.getDBIsNotNull(possibleValue)))
+                return true;
         }
-        else if (possibleValue instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) possibleValue;
-            if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
-                ImmutableExpression condition = (ImmutableExpression) terms.get(0);
-
-                return termFactory.getRDFFunctionalTerm(
-                        termFactory.getIfElseNull(condition, functionalTerm.getTerm(0)),
-                        termFactory.getIfElseNull(condition, functionalTerm.getTerm(1)))
-                        .simplify(variableNullability);
-            }
-        }
-        else if (possibleValue instanceof RDFConstant) {
-            RDFConstant constant = (RDFConstant) possibleValue;
-            ImmutableExpression condition = (ImmutableExpression) terms.get(0);
-
-            return termFactory.getRDFFunctionalTerm(
-                    termFactory.getIfElseNull(condition, termFactory.getDBStringConstant(constant.getValue())),
-                    termFactory.getIfElseNull(condition, termFactory.getRDFTermTypeConstant(constant.getType())))
-                    .simplify(variableNullability);
-        }
-        return super.simplify(terms, termFactory, variableNullability);
+        return false;
     }
 
     /**

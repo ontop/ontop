@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -36,50 +33,28 @@ public class BooleanDBIfElseNullFunctionSymbolImpl extends DefaultDBIfElseNullFu
     }
 
     @Override
-    public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
-                                  VariableNullability variableNullability) {
-        if (terms.stream().anyMatch(t -> !(t instanceof ImmutableExpression))) {
-            throw new MinorOntopInternalBugException("BooleanDBIfElseNullFunctionSymbol was expecting " +
-                    "only ImmutableExpression as sub-terms");
-        }
-
-        // TODO: evaluate in 2-value logic
-        IncrementalEvaluation conditionEvaluation =
-                ((ImmutableExpression) terms.get(0)).evaluate(variableNullability, true);
-        switch (conditionEvaluation.getStatus()) {
-            case SAME_EXPRESSION:
-                throw new MinorOntopInternalBugException("Should not be the same expression");
-            case SIMPLIFIED_EXPRESSION:
-                ImmutableExpression newCondition = conditionEvaluation.getNewExpression().get();
-                return simplify(newCondition, (ImmutableExpression) terms.get(1), termFactory, variableNullability);
-            case IS_NULL:
-            case IS_FALSE:
-                return termFactory.getNullConstant();
-            case IS_TRUE:
-            default:
-                return terms.get(1).simplify(variableNullability);
-        }
-    }
-
-    protected ImmutableTerm simplify(ImmutableExpression newCondition, ImmutableExpression thenExpression,
+    protected ImmutableTerm simplify(ImmutableExpression newCondition, ImmutableTerm newThenValue,
                                      TermFactory termFactory,
                                   VariableNullability variableNullability) {
-
-        IncrementalEvaluation thenEvaluation = thenExpression.evaluate(variableNullability, true);
-        switch (thenEvaluation.getStatus()) {
-            case SAME_EXPRESSION:
-                throw new MinorOntopInternalBugException("Should not be the same expression");
-            case SIMPLIFIED_EXPRESSION:
-                ImmutableExpression newThenExpression = thenEvaluation.getNewExpression().get();
-                // TODO: check if we are not in the case of IF_ELSE_NULL(IS_NOT_NULL(x),IS_TRUE(x)) ?
-                return termFactory.getImmutableExpression(this, newCondition, newThenExpression);
-            case IS_NULL:
-                return termFactory.getNullConstant();
-            case IS_FALSE:
-                return newCondition.negate(termFactory);
-            case IS_TRUE:
-            default:
-                return newCondition;
+        if (canBeReplacedByValue(newCondition, newThenValue, termFactory)) {
+            return newThenValue;
         }
+
+        if (newThenValue instanceof ImmutableExpression) {
+            return termFactory.getImmutableExpression(this, newCondition, newThenValue);
+        }
+        else if (newThenValue instanceof DBConstant) {
+            if (newThenValue.equals(termFactory.getDBBooleanConstant(true)))
+                return newCondition;
+            else if (newThenValue.equals(termFactory.getDBBooleanConstant(false)))
+                return newCondition.negate(termFactory);
+            else
+                throw new MinorOntopInternalBugException("Was expecting the constant to be boolean");
+        }
+        else if ((newThenValue instanceof Constant) && newThenValue.isNull())
+            return newThenValue;
+        else
+            throw new MinorOntopInternalBugException("Unexpected new \"then\" value for a boolean IF_ELSE_NULL: "
+                    + newThenValue);
     }
 }
