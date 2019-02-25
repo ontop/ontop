@@ -49,12 +49,9 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
+        // Only when both are non-nulls (one is not enough, quite likely to be invalid)
         if (newTerms.stream().allMatch(ImmutableTerm::isNull))
             return termFactory.getNullConstant();
-
-        // Only one is null, could be invalid so blocks the simplification
-        if (newTerms.stream().anyMatch(ImmutableTerm::isNull))
-            return termFactory.getImmutableFunctionalTerm(this, newTerms);
 
         if (newTerms.stream()
                 .allMatch(t -> t instanceof NonNullConstant)) {
@@ -75,6 +72,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
             return termFactory.getRDFConstant(lexicalConstant.getValue(), rdfTermType);
         }
         else
+            // May block invalid cases such as RDF(NULL, IRI)
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
