@@ -35,12 +35,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        // TODO: complain if one is null and the one is not nullable
-        if (terms.stream()
-                .filter(t -> t instanceof Constant)
-                .anyMatch(c -> ((Constant) c).isNull()))
-            return Optional.empty();
-
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
 
@@ -63,9 +57,13 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
 
         if (newTerms.stream()
-                .allMatch(t -> t instanceof DBConstant)) {
+                .allMatch(t -> t instanceof NonNullConstant)) {
 
-            DBConstant lexicalConstant = (DBConstant) newTerms.get(0);
+            DBConstant lexicalConstant = Optional.of(newTerms.get(0))
+                    .filter(c -> c instanceof DBConstant)
+                    .map(c -> (DBConstant) c)
+                    .orElseThrow(() -> new MinorOntopInternalBugException(
+                            "The constant for the lexical part was expected to be a DBConstant"));
 
             RDFTermType rdfTermType = Optional.of(newTerms.get(1))
                     .filter(c -> c instanceof RDFTermTypeConstant)
