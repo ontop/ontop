@@ -89,33 +89,33 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     /**
      * When the condition is only composed of IS_NOT_NULL expressions, see if the IF_ELSE_NULL(...) can be replaced
      * by its "then" value
+     *
+     * TODO: group together terms that are known to be nullable together to detect more cases
      */
     protected boolean canBeReplacedByValue(ImmutableExpression conditionExpression, ImmutableTerm possibleValue,
                                            TermFactory termFactory) {
-        ImmutableList<ImmutableExpression> conjuncts = conditionExpression.flattenAND()
-                .collect(ImmutableCollectors.toList());
+        return conditionExpression.flattenAND()
+                .allMatch(c -> isEnforced(c, possibleValue, termFactory));
+    }
 
-        if (conjuncts.stream().allMatch(c ->
-                (c.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
-                && !((DBIsNullOrNotFunctionSymbol) c.getFunctionSymbol()).isTrueWhenNull())) {
-            ImmutableSet<ImmutableTerm> notNullTerms = conjuncts.stream()
-                    .map(c -> c.getTerm(0))
-                    .collect(ImmutableCollectors.toSet());
-
-            return nullify(possibleValue, notNullTerms, termFactory)
-                    .simplify()
-                    .isNull();
-        }
-        return false;
+    private boolean isEnforced(ImmutableExpression subConditionExpression, ImmutableTerm possibleValue,
+                               TermFactory termFactory) {
+        return Optional.of(subConditionExpression)
+                .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
+                        && !((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull())
+                .filter(e -> nullify(possibleValue, e.getTerm(0), termFactory)
+                        .simplify()
+                        .isNull())
+                .isPresent();
     }
 
     /**
      * Recursive
      */
     private ImmutableTerm nullify(ImmutableTerm term,
-                                  ImmutableSet<ImmutableTerm> termsToReplaceByNulls,
+                                  ImmutableTerm termToReplaceByNull,
                                   TermFactory termFactory) {
-        if (termsToReplaceByNulls.contains(term))
+        if (termToReplaceByNull.equals(term))
             return termFactory.getNullConstant();
         else if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
@@ -123,7 +123,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                     functionalTerm.getFunctionSymbol(),
                     functionalTerm.getTerms().stream()
                             // Recursive
-                        .map(t -> nullify(t, termsToReplaceByNulls, termFactory))
+                        .map(t -> nullify(t, termToReplaceByNull, termFactory))
                         .collect(ImmutableCollectors.toList()));
         }
         else
