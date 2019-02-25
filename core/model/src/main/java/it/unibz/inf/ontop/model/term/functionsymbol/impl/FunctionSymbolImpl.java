@@ -177,7 +177,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
-     * Returns true if is not guaranteed to return NULL when one argument is NULL
+     * Returns true if is not guaranteed to return NULL when one argument is NULL.
+     *
+     * Can be the case for some function symbols that are rejecting certain cases
+     * and therefore refuse to simplify themselves, e.g. RDF(NULL,IRI) is invalid
+     * and therefore cannot be simplified.
+     *
      */
     protected abstract boolean tolerateNulls();
 
