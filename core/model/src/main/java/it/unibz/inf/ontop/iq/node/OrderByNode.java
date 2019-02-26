@@ -5,8 +5,10 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
+import java.util.Optional;
+
 /**
- * Follows a NULLS FIRST semantics, similarly to SPARQL
+ * Follows a NULLS FIRST semantics (if ascending, NULLS LAST otherwise), similarly to SPARQL
  *
  * See https://www.w3.org/TR/sparql11-query/#modOrderBy
  */
@@ -14,7 +16,7 @@ public interface OrderByNode extends QueryModifierNode {
 
     ImmutableList<OrderComparator> getComparators();
 
-    OrderByNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution);
+    Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution);
 
     @Override
     OrderByNode clone();

@@ -46,14 +46,16 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public OrderByNode applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
+    public Optional<OrderByNode> applySubstitution(ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         ImmutableList<OrderComparator> newComparators = comparators.stream()
                 .flatMap(c -> Stream.of(substitution.apply(c.getTerm()))
                         .filter(t -> t instanceof NonGroundTerm)
                         .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
                 .collect(ImmutableCollectors.toList());
 
-        return iqFactory.createOrderByNode(newComparators);
+        return Optional.of(newComparators)
+                .filter(cs -> !cs.isEmpty())
+                .map(iqFactory::createOrderByNode);
     }
 
     @Override
@@ -70,20 +72,24 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                               Optional<ImmutableExpression> constraint, IQTree child) {
 
-        OrderByNode newOrderByTree = applySubstitution(descendingSubstitution);
+        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint);
 
-        return iqFactory.createUnaryIQTree(newOrderByTree, newChild);
+        return newOrderByNode
+                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
+                .orElse(newChild);
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
 
-        OrderByNode newOrderByTree = applySubstitution(descendingSubstitution);
+        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
         IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
 
-        return iqFactory.createUnaryIQTree(newOrderByTree, newChild);
+        return newOrderByNode
+                .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
+                .orElse(newChild);
     }
 
     @Override

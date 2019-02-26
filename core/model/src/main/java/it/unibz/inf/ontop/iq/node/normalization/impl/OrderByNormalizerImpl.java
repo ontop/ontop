@@ -23,6 +23,9 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         this.iqFactory = iqFactory;
     }
 
+    /**
+     * TODO: why is there a loop?
+     */
     @Override
     public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator,
                                            IQProperties currentIQProperties) {
@@ -60,13 +63,13 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             this(ImmutableList.of(), Optional.of(orderByNode), child, variableGenerator);
         }
 
-        private State updateParentOrderByAndChild(UnaryOperatorNode newParent, OrderByNode newOrderByNode, IQTree newChild) {
+        private State updateParentOrderByAndChild(UnaryOperatorNode newParent, Optional<OrderByNode> newOrderByNode, IQTree newChild) {
             ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
                     .add(newParent)
                     .addAll(ancestors)
                     .build();
 
-            return new State(newAncestors, Optional.of(newOrderByNode), newChild, variableGenerator);
+            return new State(newAncestors, newOrderByNode, newChild, variableGenerator);
         }
 
         private State updateChild(IQTree newChild) {
@@ -103,7 +106,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             else if (newChildRoot instanceof EmptyNode)
                 return declareAsEmpty(newChild);
             else if (newChildRoot instanceof DistinctNode) {
-                return updateParentOrderByAndChild((DistinctNode) newChildRoot, orderBy, newChild);
+                return updateParentOrderByAndChild((DistinctNode) newChildRoot, Optional.of(orderBy), newChild);
             }
             else
                 return updateChild(newChild);
