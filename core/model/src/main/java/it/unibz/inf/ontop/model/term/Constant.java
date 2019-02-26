@@ -38,4 +38,9 @@ public interface Constant extends NonFunctionalTerm, GroundTerm, Term {
 	 */
 	Optional<TermType> getOptionalType();
 
+	@Override
+	default boolean isDeterministic() {
+		return true;
+	}
+
 }

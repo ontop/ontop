@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -106,6 +107,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         return IncrementalEvaluation.declareSameExpression();
     }
 
+    @Override
+    public boolean isDeterministic() {
+        return !(this instanceof NonDeterministicDBFunctionSymbol);
+    }
+
     /**
      * By default, to be overridden by function symbols that supports tolerate NULL values
      */
@@ -203,7 +209,14 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
-        return isAlwaysInjective();
+        if (arguments.stream()
+                .allMatch(t -> (t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic()))
+            return true;
+
+        return isAlwaysInjective() && arguments.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .allMatch(t -> t.isInjective(variableNullability));
     }
 
     /**

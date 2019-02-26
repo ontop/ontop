@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -36,9 +34,13 @@ public class DefaultDBConcatFunctionSymbol extends AbstractTypedDBFunctionSymbol
 
     @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
-        return arguments.stream()
-                .filter(t -> !(t instanceof Constant))
-                .count() <= 1;
+        return (arguments.stream()
+                .filter(t -> (!(t instanceof GroundTerm)) || ((GroundTerm) t).isDeterministic())
+                .count() <= 1)
+                && arguments.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .allMatch(t -> t.isInjective(variableNullability));
     }
 
     /**

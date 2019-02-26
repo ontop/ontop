@@ -55,9 +55,13 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
 
     @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
-        return arguments.stream()
-                .filter(t -> !(t instanceof Constant))
-                .count() <= 1;
+        return (arguments.stream()
+                .filter(t -> (!(t instanceof GroundTerm)) || ((GroundTerm) t).isDeterministic())
+                .count() <= 1)
+                && arguments.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .allMatch(t -> t.isInjective(variableNullability));
     }
 
     @Override

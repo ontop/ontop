@@ -47,6 +47,8 @@ public interface FunctionSymbol extends Predicate {
      */
     boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
 
+    boolean isDeterministic();
+
     boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 
 
