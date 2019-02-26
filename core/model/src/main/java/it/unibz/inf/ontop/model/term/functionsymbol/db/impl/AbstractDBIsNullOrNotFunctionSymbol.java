@@ -82,4 +82,10 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
     public boolean isTrueWhenNull() {
         return isNull;
     }
+
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        return IncrementalEvaluation.declareIsTrue();
+    }
 }

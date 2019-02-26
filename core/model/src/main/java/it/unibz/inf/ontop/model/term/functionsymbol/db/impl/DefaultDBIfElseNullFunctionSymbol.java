@@ -32,13 +32,20 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
 
     @Override
     public ImmutableTerm simplify(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory, VariableNullability variableNullability) {
+        ImmutableTerm firstTerm = terms.get(0);
         ImmutableTerm newPossibleValue = terms.get(1).simplify(variableNullability);
 
-        if (newPossibleValue.isNull())
+        if (firstTerm.isNull() || newPossibleValue.isNull())
             return newPossibleValue;
 
+        ImmutableExpression condition = Optional.of(firstTerm)
+                .filter(t -> t instanceof ImmutableExpression)
+                .map(t -> (ImmutableExpression) t)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The first term of an IF_ELSE_NULL " +
+                        "was expected to be an expression"));
+
         // TODO: evaluate in 2-value logic
-        ImmutableExpression.Evaluation conditionEvaluation = ((ImmutableExpression) terms.get(0)).evaluate(variableNullability);
+        ImmutableExpression.Evaluation conditionEvaluation = condition.evaluate(variableNullability);
 
         Optional<ImmutableTerm> optionalSimplifiedTerm = conditionEvaluation.getValue()
                 .map(v -> {
@@ -168,5 +175,21 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
 
         return termFactory.getBooleanIfElseNull(condition,
                 termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, ifElseNullTerms.get(1)));
+    }
+
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        ImmutableExpression condition = Optional.of(terms.get(0))
+                .filter(t -> t instanceof ImmutableExpression)
+                .map(t -> (ImmutableExpression) t)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Was expected an immutable expression as first term"));
+        ImmutableTerm thenValue = terms.get(1);
+
+        return termFactory.getConjunction(
+                condition,
+                termFactory.getDBIsNotNull(condition),
+                termFactory.getDBIsNotNull(thenValue))
+                .evaluate(variableNullability, true);
     }
 }
