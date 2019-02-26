@@ -543,14 +543,11 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm value,
                                                               ImmutableSet<Variable> leftVariables,
                                                               Variable rightProvenanceVariable) {
-            // TODO: make it stronger!!
-            if (value.getVariableStream()
-                    .anyMatch(v -> !leftVariables.contains(v)))
-                return value;
-
-            return termFactory.getIfElseNull(
-                    termFactory.getDBIsNotNull(rightProvenanceVariable),
-                    value);
+            return isNullWhenRightIsRejected(value, leftVariables)
+                    ? value
+                    : termFactory.getIfElseNull(
+                            termFactory.getDBIsNotNull(rightProvenanceVariable),
+                            value);
         }
 
         /**
@@ -638,12 +635,16 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          *
          */
         private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm, ImmutableSet<Variable> leftVariables) {
-            if (immutableTerm instanceof Constant)
-                return ((Constant) immutableTerm).isNull();
+            ImmutableSubstitution<Constant> nullSubstitution = substitutionFactory.getSubstitution(
+                    immutableTerm.getVariableStream()
+                            .filter(v -> !leftVariables.contains(v))
+                            .collect(ImmutableCollectors.toMap(
+                                    v -> v,
+                                    v -> termFactory.getNullConstant())));
 
-            // TODO: make it stronger (is a bit weak, as some functional terms may tolerate NULLs for the right)
-            return immutableTerm.getVariableStream()
-                    .anyMatch(v -> !leftVariables.contains(v));
+            return nullSubstitution.apply(immutableTerm)
+                    .simplify()
+                    .isNull();
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
