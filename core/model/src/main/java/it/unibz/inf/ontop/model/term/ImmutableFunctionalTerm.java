@@ -32,5 +32,9 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
 
     boolean isInjective(VariableNullability variableNullability);
 
+    /**
+     * Returns true if it can be post-processed modulo some decomposition
+     * (i.e. some sub-terms may not post-processed, but the top function symbol yes)
+     */
     boolean canBePostProcessed();
 }
