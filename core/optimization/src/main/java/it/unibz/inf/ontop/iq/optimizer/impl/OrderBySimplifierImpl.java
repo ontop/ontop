@@ -11,8 +11,10 @@ import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class OrderBySimplifierImpl implements OrderBySimplifier {
@@ -69,7 +71,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
                 boolean isAscending = comparator.isAscending();
 
-                return simplifyRDFTerm(functionalTerm.getTerm(0), functionalTerm.getTerm(1), child)
+                return simplifyRDFTerm(functionalTerm.getTerm(0), unwrapIfElseNull(functionalTerm.getTerm(1)), child)
                         .map(t -> iqFactory.createOrderComparator(t, isAscending));
             }
             else
@@ -90,6 +92,15 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
         protected NonGroundTerm computeDBTerm(NonGroundTerm lexicalTerm, RDFTermTypeConstant typeConstant) {
             return (NonGroundTerm) termFactory.getConversionFromRDFLexical2DB(lexicalTerm, typeConstant.getRDFTermType())
                     .simplify();
+        }
+
+        private ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
+            return Optional.of(term)
+                    .filter(t -> t instanceof ImmutableFunctionalTerm)
+                    .map(t -> (ImmutableFunctionalTerm) t)
+                    .filter(t -> t.getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
+                    .map(t -> t.getTerm(1))
+                    .orElse(term);
         }
     }
 
