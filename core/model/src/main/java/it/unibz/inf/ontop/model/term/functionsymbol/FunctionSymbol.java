@@ -14,6 +14,12 @@ import java.util.Optional;
  */
 public interface FunctionSymbol extends Predicate {
 
+    /**
+     * When the function symbol is, in the absence of non-injective functional sub-terms, sometimes but not always injective,
+     * please override isInjective(...)
+     */
+    boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
+
     boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability);
 
     FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,

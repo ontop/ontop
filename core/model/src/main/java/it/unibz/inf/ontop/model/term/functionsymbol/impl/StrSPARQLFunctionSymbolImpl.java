@@ -50,7 +50,7 @@ public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

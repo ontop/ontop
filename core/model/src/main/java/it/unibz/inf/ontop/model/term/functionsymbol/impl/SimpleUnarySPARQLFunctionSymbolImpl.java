@@ -76,7 +76,7 @@ public class SimpleUnarySPARQLFunctionSymbolImpl extends ReduciblePositiveArityS
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return isAlwaysInjective;
     }
 }

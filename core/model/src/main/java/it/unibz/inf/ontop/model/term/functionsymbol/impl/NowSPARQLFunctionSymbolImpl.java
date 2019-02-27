@@ -25,7 +25,7 @@ public class NowSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

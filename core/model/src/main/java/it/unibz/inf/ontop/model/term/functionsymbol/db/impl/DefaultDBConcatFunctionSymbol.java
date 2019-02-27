@@ -28,7 +28,7 @@ public class DefaultDBConcatFunctionSymbol extends AbstractTypedDBFunctionSymbol
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

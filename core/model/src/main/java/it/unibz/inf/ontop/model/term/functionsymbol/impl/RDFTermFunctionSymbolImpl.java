@@ -20,7 +20,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

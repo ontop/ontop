@@ -26,7 +26,7 @@ public class EBVSPARQLLikeFunctionSymbolImpl extends SPARQLLikeFunctionSymbolImp
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

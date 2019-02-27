@@ -24,7 +24,7 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

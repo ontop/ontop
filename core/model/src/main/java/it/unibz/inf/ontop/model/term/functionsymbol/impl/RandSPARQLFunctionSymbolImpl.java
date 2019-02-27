@@ -37,7 +37,7 @@ public class RandSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
      * Non-deterministic therefore non-injective
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

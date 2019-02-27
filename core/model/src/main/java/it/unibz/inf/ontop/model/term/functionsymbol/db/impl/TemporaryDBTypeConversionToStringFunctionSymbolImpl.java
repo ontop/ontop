@@ -33,7 +33,7 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

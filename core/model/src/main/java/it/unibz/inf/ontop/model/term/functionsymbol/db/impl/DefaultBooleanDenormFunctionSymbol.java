@@ -43,7 +43,7 @@ public class DefaultBooleanDenormFunctionSymbol
      * Here we assume that the DB has only one way to represent the boolean value as a string
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

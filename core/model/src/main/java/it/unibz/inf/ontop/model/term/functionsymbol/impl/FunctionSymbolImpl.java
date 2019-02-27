@@ -200,20 +200,18 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
-     * When the function symbol is sometimes but not always injective, please override isInjective(...)
-     */
-    protected abstract boolean isAlwaysInjective();
-
-    /**
      * To be overridden when is sometimes but not always injective.
      */
     @Override
     public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
+        if (!isDeterministic())
+            return false;
+
         if (arguments.stream()
                 .allMatch(t -> (t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic()))
             return true;
 
-        return isAlwaysInjective() && arguments.stream()
+        return isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() && arguments.stream()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .allMatch(t -> t.isInjective(variableNullability));

@@ -37,7 +37,7 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

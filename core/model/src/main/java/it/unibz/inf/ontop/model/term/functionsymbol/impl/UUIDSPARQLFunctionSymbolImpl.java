@@ -37,7 +37,7 @@ public class UUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements 
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

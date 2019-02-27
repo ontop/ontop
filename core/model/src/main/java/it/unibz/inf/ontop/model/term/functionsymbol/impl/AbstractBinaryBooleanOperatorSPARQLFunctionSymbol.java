@@ -71,7 +71,7 @@ public abstract class AbstractBinaryBooleanOperatorSPARQLFunctionSymbol extends 
 
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

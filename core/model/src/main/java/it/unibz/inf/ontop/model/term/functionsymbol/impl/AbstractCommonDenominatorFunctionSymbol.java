@@ -29,7 +29,7 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

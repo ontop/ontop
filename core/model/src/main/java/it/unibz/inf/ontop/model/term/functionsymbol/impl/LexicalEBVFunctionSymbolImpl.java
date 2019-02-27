@@ -47,7 +47,7 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

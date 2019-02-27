@@ -32,7 +32,7 @@ public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

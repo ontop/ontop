@@ -62,7 +62,7 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

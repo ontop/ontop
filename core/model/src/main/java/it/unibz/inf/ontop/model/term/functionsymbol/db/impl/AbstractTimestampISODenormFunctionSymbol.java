@@ -36,7 +36,7 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

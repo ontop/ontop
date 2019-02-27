@@ -27,7 +27,7 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

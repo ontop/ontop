@@ -37,7 +37,7 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

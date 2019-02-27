@@ -13,7 +13,7 @@ public class LcaseSPARQLFunctionSymbolImpl extends AbstractUnaryStringSPARQLFunc
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

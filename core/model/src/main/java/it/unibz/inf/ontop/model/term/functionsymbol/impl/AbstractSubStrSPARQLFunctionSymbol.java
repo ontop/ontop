@@ -38,7 +38,7 @@ public abstract class AbstractSubStrSPARQLFunctionSymbol extends ReduciblePositi
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

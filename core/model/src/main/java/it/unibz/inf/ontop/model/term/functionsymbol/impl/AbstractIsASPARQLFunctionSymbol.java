@@ -38,7 +38,7 @@ public abstract class AbstractIsASPARQLFunctionSymbol extends ReduciblePositiveA
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

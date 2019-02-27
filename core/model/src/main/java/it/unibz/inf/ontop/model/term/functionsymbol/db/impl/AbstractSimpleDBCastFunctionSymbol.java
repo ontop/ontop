@@ -77,7 +77,7 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return getInputType().isPresent();
     }
 

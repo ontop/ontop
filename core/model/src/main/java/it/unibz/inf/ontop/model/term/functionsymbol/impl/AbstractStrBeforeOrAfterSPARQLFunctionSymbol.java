@@ -55,7 +55,7 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
                                                                                TermFactory termFactory);
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

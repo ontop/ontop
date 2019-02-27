@@ -50,7 +50,7 @@ public class SameTermSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

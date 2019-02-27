@@ -49,7 +49,7 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

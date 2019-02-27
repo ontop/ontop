@@ -113,7 +113,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
      * TODO: implement is seriously based on the pattern and if it is unary
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

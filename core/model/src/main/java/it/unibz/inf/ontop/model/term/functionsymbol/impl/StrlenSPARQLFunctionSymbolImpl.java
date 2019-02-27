@@ -29,7 +29,7 @@ public class StrlenSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

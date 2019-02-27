@@ -37,7 +37,7 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

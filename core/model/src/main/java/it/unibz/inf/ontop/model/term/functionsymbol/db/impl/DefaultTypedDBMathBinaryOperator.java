@@ -40,7 +40,7 @@ public class DefaultTypedDBMathBinaryOperator extends FunctionSymbolImpl impleme
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

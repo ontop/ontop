@@ -25,7 +25,7 @@ public abstract class AbstractDBIsStringEmptyFunctionSymbol extends DBBooleanFun
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -49,7 +49,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
