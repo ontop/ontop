@@ -638,6 +638,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             ImmutableSubstitution<Constant> nullSubstitution = substitutionFactory.getSubstitution(
                     immutableTerm.getVariableStream()
                             .filter(v -> !leftVariables.contains(v))
+                            .distinct()
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
                                     v -> termFactory.getNullConstant())));
