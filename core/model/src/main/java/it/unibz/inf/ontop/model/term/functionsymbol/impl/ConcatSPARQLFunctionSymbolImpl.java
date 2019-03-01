@@ -60,7 +60,8 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
             VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
 
         if (arguments.stream()
-                .filter(t -> (!(t instanceof GroundTerm)) || ((GroundTerm) t).isDeterministic())
+                .filter(t -> (!(t instanceof GroundTerm)) || (!((GroundTerm) t).isDeterministic()))
+                .filter(t -> !nonFreeVariables.contains(t))
                 .count() <= 1) {
             return Optional.of(decomposeInjectiveTopFunctionalTerm(arguments, nonFreeVariables, variableNullability,
                     variableGenerator, termFactory));

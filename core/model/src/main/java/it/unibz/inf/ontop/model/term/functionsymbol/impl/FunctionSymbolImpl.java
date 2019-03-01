@@ -218,7 +218,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return Optional.empty();
 
         if (arguments.stream()
-                .allMatch(t -> (t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic()))
+                .allMatch(t -> ((t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic())
+                        || nonFreeVariables.contains(t)))
             return Optional.of(termFactory.getInjectivityDecomposition(
                     termFactory.getImmutableFunctionalTerm(this, arguments)));
 
