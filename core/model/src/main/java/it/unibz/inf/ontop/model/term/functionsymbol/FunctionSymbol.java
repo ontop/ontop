@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -20,7 +21,11 @@ public interface FunctionSymbol extends Predicate {
      */
     boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
 
-    boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability);
+    Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
+            ImmutableList<? extends ImmutableTerm> arguments,
+            ImmutableSet<Variable> nonFreeVariables,
+            VariableNullability variableNullability,
+            VariableGenerator variableGenerator, TermFactory termFactory);
 
     FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
                                VariableNullability childNullability);
@@ -68,6 +73,5 @@ public interface FunctionSymbol extends Predicate {
          */
         Optional<Variable> getBoundVariable();
     }
-
 
 }

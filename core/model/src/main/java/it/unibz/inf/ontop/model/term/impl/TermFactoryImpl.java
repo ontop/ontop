@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,6 +36,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -346,6 +348,22 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression.Evaluation getNullEvaluation() {
 		return nullEvaluation;
+	}
+
+    @Override
+    public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+    		ImmutableFunctionalTerm injectiveFunctionalTerm) {
+		return new InjectivityDecompositionImpl(injectiveFunctionalTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+			ImmutableFunctionalTerm injectiveFunctionalTerm,
+			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap) {
+
+		return (subTermSubstitutionMap.isEmpty())
+				? getInjectivityDecomposition(injectiveFunctionalTerm)
+				: new InjectivityDecompositionImpl(injectiveFunctionalTerm, subTermSubstitutionMap);
 	}
 
 	@Override

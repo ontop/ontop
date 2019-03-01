@@ -200,7 +200,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                                         VariableNullability variableNullability) {
         String otherValue = otherTerm.getValue();
 
-        if (isInjective(terms, variableNullability)) {
+        if (isInjective(terms, variableNullability, termFactory)) {
             Matcher matcher = pattern.matcher(otherTerm.getValue());
             if (matcher.find()) {
                 ImmutableList<DBConstant> subConstants = IntStream.range(0, getArity())

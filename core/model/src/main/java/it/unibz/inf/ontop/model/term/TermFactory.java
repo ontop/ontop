@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -33,6 +34,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -135,6 +137,12 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getPositiveEvaluation();
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
+
+	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
+	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+			ImmutableFunctionalTerm injectiveFunctionalTerm,
+			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap);
+
 
 
 	public Function getFunction(Predicate functor, List<Term> terms);

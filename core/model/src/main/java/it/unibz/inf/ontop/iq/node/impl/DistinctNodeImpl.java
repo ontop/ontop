@@ -110,7 +110,9 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     private boolean isLiftable(ImmutableTerm value, VariableNullability variableNullability) {
         if (value instanceof VariableOrGroundTerm)
             return true;
-        return ((ImmutableFunctionalTerm) value).isInjective(variableNullability);
+        // TODO: refactor
+        return ((ImmutableFunctionalTerm) value).getFunctionSymbol().isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
+        //return ((ImmutableFunctionalTerm) value).isInjective(variableNullability);
     }
 
     @Override
