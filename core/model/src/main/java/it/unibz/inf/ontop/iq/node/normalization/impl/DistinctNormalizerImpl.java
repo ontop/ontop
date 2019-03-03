@@ -115,10 +115,6 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             this.variableGenerator = variableGenerator;
         }
 
-        public Optional<ConstructionNode> getChildConstructionNode() {
-            return Optional.ofNullable(childConstructionNode);
-        }
-
         public BindingLiftState liftBindings() {
             if (childConstructionNode == null)
                 return this;

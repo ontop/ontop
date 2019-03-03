@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -11,6 +12,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbo
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -191,5 +193,41 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                 termFactory.getDBIsNotNull(condition),
                 termFactory.getDBIsNotNull(thenValue))
                 .evaluate(variableNullability, true);
+    }
+
+    @Override
+    public Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
+            ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonFreeVariables,
+            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
+
+        ImmutableTerm thenValue = arguments.get(1);
+        /*
+         * When the thenValue is non-null and a constant
+         */
+        if (thenValue instanceof NonNullConstant) {
+            ImmutableExpression thenCondition = Optional.of(arguments.get(0))
+                    .filter(c -> c instanceof ImmutableExpression)
+                    .map(c -> (ImmutableExpression)c)
+                    .orElseThrow(() -> new IllegalArgumentException("was expected an ImmutableExpression as first sub-term"));
+
+            /*
+             * If the thenCondition is non-nullable (like, e.g., IS_NOT_NULL)
+             */
+            if (termFactory.getDBIsNotNull(thenCondition)
+                    .evaluate(variableNullability)
+                    .getValue()
+                    .filter(v -> v.equals(ImmutableExpression.Evaluation.BooleanValue.TRUE))
+                    .isPresent()) {
+                Variable newVariable = variableGenerator.generateNewVariable();
+                ImmutableFunctionalTerm newFunctionalTerm = termFactory.getIfElseNull(
+                        termFactory.getIsTrue(newVariable),
+                        thenValue);
+                ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap = ImmutableMap.of(newVariable, thenCondition);
+
+                return Optional.of(termFactory.getInjectivityDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+            }
+
+        }
+        return super.analyzeInjectivity(arguments, nonFreeVariables, variableNullability, variableGenerator, termFactory);
     }
 }
