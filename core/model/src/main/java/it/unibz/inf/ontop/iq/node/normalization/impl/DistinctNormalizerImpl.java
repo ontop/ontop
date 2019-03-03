@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -20,6 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -120,19 +123,36 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
             if (childConstructionNode == null)
                 return this;
 
-            ImmutableSubstitution<ImmutableTerm> initialSubstitution = childConstructionNode.getSubstitution();
-            if (initialSubstitution.isEmpty())
+            ImmutableSubstitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
+            if (childSubstitution.isEmpty())
                 return this;
 
             VariableNullability grandChildVariableNullability = grandChildTree.getVariableNullability();
 
-            ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> partition =
-                    initialSubstitution.getImmutableMap().entrySet().stream()
-                            .collect(ImmutableCollectors.partitioningBy(
-                                    e -> isLiftable(e.getValue(), grandChildVariableNullability),
-                                    ImmutableCollectors.toMap()));
+            ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
-            Optional<ConstructionNode> liftedConstructionNode = Optional.ofNullable(partition.get(true))
+            ImmutableMap<Variable, Optional<InjectivityDecomposition>> injectivityDecompositionMap =
+                    childSubstitution.getImmutableMap().entrySet().stream()
+                            .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
+                            .collect(ImmutableCollectors.toMap(
+                                    Map.Entry::getKey,
+                                    e -> ((ImmutableFunctionalTerm) e.getValue())
+                                            // Analyzes injectivity
+                                            .analyzeInjectivity(nonFreeVariables, grandChildVariableNullability,
+                                                    variableGenerator)));
+
+            ImmutableMap<Variable, ImmutableTerm> liftedSubstitutionMap = Stream.concat(
+                    // All variables and constants
+                    childSubstitution.getImmutableMap().entrySet().stream()
+                            .filter(e -> e.getValue() instanceof NonFunctionalTerm),
+                    // (Possibly decomposed) injective functional terms
+                    injectivityDecompositionMap.entrySet().stream()
+                            .filter(e -> e.getValue().isPresent())
+                            .map(e -> Maps.immutableEntry(e.getKey(),
+                                    (ImmutableTerm) e.getValue().get().getInjectiveTerm())))
+                    .collect(ImmutableCollectors.toMap());
+
+            Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitutionMap)
                     .filter(m -> !m.isEmpty())
                     .map(substitutionFactory::getSubstitution)
                     .map(s -> iqFactory.createConstructionNode(childConstructionNode.getVariables(), s));
@@ -141,7 +161,20 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     .map(ConstructionNode::getChildVariables)
                     .orElseGet(childConstructionNode::getVariables);
 
-            Optional<ConstructionNode> newConstructionNode = Optional.ofNullable(partition.get(false))
+            ImmutableMap<Variable, ImmutableTerm> newChildSubstitutionMap =
+                    injectivityDecompositionMap.entrySet().stream()
+                            .flatMap(e -> e.getValue()
+                                    // Sub-term substitution entries from injectivity decompositions
+                                .map(d -> d.getSubTermSubstitutionMap()
+                                        .map(s -> s.entrySet().stream())
+                                        .orElseGet(Stream::empty))
+                                    // Non-decomposable entries
+                                .orElseGet(() -> Stream.of(Maps.immutableEntry(
+                                        e.getKey(),
+                                        childSubstitution.get(e.getKey())))))
+                            .collect(ImmutableCollectors.toMap());
+
+            Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitutionMap)
                     .filter(m -> !m.isEmpty())
                     .map(substitutionFactory::getSubstitution)
                     .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
@@ -151,7 +184,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             : Optional.of(iqFactory.createConstructionNode(newChildVariables)));
 
             // Nothing lifted
-            if (newConstructionNode
+            if (newChildConstructionNode
                     .filter(n -> n.isEquivalentTo(childConstructionNode))
                     .isPresent()) {
                 if (liftedConstructionNode.isPresent())
@@ -164,7 +197,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             .collect(ImmutableCollectors.toList()))
                     .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"));
 
-            return newConstructionNode
+            return newChildConstructionNode
                     .map(c -> new BindingLiftState(newAncestors, grandChildTree, variableGenerator, c))
                     .orElseGet(() -> new BindingLiftState(newAncestors, grandChildTree, variableGenerator));
         }
@@ -184,20 +217,6 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); })
                     // Recursive (for merging top construction nodes)
                     .normalizeForOptimization(variableGenerator);
-        }
-
-        /**
-         *
-         * NULL is treated as a regular constant (consistent with SPARQL DISTINCT and apparently with SQL DISTINCT)
-         *
-         */
-        private boolean isLiftable(ImmutableTerm value, VariableNullability variableNullability) {
-            if (value instanceof VariableOrGroundTerm)
-                return true;
-            // TODO: refactor
-            return ((ImmutableFunctionalTerm) value).getFunctionSymbol()
-                    .isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
-            //return ((ImmutableFunctionalTerm) value).isInjective(variableNullability);
         }
     }
 
