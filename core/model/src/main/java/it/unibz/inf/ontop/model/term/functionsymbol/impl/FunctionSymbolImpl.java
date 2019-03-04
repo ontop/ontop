@@ -184,7 +184,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * (first produced equality evaluated as false, while the second evaluates as NULL)
      *
      */
-    private boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
                                                          VariableNullability variableNullability,
                                                          ImmutableList<? extends ImmutableTerm> otherTerms) {
         if (mayReturnNullWithoutNullArguments())

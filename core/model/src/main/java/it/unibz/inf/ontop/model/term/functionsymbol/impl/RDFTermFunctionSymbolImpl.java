@@ -145,4 +145,14 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                 .map(ImmutableFunctionalTerm::proposeProvenanceVariables)
                 .orElseGet(Stream::empty);
     }
+
+    /**
+     * TODO: stop overriding (only use the top implementation)
+     */
+    @Override
+    protected boolean canBeSafelyDecomposedIntoConjunction(ImmutableList<? extends ImmutableTerm> terms,
+                                                           VariableNullability variableNullability,
+                                                           ImmutableList<? extends ImmutableTerm> otherTerms) {
+        return true;
+    }
 }
