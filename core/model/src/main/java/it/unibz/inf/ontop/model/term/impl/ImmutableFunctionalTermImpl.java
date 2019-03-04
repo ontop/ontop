@@ -152,6 +152,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
+    public Stream<Variable> proposeProvenanceVariables() {
+        return functionSymbol.proposeProvenanceVariables(getTerms());
+    }
+
+    @Override
     public boolean canBePostProcessed() {
         return functionSymbol.canBePostProcessed(terms);
     }

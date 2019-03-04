@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermFunctionSymbol {
 
@@ -126,5 +128,21 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         return optionalExpression
                 .map(e -> e.evaluate(variableNullability, true))
                 .orElseGet(IncrementalEvaluation::declareIsTrue);
+    }
+
+    /**
+     * Looks at the lexical term for provenance variables
+     */
+    @Override
+    public Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms) {
+        ImmutableTerm lexicalTerm = terms.get(0);
+        if (lexicalTerm instanceof Variable)
+            return Stream.of((Variable) lexicalTerm);
+
+        return Optional.of(lexicalTerm)
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .map(ImmutableFunctionalTerm::proposeProvenanceVariables)
+                .orElseGet(Stream::empty);
     }
 }

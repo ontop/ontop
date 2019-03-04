@@ -127,6 +127,23 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
+     * Conservative by default
+     *
+     * Can be overridden
+     */
+    @Override
+    public Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms) {
+        if (!mayReturnNullWithoutNullArguments() && (!tolerateNulls()))
+            return terms.stream()
+                .filter(t -> t instanceof NonConstantTerm)
+                .flatMap(t -> (t instanceof Variable)
+                        ? Stream.of((Variable) t)
+                        : ((ImmutableFunctionalTerm)t).proposeProvenanceVariables());
+        // By default
+        return Stream.empty();
+    }
+
+    /**
      * Default implementation, can be overridden
      *
      */

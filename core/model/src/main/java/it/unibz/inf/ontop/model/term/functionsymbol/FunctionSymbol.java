@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * FunctionSymbols are the functors needed to build ImmutableFunctionalTerms
@@ -62,6 +63,14 @@ public interface FunctionSymbol extends Predicate {
 
     boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 
+    /**
+     * Returns some variables are required to non-null for the functional term to be non-null.
+     *
+     * The stream is NOT guaranteed to be COMPLETE
+     *
+     * TODO: find a better name
+     */
+    Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms);
 
     interface FunctionalTermNullability {
 
