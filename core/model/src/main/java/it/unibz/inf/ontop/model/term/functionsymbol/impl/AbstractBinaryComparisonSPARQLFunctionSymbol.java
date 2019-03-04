@@ -35,7 +35,7 @@ public abstract class AbstractBinaryComparisonSPARQLFunctionSymbol extends SPARQ
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -30,7 +30,7 @@ public class DefaultNonDeterministicNullaryFunctionSymbol extends AbstractTypedD
      * Non-deterministic so non-injective
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

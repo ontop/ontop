@@ -20,7 +20,7 @@ public class MockupR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSafeIRI
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

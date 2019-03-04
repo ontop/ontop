@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
@@ -9,8 +10,8 @@ import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -18,13 +19,13 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
+import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
@@ -87,6 +88,7 @@ public class OBDAModel {
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
     private final RDF rdfFactory;
+    private final TargetQueryParserFactory targetQueryParserFactory;
 
     public OBDAModel(SpecificationFactory specificationFactory,
                      SQLPPMappingFactory ppMappingFactory,
@@ -94,7 +96,7 @@ public class OBDAModel {
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory, DatalogFactory datalogFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
-                     RDF rdfFactory) {
+                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory) {
         this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
@@ -106,6 +108,7 @@ public class OBDAModel {
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
         this.rdfFactory = rdfFactory;
+        this.targetQueryParserFactory = targetQueryParserFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -122,18 +125,9 @@ public class OBDAModel {
         ImmutableList<SQLPPTriplesMap> triplesMaps = ImmutableList.copyOf(triplesMapMap.values());
 
         try {
-            UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                    triplesMaps.stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream())
-                            .flatMap(targetAtom -> targetAtom.getSubstitution().getImmutableMap().values().stream())
-                            .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t),
-                    termFactory, typeFactory);
-
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
-                    specificationFactory.createMetadata(prefixManager,
-                            uriTemplateMatcher));
+                    specificationFactory.createMetadata(prefixManager));
             /**
              * No mapping so should never happen
              */
@@ -503,5 +497,13 @@ public class OBDAModel {
 
     public RDF getRdfFactory() {
         return rdfFactory;
+    }
+
+    public TargetQueryParser createTargetQueryParser() {
+        return targetQueryParserFactory.createParser(getMutablePrefixManager().getPrefixMap());
+    }
+
+    public TargetQueryParser createTargetQueryParser(ImmutableMap<String, String> prefixMap) {
+        return targetQueryParserFactory.createParser(prefixMap);
     }
 }

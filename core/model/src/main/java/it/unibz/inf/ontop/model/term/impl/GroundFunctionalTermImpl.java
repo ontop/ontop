@@ -23,4 +23,11 @@ public class GroundFunctionalTermImpl extends ImmutableFunctionalTermImpl implem
     public boolean isGround() {
         return true;
     }
+
+    @Override
+    public boolean isDeterministic() {
+        return getFunctionSymbol().isDeterministic()
+                && getTerms().stream()
+                .allMatch(GroundTerm::isDeterministic);
+    }
 }

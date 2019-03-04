@@ -113,7 +113,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
      * TODO: implement is seriously based on the pattern and if it is unary
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 
@@ -140,7 +140,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         ImmutableList<ImmutableTerm> termsToConcatenate = IntStream.range(0, templateCsts.size())
                 .boxed()
                 .flatMap(i -> (i < terms.size())
-                        ? Stream.of(templateCsts.get(i), termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i)))
+                        ? Stream.of(
+                                templateCsts.get(i),
+                                termFactory.getR2RMLIRISafeEncodeFunctionalTerm(terms.get(i))
+                                        // Avoids the encoding when possible
+                                        .simplify())
                         : Stream.of(templateCsts.get(i)))
                 .collect(ImmutableCollectors.toList());
 
@@ -196,7 +200,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                                                                         VariableNullability variableNullability) {
         String otherValue = otherTerm.getValue();
 
-        if (isInjective(terms, variableNullability)) {
+        if (isInjective(terms, variableNullability, termFactory)) {
             Matcher matcher = pattern.matcher(otherTerm.getValue());
             if (matcher.find()) {
                 ImmutableList<DBConstant> subConstants = IntStream.range(0, getArity())
@@ -220,5 +224,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);
+    }
+
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return true;
     }
 }

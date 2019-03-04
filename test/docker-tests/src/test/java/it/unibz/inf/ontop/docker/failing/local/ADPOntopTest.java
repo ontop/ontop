@@ -56,14 +56,9 @@ public class ADPOntopTest {
 		
 		try {
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
-				for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = bindingSet.getOWLObject(idx);
-					System.out.print(binding.toString() + ", ");
-				}
-				System.out.print("\n");
+				System.out.print(bindingSet + "\n");
 			}
 			rs.close();
 

@@ -173,17 +173,17 @@ public class LeftJoinProfTest {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
-                "SELECT ?v\n" +
+                "SELECT DISTINCT ?v\n" +
                 "WHERE {\n" +
                 "   ?p a :Professor .\n" +
                 "   OPTIONAL {\n" +
                 "     ?p :firstName ?v ;\n" +
                 "          :nickname ?nickname .\n" +
                 "  }\n" +
-                "}";
+                "} ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of(
-                "Roger", "Frank", "John", "Michael"
+               "Frank", "John", "Michael", "Roger"
         );
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
@@ -312,6 +312,28 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
 
         assertFalse(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testNotEqOrUnboundCondition() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT DISTINCT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?v . \n" +
+                "   ?p :teaches ?c .\n" +
+                "   OPTIONAL {\n" +
+                "     ?p :nickname ?n\n" +
+                "  }\n" +
+                "  FILTER ((?n != \"Rog\") || !bound(?n))\n" +
+                "}" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+               "John", "Mary"
+        );
+        checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
     @Ignore("Support preferences")

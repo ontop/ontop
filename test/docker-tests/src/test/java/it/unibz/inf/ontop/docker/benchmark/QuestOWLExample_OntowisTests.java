@@ -289,12 +289,6 @@ public class QuestOWLExample_OntowisTests {
 					count = 0;
 					while (rs.hasNext()) {
 						count ++;
-						for (int idx = 1; idx <= columnSize; idx++) {
-                            final OWLBindingSet next = rs.next();
-                            @SuppressWarnings("unused")
-							OWLObject binding = rs.next().getOWLObject(idx);
-							//System.out.print(binding.toString() + ", ");
-						}
 						//System.out.print("\n");
 					}
 					long t2 = System.currentTimeMillis();

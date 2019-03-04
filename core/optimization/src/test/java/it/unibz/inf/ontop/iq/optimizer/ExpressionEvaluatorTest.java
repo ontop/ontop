@@ -403,14 +403,18 @@ public class ExpressionEvaluatorTest {
 
     @Test
     public void testIfElseNull2() {
+        ImmutableExpression equality = TERM_FACTORY.getStrictEquality(X, TRUE);
         ImmutableExpression initialExpression = TERM_FACTORY.getDBIsNotNull(
-                TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(X, TRUE), Y));
+                TERM_FACTORY.getIfElseNull(equality, Y));
         ImmutableExpression.Evaluation result = initialExpression.evaluate(
                 CORE_UTILS_FACTORY.createDummyVariableNullability(initialExpression));
         Optional<ImmutableExpression> optionalExpression = result.getExpression();
         assertTrue(optionalExpression.isPresent());
-        assertEquals(initialExpression, optionalExpression.get());
+        assertEquals(TERM_FACTORY.getConjunction(
+                    equality,
+                    TERM_FACTORY.getDBIsNotNull(X),
+                    TERM_FACTORY.getDBIsNotNull(Y)),
+                optionalExpression.get());
     }
 
     @Test

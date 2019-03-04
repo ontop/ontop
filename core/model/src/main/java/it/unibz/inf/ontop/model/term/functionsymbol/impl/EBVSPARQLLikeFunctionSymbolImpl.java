@@ -26,7 +26,7 @@ public class EBVSPARQLLikeFunctionSymbolImpl extends SPARQLLikeFunctionSymbolImp
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
@@ -43,11 +43,12 @@ public class EBVSPARQLLikeFunctionSymbolImpl extends SPARQLLikeFunctionSymbolImp
     @Override
     protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                            TermFactory termFactory, VariableNullability variableNullability) {
-        if (newTerms.stream()
-                .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {
+        ImmutableTerm newTerm = newTerms.get(0);
 
-            ImmutableTerm subLexicalTerm = extractLexicalTerm(newTerms.get(0), termFactory);
-            ImmutableTerm subTypeTerm = extractRDFTermTypeTerm(newTerms.get(1), termFactory);
+        if (isRDFFunctionalTerm(newTerm) || (newTerm instanceof Constant)) {
+
+            ImmutableTerm subLexicalTerm = extractLexicalTerm(newTerm, termFactory);
+            ImmutableTerm subTypeTerm = extractRDFTermTypeTerm(newTerm, termFactory);
 
             ImmutableTerm lexicalTerm = computeLexicalTerm(subLexicalTerm, subTypeTerm, termFactory)
                     .simplify(variableNullability);

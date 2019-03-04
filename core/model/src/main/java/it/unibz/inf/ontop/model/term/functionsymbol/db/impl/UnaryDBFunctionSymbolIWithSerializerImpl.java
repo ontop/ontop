@@ -27,7 +27,7 @@ public class UnaryDBFunctionSymbolIWithSerializerImpl extends AbstractTypedDBFun
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return isAlwaysInjective;
     }
 

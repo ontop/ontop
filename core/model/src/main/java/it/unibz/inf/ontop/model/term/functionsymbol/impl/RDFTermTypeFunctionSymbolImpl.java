@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -14,6 +15,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermTypeFunctionSymbol {
 
@@ -42,7 +44,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 
@@ -75,6 +77,23 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     @Override
     public TypeConstantDictionary getDictionary() {
         return dictionary;
+    }
+
+    @Override
+    public ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+                              Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
+                              TermFactory termFactory) {
+        ImmutableTerm term = terms.get(0);
+
+        return termFactory.getDBCase(
+                conversionMap.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                // Condition
+                                termFactory.getStrictEquality(term, e.getKey()),
+                                // "Case" value
+                                caseTermFct.apply(e.getValue()))),
+                // Default case
+                termFactory.getNullConstant());
     }
 
     @Override

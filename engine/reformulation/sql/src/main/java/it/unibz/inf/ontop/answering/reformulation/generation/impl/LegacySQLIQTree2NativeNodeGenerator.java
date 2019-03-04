@@ -25,7 +25,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.*;
@@ -46,7 +45,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -76,9 +74,6 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 	private final boolean distinctResultSet;
 
-	@Nullable
-	private final IRIDictionary uriRefIds;
-
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(LegacySQLIQTree2NativeNodeGenerator.class);
 	private final Relation2Predicate relation2Predicate;
 	private final DatalogNormalizer datalogNormalizer;
@@ -93,8 +88,7 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 
 	@Inject
-	private LegacySQLIQTree2NativeNodeGenerator(@Nullable IRIDictionary iriDictionary,
-												OntopReformulationSQLSettings settings,
+	private LegacySQLIQTree2NativeNodeGenerator(OntopReformulationSQLSettings settings,
 												IQ2DatalogTranslator iq2DatalogTranslator,
 												Relation2Predicate relation2Predicate,
 												DatalogNormalizer datalogNormalizer, DatalogFactory datalogFactory,
@@ -115,7 +109,6 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 		this.distinctResultSet = settings.isDistinctPostProcessingEnabled();
 		this.iq2DatalogTranslator = iq2DatalogTranslator;
-		this.uriRefIds = iriDictionary;
 	}
 
 	public NativeNode generate(IQTree iqTree, RDBMetadata metadata) {
@@ -712,17 +705,7 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 			if (!(term instanceof DBConstant)) {
 				throw new MinorOntopInternalBugException("Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
 			}
-			DBConstant ct = (DBConstant) term;
-			if (hasIRIDictionary()) {
-				// TODO: check this hack
-				if (ct.getType().isString()) {
-					int id = getUriid(ct.getValue());
-					if (id >= 0)
-						//return jdbcutil.getSQLLexicalForm(String.valueOf(id));
-						return String.valueOf(id);
-				}
-			}
-			return sqladapter.render(ct);
+			return sqladapter.render((DBConstant) term);
 		}
 		else if (term instanceof Variable) {
 			Set<QualifiedAttributeID> columns = index.getColumns((Variable) term);
@@ -742,29 +725,6 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 
 		throw new RuntimeException("Unexpected function in the query: " + functionSymbol);
 	}
-
-	private boolean hasIRIDictionary() {
-		return uriRefIds != null;
-	}
-
-	/**
-	 * We look for the ID in the list of IDs, if it's not there, then we return -2,
-	 * which we know will never appear on the DB. This is correct because if a
-	 * constant appears in a query, and that constant was never inserted in the
-	 * DB, the query must be empty (that atom), by putting -2 as id, we will
-	 * enforce that.
-	 *
-	 * @param uri
-	 * @return
-	 */
-	private int getUriid(String uri) {
-		Integer id = uriRefIds.getId(uri);
-		if (id != null)
-			return id;
-		return -2;
-	}
-
-
 
 	private static final class FromItem {
 		private final RelationID alias;

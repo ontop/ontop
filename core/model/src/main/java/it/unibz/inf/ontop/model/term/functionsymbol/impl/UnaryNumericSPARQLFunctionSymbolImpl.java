@@ -54,7 +54,7 @@ public class UnaryNumericSPARQLFunctionSymbolImpl extends ReduciblePositiveArity
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.optimizer.PushDownBooleanExpressionOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.PushUpBooleanExpressionOptimizer;
@@ -47,6 +48,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
     private final PostProcessingProjectionSplitter projectionSplitter;
     private final TermTypeTermLifter rdfTypeLifter;
+    private final PostProcessableFunctionLifter functionLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
     private final LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator;
     private final DialectExtraNormalizer extraNormalizer;
@@ -59,10 +61,12 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
                                AtomFactory atomFactory, OptimizerFactory optimizerFactory,
                                PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
                                PostProcessingProjectionSplitter projectionSplitter,
-                               TermTypeTermLifter rdfTypeLifter, IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
+                               TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
+                               IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                                LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator,
                                DialectExtraNormalizer extraNormalizer)
     {
+        this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
         if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Not a DBMetadata!");
@@ -86,10 +90,12 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
             throws OntopReformulationException {
 
         IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
-
         log.debug("After lifting the RDF types:\n" + rdfTypeLiftedIQ);
 
-        PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(rdfTypeLiftedIQ);
+        IQ liftedIQ = functionLifter.optimize(rdfTypeLiftedIQ);
+        log.debug("After lifting the post-processable function symbols :\n" + liftedIQ);
+
+        PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ);
 
         IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), metadata, executorRegistry);
         NativeNode nativeNode = generateNativeNode(normalizedSubTree);

@@ -33,7 +33,7 @@ public class DatatypeSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPAR
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

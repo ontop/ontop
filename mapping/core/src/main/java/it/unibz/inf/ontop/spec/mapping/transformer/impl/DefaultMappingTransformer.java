@@ -48,7 +48,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
         if (ontology.isPresent()) {
             Mapping factsAsMapping = factConverter.convert(ontology.get().abox(),
-                    settings.isOntologyAnnotationQueryingEnabled(), mapping.getMetadata().getUriTemplateMatcher());
+                    settings.isOntologyAnnotationQueryingEnabled());
             Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
             return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
         }

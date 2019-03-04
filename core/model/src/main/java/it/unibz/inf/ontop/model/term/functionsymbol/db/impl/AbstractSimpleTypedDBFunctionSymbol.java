@@ -36,7 +36,7 @@ public abstract class AbstractSimpleTypedDBFunctionSymbol extends AbstractTypedD
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return isInjective;
     }
 

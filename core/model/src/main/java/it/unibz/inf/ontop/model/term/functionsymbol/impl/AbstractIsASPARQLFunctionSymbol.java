@@ -27,11 +27,7 @@ public abstract class AbstractIsASPARQLFunctionSymbol extends ReduciblePositiveA
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
 
         ImmutableExpression expression = termFactory.getIsAExpression(typeTerms.get(0), baseRDFType);
-
-        DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
-
-        return termFactory.getDBCastFunctionalTerm(dbTypeFactory.getDBBooleanType(), dbTypeFactory.getDBStringType(),
-                expression)
+        return termFactory.getConversion2RDFLexical(expression, xsdBooleanType)
                 .simplify();
     }
 
@@ -42,7 +38,7 @@ public abstract class AbstractIsASPARQLFunctionSymbol extends ReduciblePositiveA
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

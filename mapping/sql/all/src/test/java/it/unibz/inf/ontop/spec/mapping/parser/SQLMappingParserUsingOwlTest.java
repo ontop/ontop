@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import java.io.File;
-import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -12,12 +11,10 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.serializer.impl.OntopNativeMappingSerializer;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.junit.Test;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 
 
-import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SQLMappingParserUsingOwlTest {
@@ -103,8 +100,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
-                specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of()),
-                        UriTemplateMatcher.create(Stream.of(), TERM_FACTORY, TYPE_FACTORY)));
+                specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of())));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }

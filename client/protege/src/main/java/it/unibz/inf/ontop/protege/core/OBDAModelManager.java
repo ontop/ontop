@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -144,6 +145,7 @@ public class OBDAModelManager implements Disposable {
 		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
+		TargetQueryParserFactory targetQueryParserFactory = defaultInjector.getInstance(TargetQueryParserFactory.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -166,7 +168,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, rdfFactory);
+				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);

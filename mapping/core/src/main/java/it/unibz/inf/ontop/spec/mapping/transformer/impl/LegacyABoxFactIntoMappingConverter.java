@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +50,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
-                           UriTemplateMatcher uriTemplateMatcher) {
+    public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled) {
 
         List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
                 ontology.getAnnotationAssertions() :
@@ -71,9 +69,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 rules,
                 mappingFactory.createMetadata(
                         //TODO: parse the ontology prefixes ??
-                        mappingFactory.createPrefixManager(ImmutableMap.of()),
-                        uriTemplateMatcher
-                ));
+                        mappingFactory.createPrefixManager(ImmutableMap.of())));
     }
 
     /***

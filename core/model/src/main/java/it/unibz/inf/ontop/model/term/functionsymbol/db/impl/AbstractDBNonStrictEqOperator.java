@@ -33,7 +33,7 @@ public abstract class AbstractDBNonStrictEqOperator extends DBBooleanFunctionSym
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -60,7 +60,7 @@ public abstract class StringBooleanBinarySPARQLFunctionSymbolImpl extends Reduci
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 }

@@ -288,14 +288,9 @@ public abstract class AbstractVirtualModeTest {
         OntopOWLStatement st = conn.createStatement();
         TupleOWLResultSet rs = st.executeSelectQuery(query);
 
-        int columnSize = rs.getColumnCount();
         while (rs.hasNext()) {
             final OWLBindingSet bindingSet = rs.next();
-            for (int idx = 1; idx <= columnSize; idx++) {
-                OWLObject binding = bindingSet.getOWLObject(idx);
-                log.debug(binding.toString() + ", ");
-            }
-
+            log.debug(bindingSet.toString());
         }
         rs.close();
         long t2 = System.currentTimeMillis();

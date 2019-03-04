@@ -6,18 +6,16 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.si.SemanticIndexException;
+import it.unibz.inf.ontop.si.impl.LoadingConfiguration;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.UUID;
 
 /**
  * Wrapper for RDBMSSIRepositoryManager
@@ -38,27 +35,30 @@ public class SIRepository {
     private static final String DEFAULT_PASSWORD = "";
 
     private final RDBMSSIRepositoryManager dataRepository;
-    private final String jdbcUrl;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final LoadingConfiguration loadingConfiguration;
 
-    public SIRepository(ClassifiedTBox tbox, TermFactory termFactory, TypeFactory typeFactory,
-                        TargetAtomFactory targetAtomFactory) {
+    public SIRepository(ClassifiedTBox tbox, LoadingConfiguration loadingConfiguration) {
 
-        this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory, targetAtomFactory);
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
+        this.termFactory = loadingConfiguration.getTermFactory();
+        this.typeFactory = loadingConfiguration.getTypeFactory();
+        this.loadingConfiguration = loadingConfiguration;
+        this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory,
+            loadingConfiguration.getTargetAtomFactory());
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
-
-        this.jdbcUrl = "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
     }
 
-    public String getJdbcUrl() { return jdbcUrl; }
+    public String getJdbcUrl() { return loadingConfiguration.getJdbcUrl(); }
 
     public String getUser() { return DEFAULT_USER; }
 
     public String getPassword(){ return DEFAULT_PASSWORD; }
+
+    public String getJdbcDriver() {
+        return loadingConfiguration.getJdbcDriver();
+    }
 
     public int insertData(Connection connection, Iterator<Assertion> iterator) throws SQLException {
         return dataRepository.insertData(connection, iterator, 5000, 500);
@@ -69,7 +69,7 @@ public class SIRepository {
     public Connection createConnection() throws SemanticIndexException {
 
         try {
-            Connection localConnection = DriverManager.getConnection(jdbcUrl, getUser(), getPassword());
+            Connection localConnection = DriverManager.getConnection(getJdbcUrl(), getUser(), getPassword());
             // Creating the ABox repository
             dataRepository.createDBSchemaAndInsertMetadata(localConnection);
             return localConnection;
@@ -88,16 +88,9 @@ public class SIRepository {
 
         ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t), termFactory, typeFactory);
-
         try {
             return new SQLPPMappingImpl(mappingAxioms,
-                    specificationFactory.createMetadata(prefixManager, uriTemplateMatcher));
+                    specificationFactory.createMetadata(prefixManager));
         }
         catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());

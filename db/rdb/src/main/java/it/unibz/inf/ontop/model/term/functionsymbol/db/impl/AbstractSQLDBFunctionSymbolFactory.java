@@ -48,8 +48,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final TermType abstractRootType;
     private final DBFunctionSymbol ifThenElse;
     private final DBBooleanFunctionSymbol isStringEmpty;
-    private final DBBooleanFunctionSymbol isNull;
-    private final DBBooleanFunctionSymbol isNotNull;
+    private final DBIsNullOrNotFunctionSymbol isNull;
+    private final DBIsNullOrNotFunctionSymbol isNotNull;
     private final DBBooleanFunctionSymbol isTrue;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
@@ -84,7 +84,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultSQLBooleanDenormFunctionSymbol(booleanType, stringType));
+                new DefaultBooleanDenormFunctionSymbol(booleanType, stringType));
 
         return builder.build();
     }
@@ -205,11 +205,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLIsStringEmptyFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DBIsNullOrNotFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         return new DefaultSQLDBIsNullOrNotFunctionSymbol(true, dbBooleanType, rootDBTermType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DBIsNullOrNotFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
     }
 
@@ -322,7 +322,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
-        return new DefaultSQLBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
+        return new DefaultBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
     }
 
     @Override
@@ -478,12 +478,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBIsNull() {
+    public DBIsNullOrNotFunctionSymbol getDBIsNull() {
         return isNull;
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBIsNotNull() {
+    public DBIsNullOrNotFunctionSymbol getDBIsNotNull() {
         return isNotNull;
     }
 

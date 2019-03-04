@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -25,7 +26,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
         return (subTerm instanceof DBConstant)
                 ? convertDBConstant((DBConstant) subTerm, termFactory)
                 : (subTerm instanceof ImmutableFunctionalTerm)
-                    ? buildTermFromFunctionalTerm((ImmutableFunctionalTerm) subTerm, termFactory)
+                    ? buildTermFromFunctionalTerm((ImmutableFunctionalTerm) subTerm, termFactory, variableNullability)
                     : termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
@@ -33,9 +34,16 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
      * Default implementation
      *
      */
-    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory) {
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 
-    protected abstract DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory);
+    protected abstract DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) throws DBTypeConversionException;
+
+    protected static class DBTypeConversionException extends OntopInternalBugException {
+
+        protected DBTypeConversionException(String message) {
+            super(message);
+        }
+    }
 }

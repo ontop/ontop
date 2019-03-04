@@ -35,7 +35,7 @@ public class NumericBinarySPARQLFunctionSymbolImpl extends ReduciblePositiveArit
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

@@ -25,7 +25,7 @@ public abstract class AbstractDBStrBeforeOrAfterFunctionSymbol extends AbstractT
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 }

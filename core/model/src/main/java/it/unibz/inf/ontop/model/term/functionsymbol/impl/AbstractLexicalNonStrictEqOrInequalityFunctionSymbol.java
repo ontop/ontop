@@ -3,7 +3,10 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+
+import java.util.Optional;
 
 public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol extends BooleanFunctionSymbolImpl {
 
@@ -34,7 +37,7 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
@@ -48,8 +51,10 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                                                      VariableNullability variableNullability) {
         DBTypeFactory dbTypeFactory = termFactory.getTypeFactory().getDBTypeFactory();
 
-        ImmutableTerm typeTerm1 = newTerms.get(1);
-        ImmutableTerm typeTerm2 = newTerms.get(3);
+        ImmutableTerm lexicalTerm1 = newTerms.get(0);
+        ImmutableTerm lexicalTerm2 = newTerms.get(2);
+        ImmutableTerm typeTerm1 = unwrapIfElseNull(newTerms.get(1));
+        ImmutableTerm typeTerm2 = unwrapIfElseNull(newTerms.get(3));
         /*
          * Simplifies when both type terms are constant
          */
@@ -58,10 +63,10 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
             RDFTermType termType2 = ((RDFTermTypeConstant)typeTerm2).getRDFTermType();
 
             ImmutableTerm dbTerm1 = termFactory.getConversionFromRDFLexical2DB(
-                    termType1.getClosestDBType(dbTypeFactory), newTerms.get(0), termType1);
+                    termType1.getClosestDBType(dbTypeFactory), lexicalTerm1, termType1);
 
             ImmutableTerm dbTerm2 = termFactory.getConversionFromRDFLexical2DB(
-                    termType1.getClosestDBType(dbTypeFactory), newTerms.get(2), termType2);
+                    termType1.getClosestDBType(dbTypeFactory), lexicalTerm2, termType2);
 
             if ((termType1 instanceof ConcreteNumericRDFDatatype) && (termType2 instanceof ConcreteNumericRDFDatatype))
                 return computeNumericEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
@@ -81,7 +86,16 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                 return computeDefaultDifferentTypeEqualityOrInequality(termType1, termType2, termFactory);
         }
         else
-            return termFactory.getImmutableExpression(this, newTerms);
+            return termFactory.getImmutableExpression(this, lexicalTerm1, typeTerm1, lexicalTerm2, typeTerm2);
+    }
+
+    private ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
+        return Optional.of(term)
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
+                .map(t -> t.getTerm(1))
+                .orElse(term);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class DefaultDBStrEndsWithFunctionSymbol extends DBBooleanFunctionSymbolI
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

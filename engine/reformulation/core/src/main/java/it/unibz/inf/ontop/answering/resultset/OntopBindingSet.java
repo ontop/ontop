@@ -18,21 +18,8 @@ public interface OntopBindingSet extends Iterable<OntopBinding> {
 
     ImmutableList<String> getBindingNames();
 
-    /***
-     * Returns the constant at column "column" recall that columns start at index 1.
-     *
-     * @param column The column index of the value to be returned, start at 1
-     * @return a constant
-     */
-//    @Nullable
-//    RDFConstant getConstant(int column) throws OntopResultConversionException;
-
     @Nullable
     RDFConstant getConstant(String name) throws OntopResultConversionException;
-
-    /** If all bindings are needed, less efficient than getBindings() or the iterator*/
-    @Nullable
-    OntopBinding getBinding(int column);
 
     /** If all bindings are needed, less efficient than getBindings() or the iterator*/
     @Nullable

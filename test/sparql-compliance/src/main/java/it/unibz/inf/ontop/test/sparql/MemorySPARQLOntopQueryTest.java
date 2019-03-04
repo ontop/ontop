@@ -122,6 +122,10 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			//MalformedQueryException SPARQL Parser Encountered "."  "." is not considered as part of the decimal (error is already in the sparql algebra)
 			basicManifest + "term-7",
 
+			// "+5"^^xsd:integer is stored as a 5 integer by H2, which is in then rebuilt as "5"^^xsd:integer, which is not strictly equal to the initial one.
+			// Ontop must not return a result, test not passed due to a fair design choice of the Semantic Index (canonicalization of numbers)
+			basicManifest + "term-8",
+
 			/* DATA-R2: BOOLEAN EFFECTIVE VALUE */
 			//Cannot return the SQL type for: w is not lifted from the right side of left join
 			booleanManifest + "dawg-bev-5",

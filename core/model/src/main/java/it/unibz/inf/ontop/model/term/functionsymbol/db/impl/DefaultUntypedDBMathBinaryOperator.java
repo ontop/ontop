@@ -45,7 +45,7 @@ public class DefaultUntypedDBMathBinaryOperator extends FunctionSymbolImpl imple
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
@@ -56,6 +56,14 @@ public class DefaultUntypedDBMathBinaryOperator extends FunctionSymbolImpl imple
 
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
+        return false;
+    }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
     }
 }

@@ -35,7 +35,7 @@ public class LangSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFu
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

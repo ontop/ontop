@@ -589,8 +589,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private SQLPPTriplesMap mapping;
 
 	private ImmutableList<TargetAtom> parse(String query) {
-        TargetQueryParser textParser = new TurtleOBDASQLParser(obdaModel.getMutablePrefixManager().getPrefixMap(),
-				obdaModel.getTermFactory(), obdaModel.getTargetAtomFactory(), obdaModel.getRdfFactory());
+        TargetQueryParser textParser = obdaModel.createTargetQueryParser();
 		try {
 			return textParser.parse(query);
 		} catch (TargetQueryParserException e) {

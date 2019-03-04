@@ -40,7 +40,7 @@ public abstract class AbstractTimestampISONormFunctionSymbol extends AbstractDBT
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

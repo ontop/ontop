@@ -45,7 +45,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
@@ -173,5 +173,10 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     @Override
     protected boolean tolerateNulls() {
         return true;
+    }
+
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
     }
 }

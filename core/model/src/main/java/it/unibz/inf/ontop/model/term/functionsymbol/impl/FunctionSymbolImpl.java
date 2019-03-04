@@ -1,19 +1,26 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+import it.unibz.inf.ontop.utils.impl.VariableGeneratorImpl;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class FunctionSymbolImpl extends PredicateImpl implements FunctionSymbol {
 
@@ -106,12 +113,34 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         return IncrementalEvaluation.declareSameExpression();
     }
 
+    @Override
+    public boolean isDeterministic() {
+        return !(this instanceof NonDeterministicDBFunctionSymbol);
+    }
+
     /**
      * By default, to be overridden by function symbols that supports tolerate NULL values
      */
     @Override
     public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
         return mayReturnNullWithoutNullArguments() || (!nullableIndexes.isEmpty());
+    }
+
+    /**
+     * Conservative by default
+     *
+     * Can be overridden
+     */
+    @Override
+    public Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms) {
+        if (!mayReturnNullWithoutNullArguments() && (!tolerateNulls()))
+            return terms.stream()
+                .filter(t -> t instanceof NonConstantTerm)
+                .flatMap(t -> (t instanceof Variable)
+                        ? Stream.of((Variable) t)
+                        : ((ImmutableFunctionalTerm)t).proposeProvenanceVariables());
+        // By default
+        return Stream.empty();
     }
 
     /**
@@ -126,7 +155,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
          * In case of injectivity
          */
         if (otherTerm.getFunctionSymbol().equals(this)
-                && isInjective(terms, variableNullability)) {
+                && isInjective(terms, variableNullability, termFactory)) {
             if (getArity() == 0)
                 return IncrementalEvaluation.declareIsTrue();
 
@@ -177,7 +206,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
-     * Returns true if is not guaranteed to return NULL when one argument is NULL
+     * Returns true if is not guaranteed to return NULL when one argument is NULL.
+     *
+     * Can be the case for some function symbols that are rejecting certain cases
+     * and therefore refuse to simplify themselves, e.g. RDF(NULL,IRI) is invalid
+     * and therefore cannot be simplified.
+     *
      */
     protected abstract boolean tolerateNulls();
 
@@ -189,16 +223,90 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     protected abstract boolean mayReturnNullWithoutNullArguments();
 
     /**
-     * When the function symbol is sometimes but not always injective, please override isInjective(...)
-     */
-    protected abstract boolean isAlwaysInjective();
-
-    /**
-     * To be overridden when is sometimes but not always injective.
+     * To be overridden when is sometimes but not always injective in the absence of non-injective functional terms
      */
     @Override
-    public boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments, VariableNullability variableNullability) {
-        return isAlwaysInjective();
+    public Optional<InjectivityDecomposition> analyzeInjectivity(ImmutableList<? extends ImmutableTerm> arguments,
+                                                                 ImmutableSet<Variable> nonFreeVariables,
+                                                                 VariableNullability variableNullability,
+                                                                 VariableGenerator variableGenerator,
+                                                                 TermFactory termFactory) {
+        if (!isDeterministic())
+            return Optional.empty();
+
+        if (arguments.stream()
+                .allMatch(t -> ((t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic())
+                        || nonFreeVariables.contains(t)))
+            return Optional.of(termFactory.getInjectivityDecomposition(
+                    termFactory.getImmutableFunctionalTerm(this, arguments)));
+
+        if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
+            return Optional.empty();
+
+        return Optional.of(decomposeInjectiveTopFunctionalTerm(arguments, nonFreeVariables, variableNullability,
+                variableGenerator, termFactory));
+    }
+
+    /**
+     * Only when injectivity of the top function symbol is proved!
+     */
+    protected InjectivityDecomposition decomposeInjectiveTopFunctionalTerm(ImmutableList<? extends ImmutableTerm> arguments,
+                                                                           ImmutableSet<Variable> nonFreeVariables,
+                                                                           VariableNullability variableNullability,
+                                                                           VariableGenerator variableGenerator,
+                                                                           TermFactory termFactory) {
+        ImmutableMap<Integer, Optional<InjectivityDecomposition>> subTermDecompositions = IntStream.range(0, getArity())
+                .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
+                .boxed()
+                .collect(ImmutableCollectors.toMap(
+                        i -> i,
+                        i -> ((ImmutableFunctionalTerm) arguments.get(i))
+                                // Recursive
+                                .analyzeInjectivity(nonFreeVariables, variableNullability, variableGenerator)));
+
+        ImmutableList<ImmutableTerm> newArguments = IntStream.range(0, getArity())
+                .boxed()
+                .map(i -> Optional.ofNullable(subTermDecompositions.get(i))
+                        .map(optionalDecomposition -> optionalDecomposition
+                                // Injective functional sub-term
+                                .map(InjectivityDecomposition::getInjectiveTerm)
+                                .map(t -> (ImmutableTerm) t)
+                                // Otherwise a fresh variable
+                                .orElseGet(variableGenerator::generateNewVariable))
+                        // Previous argument when non-functional
+                        .orElseGet(() -> arguments.get(i)))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
+                .flatMap(e -> e.getValue()
+                        // Decomposition case
+                        .map(d -> d.getSubTermSubstitutionMap()
+                                .map(s -> s.entrySet().stream())
+                                .orElseGet(Stream::empty))
+                        // Not decomposed: new entry (new variable -> functional term)
+                        .orElseGet(() -> Stream.of(Maps.immutableEntry(
+                                (Variable) newArguments.get(e.getKey()),
+                                arguments.get(e.getKey())))))
+                .collect(ImmutableCollectors.toMap());
+
+        ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(this, newArguments);
+
+        return subTermSubstitutionMap.isEmpty()
+                ? termFactory.getInjectivityDecomposition(newFunctionalTerm)
+                : termFactory.getInjectivityDecomposition(newFunctionalTerm, subTermSubstitutionMap);
+    }
+
+    protected final boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,
+                                        VariableNullability variableNullability, TermFactory termFactory) {
+        // Only for test purposes
+        VariableGenerator testVariableGenerator = new VariableGeneratorImpl(
+                arguments.stream()
+                        .flatMap(ImmutableTerm::getVariableStream)
+                        .collect(ImmutableCollectors.toSet()), termFactory);
+
+        return analyzeInjectivity(arguments, ImmutableSet.of(), variableNullability, testVariableGenerator, termFactory)
+                .filter(d -> !d.getSubTermSubstitutionMap().isPresent())
+                .isPresent();
     }
 
     /**

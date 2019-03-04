@@ -43,7 +43,7 @@ public class DefaultDBIsTrueFunctionSymbol extends DBBooleanFunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 

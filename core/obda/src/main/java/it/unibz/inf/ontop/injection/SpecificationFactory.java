@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 
 /**
@@ -21,7 +20,7 @@ public interface SpecificationFactory {
 
     PrefixManager createPrefixManager(ImmutableMap<String, String> prefixToURIMap);
 
-    MappingMetadata createMetadata(PrefixManager prefixManager, UriTemplateMatcher templateMatcher);
+    MappingMetadata createMetadata(PrefixManager prefixManager);
 
     Mapping createMapping(MappingMetadata metadata,
                           @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,

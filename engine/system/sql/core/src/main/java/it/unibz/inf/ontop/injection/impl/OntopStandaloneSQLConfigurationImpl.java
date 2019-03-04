@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.iq.proposal.QueryOptimizationProposal;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
@@ -39,11 +37,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
     @Override
     public OntopStandaloneSQLSettings getSettings() {
         return settings;
-    }
-
-    @Override
-    public Optional<IRIDictionary> getIRIDictionary() {
-        return systemConfiguration.getIRIDictionary();
     }
 
     @Override
@@ -108,11 +101,6 @@ public class OntopStandaloneSQLConfigurationImpl extends OntopMappingSQLAllConfi
         @Override
         public B enableExistentialReasoning(boolean enable) {
             return translationFragmentBuilder.enableExistentialReasoning(enable);
-        }
-
-        @Override
-        public B iriDictionary(@Nonnull IRIDictionary iriDictionary) {
-            return translationFragmentBuilder.iriDictionary(iriDictionary);
         }
 
         @Override

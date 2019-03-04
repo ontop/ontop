@@ -22,7 +22,7 @@ public class BoundSPARQLFunctionSymbolImpl extends AbstractUnaryBooleanSPARQLFun
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

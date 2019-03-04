@@ -880,9 +880,7 @@ public class LeftJoinOptimizationTest {
                 SUBSTITUTION_FACTORY.getSubstitution(
                         X, generateURI1(M1),
                         Y, TERM_FACTORY.getRDFFunctionalTerm(
-                                TERM_FACTORY.getIfElseNull(
-                                        o1IsNotNull,
-                                        uri1O1Term.getTerm(0)),
+                                uri1O1Term.getTerm(0),
                                 TERM_FACTORY.getIfElseNull(
                                         o1IsNotNull,
                                         uri1O1Term.getTerm(1)))));

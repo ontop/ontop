@@ -67,7 +67,9 @@ public interface DBFunctionSymbolFactory {
      */
     DBFunctionSymbol getDBCase(int arity);
 
-    DBFunctionSymbol getDBIfElseNull();
+    DBIfElseNullFunctionSymbol getDBIfElseNull();
+
+    DBBooleanFunctionSymbol getDBBooleanIfElseNull();
 
     DBFunctionSymbol getDBIfThenElse();
 
@@ -106,8 +108,8 @@ public interface DBFunctionSymbolFactory {
 
     DBNotFunctionSymbol getDBNot();
 
-    DBBooleanFunctionSymbol getDBIsNull();
-    DBBooleanFunctionSymbol getDBIsNotNull();
+    DBIsNullOrNotFunctionSymbol getDBIsNull();
+    DBIsNullOrNotFunctionSymbol getDBIsNotNull();
 
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 

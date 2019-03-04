@@ -54,7 +54,7 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

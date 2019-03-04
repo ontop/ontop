@@ -36,7 +36,7 @@ public class DefaultSQLR2RMLSafeIRIEncodeFunctionSymbol extends AbstractR2RMLSaf
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

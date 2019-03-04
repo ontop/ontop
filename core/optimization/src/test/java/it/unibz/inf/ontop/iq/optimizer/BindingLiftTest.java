@@ -1070,7 +1070,11 @@ public class BindingLiftTest {
                         W, generateInt(H),
                         X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
                         Y, generateInt(BF1),
-                        Z, generateInt(F))));
+                        Z, TERM_FACTORY.getRDFFunctionalTerm(
+                                F,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(F),
+                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getDatatype(XSD.INTEGER)))))));
 
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
 

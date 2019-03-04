@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -42,7 +41,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryExc
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,15 +212,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.copyOf(prefixes));
         ImmutableList<SQLPPTriplesMap> mappingAxioms = ImmutableList.copyOf(mappings);
 
-        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                mappingAxioms.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream())
-                        .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-                        .filter(t -> t instanceof ImmutableFunctionalTerm)
-                        .map(t -> (ImmutableFunctionalTerm) t),
-                termFactory, typeFactory);
-
-        MappingMetadata metadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
+        MappingMetadata metadata = specificationFactory.createMetadata(prefixManager);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
 	}
     

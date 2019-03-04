@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -35,11 +36,13 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -50,9 +53,9 @@ public class TermFactoryImpl implements TermFactory {
 	private final FunctionSymbolFactory functionSymbolFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 	private final CoreUtilsFactory coreUtilsFactory;
-	private final DBConstant valueTrue;
-	private final DBConstant valueFalse;
+	private final DBConstant valueTrue, valueFalse, lexicalTrue, lexicalFalse;
 	private final Constant valueNull;
+	@Nullable
 	private final DBConstant doubleNaN;
 	// TODO: make it be a DBConstant
 	private final RDFLiteralConstant provenanceConstant;
@@ -79,8 +82,12 @@ public class TermFactoryImpl implements TermFactory {
 		DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 		this.valueTrue = new DBConstantImpl(dbTypeFactory.getDBTrueLexicalValue(), dbBooleanType);
 		this.valueFalse = new DBConstantImpl(dbTypeFactory.getDBFalseLexicalValue(), dbBooleanType);
+		this.lexicalTrue = getDBStringConstant("true");
+		this.lexicalFalse = getDBStringConstant("false");
 		this.valueNull = new NullConstantImpl(dbTypeFactory.getNullLexicalValue());
-		this.doubleNaN = new DBConstantImpl(dbTypeFactory.getDBNaNLexicalValue(), dbTypeFactory.getDBDoubleType());
+		this.doubleNaN = dbTypeFactory.getDBNaNLexicalValue()
+				.map(v -> new DBConstantImpl(v, dbTypeFactory.getDBDoubleType()))
+				.orElse(null);
 		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
@@ -341,6 +348,22 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableExpression.Evaluation getNullEvaluation() {
 		return nullEvaluation;
+	}
+
+    @Override
+    public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+    		ImmutableFunctionalTerm injectiveFunctionalTerm) {
+		return new InjectivityDecompositionImpl(injectiveFunctionalTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+			ImmutableFunctionalTerm injectiveFunctionalTerm,
+			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap) {
+
+		return (subTermSubstitutionMap.isEmpty())
+				? getInjectivityDecomposition(injectiveFunctionalTerm)
+				: new InjectivityDecompositionImpl(injectiveFunctionalTerm, subTermSubstitutionMap);
 	}
 
 	@Override
@@ -661,6 +684,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public DBConstant getXsdBooleanLexicalConstant(boolean value) {
+		return value ? lexicalTrue : lexicalFalse;
+	}
+
+	@Override
 	public Constant getNullConstant() {
 		return valueNull;
 	}
@@ -671,8 +699,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public DBConstant getDoubleNaN() {
-		return doubleNaN;
+	public Optional<DBConstant> getDoubleNaN() {
+		return Optional.ofNullable(doubleNaN);
 	}
 
 	@Override
@@ -711,13 +739,6 @@ public class TermFactoryImpl implements TermFactory {
 
 		return getRDFFunctionalTerm(templateFunctionalTerm, iriTypeConstant);
 
-	}
-
-	@Override
-	public ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI) {
-		// TODO: use an int-to-string casting function
-		DBConstant lexicalValue = getDBStringConstant(String.valueOf(encodedIRI));
-		return getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	@Override
@@ -802,7 +823,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfElseNull(), condition, term);
 	}
 
-    @Override
+	@Override
+	public ImmutableExpression getBooleanIfElseNull(ImmutableExpression condition, ImmutableExpression thenExpression) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanIfElseNull(), condition, thenExpression);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBIfThenElse(), condition, thenTerm, elseTerm);
     }

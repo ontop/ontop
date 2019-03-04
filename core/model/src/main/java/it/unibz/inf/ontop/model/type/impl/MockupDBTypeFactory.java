@@ -4,6 +4,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Optional;
+
 public class MockupDBTypeFactory implements DBTypeFactory {
 
     private final NonStringNonNumberNonBooleanDBTermType rootDBType;
@@ -86,7 +88,7 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
-    public String getDBNaNLexicalValue() {
-        return "NaN";
+    public Optional<String> getDBNaNLexicalValue() {
+        return Optional.of("NaN");
     }
 }

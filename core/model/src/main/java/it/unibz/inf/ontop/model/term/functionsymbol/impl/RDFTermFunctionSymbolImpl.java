@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -11,6 +12,8 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermFunctionSymbol {
 
@@ -19,7 +22,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 
@@ -34,12 +37,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
 
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        // TODO: complain if one is null and the one is not nullable
-        if (terms.stream()
-                .filter(t -> t instanceof Constant)
-                .anyMatch(c -> ((Constant) c).isNull()))
-            return Optional.empty();
-
         if (terms.size() != 2)
             throw new IllegalArgumentException("Wrong arity");
 
@@ -54,8 +51,12 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
 
+        // Only when both are non-nulls (one is not enough, quite likely to be invalid)
+        if (newTerms.stream().allMatch(ImmutableTerm::isNull))
+            return termFactory.getNullConstant();
+
         if (newTerms.stream()
-                .allMatch(t -> t instanceof Constant)) {
+                .allMatch(t -> t instanceof NonNullConstant)) {
 
             DBConstant lexicalConstant = Optional.of(newTerms.get(0))
                     .filter(c -> c instanceof DBConstant)
@@ -73,6 +74,7 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
             return termFactory.getRDFConstant(lexicalConstant.getValue(), rdfTermType);
         }
         else
+            // May block invalid cases such as RDF(NULL, IRI)
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
@@ -86,9 +88,12 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         return false;
     }
 
+    /**
+     * E.g. RDF(NULL, IRI) is invalid and therefore does not simplify itself to NULL.
+     */
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return true;
     }
 
     @Override
@@ -104,5 +109,40 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
             return conjunction.evaluate(variableNullability, true);
         }
         return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
+    }
+
+    /**
+     * Overridden because, it officially "tolerates" NULLs, due to the requirement that either its arguments
+     * are both null or both non-null.
+     *
+     * Nevertheless, the "spirit" of the decomposition is the same.
+     */
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms,
+                                                   TermFactory termFactory, VariableNullability variableNullability) {
+        ImmutableSet<Variable> nullableVariables = variableNullability.getNullableVariables();
+        Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(terms.stream()
+                .filter(t -> (t.isNullable(nullableVariables)))
+                .map(termFactory::getDBIsNotNull));
+
+        return optionalExpression
+                .map(e -> e.evaluate(variableNullability, true))
+                .orElseGet(IncrementalEvaluation::declareIsTrue);
+    }
+
+    /**
+     * Looks at the lexical term for provenance variables
+     */
+    @Override
+    public Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms) {
+        ImmutableTerm lexicalTerm = terms.get(0);
+        if (lexicalTerm instanceof Variable)
+            return Stream.of((Variable) lexicalTerm);
+
+        return Optional.of(lexicalTerm)
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .map(ImmutableFunctionalTerm::proposeProvenanceVariables)
+                .orElseGet(Stream::empty);
     }
 }

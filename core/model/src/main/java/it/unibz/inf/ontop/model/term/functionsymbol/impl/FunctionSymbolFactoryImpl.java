@@ -29,6 +29,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final BooleanFunctionSymbol lexicalNonStrictEqualityFunctionSymbol;
     private final BooleanFunctionSymbol lexicalEBVFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
+
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
@@ -78,6 +79,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
         this.EBVSPARQLLikeFunctionSymbol = new EBVSPARQLLikeFunctionSymbolImpl(typeFactory.getAbstractRDFSLiteral(), typeFactory.getXsdBooleanDatatype());
         this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
+
     }
 
     private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
@@ -136,6 +138,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
+                new SameTermSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ABS", XPathFunction.NUMERIC_ABS, abstractNumericType,
                         dbFunctionSymbolFactory::getAbs),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_CEIL", XPathFunction.NUMERIC_CEIL, abstractNumericType,

@@ -9,9 +9,12 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class OrderByNormalizerImpl implements OrderByNormalizer {
 
@@ -23,11 +26,19 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         this.iqFactory = iqFactory;
     }
 
+    /**
+     * NB: the loop is due to the lifting of both distinct and construction nodes
+     */
     @Override
     public IQTree normalizeForOptimization(OrderByNode orderByNode, IQTree child, VariableGenerator variableGenerator,
                                            IQProperties currentIQProperties) {
+
+        Optional<OrderByNode> simplifiedOrderByNode = simplifyOrderByNode(orderByNode, child.getVariableNullability());
+        if (!simplifiedOrderByNode.isPresent())
+            return child.normalizeForOptimization(variableGenerator);
+
         // Non-final
-        State state = new State(orderByNode, child, variableGenerator);
+        State state = new State(simplifiedOrderByNode.get(), child, variableGenerator);
         for (int i=0; i < MAX_ITERATIONS; i++) {
             State newState = state.liftChild();
             if (newState.hasConverged(state))
@@ -36,6 +47,20 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         }
         throw new MinorOntopInternalBugException("OrderByNormalizerImpl.normalizeForOptimization has not converged after "
                  + MAX_ITERATIONS + " iterations");
+    }
+
+    private Optional<OrderByNode> simplifyOrderByNode(OrderByNode orderByNode, VariableNullability variableNullability) {
+        ImmutableList<OrderByNode.OrderComparator> newComparators = orderByNode.getComparators().stream()
+                .flatMap(c -> Stream.of(c.getTerm())
+                        .map(t -> t.simplify(variableNullability))
+                        .filter(t -> t instanceof NonGroundTerm)
+                        .map(t -> (NonGroundTerm) t)
+                        .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
+                .collect(ImmutableCollectors.toList());
+
+        return Optional.of(newComparators)
+                .filter(cs -> !cs.isEmpty())
+                .map(iqFactory::createOrderByNode);
     }
 
     private class State {
@@ -60,13 +85,13 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             this(ImmutableList.of(), Optional.of(orderByNode), child, variableGenerator);
         }
 
-        private State updateParentOrderByAndChild(UnaryOperatorNode newParent, OrderByNode newOrderByNode, IQTree newChild) {
+        private State updateParentOrderByAndChild(UnaryOperatorNode newParent, Optional<OrderByNode> newOrderByNode, IQTree newChild) {
             ImmutableList<UnaryOperatorNode> newAncestors = ImmutableList.<UnaryOperatorNode>builder()
                     .add(newParent)
                     .addAll(ancestors)
                     .build();
 
-            return new State(newAncestors, Optional.of(newOrderByNode), newChild, variableGenerator);
+            return new State(newAncestors, newOrderByNode, newChild, variableGenerator);
         }
 
         private State updateChild(IQTree newChild) {
@@ -103,7 +128,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             else if (newChildRoot instanceof EmptyNode)
                 return declareAsEmpty(newChild);
             else if (newChildRoot instanceof DistinctNode) {
-                return updateParentOrderByAndChild((DistinctNode) newChildRoot, orderBy, newChild);
+                return updateParentOrderByAndChild((DistinctNode) newChildRoot, Optional.of(orderBy), newChild);
             }
             else
                 return updateChild(newChild);
@@ -115,7 +140,8 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
          */
         private State liftChildConstructionNode(ConstructionNode childRoot, UnaryIQTree child, OrderByNode orderBy) {
             return updateParentOrderByAndChild(childRoot,
-                    orderBy.applySubstitution(childRoot.getSubstitution()),
+                    orderBy.applySubstitution(childRoot.getSubstitution())
+                            .flatMap(o -> simplifyOrderByNode(o, child.getVariableNullability())),
                     child.getChild());
         }
 

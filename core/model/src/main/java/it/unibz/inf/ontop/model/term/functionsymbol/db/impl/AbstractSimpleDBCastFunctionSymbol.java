@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -36,7 +37,7 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
      */
     @Override
     protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm,
-                                                        TermFactory termFactory) {
+                                                        TermFactory termFactory, VariableNullability variableNullability) {
         if ((inputType != null) && inputType.equals(getTargetType()))
             return subTerm;
 
@@ -57,7 +58,7 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
             }
         }
         // Default
-        return super.buildTermFromFunctionalTerm(subTerm, termFactory);
+        return super.buildTermFromFunctionalTerm(subTerm, termFactory, variableNullability);
     }
 
     @Override
@@ -76,7 +77,7 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return getInputType().isPresent();
     }
 

@@ -8,10 +8,9 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
-
-    private static final String BOOL_STR = "BOOL";
 
     @AssistedInject
     private H2SQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -20,14 +19,16 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     private static Map<String, DBTermType> createH2SQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
-        // TODO: add the other alias BIT?
-        map.put(BOOL_STR, new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), typeFactory.getXsdBooleanDatatype()));
         return map;
     }
 
     private static ImmutableMap<DefaultTypeCode, String> createH2SQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
-        map.put(DefaultTypeCode.BOOLEAN, BOOL_STR);
         return ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public Optional<String> getDBNaNLexicalValue() {
+        return Optional.empty();
     }
 }

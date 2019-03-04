@@ -23,11 +23,13 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.IRIDictionary;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
@@ -239,7 +241,7 @@ public class RDBMSSIRepositoryManager {
 		ATTRIBUTE_TABLE_MAP = datatypeTableMapBuilder.build();
 	}
 	
-	private final SemanticIndexURIMap uriMap = new SemanticIndexURIMap();
+	private final SemanticIndexURIMap uriMap;
 	
 	private final ClassifiedTBox reasonerDag;
 
@@ -248,6 +250,8 @@ public class RDBMSSIRepositoryManager {
 	private final SemanticIndexViewsManager views;
 	private final TermFactory termFactory;
 	private final TargetAtomFactory targetAtomFactory;
+	private final FunctionSymbol int2IRIStringFunctionSymbol;
+	private final RDFTermTypeConstant iriTypeConstant;
 
 	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag,
 									TermFactory termFactory, TypeFactory typeFactory,
@@ -258,6 +262,12 @@ public class RDBMSSIRepositoryManager {
         cacheSI = new SemanticIndexCache(reasonerDag);
 		this.targetAtomFactory = targetAtomFactory;
 		cacheSI.buildSemanticIndexFromReasoner();
+		uriMap = new SemanticIndexURIMap();
+
+		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+		int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
+				dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType(), uriMap);
+		iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
 
@@ -779,7 +789,7 @@ public class RDBMSSIRepositoryManager {
 				
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
-						view.getId().getType1(), view.getId().getType2());
+						view.getId().getType1(), view.getId().getType2(), getUriMap());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
 				result.add(basicmapping);		
 			}
@@ -819,7 +829,7 @@ public class RDBMSSIRepositoryManager {
 				String sourceQuery = view.getSELECT(intervalsSqlFilter);
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(dpe.getIRI()) ,
-						view.getId().getType1(), view.getId().getType2());
+						view.getId().getType1(), view.getId().getType2(), getUriMap());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
 						targetQuery);
 				result.add(basicmapping);
@@ -893,13 +903,13 @@ public class RDBMSSIRepositoryManager {
 	}
 
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm classTerm, ObjectRDFType type) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm classTerm, ObjectRDFType type) {
 
 		Variable X = termFactory.getVariable("X");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type.isBlankNode())
-			subjectTerm = termFactory.getIRIFunctionalTerm(X, true);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -911,15 +921,15 @@ public class RDBMSSIRepositoryManager {
 	}
 	
 	
-	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableFunctionalTerm iriTerm, ObjectRDFType type1,
-																		RDFTermType type2) {
+	private ImmutableList<TargetAtom> constructTargetQuery(ImmutableTerm iriTerm, ObjectRDFType type1,
+																		RDFTermType type2, IRIDictionary iriDictionary) {
 
 		Variable X = termFactory.getVariable("X");
 		Variable Y = termFactory.getVariable("Y");
 
 		ImmutableFunctionalTerm subjectTerm;
 		if (!type1.isBlankNode())
-			subjectTerm = termFactory.getIRIFunctionalTerm(X, true);
+			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
 			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
 		}
@@ -928,7 +938,7 @@ public class RDBMSSIRepositoryManager {
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
 					? termFactory.getFreshBnodeFunctionalTerm(Y)
-					: termFactory.getIRIFunctionalTerm(Y, true);
+					: getEncodedIRIFunctionalTerm(Y);
 		}
 		else {
 			RDFDatatype datatype = (RDFDatatype) type2;
@@ -944,6 +954,12 @@ public class RDBMSSIRepositoryManager {
 		TargetAtom targetAtom = targetAtomFactory.getTripleTargetAtom(subjectTerm,iriTerm,objectTerm);
 
 		return ImmutableList.of(targetAtom);
+	}
+
+	public ImmutableFunctionalTerm getEncodedIRIFunctionalTerm(ImmutableTerm dbIntegerTerm) {
+		ImmutableFunctionalTerm lexicalValue = termFactory.getImmutableFunctionalTerm(
+				int2IRIStringFunctionSymbol, dbIntegerTerm);
+		return termFactory.getRDFFunctionalTerm(lexicalValue, iriTypeConstant);
 	}
 
 	

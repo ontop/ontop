@@ -84,14 +84,9 @@ public class QuestOWLExampleNotLatinTest {
 		try {
             long t1 = System.currentTimeMillis();
 			TupleOWLResultSet rs = st.executeSelectQuery(sparqlQuery);
-			int columnSize = rs.getColumnCount();
 			while (rs.hasNext()) {
-                    final OWLBindingSet bindingSet = rs.next();
-				for (int idx = 1; idx <= columnSize; idx++) {
-                    OWLObject binding = bindingSet.getOWLObject(idx);
-					System.out.print(binding.toString() + ", ");
-				}
-				System.out.print("\n");
+				final OWLBindingSet bindingSet = rs.next();
+				System.out.print(bindingSet + "\n");
 			}
 			rs.close();
             long t2 = System.currentTimeMillis();

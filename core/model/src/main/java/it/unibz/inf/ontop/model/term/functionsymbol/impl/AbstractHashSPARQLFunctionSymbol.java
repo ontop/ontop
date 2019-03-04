@@ -30,7 +30,7 @@ public abstract class AbstractHashSPARQLFunctionSymbol extends ReduciblePositive
      * Not injective because there is a probability of collision (although very small)
      */
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

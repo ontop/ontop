@@ -68,7 +68,10 @@ public class SemanticIndexViewID {
 			return false;
 		
 		SemanticIndexViewID r2 = (SemanticIndexViewID) obj;
-		return this.type1 == r2.type1 && this.type2 == r2.type2;
+		return this.type1.equals(r2.type1)
+				&& ((this.type2 == null && r2.type2 == null)
+				|| (this.type2 != null && r2.type2 != null
+					&& this.type2.equals(r2.type2)));
 	}
 	
 

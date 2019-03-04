@@ -39,13 +39,13 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
 
         bindFromSettings(QueryCache.class);
         bindFromSettings(IQTree2NativeNodeGenerator.class);
+        bindFromSettings(InputQueryTranslator.class);
 
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
                         QueryUnfolder.class,
                         NativeQueryGenerator.class,
-                        SameAsRewriter.class,
-                        InputQueryTranslator.class),
+                        SameAsRewriter.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);
 

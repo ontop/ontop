@@ -37,7 +37,7 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
@@ -66,6 +66,14 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
 
     @Override
     protected boolean tolerateNulls() {
+        return false;
+    }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
     }
 }

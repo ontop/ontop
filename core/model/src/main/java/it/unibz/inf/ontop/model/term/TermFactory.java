@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.model.term;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
@@ -33,6 +34,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -136,6 +138,12 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
+	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
+	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+			ImmutableFunctionalTerm injectiveFunctionalTerm,
+			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap);
+
+
 
 	public Function getFunction(Predicate functor, List<Term> terms);
 
@@ -223,13 +231,24 @@ public interface TermFactory {
 	
 	public BNode getConstantBNode(String name);
 
+	/**
+	 * Returns a DB boolean constant
+	 */
 	DBConstant getDBBooleanConstant(boolean value);
+
+	/**
+	 * Returns a DB string constant
+	 */
+	DBConstant getXsdBooleanLexicalConstant(boolean value);
 
 	Constant getNullConstant();
 
 	DBConstant getDBIntegerConstant(int value);
 
-	DBConstant getDoubleNaN();
+	/**
+	 * Is empty if the DB does not support (and therefore does not store) not-a-number values
+	 */
+	Optional<DBConstant> getDoubleNaN();
 
 	/**
 	 * TODO: explain
@@ -319,11 +338,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(String iriTemplate, ImmutableList<? extends ImmutableTerm> arguments);
 
 	/**
-	 * When IRIs are encoded into numbers using a dictionary
-	 */
-	ImmutableFunctionalTerm getRDFFunctionalTerm(int encodedIRI);
-
-	/**
 	 * When fact IRIs are decomposed (so as to be included in the mapping)
 	 */
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
@@ -371,6 +385,8 @@ public interface TermFactory {
 	ImmutableExpression getRDF2DBBooleanFunctionalTerm(ImmutableTerm xsdBooleanTerm);
 
 	ImmutableFunctionalTerm getIfElseNull(ImmutableExpression condition, ImmutableTerm term);
+
+	ImmutableExpression getBooleanIfElseNull(ImmutableExpression condition, ImmutableExpression thenExpression);
 
 	ImmutableFunctionalTerm getIfThenElse(ImmutableExpression condition, ImmutableTerm thenTerm, ImmutableTerm elseTerm);
 

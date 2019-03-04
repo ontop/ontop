@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
@@ -11,21 +10,16 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 @Singleton
 public class SQLTermSerializerImpl implements SQLTermSerializer {
 
-    @Nullable
-    private final IRIDictionary iriDictionary;
     private final SQLDialectAdapter sqlAdapter;
     private final TermFactory termFactory;
 
     @Inject
-    private SQLTermSerializerImpl(@Nullable IRIDictionary iriDictionary,
-                                  SQLDialectAdapter sqlAdapter, TermFactory termFactory) {
-        this.iriDictionary = iriDictionary;
+    private SQLTermSerializerImpl(SQLDialectAdapter sqlAdapter, TermFactory termFactory) {
         this.sqlAdapter = sqlAdapter;
         this.termFactory = termFactory;
     }
@@ -55,7 +49,7 @@ public class SQLTermSerializerImpl implements SQLTermSerializer {
                             t.getTerms(),
                             t2 -> serialize(t2, var2ColumnMap),
                             termFactory))
-                    .orElseThrow(() -> new SQLSerializationException("Only DBFunctionSymbol must be provided " +
+                    .orElseThrow(() -> new SQLSerializationException("Only DBFunctionSymbols must be provided " +
                             "to a SQLTermSerializer"));
         }
     }
@@ -67,16 +61,6 @@ public class SQLTermSerializerImpl implements SQLTermSerializer {
             throw new SQLSerializationException(
                     "Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
         }
-        DBConstant ct = (DBConstant) constant;
-        if (iriDictionary != null) {
-            // TODO: check this hack
-            if (ct.getType().isString()) {
-                int id = iriDictionary.getId(ct.getValue());
-                if (id >= 0)
-                    //return jdbcutil.getSQLLexicalForm(String.valueOf(id));
-                    return String.valueOf(id);
-            }
-        }
-        return sqlAdapter.render(ct);
+        return sqlAdapter.render((DBConstant) constant);
     }
 }

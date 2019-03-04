@@ -40,4 +40,12 @@ public class NonStringNonNumberNonBooleanDBTermType extends DBTermTypeImpl {
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
         return Optional.ofNullable(rdfDatatype);
     }
+
+    /**
+     * By default, we don't know if it is safe or not
+     */
+    @Override
+    public boolean isNeedingIRISafeEncoding() {
+        return true;
+    }
 }

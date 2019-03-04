@@ -13,8 +13,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -88,17 +86,9 @@ public class R2RMLMappingParser implements SQLMappingParser {
             //TODO: make the R2RMLManager simpler.
             ImmutableList<SQLPPTriplesMap> sourceMappings = manager.getMappings(manager.getModel());
 
-            UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(
-                    sourceMappings.stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream())
-                            .flatMap(atom -> atom.getSubstitution().getImmutableMap().values().stream())
-                            .filter(t -> t instanceof ImmutableFunctionalTerm)
-                            .map(t -> (ImmutableFunctionalTerm) t),
-                    termFactory, typeFactory);
-
             //TODO: try to extract prefixes from the R2RML mappings
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager, uriTemplateMatcher);
+            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
 
             return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
         } catch (InvalidR2RMLMappingException e) {

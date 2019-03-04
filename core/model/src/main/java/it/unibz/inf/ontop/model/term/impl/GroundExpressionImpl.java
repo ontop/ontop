@@ -31,4 +31,11 @@ public class GroundExpressionImpl extends ImmutableExpressionImpl implements Gro
     public boolean isVar2VarEquality() {
         return false;
     }
+
+    @Override
+    public boolean isDeterministic() {
+        return getFunctionSymbol().isDeterministic()
+                && getTerms().stream()
+                .allMatch(GroundTerm::isDeterministic);
+    }
 }

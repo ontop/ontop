@@ -1,15 +1,10 @@
 package it.unibz.inf.ontop.injection.impl;
 
-
-import com.google.inject.util.Providers;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
-
-import java.util.Optional;
 
 /**
  * NB: please also consider OntopQueryAnsweringPostModule
@@ -29,14 +24,6 @@ public class OntopTranslationModule extends OntopAbstractModule {
         bindFromSettings(RDF4JInputQueryFactory.class);
         bindFromSettings(InputQueryFactory.class);
         bindFromSettings(PostProcessingProjectionSplitter.class);
-
-        Optional<IRIDictionary> iriDictionary = configuration.getIRIDictionary();
-        if (iriDictionary.isPresent()) {
-            bind(IRIDictionary.class).toInstance(iriDictionary.get());
-        }
-        else {
-            bind(IRIDictionary.class).toProvider(Providers.of(null));
-        }
 
         configuration = null;
     }

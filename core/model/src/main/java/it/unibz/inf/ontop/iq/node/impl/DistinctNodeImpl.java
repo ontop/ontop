@@ -1,24 +1,21 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -27,90 +24,18 @@ import java.util.Optional;
 public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctNode {
 
     private static final String DISTINCT_NODE_STR = "DISTINCT";
-    private final SubstitutionFactory substitutionFactory;
+    private final DistinctNormalizer normalizer;
 
     @Inject
-    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer) {
         super(iqFactory);
-        this.substitutionFactory = substitutionFactory;
+        this.normalizer = normalizer;
     }
 
-    /**
-     * TODO: refactor
-     */
     @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.removeDistincts();
-        return liftBinding(newChild, variableGenerator, currentIQProperties);
-    }
-
-    /**
-     * TODO: refactor
-     */
-    private IQTree liftBinding(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree newChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode newChildRoot = newChild.getRootNode();
-
-        if (newChildRoot instanceof ConstructionNode)
-            return liftBindingConstructionChild((UnaryIQTree) newChild, (ConstructionNode) newChildRoot, currentIQProperties);
-        else if (newChildRoot instanceof EmptyNode)
-            return newChild;
-        else
-            return iqFactory.createUnaryIQTree(this, newChild, currentIQProperties.declareNormalizedForOptimization());
-    }
-
-    private IQTree liftBindingConstructionChild(UnaryIQTree child, ConstructionNode constructionNode,
-                                                IQProperties currentIQProperties) {
-
-        IQProperties liftedProperties = currentIQProperties.declareNormalizedForOptimization();
-
-        ImmutableSubstitution<ImmutableTerm> initialSubstitution = constructionNode.getSubstitution();
-
-        IQTree grandChild = child.getChild();
-        VariableNullability grandChildVariableNullability = grandChild.getVariableNullability();
-
-        ImmutableMap<Boolean, ImmutableMap<Variable, ImmutableTerm>> partition =
-                initialSubstitution.getImmutableMap().entrySet().stream()
-                .collect(ImmutableCollectors.partitioningBy(
-                        e -> isLiftable(e.getValue(), grandChildVariableNullability),
-                        ImmutableCollectors.toMap()));
-
-        Optional<ConstructionNode> liftedConstructionNode = Optional.ofNullable(partition.get(true))
-                .filter(m -> !m.isEmpty())
-                .map(substitutionFactory::getSubstitution)
-                .map(s -> iqFactory.createConstructionNode(child.getVariables(), s));
-
-        ImmutableSet<Variable> newChildVariables = liftedConstructionNode
-                .map(ConstructionNode::getChildVariables)
-                .orElseGet(child::getVariables);
-
-        IQTree newChild = Optional.ofNullable(partition.get(false))
-                .filter(m -> !m.isEmpty())
-                .map(substitutionFactory::getSubstitution)
-                .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
-                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild, liftedProperties))
-                .orElseGet(() -> newChildVariables.equals(grandChild.getVariables())
-                        ? grandChild
-                        : iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(newChildVariables),
-                        grandChild, liftedProperties));
-
-        IQTree distinctTree = iqFactory.createUnaryIQTree(this, newChild, liftedProperties);
-
-        return liftedConstructionNode
-                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, distinctTree, liftedProperties))
-                .orElse(distinctTree);
-    }
-
-    /**
-     *
-     * NULL is treated as a regular constant (consistent with SPARQL DISTINCT and apparently with SQL DISTINCT)
-     *
-     */
-    private boolean isLiftable(ImmutableTerm value, VariableNullability variableNullability) {
-        if (value instanceof VariableOrGroundTerm)
-            return true;
-        return ((ImmutableFunctionalTerm) value).isInjective(variableNullability);
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator,
+                                           IQProperties currentIQProperties) {
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
     }
 
     @Override

@@ -31,7 +31,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
-    private final DBFunctionSymbol ifElseNullFunctionSymbol;
+    private final DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
+    private final DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
     private final DBNotFunctionSymbol dbNotFunctionSymbol;
 
     // Lazy
@@ -224,6 +225,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
         this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
+        this.booleanIfElseNullFunctionSymbol = new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
         this.dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
         this.numericInequalityMap = new HashMap<>();
@@ -350,8 +352,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBIfElseNull() {
+    public DBIfElseNullFunctionSymbol getDBIfElseNull() {
         return ifElseNullFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBBooleanIfElseNull() {
+        return booleanIfElseNullFunctionSymbol;
     }
 
     @Override

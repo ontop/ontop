@@ -24,4 +24,12 @@ public abstract class DBBooleanFunctionSymbolImpl extends BooleanFunctionSymbolI
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
+
+    /**
+     * By default, to be overridden when necessary
+     */
+    @Override
+    public boolean isPreferringToBePostProcessedOverBeingBlocked() {
+        return false;
+    }
 }

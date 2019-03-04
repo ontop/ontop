@@ -31,10 +31,8 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
                 .jdbcUrl(repo.getJdbcUrl())
                 .jdbcUser(repo.getUser())
                 .jdbcPassword(repo.getPassword())
-                //TODO: remove it (required by Tomcat...)
-                .jdbcDriver("org.h2.Driver")
-                .keepPermanentDBConnection(true)
-                .iriDictionary(repo.getUriMap());
+                .jdbcDriver(repo.getJdbcDriver())
+                .keepPermanentDBConnection(true);
 
         tbox.ifPresent(builder::ontology);
 

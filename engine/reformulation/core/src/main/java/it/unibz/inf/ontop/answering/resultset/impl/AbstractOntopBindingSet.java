@@ -73,10 +73,4 @@ public abstract class AbstractOntopBindingSet implements OntopBindingSet {
     public OntopBinding getBinding(String name) {
         return bindingMap.get(name);
     }
-
-    @Override
-    @Nullable
-    public OntopBinding getBinding(int index) {
-        return getBindings().get(index - 1);
-    }
 }

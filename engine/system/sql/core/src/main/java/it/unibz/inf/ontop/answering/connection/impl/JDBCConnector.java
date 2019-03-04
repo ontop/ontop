@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
-import it.unibz.inf.ontop.answering.reformulation.IRIDictionary;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.answering.connection.pool.JDBCConnectionPool;
 
@@ -20,9 +19,7 @@ import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.sql.*;
-import java.util.Optional;
 
 /**
  * For RDBMS having a JDBC driver.
@@ -33,7 +30,6 @@ public class JDBCConnector implements DBConnector {
 
     private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
-    private final Optional<IRIDictionary> iriDictionary;
 
     /* The active connection used for keeping in-memory DBs alive */
     private transient Connection localConnection;
@@ -50,7 +46,6 @@ public class JDBCConnector implements DBConnector {
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
                           @Assisted DBMetadata dbMetadata,
-                          @Nullable IRIDictionary iriDictionary,
                           JDBCConnectionPool connectionPool,
                           InputQueryFactory inputQueryFactory,
                           TermFactory termFactory,
@@ -64,7 +59,6 @@ public class JDBCConnector implements DBConnector {
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.settings = settings;
-        this.iriDictionary = Optional.ofNullable(iriDictionary);
         this.connectionPool = connectionPool;
         this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
@@ -128,7 +122,7 @@ public class JDBCConnector implements DBConnector {
     @Override
     public OntopConnection getConnection() throws OntopConnectionException {
 
-        return new SQLConnection(this, queryReformulator, getSQLPoolConnection(), iriDictionary,
+        return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
                 dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
     }
 

@@ -27,7 +27,7 @@ public class LexicalLangMatchesFunctionSymbolImpl extends BooleanFunctionSymbolI
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 

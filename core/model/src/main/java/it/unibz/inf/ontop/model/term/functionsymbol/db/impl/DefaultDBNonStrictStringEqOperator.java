@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermTypeInference;
 
 public class DefaultDBNonStrictStringEqOperator extends AbstractDBNonStrictEqOperator {
     /**
@@ -28,6 +29,16 @@ public class DefaultDBNonStrictStringEqOperator extends AbstractDBNonStrictEqOpe
                     ((DBConstant) newTerms.get(0)).getValue().equals(
                             ((DBConstant) newTerms.get(1)).getValue()));
         }
+        // Same term type --> reduce it to a strict equality
+        else if (newTerms.get(0).inferType()
+                .flatMap(TermTypeInference::getTermType)
+                .filter(t -> newTerms.get(1).inferType()
+                        .flatMap(TermTypeInference::getTermType)
+                        .filter(t::equals)
+                        .isPresent())
+                .isPresent())
+            return termFactory.getStrictEquality(newTerms)
+                    .simplify(variableNullability);
         else
             return termFactory.getImmutableExpression(this, newTerms);
     }

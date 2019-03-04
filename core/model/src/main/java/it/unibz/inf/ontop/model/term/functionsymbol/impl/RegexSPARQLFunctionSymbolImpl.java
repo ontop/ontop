@@ -55,7 +55,7 @@ public class RegexSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLF
     }
 
     @Override
-    protected boolean isAlwaysInjective() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
 
