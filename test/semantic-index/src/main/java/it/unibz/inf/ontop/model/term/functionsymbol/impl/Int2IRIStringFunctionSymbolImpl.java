@@ -37,7 +37,7 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
     }
 
     @Override
-    protected boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
+    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return true;
     }
 
