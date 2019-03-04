@@ -173,17 +173,17 @@ public class LeftJoinProfTest {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
                 "\n" +
-                "SELECT ?v\n" +
+                "SELECT DISTINCT ?v\n" +
                 "WHERE {\n" +
                 "   ?p a :Professor .\n" +
                 "   OPTIONAL {\n" +
                 "     ?p :firstName ?v ;\n" +
                 "          :nickname ?nickname .\n" +
                 "  }\n" +
-                "}";
+                "} ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of(
-                "Roger", "Frank", "John", "Michael"
+               "Frank", "John", "Michael", "Roger"
         );
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
