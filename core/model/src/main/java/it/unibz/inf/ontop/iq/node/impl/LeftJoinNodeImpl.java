@@ -427,7 +427,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoin, newLeftChild, newRightChild);
 
         } catch (UnsatisfiableConditionException e) {
-            return newLeftChild;
+            EmptyNode newRightNode = iqFactory.createEmptyNode(rightChild.getVariables());
+            return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightNode);
         }
     }
 
