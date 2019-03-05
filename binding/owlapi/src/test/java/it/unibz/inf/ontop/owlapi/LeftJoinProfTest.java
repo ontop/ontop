@@ -193,6 +193,30 @@ public class LeftJoinProfTest {
     }
 
     @Test
+    public void testMinusNickname() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?v .\n" +
+                "   OPTIONAL {\n" +
+                "      ?p :nickname ?nickname .\n" +
+                "  }\n" +
+                " FILTER (!bound(?nickname)) \n" +
+                "} ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Barbara", "Diego", "Johann", "Mary"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
     public void testSimpleNickname() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
