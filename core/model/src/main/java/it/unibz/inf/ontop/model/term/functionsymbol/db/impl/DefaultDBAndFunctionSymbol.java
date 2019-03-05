@@ -50,6 +50,7 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                 .findFirst();
 
         ImmutableList<ImmutableExpression> others = newTerms.stream()
+                .map(t -> (t instanceof Variable) ? termFactory.getIsTrue((Variable)t) : t)
                 // We don't care about TRUE
                 .filter(t -> (t instanceof ImmutableExpression))
                 .map(t -> (ImmutableExpression) t)

@@ -616,7 +616,7 @@ public class SparqlAlgebraToDatalogTranslator {
             if (expr instanceof Not) {
                 return termFactory.getFunction(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                        term);
+                        convertToXsdBooleanTerm(term));
             }
             else if (expr instanceof IsNumeric) {
                 return termFactory.getFunction(
@@ -675,12 +675,12 @@ public class SparqlAlgebraToDatalogTranslator {
             if (expr instanceof And) {
                 return termFactory.getFunction(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2),
-                        term1, term2);
+                        convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
             }
             else if (expr instanceof Or) {
                 return termFactory.getFunction(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2),
-                        term1, term2);
+                        convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
             }
             else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)
@@ -786,6 +786,20 @@ public class SparqlAlgebraToDatalogTranslator {
         // NAryValueOperator (ListMemberOperator and Coalesce)
 		throw new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!");
 	}
+
+	private Term convertToXsdBooleanTerm(Term term) {
+        ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
+
+        ImmutableTerm xsdBooleanTerm = immutableTerm.inferType()
+                .flatMap(TermTypeInference::getTermType)
+                .filter(t -> t instanceof RDFDatatype)
+                .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
+                .isPresent()
+                ? immutableTerm
+                : termFactory.getSPARQLEffectiveBooleanValue(immutableTerm);
+
+        return immutabilityTools.convertToMutableTerm(xsdBooleanTerm);
+    }
 
 	private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
 			new ImmutableMap.Builder<MathExpr.MathOp, String>()
