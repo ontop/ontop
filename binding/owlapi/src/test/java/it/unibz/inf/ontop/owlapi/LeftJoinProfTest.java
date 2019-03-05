@@ -108,7 +108,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -133,7 +133,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
         "Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -160,7 +160,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -185,11 +185,53 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                "Frank", "John", "Michael", "Roger"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
         assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testMinusNickname() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?v .\n" +
+                "   OPTIONAL {\n" +
+                "      ?p :nickname ?nickname .\n" +
+                "  }\n" +
+                " FILTER (!bound(?nickname)) \n" +
+                "} ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of(
+                "Barbara", "Diego", "Johann", "Mary"
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+
+        assertFalse(LEFT_JOIN_NOT_OPTIMIZED_MSG, sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Test
+    public void testMinusLastname() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?v .\n" +
+                "   OPTIONAL {\n" +
+                "      ?p :lastName ?n .\n" +
+                "  }\n" +
+                " FILTER (!bound(?n)) \n" +
+                "} ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of();
+        checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
     @Test
@@ -208,7 +250,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Rog", "Frankie", "Johnny", "King of Pop"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -233,7 +275,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Rog", "Rog", "Johnny"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -257,7 +299,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Smith", "Poppins", "Depp"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -283,7 +325,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "Smith", "Poppins", "Depp"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -307,7 +349,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of(
                 "John", "Mary", "Roger"
         );
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -356,7 +398,7 @@ public class LeftJoinProfTest {
 
         List<String> expectedValues = ImmutableList.of(
                 "Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop", "Poppins", "Rog");
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -382,7 +424,7 @@ public class LeftJoinProfTest {
 
         List<String> expectedValues = ImmutableList.of(
                 "Depp", "Dodero", "Gamper", "Helmer", "Jackson", "Pitt", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -407,7 +449,7 @@ public class LeftJoinProfTest {
 
         List<String> expectedValues = ImmutableList.of(
                 "Depp", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -432,7 +474,7 @@ public class LeftJoinProfTest {
 
         List<String> expectedValues = ImmutableList.of(
                 "Depp", "Poppins", "Smith");
-        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -447,7 +489,7 @@ public class LeftJoinProfTest {
         return false;
     }
 
-    private String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
+    private Optional<String> checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -461,7 +503,7 @@ public class LeftJoinProfTest {
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
         OntopOWLStatement st = conn.createStatement();
-        String sql;
+        Optional<String> sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
@@ -471,8 +513,7 @@ public class LeftJoinProfTest {
                     .filter(t -> t instanceof UnaryIQTree)
                     .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
                     .filter(n -> n instanceof NativeNode)
-                    .map(n -> ((NativeNode) n).getNativeQueryString())
-                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query from\n" + executableQuery));
+                    .map(n -> ((NativeNode) n).getNativeQueryString());
 
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {

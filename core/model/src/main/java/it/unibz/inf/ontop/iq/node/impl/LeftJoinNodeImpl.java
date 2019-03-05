@@ -277,6 +277,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     }
 
+    /**
+     * NB: the constraint is only propagate to the left child
+     */
     @Override
     public IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
@@ -294,16 +297,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
                         initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
 
-                Optional<ImmutableExpression> newConstraint = constraint
-                        .map(c1 -> expressionAndCondition.getOptionalExpression()
-                                .orElse(c1));
-
                 // TODO: remove the casts
                 ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         ((ImmutableSubstitution<VariableOrGroundTerm>)(ImmutableSubstitution<?>)expressionAndCondition.getSubstitution())
                                 .composeWith2(descendingSubstitution);
 
-                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, newConstraint);
+                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty());
 
                 return updatedRightChild.isDeclaredAsEmpty()
                         ? updatedLeftChild
@@ -315,7 +314,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, constraint);
+            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, Optional.empty());
             if (updatedRightChild.isDeclaredAsEmpty()) {
                 ImmutableSet<Variable> leftVariables = updatedLeftChild.getVariables();
                 ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
@@ -335,7 +334,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedLeftChild))
                         .orElse(updatedLeftChild);
             }
-            // TODO: lift it again!
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
     }
@@ -395,40 +393,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, newRightChild, newProperties);
     }
 
-    private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, IQTree leftChild, IQTree rightChild) {
+    /**
+     * Can propagate on the left, but not on the right.
+     *
+     * TODO: transform the left join into an inner join when the constraint is rejecting nulls from the right
+     */
+    private IQTree propagateDownCondition(Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
 
-        IQTree newLeftChild = initialConstraint
+        IQTree newLeftChild = constraint
                 .map(leftChild::propagateDownConstraint)
                 .orElse(leftChild);
-
-        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
-
-        try {
-            ExpressionAndSubstitution conditionSimplificationResults =
-                    conditionSimplifier.simplifyCondition(getOptionalFilterCondition(), leftVariables,
-                            variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
-
-            Optional<ImmutableExpression> rightConstraint = conditionSimplifier.computeDownConstraint(initialConstraint,
-                    conditionSimplificationResults, rightChild.getVariableNullability());
-
-            IQTree newRightChild = Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> rightChild.applyDescendingSubstitution(s, rightConstraint))
-                    .orElseGet(() -> rightConstraint
-                            .map(rightChild::propagateDownConstraint)
-                            .orElse(rightChild));
-
-            LeftJoinNode newLeftJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
-                    ? this
-                    : conditionSimplificationResults.getOptionalExpression()
-                    .map(iqFactory::createLeftJoinNode)
-                    .orElseGet(iqFactory::createLeftJoinNode);
-
-            return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoin, newLeftChild, newRightChild);
-
-        } catch (UnsatisfiableConditionException e) {
-            return newLeftChild;
-        }
+        return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 
     private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
