@@ -6,9 +6,12 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -68,25 +71,41 @@ public class LexicalEBVFunctionSymbolImpl extends BooleanFunctionSymbolImpl {
             return computeEBV(lexicalTerm, rdfTermType, termFactory)
                     .simplify(variableNullability);
         }
-        else if ((typeTerm instanceof ImmutableFunctionalTerm)
-                && (((ImmutableFunctionalTerm) typeTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
+        else if (typeTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTypeTerm = (ImmutableFunctionalTerm) typeTerm;
-            ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap =
-                    ((RDFTermTypeFunctionSymbol) functionalTypeTerm.getFunctionSymbol()).getConversionMap();
-            ImmutableTerm magicNumberTerm = functionalTypeTerm.getTerm(0);
+            FunctionSymbol functionSymbol = functionalTypeTerm.getFunctionSymbol();
 
-            return termFactory.getDisjunction(
-                    Stream.concat(
-                            conversionMap.entrySet().stream()
-                                    .map(e -> termFactory.getConjunction(
-                                        termFactory.getStrictEquality(magicNumberTerm, e.getKey()),
-                                        termFactory.getImmutableExpression(this, lexicalTerm, e.getValue()))),
-                            Stream.of(termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(magicNumberTerm))))))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty disjunction"))
-                    .simplify(variableNullability);
+            if (functionSymbol instanceof RDFTermTypeFunctionSymbol) {
+                ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap =
+                        ((RDFTermTypeFunctionSymbol) functionalTypeTerm.getFunctionSymbol()).getConversionMap();
+                ImmutableTerm magicNumberTerm = functionalTypeTerm.getTerm(0);
+
+                return termFactory.getDisjunction(
+                        Stream.concat(
+                                conversionMap.entrySet().stream()
+                                        .map(e -> termFactory.getConjunction(
+                                                termFactory.getStrictEquality(magicNumberTerm, e.getKey()),
+                                                termFactory.getImmutableExpression(this, lexicalTerm, e.getValue()))),
+                                Stream.of(termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(magicNumberTerm))))))
+                        .orElseThrow(() -> new MinorOntopInternalBugException("Unexpected empty disjunction"))
+                        .simplify(variableNullability);
+            }
+            /*
+             * Lifts the IF_ELSE_NULL above
+             */
+            else if (functionSymbol instanceof DBIfElseNullFunctionSymbol) {
+                ImmutableExpression condition = Optional.of(functionalTypeTerm.getTerm(0))
+                        .filter(t -> t instanceof ImmutableExpression)
+                        .map(t -> (ImmutableExpression) t)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("The first argument of a IF_ELSE_NULL must be an expression"));
+
+                return termFactory.getIfElseNull(
+                        condition,
+                        termFactory.getImmutableFunctionalTerm(this, lexicalTerm, functionalTypeTerm.getTerm(1)))
+                        .simplify(variableNullability);
+            }
         }
-        else
-            return termFactory.getImmutableFunctionalTerm(this, newTerms);
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     private ImmutableTerm computeEBV(ImmutableTerm lexicalTerm, RDFTermType rdfTermType, TermFactory termFactory) {
