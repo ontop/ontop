@@ -79,7 +79,8 @@ public abstract class ReduciblePositiveAritySPARQLFunctionSymbolImpl extends SPA
                         .orElse(lexicalTerm),
                     condition
                             .map(c -> (ImmutableTerm) termFactory.getIfElseNull(c, typeTerm))
-                            .orElse(typeTerm));
+                            .orElse(typeTerm))
+                    .simplify(variableNullability);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);
