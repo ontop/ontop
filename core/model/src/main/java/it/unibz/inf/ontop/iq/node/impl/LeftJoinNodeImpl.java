@@ -278,7 +278,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     /**
-     * TODO: recheck how it manages the constraint
+     * NB: the constraint is only propagate to the left child
      */
     @Override
     public IQTree applyDescendingSubstitution(
@@ -297,16 +297,12 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
                         initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
 
-                Optional<ImmutableExpression> newConstraint = constraint
-                        .map(c1 -> expressionAndCondition.getOptionalExpression()
-                                .orElse(c1));
-
                 // TODO: remove the casts
                 ImmutableSubstitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
                         ((ImmutableSubstitution<VariableOrGroundTerm>)(ImmutableSubstitution<?>)expressionAndCondition.getSubstitution())
                                 .composeWith2(descendingSubstitution);
 
-                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, newConstraint);
+                IQTree updatedRightChild = rightChild.applyDescendingSubstitution(rightDescendingSubstitution, Optional.empty());
 
                 return updatedRightChild.isDeclaredAsEmpty()
                         ? updatedLeftChild
@@ -318,7 +314,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, constraint);
+            IQTree updatedRightChild = rightChild.applyDescendingSubstitution(descendingSubstitution, Optional.empty());
             if (updatedRightChild.isDeclaredAsEmpty()) {
                 ImmutableSet<Variable> leftVariables = updatedLeftChild.getVariables();
                 ImmutableSet<Variable> projectedVariables = Sets.union(leftVariables,
@@ -338,7 +334,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, updatedLeftChild))
                         .orElse(updatedLeftChild);
             }
-            // TODO: lift it again!
             return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
         }
     }
