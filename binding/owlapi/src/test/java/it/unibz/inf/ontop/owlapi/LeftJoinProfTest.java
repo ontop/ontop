@@ -478,7 +478,7 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(sql.toUpperCase().contains("LEFT"));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
     @Test
@@ -503,7 +503,7 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(sql.toUpperCase().contains("LEFT"));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
