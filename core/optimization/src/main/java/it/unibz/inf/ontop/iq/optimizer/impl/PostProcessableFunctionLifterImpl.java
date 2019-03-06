@@ -279,12 +279,14 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                                     v -> v,
                                     variableGenerator::generateNewVariableFromVar)));
 
+            boolean isVariableNotDefinedInSubstitution = originalDefinition.equals(variable);
+
             ImmutableSet<Variable> projectedVariablesBeforeRenaming = Stream.concat(
                     Stream.concat(
                             unionVariables.stream(),
                             Stream.of(idVariable)),
                     originalDefinition.getVariableStream())
-                    .filter(v -> !v.equals(variable))
+                    .filter(v -> isVariableNotDefinedInSubstitution || !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
             ImmutableSubstitution<ImmutableTerm> positionSubstitution =
