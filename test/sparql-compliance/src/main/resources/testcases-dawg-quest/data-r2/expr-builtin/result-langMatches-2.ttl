@@ -11,13 +11,11 @@
                       rs:binding    [ rs:value      "abc"@en ;
                                       rs:variable   "v"
                                     ]
-                    ] 
-      # Removed entry: Quest doesn't support hierarchical language tag.
-      # rs:solution   [ rs:binding    [ rs:value      "abc"@en-gb ;
-      #                                 rs:variable   "v"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      :p4 ;
-      #                                 rs:variable   "p"
-      #                               ]
-      #               ] .
-      .
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "abc"@en-gb ;
+                                      rs:variable   "v"
+                                    ] ;
+                      rs:binding    [ rs:value      :p4 ;
+                                      rs:variable   "p"
+                                    ]
+                    ] .
