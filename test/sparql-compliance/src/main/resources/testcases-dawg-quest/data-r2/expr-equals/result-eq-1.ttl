@@ -5,21 +5,16 @@
 
 []    rdf:type    rs:ResultSet ;
       rs:resultVariable  "x" ;
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :xd2 ;
-      #                             rs:variable  "x"
-      #                           ]
-      #             ] ;
-      
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :xd3 ;
-      #                             rs:variable  "x"
-      #                           ]
-      #             ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    :xd2 ;
+                                  rs:variable  "x"
+                                ]
+                  ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    :xd3 ;
+                                  rs:variable  "x"
+                                ]
+                  ] ;
       rs:solution
                   [ rs:binding  [ rs:value    :xi2 ;
                                   rs:variable  "x"
@@ -30,13 +25,11 @@
                                   rs:variable  "x"
                                 ]
                   ] ;
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution
-      #             [ rs:binding  [ rs:value    :xd1 ;
-      #                             rs:variable  "x"
-      #                           ]
-      #            ] ;
+      rs:solution
+                  [ rs:binding  [ rs:value    :xd1 ;
+                                  rs:variable  "x"
+                                ]
+                  ] ;
       rs:solution
                   [ rs:binding  [ rs:value    :xi1 ;
                                   rs:variable  "x"

@@ -202,6 +202,8 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			//Data conversion error converting "zzz" Bad datatype handling by the classic mode. missing cast to char on a URI
 			exprEqualsManifest + "eq-4",
 
+			// Lexical "values" of doubles are not preserved by the Semantic Index, so cannot match a non-canonical one
+			exprEqualsManifest + "eq-graph-2",
 
 			/* DATA-R2: OPEN_WORLD   */
 			//missing and unexpected bindings, different time in the unexpected datetime result
