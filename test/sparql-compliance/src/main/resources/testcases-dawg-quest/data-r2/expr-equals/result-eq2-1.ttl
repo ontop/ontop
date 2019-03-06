@@ -13,23 +13,20 @@
                                       rs:variable   "v1"
                                     ]
                     ] ;
- 	  # Removed entry: Quest doesn't support custom datatype
-      # rs:solution   [ rs:binding    [ rs:value      "zzz"^^:myType ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "zzz"^^:myType ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-                    
-      # Removed entry: Mismatch in data representation
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
+      rs:solution   [ rs:binding    [ rs:value      "zzz"^^:myType ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "zzz"^^:myType ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "zzz" ;
                                       rs:variable   "v2"
                                     ] ;
@@ -37,82 +34,62 @@
                                       rs:variable   "v1"
                                     ]
                     ] ;
-
-      # Removed entry: Mismatch in data representation
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
- 
-      # Removed entry: Mismatch in data representation
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-                    
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.                    
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry:       
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry:     
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
-      #
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.      
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
                                       rs:variable   "v1"
                                     ] ;
@@ -120,16 +97,13 @@
                                       rs:variable   "v2"
                                     ]
                     ] ;
-      
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.      
-      # rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
+      rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
                                       rs:variable   "v1"
                                     ] ;
@@ -137,74 +111,55 @@
                                       rs:variable   "v2"
                                     ]
                     ] ;
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-	  # 	
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Mismatch in data representation      
-      # rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
+      rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "1" ;
                                       rs:variable   "v2"
                                     ] ;
@@ -219,25 +174,20 @@
                                       rs:variable   "v2"
                                     ]
                     ] ;
-
-      # Removed entry: Mismatch in data representation
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Mismatch in data representation      
-      # rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
                                       rs:variable   "v1"
                                     ] ;
@@ -245,66 +195,48 @@
                                       rs:variable   "v2"
                                     ]
                     ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-                    
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ]
-      #               ] ;
-      
-      # Removed entry: Mismatch in data representation      
-      # rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      :z ;
                                       rs:variable   "v2"
                                     ] ;
@@ -312,36 +244,27 @@
                                       rs:variable   "v1"
                                     ]
                     ] ;
-                    
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
-      #
-      # rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "01"^^xsd:integer ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] ;
-      
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
+      rs:solution   [ rs:binding    [ rs:value      "1.0e0"^^xsd:double ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "01"^^xsd:integer ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] ;
       rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
                                       rs:variable   "v2"
                                     ] ;
@@ -356,14 +279,10 @@
                                       rs:variable   "v2"
                                     ]
                     ] ;
-                    
-      # Removed entry: Quest doesn't recognize the equality between different 
-      #    numerical datatypes.
-      # rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
-      #                                 rs:variable   "v1"
-      #                               ] ;
-      #                 rs:binding    [ rs:value      "1"^^xsd:double ;
-      #                                 rs:variable   "v2"
-      #                               ]
-      #               ] .
-	  .
+      rs:solution   [ rs:binding    [ rs:value      "1"^^xsd:integer ;
+                                      rs:variable   "v1"
+                                    ] ;
+                      rs:binding    [ rs:value      "1"^^xsd:double ;
+                                      rs:variable   "v2"
+                                    ]
+                    ] .
