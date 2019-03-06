@@ -285,7 +285,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
 
-        if (containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
+        if (constraint
+                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
+                .isPresent()
+                || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild))
             return transformIntoInnerJoinTree(leftChild, rightChild)
                 .applyDescendingSubstitution(descendingSubstitution, constraint);
 
@@ -396,9 +399,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     /**
      * Can propagate on the left, but not on the right.
      *
-     * TODO: transform the left join into an inner join when the constraint is rejecting nulls from the right
+     * Transforms the left join into an inner join when the constraint is rejecting nulls from the right
      */
     private IQTree propagateDownCondition(Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild) {
+
+        if (constraint
+                .filter(c -> isRejectingRightSpecificNulls(c, leftChild, rightChild))
+                .isPresent())
+            return transformIntoInnerJoinTree(leftChild, rightChild)
+                    .propagateDownConstraint(constraint.get());
 
         IQTree newLeftChild = constraint
                 .map(leftChild::propagateDownConstraint)
@@ -474,6 +483,28 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
     }
 
+    private boolean isRejectingRightSpecificNulls(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild) {
+        Constant nullConstant = termFactory.getNullConstant();
+
+        ImmutableSet<Variable> constraintVariables = constraint.getVariables();
+
+        ImmutableMap<Variable, Constant> nullSubstitutionMap = Sets.difference(
+                    rightChild.getVariables(),
+                    leftChild.getVariables()).stream()
+                .filter(constraintVariables::contains)
+                .collect(ImmutableCollectors.toMap(
+                        v -> v,
+                        v -> nullConstant));
+
+        if (nullSubstitutionMap.isEmpty())
+            return false;
+
+        ImmutableExpression nullifiedExpression = substitutionFactory.getSubstitution(nullSubstitutionMap)
+                .applyToBooleanExpression(constraint);
+
+        return nullifiedExpression.evaluate(termFactory.createDummyVariableNullability(nullifiedExpression))
+                .isEffectiveFalse();
+    }
 
     /**
      * Returns true when an equality between a right-specific and a term that is not a fresh variable
