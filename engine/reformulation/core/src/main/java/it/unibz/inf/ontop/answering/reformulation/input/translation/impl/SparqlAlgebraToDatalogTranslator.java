@@ -146,12 +146,13 @@ public class SparqlAlgebraToDatalogTranslator {
 
         final ImmutableList<Function> atoms;
         final ImmutableSet<Variable> variables;
-        final boolean isBGP;
+        // BGP + Bind
+        final boolean isBGPOrBind;
 
-        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables, boolean isBGP) {
+        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables, boolean isBGPOrBind) {
             this.atoms = atoms;
             this.variables = variables;
-            this.isBGP = isBGP;
+            this.isBGPOrBind = isBGPOrBind;
         }
 
         /**
@@ -183,7 +184,7 @@ public class SparqlAlgebraToDatalogTranslator {
                 eqAtoms.add(termFactory.getFunctionEQ(v, expr));
             }
 
-            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), ImmutableSet.copyOf(vars), false);
+            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), ImmutableSet.copyOf(vars), true);
         }
 
 
@@ -289,7 +290,7 @@ public class SparqlAlgebraToDatalogTranslator {
             TranslationResult a2 = translate(join.getRightArg());
             ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
 
-            if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
+            if (a1.isBGPOrBind && a2.isBGPOrBind) {             // collect triple patterns into BGPs
                 ImmutableList<Function> atoms =
                         ImmutableList.<Function>builder().addAll(a1.atoms).addAll(a2.atoms).build();
                 return new TranslationResult(atoms, vars, true);
