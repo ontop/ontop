@@ -150,6 +150,9 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			distinctManifest + "no-distinct-9",
 			distinctManifest + "distinct-9",
 
+			// The DISTINCT blocks a CASE using the IRI dictionary function (SI limitation)
+			distinctManifest + "distinct-3",
+
 			/* DATA-R2: EXPR-BUILTIN   */
 
 			//unknown datatype are not supported, so missing type
@@ -252,6 +255,13 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			sortManifest + "dawg-sort-numbers",
 			sortManifest + "dawg-sort-builtin",
 			sortManifest + "dawg-sort-function",
+
+			// Sorted by an IRI, not supported by the SI
+			sortManifest + "dawg-sort-3",
+			// Sorted by an IRI, not supported by the SI
+			sortManifest + "dawg-sort-6",
+			// Sorted by an IRI, not supported by the SI
+			sortManifest + "dawg-sort-8",
 
 
 			/* DATA-R2: TYPE-PROMOTION

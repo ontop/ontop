@@ -227,6 +227,10 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			constructManifest + "constructwhere04",
 
 			/* CSV */
+			// Sorting by IRI is not supported by the SI
+			csvTscResManifest + "tsv01",
+			// Sorting by IRI is not supported by the SI
+			csvTscResManifest + "tsv02",
 			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
 
