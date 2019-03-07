@@ -405,7 +405,7 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
-	ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to);
+	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
 	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement,
 											   ImmutableTerm flags);

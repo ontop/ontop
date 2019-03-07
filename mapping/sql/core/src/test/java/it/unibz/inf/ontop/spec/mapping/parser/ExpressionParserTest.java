@@ -1438,7 +1438,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBReplace3(), v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 3), v,
                 TERM_FACTORY.getDBStringConstant("J"),
                 TERM_FACTORY.getDBStringConstant("BL")), translation);
     }

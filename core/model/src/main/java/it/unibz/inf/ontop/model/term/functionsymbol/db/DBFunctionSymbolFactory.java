@@ -77,7 +77,7 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBLower();
 
-    DBFunctionSymbol getDBReplace3();
+    DBFunctionSymbol getDBRegexpReplace3();
 
     DBFunctionSymbol getDBRegexpReplace4();
 

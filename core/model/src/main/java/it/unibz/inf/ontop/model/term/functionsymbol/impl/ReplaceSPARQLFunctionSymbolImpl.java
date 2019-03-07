@@ -38,7 +38,7 @@ public class ReplaceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQ
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
         return getArity() == 3
-                ? termFactory.getDBReplace(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2))
+                ? termFactory.getDBRegexpReplace(subLexicalTerms.get(0), subLexicalTerms.get(1), subLexicalTerms.get(2))
                 : termFactory.getDBRegexpReplace(subLexicalTerms.get(0), subLexicalTerms.get(1),
                     subLexicalTerms.get(2), subLexicalTerms.get(3));
     }
