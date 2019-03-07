@@ -703,7 +703,8 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 			if (term.isNull())
 				return ((Constant) term).getValue();
 			if (!(term instanceof DBConstant)) {
-				throw new MinorOntopInternalBugException("Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
+				throw new MinorOntopInternalBugException("Only DBConstants or NULLs are expected in sub-tree " +
+						"to be translated into SQL. Found: " + term);
 			}
 			return sqladapter.render((DBConstant) term);
 		}

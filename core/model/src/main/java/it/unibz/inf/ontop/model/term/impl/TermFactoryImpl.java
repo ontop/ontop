@@ -57,8 +57,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final Constant valueNull;
 	@Nullable
 	private final DBConstant doubleNaN;
-	// TODO: make it be a DBConstant
-	private final RDFLiteralConstant provenanceConstant;
+	private final DBConstant provenanceConstant;
 	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final boolean isTestModeEnabled;
@@ -88,7 +87,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.doubleNaN = dbTypeFactory.getDBNaNLexicalValue()
 				.map(v -> new DBConstantImpl(v, dbTypeFactory.getDBDoubleType()))
 				.orElse(null);
-		this.provenanceConstant = new RDFLiteralConstantImpl("ontop-provenance-constant", typeFactory.getXsdStringDatatype());
+		this.provenanceConstant = new DBConstantImpl("ontop-provenance-constant", dbTypeFactory.getDBStringType());
 		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
 		this.isTestModeEnabled = settings.isTestModeEnabled();
@@ -704,7 +703,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public RDFLiteralConstant getProvenanceSpecialConstant() {
+	public DBConstant getProvenanceSpecialConstant() {
 		return provenanceConstant;
 	}
 

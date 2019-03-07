@@ -253,7 +253,7 @@ public interface TermFactory {
 	/**
 	 * TODO: explain
 	 */
-	RDFLiteralConstant getProvenanceSpecialConstant();
+	DBConstant getProvenanceSpecialConstant();
 
 	/**
 	 * Construct a {@link RDFLiteralConstant} object with a type definition.
