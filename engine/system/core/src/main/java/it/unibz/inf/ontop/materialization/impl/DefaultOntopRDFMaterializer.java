@@ -101,23 +101,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 	@Override
 	public MaterializedGraphResultSet materialize() {
 		return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, inputQueryFactory);
-//		OBDASpecification obdaSpecification = configuration.loadSpecification();
-//		ImmutableMap<IRI, VocabularyEntry> vocabulary = extractVocabulary(obdaSpecification.getSaturatedMapping());
-//		return apply(obdaSpecification, vocabulary, params, configuration);
 	}
 
 	@Override
-	public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
-			throws OBDASpecificationException {
+	public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
 
 		return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, inputQueryFactory);
-//		OBDASpecification obdaSpecification = configuration.loadSpecification();
-//
-//		ImmutableMap<IRI, VocabularyEntry> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedMapping()).entrySet().stream()
-//                .filter(e -> selectedVocabulary.contains(e.getKey()))
-//				.collect(ImmutableCollectors.toMap());
-//
-//		return apply(obdaSpecification, vocabularyMap, params, configuration);
 	}
 
 	@Override
@@ -135,17 +124,6 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 				.map(Map.Entry::getKey)
 				.collect(ImmutableCollectors.toSet());
 	}
-
-//	private MaterializedGraphResultSet apply(OBDASpecification obdaSpecification, ImmutableMap<IRI, VocabularyEntry> selectedVocabulary,
-//											 MaterializationParams params, OntopSystemConfiguration configuration) {
-//
-//		Injector injector = configuration.getInjector();
-//		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
-//		OntopQueryEngine queryEngine = engineFactory.create(obdaSpecification, configuration.getExecutorRegistry());
-//		InputQueryFactory inputQueryFactory = injector.getInstance(InputQueryFactory.class);
-//
-//		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
-//	}
 
 	/**
 	 * TODO: refactor so as to work with quads

@@ -137,8 +137,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 
 			RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
 					configuration,
-					materializationParams,
-					configuration.loadSpecification().getSaturatedMapping()
+					materializationParams
 			);
 			MaterializationGraphQuery graphQuery = materializer.materialize();
 
@@ -177,8 +176,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 
 			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
 					configuration,
-					materializationParams,
-					configuration.loadSpecification().getSaturatedMapping()
+					materializationParams
 			);
 
 			try(MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
