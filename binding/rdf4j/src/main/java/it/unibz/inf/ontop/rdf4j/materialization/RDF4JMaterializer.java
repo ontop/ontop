@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.rdf4j.materialization;
 
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.rdf4j.materialization.impl.DefaultRDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
@@ -16,42 +18,26 @@ public interface RDF4JMaterializer {
     /**
      * Materializes the saturated RDF graph
      */
-    MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                          @Nonnull MaterializationParams params)
+    MaterializationGraphQuery materialize()
             throws RepositoryException;
 
     /**
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
-    MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                          @Nonnull ImmutableSet<IRI> selectedVocabulary,
-                                          @Nonnull MaterializationParams params)
+    MaterializationGraphQuery materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws RepositoryException;
-
-    /**
-     * Materializes the saturated RDF graph with the default options
-     */
-    default MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration)
-            throws RepositoryException {
-        return materialize(configuration, MaterializationParams.defaultBuilder().build());
-    }
-
-    /**
-     * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
-     * with the default options
-     */
-    default MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                  @Nonnull ImmutableSet<IRI> selectedVocabulary)
-            throws RepositoryException {
-        return materialize(configuration, selectedVocabulary, MaterializationParams.defaultBuilder().build());
-    }
 
     /**
      * Default implementation
      */
-    static RDF4JMaterializer defaultMaterializer() {
-        return new DefaultRDF4JMaterializer();
+    static RDF4JMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+        return new DefaultRDF4JMaterializer(configuration, materializationParams);
     }
 
-
+    /**
+     * Default implementation with default parameters
+     */
+    static RDF4JMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+        return new DefaultRDF4JMaterializer(configuration);
+    }
 }

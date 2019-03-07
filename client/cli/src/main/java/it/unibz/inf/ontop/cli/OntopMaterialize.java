@@ -25,22 +25,21 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.WriterDocumentTarget;
 import org.semanticweb.owlapi.model.*;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Command(name = "materialize",
@@ -130,7 +129,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
             }
 
-            ImmutableMap<IRI, PredicateType> predicateMap = extractPredicates(ontology);
+//            ImmutableMap<IRI, PredicateType> predicateMap = extractPredicates(ontology);
 
             // Loads it only once
             SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
@@ -140,16 +139,13 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     .ppMapping(ppMapping)
                     .build();
 
-            RDF rdfFactory = configuration.getInjector().getInstance(RDF.class);
-
-            int i = 1;
-            int numPredicates = predicateMap.size();
-            for (Map.Entry<IRI, PredicateType> entry : predicateMap.entrySet()) {
-                IRI predicateIRI = entry.getKey();
-                System.err.println(String.format("Materializing %s (%d/%d)", predicateIRI, i, numPredicates));
-                serializePredicate(materializationConfig, predicateIRI, entry.getValue(), outputFile, format, ontology, rdfFactory);
-                i++;
-            }
+            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+                    materializationConfig,
+                    MaterializationParams.defaultBuilder()
+                            .enableDBResultsStreaming(doStreamResults)
+                            .build()
+            );
+            materializeClassesByFile(materializer, format, ontology, outputFile);
 
         } catch (OWLOntologyCreationException e) {
             e.printStackTrace();
@@ -158,33 +154,47 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
     }
 
-    private ImmutableMap<IRI, PredicateType> extractPredicates(OWLOntology ontology) {
-        ImmutableMap.Builder<IRI, PredicateType> predicateMapBuilder = ImmutableMap.builder();
-
-        for (OWLClass owlClass : ontology.getClassesInSignature()) {
-            predicateMapBuilder.put(owlClass.getIRI(), PredicateType.CLASS);
-        }
-        for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
-            predicateMapBuilder.put(owlDataProperty.getIRI(), PredicateType.DATA_PROPERTY);
-        }
-        for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
-            predicateMapBuilder.put(owlObjectProperty.getIRI(), PredicateType.OBJECT_PROPERTY);
-        }
-        for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
-            predicateMapBuilder.put(owlAnnotationProperty.getIRI(), PredicateType.ANNOTATION_PROPERTY);
-        }
-        return predicateMapBuilder.build();
+    private void materializeClassesByFile(OntopOWLAPIMaterializer materializer, String format, OWLOntology ontology, String outputFile) {
+        ImmutableSet<IRI> classes = materializer.getClasses();
+        int total = classes.size();
+        AtomicInteger i = new AtomicInteger();
+        classes.forEach(c -> {
+            try {
+                serializePredicate(materializer, c, PredicateType.CLASS, outputFile, format, ontology, i.incrementAndGet(), total);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
+
+//    private ImmutableMap<IRI, PredicateType> extractPredicates(OWLOntology ontology) {
+//        ImmutableMap.Builder<IRI, PredicateType> predicateMapBuilder = ImmutableMap.builder();
+//
+//        for (OWLClass owlClass : ontology.getClassesInSignature()) {
+//            predicateMapBuilder.put(owlClass.getIRI(), PredicateType.CLASS);
+//        }
+//        for (OWLDataProperty owlDataProperty : ontology.getDataPropertiesInSignature()) {
+//            predicateMapBuilder.put(owlDataProperty.getIRI(), PredicateType.DATA_PROPERTY);
+//        }
+//        for(OWLObjectProperty owlObjectProperty: ontology.getObjectPropertiesInSignature()){
+//            predicateMapBuilder.put(owlObjectProperty.getIRI(), PredicateType.OBJECT_PROPERTY);
+//        }
+//        for (OWLAnnotationProperty owlAnnotationProperty : ontology.getAnnotationPropertiesInSignature()) {
+//            predicateMapBuilder.put(owlAnnotationProperty.getIRI(), PredicateType.ANNOTATION_PROPERTY);
+//        }
+//        return predicateMapBuilder.build();
+//    }
 
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private void serializePredicate(OntopSQLOWLAPIConfiguration materializationConfig, IRI predicateIRI,
-                                    PredicateType predicateType,
-                                    String outputFile, String format, OWLOntology ontology, RDF rdfFactory) throws Exception {
+    private void serializePredicate(OntopOWLAPIMaterializer materializer, IRI predicateIRI,
+                                    PredicateType predicateType, String outputFile, String format,
+                                    OWLOntology ontology, int index, int total) throws Exception {
         final long startTime = System.currentTimeMillis();
 
 
+        System.err.println(String.format("Materializing %s (%d/%d)", predicateIRI, index, total));
         System.err.println("Starts writing triples into files.");
 
         int tripleCount = 0;
@@ -194,14 +204,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         String filePrefix = Paths.get(outputDir, predicateIRI.toString().replaceAll("[^a-zA-Z0-9]", "_")
                 + predicateType.getCode() +"_" ).toString();
-        OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
         MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
                 .enableDBResultsStreaming(doStreamResults)
                 .build();
 
-
-        try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(materializationConfig,
-                ImmutableSet.of(rdfFactory.createIRI(predicateIRI.toString())), materializationParams)) {
+        try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(ImmutableSet.of(predicateIRI))) {
 
             while (graphResultSet.hasNext()) {
                 tripleCount += serializeTripleBatch(ontology, graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);
@@ -240,7 +247,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 suffix = ".n3";
                 break;
             default:
-                throw new Exception("Unknown format: " + format);
+                throw new OntopMaterializeException("Unknown format: " + format);
         }
         String fileName = filePrefix + fileCount + suffix;
 
@@ -316,17 +323,17 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                         .build();
             }
 
-            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
-            MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-                    .enableDBResultsStreaming(doStreamResults)
-                    .build();
-
+            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+                    materializerConfiguration,
+                    MaterializationParams.defaultBuilder()
+                            .enableDBResultsStreaming(doStreamResults)
+                            .build()
+            );
 
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            try (MaterializedGraphOWLResultSet graphResults = materializer.materialize(
-                    materializerConfiguration, materializationParams)) {
+            try (MaterializedGraphOWLResultSet graphResults = materializer.materialize()) {
 
                 while (graphResults.hasNext())
                     manager.addAxiom(ontology, graphResults.next());
@@ -373,5 +380,11 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         return configBuilder
                 .propertyFile(propertiesFile)
                 .enableOntologyAnnotationQuerying(true);
+    }
+
+    private class OntopMaterializeException extends OntopInternalBugException {
+        OntopMaterializeException(String message) {
+            super(message);
+        }
     }
 }

@@ -56,9 +56,9 @@ public class ABoxMaterializerExample {
 		/*
 		 * Start materializing data from database to triples.
 		 */
-		OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+		OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(configuration);
 
-		try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration)) {
+		try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
 
 			/*
 			 * Print the triples into an external file.
