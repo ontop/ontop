@@ -90,6 +90,16 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 		}
 	}
 
+	@Override
+	public ImmutableSet<IRI> getClasses() {
+		return materializer.getClasses();
+	}
+
+	@Override
+	public ImmutableSet<IRI> getProperties() {
+		return materializer.getProperties();
+	}
+
 	/**
 	 * Specialized graph query
 	 */

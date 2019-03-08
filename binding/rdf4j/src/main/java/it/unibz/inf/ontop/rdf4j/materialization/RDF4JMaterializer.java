@@ -40,4 +40,7 @@ public interface RDF4JMaterializer {
     static RDF4JMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
         return new DefaultRDF4JMaterializer(configuration);
     }
+
+    ImmutableSet<IRI> getClasses();
+    ImmutableSet<IRI> getProperties();
 }

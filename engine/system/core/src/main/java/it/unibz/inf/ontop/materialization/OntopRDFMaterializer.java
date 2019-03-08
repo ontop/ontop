@@ -26,6 +26,13 @@ public interface OntopRDFMaterializer {
     /**
      * Default implementation
      */
+    static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+        return new DefaultOntopRDFMaterializer(configuration, materializationParams);
+    }
+
+    /**
+     * Default implementation
+     */
     static OntopRDFMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
         return new DefaultOntopRDFMaterializer(configuration, MaterializationParams.defaultBuilder().build());
     }

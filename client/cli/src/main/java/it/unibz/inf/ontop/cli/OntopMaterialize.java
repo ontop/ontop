@@ -26,19 +26,34 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
+import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
+import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import org.apache.commons.rdf.api.IRI;
+import org.eclipse.rdf4j.query.GraphQueryResult;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.WriterDocumentTarget;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+
+//import org.semanticweb.owlapi.apibinding.OWLManager;
+//import org.semanticweb.owlapi.io.WriterDocumentTarget;
+//import org.semanticweb.owlapi.model.*;
 
 
 @Command(name = "materialize",
@@ -90,71 +105,112 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     private boolean doStreamResults = true;
 
-    public OntopMaterialize(){}
+    public OntopMaterialize() {
+    }
 
     @Override
-    public void run(){
+    public void run() {
 
         //   Streaming it's necessary to materialize large RDF graphs without
         //   storing all the SQL results of one big query in memory.
-        if (noStream){
+        if (noStream) {
             doStreamResults = false;
         }
-        if(separate) {
-            runWithSeparateFiles();
+        RDF4JMaterializer materializer = getMaterializer();
+        if (separate) {
+            runWithSeparateFiles(materializer);
         } else {
-            runWithSingleFile();
+            runWithSingleFile(materializer);
         }
     }
 
-    private void runWithSeparateFiles() {
-        if (owlFile == null) {
-            throw new NullPointerException("You have to specify an ontology file!");
-        }
+    private RDF4JMaterializer getMaterializer() {
+
+        RDF4JMaterializer materializer = null;
         try {
-
-            OntopSQLOWLAPIConfiguration configuration = createAndInitConfigurationBuilder()
-                    .ontologyFile(owlFile)
+            OWLOntology ontology = loadOntology();
+            OntopSQLOWLAPIConfiguration materializerConfiguration = createAndInitConfigurationBuilder()
+                    .ontology(ontology)
                     .build();
-
-            // Loads it only once
-            SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
-            OntopSQLOWLAPIConfiguration materializationConfig = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                    .propertyFile(propertiesFile)
-                    // To avoid parsing it again and again
-                    .ppMapping(ppMapping)
-                    .build();
-
-            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
-                    materializationConfig,
+            materializer = RDF4JMaterializer.defaultMaterializer(
+                    materializerConfiguration,
                     MaterializationParams.defaultBuilder()
                             .enableDBResultsStreaming(doStreamResults)
                             .build()
             );
-            materializeClassesByFile(materializer, format,  outputFile);
-            materializePropertiesByFile(materializer, format, outputFile);
-
+        } catch (OBDASpecificationException e) {
+            e.printStackTrace();
         } catch (OWLOntologyCreationException e) {
             e.printStackTrace();
+        }
+        return materializer;
+    }
+
+    private OWLOntology loadOntology() throws OWLOntologyCreationException {
+        if (owlFile != null) {
+            OWLOntology ontology = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(new File(owlFile));
+            if (disableReasoning) {
+                return extractDeclarations(ontology.getOWLOntologyManager(), ontology);
+            }
+            return ontology;
+        }
+        return OWLManager.createOWLOntologyManager().createOntology();
+    }
+
+    private void runWithSeparateFiles(RDF4JMaterializer materializer) {
+
+
+//        if (owlFile == null) {
+//            throw new NullPointerException("You have to specify an ontology file!");
+//        }
+//        try {
+//
+//            OntopSQLOWLAPIConfiguration configuration = createAndInitConfigurationBuilder()
+//                    .ontologyFile(owlFile)
+//                    .build();
+//
+//            // Loads it only once
+//            SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
+//            OntopSQLOWLAPIConfiguration materializationConfig = OntopSQLOWLAPIConfiguration.defaultBuilder()
+//                    .propertyFile(propertiesFile)
+//                    // To avoid parsing it again and again
+//                    .ppMapping(ppMapping)
+//                    .build();
+//
+//            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+//                    materializationConfig,
+//                    MaterializationParams.defaultBuilder()
+//                            .enableDBResultsStreaming(doStreamResults)
+//                            .build()
+//            );
+        try {
+            materializeClassesByFile(materializer, format, outputFile);
+            materializePropertiesByFile(materializer, format, outputFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+//        } catch (OWLOntologyCreationException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
-    private void materializeClassesByFile(OntopOWLAPIMaterializer materializer, String format, String outputFile) throws Exception {
+    private void materializeClassesByFile(RDF4JMaterializer materializer, String format, String outputFile) throws Exception {
         ImmutableSet<IRI> classes = materializer.getClasses();
         int total = classes.size();
         AtomicInteger i = new AtomicInteger();
-        for (IRI c: classes) {
+        for (IRI c : classes) {
             serializePredicate(materializer, c, PredicateType.CLASS, outputFile, format, i.incrementAndGet(), total);
         }
     }
 
-    private void materializePropertiesByFile(OntopOWLAPIMaterializer materializer, String format, String outputFile) throws Exception {
+    private void materializePropertiesByFile(RDF4JMaterializer materializer, String format, String outputFile) throws Exception {
         ImmutableSet<IRI> properties = materializer.getProperties();
         int total = properties.size();
         AtomicInteger i = new AtomicInteger();
-        for (IRI p: properties) {
+        for (IRI p : properties) {
             serializePredicate(materializer, p, PredicateType.PROPERTY, outputFile, format, i.incrementAndGet(), total);
         }
     }
@@ -162,7 +218,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     /**
      * Serializes the A-box corresponding to a predicate into one or multiple file.
      */
-    private void serializePredicate(OntopOWLAPIMaterializer materializer, IRI predicateIRI,
+    private void serializePredicate(RDF4JMaterializer materializer, IRI predicateIRI,
                                     PredicateType predicateType, String outputFile, String format,
                                     int index, int total) throws Exception {
         final long startTime = System.currentTimeMillis();
@@ -177,18 +233,16 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         String outputDir = outputFile;
 
         String filePrefix = Paths.get(outputDir, predicateIRI.toString().replaceAll("[^a-zA-Z0-9]", "_")
-                + predicateType.getCode() +"_" ).toString();
+                + predicateType.getCode() + "_").toString();
 
-        try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(ImmutableSet.of(predicateIRI))) {
+        GraphQueryResult result = materializer.materialize(ImmutableSet.of(predicateIRI)).evaluate();
 
-            while (graphResultSet.hasNext()) {
-                tripleCount += serializeTripleBatch(graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);
-                fileCount++;
-            }
-
-            System.out.println("NR of TRIPLES: " + tripleCount);
-            System.out.println("VOCABULARY SIZE (NR of QUERIES): " + graphResultSet.getSelectedVocabulary().size());
+        while (result.hasNext()) {
+            tripleCount += serializeTripleBatch(result, filePrefix, fileCount, format, Optional.of(TRIPLE_LIMIT_PER_FILE));
+            fileCount++;
         }
+
+        System.out.println("NR of TRIPLES: " + tripleCount);
 
         final long endTime = System.currentTimeMillis();
         final long time = endTime - startTime;
@@ -199,55 +253,85 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Serializes a batch of triples corresponding to a predicate into one file.
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      */
-    private int serializeTripleBatch(MaterializedGraphOWLResultSet iterator,
-                                     String filePrefix, String predicateName, int fileCount, String format) throws Exception {
+    private int serializeTripleBatch(GraphQueryResult result, String filePrefix, int fileCount, String format, Optional<Integer> limitPerFile) throws Exception {
         String suffix;
+        Function<Writer, RDFHandler> handlerConstructor;
 
         switch (format) {
             case RDF_XML:
                 suffix = ".rdf";
+                handlerConstructor = RDFXMLWriter::new;
                 break;
-            case OWL_XML:
-                suffix = ".owl";
-                break;
+//            case OWL_XML:
+//                suffix = ".owl";
+//                break;
             case TURTLE:
                 suffix = ".ttl";
+                handlerConstructor = TurtleWriter::new;
                 break;
             case N3:
                 suffix = ".n3";
+                handlerConstructor = N3Writer::new;
                 break;
             default:
                 throw new Exception("Unknown format: " + format);
         }
         String fileName = filePrefix + fileCount + suffix;
 
-        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
-        // Main buffer
-        OWLOntology aBox = manager.createOntology(IRI.create(predicateName));
+//            String outfile = out.getAbsolutePath();
+//            System.out.println(outfile);
 
+//            MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
+//                    .enableDBResultsStreaming(DO_STREAM_RESULTS)
+//                    .build();
+
+//            RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
+//                    configuration,
+//                    materializationParams
+//            );
+//            MaterializationGraphQuery graphQuery = materializer.materialize();
         int tripleCount = 0;
-        while (iterator.hasNext() && (tripleCount < TRIPLE_LIMIT_PER_FILE )) {
-            manager.addAxiom(aBox, iterator.next());
-            tripleCount++;
-        }
 
-        //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
-        //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        manager.saveOntology(aBox, getDocumentFormat(format), new WriterDocumentTarget(writer));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
+        RDFHandler handler = handlerConstructor.apply(writer);
+        handler.startRDF();
+        while (result.hasNext() && (!limitPerFile.isPresent() || tripleCount < limitPerFile.get()))
+            handler.handleStatement(result.next());
+        handler.endRDF();
+
+//        } finally {
+        if (writer != null)
+            writer.close();
+//        }
+//        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+//
+//        // Main buffer
+//        OWLOntology aBox = manager.createOntology(IRI.create(predicateName));
+//
+//        int tripleCount = 0;
+//        while (graphQuery.hasNext() && (tripleCount < TRIPLE_LIMIT_PER_FILE )) {
+//            manager.addAxiom(aBox, graphQuery.next());
+//            tripleCount++;
+//        }
+//
+//        //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(outputPath.toFile()));
+//        //BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+//        manager.saveOntology(aBox, getDocumentFormat(format), new WriterDocumentTarget(writer));
 
         return tripleCount;
     }
 
 
-    public void runWithSingleFile() {
+    public void runWithSingleFile(RDF4JMaterializer materializer) {
         BufferedOutputStream output = null;
         BufferedWriter writer = null;
 
-        try {
-            final long startTime = System.currentTimeMillis();
+        int tripleCount = 0;
 
+        final long startTime = System.currentTimeMillis();
+        try {
             if (outputFile != null) {
                 output = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
@@ -255,72 +339,94 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             }
             writer = new BufferedWriter(new OutputStreamWriter(output, "UTF-8"));
 
-            Builder configBuilder = createAndInitConfigurationBuilder();
+            GraphQueryResult result = materializer.materialize().evaluate();
 
-            if (owlFile != null) {
-                configBuilder.ontologyFile(owlFile);
-            }
+            tripleCount += serializeTripleBatch(result, outputFile, 1, format, Optional.of(TRIPLE_LIMIT_PER_FILE));
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
 
-            OntopSQLOWLAPIConfiguration initialConfiguration = configBuilder.build();
+        System.out.println("NR of TRIPLES: " + tripleCount);
+
+        final long endTime = System.currentTimeMillis();
+        final long time = endTime - startTime;
+        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+
+//            Builder configBuilder = createAndInitConfigurationBuilder();
+//            if (owlFile != null) {
+//                configBuilder.ontologyFile(owlFile);
+//            }
+//
+//            OntopSQLOWLAPIConfiguration initialConfiguration = configBuilder.build();
             //OBDAModel obdaModel = initialConfiguration.loadSpecification();
 
-            OWLOntology ontology;
-            OntopSQLOWLAPIConfiguration materializerConfiguration;
+//            OWLOntology ontology;
+//            OntopSQLOWLAPIConfiguration materializerConfiguration;
 
-            if (owlFile != null) {
-            // Loading the OWL ontology from the file as with normal OWLReasoners
-                OWLOntology initialOntology = initialConfiguration.loadProvidedInputOntology();
-
-                if (disableReasoning) {
-                    ontology = extractDeclarations(initialOntology.getOWLOntologyManager(), initialOntology);
-                }
-                else {
-                    ontology = initialOntology;
-                }
-                materializerConfiguration = createAndInitConfigurationBuilder()
-                        .ontology(ontology)
-                        .build();
-
-            } else {
-                ontology = OWLManager.createOWLOntologyManager().createOntology();
-                materializerConfiguration = createAndInitConfigurationBuilder()
-                        .ontology(ontology)
-                        .build();
-            }
-
-            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
-                    materializerConfiguration,
-                    MaterializationParams.defaultBuilder()
-                            .enableDBResultsStreaming(doStreamResults)
-                            .build()
-            );
+//            if (owlFile != null) {
+//                // Loading the OWL ontology from the file as with normal OWLReasoners
+////                OWLOntology initialOntology = initialConfiguration.loadProvidedInputOntology();
+//
+//                if (disableReasoning) {
+//                    ontology = extractDeclarations(initialOntology.getOWLOntologyManager(), initialOntology);
+//                } else {
+//                    ontology = initialOntology;
+//                }
+//                materializerConfiguration = createAndInitConfigurationBuilder()
+//                        .ontology(ontology)
+//                        .build();
+//
+//            } else {
+//                ontology = OWLManager.createOWLOntologyManager().createOntology();
+//                materializerConfiguration = createAndInitConfigurationBuilder()
+//                        .ontology(ontology)
+//                        .build();
+//            }
+//
+//            OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+//                    materializerConfiguration,
+//                    MaterializationParams.defaultBuilder()
+//                            .enableDBResultsStreaming(doStreamResults)
+//                            .build()
+//            );
 
             // OBDAModelSynchronizer.declarePredicates(ontology, obdaModel);
 
-            OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            try (MaterializedGraphOWLResultSet graphResults = materializer.materialize()) {
-
-                while (graphResults.hasNext())
-                    manager.addAxiom(ontology, graphResults.next());
-
-                OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
-
-                manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
-
-                System.err.println("NR of TRIPLES: " + graphResults.getTripleCountSoFar());
-                System.err.println("VOCABULARY SIZE (NR of QUERIES): " + graphResults.getSelectedVocabulary().size());
-            }
-            if (outputFile!=null)
-                output.close();
-
-            final long endTime = System.currentTimeMillis();
-            final long time = endTime - startTime;
-            System.out.println("Elapsed time to materialize: "+time + " {ms}");
-
-        } catch (Exception e) {
-            System.out.println("Error materializing ontology:");
-            e.printStackTrace();
-        }
+//
+//        System.out.println("NR of TRIPLES: " + tripleCount);
+//
+//        final long endTime = System.currentTimeMillis();
+//        final long time = endTime - startTime;
+//        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+//
+//            OWLOntologyManager manager = ontology.getOWLOntologyManager();
+//            try (MaterializedGraphOWLResultSet graphResults = materializer.materialize()) {
+//
+//                while (graphResults.hasNext())
+//                    manager.addAxiom(ontology, graphResults.next());
+//
+//                OWLDocumentFormat DocumentFormat = getDocumentFormat(format);
+//
+//                manager.saveOntology(ontology, DocumentFormat, new WriterDocumentTarget(writer));
+//
+//                System.err.println("NR of TRIPLES: " + graphResults.getTripleCountSoFar());
+//                System.err.println("VOCABULARY SIZE (NR of QUERIES): " + graphResults.getSelectedVocabulary().size());
+//            }
+//            if (outputFile != null)
+//                output.close();
+//
+//            final long endTime = System.currentTimeMillis();
+//            final long time = endTime - startTime;
+//            System.out.println("Elapsed time to materialize: " + time + " {ms}");
+//
+//        } catch (Exception e) {
+//            System.out.println("Error materializing ontology:");
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -337,8 +443,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         if (isR2rmlFile(mappingFile)) {
             configBuilder.r2rmlMappingFile(mappingFile);
-        }
-        else {
+        } else {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
