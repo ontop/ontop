@@ -105,8 +105,13 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 	@Override
 	public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
+		return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, inputQueryFactory);
+	}
 
-		return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, inputQueryFactory);
+	private ImmutableMap<IRI,VocabularyEntry> filterVocabularyEntries(ImmutableSet<IRI> selectedVocabulary) {
+		return vocabulary.entrySet().stream()
+				.filter(e -> selectedVocabulary.contains(e.getKey()))
+				.collect(ImmutableCollectors.toMap());
 	}
 
 	@Override

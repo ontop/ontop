@@ -26,7 +26,6 @@ import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
@@ -118,15 +117,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     .ontologyFile(owlFile)
                     .build();
 
-            OWLOntology ontology = configuration.loadProvidedInputOntology();
-
-            if (disableReasoning) {
-                /*
-                 * when reasoning is disabled, we extract only the declaration assertions for the vocabulary
-                 */
-                ontology = extractDeclarations(ontology.getOWLOntologyManager(), ontology);
-            }
-
             // Loads it only once
             SQLPPMapping ppMapping = configuration.loadProvidedPPMapping();
             OntopSQLOWLAPIConfiguration materializationConfig = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -141,8 +131,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                             .enableDBResultsStreaming(doStreamResults)
                             .build()
             );
-            materializeClassesByFile(materializer, format, ontology, outputFile);
-            materializePropertiesByFile(materializer, format, ontology, outputFile);
+            materializeClassesByFile(materializer, format,  outputFile);
+            materializePropertiesByFile(materializer, format, outputFile);
 
         } catch (OWLOntologyCreationException e) {
             e.printStackTrace();
@@ -151,21 +141,21 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         }
     }
 
-    private void materializeClassesByFile(OntopOWLAPIMaterializer materializer, String format, OWLOntology ontology, String outputFile) throws Exception {
+    private void materializeClassesByFile(OntopOWLAPIMaterializer materializer, String format, String outputFile) throws Exception {
         ImmutableSet<IRI> classes = materializer.getClasses();
         int total = classes.size();
         AtomicInteger i = new AtomicInteger();
         for (IRI c: classes) {
-            serializePredicate(materializer, c, PredicateType.CLASS, outputFile, format, ontology, i.incrementAndGet(), total);
+            serializePredicate(materializer, c, PredicateType.CLASS, outputFile, format, i.incrementAndGet(), total);
         }
     }
 
-    private void materializePropertiesByFile(OntopOWLAPIMaterializer materializer, String format, OWLOntology ontology, String outputFile) throws Exception {
+    private void materializePropertiesByFile(OntopOWLAPIMaterializer materializer, String format, String outputFile) throws Exception {
         ImmutableSet<IRI> properties = materializer.getProperties();
         int total = properties.size();
         AtomicInteger i = new AtomicInteger();
         for (IRI p: properties) {
-            serializePredicate(materializer, p, PredicateType.PROPERTY, outputFile, format, ontology, i.incrementAndGet(), total);
+            serializePredicate(materializer, p, PredicateType.PROPERTY, outputFile, format, i.incrementAndGet(), total);
         }
     }
 
@@ -174,7 +164,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      */
     private void serializePredicate(OntopOWLAPIMaterializer materializer, IRI predicateIRI,
                                     PredicateType predicateType, String outputFile, String format,
-                                    OWLOntology ontology, int index, int total) throws Exception {
+                                    int index, int total) throws Exception {
         final long startTime = System.currentTimeMillis();
 
 
@@ -192,7 +182,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         try (MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(ImmutableSet.of(predicateIRI))) {
 
             while (graphResultSet.hasNext()) {
-                tripleCount += serializeTripleBatch(ontology, graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);
+                tripleCount += serializeTripleBatch(graphResultSet, filePrefix, predicateIRI.toString(), fileCount, format);
                 fileCount++;
             }
 
@@ -209,7 +199,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Serializes a batch of triples corresponding to a predicate into one file.
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      */
-    private int serializeTripleBatch(OWLOntology ontology, MaterializedGraphOWLResultSet iterator,
+    private int serializeTripleBatch(MaterializedGraphOWLResultSet iterator,
                                      String filePrefix, String predicateName, int fileCount, String format) throws Exception {
         String suffix;
 
@@ -235,11 +225,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
         // Main buffer
         OWLOntology aBox = manager.createOntology(IRI.create(predicateName));
-
-        // Add the signatures
-        for (OWLDeclarationAxiom axiom : ontology.getAxioms(AxiomType.DECLARATION)) {
-            manager.addAxiom(aBox, axiom);
-        }
 
         int tripleCount = 0;
         while (iterator.hasNext() && (tripleCount < TRIPLE_LIMIT_PER_FILE )) {
