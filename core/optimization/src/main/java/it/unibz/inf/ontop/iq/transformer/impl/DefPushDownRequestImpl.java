@@ -50,7 +50,7 @@ public class DefPushDownRequestImpl implements DefinitionPushDownTransformer.Def
     public DefinitionPushDownTransformer.DefPushDownRequest newRequest(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new DefPushDownRequestImpl(newVariable,
-                substitution.apply(definition).simplify(),
+                substitution.apply(definition),
                 substitution.applyToBooleanExpression(condition));
     }
 

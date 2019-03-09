@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -157,7 +158,13 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 .map(c -> c.acceptTransformer(this))
                 .collect(ImmutableCollectors.toList());
 
-        return iqFactory.createNaryIQTree(rootNode, newChildren);
+        UnionNode newRootNode = newChildren.stream()
+                .findAny()
+                .map(IQTree::getVariables)
+                .map(iqFactory::createUnionNode)
+                .orElseThrow(() -> new MinorOntopInternalBugException("An union always have multiple children"));
+
+        return iqFactory.createNaryIQTree(newRootNode, newChildren);
     }
 
     @Override
