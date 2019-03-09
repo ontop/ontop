@@ -90,6 +90,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
     private static final String graphManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/graph/manifest#";
 	private static final String openWorldManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/open-world/manifest#";
 	private static final String regexManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/regex/manifest#";
+	private static final String solutionSeqManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/solution-seq/manifest#";
 	private static final String sortManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/sort/manifest#";
 	private static final String typePromotionManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/type-promotion/manifest#";
 
@@ -247,6 +248,13 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			/* DATA-R2: REGEX
 			Missing bindings #string operation over URI is not supported in SI mode*/
 			regexManifest + "dawg-regex-004",
+
+			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
+			solutionSeqManifest + "limit-4",
+			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
+			solutionSeqManifest + "offset-4",
+			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
+			solutionSeqManifest + "slice-5",
 
 			/* DATA-R2: SORT
 			 * Problem with SPARQL translation
