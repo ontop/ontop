@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -97,7 +98,15 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
 
             IQTree pushDownChildTree = pushDownDefinitions(child, definitionsToPushDown);
 
-            return iqFactory.createUnaryIQTree(newNode, pushDownChildTree.acceptTransformer(this));
+            UnaryIQTree orderByTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree.acceptTransformer(this));
+
+            // Makes sure no new variable is projected by the returned tree
+            ImmutableSet<Variable> childVariables = child.getVariables();
+            return pushDownChildTree.getVariables().equals(childVariables)
+                    ? orderByTree
+                    : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(childVariables),
+                            orderByTree);
         }
 
         protected Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,
