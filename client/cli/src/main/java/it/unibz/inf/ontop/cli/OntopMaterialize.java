@@ -41,11 +41,15 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
@@ -77,7 +81,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
 
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
-            title = "output", description = "output file (default) or directory (only for --separate-files)")
+            title = "output", description = "output file (default) or prefix (only for --separate-files)")
     //@BashCompletion(behaviour = CompletionBehaviour.FILENAMES)
     private String outputFile;
 
@@ -111,27 +115,13 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             doStreamResults = false;
         }
         RDF4JMaterializer materializer = createMaterializer();
-        OutputSpec outputSpec = computeOuputSpec();
+        OutputSpec outputSpec = (outputFile == null) ?
+                new OutputSpec(format) :
+                new OutputSpec(outputFile, format);
         if (separate) {
             runWithSeparateFiles(materializer, outputSpec);
         } else {
             runWithSingleFile(materializer, outputSpec);
-        }
-    }
-
-    private OutputSpec computeOuputSpec() {
-
-        String prefix = removeExtension(outputFile);
-        switch (format) {
-            case RDF_XML:
-                return new OutputSpec(prefix, ".rdf", RDFXMLWriter::new);
-//            case OWL_XML:
-            case TURTLE:
-                return new OutputSpec(prefix, ".ttl", TurtleWriter::new);
-            case N3:
-                return new OutputSpec(prefix, ".n3", N3Writer::new);
-            default:
-                throw new RuntimeException("Unknown format: " + format);
         }
     }
 
@@ -166,6 +156,32 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         return OWLManager.createOWLOntologyManager().createOntology();
     }
 
+    private void runWithSingleFile(RDF4JMaterializer materializer, OutputSpec outputSpec) {
+        int tripleCount = 0;
+
+        final long startTime = System.currentTimeMillis();
+
+        GraphQueryResult result = materializer.materialize().evaluate();
+
+        try {
+            BufferedWriter writer = outputSpec.createWriter(Optional.empty());
+            tripleCount += serializeTripleBatch(
+                    result,
+                    Optional.empty(),
+                    writer,
+                    outputSpec.createRDFHandler(writer)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("NR of TRIPLES: " + tripleCount);
+
+        final long endTime = System.currentTimeMillis();
+        final long time = endTime - startTime;
+        System.out.println("Elapsed time to materialize: " + time + " {ms}");
+    }
+
     private void runWithSeparateFiles(RDF4JMaterializer materializer, OutputSpec outputSpec) {
         try {
             materializeClassesByFile(materializer, outputSpec);
@@ -186,6 +202,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     private void materializePropertiesByFile(RDF4JMaterializer materializer, OutputSpec outputSpec) throws Exception {
         ImmutableSet<IRI> properties = materializer.getProperties();
+
         int total = properties.size();
         AtomicInteger i = new AtomicInteger();
         for (IRI p : properties) {
@@ -208,19 +225,18 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         int tripleCount = 0;
         int fileCount = 0;
 
-        String outputDir = outputFile;
-
-        String filePrefix = Paths.get(outputDir, predicateIRI.toString().replaceAll("[^a-zA-Z0-9]", "_")
-                + predicateType.getCode() + "_").toString();
+        String fileSubstring = predicateIRI.toString().replaceAll("[^a-zA-Z0-9]", "_")
+                + predicateType.getCode() + "_";
 
         GraphQueryResult result = materializer.materialize(ImmutableSet.of(predicateIRI)).evaluate();
 
         while (result.hasNext()) {
+            BufferedWriter writer = outputSpec.createWriter(Optional.of(fileSubstring + fileCount));
             tripleCount += serializeTripleBatch(
                     result,
                     Optional.of(TRIPLE_LIMIT_PER_FILE),
-                    filePrefix + fileCount + outputSpec.suffix,
-                    outputSpec.handlerConstructor
+                    writer,
+                    outputSpec.createRDFHandler(writer)
             );
             fileCount++;
         }
@@ -236,10 +252,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
      * Serializes a batch of triples into one file.
      * Upper bound: TRIPLE_LIMIT_PER_FILE.
      */
-    private int serializeTripleBatch(GraphQueryResult result, Optional<Integer> limitPerFile, String fileName, Function<Writer, RDFHandler> handlerConstructor) throws Exception {
+    private int serializeTripleBatch(GraphQueryResult result, Optional<Integer> limitPerFile, BufferedWriter writer, RDFHandler handler) throws IOException {
         int tripleCount = 0;
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
-        RDFHandler handler = handlerConstructor.apply(writer);
         handler.startRDF();
         while (result.hasNext() && (!limitPerFile.isPresent() || tripleCount < limitPerFile.get())) {
             handler.handleStatement(result.next());
@@ -249,33 +263,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
         writer.close();
         return tripleCount;
     }
-
-
-    public void runWithSingleFile(RDF4JMaterializer materializer, OutputSpec outputSpec) {
-        int tripleCount = 0;
-
-        final long startTime = System.currentTimeMillis();
-
-        GraphQueryResult result = materializer.materialize().evaluate();
-
-        try {
-            tripleCount += serializeTripleBatch(
-                    result,
-                    Optional.empty(),
-                    outputSpec.prefix + outputSpec.suffix,
-                    outputSpec.handlerConstructor
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        System.out.println("NR of TRIPLES: " + tripleCount);
-
-        final long endTime = System.currentTimeMillis();
-        final long time = endTime - startTime;
-        System.out.println("Elapsed time to materialize: " + time + " {ms}");
-    }
-
 
     /**
      * Mapping file + connection info
@@ -296,14 +283,57 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     }
 
     private class OutputSpec {
-        private final String prefix;
-        private final String suffix;
-        private final Function<Writer, RDFHandler> handlerConstructor;
+        private final Optional<String> prefix;
+        private final String format;
 
-        private OutputSpec(String prefix, String suffix, Function<Writer, RDFHandler> handlerConstructor) {
-            this.prefix = prefix;
-            this.suffix = suffix;
-            this.handlerConstructor = handlerConstructor;
+        private OutputSpec(String prefix, String format) {
+            this.prefix = Optional.of(removeExtension(prefix));
+            this.format = format;
+        }
+
+        private OutputSpec(String format) {
+            this.prefix = Optional.empty();
+            this.format = format;
+        }
+
+        // We need a direct access to the writer to close it (cannot be done via the RDFHandler)
+        private BufferedWriter createWriter(Optional<String> prefixExtension) throws IOException {
+            if (prefix.isPresent()) {
+                String suffix = getSuffix();
+                return Files.newBufferedWriter(
+                        prefixExtension.isPresent() ?
+                                Paths.get(prefix.get(), prefixExtension.get() + suffix) :
+                                Paths.get(prefix.get() + suffix),
+                        Charset.forName("UTF-8")
+                );
+            }
+            return new BufferedWriter(new OutputStreamWriter(System.out, "UTF-8"));
+        }
+
+        private String getSuffix() {
+            switch (format) {
+                case RDF_XML:
+                    return ".rdf";
+                case TURTLE:
+                    return ".ttl";
+                case N3:
+                    return ".n3";
+                default:
+                    throw new RuntimeException("Unknown output format: " + format);
+            }
+        }
+
+        private RDFHandler createRDFHandler(BufferedWriter writer) {
+            switch (format) {
+                case RDF_XML:
+                    return new RDFXMLWriter(writer);
+                case TURTLE:
+                    return new TurtleWriter(writer);
+                case N3:
+                    return new N3Writer(writer);
+                default:
+                    throw new RuntimeException("Unknown output format: " + format);
+            }
         }
     }
 }
