@@ -118,7 +118,9 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                 return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(replacingChild));
 
             default:
-                return new NodeCentricOptimizationResultsImpl<>(query, iqFactory.createInnerJoinNode(newCondition));
+                InnerJoinNode newJoinNode = iqFactory.createInnerJoinNode(newCondition);
+                treeComponent.replaceNode(joinNode, newJoinNode);
+                return new NodeCentricOptimizationResultsImpl<>(query, newJoinNode);
         }
     }
 
