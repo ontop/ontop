@@ -1,69 +1,39 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
-/*
- * #%L
- * ontop-obdalib-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.*;
-import org.eclipse.rdf4j.model.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class R2RMLParser {
 
-	List<NonVariableTerm> classPredicates;
-	List<Resource> joinPredObjNodes;
-
-
-    RDF4JR2RMLMappingManager mapManager;
-	Logger logger = LoggerFactory.getLogger(R2RMLParser.class);
+	private final RDF4JR2RMLMappingManager manager;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
 	private final OntopMappingSQLSettings settings;
 	private final RDF rdfFactory;
 
-	/**
-	 * empty constructor
-	 * @param termFactory
-	 * @param typeFactory
-	 */
-	public R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
+	@Inject
+	private R2RMLParser(TermFactory termFactory, TypeFactory typeFactory, RDF rdfFactory,
 					   OntopMappingSQLSettings settings) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.settings = settings;
-		mapManager = RDF4JR2RMLMappingManager.getInstance();
-		classPredicates = new ArrayList<>();
-		joinPredObjNodes = new ArrayList<>();
+		this.manager = RDF4JR2RMLMappingManager.getInstance();
 		this.rdfFactory = rdfFactory;
 	}
 
@@ -72,8 +42,8 @@ public class R2RMLParser {
 	 * @param myGraph - the Graph to process
 	 * @return Collection<TriplesMap> - the collection of mappings
 	 */
-	public Collection<TriplesMap> getMappingNodes(Graph myGraph) throws InvalidR2RMLMappingException {
-		return mapManager.importMappings(myGraph);
+	public Collection<TriplesMap> extractTripleMaps(Graph myGraph) throws InvalidR2RMLMappingException {
+		return manager.importMappings(myGraph);
 	}
 
 	/**
@@ -85,17 +55,9 @@ public class R2RMLParser {
 		return tm.getLogicalTable().getSQLQuery();
 	}
 
-	/**
-	 * Get classes
-     * They can be retrieved only once, after retrieving everything is cleared.
-	 * @return
-	 */
-	public List<NonVariableTerm> getClassPredicates() {
-		List<NonVariableTerm> classes = new ArrayList<>();
-		for (NonVariableTerm p : classPredicates)
-			classes.add(p);
-		classPredicates.clear();
-		return classes;
+
+	public Stream<IRI> extractClassIRIs(SubjectMap subjectMap) {
+		return subjectMap.getClasses().stream();
 	}
 
 	/**
@@ -114,124 +76,62 @@ public class R2RMLParser {
 		return predobjs;
 	}
 
-	public ImmutableTerm getSubjectAtom(TriplesMap tm) throws Exception {
-		return getSubjectAtom(tm, "");
+	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap) {
+		return extractSubjectTerm(subjectMap, "");
 	}
 
-	/**
-	 * Get subject
-	 *
-	 * @param tm
-	 * @param joinCond
-	 * @return
-	 * @throws Exception
-	 */
-	public ImmutableTerm getSubjectAtom(TriplesMap tm, String joinCond) throws Exception {
-		ImmutableTerm subjectAtom = null;
-		String subj = "";
-		classPredicates.clear();
-
-		// SUBJECT
-		SubjectMap sMap = tm.getSubjectMap();
-
-		// process template declaration
-		IRI termType = sMap.getTermType();
-
-		// WORKAROUND for:
-		// SubjectMap.getTemplateString() throws NullPointerException when
-		// template == null
-		//
-		Template template = sMap.getTemplate();
-		if (template == null) {
-			subj = null;
-		} else {
-			subj = sMap.getTemplateString();
-		}
-
-		if (subj != null) {
-			// create uri("...",var)
-			subjectAtom = getTermTypeAtom(subj, termType, joinCond);
-		}
-
-		// process column declaration
-		subj = sMap.getColumn();
-		if (subj != null) {
-			if(template == null && (termType.equals(R2RMLVocabulary.iri))){
-
-				subjectAtom = termFactory.getRDFFunctionalTerm(
-						termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(subj)),
-						termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType()));
-
-			}
-			else {
-				// create uri("...",var)
-				subjectAtom = getTermTypeAtom(subj, termType, joinCond);
-			}
-		}
-
-		// process constant declaration
-        // TODO(xiao): toString() is suspicious
-        RDFTerm subjConstant = sMap.getConstant();
-		if (subjConstant != null) {
-			// create uri("...",var)
-            subj = subjConstant.toString();
-			subjectAtom = getURIFunction(subj, joinCond);
-		}
-
-
-		// process class declaration
-		List<IRI> classes = sMap.getClasses();
-		for (IRI o : classes) {
-            classPredicates.add(termFactory.getConstantIRI(o));
-		}
-
-		if (subjectAtom == null)
-			throw new Exception("Error in parsing the subjectMap in node "
-					+ tm.toString());
-
-		return subjectAtom;
-
+	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap, String joinCond) {
+		return extractIRIorBnodeTerm(subjectMap, joinCond);
 	}
 
-	/**
-	 * Get body predicates with templates
-	 * @param pom
-	 * @return
-	 * @throws Exception
-	 */
-	public List<NonVariableTerm> getBodyURIPredicates(PredicateObjectMap pom) {
-		List<NonVariableTerm> predicateAtoms = new ArrayList<>();
-
-		// process PREDICATEMAP
-		for (PredicateMap pm : pom.getPredicateMaps()) {
-
-			RDFTerm pmConstant = pm.getConstant();
-			if (pmConstant != null) {
-				IRIConstant bodyPredicate = termFactory.getConstantIRI(
-						rdfFactory.createIRI(pmConstant.toString()));
-				predicateAtoms.add(bodyPredicate);
-			}
-
-			Template t = pm.getTemplate();
-			if (t != null) {
-				// create uri("...",var)
-				NonVariableTerm predicateAtom = getURIFunction(t.toString());
-				predicateAtoms.add(predicateAtom);
-			}
-
-			// process column declaration
-			String c = pm.getColumn();
-			if (c != null) {
-				NonVariableTerm predicateAtom = getURIFunction(c);
-				predicateAtoms.add(predicateAtom);
-			}
-		}
-		return predicateAtoms;
-
+	public ImmutableList<NonVariableTerm> extractPredicateTerms(PredicateObjectMap pom) {
+		return pom.getPredicateMaps().stream()
+				.map(this::extractIRITerm)
+				.collect(ImmutableCollectors.toList());
 	}
 
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom) throws InvalidR2RMLMappingException {
-		return getObjectAtom(pom, "");
+
+	private NonVariableTerm extractIRITerm(TermMap termMap) {
+		if (!termMap.getTermType().equals(R2RMLVocabulary.iri))
+			throw new R2RMLParsingBugException("The term map must be an IRI, not " + termMap.getTermType());
+		return extractIRIorBnodeTerm(termMap, "");
+	}
+
+	private NonVariableTerm extractIRIorBnodeTerm(TermMap termMap, String joinCond) {
+		IRI termTypeIRI = termMap.getTermType();
+
+		boolean isIRI = termTypeIRI.equals(R2RMLVocabulary.iri);
+		if ((!isIRI) && (!termTypeIRI.equals(R2RMLVocabulary.blankNode)))
+			throw new R2RMLParsingBugException("Was expecting an IRI or a blank node, not a " + termTypeIRI);
+
+		// CONSTANT CASE
+		RDFTerm constant = termMap.getConstant();
+		if (constant != null) {
+			if (!isIRI)
+				throw new R2RMLParsingBugException("Constant blank nodes are not accepted in R2RML " +
+						"(should have been detected earlier)");
+			return termFactory.getConstantIRI(rdfFactory.createIRI(constant.toString()));
+		}
+
+		return Optional.ofNullable(termMap.getTemplate())
+				// TEMPLATE CASE
+				// TODO: should we use the Template object instead?
+				.map(Template::toString)
+				.map(s -> extractRDFTerm(s, termTypeIRI, joinCond))
+				// COLUMN case
+				.orElseGet(() -> Optional.ofNullable(termMap.getColumn())
+						.map(column -> termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(column)))
+						.map(lex -> termFactory.getRDFFunctionalTerm(
+								lex,
+								termFactory.getRDFTermTypeConstant(
+										isIRI ? typeFactory.getIRITermType() : typeFactory.getBlankNodeType())))
+						.orElseThrow(() -> new R2RMLParsingBugException("A term map is either constant-valued, " +
+								"column-valued or template-valued.")));
+	}
+
+
+	public ImmutableTerm extractRegularObjectTerms(PredicateObjectMap pom) throws InvalidR2RMLMappingException {
+		return extractRegularObjectTerms(pom, "");
 	}
 
 	public boolean isConcat(String st) {
@@ -249,13 +149,13 @@ public class R2RMLParser {
 
 	/**
 	 * Get the object atom, it can be a constant, a column or a template
-	 * 
+	 *
 	 * @param pom
 	 * @param joinCond
 	 * @return
 	 * @throws Exception
 	 */
-	public ImmutableTerm getObjectAtom(PredicateObjectMap pom, String joinCond) throws InvalidR2RMLMappingException {
+	public ImmutableTerm extractRegularObjectTerms(PredicateObjectMap pom, String joinCond) throws InvalidR2RMLMappingException {
 		ImmutableTerm lexicalTerm = null;
 		if (pom.getObjectMaps().isEmpty()) {
 			return null;
@@ -343,7 +243,7 @@ public class R2RMLParser {
 			//then we check if the template includes concat 
 			concat = isConcat(t.toString());
 			if (typ.equals(R2RMLVocabulary.literal) && (concat)){
-				lexicalTerm = getTypedFunction(t.toString(), 4, joinCond);
+				lexicalTerm = extractRDFTerm(t.toString(), 4, joinCond);
 			}else {
 
 				// a template can be a rr:IRI, a
@@ -365,7 +265,7 @@ public class R2RMLParser {
 					// we check if the template is a IRI a simple literal or a
 					// blank
 					// node and create the function object
-					lexicalTerm = getTermTypeAtom(t.toString(), type, joinCond);
+					lexicalTerm = extractRDFTerm(t.toString(), type, joinCond);
 				}
 			}
 		}
@@ -401,50 +301,33 @@ public class R2RMLParser {
 		throw new MinorOntopInternalBugException("TODO: fix this broken logic for " + lexicalTerm);
 	}
 
-	@Deprecated
-	public List<BlankNodeOrIRI> getJoinNodes(TriplesMap tm) {
-		List<BlankNodeOrIRI> joinPredObjNodes = new ArrayList<BlankNodeOrIRI>();
-		// get predicate-object nodes
-		Set<BlankNodeOrIRI> predicateObjectNodes = getPredicateObjects(tm);
-		return joinPredObjNodes;
-	}
+	private NonVariableTerm extractRDFTerm(String string, IRI typeIRI, String joinCond) {
 
-	/**
-	 * get a typed atom of a specific type
-	 * 
-	 * @param type
-	 *            - iri, blanknode or literal
-	 * @param string
-	 *            - the atom as string
-	 * @return the contructed Function atom
-	 */
-	private NonVariableTerm getTermTypeAtom(String string, Object type, String joinCond) {
+		if (typeIRI.equals(R2RMLVocabulary.iri)) {
 
-		if (type.equals(R2RMLVocabulary.iri)) {
+			return extractFunctionalIRITerm(string, joinCond);
 
-			return getURIFunction(string, joinCond);
+		} else if (typeIRI.equals(R2RMLVocabulary.blankNode)) {
 
-		} else if (type.equals(R2RMLVocabulary.blankNode)) {
+			return extractRDFTerm(string, 2, joinCond);
 
-			return getTypedFunction(string, 2, joinCond);
+		} else if (typeIRI.equals(R2RMLVocabulary.literal)) {
 
-		} else if (type.equals(R2RMLVocabulary.literal)) {
-
-			return getTypedFunction(trim(string), 3, joinCond);
+			return extractRDFTerm(trim(string), 3, joinCond);
 		}
-		return null;
+		throw new R2RMLParsingBugException("Unexpected term type: " + typeIRI);
 	}
 
-	private NonVariableTerm getURIFunction(String string, String joinCond) {
-		return getTypedFunction(string, 1, joinCond);
+	private NonVariableTerm extractFunctionalIRITerm(String string, String joinCond) {
+		return extractRDFTerm(string, 1, joinCond);
 	}
 
-	private NonVariableTerm getURIFunction(String string) {
-		return getTypedFunction(string, 1);
+	private NonVariableTerm extractFunctionalIRITerm(String string) {
+		return extractRDFTerm(string, 1);
 	}
 
-	public NonVariableTerm getTypedFunction(String parsedString, int type) {
-		return getTypedFunction(parsedString, type, "");
+	public NonVariableTerm extractRDFTerm(String parsedString, int type) {
+		return extractRDFTerm(parsedString, type, "");
 	}
 	
 	
@@ -473,8 +356,8 @@ public class R2RMLParser {
 	 *            - CHILD_ or PARENT_ prefix for variables
 	 * @return the constructed Function atom
 	 */
-	public NonVariableTerm getTypedFunction(String parsedString, int type,
-			String joinCond) {
+	private NonVariableTerm extractRDFTerm(String parsedString, int type,
+										   String joinCond) {
 
 		List<ImmutableTerm> terms = new ArrayList<>();
 		String string = (parsedString);
@@ -555,8 +438,9 @@ public class R2RMLParser {
 			return termFactory.getRDFLiteralFunctionalTerm(lexicalValue, XSD.STRING);
 		case 4://concat
 			return termFactory.getDBConcatFunctionalTerm(ImmutableList.copyOf(terms));
+		default:
+			throw new MinorOntopInternalBugException("Unexpected type code: " + type);
 		}
-		return null;
 	}
 
 	/**
@@ -590,6 +474,16 @@ public class R2RMLParser {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
+	}
+
+	/**
+	 * Bug most likely coming from the R2RML library, but we classify as an "internal" bug
+	 */
+	private static class R2RMLParsingBugException extends OntopInternalBugException {
+
+		protected R2RMLParsingBugException(String message) {
+			super(message);
+		}
 	}
 
 
