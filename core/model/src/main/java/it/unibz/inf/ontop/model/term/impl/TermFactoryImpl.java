@@ -904,7 +904,7 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
-	public ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<ImmutableTerm> terms) {
+	public ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {
 		int arity = terms.size();
 		if (arity < 2)
 			throw new IllegalArgumentException("CONCAT needs at least two arguments");
