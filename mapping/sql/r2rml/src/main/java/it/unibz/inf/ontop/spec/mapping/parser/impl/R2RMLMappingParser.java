@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
@@ -49,17 +48,15 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
-    private final TermFactory termFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final R2RMLParser r2rmlParser;
 
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
-                               TermFactory termFactory, TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser) {
+                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
-        this.termFactory = termFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.r2rmlParser = r2rmlParser;
     }
@@ -112,21 +109,21 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
         ImmutableList.Builder<SQLPPTriplesMap> ppTriplesMapsBuilder = ImmutableList.builder();
 
-        /*
-         * TODO: refactor so that ONLY ONE PPTriplesMap is created per triples map
-         */
         for (TriplesMap tm : tripleMaps) {
             extractPPTriplesMap(tm)
                     .ifPresent(ppTriplesMapsBuilder::add);
 
-            // pass 2 - check for join conditions, add to list
+            /*
+             * Pass 2 - Creates new PP triples maps for object ref maps
+             * NB: these triples maps are novel because the SQL queries are different
+             */
             ppTriplesMapsBuilder.addAll(extractJoinPPTriplesMaps(tripleMaps, tm));
         }
         return ppTriplesMapsBuilder.build();
     }
 
     private Optional<SQLPPTriplesMap> extractPPTriplesMap(TriplesMap tm) throws InvalidR2RMLMappingException {
-        String sourceQuery = r2rmlParser.getSQLQuery(tm).trim();
+        String sourceQuery = r2rmlParser.extractSQLQuery(tm).trim();
         ImmutableList<TargetAtom> targetAtoms = extractMappingTargetAtoms(tm);
 
         if (targetAtoms.isEmpty()){
@@ -145,29 +142,17 @@ public class R2RMLMappingParser implements SQLMappingParser {
         SubjectMap subjectMap = tm.getSubjectMap();
         ImmutableTerm subjectTerm = r2rmlParser.extractSubjectTerm(subjectMap);
 
-        //TODO: avoid using forEach
         r2rmlParser.extractClassIRIs(subjectMap)
                 .map(i -> targetAtomFactory.getTripleTargetAtom(subjectTerm, i))
                 .forEach(targetAtoms::add);
 
         for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
-            //for each predicate object map
 
-            //predicates that contain a variable are separately treated TODO: WHERE?
-            List<NonVariableTerm> bodyURIPredicates = r2rmlParser.extractPredicateTerms(pom);
-
-            ImmutableTerm objectTerm = r2rmlParser.extractRegularObjectTerms(pom);
-
-            if (objectTerm == null) {
-                // skip, object is a join
-                continue;
-            }
-
-
-            //treat predicates
-            for (NonVariableTerm predFunction : bodyURIPredicates) {
-
-                targetAtoms.add(targetAtomFactory.getTripleTargetAtom(subjectTerm, predFunction, objectTerm));   // objectAtom
+            List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pom);
+            for (ImmutableTerm objectTerm : r2rmlParser.extractRegularObjectTerms(pom)) {
+                for (NonVariableTerm predicateTerm : predicateTerms) {
+                    targetAtoms.add(targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateTerm, objectTerm));
+                }
             }
         }
         return targetAtoms.build();
@@ -193,14 +178,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 ImmutableTerm childSubject = r2rmlParser.extractSubjectTerm(tm.getSubjectMap());
 
                 TriplesMap parent = robm.getParentMap();
-                // TODO: can we just use the parent instead? CHECK
-                TriplesMap parentTriple = tripleMaps.stream()
-                        .filter(m -> m.equals(parent))
-                        .findAny()
-                        .orElseThrow(() -> new MinorOntopInternalBugException(
-                                "In the R2RML graph, the parent triples map could not be found"));
-
-                ImmutableTerm parentSubject = r2rmlParser.extractSubjectTerm(parentTriple.getSubjectMap());
+                ImmutableTerm parentSubject = r2rmlParser.extractSubjectTerm(parent.getSubjectMap());
 
                 ImmutableList<TargetAtom> targetAtoms = predicateTerms.stream()
                         .map(p -> targetAtomFactory.getTripleTargetAtom(childSubject, p, parentSubject))
