@@ -118,7 +118,9 @@ public class RedundantJoinFKTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, dataNode2);
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+        expectedQueryBuilder.addChild(constructionNode, filterNode);
+        expectedQueryBuilder.addChild(filterNode, dataNode2);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
@@ -286,7 +288,9 @@ public class RedundantJoinFKTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         expectedQueryBuilder.init(projectionAtom1, constructionNode);
-        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
+        InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBIsNotNull(A),
+                TERM_FACTORY.getDBIsNotNull(C)));
         expectedQueryBuilder.addChild(constructionNode, joinNode1);
         expectedQueryBuilder.addChild(joinNode1, dataNode1_1);
         expectedQueryBuilder.addChild(joinNode1, dataNode1_2);
@@ -327,7 +331,11 @@ public class RedundantJoinFKTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, dataNode2);
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBIsNotNull(A),
+                TERM_FACTORY.getDBIsNotNull(B)));
+        expectedQueryBuilder.addChild(constructionNode, filterNode);
+        expectedQueryBuilder.addChild(filterNode, dataNode2);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
