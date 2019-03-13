@@ -26,8 +26,11 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -44,14 +47,19 @@ public class DirectMappingAxiomProducer {
 
 	private final TermFactory termFactory;
 	private final org.apache.commons.rdf.api.RDF rdfFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 	private final TargetAtomFactory targetAtomFactory;
+	private final TypeFactory typeFactory;
 
 	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
-									  org.apache.commons.rdf.api.RDF rdfFactory) {
+									  org.apache.commons.rdf.api.RDF rdfFactory,
+									  DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
         this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		this.targetAtomFactory = targetAtomFactory;
 		this.rdfFactory = rdfFactory;
+		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.typeFactory = typeFactory;
 	}
 
 
@@ -59,10 +67,11 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table) {
+	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition,
+			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		Map<String, ImmutableList<TargetAtom>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys())
-			refAxioms.put(getRefSQL(fk), getRefCQ(fk));
+			refAxioms.put(getRefSQL(fk), getRefCQ(fk, bnodeTemplateMap));
 		
 		return refAxioms;
 	}
@@ -125,12 +134,12 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table) {
+    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
 		//Class Atom
-		ImmutableTerm sub = generateSubject(table, false);
+		ImmutableTerm sub = generateSubject(table, false, bnodeTemplateMap);
 		atoms.add(getAtom(getTableIRI(table.getID()), sub));
 
 		//DataType Atoms
@@ -156,9 +165,10 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	private ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk) {
-        ImmutableTerm sub = generateSubject(fk.getRelation(), true);
-		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true);
+	private ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk, Map<DatabaseRelationDefinition,
+			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+        ImmutableTerm sub = generateSubject(fk.getRelation(), true, bnodeTemplateMap);
+		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true, bnodeTemplateMap);
 
 		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
 		return ImmutableList.of(atom);
@@ -226,9 +236,11 @@ public class DirectMappingAxiomProducer {
      * - If the table has no primary key, the row node is a fresh blank node that is unique to this row.
      *
      * @param td
-     * @return
+     * @param bnodeTemplateMap
+	 * @return
      */
-    private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref) {
+    private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref,
+										  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		
 		String varNamePrefix = ref
 				? td.getID().getTableName() + "_"
@@ -254,7 +266,16 @@ public class DirectMappingAxiomProducer {
 			for (Attribute att : td.getAttributes())
 				vars.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
 
-			return termFactory.getFreshBnodeFunctionalTerm(ImmutableList.copyOf(vars));
+			/*
+			 * Re-use the blank node template if already existing
+			 */
+			BnodeStringTemplateFunctionSymbol functionSymbol = bnodeTemplateMap
+					.computeIfAbsent(td,
+							d -> dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(vars.size()));
+
+			ImmutableFunctionalTerm lexicalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, ImmutableList.copyOf(vars));
+			return termFactory.getRDFFunctionalTerm(lexicalTerm,
+					termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType()));
 		}
 	}
 

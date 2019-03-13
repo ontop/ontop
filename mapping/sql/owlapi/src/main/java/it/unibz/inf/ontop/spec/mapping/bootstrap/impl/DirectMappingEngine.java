@@ -32,6 +32,8 @@ import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -90,6 +92,7 @@ public class DirectMappingEngine {
 	private final RDF rdfFactory;
 	private final OntopSQLCredentialSettings settings;
 	private final TargetAtomFactory targetAtomFactory;
+	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     private String baseIRI;
 	private int currentMappingIndex = 1;
@@ -109,7 +112,8 @@ public class DirectMappingEngine {
 	private DirectMappingEngine(OntopSQLCredentialSettings settings,
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
-								RDF rdfFactory, TargetAtomFactory targetAtomFactory) {
+								RDF rdfFactory, TargetAtomFactory targetAtomFactory,
+								DBFunctionSymbolFactory dbFunctionSymbolFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -117,6 +121,7 @@ public class DirectMappingEngine {
 		this.termFactory = termFactory;
 		this.rdfFactory = rdfFactory;
 		this.targetAtomFactory = targetAtomFactory;
+		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 	}
 
 	/**
@@ -250,8 +255,9 @@ public class DirectMappingEngine {
 			this.baseIRI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<SQLPPTriplesMap> mappingAxioms = new ArrayList<>();
+		Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
 		for (DatabaseRelationDefinition td : tables) {
-			mappingAxioms.addAll(getMapping(td, baseIRI));
+			mappingAxioms.addAll(getMapping(td, baseIRI, bnodeTemplateMap));
 		}
 
 		List<SQLPPTriplesMap> mappings = new ArrayList<>();
@@ -267,20 +273,22 @@ public class DirectMappingEngine {
 	 * 
 	 * @param table : the data definition from which mappings are extraced
 	 * @param baseUri : the base uri needed for direct mapping axiom
-	 * 
-	 *  @return a List of OBDAMappingAxiom-s
+	 *
+	 *  @param bnodeTemplateMap
+	 * @return a List of OBDAMappingAxiom-s
 	 */
-	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
+	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri,
+											 Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory,
-				rdfFactory);
+				rdfFactory, dbFunctionSymbolFactory, typeFactory);
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,
-				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table)));
+				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
 		currentMappingIndex++;
 		
-		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table);
+		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
 		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
             OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
 			ImmutableList<TargetAtom> targetQuery = e.getValue();
