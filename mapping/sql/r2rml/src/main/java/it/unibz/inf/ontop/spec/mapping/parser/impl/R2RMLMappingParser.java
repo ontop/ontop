@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import eu.optique.r2rml.api.model.PredicateObjectMap;
 import eu.optique.r2rml.api.model.RefObjectMap;
@@ -107,19 +108,45 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
         Collection<TriplesMap> tripleMaps = r2rmlParser.extractTripleMaps(mappingGraph);
 
-        ImmutableList.Builder<SQLPPTriplesMap> ppTriplesMapsBuilder = ImmutableList.builder();
+        /*
+         * Pass 1: creates "regular" PP triples maps using the original SQL queries
+         */
+        Map<TriplesMap, SQLPPTriplesMap> regularMap = new HashMap<>();
 
         for (TriplesMap tm : tripleMaps) {
             extractPPTriplesMap(tm)
-                    .ifPresent(ppTriplesMapsBuilder::add);
-
-            /*
-             * Pass 2 - Creates new PP triples maps for object ref maps
-             * NB: these triples maps are novel because the SQL queries are different
-             */
-            ppTriplesMapsBuilder.addAll(extractJoinPPTriplesMaps(tm));
+                    .ifPresent(m -> regularMap.put(tm, m));
         }
-        return ppTriplesMapsBuilder.build();
+
+        /*
+         * It is important to create subject terms only once because of blank nodes.
+         */
+        ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap = regularMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> extractSubjectTerm(e.getValue())));
+
+        List<SQLPPTriplesMap> ppTriplesMaps = Lists.newArrayList();
+        ppTriplesMaps.addAll(regularMap.values());
+
+        /*
+         * Pass 2 - Creates new PP triples maps for object ref maps
+         * NB: these triples maps are novel because the SQL queries are different
+         */
+        for (TriplesMap tm : tripleMaps) {
+            ppTriplesMaps.addAll(extractJoinPPTriplesMaps(tm, subjectTermMap));
+        }
+
+
+        return ImmutableList.copyOf(ppTriplesMaps);
+    }
+
+    private ImmutableTerm extractSubjectTerm(SQLPPTriplesMap sqlppTriplesMap) {
+        return sqlppTriplesMap.getTargetAtoms().stream()
+                .map(a -> a.getSubstitutedTerm(0))
+                .findAny()
+                .orElseThrow(() -> new MinorOntopInternalBugException("" +
+                        "All created SQLPPTriplesMaps must have at least one target atom"));
     }
 
     private Optional<SQLPPTriplesMap> extractPPTriplesMap(TriplesMap tm) throws InvalidR2RMLMappingException {
@@ -158,7 +185,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return targetAtoms.build();
     }
 
-    private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm) throws InvalidR2RMLMappingException {
+    private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm,
+                                                           ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap) throws InvalidR2RMLMappingException {
         ImmutableList.Builder<SQLPPTriplesMap> joinPPTriplesMapsBuilder = ImmutableList.builder();
         for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 
@@ -175,10 +203,15 @@ public class R2RMLMappingParser implements SQLMappingParser {
                     throw new InvalidR2RMLMappingException("Could not create source query for join in " + tm);
                 }
 
-                ImmutableTerm childSubject = r2rmlParser.extractSubjectTerm(tm.getSubjectMap());
+                ImmutableTerm childSubject = Optional.ofNullable(subjectTermMap.get(tm))
+                        .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
 
                 TriplesMap parent = robm.getParentMap();
-                ImmutableTerm parentSubject = r2rmlParser.extractSubjectTerm(parent.getSubjectMap());
+                /*
+                 * Re-uses the already created subject term. Important when dealing with blank nodes.
+                 */
+                ImmutableTerm parentSubject = Optional.ofNullable(subjectTermMap.get(parent))
+                        .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
 
                 ImmutableList<TargetAtom> targetAtoms = predicateTerms.stream()
                         .map(p -> targetAtomFactory.getTripleTargetAtom(childSubject, p, parentSubject))
