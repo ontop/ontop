@@ -81,9 +81,52 @@ public class RDB2RDFTest {
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
 	private static Set<String> IGNORE = ImmutableSet.of(
-		"tc0002f", "tc0002h", "tc0003a", "dg0005", "tc0007h", "tc0009a", "tc0009b", "tc0009d", "dg0010", "tc0010c", "dg0012",
-		"dg0014", "tc0014b", "tc0014c", "tc0015b", "dg0016", "tc0016c", "tc0016e", "dg0017", "dg0018", "tc0018a", "tc0019a",
-		"tc0019b", "tc0020b", "dg0025"
+			// TODO: understand why
+			"tc0002f",
+			// Should reject an undefined SQL version
+			"tc0003a",
+			// Should create duplicate blank nodes
+			"dg0005",
+			// Named graph
+			"tc0007h",
+			// The SQL should not be rejected
+			"tc0009a",
+			// The SQL should not be rejected
+			"tc0009b",
+			// TODO: check: literal not typed as XSD.INTEGER
+			"tc0009d",
+			// TODO: fix: too much escaping for the curly brackets in the string
+			"tc0010c",
+			// TODO: check, could just be double "formatting"
+			"dg0012",
+			// TODO: check why
+			"dg0014",
+			// TODO: check why
+			"tc0014b",
+			// Less results than expected. TODO: check why
+			"tc0014c",
+			// Should reject an invalid language tag
+			"tc0015b",
+			// TODO: check, could just be double "formatting"
+			"dg0016",
+			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
+			"tc0016c",
+			// Wrong data IRI created. TODO: fix it
+			"tc0016e",
+			// Excessive IRI encoding done for extreme-east asia characters
+			"dg0017",
+			// Padding spaces missing in literals. TODO: fix it
+			"dg0018",
+			// Padding spaces missing in literals. TODO: fix it
+			"tc0018a",
+			// Should create an IRI based on a column and the "base" prefix. TODO: at least throw a better exception
+			"tc0019a",
+			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
+			"tc0019b",
+			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
+			"tc0020b",
+			// TODO: double check the result to detect any difference
+			"dg0025"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();
