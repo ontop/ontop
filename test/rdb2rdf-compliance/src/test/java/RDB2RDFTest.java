@@ -81,7 +81,7 @@ public class RDB2RDFTest {
 	 * Following tests are failing due to various different reasons and bugs and are excluded manually.
 	 */
 	private static Set<String> IGNORE = ImmutableSet.of(
-			// TODO: understand why
+			// Column appearing in the template: {Name} is not equivalent to {\"Name\"} and should be therefore not accepted
 			"tc0002f",
 			// Should reject an undefined SQL version
 			"tc0003a",
@@ -93,7 +93,7 @@ public class RDB2RDFTest {
 			"tc0009a",
 			// The SQL should not be rejected
 			"tc0009b",
-			// TODO: check: literal not typed as XSD.INTEGER
+			// Should recognize that COUNT(...) in the source query returns an INTEGER to infer the right XSD datatype
 			"tc0009d",
 			// TODO: fix: too much escaping for the curly brackets in the string
 			"tc0010c",

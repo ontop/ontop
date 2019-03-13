@@ -117,7 +117,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
              * Pass 2 - Creates new PP triples maps for object ref maps
              * NB: these triples maps are novel because the SQL queries are different
              */
-            ppTriplesMapsBuilder.addAll(extractJoinPPTriplesMaps(tripleMaps, tm));
+            ppTriplesMapsBuilder.addAll(extractJoinPPTriplesMaps(tm));
         }
         return ppTriplesMapsBuilder.build();
     }
@@ -158,7 +158,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return targetAtoms.build();
     }
 
-    private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(Collection<TriplesMap> tripleMaps, TriplesMap tm) throws InvalidR2RMLMappingException {
+    private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm) throws InvalidR2RMLMappingException {
         ImmutableList.Builder<SQLPPTriplesMap> joinPPTriplesMapsBuilder = ImmutableList.builder();
         for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 
