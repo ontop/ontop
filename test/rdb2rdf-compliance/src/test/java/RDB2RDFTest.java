@@ -101,8 +101,10 @@ public class RDB2RDFTest {
 			"tc0009d",
 			// TODO: fix: too much escaping for the curly brackets in the string
 			"tc0010c",
-			// TODO: check, could just be double "formatting"
+			// Modified (different XSD.DOUBLE lexical form)
 			"dg0012",
+			// Incomplete results
+			"dg0012-modified",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
@@ -115,7 +117,7 @@ public class RDB2RDFTest {
 			"tc0014c",
 			// Should reject an invalid language tag
 			"tc0015b",
-			// TODO: check, could just be double "formatting"
+			// Double + timezone was not expected to be added. Same for milliseconds.
 			"dg0016",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0016b",
@@ -134,9 +136,7 @@ public class RDB2RDFTest {
 			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
 			"tc0019b",
 			// Should reject some data (with a space) leading to the creating of an invalid IRI. TODO: throw a better exception
-			"tc0020b",
-			// TODO: double check the result to detect any difference
-			"dg0025"
+			"tc0020b"
 	);
 
 	private static List<String> FAILURES = Lists.newArrayList();

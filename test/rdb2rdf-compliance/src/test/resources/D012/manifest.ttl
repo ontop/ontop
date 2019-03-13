@@ -21,6 +21,18 @@
 	rdb2rdftest:hasExpectedOutput true ;	
 	rdb2rdftest:output "directGraph.ttl" ;
 .
+
+# MODIFIED VERSION
+<dg0012-modified> a rdb2rdftest:DirectMapping ;
+	dcterms:title "Generation of direct graph from a database without primary keys (modified)";
+	dcterms:identifier "DirectGraphTC0012" ;
+	test:purpose "Test the generation of direct graph from a database without primary keys, by creating subject BlankNodes" ;
+	test:specificationReference "#no-pk" ;
+	rdb2rdftest:database <d012> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "directGraph-modified.ttl"
+.
+
 <tc0012a> a rdb2rdftest:R2RML ;	
 	dcterms:title "Duplicate tuples generate same blank node" ; 
 	dcterms:identifier "R2RMLTC0012a" ;
