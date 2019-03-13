@@ -46,6 +46,18 @@
 	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
 .
 
+#MODIFIED VERSION
+<tc0016b-modified> a rdb2rdftest:R2RML ;
+	dcterms:title "Table with datatypes: real and float (modified)" ;
+	dcterms:identifier "R2RMLTC0016b-modified" ;
+	test:purpose "Tests the rr:termtype and datatype conversions: real and float" ;
+	test:specificationReference "#datatype-conversions" ;
+	rdb2rdftest:database <d016> ;
+	rdb2rdftest:hasExpectedOutput true ;
+	rdb2rdftest:output "mappedb-modified.nq" ;
+	rdb2rdftest:mappingDocument "r2rmlb.ttl" ;
+.
+
 <tc0016c> a rdb2rdftest:R2RML ;	
 	dcterms:title "Table with datatypes: date and timestamp" ; 
 	dcterms:identifier "R2RMLTC0016c" ;

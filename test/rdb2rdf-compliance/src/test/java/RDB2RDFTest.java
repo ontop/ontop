@@ -87,6 +87,10 @@ public class RDB2RDFTest {
 			"tc0003a",
 			// Should create duplicate blank nodes
 			"dg0005",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0005a",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0005b",
 			// Named graph
 			"tc0007h",
 			// The SQL should not be rejected
@@ -99,6 +103,10 @@ public class RDB2RDFTest {
 			"tc0010c",
 			// TODO: check, could just be double "formatting"
 			"dg0012",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0012a",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0012e",
 			// TODO: check why
 			"dg0014",
 			// TODO: check why
@@ -109,6 +117,8 @@ public class RDB2RDFTest {
 			"tc0015b",
 			// TODO: check, could just be double "formatting"
 			"dg0016",
+			// Modified (different XSD.DOUBLE lexical form)
+			"tc0016b",
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
 			// Wrong data IRI created. TODO: fix it
