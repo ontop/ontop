@@ -25,10 +25,12 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -47,8 +49,10 @@ public class SparqlQueryController {
     private final Repository repository;
 
     @Autowired
-    public SparqlQueryController(EndpointConfig config) {
-        this.repository = setupVirtualRepository(config.getMappingFile(), config.getOntologyFile(), config.getPropertiesFile());
+    public SparqlQueryController(@Value("${ontology}") String owlFile,
+                                 @Value("${mapping}") String mappingFile,
+                                 @Value("${properties}") String propertiesFile) {
+        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile);
     }
 
     private static Repository setupVirtualRepository(String mappings, String ontology, String properties) throws RepositoryException {
@@ -113,7 +117,6 @@ public class SparqlQueryController {
                                              String query, String[] defaultGraphUri, String[] namedGraphUri) {
 
         HttpHeaders headers = new HttpHeaders();
-
         HttpStatus status = HttpStatus.OK;
 
         RepositoryConnection connection = repository.getConnection();

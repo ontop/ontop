@@ -23,6 +23,8 @@ Assume that the following files are in the working directory:
 
 You can start an Ontop SPARQL endpoint by using the `ontop/ontop-endpoint` image directly:
 
+
+#### Linux/Mac
 ```console
 docker run --rm \
 -v $PWD/input:/opt/ontop/input \
@@ -32,6 +34,18 @@ docker run --rm \
 -e PROPERTIES_FILE=/opt/ontop/input/university-complete.docker.properties \
 -p 8080:8080 ontop/ontop-endpoint
 ```
+
+#### Windows
+```console
+docker run --rm ^
+-v %CD%/input:/opt/ontop/input ^
+-v %CD%/jdbc:/opt/ontop/jdbc ^
+-e ONTOLOGY_FILE=/opt/ontop/input/university-complete.ttl ^
+-e MAPPING_FILE=/opt/ontop/input/university-complete.obda ^
+-e PROPERTIES_FILE=/opt/ontop/input/university-complete.docker.properties ^
+-p 8080:8080 ontop/ontop-endpoint
+```
+
 
 ### Create a dedicated image 
 
@@ -47,7 +61,8 @@ ENTRYPOINT java -cp ./lib/*:./jdbc/* -Dlogback.configurationFile=file:./log/logb
         it.unibz.inf.ontop.endpoint.OntopEndpointApplication \
         --ontology=input/university-complete.ttl \
         --mapping=input/university-complete.obda \
-        --properties=input/university-complete.docker.properties
+        --properties=input/university-complete.docker.properties \
+        --cors-allowed-origins=http://yasgui.org
 ```
 
 Then, run the commands to build and run the Docker image:

@@ -1,7 +1,5 @@
 FROM openjdk:8-jdk-alpine
 
-MAINTAINER Guohui Xiao <gh.xiao@gmail.com>
-
 VOLUME /tmp
 RUN mkdir -p /opt/ontop
 COPY . /opt/ontop/
