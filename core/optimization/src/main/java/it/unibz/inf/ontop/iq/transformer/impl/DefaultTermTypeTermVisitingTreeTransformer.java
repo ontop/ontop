@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -174,7 +175,13 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                 .orElseThrow(() -> new UnexpectedlyFormattedIQTreeException(
                         "Was expecting the child to start with a ConstructionNode"));
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(
+        /*
+         * All the definitions.
+         *
+         * Some of them may be propagated down (var-to-var when the second variable is not projected)
+         *
+         */
+        ImmutableSubstitution<ImmutableTerm> newDefinitions = substitutionFactory.getSubstitution(
                 initialConstructionNode.getSubstitution().getImmutableMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 e -> Optional.ofNullable(integerVariableMap.get(e.getKey())).orElseGet(e::getKey),
@@ -182,9 +189,27 @@ public class DefaultTermTypeTermVisitingTreeTransformer
                                         ? transformIntoIntegerDefinition(e.getValue())
                                         : e.getValue())));
 
+        Optional<InjectiveVar2VarSubstitution> optionalSubstitutionToPropagateDown = Optional.of(
+                newDefinitions.getImmutableMap().entrySet().stream()
+                        .filter(e -> (e.getValue() instanceof Variable) && !newProjectedVariables.contains(e.getValue()))
+                        // Inverse the entry
+                        .map(e -> Maps.immutableEntry((Variable) e.getValue(), e.getKey()))
+                        .collect(ImmutableCollectors.toMap()))
+                .filter(m -> !m.isEmpty())
+                .map(substitutionFactory::getInjectiveVar2VarSubstitution);
+
+        IQTree grandChild = ((UnaryIQTree) child).getChild();
+        IQTree newGrandChild = optionalSubstitutionToPropagateDown
+                .map(s -> grandChild.applyDescendingSubstitution(s, Optional.empty()))
+                .orElse(grandChild);
+
+        ImmutableSubstitution<ImmutableTerm> newChildSubstitution = optionalSubstitutionToPropagateDown
+                .map(prop -> prop.applyRenaming(newDefinitions))
+                .orElse(newDefinitions);
+
         return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(newProjectedVariables, newSubstitution),
-                ((UnaryIQTree) child).getChild());
+                iqFactory.createConstructionNode(newProjectedVariables, newChildSubstitution),
+                newGrandChild);
     }
 
     private ImmutableTerm transformIntoIntegerDefinition(ImmutableTerm term) {
