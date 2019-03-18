@@ -233,12 +233,14 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private Function wrapNonTriplePattern(TranslationResult sub) {
-        if (sub.atoms.isEmpty() || sub.atoms.size() > 1 || sub.atoms.get(0).isAlgebraFunction()) {
+	    if (sub.atoms.size() == 1 && (sub.atoms.get(0) instanceof AtomPredicate))
+	        return sub.atoms.get(0);
+	    // By default, create a sub-rule
+        else {
             Function head = getFreshHead(new ArrayList<>(sub.variables));
             appendRule(head, sub.atoms);
             return head;
         }
-        return sub.atoms.get(0);
     }
 
     private void appendRule(Function head, List<Function> body) {
