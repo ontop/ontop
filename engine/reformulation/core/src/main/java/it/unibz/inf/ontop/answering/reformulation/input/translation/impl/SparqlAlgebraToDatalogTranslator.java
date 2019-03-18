@@ -233,7 +233,7 @@ public class SparqlAlgebraToDatalogTranslator {
     }
 
     private Function wrapNonTriplePattern(TranslationResult sub) {
-	    if (sub.atoms.size() == 1 && (sub.atoms.get(0) instanceof AtomPredicate))
+	    if (sub.atoms.size() == 1 && (sub.atoms.get(0).getFunctionSymbol() instanceof AtomPredicate))
 	        return sub.atoms.get(0);
 	    // By default, create a sub-rule
         else {
