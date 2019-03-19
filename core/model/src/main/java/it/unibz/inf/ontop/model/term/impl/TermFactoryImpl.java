@@ -860,7 +860,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getDBCase(whenPairs, valueNull);
 	}
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
+	}
+
+	@Override
     public ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
         return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRegexpReplace3(), text, from, to);
     }

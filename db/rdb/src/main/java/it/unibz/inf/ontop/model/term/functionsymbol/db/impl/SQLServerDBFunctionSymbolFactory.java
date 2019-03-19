@@ -158,7 +158,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
      */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
-                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+                                           Function<ImmutableTerm, String> termConverter,
+                                           TermFactory termFactory) {
         return String.format("CONVERT(varchar,%s,127)", termConverter.apply(terms.get(0)));
     }
 
@@ -175,5 +176,18 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
         return new SQLServerBooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
+    }
+
+    /**
+     * TODO: try to support the fragment that reduces to REPLACE
+     */
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace3() {
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace4() {
+        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
 }

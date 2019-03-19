@@ -13,6 +13,7 @@ import java.util.function.Function;
 
 public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
+    private final static String CAST_TEMPLATE = "CAST(%s AS %s)";
     private final DBTermType dbStringType;
 
     protected AbstractTimestampISODenormFunctionSymbol(DBTermType timestampType, DBTermType dbStringType) {
@@ -54,12 +55,16 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
 
     @Override
     protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement timestamp denormalization");
+        String newString = constant.getValue().replace("T", " ");
+        return termFactory.getDBConstant(newString, getTargetType());
     }
 
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
+        ImmutableFunctionalTerm newTerm = termFactory.getDBReplace(terms.get(0),
+                termFactory.getDBStringConstant("T"),
+                termFactory.getDBStringConstant(" "));
+        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getName());
     }
 }

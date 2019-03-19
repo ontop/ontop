@@ -427,6 +427,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    public DBFunctionSymbol getDBReplace() {
+        return getRegularDBFunctionSymbol(REPLACE_STR, 3);
+    }
+
+    @Override
     public DBFunctionSymbol getDBRegexpReplace3() {
         return getRegularDBFunctionSymbol(REGEXP_REPLACE_STR, 3);
     }

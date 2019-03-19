@@ -308,6 +308,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBReplace() {
+        return getRegularDBFunctionSymbol("REPLACE", 3);
+    }
+
+    @Override
     public DBFunctionSymbol getDBRegexpReplace3() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
