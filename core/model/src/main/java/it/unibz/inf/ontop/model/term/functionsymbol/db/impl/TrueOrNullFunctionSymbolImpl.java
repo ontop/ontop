@@ -21,7 +21,7 @@ public class TrueOrNullFunctionSymbolImpl extends AbstractOrNullFunctionSymbol i
 
         ImmutableExpression condition = termFactory.getDisjunction((ImmutableList<ImmutableExpression>) terms);
 
-        ImmutableFunctionalTerm newExpression = termFactory.getIfElseNull(condition, termFactory.getDBBooleanConstant(true));
+        ImmutableFunctionalTerm newExpression = termFactory.getBooleanIfElseNull(condition, termFactory.getIsTrue(termFactory.getDBBooleanConstant(true)));
         return termConverter.apply(newExpression);
     }
 }

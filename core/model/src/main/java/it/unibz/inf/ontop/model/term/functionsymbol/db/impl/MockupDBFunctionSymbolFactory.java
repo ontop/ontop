@@ -420,7 +420,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getIsTrue() {
+    public DBIsTrueFunctionSymbol getIsTrue() {
         return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
     }
 

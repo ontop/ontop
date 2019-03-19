@@ -42,7 +42,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     private final DBTypeFactory dbTypeFactory;
     private final DBTermType dbStringType;
-    private final DBTermType dbBooleanType;
+    protected final DBTermType dbBooleanType;
     private final DBTermType dbDoubleType;
     private final DBTermType abstractRootDBType;
     private final TermType abstractRootType;
@@ -50,7 +50,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBBooleanFunctionSymbol isStringEmpty;
     private final DBIsNullOrNotFunctionSymbol isNull;
     private final DBIsNullOrNotFunctionSymbol isNotNull;
-    private final DBBooleanFunctionSymbol isTrue;
+    private final DBIsTrueFunctionSymbol isTrue;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
                                                  ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
@@ -213,7 +213,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
         return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
     }
 
@@ -493,7 +493,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBBooleanFunctionSymbol getIsTrue() {
+    public DBIsTrueFunctionSymbol getIsTrue() {
         return isTrue;
     }
 

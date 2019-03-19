@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -166,11 +167,13 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return UUID_STR;
     }
 
-    /**
-     * TODO: implement seriously
-     */
     @Override
-    protected DBBooleanFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
-        return super.createDBIsTrue(dbBooleanType);
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new SQLServerDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
+        return new SQLServerBooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
     }
 }

@@ -32,7 +32,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
     private final DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
-    private final DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
     private final DBNotFunctionSymbol dbNotFunctionSymbol;
 
     // Lazy
@@ -94,6 +93,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Nullable
     private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
 
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -225,7 +227,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
         this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
-        this.booleanIfElseNullFunctionSymbol = new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
+        this.booleanIfElseNullFunctionSymbol = null;
         this.dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
         this.numericInequalityMap = new HashMap<>();
@@ -358,6 +360,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBBooleanFunctionSymbol getDBBooleanIfElseNull() {
+        if (booleanIfElseNullFunctionSymbol == null)
+            booleanIfElseNullFunctionSymbol = createDBBooleanIfElseNull();
         return booleanIfElseNullFunctionSymbol;
     }
 
@@ -781,6 +785,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                                                      DBTermType targetType);
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
+
+    protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
+        return new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
+    }
 
     protected abstract DBStrictEqFunctionSymbol createDBStrictEquality(int arity);
 
