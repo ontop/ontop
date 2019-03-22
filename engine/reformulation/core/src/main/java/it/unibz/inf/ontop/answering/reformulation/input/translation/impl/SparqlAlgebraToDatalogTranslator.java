@@ -549,9 +549,11 @@ public class SparqlAlgebraToDatalogTranslator {
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
+            // BC-march-19: it seems that SPARQL does not forbid invalid lexical forms
+            //     (e.g. when interpreted as an EBV, they evaluate to false)
             // check if the value is (lexically) correct for the specified datatype
-            if (!XMLDatatypeUtil.isValidValue(value, typeURI))
-                throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
+//            if (!XMLDatatypeUtil.isValidValue(value, typeURI))
+//                throw new OntopUnsupportedInputQueryException("Invalid lexical form for datatype. Found: " + value);
 
             Term constant = termFactory.getDBStringConstant(value);
 
