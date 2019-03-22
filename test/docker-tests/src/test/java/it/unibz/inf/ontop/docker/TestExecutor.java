@@ -17,6 +17,7 @@ import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.junit.Assert;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -84,7 +85,7 @@ public class TestExecutor {
             throw new Exception("Expected: " + expectedResult + ", result: " + queryResult);
     }
 
-    private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) throws Exception {
+    private void compareResultSize(TupleQueryResult queryResult, ResultSetInfo expectedResult) {
         int queryResultSize = countTuple(queryResult);
         int expectedResultSize = (Integer) attributeValue(expectedResult, "counter");
         if (queryResultSize != expectedResultSize) {
@@ -100,7 +101,7 @@ public class TestExecutor {
             message.append("\n");
             message.append("=====================================\n");
             //logger.error(message.toString());
-            throw new Exception(message.toString());
+            Assert.fail(message.toString());
         }
     }
 
