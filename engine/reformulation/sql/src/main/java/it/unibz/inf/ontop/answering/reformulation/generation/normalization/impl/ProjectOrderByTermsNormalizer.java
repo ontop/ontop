@@ -201,7 +201,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             return iqFactory.createUnaryIQTree(
                     (UnaryOperatorNode) rootNode,
                     // Recursive
-                    updateTopConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
+                    insertConstructionNode(((UnaryIQTree)tree).getChild(), newConstructionNode));
         else
             return iqFactory.createUnaryIQTree(newConstructionNode, tree);
     }
