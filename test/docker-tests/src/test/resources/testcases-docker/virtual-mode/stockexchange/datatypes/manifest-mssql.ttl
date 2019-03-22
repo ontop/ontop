@@ -12,9 +12,9 @@
       :literal-1 :literal-2
       :string-1 :string-2 :string-3
       :integer-1 :integer-2 :integer-3
-      :pos-integer-1 :pos-integer-2 :pos-integer-3
+      :pos-integer-1 :pos-integer-2 :pos-integer-3 :pos-integer-2-bis :pos-integer-3-bis
       :neg-integer-1 :neg-integer-2 :neg-integer-3
-      :decimal-1 :decimal-2 :decimal-3
+      :decimal-1 :decimal-2 :decimal-3 :decimal-2-bis :decimal-3-bis
       :pos-decimal-1 :pos-decimal-2 :pos-decimal-3
       :neg-decimal-1 :neg-decimal-2 :neg-decimal-3
       :double-1 :double-2 :double-3
@@ -138,6 +138,7 @@
 	mf:parameters <stockexchange-mssql.properties> .
 
 
+# Not matching because using a non-canonical lexical form outside of a filter
 :pos-integer-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q10: PositiveInteger without quotes" ;
     obdat:approval obdat:Approved ;
@@ -149,7 +150,18 @@
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
 
-    
+:pos-integer-2-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q10-bis: PositiveInteger without quotes" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <pos-integer-2-bis.rq> ] ;
+    mf:result <pos-integer-2-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+# Not matching because using a non-canonical lexical form outside of a filter
 :pos-integer-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q11: PositiveInteger with xsd:integer" ;
     obdat:approval obdat:Approved ;
@@ -157,6 +169,17 @@
     mf:action
             [ qt:query <pos-integer-3.rq> ] ;
     mf:result <pos-integer-3.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+:pos-integer-3-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q11-bis: PositiveInteger with xsd:integer" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <pos-integer-3-bis.rq> ] ;
+    mf:result <pos-integer-3-bis.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
@@ -209,7 +232,7 @@
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
 
-
+# Not matching because using a different lexical form outside of a filter
 :decimal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q16: Decimal without quotes" ;
     obdat:approval obdat:Approved ;
@@ -221,7 +244,18 @@
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
 
-    
+:decimal-2-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q16-bis: Decimal without quotes" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <decimal-2-bis.rq> ] ;
+    mf:result <decimal-2-bis.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+# Not matching because using a different lexical form outside of a filter
 :decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q17: Decimal with xsd:decimal" ;
     obdat:approval obdat:Approved ;
@@ -229,6 +263,17 @@
     mf:action
             [ qt:query <decimal-3.rq> ] ;
     mf:result <decimal-3.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+:decimal-3-bis rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q17-bis: Decimal with xsd:decimal" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <decimal-3-bis.rq> ] ;
+    mf:result <decimal-3-bis.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
@@ -245,7 +290,6 @@
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
 
-
 :pos-decimal-2 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q19: PositiveDecimal without quotes" ;
     obdat:approval obdat:Approved ;
@@ -257,7 +301,6 @@
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
 
-    
 :pos-decimal-3 rdf:type mf:QueryEvaluationTest ;
     mf:name    "Q20: PositiveDecimal with xsd:decimal" ;
     obdat:approval obdat:Approved ;
