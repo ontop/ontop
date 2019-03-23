@@ -36,7 +36,7 @@ public class TestExecutor {
     private final Repository dataRep;
     private final Logger logger;
 
-    TestExecutor(String name, String queryFileURL, String resultFileURL, Repository dataRep, Logger logger) {
+    public TestExecutor(String name, String queryFileURL, String resultFileURL, Repository dataRep, Logger logger) {
         this.name = name;
         this.queryFileURL =queryFileURL;
 		this.resultFileURL =resultFileURL;
