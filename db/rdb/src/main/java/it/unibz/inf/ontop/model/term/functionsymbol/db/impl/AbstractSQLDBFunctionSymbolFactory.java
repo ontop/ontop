@@ -229,9 +229,31 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return targetType.equals(dbBooleanType)
-                ? new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType)
-                : new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        if (targetType.equals(dbBooleanType))
+            return new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType);
+
+        DBTermType.Category inputCategory = inputType.getCategory();
+        if (inputCategory.equals(targetType.getCategory())) {
+            switch (inputCategory) {
+                case STRING:
+                    return createStringToStringCastFunctionSymbol(inputType, targetType);
+                case DATETIME:
+                    return createDatetimeToDatetimeCastFunctionSymbol(inputType, targetType);
+                default:
+                    return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+            }
+        }
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
+                                                                                    DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
+                                                                                        DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
     }
 
     @Override

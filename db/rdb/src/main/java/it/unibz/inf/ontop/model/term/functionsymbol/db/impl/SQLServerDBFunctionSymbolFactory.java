@@ -216,4 +216,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     public DBFunctionSymbol getDBRegexpReplace4() {
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
     }
+
+    /**
+     * Cast made explicit, because for instance
+     * «The data types text and varchar are incompatible in the equal to operator»
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
+                                                                                    DBTermType targetType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
 }
