@@ -28,11 +28,11 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdBooleanDatatype());
         // Name for TIMESTAMP
-        NonStringNonNumberNonBooleanDBTermType datetimeType = new NonStringNonNumberNonBooleanDBTermType(DATETIME_STR, rootTermType.getAncestry(),
+        DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
-        NonStringNonNumberNonBooleanDBTermType datetime2Type = new NonStringNonNumberNonBooleanDBTermType(DATETIME2_STR, rootTermType.getAncestry(),
+        DatetimeDBTermType datetime2Type = new DatetimeDBTermType(DATETIME2_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
-        NonStringNonNumberNonBooleanDBTermType dateTimeOffset = new NonStringNonNumberNonBooleanDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
+        DatetimeDBTermType dateTimeOffset = new DatetimeDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);

@@ -22,18 +22,8 @@ public class NumberDBTermType extends DBTermTypeImpl {
     }
 
     @Override
-    public boolean isString() {
-        return false;
-    }
-
-    @Override
-    public boolean isNumber() {
-        return true;
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return false;
+    public Category getCategory() {
+        return Category.NUMBER;
     }
 
     @Override

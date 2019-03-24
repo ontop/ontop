@@ -5,25 +5,27 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 
 import java.util.Optional;
 
-public class StringDBTermType extends DBTermTypeImpl {
+public class DatetimeDBTermType extends DBTermTypeImpl {
+    private final RDFDatatype rdfDatatype;
 
-    private final RDFDatatype xsdStringDatatype;
-
-    protected StringDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
+    protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
         super(name, parentAncestry, false);
-        this.xsdStringDatatype = xsdStringDatatype;
+        this.rdfDatatype = rdfDatatype;
     }
 
     @Override
     public Category getCategory() {
-        return Category.STRING;
+        return Category.DATETIME;
     }
 
     @Override
     public Optional<RDFDatatype> getNaturalRDFDatatype() {
-        return Optional.of(xsdStringDatatype);
+        return Optional.of(rdfDatatype);
     }
 
+    /**
+     * TODO: check if it is safe or not
+     */
     @Override
     public boolean isNeedingIRISafeEncoding() {
         return true;

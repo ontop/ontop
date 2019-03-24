@@ -16,18 +16,8 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
     }
 
     @Override
-    public boolean isString() {
-        return false;
-    }
-
-    @Override
-    public boolean isNumber() {
-        return false;
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return true;
+    public Category getCategory() {
+        return Category.BOOLEAN;
     }
 
     @Override

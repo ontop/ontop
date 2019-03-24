@@ -81,7 +81,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Returns a mutable map so that it can be modified by sub-classes
      */
     protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
-        DBTermType rootDBType = new NonStringNonNumberNonBooleanDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
+        DBTermType rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
 
         TermTypeAncestry rootAncestry = rootDBType.getAncestry();
 
@@ -107,9 +107,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NVARCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
                     new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(INT_STR, rootAncestry, xsdInteger),
                     // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk
@@ -123,9 +123,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble),
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
-                    new NonStringNonNumberNonBooleanDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
-                    new NonStringNonNumberNonBooleanDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
-                    new NonStringNonNumberNonBooleanDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
+                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
                 .collect(Collectors.toMap(
                         DBTermType::getName,
                         t -> t));
@@ -159,7 +159,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
          * Creates a new term type if not known
          */
         return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
     }
 
     @Override
