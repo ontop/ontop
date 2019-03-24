@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
@@ -46,9 +47,19 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
         return false;
     }
 
-    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory, VariableNullability variableNullability) {
-        if (subTerm.getFunctionSymbol() instanceof AbstractTimestampISONormFunctionSymbol) {
-            return subTerm.getTerm(0);
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory,
+                                                        VariableNullability variableNullability) {
+        FunctionSymbol subTermFunctionSymbol = subTerm.getFunctionSymbol();
+        // TODO: avoid relying on a concrete class
+        if (subTermFunctionSymbol instanceof AbstractTimestampISONormFunctionSymbol) {
+            DBTermType targetType = getTargetType();
+            ImmutableTerm subSubTerm = subTerm.getTerm(0);
+
+            return ((AbstractTimestampISONormFunctionSymbol) subTermFunctionSymbol).getInputType()
+                    // There might be several DB datetime types
+                    .filter(t -> !t.equals(targetType))
+                    .map(t -> (ImmutableTerm) termFactory.getDBCastFunctionalTerm(t, targetType, subSubTerm))
+                    .orElse(subSubTerm);
         }
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
