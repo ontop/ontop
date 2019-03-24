@@ -136,7 +136,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
      * Too simplistic!
      */
     @Override
-    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBDateTimestampType(), dbStringType);
     }
 

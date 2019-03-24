@@ -243,8 +243,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
 
         // Date time
-        builder.put(dbTypeFactory.getDBDateTimestampType(),
-                typeFactory.getXsdDatetimeDatatype(), createDateTimeNormFunctionSymbol());
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
+        builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
         // Boolean
         builder.put(dbTypeFactory.getDBBooleanType(),
                 typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
@@ -252,7 +256,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return builder.build();
     }
 
-    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
 
     @Override

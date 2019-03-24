@@ -10,9 +10,12 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
 
 import java.util.function.Function;
 
@@ -27,6 +30,29 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     private SQLServerDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDefaultDenormalizationTable(typeFactory),
                 createSQLServerRegularFunctionTable(typeFactory), typeFactory);
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        builder.putAll(super.createNormalizationTable());
+
+        // Other DB datetimes
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+
+        // TODO: get rid of the typeCode (meaningless)
+        DBTermType datetime2 = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIME2_STR);
+        DBTypeConversionFunctionSymbol datetime2NormFunctionSymbol = createDateTimeNormFunctionSymbol(datetime2);
+        builder.put(datetime2, xsdDatetime, datetime2NormFunctionSymbol);
+        builder.put(datetime2, xsdDatetimeStamp, datetime2NormFunctionSymbol);
+
+        DBTermType datetimeOffset = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIMEOFFSET_STR);
+        DBTypeConversionFunctionSymbol datetimeOffsetNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetimeOffset);
+        builder.put(datetimeOffset, xsdDatetime, datetimeOffsetNormFunctionSymbol);
+        builder.put(datetimeOffset, xsdDatetimeStamp, datetimeOffsetNormFunctionSymbol);
+
+        return builder.build();
     }
 
     /**

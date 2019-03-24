@@ -13,8 +13,10 @@ import java.util.Optional;
 public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String BIT_STR = "BIT";
-    protected static final String DATETIME_STR = "DATETIME";
-    protected static final String DATETIME2_STR = "DATETIME2";
+    public static final String DATETIME_STR = "DATETIME";
+    public static final String DATETIME2_STR = "DATETIME2";
+    public static final String DATETIMEOFFSET_STR = "DATETIMEOFFSET";
+
 
     @AssistedInject
     private SQLServerDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -30,11 +32,14 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDatetimeDatatype());
         NonStringNonNumberNonBooleanDBTermType datetime2Type = new NonStringNonNumberNonBooleanDBTermType(DATETIME2_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
+        NonStringNonNumberNonBooleanDBTermType dateTimeOffset = new NonStringNonNumberNonBooleanDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
+                typeFactory.getXsdDatetimeDatatype());
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
         map.put(DATETIME_STR, datetimeType);
         map.put(DATETIME2_STR, datetime2Type);
+        map.put(DATETIMEOFFSET_STR, dateTimeOffset);
         return map;
     }
 

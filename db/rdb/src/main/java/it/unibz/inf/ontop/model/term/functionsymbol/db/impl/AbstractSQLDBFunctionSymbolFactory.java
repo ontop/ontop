@@ -40,7 +40,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
-    private final DBTypeFactory dbTypeFactory;
+    protected final DBTypeFactory dbTypeFactory;
+    protected final TypeFactory typeFactory;
     private final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;
     private final DBTermType dbDoubleType;
@@ -57,6 +58,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                  TypeFactory typeFactory) {
         super(deNormalizationTable, regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.typeFactory = typeFactory;
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
@@ -80,8 +82,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
 
         // Date time
-        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
-                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
+        DefaultSQLTimestampISODenormFunctionSymbol timestampDenormalization =
+                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType);
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(), timestampDenormalization);
+        builder.put(timestampType, typeFactory.getXsdDatetimeStampDatatype(), timestampDenormalization);
+
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
                 new DefaultBooleanDenormFunctionSymbol(booleanType, stringType));
@@ -309,9 +314,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         return new DefaultSQLTimestampISONormFunctionSymbol(
-                dbTypeFactory.getDBDateTimestampType(),
+                dbDateTimestampType,
                 dbStringType,
                 this::serializeDateTimeNorm);
     }

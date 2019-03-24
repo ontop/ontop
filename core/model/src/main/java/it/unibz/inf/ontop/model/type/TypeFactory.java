@@ -57,6 +57,10 @@ public interface TypeFactory {
 		return getDatatype(XSD.DATETIME);
 	}
 
+	default RDFDatatype getXsdDatetimeStampDatatype() {
+		return getDatatype(XSD.DATETIMESTAMP);
+	}
+
 	MetaRDFTermType getMetaRDFTermType();
 
 	DBTypeFactory getDBTypeFactory();
