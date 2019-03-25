@@ -27,7 +27,7 @@
       :datetime-3h :datetime-3i :datetime-3j
       :boolean-1a :boolean-1b :boolean-1c :boolean-1d
       :boolean-2a :boolean-2b :boolean-2c :boolean-2d
-      :boolean-3a :boolean-3b :boolean-3c :boolean-3d
+      :boolean-3a :boolean-3b :boolean-3c :boolean-3d :boolean-3e :boolean-3f
     ) .
 
 :literal-1 rdf:type mf:QueryEvaluationTest ;
@@ -788,6 +788,29 @@
     mf:action
             [ qt:query <boolean-3d.rq> ] ;
     mf:result <boolean-3d.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+:boolean-3e rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q61: String of Boolean equal to capital TRUE" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <boolean-3e.rq> ] ;
+    mf:result <boolean-3e.ttl> ;
+    mf:knowledgebase <stockexchange.owl> ;
+    mf:mappings <stockexchange-mssql.obda> ;
+	mf:parameters <stockexchange-mssql.properties> .
+
+
+:boolean-3f rdf:type mf:QueryEvaluationTest ;
+    mf:name    "Q62: String of Boolean equal to true" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <boolean-3f.rq> ] ;
+    mf:result <boolean-3f.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-mssql.obda> ;
 	mf:parameters <stockexchange-mssql.properties> .
