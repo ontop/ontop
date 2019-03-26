@@ -40,9 +40,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
-    private final DBTypeFactory dbTypeFactory;
-    private final DBTermType dbStringType;
-    private final DBTermType dbBooleanType;
+    protected final DBTypeFactory dbTypeFactory;
+    protected final TypeFactory typeFactory;
+    protected final DBTermType dbStringType;
+    protected final DBTermType dbBooleanType;
     private final DBTermType dbDoubleType;
     private final DBTermType abstractRootDBType;
     private final TermType abstractRootType;
@@ -50,13 +51,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBBooleanFunctionSymbol isStringEmpty;
     private final DBIsNullOrNotFunctionSymbol isNull;
     private final DBIsNullOrNotFunctionSymbol isNotNull;
-    private final DBBooleanFunctionSymbol isTrue;
+    private final DBIsTrueFunctionSymbol isTrue;
 
-    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
-                                                 ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
+    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
-        super(deNormalizationTable, regularFunctionTable, typeFactory);
+        super(regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.typeFactory = typeFactory;
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
@@ -67,26 +68,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
         this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
         this.isTrue = createDBIsTrue(dbBooleanType);
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
-            TypeFactory typeFactory) {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        DBTermType stringType = dbTypeFactory.getDBStringType();
-        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
-
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        // Date time
-        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(),
-                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType));
-        // Boolean
-        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultBooleanDenormFunctionSymbol(booleanType, stringType));
-
-        return builder.build();
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
@@ -213,7 +194,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultSQLDBIsNullOrNotFunctionSymbol(false, dbBooleanType, rootDBTermType);
     }
 
-    protected DBBooleanFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
         return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
     }
 
@@ -224,9 +205,31 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return targetType.equals(dbBooleanType)
-                ? new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType)
-                : new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        if (targetType.equals(dbBooleanType))
+            return new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType);
+
+        DBTermType.Category inputCategory = inputType.getCategory();
+        if (inputCategory.equals(targetType.getCategory())) {
+            switch (inputCategory) {
+                case STRING:
+                    return createStringToStringCastFunctionSymbol(inputType, targetType);
+                case DATETIME:
+                    return createDatetimeToDatetimeCastFunctionSymbol(inputType, targetType);
+                default:
+                    return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+            }
+        }
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
+                                                                                    DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
+                                                                                        DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
     }
 
     @Override
@@ -309,9 +312,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         return new DefaultSQLTimestampISONormFunctionSymbol(
-                dbTypeFactory.getDBDateTimestampType(),
+                dbDateTimestampType,
                 dbStringType,
                 this::serializeDateTimeNorm);
     }
@@ -323,6 +326,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
         return new DefaultBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
+        return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
+        return new DefaultBooleanDenormFunctionSymbol(dbBooleanType, dbStringType);
     }
 
     @Override
@@ -427,6 +440,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    public DBFunctionSymbol getDBReplace() {
+        return getRegularDBFunctionSymbol(REPLACE_STR, 3);
+    }
+
+    @Override
     public DBFunctionSymbol getDBRegexpReplace3() {
         return getRegularDBFunctionSymbol(REGEXP_REPLACE_STR, 3);
     }
@@ -493,7 +511,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBBooleanFunctionSymbol getIsTrue() {
+    public DBIsTrueFunctionSymbol getIsTrue() {
         return isTrue;
     }
 

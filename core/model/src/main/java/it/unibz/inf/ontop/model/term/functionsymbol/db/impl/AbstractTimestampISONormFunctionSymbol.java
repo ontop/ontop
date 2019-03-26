@@ -19,7 +19,7 @@ public abstract class AbstractTimestampISONormFunctionSymbol extends AbstractDBT
 
     protected AbstractTimestampISONormFunctionSymbol(DBTermType timestampType, DBTermType dbStringType,
                                                      DBFunctionSymbolSerializer serializer) {
-        super("isoTimestamp", timestampType, dbStringType);
+        super("iso" + timestampType.getName(), timestampType, dbStringType);
         this.timestampType = timestampType;
         this.serializer = serializer;
     }

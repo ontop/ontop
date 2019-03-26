@@ -36,19 +36,12 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Inject
     private MockupDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultDenormalizationTable(typeFactory),
-                createDefaultRegularFunctionTable(typeFactory), typeFactory);
+        super(createDefaultRegularFunctionTable(typeFactory), typeFactory);
         abstractRootType = typeFactory.getAbstractAtomicTermType();
         dbTypeFactory = typeFactory.getDBTypeFactory();
         dbBooleanType = dbTypeFactory.getDBBooleanType();
         abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         dbStringType = dbTypeFactory.getDBStringType();
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
-            TypeFactory typeFactory) {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        return builder.build();
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
@@ -136,7 +129,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
      * Too simplistic!
      */
     @Override
-    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol() {
+    protected DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType) {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBDateTimestampType(), dbStringType);
     }
 
@@ -146,6 +139,16 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBBooleanType(), dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
@@ -308,6 +311,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBReplace() {
+        return getRegularDBFunctionSymbol("REPLACE", 3);
+    }
+
+    @Override
     public DBFunctionSymbol getDBRegexpReplace3() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
@@ -420,7 +428,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBBooleanFunctionSymbol getIsTrue() {
+    public DBIsTrueFunctionSymbol getIsTrue() {
         return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
     }
 

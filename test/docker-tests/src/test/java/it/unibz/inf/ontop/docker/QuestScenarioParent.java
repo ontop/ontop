@@ -48,18 +48,11 @@ public abstract class QuestScenarioParent extends TestCase {
 	protected Repository dataRep;
 	
 	public interface Factory {
-		QuestScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
-                                                    String resultFileURL, String owlFileURL, String obdaFileURL);
 		
 		QuestScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL,
                                                     String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL);
 	
 		String getMainManifestFile();
-	}
-
-	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL,
-                               String owlFileURL, String obdaFileURL) {
-		this(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
 	}
 
 	public QuestScenarioParent(String testURI, String name, String queryFileURL, String resultFileURL,

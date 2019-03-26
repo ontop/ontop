@@ -8,12 +8,12 @@ import java.util.Optional;
 
 public class MockupDBTypeFactory implements DBTypeFactory {
 
-    private final NonStringNonNumberNonBooleanDBTermType rootDBType;
+    private final NonStringNonNumberNonBooleanNonDatetimeDBTermType rootDBType;
     private final TermTypeAncestry rootAncestry;
 
     @AssistedInject
     private MockupDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        rootDBType = new NonStringNonNumberNonBooleanDBTermType("AbstractDBType", rootTermType.getAncestry(), true);
+        rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType("AbstractDBType", rootTermType.getAncestry(), true);
         rootAncestry = rootDBType.getAncestry();
     }
 
@@ -69,7 +69,7 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBTermType(int typeCode, String typeName) {
-        return new NonStringNonNumberNonBooleanDBTermType(typeName, rootAncestry, false);
+        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
     }
 
     @Override

@@ -7,7 +7,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer.ProjectionDecomposition;
 import it.unibz.inf.ontop.model.term.*;
@@ -22,14 +23,17 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ProjectionDecomposer decomposer;
+    private final DistinctNormalizer distinctNormalizer;
 
     @Inject
     private PostProcessingProjectionSplitterImpl(IntermediateQueryFactory iqFactory,
                                                  SubstitutionFactory substitutionFactory,
-                                                 CoreUtilsFactory coreUtilsFactory) {
+                                                 CoreUtilsFactory coreUtilsFactory,
+                                                 DistinctNormalizer distinctNormalizer) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.decomposer = coreUtilsFactory.createProjectionDecomposer(ImmutableFunctionalTerm::canBePostProcessed);
+        this.distinctNormalizer = distinctNormalizer;
     }
 
     @Override
@@ -55,7 +59,8 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
         ConstructionNode initialRootNode = (ConstructionNode) initialTree.getRootNode();
         IQTree initialSubTree = initialTree.getChild();
 
-        ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(), variableGenerator);
+        ProjectionDecomposition decomposition = decomposer.decomposeSubstitution(initialRootNode.getSubstitution(),
+                variableGenerator);
 
         ConstructionNode postProcessingNode = iqFactory.createConstructionNode(initialRootNode.getVariables(),
                 decomposition.getTopSubstitution()
@@ -74,9 +79,64 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
                         .orElseGet(() -> iqFactory.createConstructionNode(newSubTreeVariables)),
                     initialSubTree);
 
-        return new PostProcessingSplitImpl(postProcessingNode, newSubTree, variableGenerator);
+        return new PostProcessingSplitImpl(postProcessingNode,
+                normalizeNewSubTree(newSubTree, variableGenerator),
+                variableGenerator);
     }
 
+    /**
+     * Tries to push down the possible root construction node under a SLICE and a DISTINCT
+     *
+     */
+    private IQTree normalizeNewSubTree(IQTree newSubTree, VariableGenerator variableGenerator) {
+        return Optional.of(newSubTree.getRootNode())
+                .filter(n -> n instanceof ConstructionNode)
+                .map(n -> (ConstructionNode) n)
+                .map(c -> insertConstructionNode(((UnaryIQTree) newSubTree).getChild(), c, variableGenerator))
+                .orElse(newSubTree);
+    }
+
+    /**
+     * Recursive
+     */
+    private IQTree insertConstructionNode(IQTree tree, ConstructionNode constructionNode, VariableGenerator variableGenerator) {
+        QueryNode rootNode = tree.getRootNode();
+        if (rootNode instanceof SliceNode)
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) rootNode,
+                    // Recursive
+                    insertConstructionNode(((UnaryIQTree)tree).getChild(), constructionNode, variableGenerator));
+        /*
+         * Distinct:
+         * If
+         *  1. the construction node could be fully lifted above the distinct,
+         *  2. AND the distinct old projects the variables required by the construction node
+         * THEN it can be pushed under the DISTINCT
+         *
+         * "Reverses" the binding lift operation except that here either all the bindings are pushed down or none.
+         *
+         * TODO: relax the condition 1?
+         *
+         */
+        else if (rootNode instanceof DistinctNode) {
+            IQTree childTree = ((UnaryIQTree) tree).getChild();
+
+            // Stops if the child tree is projecting more variables than what the construction node expects
+            if (!childTree.getVariables().equals(constructionNode.getChildVariables()))
+                return tree;
+
+            UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, childTree);
+
+            IQTree liftedTree = distinctNormalizer.normalizeForOptimization((DistinctNode) rootNode, possibleChildTree, variableGenerator,
+                    iqFactory.createIQProperties());
+
+            return liftedTree.getRootNode().isEquivalentTo(constructionNode)
+                    ? possibleChildTree
+                    : tree;
+        }
+        else
+            return iqFactory.createUnaryIQTree(constructionNode, tree);
+    }
 
     static class PostProcessingSplitImpl implements PostProcessingSplit {
 

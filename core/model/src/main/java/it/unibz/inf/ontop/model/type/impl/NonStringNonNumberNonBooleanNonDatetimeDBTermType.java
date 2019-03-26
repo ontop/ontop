@@ -6,34 +6,24 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class NonStringNonNumberNonBooleanDBTermType extends DBTermTypeImpl {
+public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTypeImpl {
 
     @Nullable
     private final RDFDatatype rdfDatatype;
 
-    protected NonStringNonNumberNonBooleanDBTermType(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
         super(name, parentAncestry, isAbstract);
         rdfDatatype = null;
     }
 
-    protected NonStringNonNumberNonBooleanDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
         super(name, parentAncestry, false);
         this.rdfDatatype = rdfDatatype;
     }
 
     @Override
-    public boolean isString() {
-        return false;
-    }
-
-    @Override
-    public boolean isNumber() {
-        return false;
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return false;
+    public Category getCategory() {
+        return Category.OTHER;
     }
 
     @Override

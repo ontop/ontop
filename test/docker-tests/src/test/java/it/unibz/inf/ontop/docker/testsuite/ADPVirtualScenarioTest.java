@@ -36,12 +36,6 @@ public class ADPVirtualScenarioTest extends QuestVirtualScenarioParent {
 		return ScenarioManifestTestUtils.suite(new Factory() {
 			@Override
 			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
-					String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new ADPVirtualScenarioTest(testURI, name, queryFileURL, resultFileURL, owlFileURL,
-						obdaFileURL, "");
-			}
-			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
 				return new ADPVirtualScenarioTest(testURI, name, queryFileURL, resultFileURL, owlFileURL,
 						obdaFileURL, parameterFileURL);

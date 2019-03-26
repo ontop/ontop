@@ -17,8 +17,7 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
 
     @Inject
     private DefaultSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultDenormalizationTable(typeFactory),
-                createDefaultRegularFunctionTable(typeFactory), typeFactory);
+        super(createDefaultRegularFunctionTable(typeFactory), typeFactory);
     }
 
     @Override

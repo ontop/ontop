@@ -499,10 +499,14 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     public String render(DBConstant constant) {
         DBTermType dbType = constant.getType();
 
-        return (dbType.isNumber() || dbType.isBoolean())
+        switch (dbType.getCategory()) {
+            case NUMBER:
                 // TODO: handle the special case of not-a-number!
-                ? constant.getValue()
-                : getSQLLexicalFormString(constant.getValue());
+            case BOOLEAN:
+                return constant.getValue();
+            default:
+                return getSQLLexicalFormString(constant.getValue());
+        }
     }
 
     /**

@@ -119,8 +119,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <text_mssql.rq> ] ;
-    mf:result <text_mssql.ttl> ;
+            [ qt:query <text.rq> ] ;
+    mf:result <text.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda>;
 	mf:parameters <datatypes-mssql.properties> .
@@ -130,8 +130,8 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <text_mssql-graph.rq> ] ;
-    mf:result <text_mssql.ttl> ;
+            [ qt:query <text-graph.rq> ] ;
+    mf:result <text.ttl> ;
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-mssql.obda>;
 	mf:parameters <datatypes-mssql.properties> .

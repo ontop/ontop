@@ -15,18 +15,8 @@ public class StringDBTermType extends DBTermTypeImpl {
     }
 
     @Override
-    public boolean isString() {
-        return true;
-    }
-
-    @Override
-    public boolean isNumber() {
-        return false;
-    }
-
-    @Override
-    public boolean isBoolean() {
-        return false;
+    public Category getCategory() {
+        return Category.STRING;
     }
 
     @Override

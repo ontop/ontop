@@ -61,6 +61,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        if ((limit != null) && limit == 0)
+            return iqFactory.createEmptyNode(child.getVariables());
 
         IQTree newChild = child.normalizeForOptimization(variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();

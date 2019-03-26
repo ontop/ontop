@@ -33,12 +33,7 @@ public class DockerOracleTestSuite extends QuestVirtualScenarioParent {
 
 	public static Test suite() throws Exception {
 		return ScenarioManifestTestUtils.suite(new Factory() {
-			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
-					String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new DockerOracleTestSuite(testURI, name, queryFileURL, resultFileURL, owlFileURL,
-						obdaFileURL, "");
-			}
+
 			@Override
 			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
 					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {

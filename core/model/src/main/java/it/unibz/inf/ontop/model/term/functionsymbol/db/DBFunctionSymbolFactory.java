@@ -77,6 +77,8 @@ public interface DBFunctionSymbolFactory {
 
     DBFunctionSymbol getDBLower();
 
+    DBFunctionSymbol getDBReplace();
+
     DBFunctionSymbol getDBRegexpReplace3();
 
     DBFunctionSymbol getDBRegexpReplace4();
@@ -136,7 +138,7 @@ public interface DBFunctionSymbolFactory {
 
     DBBooleanFunctionSymbol getDBIsStringEmpty();
 
-    DBBooleanFunctionSymbol getIsTrue();
+    DBIsTrueFunctionSymbol getIsTrue();
 
     /**
      * Arity 2, first argument is the string in which to search, second argument is subString

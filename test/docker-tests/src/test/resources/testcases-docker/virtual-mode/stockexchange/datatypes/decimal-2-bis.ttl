@@ -3,5 +3,4 @@
 @prefix :        <http://example.org/#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size      "-1" ;
-      rsi:thrownException        "org.eclipse.rdf4j.query.QueryEvaluationException" .
+      rsi:size      "1" .

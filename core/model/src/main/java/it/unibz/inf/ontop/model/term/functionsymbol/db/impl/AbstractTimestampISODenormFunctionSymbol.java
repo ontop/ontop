@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 
 public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
+    private final static String CAST_TEMPLATE = "CAST(%s AS %s)";
     private final DBTermType dbStringType;
 
     protected AbstractTimestampISODenormFunctionSymbol(DBTermType timestampType, DBTermType dbStringType) {
@@ -45,21 +47,42 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
         return false;
     }
 
-    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory, VariableNullability variableNullability) {
-        if (subTerm.getFunctionSymbol() instanceof AbstractTimestampISONormFunctionSymbol) {
-            return subTerm.getTerm(0);
+    protected ImmutableTerm buildTermFromFunctionalTerm(ImmutableFunctionalTerm subTerm, TermFactory termFactory,
+                                                        VariableNullability variableNullability) {
+        FunctionSymbol subTermFunctionSymbol = subTerm.getFunctionSymbol();
+        // TODO: avoid relying on a concrete class
+        if (subTermFunctionSymbol instanceof AbstractTimestampISONormFunctionSymbol) {
+            DBTermType targetType = getTargetType();
+            ImmutableTerm subSubTerm = subTerm.getTerm(0);
+
+            return ((AbstractTimestampISONormFunctionSymbol) subTermFunctionSymbol).getInputType()
+                    // There might be several DB datetime types
+                    .filter(t -> !t.equals(targetType))
+                    .map(t -> (ImmutableTerm) termFactory.getDBCastFunctionalTerm(t, targetType, subSubTerm))
+                    .orElse(subSubTerm);
         }
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 
+    /**
+     * TODO: make it stronger
+     */
     @Override
-    protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement timestamp denormalization");
+    protected ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) {
+        String newString = constant.getValue().replace("T", " ");
+        return termFactory.getDBConstant(newString, getTargetType());
     }
 
+    /**
+     *
+     * TODO: make it stronger
+     */
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement getNativeDBString for " + getClass());
+        ImmutableFunctionalTerm newTerm = termFactory.getDBReplace(terms.get(0),
+                termFactory.getDBStringConstant("T"),
+                termFactory.getDBStringConstant(" "));
+        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getName());
     }
 }

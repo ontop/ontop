@@ -9,14 +9,7 @@ public interface DBTermType extends TermType {
 
     String getName();
 
-    /**
-     * Returns true if it is a character or string DB type.
-     */
-    boolean isString();
-
-    boolean isNumber();
-
-    boolean isBoolean();
+    Category getCategory();
 
     Optional<RDFDatatype> getNaturalRDFDatatype();
 
@@ -24,4 +17,12 @@ public interface DBTermType extends TermType {
      * Returns true if some values in its value space may need an IRI safe encoding
      */
     boolean isNeedingIRISafeEncoding();
+
+    enum Category {
+        STRING,
+        NUMBER,
+        BOOLEAN,
+        DATETIME,
+        OTHER
+    }
 }

@@ -35,7 +35,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     private final SQLDialectAdapter dialectAdapter;
 
     @Inject
-    private DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
+    protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
         this.sqlTermSerializer = sqlTermSerializer;
         this.dialectAdapter = dialectAdapter;
     }
@@ -54,9 +54,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected static final String VIEW_PREFIX = "v";
         private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
         private final AtomicInteger viewCounter;
-        private final SQLTermSerializer sqlTermSerializer;
-        private final SQLDialectAdapter dialectAdapter;
-        private final QuotedIDFactory idFactory;
+        protected final SQLTermSerializer sqlTermSerializer;
+        protected final SQLDialectAdapter dialectAdapter;
+        protected final QuotedIDFactory idFactory;
 
         protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter,
                                                        QuotedIDFactory idFactory) {

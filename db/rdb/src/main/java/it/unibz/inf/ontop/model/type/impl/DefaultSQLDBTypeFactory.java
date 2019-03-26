@@ -27,9 +27,13 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String CLOB_STR = "CLOB";
     protected static final String CHAR_LARGE_STR = "CHARACTER LARGE OBJECT";
     protected static final String NATIONAL_CHAR_STR = "NATIONAL CHARACTER";
+    protected static final String NCHAR_STR = "NCHAR";
     protected static final String NATIONAL_CHAR_VAR_STR = "NATIONAL CHARACTER VARYING";
+    protected static final String NVARCHAR_STR = "NVARCHAR";
     protected static final String NATIONAL_CHAR_LARGE_STR = "NATIONAL CHARACTER LARGE OBJECT";
     protected static final String INTEGER_STR = "INTEGER";
+    protected static final String INT_STR = "INT";
+    protected static final String TINYINT_STR = "TINYINT";
     protected static final String SMALLINT_STR = "SMALLINT";
     protected static final String BIGINT_STR = "BIGINT";
     protected static final String NUMERIC_STR = "NUMERIC";
@@ -77,7 +81,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Returns a mutable map so that it can be modified by sub-classes
      */
     protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
-        DBTermType rootDBType = new NonStringNonNumberNonBooleanDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
+        DBTermType rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true);
 
         TermTypeAncestry rootAncestry = rootDBType.getAncestry();
 
@@ -86,6 +90,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
         RDFDatatype xsdDouble = typeFactory.getXsdDoubleDatatype();
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         // TODO: complete
         return Stream.of(rootDBType,
@@ -98,12 +103,17 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(CHAR_LARGE_STR, rootAncestry, xsdString),
                     new StringDBTermType(CLOB_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NVARCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
-                    new NonStringNonNumberNonBooleanDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
                     new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
+                    new NumberDBTermType(INT_STR, rootAncestry, xsdInteger),
+                    // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk
+                    new NumberDBTermType(TINYINT_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(NUMERIC_STR, rootAncestry, xsdDecimal),
@@ -112,10 +122,10 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
                     new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble),
-                    new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), typeFactory.getXsdBooleanDatatype()),
-                    new NonStringNonNumberNonBooleanDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
-                    new NonStringNonNumberNonBooleanDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
-                    new NonStringNonNumberNonBooleanDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
+                    new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
+                    new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()))
                 .collect(Collectors.toMap(
                         DBTermType::getName,
                         t -> t));
@@ -149,7 +159,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
          * Creates a new term type if not known
          */
         return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
     }
 
     @Override
@@ -176,7 +186,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Can be overridden
      */
     protected String preprocessTypeName(String typeName) {
-        return typeName.replaceAll("\\([\\d, ]+\\)", "");
+        return typeName.replaceAll("\\([\\d, ]+\\)", "")
+                .toUpperCase();
     }
 
     @Override

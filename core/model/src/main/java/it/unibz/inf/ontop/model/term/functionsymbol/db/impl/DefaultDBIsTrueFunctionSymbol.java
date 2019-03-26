@@ -6,13 +6,14 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
 
-public class DefaultDBIsTrueFunctionSymbol extends DBBooleanFunctionSymbolImpl {
+public class DefaultDBIsTrueFunctionSymbol extends DBBooleanFunctionSymbolImpl implements DBIsTrueFunctionSymbol {
 
     protected DefaultDBIsTrueFunctionSymbol(DBTermType dbBooleanTermType) {
         super("IS_TRUE", ImmutableList.of(dbBooleanTermType), dbBooleanTermType);

@@ -32,7 +32,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
     private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
     private final DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
-    private final DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
     private final DBNotFunctionSymbol dbNotFunctionSymbol;
 
     // Lazy
@@ -94,6 +93,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Nullable
     private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
 
+    // Lazy
+    @Nullable
+    private DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -109,8 +111,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     /**
      *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
+     *
+     *  LAZY
      */
-    private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
+    @Nullable
+    private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
 
     /**
@@ -183,12 +188,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
 
-    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
-                                              ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
-        this.deNormalizationTable = deNormalizationTable;
+        this.deNormalizationTable = null;
         this.unaryNumericTable = HashBasedTable.create();
         this.binaryMathTable = HashBasedTable.create();
         this.untypedBinaryMathMap = new HashMap<>();
@@ -225,7 +229,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.rootDBType = dbTypeFactory.getAbstractRootDBType();
         this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
         this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
-        this.booleanIfElseNullFunctionSymbol = new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
+        this.booleanIfElseNullFunctionSymbol = null;
         this.dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
         this.numericInequalityMap = new HashMap<>();
@@ -241,8 +245,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
 
         // Date time
-        builder.put(dbTypeFactory.getDBDateTimestampType(),
-                typeFactory.getXsdDatetimeDatatype(), createDateTimeNormFunctionSymbol());
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+        DBTermType defaultDBDateTimestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(defaultDBDateTimestampType);
+        builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
         // Boolean
         builder.put(dbTypeFactory.getDBBooleanType(),
                 typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
@@ -250,8 +258,30 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return builder.build();
     }
 
-    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol();
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        DBTypeConversionFunctionSymbol timestampDenormalization = createDateTimeDenormFunctionSymbol(timestampType);
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(), timestampDenormalization);
+        builder.put(timestampType, typeFactory.getXsdDatetimeStampDatatype(), timestampDenormalization);
+
+        // Boolean
+        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(), createBooleanDenormFunctionSymbol());
+
+        return builder.build();
+    }
+
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
+    protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
+
 
     @Override
     public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
@@ -358,6 +388,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBBooleanFunctionSymbol getDBBooleanIfElseNull() {
+        if (booleanIfElseNullFunctionSymbol == null)
+            booleanIfElseNullFunctionSymbol = createDBBooleanIfElseNull();
         return booleanIfElseNullFunctionSymbol;
     }
 
@@ -782,6 +814,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
 
+    protected DBBooleanFunctionSymbol createDBBooleanIfElseNull() {
+        return new BooleanDBIfElseNullFunctionSymbolImpl(dbBooleanType);
+    }
+
     protected abstract DBStrictEqFunctionSymbol createDBStrictEquality(int arity);
 
     protected abstract DBBooleanFunctionSymbol createDBStrictNEquality(int arity);
@@ -869,6 +905,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType,
                                                                                        RDFTermType rdfTermType) {
+        if (deNormalizationTable == null)
+            deNormalizationTable = createDenormalizationTable();
+
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)

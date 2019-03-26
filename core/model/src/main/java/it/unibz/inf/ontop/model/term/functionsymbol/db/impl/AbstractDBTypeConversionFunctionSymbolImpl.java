@@ -38,7 +38,7 @@ public abstract class AbstractDBTypeConversionFunctionSymbolImpl extends Abstrac
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 
-    protected abstract DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) throws DBTypeConversionException;
+    protected abstract ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) throws DBTypeConversionException;
 
     protected static class DBTypeConversionException extends OntopInternalBugException {
 
