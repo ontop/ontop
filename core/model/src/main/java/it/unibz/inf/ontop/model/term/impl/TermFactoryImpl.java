@@ -975,11 +975,6 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getIsTrue(), dbBooleanTerm);
     }
 
-    @Override
-    public ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCharLength(), stringTerm);
-    }
-
 	@Override
 	public ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBSubString2(), stringTerm, from);

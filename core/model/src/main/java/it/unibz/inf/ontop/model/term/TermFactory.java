@@ -460,8 +460,6 @@ public interface TermFactory {
 	 */
 	ImmutableExpression getIsTrue(NonFunctionalTerm dbBooleanTerm);
 
-	ImmutableFunctionalTerm getDBStrlen(ImmutableTerm stringTerm);
-
 	ImmutableFunctionalTerm getDBSubString2(ImmutableTerm stringTerm, ImmutableTerm from);
 
 	ImmutableFunctionalTerm getDBSubString3(ImmutableTerm stringTerm, ImmutableTerm from, ImmutableTerm to);

@@ -126,7 +126,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
                 dbDateTimestamp, true, abstractRootDBType);
-        builder.put(CURRENT_TIMESTAMP_STR, 1, nowFunctionSymbol);
+        builder.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
 
         return builder.build();

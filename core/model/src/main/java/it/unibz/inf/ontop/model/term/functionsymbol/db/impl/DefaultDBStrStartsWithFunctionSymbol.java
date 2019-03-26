@@ -39,7 +39,7 @@ public class DefaultDBStrStartsWithFunctionSymbol extends DBBooleanFunctionSymbo
                         termFactory.getDBSubString3(
                                 terms.get(0),
                                 termFactory.getDBIntegerConstant(1),
-                                termFactory.getDBStrlen(secondTerm)),
+                                termFactory.getDBCharLength(secondTerm)),
                         secondTerm));
     }
 

@@ -23,6 +23,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     private static final String UUID_STR = "NEWID";
     private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
+    private static final String LEN_STR = "LEN";
 
     private static final String UNSUPPORTED_MSG = "Not supported by SQL server";
 
@@ -61,6 +62,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
+        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
@@ -74,7 +76,21 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                 abstractRootDBType);
         table.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
+        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LEN_STR, 1, dbIntType,
+                false, abstractRootDBType);
+        table.remove(CHAR_LENGTH_STR, 1);
+        table.put(LEN_STR, 1, strlenFunctionSymbol);
+
+        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
+        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
         return ImmutableTable.copyOf(table);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCharLength() {
+        return getRegularDBFunctionSymbol(LEN_STR, 1);
     }
 
     @Override
@@ -185,7 +201,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter,
                                            TermFactory termFactory) {
-        return String.format("CONVERT(varchar,%s,127)", termConverter.apply(terms.get(0)));
+        return String.format("CONVERT(nvarchar(50),%s,127)", termConverter.apply(terms.get(0)));
     }
 
     @Override
