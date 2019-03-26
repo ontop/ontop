@@ -47,7 +47,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.BOOLEAN, BIT_STR);
         map.put(DefaultTypeCode.STRING, NVARCHAR_STR);
-        map.put(DefaultTypeCode.DATETIMESTAMP, DATETIME_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, DATETIME2_STR);
         // By default float is float(53) which is a float with double precision
         map.put(DefaultTypeCode.DOUBLE, FLOAT_STR);
         return ImmutableMap.copyOf(map);

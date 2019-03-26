@@ -42,7 +42,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected final DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
-    private final DBTermType dbStringType;
+    protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;
     private final DBTermType dbDoubleType;
     private final DBTermType abstractRootDBType;

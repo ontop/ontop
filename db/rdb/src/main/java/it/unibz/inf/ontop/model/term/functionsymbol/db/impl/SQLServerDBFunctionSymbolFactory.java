@@ -41,10 +41,10 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
 
         // TODO: get rid of the typeCode (meaningless)
-        DBTermType datetime2 = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIME2_STR);
-        DBTypeConversionFunctionSymbol datetime2NormFunctionSymbol = createDateTimeNormFunctionSymbol(datetime2);
-        builder.put(datetime2, xsdDatetime, datetime2NormFunctionSymbol);
-        builder.put(datetime2, xsdDatetimeStamp, datetime2NormFunctionSymbol);
+        DBTermType datetime = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIME_STR);
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetime);
+        builder.put(datetime, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(datetime, xsdDatetimeStamp, datetimeNormFunctionSymbol);
 
         DBTermType datetimeOffset = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIMEOFFSET_STR);
         DBTypeConversionFunctionSymbol datetimeOffsetNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetimeOffset);
@@ -224,5 +224,10 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
                                                                                     DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
+        return new SQLServerTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 }
