@@ -24,8 +24,7 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
-        super(createDefaultDenormalizationTable(typeFactory),
-                createH2RegularFunctionTable(typeFactory), typeFactory);
+        super(createH2RegularFunctionTable(typeFactory), typeFactory);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createH2RegularFunctionTable(

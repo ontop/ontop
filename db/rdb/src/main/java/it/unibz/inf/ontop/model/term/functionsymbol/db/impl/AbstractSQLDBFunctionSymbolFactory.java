@@ -53,10 +53,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private final DBIsNullOrNotFunctionSymbol isNotNull;
     private final DBIsTrueFunctionSymbol isTrue;
 
-    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
-                                                 ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
+    protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
-        super(deNormalizationTable, regularFunctionTable, typeFactory);
+        super(regularFunctionTable, typeFactory);
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
         this.typeFactory = typeFactory;
         this.dbStringType = dbTypeFactory.getDBStringType();
@@ -69,29 +68,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
         this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
         this.isTrue = createDBIsTrue(dbBooleanType);
-    }
-
-    protected static ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDefaultDenormalizationTable(
-            TypeFactory typeFactory) {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        DBTermType stringType = dbTypeFactory.getDBStringType();
-        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
-        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
-
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        // Date time
-        DefaultSQLTimestampISODenormFunctionSymbol timestampDenormalization =
-                new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, stringType);
-        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(), timestampDenormalization);
-        builder.put(timestampType, typeFactory.getXsdDatetimeStampDatatype(), timestampDenormalization);
-
-        // Boolean
-        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(),
-                new DefaultBooleanDenormFunctionSymbol(booleanType, stringType));
-
-        return builder.build();
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
@@ -350,6 +326,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
         return new DefaultBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
+        return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol() {
+        return new DefaultBooleanDenormFunctionSymbol(dbBooleanType, dbStringType);
     }
 
     @Override

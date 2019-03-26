@@ -111,8 +111,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     /**
      *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
+     *
+     *  LAZY
      */
-    private final ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
+    @Nullable
+    private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
 
     /**
@@ -185,12 +188,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
 
-    protected AbstractDBFunctionSymbolFactory(ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable,
-                                              ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
                                               TypeFactory typeFactory) {
         this.castMap = new HashMap<>();
         this.castTable = HashBasedTable.create();
-        this.deNormalizationTable = deNormalizationTable;
+        this.deNormalizationTable = null;
         this.unaryNumericTable = HashBasedTable.create();
         this.binaryMathTable = HashBasedTable.create();
         this.untypedBinaryMathMap = new HashMap<>();
@@ -256,8 +258,30 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return builder.build();
     }
 
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+
+        DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
+        DBTermType booleanType = dbTypeFactory.getDBBooleanType();
+
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+
+        // Date time
+        DBTypeConversionFunctionSymbol timestampDenormalization = createDateTimeDenormFunctionSymbol(timestampType);
+        builder.put(timestampType, typeFactory.getXsdDatetimeDatatype(), timestampDenormalization);
+        builder.put(timestampType, typeFactory.getXsdDatetimeStampDatatype(), timestampDenormalization);
+
+        // Boolean
+        builder.put(booleanType, typeFactory.getXsdBooleanDatatype(), createBooleanDenormFunctionSymbol());
+
+        return builder.build();
+    }
+
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
+    protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
+
 
     @Override
     public IRIStringTemplateFunctionSymbol getIRIStringTemplateFunctionSymbol(String iriTemplate) {
@@ -881,6 +905,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType,
                                                                                        RDFTermType rdfTermType) {
+        if (deNormalizationTable == null)
+            deNormalizationTable = createDenormalizationTable();
+
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
