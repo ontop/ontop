@@ -68,7 +68,7 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
      * TODO: make it stronger
      */
     @Override
-    protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
+    protected ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) {
         String newString = constant.getValue().replace("T", " ");
         return termFactory.getDBConstant(newString, getTargetType());
     }
