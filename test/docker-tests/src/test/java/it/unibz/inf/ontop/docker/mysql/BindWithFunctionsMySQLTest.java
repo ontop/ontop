@@ -23,8 +23,13 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +46,19 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
     private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
-    public BindWithFunctionsMySQLTest() {
-        super(owlfile, obdafile, propertyfile);
+    private static OntopOWLReasoner REASONER;
+    private static OWLConnection CONNECTION;
+
+    public BindWithFunctionsMySQLTest() throws OWLOntologyCreationException {
+        super(createReasoner(owlfile, obdafile, propertyfile));
+        REASONER = getReasoner();
+        CONNECTION = getConnection();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Ignore("Not yet supported")

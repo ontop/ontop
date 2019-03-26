@@ -34,6 +34,7 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,34 +56,44 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractBindTestWithFunctions {
 
-    private final String owlfile;
-    private final String obdafile;
-    private final String propertiesfile;
-
     protected static Logger log = LoggerFactory.getLogger(AbstractBindTestWithFunctions.class);
+    private final OntopOWLReasoner reasoner;
+    private final OWLConnection conn;
 
 
-    protected AbstractBindTestWithFunctions(String owlfile, String obdafile, String propertiesfile) {
-        this.owlfile =  this.getClass().getResource(owlfile).toString();
-        this.obdafile =  this.getClass().getResource(obdafile).toString();
-        this.propertiesfile =  this.getClass().getResource(propertiesfile).toString();
+    protected AbstractBindTestWithFunctions(OntopOWLReasoner reasoner) {
+        this.reasoner = reasoner;
+        this.conn = reasoner.getConnection();
+    }
+
+    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
+        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
+        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
+
+        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
+                .enableTestMode()
+                .build();
+        return factory.createReasoner(config);
+    }
+
+    public OntopOWLReasoner getReasoner() {
+        return reasoner;
+    }
+
+    public OWLConnection getConnection() {
+        return conn;
     }
 
     private void runTests(String query) throws Exception {
 
         // Creating a new instance of the reasoner
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .propertyFile(propertiesfile)
-                .enableTestMode()
-                .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
-
         // Now we are ready for querying
-        OWLConnection conn = reasoner.getConnection();
         OWLStatement st = conn.createStatement();
 
 
@@ -102,9 +113,6 @@ public abstract class AbstractBindTestWithFunctions {
 
         } catch (Exception e) {
             throw e;
-        } finally {
-            conn.close();
-            reasoner.dispose();
         }
     }
 
@@ -793,16 +801,6 @@ public abstract class AbstractBindTestWithFunctions {
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
 
-        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(obdafile)
-                .ontologyFile(owlfile)
-                .enableTestMode()
-                .propertyFile(propertiesfile)
-                .build();
-        OntopOWLReasoner reasoner = factory.createReasoner(config);
-
-
         // Now we are ready for querying
         OWLConnection conn = reasoner.getConnection();
         OWLStatement st = conn.createStatement();
@@ -830,9 +828,6 @@ public abstract class AbstractBindTestWithFunctions {
             }
         } catch (Exception e) {
             throw e;
-        } finally {
-            conn.close();
-            reasoner.dispose();
         }
         assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
                 returnedValues.equals(expectedValues));
