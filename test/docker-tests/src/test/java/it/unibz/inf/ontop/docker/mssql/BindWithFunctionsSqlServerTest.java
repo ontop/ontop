@@ -31,6 +31,8 @@ import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -107,12 +109,17 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     @Override
     protected List<String> getSecondsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"6.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
+        expectedValues.add("\"52\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"6\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
 
         return expectedValues;
+    }
+
+    @Ignore
+    @Test
+    public void testTZ(){
     }
 
     @Override

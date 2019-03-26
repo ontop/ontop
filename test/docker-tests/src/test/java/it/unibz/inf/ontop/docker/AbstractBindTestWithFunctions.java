@@ -754,7 +754,7 @@ public abstract class AbstractBindTestWithFunctions {
         runTests(queryBind);
     }
 
-    //    @Test timezone is not supported in h2
+    @Test
     public void testTZ() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"

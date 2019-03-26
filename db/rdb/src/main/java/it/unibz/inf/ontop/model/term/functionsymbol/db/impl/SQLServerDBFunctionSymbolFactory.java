@@ -174,8 +174,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return String.format("CONVERT(nvarchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",
+                termConverter.apply(terms.get(0)));
     }
 
     /**
@@ -245,5 +245,35 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new SQLServerTimestampISODenormFunctionSymbol(timestampType, dbStringType);
+    }
+
+    @Override
+    protected String serializeYear(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("YEAR(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMonth(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("MONTH(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeDay(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DAY(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(HOUR , %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeMinutes(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(MINUTE, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("DATEPART(SECOND, %s)", termConverter.apply(terms.get(0)));
     }
 }
