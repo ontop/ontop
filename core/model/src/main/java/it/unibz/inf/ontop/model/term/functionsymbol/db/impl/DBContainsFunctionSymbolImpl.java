@@ -55,9 +55,6 @@ public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        if (newTerms.stream().anyMatch(ImmutableTerm::isNull))
-            return termFactory.getNullConstant();
-
         if (newTerms.stream().allMatch(t -> t instanceof DBConstant)) {
             String mainString = ((DBConstant) newTerms.get(0)).getValue();
             String searchString = ((DBConstant) newTerms.get(1)).getValue();

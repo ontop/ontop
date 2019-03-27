@@ -116,6 +116,46 @@ public abstract class AbstractBindTestWithFunctions {
         }
     }
 
+    @Test
+    public void testAndBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testOrBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
 
 	/*
 	 * Tests for numeric functions
@@ -408,8 +448,29 @@ public abstract class AbstractBindTestWithFunctions {
 
         checkReturnedValues(queryBind, expectedValues);
     }
+
     @Test
-    public void testContains() throws Exception {
+    public void testContainsBind() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testContainsFilter() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -424,7 +485,6 @@ public abstract class AbstractBindTestWithFunctions {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
         checkReturnedValues(queryBind, expectedValues);
-
     }
 
 
@@ -802,6 +862,30 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
     @Test
+    public void testDivide() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND ((?p / 2) AS ?w)\n"
+                + "}";
+
+
+        checkReturnedValues(queryBind, getDivideExpectedValues());
+    }
+
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5\"^^xsd:decimal");
+        expectedValues.add("\"11.5\"^^xsd:decimal");
+        expectedValues.add("\"17\"^^xsd:decimal");
+        expectedValues.add("\"5\"^^xsd:decimal");
+        return expectedValues;
+    }
+
+    @Test
     public void testTZ() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -824,26 +908,6 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"0.0\"");
 
         return expectedValues;
-    }
-//        @Test see results of datetime with locale
-    public void testDatetime() throws Exception {
-
-        TermFactory termFactory = OntopModelConfiguration.defaultBuilder().build().getTermFactory();
-
-        String value = "Jan 31 2013 9:32AM";
-
-        DateFormat df = new SimpleDateFormat("MMM dd yyyy hh:mmaa", Locale.CHINA);
-
-        java.util.Date date;
-        try {
-            date = df.parse(value);
-            Timestamp ts = new Timestamp(date.getTime());
-            System.out.println(termFactory.getRDFLiteralConstant(ts.toString().replace(' ', 'T'), XSD.DATETIME));
-
-        } catch (ParseException pe) {
-
-            throw new RuntimeException(pe);
-        }
     }
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
