@@ -76,44 +76,12 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     }
 
     @Override
-    protected List<String> getFloorExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        return expectedValues;
-    }
-
-    @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.00, 43.00\"^^xsd:string");
         expectedValues.add("\"0.00, 23.00\"^^xsd:string");
         expectedValues.add("\"0.00, 34.00\"^^xsd:string");
         expectedValues.add("\"0.00, 10.00\"^^xsd:string");
-        return expectedValues;
-    }
-
-    @Override
-    protected List<String> getCeilExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-
-        return expectedValues;
-    }
-
-    @Override
-    protected List<String> getSecondsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-
         return expectedValues;
     }
 

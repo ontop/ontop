@@ -27,6 +27,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     private static final String UUID_STR = "NEWID";
     private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
     private static final String LEN_STR = "LEN";
+    private static final String CEILING_STR = "CEILING";
 
     private static final String UNSUPPORTED_MSG = "Not supported by SQL server";
 
@@ -287,5 +288,15 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeSeconds(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("DATEPART(SECOND, %s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+        return new SQLServerRoundFunctionSymbol(dbTermType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+        return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEILING_STR, 1, dbTermType, false);
     }
 }
