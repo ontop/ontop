@@ -105,7 +105,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     //Note: in specification of SPARQL function if the string doesn't contain the specified string empty string has to be returned,
     //here instead return null value
     @Override
-    protected List<String> getBindWithAfterExpectedValues() {
+    protected List<String> getBindWithAfter1ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\" Semantic Web\"@en");
@@ -119,7 +119,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     //here instead return null value
 
     @Override
-    protected List<String> getBindWithBeforeExpectedValues() {
+    protected List<String> getBindWithBefore1ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add(null);  // ROMAN (23 Dec 2015): now the language tag is handled correctly
         expectedValues.add("\"The Seman\"@en");

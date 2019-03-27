@@ -479,7 +479,7 @@ public abstract class AbstractBindTestWithFunctions {
 
 
     @Test
-    public void testBindWithBefore() throws Exception {
+    public void testBindWithBefore1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -490,23 +490,46 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRBEFORE(?title,\"ti\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithBeforeExpectedValues());
+        checkReturnedValues(queryBind, getBindWithBefore1ExpectedValues());
 
     }
 
-    protected List<String> getBindWithBeforeExpectedValues() {
+    protected List<String> getBindWithBefore1ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Seman\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduc\"@en");
 
         return expectedValues;
     }
 
+    @Test
+    public void testBindWithBefore2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRBEFORE(?title,\"\") AS ?w)\n"
+                + "}";
+        checkReturnedValues(queryBind, getBindWithBefore2ExpectedValues());
+    }
+
+    protected List<String> getBindWithBefore2ExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        return expectedValues;
+    }
+
 
     @Test
-    public void testBindWithAfter() throws Exception {
+    public void testBindWithAfter1() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -517,16 +540,40 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   BIND (STRAFTER(?title,\"The\") AS ?w)\n"
                 + "}";
 
-        checkReturnedValues(queryBind, getBindWithAfterExpectedValues());
+        checkReturnedValues(queryBind, getBindWithAfter1ExpectedValues());
+    }
+
+    protected List<String> getBindWithAfter1ExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\" Semantic Web\"@en");
+        expectedValues.add("\"\"^^xsd:string");
+        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+        return expectedValues;
+    }
+
+    @Test
+    public void testBindWithAfter2() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND (STRAFTER(?title,\"\") AS ?w)\n"
+                + "}";
+
+        checkReturnedValues(queryBind, getBindWithAfter2ExpectedValues());
 
     }
 
-    protected List<String> getBindWithAfterExpectedValues() {
+    protected List<String> getBindWithAfter2ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
-        expectedValues.add("\" Semantic Web\"@en");
         expectedValues.add("\"\"@en");
-        expectedValues.add("\" Logic Book: Introduction, Second Edition\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
+        expectedValues.add("\"\"@en");
 
         return expectedValues;
     }
