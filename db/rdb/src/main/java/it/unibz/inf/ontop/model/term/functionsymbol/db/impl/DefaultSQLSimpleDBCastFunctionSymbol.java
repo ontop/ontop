@@ -29,6 +29,6 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
             throw new IllegalArgumentException(terms +
                     " does not respect the arity of " + getArity());
 
-        return String.format(CAST_TEMPLATE, termConverter.apply(terms.get(0)), getTargetType().getName());
+        return String.format(CAST_TEMPLATE, termConverter.apply(terms.get(0)), getTargetType().getCompleteName());
     }
 }

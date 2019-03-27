@@ -25,7 +25,7 @@ public class SQLServerTimestampISODenormFunctionSymbol extends AbstractTimestamp
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format(TEMPLATE,
-                timestampType.getName(),
+                timestampType.getCompleteName(),
                 termConverter.apply(terms.get(0)));
     }
 

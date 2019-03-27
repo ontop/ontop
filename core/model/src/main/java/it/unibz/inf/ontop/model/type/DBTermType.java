@@ -9,6 +9,8 @@ public interface DBTermType extends TermType {
 
     String getName();
 
+    String getCompleteName();
+
     Category getCategory();
 
     Optional<RDFDatatype> getNaturalRDFDatatype();

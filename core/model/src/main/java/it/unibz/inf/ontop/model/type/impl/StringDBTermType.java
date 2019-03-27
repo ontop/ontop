@@ -7,11 +7,25 @@ import java.util.Optional;
 
 public class StringDBTermType extends DBTermTypeImpl {
 
+    private final String completeName;
     private final RDFDatatype xsdStringDatatype;
 
     protected StringDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
         super(name, parentAncestry, false);
         this.xsdStringDatatype = xsdStringDatatype;
+        this.completeName = name;
+    }
+
+    protected StringDBTermType(String name, String completeName,
+                               TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
+        super(name, parentAncestry, false);
+        this.completeName = completeName;
+        this.xsdStringDatatype = xsdStringDatatype;
+    }
+
+    @Override
+    public String getCompleteName() {
+        return completeName;
     }
 
     @Override
