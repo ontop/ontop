@@ -19,13 +19,15 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     protected static final String ABSTRACT_DB_TYPE_STR = "AbstractDBType";
 
-    protected static final String TEXT_STR = "TEXT";
+    public static final String TEXT_STR = "TEXT";
     protected static final String CHAR_STR = "CHAR";
     protected static final String CHARACTER_STR = "CHARACTER";
     protected static final String VARCHAR_STR = "VARCHAR";
     protected static final String CHAR_VAR_STR = "CHARACTER VARYING";
     protected static final String CLOB_STR = "CLOB";
     protected static final String CHAR_LARGE_STR = "CHARACTER LARGE OBJECT";
+    public static final String NATIONAL_TEXT_STR = "NATIONAL TEXT";
+    public static final String NTEXT_STR = "NTEXT";
     protected static final String NATIONAL_CHAR_STR = "NATIONAL CHARACTER";
     protected static final String NCHAR_STR = "NCHAR";
     protected static final String NATIONAL_CHAR_VAR_STR = "NATIONAL CHARACTER VARYING";
@@ -102,6 +104,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(CHAR_LARGE_STR, rootAncestry, xsdString),
                     new StringDBTermType(CLOB_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NATIONAL_TEXT_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NTEXT_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),

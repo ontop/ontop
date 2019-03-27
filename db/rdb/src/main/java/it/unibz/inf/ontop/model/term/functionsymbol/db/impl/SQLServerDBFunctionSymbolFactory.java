@@ -19,6 +19,9 @@ import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
 
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.NTEXT_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TEXT_STR;
+
 public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UUID_STR = "NEWID";
@@ -235,13 +238,20 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
-     * Cast made explicit, because for instance
+     * Cast made explicit when the input type is ntext or text as
      * «The data types text and varchar are incompatible in the equal to operator»
      */
     @Override
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
                                                                                     DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        switch (inputType.getName()) {
+            case NTEXT_STR:
+            case TEXT_STR:
+                return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+            default:
+                // Implicit cast
+                return super.createStringToStringCastFunctionSymbol(inputType, targetType);
+        }
     }
 
     @Override
@@ -266,7 +276,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     @Override
     protected String serializeHours(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEPART(HOUR , %s)", termConverter.apply(terms.get(0)));
+        return String.format("DATEPART(HOUR, %s)", termConverter.apply(terms.get(0)));
     }
 
     @Override
