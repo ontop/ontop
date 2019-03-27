@@ -40,7 +40,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
-    protected final DBTypeFactory dbTypeFactory;
+    protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
     protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;

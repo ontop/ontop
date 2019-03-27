@@ -741,37 +741,37 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createYearFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
                 this::serializeYear);
     }
 
     protected DBFunctionSymbol createMonthFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_MONTH", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH", rootDBType, dbIntegerType, false,
                 this::serializeMonth);
     }
 
     protected DBFunctionSymbol createDayFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_DAY", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY", rootDBType, dbIntegerType, false,
                 this::serializeDay);
     }
 
     protected DBFunctionSymbol createHoursFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_HOURS", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_HOURS", rootDBType, dbIntegerType, false,
                 this::serializeHours);
     }
 
     protected DBFunctionSymbol createMinutesFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_MINUTES", rootDBType, dbIntegerType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MINUTES", rootDBType, dbIntegerType, false,
                 this::serializeMinutes);
     }
 
     protected DBFunctionSymbol createSecondsFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_SECONDS", rootDBType, dbDecimalType, false,
                 this::serializeSeconds);
     }
 
     protected DBFunctionSymbol createTzFunctionSymbol() {
-        return new UnaryDBFunctionSymbolIWithSerializerImpl("DB_SECONDS", rootDBType, dbStringType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_SECONDS", rootDBType, dbStringType, false,
                 this::serializeTz);
     }
 

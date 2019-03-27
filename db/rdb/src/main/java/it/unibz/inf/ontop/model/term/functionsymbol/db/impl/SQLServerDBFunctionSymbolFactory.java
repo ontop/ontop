@@ -31,9 +31,16 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     private static final String UNSUPPORTED_MSG = "Not supported by SQL server";
 
+    private final DBFunctionSymbol substr2FunctionSymbol;
+
     @Inject
     private SQLServerDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createSQLServerRegularFunctionTable(typeFactory), typeFactory);
+
+        DBTermType dbRootType = dbTypeFactory.getAbstractRootDBType();
+
+        substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(SUBSTR_STR + "2",
+                ImmutableList.of(dbRootType, dbRootType), dbStringType, false, this::serializeSubString2);
     }
 
     @Override
@@ -89,6 +96,10 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
+        // Removals not replaced by regular function symbols
+        table.remove(SUBSTRING_STR, 2);
+        table.remove(SUBSTR_STR, 2);
+
         return ImmutableTable.copyOf(table);
     }
 
@@ -101,75 +112,56 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter,
                                        TermFactory termFactory) {
-        return String.format("CHARINDEX(%s,%s) > 0",
+        return String.format("(CHARINDEX(%s,%s) > 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
                                         Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
 
-        return String.format("LEFT(%s,CHARINDEX(%s,%s)-1)", str, before, str);
+        return String.format("LEFT(%s,SIGN(CHARINDEX(%s,%s))* (CHARINDEX(%s,%s)-1))", str, before, str, before, str);
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-
-        // sign return 1 if positive number, 0 if 0, and -1 if negative number
-        // it will return everything after the value if it is present or it will return an empty string if it is not present
-        return String.format("SUBSTRING(%s,CHARINDEX(%s,%s) + LENGTH(%s), SIGN(CHARINDEX(%s,%s)) * LENGTH(%s))",
+        //FIXME when no match found should return empty string
+        return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
                 str, after, str, after, after, str, str);
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms,
                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('MD5',%s),2))",
+                termConverter.apply(terms.get(0)));
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms,
                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return String.format("LOWER(CONVERT(VARCHAR(40), HASHBYTES('SHA1',%s),2))", termConverter.apply(terms.get(0)));
+
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("HASH('SHA256', STRINGTOUTF8(%s), 1)", termConverter.apply(terms.get(0)));
+        return String.format("LOWER(CONVERT(VARCHAR(64), HASHBYTES('SHA2_256',%s),2))",
+                termConverter.apply(terms.get(0)));
     }
 
-    /**
-     * TODO: update
-     */
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        // TODO: throw a better exception
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+        return String.format("LOWER(CONVERT(VARCHAR(128), HASHBYTES('SHA2_512',%s),2))",
+                termConverter.apply(terms.get(0)));
     }
 
     /**
@@ -298,5 +290,17 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
         return new DefaultSQLSimpleMultitypedDBFunctionSymbolImpl(CEILING_STR, 1, dbTermType, false);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSubString2() {
+        return substr2FunctionSymbol;
+    }
+
+    protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,
+                                         Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String start = termConverter.apply(terms.get(1));
+        return String.format("SUBSTRING(%s,%s,LEN(%s))", str, start, str);
     }
 }

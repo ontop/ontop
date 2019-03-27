@@ -5,17 +5,19 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermType;
 
 import java.util.function.Function;
 
-public class UnaryDBFunctionSymbolIWithSerializerImpl extends AbstractTypedDBFunctionSymbol {
+public class DBFunctionSymbolWithSerializerImpl extends AbstractTypedDBFunctionSymbol {
     private final boolean isAlwaysInjective;
     private final DBFunctionSymbolSerializer serializer;
 
-    protected UnaryDBFunctionSymbolIWithSerializerImpl(String name, DBTermType inputDBType, DBTermType targetType,
-                                                       boolean isAlwaysInjective,
-                                                       DBFunctionSymbolSerializer serializer) {
-        super(name, ImmutableList.of(inputDBType), targetType);
+    protected DBFunctionSymbolWithSerializerImpl(String name, ImmutableList<TermType> inputDBTypes,
+                                                 DBTermType targetType,
+                                                 boolean isAlwaysInjective,
+                                                 DBFunctionSymbolSerializer serializer) {
+        super(name, inputDBTypes, targetType);
         this.isAlwaysInjective = isAlwaysInjective;
         this.serializer = serializer;
     }

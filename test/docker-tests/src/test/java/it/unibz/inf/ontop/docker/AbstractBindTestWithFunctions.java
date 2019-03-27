@@ -236,7 +236,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
                 + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
-                + "   BIND (SHA256(?title) AS ?w)\n"
+                + "   BIND (SHA256(str(?title)) AS ?w)\n"
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
