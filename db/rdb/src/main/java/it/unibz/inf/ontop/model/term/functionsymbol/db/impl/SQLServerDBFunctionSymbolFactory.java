@@ -169,7 +169,9 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
-     * TODO: update
+     * TODO: change strategy as it returns "00:00" when no timezone is specified instead of ""
+     * If done on the string, then we could make the CAST between DB timestamps implicit
+     * (DATEPART(TZ...) is not supported for DATETIME)
      */
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms,

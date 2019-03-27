@@ -117,9 +117,10 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
         return expectedValues;
     }
 
-    @Ignore
+    @Ignore("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
     @Test
-    public void testTZ(){
+    public void testTZ() throws Exception {
+        super.testTZ();
     }
 
     @Override

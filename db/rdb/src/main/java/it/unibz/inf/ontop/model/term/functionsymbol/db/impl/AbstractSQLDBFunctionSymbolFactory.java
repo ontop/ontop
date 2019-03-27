@@ -213,8 +213,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
             switch (inputCategory) {
                 case STRING:
                     return createStringToStringCastFunctionSymbol(inputType, targetType);
-                case DATETIME:
-                    return createDatetimeToDatetimeCastFunctionSymbol(inputType, targetType);
                 default:
                     return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
             }
@@ -224,11 +222,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
                                                                                     DBTermType targetType) {
-        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
-    }
-
-    protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
-                                                                                        DBTermType targetType) {
         return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
     }
 
