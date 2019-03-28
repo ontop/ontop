@@ -50,7 +50,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String TIMESTAMP_STR = "TIMESTAMP";
     protected static final String BINARY_STR = "BINARY";
     protected static final String BINARY_VAR_STR = "BINARY VARYING";
+    protected static final String VARBINARY_STR = "VARBINARY";
     protected static final String BINARY_LARGE_STR = "BINARY LARGE OBJECT";
+    protected static final String BLOB_STR = "BLOB";
 
     protected enum DefaultTypeCode {
         STRING,
@@ -113,7 +115,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(VARBINARY_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BLOB_STR, rootAncestry, hexBinary),
                     new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
                     new NumberDBTermType(INT_STR, rootAncestry, xsdInteger),
                     // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk

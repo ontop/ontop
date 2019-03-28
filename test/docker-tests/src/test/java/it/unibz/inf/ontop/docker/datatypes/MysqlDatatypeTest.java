@@ -20,31 +20,36 @@ package it.unibz.inf.ontop.docker.datatypes;
  * #L%
  */
 
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
+import it.unibz.inf.ontop.docker.utils.OntopTestCase;
+import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
+import org.junit.AfterClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class MysqlDatatypeTest extends QuestDatatypeParent {
+import java.util.Collection;
 
-	public MysqlDatatypeTest(String testURI, String name, String queryFileURL, String resultFileURL, 
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
-		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
+@RunWith(Parameterized.class)
+public class MysqlDatatypeTest extends OntopTestCase {
+
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
+
+	public MysqlDatatypeTest(String name, String queryFileURL, String resultFileURL, String owlFileURL, String obdaFileURL,
+							 String parameterFileURL, RepositoryRegistry registry, ImmutableSet<String> ignoredTests) {
+		super(name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL, registry, ignoredTests);
 	}
 
-	public static Test suite() throws Exception {
-		return QuestDatatypeTestUtils.suite(new Factory() {
-			@Override
-			public MysqlDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL,
-                                                             String resultFileURL, String owlFileURL, String obdaFileURL) {
-				return new MysqlDatatypeTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, "");
-			}
-			@Override
-			public MysqlDatatypeTest createQuestDatatypeTest(String testURI, String name, String queryFileURL,
-                                                             String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new MysqlDatatypeTest(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
-			}
-			@Override
-			public String getMainManifestFile() {
-				return "/testcases-docker/manifest-datatype-mysql.ttl";
-			}
-		});
+	@Parameterized.Parameters(name="{0}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-docker/manifest-datatype-mysql.ttl",
+				IGNORE, REGISTRY);
+	}
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
 	}
 }
