@@ -19,8 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.AbstractDBFunctionSymbolFactory.UnaryNumericLabel.*;
-
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
     private static final String BNODE_PREFIX = "_:ontop-bnode-";
@@ -107,13 +105,26 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      */
     private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
+    /**
+     * Only for SIMPLE casts to DB string.
+     * (Source DB type -> function symbol)
+     *
+     * NB: why using a map instead of table? Because tables are not thread-safe while some maps are.
+     */
+    private final Map<DBTermType, DBTypeConversionFunctionSymbol> simpleCastToDBStringMap;
+
+    /**
+     * Only for SIMPLE casts FROM DB string.
+     * (Target DB type -> function symbol)
+     *
+     */
+    private final Map<DBTermType, DBTypeConversionFunctionSymbol> simpleCastFromDBStringMap;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from a determined type (no normalization)
      */
-    private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> castTable;
+    private final Table<DBTermType, DBTermType, DBTypeConversionFunctionSymbol> otherSimpleCastTable;
 
-    private final Table<UnaryNumericLabel, DBTermType, DBFunctionSymbol> unaryNumericTable;
     private final Table<String, DBTermType, DBMathBinaryOperator> binaryMathTable;
     private final Map<String, DBMathBinaryOperator> untypedBinaryMathMap;
 
@@ -147,6 +158,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> datetimeInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> defaultInequalityMap;
+
+    private final Map<DBTermType, DBFunctionSymbol> absMap;
+    private final Map<DBTermType, DBFunctionSymbol> ceilMap;
+    private final Map<DBTermType, DBFunctionSymbol> floorMap;
+    private final Map<DBTermType, DBFunctionSymbol> roundMap;
 
     private final TypeFactory typeFactory;
     private final DBTermType rootDBType;
@@ -186,13 +202,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
         this.dbDecimalType = dbTypeFactory.getDBDecimalType();
 
-        // TODO: avoid the usage of tables as they are not thread-safe
-        // TODO: put some locks around the tables
-        this.castTable = HashBasedTable.create();
-        this.unaryNumericTable = HashBasedTable.create();
+        // NB: in terms of design, we prefer avoiding using tables as they are not thread-safe
         this.binaryMathTable = HashBasedTable.create();
         this.untypedFunctionTable = HashBasedTable.create();
         this.notPredefinedBooleanFunctionTable = HashBasedTable.create();
+
+        this.simpleCastToDBStringMap = new ConcurrentHashMap<>();
+        this.simpleCastFromDBStringMap = new ConcurrentHashMap<>();
+        this.otherSimpleCastTable = HashBasedTable.create();
 
         this.untypedBinaryMathMap = new ConcurrentHashMap<>();
         this.caseMap = new ConcurrentHashMap<>();
@@ -208,6 +225,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.stringInequalityMap = new ConcurrentHashMap<>();
         this.datetimeInequalityMap = new ConcurrentHashMap<>();
         this.defaultInequalityMap = new ConcurrentHashMap<>();
+
+        this.absMap = new ConcurrentHashMap<>();
+        this.ceilMap = new ConcurrentHashMap<>();
+        this.floorMap = new ConcurrentHashMap<>();
+        this.roundMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -218,8 +240,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         normalizationTable = createNormalizationTable();
         deNormalizationTable = createDenormalizationTable();
 
-        temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
-                rootDBType, dbStringType);
+        temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(rootDBType, dbStringType);
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
         dbEndsWithFunctionSymbol = createStrEndsFunctionSymbol();
         dbLikeFunctionSymbol = createLikeFunctionSymbol();
@@ -327,53 +348,97 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBTypeConversionFunctionSymbol getDBCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        if (castTable.contains(inputType, targetType))
-            return castTable.get(inputType, targetType);
+        if (inputType.equals(dbStringType)) {
+            if (simpleCastFromDBStringMap.containsKey(targetType))
+                return simpleCastFromDBStringMap.get(targetType);
 
-        DBTypeConversionFunctionSymbol castFunctionSymbol = createSimpleCastFunctionSymbol(inputType, targetType);
-        castTable.put(inputType, targetType, castFunctionSymbol);
-        return castFunctionSymbol;
+            DBTypeConversionFunctionSymbol castFunctionSymbol = createSimpleCastFunctionSymbol(inputType, targetType);
+            simpleCastFromDBStringMap.put(targetType, castFunctionSymbol);
+            return castFunctionSymbol;
+        }
+        else if (targetType.equals(dbStringType)) {
+            if (simpleCastToDBStringMap.containsKey(inputType))
+                return simpleCastToDBStringMap.get(inputType);
+
+            DBTypeConversionFunctionSymbol castFunctionSymbol = createSimpleCastFunctionSymbol(inputType, targetType);
+            simpleCastToDBStringMap.put(inputType, castFunctionSymbol);
+            return castFunctionSymbol;
+        }
+        /*
+         * Default case: a table is used and therefore must be "synchronized"
+         */
+        else {
+            synchronized (otherSimpleCastTable) {
+                if (otherSimpleCastTable.contains(inputType, targetType))
+                    return otherSimpleCastTable.get(inputType, targetType);
+
+                DBTypeConversionFunctionSymbol castFunctionSymbol = createSimpleCastFunctionSymbol(inputType, targetType);
+                otherSimpleCastTable.put(inputType, targetType, castFunctionSymbol);
+                return castFunctionSymbol;
+            }
+        }
     }
 
     @Override
     public DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity) {
         String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
 
-        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity))
-                .map(Optional::of)
-                .orElseGet(() -> Optional.ofNullable(untypedFunctionTable.get(canonicalName, arity)));
+        // Looks first in the immutable table
+        Optional<DBFunctionSymbol> optionalPredefinedSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity));
+        if (optionalPredefinedSymbol.isPresent()) {
+            return optionalPredefinedSymbol.get();
+        }
 
-        // NB: we don't look inside notPredefinedBooleanFunctionTable to avoid enforcing the boolean type
+        /*
+         * Mutable tables are not thread-safe
+         */
+        synchronized (untypedFunctionTable) {
+            Optional<DBFunctionSymbol> optionalUntypedSymbol = Optional.ofNullable(
+                    untypedFunctionTable.get(canonicalName, arity));
+            // NB: we don't look inside notPredefinedBooleanFunctionTable to avoid enforcing the boolean type
+            if (optionalUntypedSymbol.isPresent())
+                return optionalUntypedSymbol.get();
 
-        if (optionalSymbol.isPresent())
-            return optionalSymbol.get();
-
-        DBFunctionSymbol symbol = createRegularUntypedFunctionSymbol(canonicalName, arity);
-        untypedFunctionTable.put(canonicalName, arity, symbol);
-        return symbol;
+            DBFunctionSymbol symbol = createRegularUntypedFunctionSymbol(canonicalName, arity);
+            untypedFunctionTable.put(canonicalName, arity, symbol);
+            return symbol;
+        }
     }
 
     @Override
     public DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity) {
         String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
 
-        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity))
-                .map(Optional::of)
-                .orElseGet(() -> Optional.ofNullable(notPredefinedBooleanFunctionTable.get(canonicalName, arity)));
-
-        // NB: we don't look inside untypedFunctionTable as they are not declared as boolean
-
-        if (optionalSymbol.isPresent()) {
-            DBFunctionSymbol functionSymbol = optionalSymbol.get();
+        // Looks first in the immutable table
+        Optional<DBFunctionSymbol> optionalRegularSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity));
+        if (optionalRegularSymbol.isPresent()) {
+            DBFunctionSymbol functionSymbol = optionalRegularSymbol.get();
             if (functionSymbol instanceof DBBooleanFunctionSymbol)
                 return (DBBooleanFunctionSymbol) functionSymbol;
             else
                 throw new IllegalArgumentException(nameInDialect + " is known not to be a boolean function symbol");
         }
 
-        DBBooleanFunctionSymbol symbol = createRegularBooleanFunctionSymbol(canonicalName, arity);
-        notPredefinedBooleanFunctionTable.put(canonicalName, arity, symbol);
-        return symbol;
+        /*
+         * Mutable tables are not thread-safe
+         */
+        synchronized (notPredefinedBooleanFunctionTable) {
+            Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(notPredefinedBooleanFunctionTable.get(canonicalName, arity));
+
+            // NB: we don't look inside untypedFunctionTable as they are not declared as boolean
+
+            if (optionalSymbol.isPresent()) {
+                DBFunctionSymbol functionSymbol = optionalSymbol.get();
+                if (functionSymbol instanceof DBBooleanFunctionSymbol)
+                    return (DBBooleanFunctionSymbol) functionSymbol;
+                else
+                    throw new IllegalArgumentException(nameInDialect + " is known not to be a boolean function symbol");
+            }
+
+            DBBooleanFunctionSymbol symbol = createRegularBooleanFunctionSymbol(canonicalName, arity);
+            notPredefinedBooleanFunctionTable.put(canonicalName, arity, symbol);
+            return symbol;
+        }
     }
 
     @Override
@@ -538,14 +603,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType dbNumericType) {
-        DBMathBinaryOperator existingOperator = binaryMathTable.get(dbMathOperatorName, dbNumericType);
-        if (existingOperator != null) {
-            return existingOperator;
-        }
+        // Mutable tables are not thread-safe
+        synchronized (binaryMathTable) {
+            DBMathBinaryOperator existingOperator = binaryMathTable.get(dbMathOperatorName, dbNumericType);
+            if (existingOperator != null) {
+                return existingOperator;
+            }
 
-        DBMathBinaryOperator newOperator = createDBBinaryMathOperator(dbMathOperatorName, dbNumericType);
-        binaryMathTable.put(dbMathOperatorName, dbNumericType, newOperator);
-        return newOperator;
+            DBMathBinaryOperator newOperator = createDBBinaryMathOperator(dbMathOperatorName, dbNumericType);
+            binaryMathTable.put(dbMathOperatorName, dbNumericType, newOperator);
+            return newOperator;
+        }
     }
 
     @Override
@@ -562,41 +630,41 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getAbs(DBTermType dbTermType) {
-        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(ABS, dbTermType);
+        DBFunctionSymbol existingFunctionSymbol = absMap.get(dbTermType);
         if (existingFunctionSymbol != null)
             return existingFunctionSymbol;
         DBFunctionSymbol dbFunctionSymbol = createAbsFunctionSymbol(dbTermType);
-        unaryNumericTable.put(ABS, dbTermType, dbFunctionSymbol);
+        absMap.put(dbTermType, dbFunctionSymbol);
         return dbFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getCeil(DBTermType dbTermType) {
-        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(CEIL, dbTermType);
+        DBFunctionSymbol existingFunctionSymbol = ceilMap.get(dbTermType);
         if (existingFunctionSymbol != null)
             return existingFunctionSymbol;
         DBFunctionSymbol dbFunctionSymbol = createCeilFunctionSymbol(dbTermType);
-        unaryNumericTable.put(CEIL, dbTermType, dbFunctionSymbol);
+        ceilMap.put(dbTermType, dbFunctionSymbol);
         return dbFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getFloor(DBTermType dbTermType) {
-        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(FLOOR, dbTermType);
+        DBFunctionSymbol existingFunctionSymbol = floorMap.get(dbTermType);
         if (existingFunctionSymbol != null)
             return existingFunctionSymbol;
         DBFunctionSymbol dbFunctionSymbol = createFloorFunctionSymbol(dbTermType);
-        unaryNumericTable.put(FLOOR, dbTermType, dbFunctionSymbol);
+        floorMap.put(dbTermType, dbFunctionSymbol);
         return dbFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getRound(DBTermType dbTermType) {
-        DBFunctionSymbol existingFunctionSymbol = unaryNumericTable.get(ROUND, dbTermType);
+        DBFunctionSymbol existingFunctionSymbol = roundMap.get(dbTermType);
         if (existingFunctionSymbol != null)
             return existingFunctionSymbol;
         DBFunctionSymbol dbFunctionSymbol = createRoundFunctionSymbol(dbTermType);
-        unaryNumericTable.put(ROUND, dbTermType, dbFunctionSymbol);
+        roundMap.put(dbTermType, dbFunctionSymbol);
         return dbFunctionSymbol;
     }
 
@@ -895,13 +963,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .flatMap(t -> Optional.ofNullable(deNormalizationTable.get(targetDBType, t)))
                 // Fallback to simple cast
                 .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
-    }
-
-    enum UnaryNumericLabel {
-        ABS,
-        CEIL,
-        FLOOR,
-        ROUND
     }
 
 }
