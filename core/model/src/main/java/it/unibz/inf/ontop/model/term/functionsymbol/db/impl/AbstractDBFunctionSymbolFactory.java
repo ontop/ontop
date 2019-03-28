@@ -365,7 +365,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
             return castFunctionSymbol;
         }
         /*
-         * Default case: a table is used and therefore must be "synchronized"
+         * Mutable tables are not thread-safe
          */
         else {
             synchronized (otherSimpleCastTable) {

@@ -15,10 +15,10 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
@@ -44,7 +44,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
-    private final DBTermType rootDBType;
     private final DBTermType dbStringType;
 
     @Inject
@@ -57,16 +56,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
-        this.rootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType rootDBType = dbTypeFactory.getAbstractRootDBType();
 
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
         this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
-        this.commonDenominatorMap = new HashMap<>();
-        this.concatMap = new HashMap<>();
-        this.isAMap = new HashMap<>();
-        this.lexicalInequalityFunctionSymbolMap = new HashMap<>();
+        this.commonDenominatorMap = new ConcurrentHashMap<>();
+        this.concatMap = new ConcurrentHashMap<>();
+        this.isAMap = new ConcurrentHashMap<>();
+        this.lexicalInequalityFunctionSymbolMap = new ConcurrentHashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
         rdf2DBBooleanFunctionSymbol = new RDF2DBBooleanFunctionSymbolImpl(typeFactory.getXsdBooleanDatatype(),
                 dbBooleanType, dbStringType);
@@ -82,7 +81,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     }
 
-    private static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
+    protected static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
             TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
