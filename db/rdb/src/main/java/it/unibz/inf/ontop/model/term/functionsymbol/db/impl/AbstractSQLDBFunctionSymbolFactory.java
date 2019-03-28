@@ -44,14 +44,19 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected final TypeFactory typeFactory;
     protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;
-    private final DBTermType dbDoubleType;
-    private final DBTermType abstractRootDBType;
-    private final TermType abstractRootType;
-    private final DBFunctionSymbol ifThenElse;
-    private final DBBooleanFunctionSymbol isStringEmpty;
-    private final DBIsNullOrNotFunctionSymbol isNull;
-    private final DBIsNullOrNotFunctionSymbol isNotNull;
-    private final DBIsTrueFunctionSymbol isTrue;
+    protected final DBTermType dbDoubleType;
+    protected final DBTermType abstractRootDBType;
+    protected final TermType abstractRootType;
+    // Created in init()
+    private DBFunctionSymbol ifThenElse;
+    // Created in init()
+    private DBBooleanFunctionSymbol isStringEmpty;
+    // Created in init()
+    private DBIsNullOrNotFunctionSymbol isNull;
+    // Created in init()
+    private DBIsNullOrNotFunctionSymbol isNotNull;
+    // Created in init()
+    private DBIsTrueFunctionSymbol isTrue;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
@@ -62,12 +67,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-        this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
-        this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
-        this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
-        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
-        this.isTrue = createDBIsTrue(dbBooleanType);
+    }
+
+    @Override
+    protected void init() {
+        // Always call it first
+        super.init();
+        ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
+        isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
+        isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
+        isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
+        isTrue = createDBIsTrue(dbBooleanType);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {

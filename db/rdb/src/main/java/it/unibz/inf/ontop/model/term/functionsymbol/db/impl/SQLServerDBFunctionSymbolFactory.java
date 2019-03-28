@@ -31,16 +31,22 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     private static final String UNSUPPORTED_MSG = "Not supported by SQL server";
 
-    private final DBFunctionSymbol substr2FunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol substr2FunctionSymbol;
 
     @Inject
     private SQLServerDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createSQLServerRegularFunctionTable(typeFactory), typeFactory);
+    }
 
-        DBTermType dbRootType = dbTypeFactory.getAbstractRootDBType();
+    @Override
+    protected void init() {
+        // Always call it first
+        super.init();
 
+        // Non-regular
         substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(SUBSTR_STR + "2",
-                ImmutableList.of(dbRootType, dbRootType), dbStringType, false, this::serializeSubString2);
+                ImmutableList.of(abstractRootDBType, abstractRootDBType), dbStringType, false, this::serializeSubString2);
     }
 
     @Override

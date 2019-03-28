@@ -4,6 +4,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
+import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
@@ -11,10 +12,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
-import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -26,75 +26,67 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private static final String BNODE_PREFIX = "_:ontop-bnode-";
     private static final String PLACEHOLDER = "{}";
 
-    private final TypeFactory typeFactory;
-    private final DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
-    private final DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
-    private final DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
-    private final DBBooleanFunctionSymbol dbLikeFunctionSymbol;
-    private final DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
-    private final DBNotFunctionSymbol dbNotFunctionSymbol;
+    /**
+     * Name (in the DB dialect), arity -> predefined REGULAR DBFunctionSymbol
+     *
+     * A regular function symbol is identified by its name in the DB dialect and can be used in the INPUT MAPPING file.
+     *
+     */
+    private final ImmutableTable<String, Integer, DBFunctionSymbol> predefinedRegularFunctionTable;
 
-    // Lazy
-    @Nullable
+    // Created in init()
+    private DBTypeConversionFunctionSymbol temporaryToStringCastFunctionSymbol;
+    // Created in init()
+    private DBBooleanFunctionSymbol dbStartsWithFunctionSymbol;
+    // Created in init()
+    private DBBooleanFunctionSymbol dbEndsWithFunctionSymbol;
+    // Created in init()
+    private DBBooleanFunctionSymbol dbLikeFunctionSymbol;
+    // Created in init()
+    private DBIfElseNullFunctionSymbol ifElseNullFunctionSymbol;
+    // Created in init()
+    private DBNotFunctionSymbol dbNotFunctionSymbol;
+
+    // Created in init()
     private DBBooleanFunctionSymbol containsFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol r2rmlIRISafeEncodeFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol strBeforeFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol strAfterFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol md5FunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol sha1FunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol sha256FunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol sha512FunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol yearFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol monthFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol dayFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol hoursFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol minutesFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol secondsFunctionSymbol;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBFunctionSymbol tzFunctionSymbol;
 
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBBooleanFunctionSymbol nonStrictNumericEqOperator;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBBooleanFunctionSymbol nonStrictStringEqOperator;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBBooleanFunctionSymbol nonStrictDatetimeEqOperator;
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
-
-    // Lazy
-    @Nullable
+    // Created in init()
     private DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
 
     /**
@@ -104,17 +96,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      *  For conversion function symbols that implies a NORMALIZATION as RDF lexical term
      *
-     *  LAZY
+     *  Created in init()
      */
-    @Nullable
     private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> normalizationTable;
 
     /**
      *  For conversion function symbols that implies a DENORMALIZATION from RDF lexical term
      *
-     *  LAZY
+     *  Created in init()
      */
-    @Nullable
     private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
 
@@ -158,16 +148,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> datetimeInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> defaultInequalityMap;
 
+    private final TypeFactory typeFactory;
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
     private final DBTermType dbBooleanType;
     private final DBTermType dbIntegerType;
     private final DBTermType dbDecimalType;
-
-    /**
-     * Name (in the DB dialect), arity -> predefined DBFunctionSymbol
-     */
-    private final ImmutableTable<String, Integer, DBFunctionSymbol> predefinedFunctionTable;
 
     /**
      * Name (in the DB dialect), arity -> not predefined untyped DBFunctionSymbol
@@ -188,56 +174,80 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final AtomicInteger counter;
 
 
-    protected AbstractDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> defaultRegularFunctionTable,
+    protected AbstractDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> predefinedRegularFunctionTable,
                                               TypeFactory typeFactory) {
-        this.castMap = new HashMap<>();
-        this.castTable = HashBasedTable.create();
-        this.deNormalizationTable = null;
-        this.unaryNumericTable = HashBasedTable.create();
-        this.binaryMathTable = HashBasedTable.create();
-        this.untypedBinaryMathMap = new HashMap<>();
+        this.counter = new AtomicInteger();
+        this.typeFactory = typeFactory;
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        this.rootDBType = dbTypeFactory.getAbstractRootDBType();
+        this.predefinedRegularFunctionTable = predefinedRegularFunctionTable;
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
         this.dbDecimalType = dbTypeFactory.getDBDecimalType();
-        this.temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
-                dbTypeFactory.getAbstractRootDBType(), dbStringType);
-        this.predefinedFunctionTable = defaultRegularFunctionTable;
+
+        // TODO: avoid the usage of tables as they are not thread-safe
+        // TODO: put some locks around the tables
+        this.castTable = HashBasedTable.create();
+        this.unaryNumericTable = HashBasedTable.create();
+        this.binaryMathTable = HashBasedTable.create();
         this.untypedFunctionTable = HashBasedTable.create();
         this.notPredefinedBooleanFunctionTable = HashBasedTable.create();
-        this.caseMap = new HashMap<>();
-        this.strictEqMap = new HashMap<>();
-        this.strictNEqMap = new HashMap<>();
-        this.falseOrNullMap = new HashMap<>();
-        this.trueOrNullMap = new HashMap<>();
-        this.r2rmlIRISafeEncodeFunctionSymbol = null;
-        this.strBeforeFunctionSymbol = null;
-        this.strAfterFunctionSymbol = null;
-        this.md5FunctionSymbol = null;
-        this.sha1FunctionSymbol = null;
-        this.sha256FunctionSymbol = null;
-        this.sha512FunctionSymbol = null;
-        this.iriTemplateMap = new HashMap<>();
-        this.bnodeTemplateMap = new HashMap<>();
-        this.counter = new AtomicInteger();
-        this.typeFactory = typeFactory;
-        this.dbStartsWithFunctionSymbol = new DefaultDBStrStartsWithFunctionSymbol(
-                dbTypeFactory.getAbstractRootDBType(), dbStringType);
-        this.dbEndsWithFunctionSymbol = new DefaultDBStrEndsWithFunctionSymbol(
-                dbTypeFactory.getAbstractRootDBType(), dbStringType);
-        this.rootDBType = dbTypeFactory.getAbstractRootDBType();
-        this.dbLikeFunctionSymbol = new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
-        this.ifElseNullFunctionSymbol = new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
-        this.booleanIfElseNullFunctionSymbol = null;
-        this.dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
 
-        this.numericInequalityMap = new HashMap<>();
-        this.booleanInequalityMap = new HashMap<>();
-        this.stringInequalityMap = new HashMap<>();
-        this.datetimeInequalityMap = new HashMap<>();
-        this.defaultInequalityMap = new HashMap<>();
-        this.normalizationTable = null;
+        this.untypedBinaryMathMap = new ConcurrentHashMap<>();
+        this.caseMap = new ConcurrentHashMap<>();
+        this.strictEqMap = new ConcurrentHashMap<>();
+        this.strictNEqMap = new ConcurrentHashMap<>();
+        this.falseOrNullMap = new ConcurrentHashMap<>();
+        this.trueOrNullMap = new ConcurrentHashMap<>();
+        this.castMap = new ConcurrentHashMap<>();
+        this.iriTemplateMap = new ConcurrentHashMap<>();
+        this.bnodeTemplateMap = new ConcurrentHashMap<>();
+        this.numericInequalityMap = new ConcurrentHashMap<>();
+        this.booleanInequalityMap = new ConcurrentHashMap<>();
+        this.stringInequalityMap = new ConcurrentHashMap<>();
+        this.datetimeInequalityMap = new ConcurrentHashMap<>();
+        this.defaultInequalityMap = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Called automatically by Guice
+     */
+    @Inject
+    protected void init() {
+        normalizationTable = createNormalizationTable();
+        deNormalizationTable = createDenormalizationTable();
+
+        temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(
+                rootDBType, dbStringType);
+        dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
+        dbEndsWithFunctionSymbol = createStrEndsFunctionSymbol();
+        dbLikeFunctionSymbol = createLikeFunctionSymbol();
+        ifElseNullFunctionSymbol = createRegularIfElseNull();
+        dbNotFunctionSymbol = createDBNotFunctionSymbol(dbBooleanType);
+
+        booleanIfElseNullFunctionSymbol = createDBBooleanIfElseNull();
+        nonStrictNumericEqOperator = createNonStrictNumericEquality();
+        nonStrictStringEqOperator = createNonStrictStringEquality();
+        nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
+        nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
+        r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
+        strAfterFunctionSymbol = createStrAfterFunctionSymbol();
+        containsFunctionSymbol = createContainsFunctionSymbol();
+        strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
+
+        md5FunctionSymbol = createMD5FunctionSymbol();
+        sha1FunctionSymbol = createSHA1FunctionSymbol();
+        sha256FunctionSymbol = createSHA256FunctionSymbol();
+        sha512FunctionSymbol = createSHA512FunctionSymbol();
+
+        yearFunctionSymbol = createYearFunctionSymbol();
+        monthFunctionSymbol = createMonthFunctionSymbol();
+        dayFunctionSymbol = createDayFunctionSymbol();
+        hoursFunctionSymbol = createHoursFunctionSymbol();
+        minutesFunctionSymbol = createMinutesFunctionSymbol();
+        secondsFunctionSymbol = createSecondsFunctionSymbol();
+        tzFunctionSymbol = createTzFunctionSymbol();
     }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
@@ -276,11 +286,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         return builder.build();
     }
-
-    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
-    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
-    protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
-    protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
 
 
     @Override
@@ -334,7 +339,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity) {
         String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
 
-        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedFunctionTable.get(canonicalName, arity))
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity))
                 .map(Optional::of)
                 .orElseGet(() -> Optional.ofNullable(untypedFunctionTable.get(canonicalName, arity)));
 
@@ -352,7 +357,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity) {
         String canonicalName = canonicalizeRegularFunctionSymbolName(nameInDialect);
 
-        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedFunctionTable.get(canonicalName, arity))
+        Optional<DBFunctionSymbol> optionalSymbol = Optional.ofNullable(predefinedRegularFunctionTable.get(canonicalName, arity))
                 .map(Optional::of)
                 .orElseGet(() -> Optional.ofNullable(notPredefinedBooleanFunctionTable.get(canonicalName, arity)));
 
@@ -388,8 +393,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBBooleanFunctionSymbol getDBBooleanIfElseNull() {
-        if (booleanIfElseNullFunctionSymbol == null)
-            booleanIfElseNullFunctionSymbol = createDBBooleanIfElseNull();
         return booleanIfElseNullFunctionSymbol;
     }
 
@@ -413,29 +416,21 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBBooleanFunctionSymbol getDBNonStrictNumericEquality() {
-        if (nonStrictNumericEqOperator == null)
-            nonStrictNumericEqOperator = createNonStrictNumericEquality();
         return nonStrictNumericEqOperator;
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBNonStrictStringEquality() {
-        if (nonStrictStringEqOperator == null)
-            nonStrictStringEqOperator = createNonStrictStringEquality();
         return nonStrictStringEqOperator;
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBNonStrictDatetimeEquality() {
-        if (nonStrictDatetimeEqOperator == null)
-            nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
         return nonStrictDatetimeEqOperator;
     }
 
     @Override
     public DBBooleanFunctionSymbol getDBNonStrictDefaultEquality() {
-        if (nonStrictDefaultEqOperator == null)
-            nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
         return nonStrictDefaultEqOperator;
     }
 
@@ -481,8 +476,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getR2RMLIRISafeEncode() {
-        if (r2rmlIRISafeEncodeFunctionSymbol == null)
-            r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
         return r2rmlIRISafeEncodeFunctionSymbol;
     }
 
@@ -505,8 +498,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBBooleanFunctionSymbol getDBContains() {
-        if (containsFunctionSymbol == null)
-            containsFunctionSymbol = createContainsFunctionSymbol();
         return containsFunctionSymbol;
     }
 
@@ -517,43 +508,31 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBStrBefore() {
-        if (strBeforeFunctionSymbol == null)
-            strBeforeFunctionSymbol = createStrBeforeFunctionSymbol();
         return strBeforeFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBStrAfter() {
-        if (strAfterFunctionSymbol == null)
-            strAfterFunctionSymbol = createStrAfterFunctionSymbol();
         return strAfterFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBMd5() {
-        if (md5FunctionSymbol == null)
-            md5FunctionSymbol = createMD5FunctionSymbol();
         return md5FunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBSha1() {
-        if (sha1FunctionSymbol == null)
-            sha1FunctionSymbol = createSHA1FunctionSymbol();
         return sha1FunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBSha256() {
-        if (sha256FunctionSymbol == null)
-            sha256FunctionSymbol = createSHA256FunctionSymbol();
         return sha256FunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBSha512() {
-        if (sha512FunctionSymbol == null)
-            sha512FunctionSymbol = createSHA512FunctionSymbol();
         return sha512FunctionSymbol;
     }
 
@@ -623,51 +602,59 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBYear() {
-        if (yearFunctionSymbol == null)
-            yearFunctionSymbol = createYearFunctionSymbol();
         return yearFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBMonth() {
-        if (monthFunctionSymbol == null)
-            monthFunctionSymbol = createMonthFunctionSymbol();
         return monthFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBDay() {
-        if (dayFunctionSymbol == null)
-            dayFunctionSymbol = createDayFunctionSymbol();
         return dayFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBHours() {
-        if (hoursFunctionSymbol == null)
-            hoursFunctionSymbol = createHoursFunctionSymbol();
         return hoursFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBMinutes() {
-        if (minutesFunctionSymbol == null)
-            minutesFunctionSymbol = createMinutesFunctionSymbol();
         return minutesFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBSeconds() {
-        if (secondsFunctionSymbol == null)
-            secondsFunctionSymbol = createSecondsFunctionSymbol();
         return secondsFunctionSymbol;
     }
 
     @Override
     public DBFunctionSymbol getDBTz() {
-        if (tzFunctionSymbol == null)
-            tzFunctionSymbol = createTzFunctionSymbol();
         return tzFunctionSymbol;
+    }
+
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
+    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
+    protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
+
+    protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
+        return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
+    }
+
+    protected DBIfElseNullFunctionSymbol createRegularIfElseNull() {
+        return new DefaultDBIfElseNullFunctionSymbol(dbBooleanType, rootDBType);
+    }
+
+    protected DBBooleanFunctionSymbol createStrStartsFunctionSymbol() {
+        return new DefaultDBStrStartsWithFunctionSymbol(rootDBType, dbStringType);
+    }
+
+    protected DBBooleanFunctionSymbol createStrEndsFunctionSymbol() {
+        return new DefaultDBStrEndsWithFunctionSymbol(
+                rootDBType, dbStringType);
     }
 
     /**
@@ -891,9 +878,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
-        if (normalizationTable == null)
-            normalizationTable = createNormalizationTable();
-
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
@@ -905,9 +889,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     @Override
     public DBTypeConversionFunctionSymbol getConversionFromRDFLexical2DBFunctionSymbol(DBTermType targetDBType,
                                                                                        RDFTermType rdfTermType) {
-        if (deNormalizationTable == null)
-            deNormalizationTable = createDenormalizationTable();
-
         return Optional.of(rdfTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype) t)
