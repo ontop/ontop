@@ -35,9 +35,6 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // Overloads BIGINT to use SIGNED for casting purposes
         NumberDBTermType bigIntType = new NumberDBTermType(BIGINT_STR, "SIGNED", rootAncestry, xsdInteger);
 
-        // Overloads DOUBLE because CAST to Double is not supported (but cast to DECIMAL is)
-        NumberDBTermType doubleType = new NumberDBTermType(DOUBLE_STR, "DECIMAL", rootAncestry, xsdInteger);
-
         // Overloads NVARCHAR to insert the precision
         StringDBTermType textType = new StringDBTermType(TEXT_STR, "CHAR CHARACTER SET utf8", rootAncestry,
                 typeFactory.getXsdStringDatatype());
@@ -75,13 +72,14 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TEXT_STR, textType);
         map.put(MEDIUMINT_STR, mediumIntType);
         map.put(BIGINT_STR, bigIntType);
-        map.put(DOUBLE_STR, doubleType);
         map.put(DATETIME_STR, datetimeType);
         return map;
     }
 
     private static ImmutableMap<DefaultTypeCode, String> createMySQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
+        // Because CAST to DOUBLE is not supported by MySQL but cast to DECIMAL is.
+        map.put(DefaultTypeCode.DOUBLE, DECIMAL_STR);
         return ImmutableMap.copyOf(map);
     }
 
