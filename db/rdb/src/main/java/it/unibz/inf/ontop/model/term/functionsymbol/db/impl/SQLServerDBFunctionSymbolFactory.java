@@ -73,7 +73,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
-     * TODO: update
+     * TODO: check the regexp
      */
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createSQLServerRegularFunctionTable(
             TypeFactory typeFactory) {

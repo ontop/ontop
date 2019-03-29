@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
-    protected static final String BIT_STR = "BIT";
+    public static final String BIT_STR = "BIT";
     protected static final String TINYBLOB_STR = "TINYBLOB";
     protected static final String MEDIUMBLOB_STR = "MEDIUMBLOB";
     protected static final String LONGBLOB_STR = "LONGBLOB";
@@ -28,7 +28,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         super(createMySQLTypeMap(rootTermType, typeFactory), createMySQLCodeMap());
     }
 
-    private static Map<String, DBTermType> createMySQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+    protected static Map<String, DBTermType> createMySQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
         TermTypeAncestry rootAncestry = rootTermType.getAncestry();
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
 
@@ -38,6 +38,10 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // Overloads NVARCHAR to insert the precision
         StringDBTermType textType = new StringDBTermType(TEXT_STR, "CHAR CHARACTER SET utf8", rootAncestry,
                 typeFactory.getXsdStringDatatype());
+
+        // Overloads DECIMAL to specify a precision for casting purposes
+        NumberDBTermType decimalType = new NumberDBTermType(DECIMAL_STR, "DECIMAL(60,30)", rootAncestry,
+                typeFactory.getXsdDecimalDatatype());
 
         // Non-standard (not part of the R2RML standard).
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
@@ -72,14 +76,17 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TEXT_STR, textType);
         map.put(MEDIUMINT_STR, mediumIntType);
         map.put(BIGINT_STR, bigIntType);
+        map.put(DECIMAL_STR, decimalType);
         map.put(DATETIME_STR, datetimeType);
         return map;
     }
 
-    private static ImmutableMap<DefaultTypeCode, String> createMySQLCodeMap() {
+    protected static ImmutableMap<DefaultTypeCode, String> createMySQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         // Because CAST to DOUBLE is not supported by MySQL but cast to DECIMAL is.
         map.put(DefaultTypeCode.DOUBLE, DECIMAL_STR);
+        // Only CAST to DATETIME is supported by MySQL, not CAST to TIMESTAMP
+        map.put(DefaultTypeCode.DATETIMESTAMP, DATETIME_STR);
         return ImmutableMap.copyOf(map);
     }
 

@@ -47,7 +47,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String BOOLEAN_STR = "BOOLEAN";
     protected static final String DATE_STR = "DATE";
     protected static final String TIME_STR = "TIME";
-    protected static final String TIMESTAMP_STR = "TIMESTAMP";
+    public static final String TIMESTAMP_STR = "TIMESTAMP";
     protected static final String BINARY_STR = "BINARY";
     protected static final String BINARY_VAR_STR = "BINARY VARYING";
     protected static final String VARBINARY_STR = "VARBINARY";
