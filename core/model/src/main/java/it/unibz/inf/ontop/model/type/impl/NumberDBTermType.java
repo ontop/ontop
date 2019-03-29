@@ -8,17 +8,26 @@ import java.util.Optional;
 
 public class NumberDBTermType extends DBTermTypeImpl {
 
+    private final String castName;
     @Nullable
     private final RDFDatatype rdfDatatype;
 
     protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
         super(name, parentAncestry, isAbstract);
         rdfDatatype = null;
+        castName = name;
+    }
+
+    protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
+        super(name, parentAncestry, false);
+        this.castName = castName;
+        this.rdfDatatype = rdfDatatype;
     }
 
     protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
         super(name, parentAncestry, false);
         this.rdfDatatype = rdfDatatype;
+        castName = name;
     }
 
     @Override
@@ -38,5 +47,10 @@ public class NumberDBTermType extends DBTermTypeImpl {
     @Override
     public boolean isNeedingIRISafeEncoding() {
         return false;
+    }
+
+    @Override
+    public String getCastName() {
+        return castName;
     }
 }

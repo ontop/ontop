@@ -9,7 +9,7 @@ public interface DBTermType extends TermType {
 
     String getName();
 
-    String getCompleteName();
+    String getCastName();
 
     Category getCategory();
 

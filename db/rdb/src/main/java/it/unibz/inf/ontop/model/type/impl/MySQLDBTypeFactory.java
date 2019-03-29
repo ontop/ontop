@@ -30,6 +30,17 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     private static Map<String, DBTermType> createMySQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
         TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+        RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+
+        // Overloads BIGINT to use SIGNED for casting purposes
+        NumberDBTermType bigIntType = new NumberDBTermType(BIGINT_STR, "SIGNED", rootAncestry, xsdInteger);
+
+        // Overloads DOUBLE because CAST to Double is not supported (but cast to DECIMAL is)
+        NumberDBTermType doubleType = new NumberDBTermType(DOUBLE_STR, "DECIMAL", rootAncestry, xsdInteger);
+
+        // Overloads NVARCHAR to insert the precision
+        StringDBTermType textType = new StringDBTermType(TEXT_STR, "CHAR CHARACTER SET utf8", rootAncestry,
+                typeFactory.getXsdStringDatatype());
 
         // Non-standard (not part of the R2RML standard).
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
@@ -45,7 +56,6 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         StringDBTermType setTextType = new StringDBTermType(SET_STR, rootAncestry, xsdString);
         StringDBTermType enumTextType = new StringDBTermType(ENUM_STR, rootAncestry, xsdString);
 
-        RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
         NumberDBTermType mediumIntType = new NumberDBTermType(MEDIUMINT_STR, rootAncestry, xsdInteger);
 
         // NB: TIMESTAMP also exists
@@ -62,7 +72,10 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(LONGTEXT_STR, longTextType);
         map.put(SET_STR, setTextType);
         map.put(ENUM_STR, enumTextType);
+        map.put(TEXT_STR, textType);
         map.put(MEDIUMINT_STR, mediumIntType);
+        map.put(BIGINT_STR, bigIntType);
+        map.put(DOUBLE_STR, doubleType);
         map.put(DATETIME_STR, datetimeType);
         return map;
     }

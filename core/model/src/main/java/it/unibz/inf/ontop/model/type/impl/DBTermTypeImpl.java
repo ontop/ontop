@@ -21,7 +21,7 @@ public abstract class DBTermTypeImpl extends TermTypeImpl implements DBTermType 
      * Default implementation, can be overridden
      */
     @Override
-    public String getCompleteName() {
+    public String getCastName() {
         return name;
     }
 }

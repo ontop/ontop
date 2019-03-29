@@ -83,6 +83,6 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
         ImmutableFunctionalTerm newTerm = termFactory.getDBReplace(terms.get(0),
                 termFactory.getDBStringConstant("T"),
                 termFactory.getDBStringConstant(" "));
-        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getCompleteName());
+        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getCastName());
     }
 }
