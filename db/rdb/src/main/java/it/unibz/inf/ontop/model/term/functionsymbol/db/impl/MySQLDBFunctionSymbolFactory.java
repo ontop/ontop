@@ -14,13 +14,13 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory;
 
 
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
-import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.DATETIME_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TINYINT_STR;
+import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.BIT_STR;
 
 public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -51,15 +51,12 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     /**
      * We know that the normalization function DATETIME -> xsd:datetimeStamp will always be invalid
      *   (it is not bound to any timezone).
-     * TODO: how to inform the user? In a mapping it would be invalid, but what about a cast in a SPARQL query?S
+     * TODO: how to inform the user? In a mapping it would be invalid, but what about a cast in a SPARQL query?
      */
     @Override
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
         table.putAll(super.createNormalizationTable());
-        // Second type of boolean
-        table.put(dbTypeFactory.getDBTermType(0, MySQLDBTypeFactory.BIT_STR),
-                typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
 
         // TIMESTAMP is not the default
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
@@ -69,6 +66,13 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         DBTypeConversionFunctionSymbol timestampNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestamp);
         table.put(timestamp, xsdDatetime, timestampNormFunctionSymbol);
         table.put(timestamp, xsdDatetimeStamp, timestampNormFunctionSymbol);
+
+        // BIT and TINYINT (numbers) to boolean
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        DBTermType bit = dbTypeFactory.getDBTermType(0, BIT_STR);
+        DBTermType tinyInt = dbTypeFactory.getDBTermType(0, TINYINT_STR);
+        table.put(bit, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(bit, dbStringType));
+        table.put(tinyInt, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(tinyInt, dbStringType));
 
         return ImmutableTable.copyOf(table);
     }

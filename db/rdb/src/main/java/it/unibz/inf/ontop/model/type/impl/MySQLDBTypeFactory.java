@@ -44,9 +44,6 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDecimalDatatype());
 
         // Non-standard (not part of the R2RML standard).
-        BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype());
-
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         StringDBTermType tinyBlobType = new StringDBTermType(TINYBLOB_STR, rootAncestry, xsdString);
         StringDBTermType mediumBlobType = new StringDBTermType(MEDIUMBLOB_STR, rootAncestry, xsdString);
@@ -62,6 +59,9 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // NB: TIMESTAMP also exists
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype());
+
+        // TODO: shall we treat BIT as a number? Then, we would have to serialize it differently (e.g. b'011111')
+        DBTermType bitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);

@@ -21,6 +21,11 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
         this.rdfDatatype = rdfDatatype;
     }
 
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry) {
+        super(name, parentAncestry, false);
+        this.rdfDatatype = null;
+    }
+
     @Override
     public Category getCategory() {
         return Category.OTHER;

@@ -35,7 +35,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String NATIONAL_CHAR_LARGE_STR = "NATIONAL CHARACTER LARGE OBJECT";
     protected static final String INTEGER_STR = "INTEGER";
     protected static final String INT_STR = "INT";
-    protected static final String TINYINT_STR = "TINYINT";
+    public static final String TINYINT_STR = "TINYINT";
     protected static final String SMALLINT_STR = "SMALLINT";
     protected static final String BIGINT_STR = "BIGINT";
     protected static final String NUMERIC_STR = "NUMERIC";
