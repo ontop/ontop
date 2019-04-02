@@ -43,12 +43,16 @@ public class TemporaryDBTypeConversionToStringFunctionSymbolImpl extends Abstrac
     }
 
     /**
-     * Minimal optimization
+     * Minimalistic optimization: just optimize when the sub-term is a DB string constant.
      */
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        return termFactory.getImmutableFunctionalTerm(this, newTerms);
+        ImmutableTerm newTerm = newTerms.get(0);
+        if ((newTerm instanceof DBConstant) && ((DBConstant) newTerm).getType().equals(getTargetType()))
+            return newTerm;
+
+        return termFactory.getImmutableFunctionalTerm(this, newTerm);
     }
 
     @Override

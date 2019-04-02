@@ -27,7 +27,7 @@ public class AbstractRDF4JTest {
     private static Connection SQL_CONNECTION;
     private static RepositoryConnection REPO_CONNECTION;
 
-    protected static void init(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
+    protected static void initOBDA(String dbScriptRelativePath, String obdaRelativePath) throws SQLException, IOException {
 
         String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
 
@@ -50,6 +50,43 @@ public class AbstractRDF4JTest {
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(AbstractRDF4JTest.class.getResource(obdaRelativePath).getPath())
+                .jdbcUrl(jdbcUrl)
+                .jdbcUser(USER)
+                .jdbcPassword(PASSWORD)
+                .enableTestMode()
+                .build();
+
+        OntopRepository repo = OntopRepository.defaultRepository(config);
+        repo.initialize();
+        /*
+         * Prepare the data connection for querying.
+         */
+        REPO_CONNECTION = repo.getConnection();
+    }
+
+    protected static void initR2RML(String dbScriptRelativePath, String r2rmlRelativePath) throws SQLException, IOException {
+
+        String jdbcUrl = URL_PREFIX + UUID.randomUUID().toString();
+
+        SQL_CONNECTION = DriverManager.getConnection(jdbcUrl, USER, PASSWORD);
+
+        Statement st = SQL_CONNECTION.createStatement();
+
+        FileReader reader = new FileReader(AbstractRDF4JTest.class.getResource(dbScriptRelativePath).getPath());
+        BufferedReader in = new BufferedReader(reader);
+        StringBuilder bf = new StringBuilder();
+        String line = in.readLine();
+        while (line != null) {
+            bf.append(line);
+            line = in.readLine();
+        }
+        in.close();
+
+        st.executeUpdate(bf.toString());
+        SQL_CONNECTION.commit();
+
+        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .r2rmlMappingFile(AbstractRDF4JTest.class.getResource(r2rmlRelativePath).getPath())
                 .jdbcUrl(jdbcUrl)
                 .jdbcUser(USER)
                 .jdbcPassword(PASSWORD)

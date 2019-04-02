@@ -67,6 +67,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -206,12 +207,16 @@ public class MetaMappingExpander {
 
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
 
-						IRIConstant predicateTerm = termFactory.getConstantIRI(
-								rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
+						// Transforms the result set into a substitution
+						ImmutableSubstitution<DBConstant> dbSubstitution = substitutionFactory.getSubstitution(
+								IntStream.range(0, values.size())
+										.boxed()
+										.collect(ImmutableCollectors.toMap(
+												templateVariables::get,
+												i -> termFactory.getDBStringConstant(values.get(i)))));
 
-						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
-						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
-								.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+						ImmutableSubstitution<ImmutableTerm> newSubstitution = dbSubstitution.composeWith(m.target.getSubstitution())
+								.simplifyValues();
 
 						TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
 
@@ -378,22 +383,5 @@ public class MetaMappingExpander {
 		return templateVariables.stream()
 				.map(v -> QuotedID.createIdFromDatabaseRecord(idfac, v.getName()))
 				.collect(ImmutableCollectors.toList());
-	}
-
-	private static String getPredicateName(ImmutableTerm lexicalTerm, List<String> values) {
-		if (lexicalTerm instanceof Variable) {
-			return values.get(0);
-		}
-		else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
-				&& ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-
-			String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
-					((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol())
-					.getTemplate();
-			return URITemplates.format(iriTemplate, values);
-		}
-		else {
-			throw new MinorOntopInternalBugException("Unexpected lexical template term: " + lexicalTerm);
-		}
 	}
 }

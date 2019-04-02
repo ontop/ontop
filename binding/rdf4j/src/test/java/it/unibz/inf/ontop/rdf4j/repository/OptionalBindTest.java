@@ -19,7 +19,7 @@ public class OptionalBindTest extends AbstractRDF4JTest {
 
     @BeforeClass
     public static void before() throws IOException, SQLException {
-        init(CREATE_DB_FILE, OBDA_FILE);
+        initOBDA(CREATE_DB_FILE, OBDA_FILE);
     }
 
     @AfterClass
