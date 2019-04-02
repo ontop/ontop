@@ -71,7 +71,7 @@ public class RDF4JMetaMappingTest {
 
     @Test
     public void testSPO() throws Exception {
-        String queryString = "SELECT * WHERE {s ?p ?o.}";
+        String queryString = "SELECT * WHERE {?s ?p ?o .}";
 
         // execute query
         TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
