@@ -80,7 +80,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         // BIT(1) boolean normalization
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType bitOne = dbTypeFactory.getDBTermType(BIT_STR, 1);
-        table.put(bitOne, xsdBoolean, new DefaultBooleanNormFunctionSymbol(bitOne, dbStringType));
+        table.put(bitOne, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(bitOne, dbStringType));
 
         return ImmutableTable.copyOf(table);
     }
