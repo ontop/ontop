@@ -258,9 +258,10 @@ public class RDBMetadataExtractionTools {
 					// columnNoNulls, columnNullable, columnNullableUnknown
 					boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
 					String typeName = rs.getString("TYPE_NAME");
-					int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
+					int columnSize = rs.getInt("COLUMN_SIZE");
+					//int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
 
-					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(dataType, typeName);
+					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(typeName, columnSize);
 
 					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
 				}

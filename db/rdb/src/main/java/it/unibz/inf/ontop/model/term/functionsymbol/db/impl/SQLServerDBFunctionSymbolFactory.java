@@ -58,13 +58,12 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
 
-        // TODO: get rid of the typeCode (meaningless)
-        DBTermType datetime = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIME_STR);
+        DBTermType datetime = dbTypeFactory.getDBTermType(SQLServerDBTypeFactory.DATETIME_STR);
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetime);
         builder.put(datetime, xsdDatetime, datetimeNormFunctionSymbol);
         builder.put(datetime, xsdDatetimeStamp, datetimeNormFunctionSymbol);
 
-        DBTermType datetimeOffset = dbTypeFactory.getDBTermType(0, SQLServerDBTypeFactory.DATETIMEOFFSET_STR);
+        DBTermType datetimeOffset = dbTypeFactory.getDBTermType(SQLServerDBTypeFactory.DATETIMEOFFSET_STR);
         DBTypeConversionFunctionSymbol datetimeOffsetNormFunctionSymbol = createDateTimeNormFunctionSymbol(datetimeOffset);
         builder.put(datetimeOffset, xsdDatetime, datetimeOffsetNormFunctionSymbol);
         builder.put(datetimeOffset, xsdDatetimeStamp, datetimeOffsetNormFunctionSymbol);

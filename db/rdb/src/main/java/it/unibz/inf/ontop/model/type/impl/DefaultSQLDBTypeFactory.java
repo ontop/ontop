@@ -160,8 +160,19 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
-    public DBTermType getDBTermType(int typeCode, String typeName) {
+    public DBTermType getDBTermType(String typeName) {
         String typeString = preprocessTypeName(typeName);
+
+        /*
+         * Creates a new term type if not known
+         */
+        return sqlTypeMap.computeIfAbsent(typeString,
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
+    }
+
+    @Override
+    public DBTermType getDBTermType(String typeName, int columnSize) {
+        String typeString = preprocessTypeName(typeName, columnSize);
 
         /*
          * Creates a new term type if not known
@@ -194,6 +205,15 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Can be overridden
      */
     protected String preprocessTypeName(String typeName) {
+        return typeName.replaceAll("\\([\\d, ]+\\)", "")
+                .toUpperCase();
+    }
+
+    /**
+     * By default, ignore the column size
+     * Can be overridden
+     */
+    protected String preprocessTypeName(String typeName, int columnSize) {
         return typeName.replaceAll("\\([\\d, ]+\\)", "")
                 .toUpperCase();
     }

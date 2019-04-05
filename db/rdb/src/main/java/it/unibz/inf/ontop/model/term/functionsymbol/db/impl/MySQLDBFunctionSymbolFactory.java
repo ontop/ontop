@@ -61,18 +61,16 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         // TIMESTAMP is not the default
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-        DBTermType timestamp = dbTypeFactory.getDBTermType(0, TIMESTAMP_STR);
+        DBTermType timestamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
 
         DBTypeConversionFunctionSymbol timestampNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestamp);
         table.put(timestamp, xsdDatetime, timestampNormFunctionSymbol);
         table.put(timestamp, xsdDatetimeStamp, timestampNormFunctionSymbol);
 
-        // BIT and TINYINT (numbers) to boolean
+        // BIT(1) boolean normalization
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-        DBTermType bit = dbTypeFactory.getDBTermType(0, BIT_STR);
-        DBTermType tinyInt = dbTypeFactory.getDBTermType(0, TINYINT_STR);
-        table.put(bit, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(bit, dbStringType));
-        table.put(tinyInt, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(tinyInt, dbStringType));
+        DBTermType bitOne = dbTypeFactory.getDBTermType(BIT_STR, 1);
+        table.put(bitOne, xsdBoolean, new DefaultBooleanNormFunctionSymbol(bitOne, dbStringType));
 
         return ImmutableTable.copyOf(table);
     }

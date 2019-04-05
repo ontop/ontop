@@ -30,10 +30,13 @@ public interface DBTypeFactory {
      */
     DBTermType getAbstractRootDBType();
 
-    /**
-     * BC: TODO: should we keep the typeCode? Still needed?
-     */
-    DBTermType getDBTermType(int typeCode, String typeName);
+    DBTermType getDBTermType(String typeName);
+    DBTermType getDBTermType(String typeName, int columnSize);
+
+    @Deprecated
+    default DBTermType getDBTermType(int typeCode, String typeName) {
+        return getDBTermType(typeName);
+    }
 
     String getDBTrueLexicalValue();
     String getDBFalseLexicalValue();

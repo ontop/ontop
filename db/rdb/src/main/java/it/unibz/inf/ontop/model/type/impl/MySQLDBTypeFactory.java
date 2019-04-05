@@ -11,6 +11,8 @@ import java.util.Optional;
 public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String BIT_STR = "BIT";
+    public static final String BIT_ONE_STR = "BIT(1)";
+    private static final String TINY_INT_ONE_STR = "TINYINT(1)";
     protected static final String TINYBLOB_STR = "TINYBLOB";
     protected static final String MEDIUMBLOB_STR = "MEDIUMBLOB";
     protected static final String LONGBLOB_STR = "LONGBLOB";
@@ -61,10 +63,15 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDatetimeDatatype());
 
         // TODO: shall we treat BIT as a number? Then, we would have to serialize it differently (e.g. b'011111')
-        DBTermType bitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry);
+        DBTermType defaultBitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry);
+
+        // Special cases that are interpreted as booleans
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
-        map.put(BIT_STR, bitType);
+        map.put(BIT_ONE_STR, bitOneType);
+        map.put(BIT_STR, defaultBitType);
         map.put(TINYBLOB_STR, tinyBlobType);
         map.put(MEDIUMBLOB_STR, mediumBlobType);
         map.put(LONGBLOB_STR, longBlobType);
@@ -93,5 +100,43 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     @Override
     public Optional<String> getDBNaNLexicalValue() {
         return Optional.empty();
+    }
+
+    /**
+     * Keeps the parameters for BIT(1).
+     * Transforms TINYINT(1) into BOOLEAN (alias)
+     *
+     * For the other type strings, performs the standard pre-processing.
+     */
+    @Override
+    protected String preprocessTypeName(String typeName) {
+        String capitalizedTypeName = typeName.toUpperCase();
+        switch (capitalizedTypeName) {
+            case TINY_INT_ONE_STR:
+                return BOOLEAN_STR;
+            case BIT_ONE_STR:
+                return capitalizedTypeName;
+            default:
+                return super.preprocessTypeName(capitalizedTypeName);
+        }
+    }
+
+    /**
+     * Transforms (BIT, 1) and (TINYINT, 1) into BIT(1) and BOOLEAN (alias)
+     */
+    @Override
+    protected String preprocessTypeName(String typeName, int columnSize) {
+        String capitalizedTypeName = typeName.toUpperCase();
+        switch (capitalizedTypeName) {
+            case TINYINT_STR:
+                if (columnSize == 1)
+                    return BOOLEAN_STR;
+                break;
+            case BIT_STR:
+                if (columnSize == 1)
+                    return capitalizedTypeName + "(1)";
+                break;
+        }
+        return super.preprocessTypeName(capitalizedTypeName);
     }
 }
