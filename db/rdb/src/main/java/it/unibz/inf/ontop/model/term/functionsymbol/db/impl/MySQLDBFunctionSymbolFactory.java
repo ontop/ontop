@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TINYINT_STR;
@@ -27,6 +28,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     protected static final String UUID_STR = "UUID";
     protected static final String  CURRENT_TZ_STR =
             "REPLACE(TIME_FORMAT(TIMEDIFF(NOW(),CONVERT_TZ(NOW(),@@session.time_zone,'+00:00')),'+%H:%i'),'+-','-')";
+    private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
 
     private static final String UNSUPPORTED_MSG = "Not supported by MySQL";
 
@@ -44,6 +46,14 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+
+        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
+
+        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
+                abstractRootDBType);
+        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
         return ImmutableTable.copyOf(table);
     }
@@ -171,13 +181,28 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return UUID_STR;
     }
 
+    /**
+     * NB: For MySQL >= 8, REGEXP_LIKE could be used
+     */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        throw new RuntimeException("TODO: support it");
+        return new DBBooleanFunctionSymbolWithSerializerImpl("REGEXP_MATCHES_2",
+                ImmutableList.of(abstractRootDBType, abstractRootDBType), dbBooleanType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        // NB: BINARY is for making it case sensitive
+                        "(%s REGEXP BINARY %s)",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1))));
     }
 
+    /**
+     * Only supported for MySQL >= 8 use REGEXP_LIKE
+     *
+     * TODO: find a partial solution for other versions of MySQL?
+     */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        throw new RuntimeException("TODO: support it");
+        // For MySQL >= 8
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 }
