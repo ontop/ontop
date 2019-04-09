@@ -114,9 +114,10 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         else if ((otherTerm instanceof ImmutableFunctionalTerm)
                 && (((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this))) {
             ImmutableList<? extends ImmutableTerm> otherSubTerms = ((ImmutableFunctionalTerm) otherTerm).getTerms();
-            return IncrementalEvaluation.declareSimplifiedExpression(termFactory.getConjunction(
+            return termFactory.getConjunction(
                     termFactory.getStrictEquality(terms.get(0), otherSubTerms.get(0)),
-                    termFactory.getStrictEquality(terms.get(1), otherSubTerms.get(1))));
+                    termFactory.getStrictEquality(terms.get(1), otherSubTerms.get(1)))
+                    .evaluate(variableNullability, true);
         }
         return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
     }
