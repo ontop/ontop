@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -42,18 +43,21 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
     public AscendingSubstitutionNormalization normalizeAscendingSubstitution(
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
+        ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.reduceDomainToIntersectionWith(projectedVariables);
+
         Var2VarSubstitution downRenamingSubstitution = substitutionFactory.getVar2VarSubstitution(
-                ascendingSubstitution.getImmutableMap().entrySet().stream()
+                reducedAscendingSubstitution.getImmutableMap().entrySet().stream()
                         .filter(e -> e.getValue() instanceof Variable)
                         .map(e -> Maps.immutableEntry(e.getKey(), (Variable) e.getValue()))
                         .filter(e -> !projectedVariables.contains(e.getValue()))
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getValue,
                                 Map.Entry::getKey,
+                                // In case of key conflict, choose anyone of them
                                 (v1, v2) -> v1)));
 
         ImmutableSubstitution<ImmutableTerm> newAscendingSubstitution = downRenamingSubstitution
-                .composeWith(ascendingSubstitution)
+                .composeWith(reducedAscendingSubstitution)
                 .reduceDomainToIntersectionWith(projectedVariables)
                 .simplifyValues();
 
