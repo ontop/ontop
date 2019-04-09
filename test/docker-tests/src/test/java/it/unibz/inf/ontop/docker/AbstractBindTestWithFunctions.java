@@ -878,10 +878,10 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getDivideExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"21.5\"^^xsd:decimal");
-        expectedValues.add("\"11.5\"^^xsd:decimal");
-        expectedValues.add("\"17\"^^xsd:decimal");
-        expectedValues.add("\"5\"^^xsd:decimal");
+        expectedValues.add("\"21.250000\"^^xsd:decimal");
+        expectedValues.add("\"11.500000\"^^xsd:decimal");
+        expectedValues.add("\"16.750000\"^^xsd:decimal");
+        expectedValues.add("\"5.000000\"^^xsd:decimal");
         return expectedValues;
     }
 

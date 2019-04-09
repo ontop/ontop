@@ -60,12 +60,7 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         CONNECTION.close();
         REASONER.dispose();
     }
-
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testHash() {
-    }
+    
 
     @Ignore("Not yet supported")
     @Test
@@ -97,10 +92,10 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getAbsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"9\"^^xsd:decimal");
-        expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"7\"^^xsd:decimal");
-        expectedValues.add("\"2\"^^xsd:decimal");
+        expectedValues.add("\"8.5000\"^^xsd:decimal");
+        expectedValues.add("\"5.7500\"^^xsd:decimal");
+        expectedValues.add("\"6.7000\"^^xsd:decimal");
+        expectedValues.add("\"1.5000\"^^xsd:decimal");
         return expectedValues;
     }
 
