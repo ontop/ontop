@@ -179,7 +179,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             if (innerTerm instanceof Function) {
                 // Recursive call
-                innerchanges = innerchanges || applySingletonSubstitution((Function)innerTerm, substitution);
+                boolean newChange = applySingletonSubstitution((Function) innerTerm, substitution);
+                innerchanges = innerchanges || newChange;
             }
             else if (substitution.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
                 functionalTerm.getTerms().set(i, substitution.getTerm());

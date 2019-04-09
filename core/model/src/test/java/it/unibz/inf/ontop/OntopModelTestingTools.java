@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
 
@@ -29,6 +30,7 @@ public class OntopModelTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final UnifierUtilities UNIFIER_UTILITIES;
+    public static final ImmutableUnificationTools UNIFICATION_TOOLS;
     public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
     public static final IQConverter IQ_CONVERTER;
     public static final RDF RDF_FACTORY;
@@ -49,6 +51,7 @@ public class OntopModelTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
+        UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
