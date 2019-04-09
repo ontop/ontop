@@ -11,8 +11,8 @@ WHERE {
 ?customer :requests ?req.
 ?req :containsITU  ?itu;
 	:hasRequestDate ?date.
-FILTER(?date >= "2011-11-11"^^xsd:date &&
-?date < "2011-11-12"^^xsd:date).
+FILTER(?date >= "2011-11-11T00:00:00Z"^^xsd:dateTime &&
+?date < "2011-11-12T00:00:00Z"^^xsd:dateTime).
 }
 ORDER BY ?customer
 

@@ -164,7 +164,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * We apply the filter to the right (and then ignore it)
          */
         VariableNullability rightNullability = getOptionalFilterCondition()
-                .map(c -> variableNullabilityTools.updateWithFilter(c, rightChild.getVariableNullability().getNullableGroups()))
+                .map(c -> variableNullabilityTools.updateWithFilter(c, rightChild.getVariableNullability().getNullableGroups(),
+                        rightChild.getVariables()))
                 .orElseGet(rightChild::getVariableNullability);
 
         ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
@@ -198,7 +199,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 rightGroupStream)
                 .collect(ImmutableCollectors.toSet());
 
-        return coreUtilsFactory.createVariableNullability(nullableGroups);
+        ImmutableSet<Variable> scope = Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
+
+        return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
     /**

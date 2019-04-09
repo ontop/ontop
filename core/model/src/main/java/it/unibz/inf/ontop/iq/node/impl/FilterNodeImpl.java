@@ -100,7 +100,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @Override
     public VariableNullability getVariableNullability(IQTree child) {
-        return variableNullabilityTools.updateWithFilter(getFilterCondition(), child.getVariableNullability().getNullableGroups());
+        return variableNullabilityTools.updateWithFilter(getFilterCondition(),
+                child.getVariableNullability().getNullableGroups(), child.getVariables());
     }
 
 

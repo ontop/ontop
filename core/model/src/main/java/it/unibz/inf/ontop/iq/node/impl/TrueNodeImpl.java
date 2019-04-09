@@ -132,7 +132,7 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
 
     @Override
     public VariableNullability getVariableNullability() {
-        return coreUtilsFactory.createEmptyVariableNullability();
+        return coreUtilsFactory.createEmptyVariableNullability(ImmutableSet.of());
     }
 
     @Override

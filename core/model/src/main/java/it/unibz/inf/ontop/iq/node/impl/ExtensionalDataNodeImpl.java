@@ -129,7 +129,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                     .map(ImmutableSet::of)
                     .collect(ImmutableCollectors.toSet());
 
-            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups);
+            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, getVariables());
         }
 
         return variableNullability;

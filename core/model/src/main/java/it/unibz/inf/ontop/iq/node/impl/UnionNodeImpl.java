@@ -120,7 +120,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .map(v -> computeNullableGroup(v, preselectedGroupMap, variableNullabilities))
                 .collect(ImmutableCollectors.toSet());
 
-        return coreUtilsFactory.createVariableNullability(nullableGroups);
+        ImmutableSet<Variable> scope = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
     private ImmutableSet<Variable> computeNullableGroup(Variable mainVariable,
