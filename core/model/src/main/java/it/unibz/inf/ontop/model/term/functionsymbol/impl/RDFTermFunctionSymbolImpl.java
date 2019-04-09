@@ -108,6 +108,16 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
 
             return conjunction.evaluate(variableNullability, true);
         }
+        /*
+         * Strict equality between two RDF functional terms -> strict equality between their components
+         */
+        else if ((otherTerm instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol().equals(this))) {
+            ImmutableList<? extends ImmutableTerm> otherSubTerms = ((ImmutableFunctionalTerm) otherTerm).getTerms();
+            return IncrementalEvaluation.declareSimplifiedExpression(termFactory.getConjunction(
+                    termFactory.getStrictEquality(terms.get(0), otherSubTerms.get(0)),
+                    termFactory.getStrictEquality(terms.get(1), otherSubTerms.get(1))));
+        }
         return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
     }
 
