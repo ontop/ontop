@@ -53,18 +53,23 @@ public class JoinOrFilterVariableNullabilityTools {
                         .noneMatch(coOccuringVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
+        ImmutableSet<Variable> scope = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
         return joiningCondition
-                .map(e -> updateWithFilter(e, nullableGroups))
-                .orElseGet(() -> coreUtilsFactory.createVariableNullability(nullableGroups));
+                .map(e -> updateWithFilter(e, nullableGroups, scope))
+                .orElseGet(() -> coreUtilsFactory.createVariableNullability(nullableGroups, scope));
     }
 
     public VariableNullability updateWithFilter(ImmutableExpression filter,
-                                                   ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
+                                                ImmutableSet<ImmutableSet<Variable>> nullableGroups,
+                                                ImmutableSet<Variable> scope) {
         ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
                 .filter(g -> !nullabilityEvaluator.isFilteringNullValues(filter, g))
                 .collect(ImmutableCollectors.toSet());
 
-        return coreUtilsFactory.createVariableNullability(newNullableGroups);
+        return coreUtilsFactory.createVariableNullability(newNullableGroups, scope);
     }
 
     public VariableNullability getDummyVariableNullability(ImmutableSet<Variable> variables) {

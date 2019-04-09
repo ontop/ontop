@@ -122,7 +122,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public VariableNullability getVariableNullability() {
-        return coreUtilsFactory.createVariableNullability(ImmutableSet.of(projectedVariables));
+        return coreUtilsFactory.createVariableNullability(ImmutableSet.of(projectedVariables), projectedVariables);
     }
 
     @Override
