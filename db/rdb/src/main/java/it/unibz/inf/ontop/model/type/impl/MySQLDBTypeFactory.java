@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String ENUM_STR = "ENUM";
     protected static final String MEDIUMINT_STR = "MEDIUMINT";
     protected static final String UNSIGNED_SUFFIX = " UNSIGNED";
+    public static final String YEAR_STR = "YEAR";
 
     public static final String DATETIME_STR = "DATETIME";
 
@@ -77,6 +79,9 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean);
 
+        DBTermType yearType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(YEAR_STR, rootAncestry,
+                typeFactory.getDatatype(XSD.GYEAR));
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_ONE_STR, bitOneType);
         map.put(BIT_STR, defaultBitType);
@@ -98,6 +103,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(BIGINT_STR + UNSIGNED_SUFFIX, unsignedBigIntType);
         map.put(DECIMAL_STR, decimalType);
         map.put(DATETIME_STR, datetimeType);
+        map.put(YEAR_STR, yearType);
         return map;
     }
 

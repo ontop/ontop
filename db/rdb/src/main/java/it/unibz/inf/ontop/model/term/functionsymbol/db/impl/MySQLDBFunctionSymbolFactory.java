@@ -14,12 +14,14 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
 import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.BIT_STR;
+import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.YEAR_STR;
 
 public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -79,6 +81,11 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         DBTermType bitOne = dbTypeFactory.getDBTermType(BIT_STR, 1);
         table.put(bitOne, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(bitOne, dbStringType));
+
+        // Forbids the post-processing of YEAR_TO_TEXT as the JDBC driver converts strangely the YEAR
+        RDFDatatype xsdYear = typeFactory.getDatatype(XSD.GYEAR);
+        DBTermType year = dbTypeFactory.getDBTermType(YEAR_STR);
+        table.put(year, xsdYear, new NonPostProcessedSQLSimpleDBCastFunctionSymbolImpl(year, dbStringType));
 
         return ImmutableTable.copyOf(table);
     }
