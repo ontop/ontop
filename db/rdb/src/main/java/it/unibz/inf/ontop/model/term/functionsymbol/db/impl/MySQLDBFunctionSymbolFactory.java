@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -217,14 +218,38 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                         termConverter.apply(terms.get(1))));
     }
 
-    /**
-     * Only supported for MySQL >= 8 use REGEXP_LIKE
-     *
-     * TODO: find a partial solution for other versions of MySQL?
-     */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        // For MySQL >= 8
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
+        return new DBBooleanFunctionSymbolWithSerializerImpl("REGEXP_MATCHES_3",
+                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootDBType), dbBooleanType, false,
+                this::serializeDBRegexpMatches3);
+    }
+
+    /**
+     * TODO: throw an exception when the version is detected to be < 8 and reaching the "default" case?
+     */
+    protected String serializeDBRegexpMatches3(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String string = termConverter.apply(terms.get(0));
+        String pattern = termConverter.apply(terms.get(1));
+        ImmutableTerm flagTerm = terms.get(2);
+        if (flagTerm instanceof DBConstant) {
+            String flags = ((DBConstant) flagTerm).getValue();
+            switch (flags) {
+                // Case sensitive
+                case "":
+                    return String.format("(%s REGEXP BINARY %s)", string, pattern);
+                // Case insensitive
+                case "i":
+                    // TODO: is it robust to collation?
+                    return String.format("(%s REGEXP %s)", string, pattern);
+                default:
+                    break;
+            }
+        }
+
+        // REGEXP_LIKE is only supported by MySQL >= 8
+        return getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3)
+                .getNativeDBString(terms, termConverter, termFactory);
     }
 }
