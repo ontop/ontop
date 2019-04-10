@@ -10,12 +10,12 @@ import javax.annotation.Nonnull;
 /**
  * Can simplify itself in case of strict equalities with a constant
  */
-public class SimplifyingSQLCastToStringFunctionSymbolImpl extends DefaultSQLSimpleDBCastFunctionSymbol {
+public class SQLCastIntegerToStringFunctionSymbolImpl extends DefaultSQLSimpleDBCastFunctionSymbol {
 
     @Nonnull
     private final DBTermType inputType;
 
-    protected SimplifyingSQLCastToStringFunctionSymbolImpl(@Nonnull DBTermType inputType, DBTermType dbStringType) {
+    protected SQLCastIntegerToStringFunctionSymbolImpl(@Nonnull DBTermType inputType, DBTermType dbStringType) {
         super(inputType, dbStringType);
         this.inputType = inputType;
         if (inputType.isAbstract())
@@ -29,6 +29,11 @@ public class SimplifyingSQLCastToStringFunctionSymbolImpl extends DefaultSQLSimp
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
+        String otherValue = otherTerm.getValue();
+        // Positive numbers normally does not start with +
+        if (otherValue.startsWith("+"))
+            return IncrementalEvaluation.declareSameExpression();
+
         ImmutableExpression newEquality = termFactory.getStrictEquality(
                 terms.get(0),
                 termFactory.getDBConstant(otherTerm.getValue(), inputType));

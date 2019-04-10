@@ -287,7 +287,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      * The returned function symbol can apply additional optimizations
      */
     protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
-        return new SimplifyingSQLCastToStringFunctionSymbolImpl(inputType, dbStringType);
+        return new SQLCastIntegerToStringFunctionSymbolImpl(inputType, dbStringType);
     }
 
     @Override
