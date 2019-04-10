@@ -236,6 +236,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                     return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
             }
         }
+
+        if (targetType.equals(dbStringType)) {
+            switch (inputCategory) {
+                case INTEGER:
+                    return createIntegerToStringCastFunctionSymbol(inputType);
+                default:
+            }
+        }
+
+
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
     }
 
@@ -271,6 +281,13 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
                                                                                     DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * The returned function symbol can apply additional optimizations
+     */
+    protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
+        return new SimplifyingSQLCastToStringFunctionSymbolImpl(inputType, dbStringType);
     }
 
     @Override
