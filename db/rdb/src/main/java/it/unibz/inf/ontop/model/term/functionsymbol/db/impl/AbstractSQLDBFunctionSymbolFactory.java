@@ -222,6 +222,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType.Category inputCategory = inputType.getCategory();
         if (inputCategory.equals(targetType.getCategory())) {
             switch (inputCategory) {
+                case INTEGER:
+                    return createIntegerToIntegerCastFunctionSymbol(inputType, targetType);
+                case DECIMAL:
+                    return createDecimalToDecimalCastFunctionSymbol(inputType, targetType);
+                case FLOAT_DOUBLE:
+                    return createFloatDoubleToFloatDoubleCastFunctionSymbol(inputType, targetType);
                 case STRING:
                     return createStringToStringCastFunctionSymbol(inputType, targetType);
                 case DATETIME:
@@ -230,6 +236,27 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                     return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
             }
         }
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * Implicit
+     */
+    protected DBTypeConversionFunctionSymbol createIntegerToIntegerCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * TODO: make it implicit by default?
+     */
+    protected DBTypeConversionFunctionSymbol createDecimalToDecimalCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * TODO: make it implicit by default?
+     */
+    protected DBTypeConversionFunctionSymbol createFloatDoubleToFloatDoubleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
     }
 
