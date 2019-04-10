@@ -12,6 +12,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+
 /**
  * See https://www.w3.org/TR/r2rml/#natural-mapping
  */
@@ -118,18 +122,18 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(VARBINARY_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BLOB_STR, rootAncestry, hexBinary),
-                    new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(INT_STR, rootAncestry, xsdInteger),
+                    new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(INT_STR, rootAncestry, xsdInteger, INTEGER),
                     // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk
-                    new NumberDBTermType(TINYINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(NUMERIC_STR, rootAncestry, xsdDecimal),
-                    new NumberDBTermType(DECIMAL_STR, rootAncestry, xsdDecimal),
-                    new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble),
+                    new NumberDBTermType(TINYINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(NUMERIC_STR, rootAncestry, xsdDecimal, DECIMAL),
+                    new NumberDBTermType(DECIMAL_STR, rootAncestry, xsdDecimal, DECIMAL),
+                    new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),

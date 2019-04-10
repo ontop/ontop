@@ -11,28 +11,26 @@ public class NumberDBTermType extends DBTermTypeImpl {
     private final String castName;
     @Nullable
     private final RDFDatatype rdfDatatype;
+    private final Category category;
 
-    protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        super(name, parentAncestry, isAbstract);
-        rdfDatatype = null;
-        castName = name;
-    }
-
-    protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
+    protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
+                               Category category) {
         super(name, parentAncestry, false);
         this.castName = castName;
         this.rdfDatatype = rdfDatatype;
+        this.category = category;
     }
 
-    protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
+    protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype, Category category) {
         super(name, parentAncestry, false);
         this.rdfDatatype = rdfDatatype;
         castName = name;
+        this.category = category;
     }
 
     @Override
     public Category getCategory() {
-        return Category.NUMBER;
+        return category;
     }
 
     @Override

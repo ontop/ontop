@@ -22,7 +22,9 @@ public interface DBTermType extends TermType {
 
     enum Category {
         STRING,
-        NUMBER,
+        INTEGER,
+        DECIMAL,
+        FLOAT_DOUBLE,
         BOOLEAN,
         DATETIME,
         OTHER

@@ -9,6 +9,9 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.Map;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+
 public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     public static final String BIT_STR = "BIT";
@@ -38,7 +41,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
 
         // Overloads BIGINT to use SIGNED for casting purposes
-        NumberDBTermType bigIntType = new NumberDBTermType(BIGINT_STR, "SIGNED", rootAncestry, xsdInteger);
+        NumberDBTermType bigIntType = new NumberDBTermType(BIGINT_STR, "SIGNED", rootAncestry, xsdInteger, INTEGER);
 
         // Overloads NVARCHAR to insert the precision
         StringDBTermType textType = new StringDBTermType(TEXT_STR, "CHAR CHARACTER SET utf8", rootAncestry,
@@ -46,7 +49,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         // Overloads DECIMAL to specify a precision for casting purposes
         NumberDBTermType decimalType = new NumberDBTermType(DECIMAL_STR, "DECIMAL(60,30)", rootAncestry,
-                typeFactory.getXsdDecimalDatatype());
+                typeFactory.getXsdDecimalDatatype(), DECIMAL);
 
         // Non-standard (not part of the R2RML standard).
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
@@ -59,13 +62,13 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         StringDBTermType setTextType = new StringDBTermType(SET_STR, rootAncestry, xsdString);
         StringDBTermType enumTextType = new StringDBTermType(ENUM_STR, rootAncestry, xsdString);
 
-        NumberDBTermType mediumIntType = new NumberDBTermType(MEDIUMINT_STR, rootAncestry, xsdInteger);
+        NumberDBTermType mediumIntType = new NumberDBTermType(MEDIUMINT_STR, rootAncestry, xsdInteger, INTEGER);
         // Unsigned
-        NumberDBTermType unsignedTinyIntType = new NumberDBTermType(TINYINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
-        NumberDBTermType unsignedSmallIntType = new NumberDBTermType(SMALLINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
-        NumberDBTermType unsignedMediumIntType = new NumberDBTermType(MEDIUMINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
-        NumberDBTermType unsignedIntType = new NumberDBTermType(INT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
-        NumberDBTermType unsignedBigIntType = new NumberDBTermType(BIGINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+        NumberDBTermType unsignedTinyIntType = new NumberDBTermType(TINYINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger, INTEGER);
+        NumberDBTermType unsignedSmallIntType = new NumberDBTermType(SMALLINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger, INTEGER);
+        NumberDBTermType unsignedMediumIntType = new NumberDBTermType(MEDIUMINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger, INTEGER);
+        NumberDBTermType unsignedIntType = new NumberDBTermType(INT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger, INTEGER);
+        NumberDBTermType unsignedBigIntType = new NumberDBTermType(BIGINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger, INTEGER);
 
 
         // NB: TIMESTAMP also exists
