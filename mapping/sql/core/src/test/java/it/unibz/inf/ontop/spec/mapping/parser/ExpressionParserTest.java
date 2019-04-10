@@ -735,10 +735,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
-                TERM_FACTORY.getDBStringConstant("A.*B"),
-                TERM_FACTORY.getDBStringConstant("")), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
 
     @Test
@@ -754,10 +753,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
-                        TERM_FACTORY.getDBStringConstant("A.*B"),
-                        TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
+                        TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
     }
 
     @Test
@@ -810,10 +808,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
-                        TERM_FACTORY.getDBStringConstant("A.*B"),
-                        TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
+                        TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
     }
 
     @Test
@@ -828,10 +825,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
-                TERM_FACTORY.getDBStringConstant("A.*B"),
-                TERM_FACTORY.getDBStringConstant("")), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
 
     @Test
@@ -884,10 +880,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
-                TERM_FACTORY.getDBStringConstant("A.*B"),
-                TERM_FACTORY.getDBStringConstant("")), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
 
     @Test
@@ -921,10 +916,9 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(NOT,
-                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches3(),
+                TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
-                        TERM_FACTORY.getDBStringConstant("A.*B"),
-                        TERM_FACTORY.getDBStringConstant(""))), translation.get(0));
+                        TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
     }
 
     @Test
