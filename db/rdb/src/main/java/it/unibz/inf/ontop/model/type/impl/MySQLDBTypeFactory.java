@@ -22,6 +22,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String SET_STR = "SET";
     protected static final String ENUM_STR = "ENUM";
     protected static final String MEDIUMINT_STR = "MEDIUMINT";
+    protected static final String UNSIGNED_SUFFIX = " UNSIGNED";
 
     public static final String DATETIME_STR = "DATETIME";
 
@@ -57,6 +58,13 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         StringDBTermType enumTextType = new StringDBTermType(ENUM_STR, rootAncestry, xsdString);
 
         NumberDBTermType mediumIntType = new NumberDBTermType(MEDIUMINT_STR, rootAncestry, xsdInteger);
+        // Unsigned
+        NumberDBTermType unsignedTinyIntType = new NumberDBTermType(TINYINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+        NumberDBTermType unsignedSmallIntType = new NumberDBTermType(SMALLINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+        NumberDBTermType unsignedMediumIntType = new NumberDBTermType(MEDIUMINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+        NumberDBTermType unsignedIntType = new NumberDBTermType(INT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+        NumberDBTermType unsignedBigIntType = new NumberDBTermType(BIGINT_STR + UNSIGNED_SUFFIX, rootAncestry, xsdInteger);
+
 
         // NB: TIMESTAMP also exists
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
@@ -83,6 +91,11 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TEXT_STR, textType);
         map.put(MEDIUMINT_STR, mediumIntType);
         map.put(BIGINT_STR, bigIntType);
+        map.put(TINYINT_STR + UNSIGNED_SUFFIX, unsignedTinyIntType);
+        map.put(SMALLINT_STR + UNSIGNED_SUFFIX, unsignedSmallIntType);
+        map.put(MEDIUMINT_STR + UNSIGNED_SUFFIX, unsignedMediumIntType);
+        map.put(INT_STR + UNSIGNED_SUFFIX, unsignedIntType);
+        map.put(BIGINT_STR + UNSIGNED_SUFFIX, unsignedBigIntType);
         map.put(DECIMAL_STR, decimalType);
         map.put(DATETIME_STR, datetimeType);
         return map;
