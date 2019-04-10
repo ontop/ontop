@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
+import java.util.regex.Pattern;
 
 /**
  * Can simplify itself in case of strict equalities with a constant
@@ -14,12 +15,14 @@ public class SQLCastIntegerToStringFunctionSymbolImpl extends DefaultSQLSimpleDB
 
     @Nonnull
     private final DBTermType inputType;
+    private final Pattern pattern;
 
     protected SQLCastIntegerToStringFunctionSymbolImpl(@Nonnull DBTermType inputType, DBTermType dbStringType) {
         super(inputType, dbStringType);
         this.inputType = inputType;
         if (inputType.isAbstract())
             throw new IllegalArgumentException("Was expecting a concrete input type");
+        this.pattern = Pattern.compile("^[0+]\\d+");
     }
 
     /**
@@ -30,8 +33,8 @@ public class SQLCastIntegerToStringFunctionSymbolImpl extends DefaultSQLSimpleDB
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
         String otherValue = otherTerm.getValue();
-        // Positive numbers normally does not start with +
-        if (otherValue.startsWith("+"))
+        // Positive non-null numbers normally does not start with + or by 0
+        if (pattern.matcher(otherValue).matches())
             return IncrementalEvaluation.declareSameExpression();
 
         ImmutableExpression newEquality = termFactory.getStrictEquality(
