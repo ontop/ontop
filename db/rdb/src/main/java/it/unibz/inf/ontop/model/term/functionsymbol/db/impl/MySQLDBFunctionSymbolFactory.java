@@ -194,6 +194,11 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected DBFunctionSymbol createR2RMLIRISafeEncode() {
+        return new MySQLR2RMLSafeIRIEncodeFunctionSymbolImpl(dbStringType);
+    }
+
+    @Override
     protected String getUUIDNameInDialect() {
         return UUID_STR;
     }
