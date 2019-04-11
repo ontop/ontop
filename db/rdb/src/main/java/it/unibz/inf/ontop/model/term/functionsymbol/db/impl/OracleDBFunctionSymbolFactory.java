@@ -138,12 +138,9 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new UnsupportedOperationException("This method should not be called for Oracle");
     }
 
-    /**
-     * TODO: use TO_TIMESTAMP or TO_TIMESTAMP_TZ depending on the presence of a TZ
-     */
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
-        return super.createDateTimeDenormFunctionSymbol(timestampType);
+        return new OracleTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 
     @Override

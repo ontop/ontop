@@ -73,6 +73,7 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.DECIMAL, NUMBER_STR);
         map.put(DefaultTypeCode.LARGE_INTEGER, NUMBER_19_STR);
         map.put(DefaultTypeCode.DOUBLE, BINARY_DOUBLE_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_TZ_STR);
         return ImmutableMap.copyOf(map);
     }
 

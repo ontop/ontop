@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.datalog.OrderCondition;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.sql.Types;
 import java.util.*;
@@ -364,6 +366,17 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 				.collect(Collectors.toSet());
 
 		return nameViewOrVariable(prefix, tableName, suffix, viewNames, true);
+	}
+
+	@Override
+	public String render(DBConstant constant) {
+		DBTermType dbType = constant.getType();
+		switch (dbType.getCategory()) {
+			case DATETIME:
+				return String.format("TIMESTAMP '%s'", constant.getValue());
+			default:
+				return super.render(constant);
+		}
 	}
 
 	/**
