@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class DefaultSQLIfThenElseFunctionSymbol extends AbstractDBIfThenElseFunctionSymbol {
 
-    private static final String TEMPLATE = "CASE WHEN %s THEN %s ELSE %s END";
+    private static final String TEMPLATE = "CASE WHEN %s THEN %s ELSE %s END";
 
     protected DefaultSQLIfThenElseFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super(dbBooleanType, rootDBTermType);
