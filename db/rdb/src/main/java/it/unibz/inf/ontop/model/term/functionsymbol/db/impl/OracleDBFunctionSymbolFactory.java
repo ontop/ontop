@@ -106,6 +106,16 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new RuntimeException("TODO: support");
     }
 
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
+        return new OracleCastIntegerToStringFunctionSymbol(inputType, dbStringType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
+        return new OracleCastToStringFunctionSymbol(inputType, dbStringType);
+    }
+
     /**
      * Overrides
      */

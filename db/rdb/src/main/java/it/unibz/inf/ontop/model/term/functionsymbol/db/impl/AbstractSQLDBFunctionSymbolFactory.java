@@ -242,6 +242,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 case INTEGER:
                     return createIntegerToStringCastFunctionSymbol(inputType);
                 default:
+                    return createDefaultCastToStringFunctionSymbol(inputType);
             }
         }
 
@@ -288,6 +289,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      */
     protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
         return new SQLCastIntegerToStringFunctionSymbolImpl(inputType, dbStringType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, dbStringType);
     }
 
     @Override
