@@ -19,6 +19,11 @@ import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
  *   - NUMBER is used both for integers and decimals
  *   - Oracle does not have a proper boolean type... A common practice is to use NUMBER(1)
  *
+ *  Assumption: the default character set of VARCHAR2 on the Oracle instance is expected to contain
+ *  all the possible characters that can be encountered by the application. NB: on modern instances,
+ *  it is usually UTF-8, which is safe.
+ *
+ *
  */
 public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -74,6 +79,8 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(DefaultTypeCode.LARGE_INTEGER, NUMBER_19_STR);
         map.put(DefaultTypeCode.DOUBLE, BINARY_DOUBLE_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_TZ_STR);
+        // NB: Conversions to VARCHAR2 use the TO_CHAR(...) function
+        map.put(DefaultTypeCode.STRING, VARCHAR2_STR);
         return ImmutableMap.copyOf(map);
     }
 
