@@ -58,11 +58,10 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         table.put(timestampLTzType, xsdDatetime, datetimeLTZNormFunctionSymbol);
         table.put(timestampLTzType, xsdDatetimeStamp, datetimeLTZNormFunctionSymbol);
 
-        DBTermType timestampTzType = dbTypeFactory.getDBTermType(TIMESTAMP_TZ_STR);
-        DBTypeConversionFunctionSymbol datetimeTZNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampTzType);
-        table.put(timestampTzType, xsdDatetime, datetimeTZNormFunctionSymbol);
-        table.put(timestampTzType, xsdDatetimeStamp, datetimeTZNormFunctionSymbol);
-
+        DBTermType timestampType = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);
+        table.put(timestampType, xsdDatetime, datetimeNormFunctionSymbol);
+        // No TZ for TIMESTAMP --> incompatible with XSD.DATETIMESTAMP
         return ImmutableTable.copyOf(table);
     }
 
@@ -135,6 +134,9 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 (terms, converter, factory) -> serializeDateTimeNorm(dbDateTimestampType, terms, converter));
     }
 
+    /**
+     * NB: In some JDBC connection settings, returns a comma instead of a period.
+     */
     protected String serializeDateTimeNorm(DBTermType dbDateTimestampType,
                                            ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter) {
@@ -142,11 +144,12 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
          * TIMESTAMP by default does not support time zones
          */
         if (dbDateTimestampType.equals(dbTypeFactory.getDBTermType(TIMESTAMP_STR))) {
-            return String.format("REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF'),' ','T')", termConverter.apply(terms.get(0)));
+            return String.format("REPLACE(REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF'),' ','T'),',','.')", termConverter.apply(terms.get(0)));
         }
         // Timezone support
         else
-            return String.format("REGEXP_REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF TZH:TZM'),' ','T',1,1),' ','')",
+            return String.format(
+                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF TZH:TZM'),' ','T',1,1),' ',''),',','.')",
                     termConverter.apply(terms.get(0)));
     }
 
