@@ -36,6 +36,8 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
 
     IncrementalEvaluation evaluate2VL(VariableNullability variableNullability, boolean isExpressionNew);
 
+    ImmutableTerm simplify2VL(VariableNullability variableNullability);
+
     boolean isVar2VarEquality();
 
     /**

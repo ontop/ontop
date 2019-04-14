@@ -27,6 +27,16 @@ public interface BooleanFunctionSymbol extends FunctionSymbol {
      */
     default ImmutableTerm simplify2VL(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
                               VariableNullability variableNullability) {
-        return simplify(terms, termFactory, variableNullability);
+        ImmutableTerm newTerm = simplify(terms, termFactory, variableNullability);
+
+        // Makes sure that the returned expression has been inform that "2VL simplifications" can be applied
+        // Prevents an infinite loop
+        if (newTerm instanceof ImmutableExpression) {
+            ImmutableExpression newExpression = (ImmutableExpression) newTerm;
+            if ((!this.equals(newExpression.getFunctionSymbol())) || (!terms.equals(newExpression.getTerms()))) {
+                return newExpression.simplify2VL(variableNullability);
+            }
+        }
+        return newTerm;
     }
 }

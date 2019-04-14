@@ -68,7 +68,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
 
     @Override
     public Evaluation evaluate2VL(VariableNullability variableNullability) {
-        ImmutableTerm newTerm = getFunctionSymbol().simplify2VL(getTerms(), termFactory, variableNullability);
+        ImmutableTerm newTerm = simplify2VL(variableNullability);
         return convertTermToEvaluation(newTerm, false);
     }
 
@@ -97,6 +97,11 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     public IncrementalEvaluation evaluate2VL(VariableNullability variableNullability, boolean isExpressionNew) {
         return evaluate2VL(variableNullability)
                 .getEvaluationResult(this, isExpressionNew);
+    }
+
+    @Override
+    public ImmutableTerm simplify2VL(VariableNullability variableNullability) {
+        return getFunctionSymbol().simplify2VL(getTerms(), termFactory, variableNullability);
     }
 
 
