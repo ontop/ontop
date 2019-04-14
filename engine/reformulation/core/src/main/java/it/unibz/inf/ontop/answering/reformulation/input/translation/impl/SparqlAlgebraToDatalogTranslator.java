@@ -448,7 +448,7 @@ public class SparqlAlgebraToDatalogTranslator {
          *
          * TEMPORARY
          */
-        IncrementalEvaluation evaluation = expression.evaluate(
+        IncrementalEvaluation evaluation = expression.evaluate2VL(
                 termFactory.createDummyVariableNullability(expression), true);
 
         return evaluation.getNewExpression()

@@ -53,7 +53,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression.Evaluation> optionalEvaluationResults =
                 nonOptimizedExpression
-                        .map(expression -> expression.evaluate(variableNullability));
+                        .map(expression -> expression.evaluate2VL(variableNullability));
 
         if (optionalEvaluationResults.isPresent()) {
             ImmutableExpression.Evaluation results = optionalEvaluationResults.get();
@@ -156,7 +156,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                     substitutedConstraint.flattenAND())))
                     .orElse(substitutedConstraint);
 
-            ImmutableExpression.Evaluation evaluationResults = combinedExpression.evaluate(childVariableNullability);
+            ImmutableExpression.Evaluation evaluationResults = combinedExpression.evaluate2VL(childVariableNullability);
 
             if (evaluationResults.isEffectiveFalse())
                 throw new UnsatisfiableConditionException();

@@ -428,7 +428,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
-        ImmutableExpression.Evaluation results = expression.evaluate(
+        ImmutableExpression.Evaluation results = expression.evaluate2VL(
                 coreUtilsFactory.createDummyVariableNullability(expression));
 
         if (results.isEffectiveFalse())
@@ -505,7 +505,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableExpression nullifiedExpression = substitutionFactory.getSubstitution(nullSubstitutionMap)
                 .applyToBooleanExpression(constraint);
 
-        return nullifiedExpression.evaluate(termFactory.createDummyVariableNullability(nullifiedExpression))
+        return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))
                 .isEffectiveFalse();
     }
 

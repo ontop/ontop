@@ -110,7 +110,7 @@ public class PushDownBooleanExpressionExecutorImpl implements PushDownBooleanExp
         Optional<ImmutableExpression> optionalExpression = termFactory.getConjunction(newExpressions.stream())
                 .flatMap(e -> {
                     // TODO: consider proper variable nullability
-                    IncrementalEvaluation evaluation = e.evaluate(termFactory.createDummyVariableNullability(e), true);
+                    IncrementalEvaluation evaluation = e.evaluate2VL(termFactory.createDummyVariableNullability(e), true);
                     switch(evaluation.getStatus()) {
                         case SAME_EXPRESSION:
                             throw new MinorOntopInternalBugException("Was not expecting to get the same expression");

@@ -27,6 +27,15 @@ public interface ImmutableExpression extends ImmutableFunctionalTerm {
 
     IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew);
 
+    /**
+     * 2-valued logic (2VL): NULL is reduced to FALSE
+     * Is intended to be used by filtering condition, where both NULL and FALSE cause the condition to be rejected.
+     *
+     */
+    Evaluation evaluate2VL(VariableNullability variableNullability);
+
+    IncrementalEvaluation evaluate2VL(VariableNullability variableNullability, boolean isExpressionNew);
+
     boolean isVar2VarEquality();
 
     /**
