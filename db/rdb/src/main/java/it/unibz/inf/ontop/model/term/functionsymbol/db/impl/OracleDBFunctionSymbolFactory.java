@@ -15,10 +15,12 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.UUID;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.DATE_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_TZ_STR;
@@ -62,6 +64,23 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timestampType);
         table.put(timestampType, xsdDatetime, datetimeNormFunctionSymbol);
         // No TZ for TIMESTAMP --> incompatible with XSD.DATETIMESTAMP
+
+        DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
+        DBTypeConversionFunctionSymbol dateNormFunctionSymbol = new OracleDateNormFunctionSymbol(dbDateType, dbStringType);
+        table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateNormFunctionSymbol);
+
+        return ImmutableTable.copyOf(table);
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
+        Table<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> table = HashBasedTable.create();
+        table.putAll(super.createDenormalizationTable());
+
+        DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
+        DBTypeConversionFunctionSymbol dateDenormFunctionSymbol = new OracleDateDenormFunctionSymbol(dbStringType, dbDateType);
+        table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateDenormFunctionSymbol);
+
         return ImmutableTable.copyOf(table);
     }
 
