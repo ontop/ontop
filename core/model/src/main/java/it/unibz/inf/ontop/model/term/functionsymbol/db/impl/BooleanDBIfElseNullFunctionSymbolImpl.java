@@ -57,4 +57,20 @@ public class BooleanDBIfElseNullFunctionSymbolImpl extends DefaultDBIfElseNullFu
             throw new MinorOntopInternalBugException("Unexpected new \"then\" value for a boolean IF_ELSE_NULL: "
                     + newThenValue);
     }
+
+    @Override
+    public ImmutableTerm simplify2VL(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                     VariableNullability variableNullability) {
+        ImmutableTerm thenValue = terms.get(1);
+        ImmutableExpression thenExpression = (thenValue instanceof ImmutableExpression)
+                ? (ImmutableExpression) thenValue
+                : termFactory.getIsTrue(Optional.of(thenValue)
+                        .filter(v -> v instanceof NonFunctionalTerm)
+                        .map(v -> (NonFunctionalTerm) v)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("Was an expected an immutable expression " +
+                                "or non functional term as a then condition")));
+
+        return termFactory.getConjunction((ImmutableExpression) terms.get(0), thenExpression)
+                .simplify2VL(variableNullability);
+    }
 }
