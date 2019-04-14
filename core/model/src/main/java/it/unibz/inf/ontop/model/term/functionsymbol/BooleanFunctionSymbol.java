@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -21,7 +22,7 @@ public interface BooleanFunctionSymbol extends FunctionSymbol {
     ImmutableExpression negate(ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory);
 
     /**
-     * Can further simplify than the simplify(...) because here FALSE can be treated as equivalent (2-valued logic)
+     * Can further simplify than the simplify(...) because here FALSE can be treated as equivalent to NULL (2-valued logic)
      *
      * By default, reuses simplify(...).
      */
@@ -37,6 +38,8 @@ public interface BooleanFunctionSymbol extends FunctionSymbol {
                 return newExpression.simplify2VL(variableNullability);
             }
         }
+        else if (newTerm.isNull())
+            return termFactory.getDBBooleanConstant(false);
         return newTerm;
     }
 }
