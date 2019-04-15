@@ -34,7 +34,7 @@ import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -75,9 +75,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static final String RDF_XML = "rdfxml";
-    private static final String OWL_XML = "owlxml";
     private static final String TURTLE = "turtle";
-    private static final String N3 = "n3";
 
 
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
@@ -87,9 +85,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
     @Option(type = OptionType.COMMAND, name = {"-f", "--format"}, title = "outputFormat",
             description = "The format of the materialized ontology. " +
-                    //" Options: rdfxml, owlxml, turtle, n3. " +
+                    //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, OWL_XML, TURTLE, N3})
+    @AllowedValues(allowedValues = {RDF_XML, TURTLE})
     public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -316,8 +314,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     return ".rdf";
                 case TURTLE:
                     return ".ttl";
-                case N3:
-                    return ".n3";
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
@@ -328,9 +324,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 case RDF_XML:
                     return new RDFXMLWriter(writer);
                 case TURTLE:
-                    return new TurtleWriter(writer);
-                case N3:
-                    return new N3Writer(writer);
+                    TurtleWriter tw  = new TurtleWriter(writer);
+                    tw.set(BasicWriterSettings.PRETTY_PRINT, false);
+                    return tw;
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
