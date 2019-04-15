@@ -31,7 +31,9 @@ import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.impl.OntopMaterializedGraphOWLResultSet;
-import org.apache.commons.rdf.api.IRI;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.RDF;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
@@ -39,32 +41,57 @@ import javax.annotation.Nonnull;
 public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 
 	private final OntopRDFMaterializer materializer;
+	private RDF rdfFactory;
 
-	public DefaultOntopOWLAPIMaterializer() {
-		materializer = new DefaultOntopRDFMaterializer();
+	public DefaultOntopOWLAPIMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+		materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);
+		rdfFactory = configuration.getInjector().getInstance(RDF.class);
+	}
+
+	/**
+	 * Materializes the saturated RDF graph with the default options
+	 */
+	public DefaultOntopOWLAPIMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+		this(configuration, MaterializationParams.defaultBuilder().build());
 	}
 
 	@Override
-	public MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                     @Nonnull MaterializationParams params)
+	public MaterializedGraphOWLResultSet materialize()
 			throws OWLException {
 		try {
-			return wrap(materializer.materialize(configuration, params));
+			return wrap(materializer.materialize());
 		} catch (OBDASpecificationException e) {
 			throw new OntopOWLException(e);
 		}
 	}
 
 	@Override
-	public MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                     @Nonnull ImmutableSet<IRI> selectedVocabulary,
-                                                     @Nonnull MaterializationParams params)
+	public MaterializedGraphOWLResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
 			throws OWLException {
 		try {
-			return wrap(materializer.materialize(configuration, selectedVocabulary, params));
+			return wrap(
+					materializer.materialize(
+							selectedVocabulary.stream()
+									.map(i -> rdfFactory.createIRI(i.toString()))
+									.collect(ImmutableCollectors.toSet()))
+			);
 		} catch (OBDASpecificationException e) {
 			throw new OntopOWLException(e);
 		}
+	}
+
+	@Override
+	public ImmutableSet<IRI> getClasses() {
+		return materializer.getClasses().stream()
+				.map(i -> IRI.create(i.getIRIString()))
+				.collect(ImmutableCollectors.toSet());
+	}
+
+	@Override
+	public ImmutableSet<IRI> getProperties() {
+		return materializer.getProperties().stream()
+				.map(i -> IRI.create(i.getIRIString()))
+				.collect(ImmutableCollectors.toSet());
 	}
 
 	private MaterializedGraphOWLResultSet wrap(MaterializedGraphResultSet graphResultSet) {

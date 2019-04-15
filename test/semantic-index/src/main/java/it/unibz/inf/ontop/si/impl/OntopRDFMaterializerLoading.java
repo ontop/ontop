@@ -45,12 +45,11 @@ public class OntopRDFMaterializerLoading {
                     obdaConfiguration.getTermFactory(), obdaConfiguration.getTypeFactory(),
                     obdaConfiguration.getInjector().getInstance(TargetAtomFactory.class));
 
-            OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
                     .enableDBResultsStreaming(true)
                     .build();
-            try (MaterializedGraphResultSet graphResultSet = materializer.materialize(
-                    obdaConfiguration, materializationParams)) {
+            OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(obdaConfiguration, materializationParams);
+            try (MaterializedGraphResultSet graphResultSet = materializer.materialize()) {
 
                 Connection connection = repo.createConnection();
                 int count = repo.insertData(connection,

@@ -70,9 +70,8 @@ else
 fi
 
 # location for protege clean folder
-PROTEGE_COPY_FILENAME=Protege-5.5.0-beta-7-platform-independent
-PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0-beta-7
-
+-PROTEGE_COPY_FILENAME=Protege-5.5.0-beta-7-platform-independent
+-PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0-beta-7
 
 # location and name for jetty distribution (should be ZIP)
 JETTY_COPY_FILENAME=jetty-distribution-9.4.6
