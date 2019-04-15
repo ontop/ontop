@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -67,6 +68,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -198,15 +200,29 @@ public class MetaMappingExpander {
 
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
 
+						ImmutableList<Variable> templateVariables = templateAtom.getTerms().stream()
+										.filter(t -> t instanceof Variable)
+										.map(v -> (Variable) v)
+										.distinct()
+										.collect(ImmutableCollectors.toList());
+
+						// Transforms the result set into a substitution
+						ImmutableSubstitution<ValueConstant> valueSubstitution = substitutionFactory.getSubstitution(
+								IntStream.range(0, values.size())
+								.boxed()
+								.collect(ImmutableCollectors.toMap(
+										templateVariables::get,
+										i -> termFactory.getConstantLiteral(values.get(i)))));
 
 						// In a mapping assertion, we create ground terms instead of constants for IRIs
 						// (so as to guarantee that RDF functions can ALWAYS be lifted after unfolding)
 						GroundFunctionalTerm predicateTerm = (GroundFunctionalTerm) termFactory.getImmutableUriTemplate(
 								termFactory.getConstantLiteral(getPredicateName(templateAtom.getTerm(0), values)));
-
 						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
-						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
-								.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+						// TODO: simplify (for the beta-4)
+						ImmutableSubstitution<ImmutableTerm> newSubstitution = valueSubstitution.composeWith(
+								m.target.getSubstitution()
+										.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm)));
 
 						TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
 
