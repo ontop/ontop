@@ -64,25 +64,28 @@ public class AbstractTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
         return termFactory.getImmutableFunctionalTerm(this, ImmutableList.of(subTerm));
     }
 
-    /**
-     * TODO: make it stronger
-     */
     @Override
     protected ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        String newString = constant.getValue().replace("T", " ");
+        String newString = constant.getValue()
+                .replace("T", " ")
+                //.replaceFirst("([+-]\\d\\d:\\d\\d)", " $0")
+                //.replace("Z", " +00:00");
+                .replace("Z", "+00:00");
+
         return termFactory.getDBConstant(newString, getTargetType());
     }
 
-    /**
-     *
-     * TODO: make it stronger
-     */
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        ImmutableFunctionalTerm newTerm = termFactory.getDBReplace(terms.get(0),
+        ImmutableFunctionalTerm replaceTTerm = termFactory.getDBReplace(terms.get(0),
                 termFactory.getDBStringConstant("T"),
                 termFactory.getDBStringConstant(" "));
-        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getName());
+
+        ImmutableFunctionalTerm newTerm = termFactory.getDBReplace(replaceTTerm,
+                termFactory.getDBStringConstant("Z"),
+                termFactory.getDBStringConstant("+00:00"));
+
+        return String.format(CAST_TEMPLATE, termConverter.apply(newTerm), getTargetType().getCastName());
     }
 }

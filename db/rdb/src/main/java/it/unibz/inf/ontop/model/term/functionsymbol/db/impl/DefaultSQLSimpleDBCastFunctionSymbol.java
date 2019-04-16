@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
@@ -29,6 +27,6 @@ public class DefaultSQLSimpleDBCastFunctionSymbol extends AbstractSimpleDBCastFu
             throw new IllegalArgumentException(terms +
                     " does not respect the arity of " + getArity());
 
-        return String.format(CAST_TEMPLATE, termConverter.apply(terms.get(0)), getTargetType().getName());
+        return String.format(CAST_TEMPLATE, termConverter.apply(terms.get(0)), getTargetType().getCastName());
     }
 }

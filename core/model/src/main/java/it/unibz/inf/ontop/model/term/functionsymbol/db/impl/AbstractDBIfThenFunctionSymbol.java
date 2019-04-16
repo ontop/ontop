@@ -100,7 +100,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
                     .orElseThrow(() -> new MinorOntopInternalBugException(term + " was expected to be " +
                             "an ImmutableExpression due to its position in " + this));
 
-            ImmutableExpression.Evaluation evaluation = expression.evaluate(variableNullability);
+            ImmutableExpression.Evaluation evaluation = expression.evaluate2VL(variableNullability);
             if (evaluation.getValue().isPresent()) {
                 switch (evaluation.getValue().get()) {
                     case TRUE:

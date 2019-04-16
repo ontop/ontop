@@ -62,7 +62,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                     child.acceptTransformer(this));
 
         ImmutableExpression newCondition = newRequest.getCondition();
-        Optional<ImmutableTerm> optionalLocalDefinition = newCondition.evaluate(termFactory.createDummyVariableNullability(newCondition))
+        Optional<ImmutableTerm> optionalLocalDefinition = newCondition.evaluate2VL(termFactory.createDummyVariableNullability(newCondition))
                 .getValue()
                 .map(v -> {
                     switch (v) {

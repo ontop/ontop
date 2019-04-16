@@ -20,7 +20,7 @@ public class StrlenSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
 
     @Override
     protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
-        return termFactory.getDBStrlen(subLexicalTerms.get(0));
+        return termFactory.getDBCharLength(subLexicalTerms.get(0));
     }
 
     @Override

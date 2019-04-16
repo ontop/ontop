@@ -23,8 +23,13 @@ package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,15 +46,21 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     private static final String obdafile = "/mysql/bindTest/sparqlBindMySQL.obda";
     private static final String propertyfile = "/mysql/bindTest/sparqlBindMySQL.properties";
 
-    public BindWithFunctionsMySQLTest() {
-        super(owlfile, obdafile, propertyfile);
+    private static OntopOWLReasoner REASONER;
+    private static OWLConnection CONNECTION;
+
+    public BindWithFunctionsMySQLTest() throws OWLOntologyCreationException {
+        super(createReasoner(owlfile, obdafile, propertyfile));
+        REASONER = getReasoner();
+        CONNECTION = getConnection();
     }
 
-    @Ignore("Not yet supported")
-    @Test
-    @Override
-    public void testHash() {
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
+    
 
     @Ignore("Not yet supported")
     @Test
@@ -81,10 +92,10 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getAbsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"9\"^^xsd:decimal");
-        expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"7\"^^xsd:decimal");
-        expectedValues.add("\"2\"^^xsd:decimal");
+        expectedValues.add("\"8.5000\"^^xsd:decimal");
+        expectedValues.add("\"5.7500\"^^xsd:decimal");
+        expectedValues.add("\"6.7000\"^^xsd:decimal");
+        expectedValues.add("\"1.5000\"^^xsd:decimal");
         return expectedValues;
     }
 

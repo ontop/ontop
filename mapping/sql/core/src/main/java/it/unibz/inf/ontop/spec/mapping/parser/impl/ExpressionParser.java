@@ -236,7 +236,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(RegExpMySQLOperator expression) {
-            Term flags;
+            DBConstant flags;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
                     flags = termFactory.getDBStringConstant("");
@@ -247,8 +247,9 @@ public class ExpressionParser {
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, (t1, t2) ->  termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(),
-                    t1, t2, flags));
+            process(expression, (t1, t2) -> flags.getValue().isEmpty()
+                    ? termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches2(), t1, t2)
+                    : termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags));
         }
 
         // POSIX Regular Expressions
@@ -256,7 +257,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(RegExpMatchOperator expression) {
-            Term flags;
+            DBConstant flags;
             java.util.function.UnaryOperator<Function> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
@@ -279,7 +280,10 @@ public class ExpressionParser {
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) ->
-                    not.apply(termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags)));
+                    not.apply(
+                            flags.getValue().isEmpty()
+                                    ? termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches2(), t1, t2)
+                                    : termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags)));
         }
 
 

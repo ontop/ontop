@@ -40,18 +40,23 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
 
 
-    protected final DBTypeFactory dbTypeFactory;
+    protected DBTypeFactory dbTypeFactory;
     protected final TypeFactory typeFactory;
     protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;
-    private final DBTermType dbDoubleType;
-    private final DBTermType abstractRootDBType;
-    private final TermType abstractRootType;
-    private final DBFunctionSymbol ifThenElse;
-    private final DBBooleanFunctionSymbol isStringEmpty;
-    private final DBIsNullOrNotFunctionSymbol isNull;
-    private final DBIsNullOrNotFunctionSymbol isNotNull;
-    private final DBIsTrueFunctionSymbol isTrue;
+    protected final DBTermType dbDoubleType;
+    protected final DBTermType abstractRootDBType;
+    protected final TermType abstractRootType;
+    // Created in init()
+    private DBFunctionSymbol ifThenElse;
+    // Created in init()
+    private DBBooleanFunctionSymbol isStringEmpty;
+    // Created in init()
+    private DBIsNullOrNotFunctionSymbol isNull;
+    // Created in init()
+    private DBIsNullOrNotFunctionSymbol isNotNull;
+    // Created in init()
+    private DBIsTrueFunctionSymbol isTrue;
 
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
@@ -62,12 +67,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
-        this.ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
-        this.isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
-        this.isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
-        this.isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
-        this.isTrue = createDBIsTrue(dbBooleanType);
+    }
+
+    @Override
+    protected void init() {
+        // Always call it first
+        super.init();
+        ifThenElse = createDBIfThenElse(dbBooleanType, abstractRootDBType);
+        isStringEmpty = createIsStringEmpty(dbBooleanType, abstractRootDBType);
+        isNull = createDBIsNull(dbBooleanType, abstractRootDBType);
+        isNotNull = createDBIsNotNull(dbBooleanType, abstractRootDBType);
+        isTrue = createDBIsTrue(dbBooleanType);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
@@ -126,7 +137,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
         DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
                 dbDateTimestamp, true, abstractRootDBType);
-        builder.put(CURRENT_TIMESTAMP_STR, 1, nowFunctionSymbol);
+        builder.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
 
         return builder.build();
@@ -211,6 +222,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType.Category inputCategory = inputType.getCategory();
         if (inputCategory.equals(targetType.getCategory())) {
             switch (inputCategory) {
+                case INTEGER:
+                    return createIntegerToIntegerCastFunctionSymbol(inputType, targetType);
+                case DECIMAL:
+                    return createDecimalToDecimalCastFunctionSymbol(inputType, targetType);
+                case FLOAT_DOUBLE:
+                    return createFloatDoubleToFloatDoubleCastFunctionSymbol(inputType, targetType);
                 case STRING:
                     return createStringToStringCastFunctionSymbol(inputType, targetType);
                 case DATETIME:
@@ -219,6 +236,38 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                     return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
             }
         }
+
+        if (targetType.equals(dbStringType)) {
+            switch (inputCategory) {
+                case INTEGER:
+                    return createIntegerToStringCastFunctionSymbol(inputType);
+                default:
+                    return createDefaultCastToStringFunctionSymbol(inputType);
+            }
+        }
+
+
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * Implicit
+     */
+    protected DBTypeConversionFunctionSymbol createIntegerToIntegerCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
+        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * TODO: make it implicit by default?
+     */
+    protected DBTypeConversionFunctionSymbol createDecimalToDecimalCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * TODO: make it implicit by default?
+     */
+    protected DBTypeConversionFunctionSymbol createFloatDoubleToFloatDoubleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
         return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
     }
 
@@ -227,9 +276,23 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
     }
 
+    /**
+     * By default explicit
+     */
     protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
-                                                                                        DBTermType targetType) {
-        return new DefaultImplicitDBCastFunctionSymbol(inputType, targetType);
+                                                                                    DBTermType targetType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+    }
+
+    /**
+     * The returned function symbol can apply additional optimizations
+     */
+    protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
+        return new SQLCastIntegerToStringFunctionSymbolImpl(inputType, dbStringType);
+    }
+
+    protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
+        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, dbStringType);
     }
 
     @Override

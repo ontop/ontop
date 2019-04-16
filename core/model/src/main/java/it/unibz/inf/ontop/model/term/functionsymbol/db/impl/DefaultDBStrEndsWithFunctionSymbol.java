@@ -38,7 +38,7 @@ public class DefaultDBStrEndsWithFunctionSymbol extends DBBooleanFunctionSymbolI
                 termFactory.getStrictEquality(
                         termFactory.getDBRight(
                                 terms.get(0),
-                                termFactory.getDBStrlen(secondTerm)),
+                                termFactory.getDBCharLength(secondTerm)),
                         secondTerm));
     }
 

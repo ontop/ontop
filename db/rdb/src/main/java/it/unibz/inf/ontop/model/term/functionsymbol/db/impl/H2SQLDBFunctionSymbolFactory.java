@@ -123,6 +123,8 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     /**
      * Asks the timezone to be included
+     *
+     * TODO: fix the timezone
      */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,

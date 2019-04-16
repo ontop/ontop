@@ -9,6 +9,8 @@ public interface DBTermType extends TermType {
 
     String getName();
 
+    String getCastName();
+
     Category getCategory();
 
     Optional<RDFDatatype> getNaturalRDFDatatype();
@@ -20,7 +22,9 @@ public interface DBTermType extends TermType {
 
     enum Category {
         STRING,
-        NUMBER,
+        INTEGER,
+        DECIMAL,
+        FLOAT_DOUBLE,
         BOOLEAN,
         DATETIME,
         OTHER

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -12,8 +13,11 @@ public class DefaultSQLTimestampISONormFunctionSymbol extends AbstractTimestampI
         super(timestampType, dbStringType, serializer);
     }
 
+    /**
+     * TODO: try to return a constant
+     */
     @Override
-    protected DBConstant convertDBConstant(DBConstant constant, TermFactory termFactory) {
-        throw new RuntimeException("TODO: implement timestamp conversion");
+    protected ImmutableTerm convertDBConstant(DBConstant constant, TermFactory termFactory) {
+        return termFactory.getImmutableFunctionalTerm(this, constant);
     }
 }

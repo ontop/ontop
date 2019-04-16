@@ -28,6 +28,13 @@ package it.unibz.inf.ontop.docker.mssql;
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.docker.AbstractBindTestWithFunctions;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +50,19 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     private static final String obdafile = "/mssql/sparqlBindSqlServer.obda";
     private static final String propertiesfile = "/mssql/sparqlBindSqlServer.properties";
 
-    public BindWithFunctionsSqlServerTest() {
-        super(owlfile, obdafile, propertiesfile );
+    private static OntopOWLReasoner REASONER;
+    private static OWLConnection CONNECTION;
+
+    public BindWithFunctionsSqlServerTest() throws OWLOntologyCreationException {
+        super(createReasoner(owlfile, obdafile, propertiesfile));
+        REASONER = getReasoner();
+        CONNECTION = getConnection();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Override
@@ -58,16 +76,6 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     }
 
     @Override
-    protected List<String> getFloorExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        return expectedValues;
-    }
-
-    @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0.00, 43.00\"^^xsd:string");
@@ -77,26 +85,10 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
         return expectedValues;
     }
 
-    @Override
-    protected List<String> getCeilExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-        expectedValues.add("\"1.0000\"^^xsd:decimal");
-
-        return expectedValues;
-    }
-
-    @Override
-    protected List<String> getSecondsExpectedValues() {
-        List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-        expectedValues.add("\"6.0000\"^^xsd:decimal");
-        expectedValues.add("\"0.0000\"^^xsd:decimal");
-
-        return expectedValues;
+    @Ignore("DATETIME does not have an offset. TODO: update the data source (use DATETIME2 instead)")
+    @Test
+    public void testTZ() throws Exception {
+        super.testTZ();
     }
 
     @Override

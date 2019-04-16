@@ -164,7 +164,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
          * We apply the filter to the right (and then ignore it)
          */
         VariableNullability rightNullability = getOptionalFilterCondition()
-                .map(c -> variableNullabilityTools.updateWithFilter(c, rightChild.getVariableNullability().getNullableGroups()))
+                .map(c -> variableNullabilityTools.updateWithFilter(c, rightChild.getVariableNullability().getNullableGroups(),
+                        rightChild.getVariables()))
                 .orElseGet(rightChild::getVariableNullability);
 
         ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
@@ -198,7 +199,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 rightGroupStream)
                 .collect(ImmutableCollectors.toSet());
 
-        return coreUtilsFactory.createVariableNullability(nullableGroups);
+        ImmutableSet<Variable> scope = Sets.union(leftChild.getVariables(), rightChild.getVariables()).immutableCopy();
+
+        return coreUtilsFactory.createVariableNullability(nullableGroups, scope);
     }
 
     /**
@@ -425,7 +428,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         // No proper variable nullability information is given for optimizing during descending substitution
         // (too complicated)
         // Therefore, please consider normalizing afterwards
-        ImmutableExpression.Evaluation results = expression.evaluate(
+        ImmutableExpression.Evaluation results = expression.evaluate2VL(
                 coreUtilsFactory.createDummyVariableNullability(expression));
 
         if (results.isEffectiveFalse())
@@ -502,7 +505,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableExpression nullifiedExpression = substitutionFactory.getSubstitution(nullSubstitutionMap)
                 .applyToBooleanExpression(constraint);
 
-        return nullifiedExpression.evaluate(termFactory.createDummyVariableNullability(nullifiedExpression))
+        return nullifiedExpression.evaluate2VL(termFactory.createDummyVariableNullability(nullifiedExpression))
                 .isEffectiveFalse();
     }
 

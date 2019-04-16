@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
@@ -24,8 +25,14 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
     }
 
     private static Map<String, DBTermType> createSQLServerTypeMap(TermType rootTermType, TypeFactory typeFactory) {
+        TermTypeAncestry rootAncestry = rootTermType.getAncestry();
+
+        // Overloads NVARCHAR to insert the precision
+        StringDBTermType nvarcharType = new StringDBTermType(NVARCHAR_STR, "NVARCHAR(max)", rootAncestry,
+                typeFactory.getXsdStringDatatype());
+
         // Non-standard (not part of the R2RML standard).
-        BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootTermType.getAncestry(),
+        BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
                 typeFactory.getXsdBooleanDatatype());
         // Name for TIMESTAMP
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
@@ -36,6 +43,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDatetimeDatatype());
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
+        map.put(NVARCHAR_STR, nvarcharType);
         map.put(BIT_STR, bitType);
         map.put(DATETIME_STR, datetimeType);
         map.put(DATETIME2_STR, datetime2Type);

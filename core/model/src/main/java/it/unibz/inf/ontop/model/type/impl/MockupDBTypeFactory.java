@@ -19,47 +19,47 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBStringType() {
-        return getDBTermType(-1, "STRING");
+        return getDBTermType("STRING");
     }
 
     @Override
     public DBTermType getDBLargeIntegerType() {
-        return getDBTermType(-1, "LARGE_INT");
+        return getDBTermType("LARGE_INT");
     }
 
     @Override
     public DBTermType getDBDecimalType() {
-        return getDBTermType(-1, "DEC");
+        return getDBTermType("DEC");
     }
 
     @Override
     public DBTermType getDBBooleanType() {
-        return getDBTermType(-1, "BOOL");
+        return getDBTermType("BOOL");
     }
 
     @Override
     public DBTermType getDBDateType() {
-        return getDBTermType(-1, "DATE");
+        return getDBTermType("DATE");
     }
 
     @Override
     public DBTermType getDBTimeType() {
-        return getDBTermType(-1, "TIME");
+        return getDBTermType("TIME");
     }
 
     @Override
     public DBTermType getDBDateTimestampType() {
-        return getDBTermType(-1, "TIMESTAMP");
+        return getDBTermType("TIMESTAMP");
     }
 
     @Override
     public DBTermType getDBDoubleType() {
-        return getDBTermType(-1, "DOUBLE");
+        return getDBTermType("DOUBLE");
     }
 
     @Override
     public DBTermType getDBHexBinaryType() {
-        return getDBTermType(-1, "HEXBINARY");
+        return getDBTermType("HEXBINARY");
     }
 
     @Override
@@ -68,7 +68,12 @@ public class MockupDBTypeFactory implements DBTypeFactory {
     }
 
     @Override
-    public DBTermType getDBTermType(int typeCode, String typeName) {
+    public DBTermType getDBTermType(String typeName) {
+        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+    }
+
+    @Override
+    public DBTermType getDBTermType(String typeName, int columnSize) {
         return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
     }
 

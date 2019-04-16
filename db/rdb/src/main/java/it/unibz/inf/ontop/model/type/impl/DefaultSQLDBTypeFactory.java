@@ -12,6 +12,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
+import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+
 /**
  * See https://www.w3.org/TR/r2rml/#natural-mapping
  */
@@ -19,13 +23,15 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
 
     protected static final String ABSTRACT_DB_TYPE_STR = "AbstractDBType";
 
-    protected static final String TEXT_STR = "TEXT";
+    public static final String TEXT_STR = "TEXT";
     protected static final String CHAR_STR = "CHAR";
     protected static final String CHARACTER_STR = "CHARACTER";
     protected static final String VARCHAR_STR = "VARCHAR";
     protected static final String CHAR_VAR_STR = "CHARACTER VARYING";
     protected static final String CLOB_STR = "CLOB";
     protected static final String CHAR_LARGE_STR = "CHARACTER LARGE OBJECT";
+    public static final String NATIONAL_TEXT_STR = "NATIONAL TEXT";
+    public static final String NTEXT_STR = "NTEXT";
     protected static final String NATIONAL_CHAR_STR = "NATIONAL CHARACTER";
     protected static final String NCHAR_STR = "NCHAR";
     protected static final String NATIONAL_CHAR_VAR_STR = "NATIONAL CHARACTER VARYING";
@@ -33,7 +39,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String NATIONAL_CHAR_LARGE_STR = "NATIONAL CHARACTER LARGE OBJECT";
     protected static final String INTEGER_STR = "INTEGER";
     protected static final String INT_STR = "INT";
-    protected static final String TINYINT_STR = "TINYINT";
+    public static final String TINYINT_STR = "TINYINT";
     protected static final String SMALLINT_STR = "SMALLINT";
     protected static final String BIGINT_STR = "BIGINT";
     protected static final String NUMERIC_STR = "NUMERIC";
@@ -43,12 +49,14 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String DOUBLE_STR = "DOUBLE";
     protected static final String DOUBLE_PREC_STR = "DOUBLE PRECISION";
     protected static final String BOOLEAN_STR = "BOOLEAN";
-    protected static final String DATE_STR = "DATE";
-    protected static final String TIME_STR = "TIME";
-    protected static final String TIMESTAMP_STR = "TIMESTAMP";
+    public static final String DATE_STR = "DATE";
+    public static final String TIME_STR = "TIME";
+    public static final String TIMESTAMP_STR = "TIMESTAMP";
     protected static final String BINARY_STR = "BINARY";
     protected static final String BINARY_VAR_STR = "BINARY VARYING";
+    protected static final String VARBINARY_STR = "VARBINARY";
     protected static final String BINARY_LARGE_STR = "BINARY LARGE OBJECT";
+    protected static final String BLOB_STR = "BLOB";
 
     protected enum DefaultTypeCode {
         STRING,
@@ -102,6 +110,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(CHAR_LARGE_STR, rootAncestry, xsdString),
                     new StringDBTermType(CLOB_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NATIONAL_TEXT_STR, rootAncestry, xsdString),
+                    new StringDBTermType(NTEXT_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),
@@ -109,19 +119,21 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(VARBINARY_STR, rootAncestry, hexBinary),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary),
-                    new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(INT_STR, rootAncestry, xsdInteger),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BLOB_STR, rootAncestry, hexBinary),
+                    new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(INT_STR, rootAncestry, xsdInteger, INTEGER),
                     // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk
-                    new NumberDBTermType(TINYINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger),
-                    new NumberDBTermType(NUMERIC_STR, rootAncestry, xsdDecimal),
-                    new NumberDBTermType(DECIMAL_STR, rootAncestry, xsdDecimal),
-                    new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble),
-                    new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble),
+                    new NumberDBTermType(TINYINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(SMALLINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(BIGINT_STR, rootAncestry, xsdInteger, INTEGER),
+                    new NumberDBTermType(NUMERIC_STR, rootAncestry, xsdDecimal, DECIMAL),
+                    new NumberDBTermType(DECIMAL_STR, rootAncestry, xsdDecimal, DECIMAL),
+                    new NumberDBTermType(FLOAT_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(REAL_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(DOUBLE_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
+                    new NumberDBTermType(DOUBLE_PREC_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE),
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE)),
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
@@ -152,8 +164,19 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     }
 
     @Override
-    public DBTermType getDBTermType(int typeCode, String typeName) {
+    public DBTermType getDBTermType(String typeName) {
         String typeString = preprocessTypeName(typeName);
+
+        /*
+         * Creates a new term type if not known
+         */
+        return sqlTypeMap.computeIfAbsent(typeString,
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false));
+    }
+
+    @Override
+    public DBTermType getDBTermType(String typeName, int columnSize) {
+        String typeString = preprocessTypeName(typeName, columnSize);
 
         /*
          * Creates a new term type if not known
@@ -186,6 +209,15 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Can be overridden
      */
     protected String preprocessTypeName(String typeName) {
+        return typeName.replaceAll("\\([\\d, ]+\\)", "")
+                .toUpperCase();
+    }
+
+    /**
+     * By default, ignore the column size
+     * Can be overridden
+     */
+    protected String preprocessTypeName(String typeName, int columnSize) {
         return typeName.replaceAll("\\([\\d, ]+\\)", "")
                 .toUpperCase();
     }

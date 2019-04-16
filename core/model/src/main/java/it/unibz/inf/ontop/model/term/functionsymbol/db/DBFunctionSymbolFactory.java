@@ -54,10 +54,21 @@ public interface DBFunctionSymbolFactory {
 
 
     /**
+     * A regular function symbol if a function symbol that can be identified by its name in the DB dialect.
+     * It can therefore be used in the input mapping document.
+     *
      * Not for special DB function symbols such as casts.
+     *
      */
     DBFunctionSymbol getRegularDBFunctionSymbol(String nameInDialect, int arity);
 
+    /**
+     * A regular function symbol if a function symbol that can be identified by its name in the DB dialect.
+     * It can therefore be used in the input mapping document.
+     *
+     * Not for special DB function symbols such as casts.
+     *
+     */
     DBBooleanFunctionSymbol getRegularDBBooleanFunctionSymbol(String nameInDialect, int arity);
 
     /**

@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
-public class DBHashFunctionSymbolImpl extends UnaryDBFunctionSymbolIWithSerializerImpl {
+public class DBHashFunctionSymbolImpl extends UnaryDBFunctionSymbolWithSerializerImpl {
 
     protected DBHashFunctionSymbolImpl(String name, DBTermType rootDBType, DBTermType dbStringType,
                                        DBFunctionSymbolSerializer serializer) {

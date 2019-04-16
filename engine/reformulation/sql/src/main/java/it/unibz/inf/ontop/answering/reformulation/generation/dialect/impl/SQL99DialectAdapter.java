@@ -500,7 +500,9 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         DBTermType dbType = constant.getType();
 
         switch (dbType.getCategory()) {
-            case NUMBER:
+            case INTEGER:
+            case DECIMAL:
+            case FLOAT_DOUBLE:
                 // TODO: handle the special case of not-a-number!
             case BOOLEAN:
                 return constant.getValue();

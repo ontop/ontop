@@ -53,7 +53,15 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return builder.build();
     }
 
+    /**
+     * This mockup does not provide any denormalization function symbol
+     */
     @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createDenormalizationTable() {
+        return ImmutableTable.of();
+    }
+
+        @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:

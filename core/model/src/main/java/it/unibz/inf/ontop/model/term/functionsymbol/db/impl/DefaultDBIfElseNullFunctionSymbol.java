@@ -46,8 +46,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                 .orElseThrow(() -> new MinorOntopInternalBugException("The first term of an IF_ELSE_NULL " +
                         "was expected to be an expression"));
 
-        // TODO: evaluate in 2-value logic
-        ImmutableExpression.Evaluation conditionEvaluation = condition.evaluate(variableNullability);
+        ImmutableExpression.Evaluation conditionEvaluation = condition.evaluate2VL(variableNullability);
 
         Optional<ImmutableTerm> optionalSimplifiedTerm = conditionEvaluation.getValue()
                 .map(v -> {

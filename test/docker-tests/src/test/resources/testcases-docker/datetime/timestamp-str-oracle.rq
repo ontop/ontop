@@ -2,6 +2,6 @@ PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
 
 SELECT ?x ?y
 WHERE {
-   ?x a :Row; :hasTimestampString ?y
-   FILTER ( ?y = "18-MAR-13 10:12:10"^^xsd:string ) .
+   ?x a :Row; :hasTimestamp ?y
+   FILTER ( str(?y) = "2013-03-18T10:12:10.000000"^^xsd:string ) .
 }

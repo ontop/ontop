@@ -16,6 +16,9 @@ import java.util.Collection;
  */
 public interface VariableNullability {
 
+    /**
+     * NB: for variables outside its scope, returns true (as it does not know anything about them)
+     */
     boolean isPossiblyNullable(Variable variable);
 
     /**

@@ -17481,7 +17481,7 @@
         <http://www.w3.org/ns/r2rml#logicalTable>
                 [ a       <http://www.w3.org/ns/r2rml#R2RMLView> ;
                   <http://www.w3.org/ns/r2rml#sqlQuery>
-                          "SELECT wlbNpdidWellbore,wlbPressReleaseUrl FROM wellbore_exploration_all"
+                          "SELECT wlbNpdidWellbore,wlbPressReleaseUrl FROM wellbore_exploration_all WHERE wlbPressReleaseUrl LIKE 'http_%'"
                 ] ;
         <http://www.w3.org/ns/r2rml#predicateObjectMap>
                 [ a       <http://www.w3.org/ns/r2rml#PredicateObjectMap> ;

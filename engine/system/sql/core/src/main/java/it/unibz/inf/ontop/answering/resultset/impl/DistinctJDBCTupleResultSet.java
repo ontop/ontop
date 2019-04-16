@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.answering.resultset.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
@@ -77,10 +76,7 @@ public class DistinctJDBCTupleResultSet extends JDBCTupleResultSet implements Tu
 
         ArrayList rowKey = new ArrayList<>();
         for (int i = 1; i <= getSignature().size();  i ++ ) {
-            int column = i * 3;
-            rowKey.add(getRawObject(column-2));  //type
-            rowKey.add(getRawObject(column-1)); //lang
-            rowKey.add(getRawObject(column)); //value
+            rowKey.add(getRawObject(i)); //value
         }
         return rowKey;
     }

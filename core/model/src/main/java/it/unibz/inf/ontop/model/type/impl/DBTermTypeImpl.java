@@ -16,4 +16,12 @@ public abstract class DBTermTypeImpl extends TermTypeImpl implements DBTermType 
     public String getName() {
         return name;
     }
+
+    /**
+     * Default implementation, can be overridden
+     */
+    @Override
+    public String getCastName() {
+        return name;
+    }
 }

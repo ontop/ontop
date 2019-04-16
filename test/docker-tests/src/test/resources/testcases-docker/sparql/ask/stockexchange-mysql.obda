@@ -33,7 +33,7 @@ target		:company-{id} :hasAddress :address-{addressid} .
 source		select id, addressid from company
 
 mappingId	mapping-stocks
-target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype} ; :stockDescription {description}@en-us . 
+target		:stock-{id} a :Stock ; :financialInstrumentID {id} ; :amountOfShares {numberofshares} ; :typeOfShares {sharetype}^^xsd:boolean ; :stockDescription {description}@en-us .
 source		select id, numberofshares, sharetype, description from stockinformation
 
 mappingId	mapping-stockbooks

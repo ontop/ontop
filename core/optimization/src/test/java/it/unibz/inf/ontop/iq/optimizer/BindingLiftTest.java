@@ -2207,6 +2207,27 @@ public class BindingLiftTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void testAscendingSubstitutionNormalization1() {
+        ExtensionalDataNode table1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR1, A));
+        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y, A),
+                SUBSTITUTION_FACTORY.getSubstitution(X, A, Y, A));
+        UnaryIQTree subTree1 = IQ_FACTORY.createUnaryIQTree(constructionNode1, table1);
+        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y));
+        UnaryIQTree initialIQTree = IQ_FACTORY.createUnaryIQTree(constructionNode2, subTree1);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
+        IQ initialQuery = IQ_FACTORY.createIQ(projectionAtom, initialIQTree);
+
+        // Expected
+        ExtensionalDataNode newTable = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR1, X));
+        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
+                SUBSTITUTION_FACTORY.getSubstitution(Y, X));
+        IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode3, newTable));
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
     private static ImmutableFunctionalTerm generateIfIsNotNullElseNull(Variable rightSpecificVariable,
                                                                        ImmutableTerm conditionalValue) {
         return TERM_FACTORY.getIfElseNull(

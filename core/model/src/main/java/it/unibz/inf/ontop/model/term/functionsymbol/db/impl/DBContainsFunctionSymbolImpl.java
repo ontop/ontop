@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -36,12 +35,9 @@ public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
         return false;
     }
 
-    /**
-     * Could be supported in the future
-     */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
+        return true;
     }
 
     @Override
@@ -54,5 +50,18 @@ public class DBContainsFunctionSymbolImpl extends DBBooleanFunctionSymbolImpl {
     @Override
     protected boolean tolerateNulls() {
         return false;
+    }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        if (newTerms.stream().allMatch(t -> t instanceof DBConstant)) {
+            String mainString = ((DBConstant) newTerms.get(0)).getValue();
+            String searchString = ((DBConstant) newTerms.get(1)).getValue();
+
+            return termFactory.getDBBooleanConstant(mainString.contains(searchString));
+        }
+
+        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 }

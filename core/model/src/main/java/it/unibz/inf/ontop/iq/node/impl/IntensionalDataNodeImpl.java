@@ -80,7 +80,7 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
 
     @Override
     public VariableNullability getVariableNullability() {
-        return coreUtilsFactory.createEmptyVariableNullability();
+        return coreUtilsFactory.createEmptyVariableNullability(getVariables());
     }
 
     @Override
