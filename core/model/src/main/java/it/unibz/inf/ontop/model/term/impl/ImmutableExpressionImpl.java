@@ -63,6 +63,16 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     @Override
     public Evaluation evaluate(VariableNullability variableNullability) {
         ImmutableTerm newTerm = simplify(variableNullability);
+        return convertTermToEvaluation(newTerm, true);
+    }
+
+    @Override
+    public Evaluation evaluate2VL(VariableNullability variableNullability) {
+        ImmutableTerm newTerm = simplify2VL(variableNullability);
+        return convertTermToEvaluation(newTerm, false);
+    }
+
+    private Evaluation convertTermToEvaluation(ImmutableTerm newTerm, boolean use3VL) {
         if (newTerm instanceof ImmutableExpression)
             return termFactory.getEvaluation((ImmutableExpression) newTerm);
         else if (newTerm.equals(termFactory.getDBBooleanConstant(true)))
@@ -70,7 +80,7 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
         else if (newTerm.equals(termFactory.getDBBooleanConstant(false)))
             return termFactory.getNegativeEvaluation();
         else if (newTerm.equals(termFactory.getNullConstant()))
-            return termFactory.getNullEvaluation();
+            return use3VL ? termFactory.getNullEvaluation() : termFactory.getNegativeEvaluation();
         else if (newTerm instanceof NonFunctionalTerm)
             return termFactory.getEvaluation(termFactory.getIsTrue((NonFunctionalTerm) newTerm));
 
@@ -81,6 +91,17 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     public IncrementalEvaluation evaluate(VariableNullability variableNullability, boolean isExpressionNew) {
         return evaluate(variableNullability)
                 .getEvaluationResult(this, isExpressionNew);
+    }
+
+    @Override
+    public IncrementalEvaluation evaluate2VL(VariableNullability variableNullability, boolean isExpressionNew) {
+        return evaluate2VL(variableNullability)
+                .getEvaluationResult(this, isExpressionNew);
+    }
+
+    @Override
+    public ImmutableTerm simplify2VL(VariableNullability variableNullability) {
+        return getFunctionSymbol().simplify2VL(getTerms(), termFactory, variableNullability);
     }
 
 

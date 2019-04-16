@@ -73,7 +73,7 @@ public class FilterNullableVariableQueryTransformerImpl implements FilterNullabl
         ImmutableExpression nonOptimizedExpression = termFactory.getConjunction(filteringExpressionStream)
                 .orElseThrow(() -> new IllegalArgumentException("Is nullableProjectedVariables empty? After folding" +
                         "there should be one expression"));
-        IncrementalEvaluation evaluationResult = nonOptimizedExpression.evaluate(
+        IncrementalEvaluation evaluationResult = nonOptimizedExpression.evaluate2VL(
                 coreUtilsFactory.createDummyVariableNullability(nonOptimizedExpression), false);
 
         switch (evaluationResult.getStatus()) {

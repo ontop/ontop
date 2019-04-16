@@ -83,4 +83,20 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
     protected boolean mayReturnNullWithoutNullArguments() {
         return true;
     }
+
+    /**
+     * 2VL: the NULL is considered "equivalent" to FALSE
+     */
+    @Override
+    public ImmutableTerm simplify2VL(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                     VariableNullability variableNullability) {
+        // TRUE or NULL
+        if (possibleBoolean) {
+            return termFactory.getDisjunction((ImmutableList<ImmutableExpression>)terms)
+                    .simplify2VL(variableNullability);
+        }
+        // FALSE or NULL
+        else
+            return termFactory.getDBBooleanConstant(false);
+    }
 }

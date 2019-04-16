@@ -30,7 +30,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
         ImmutableExpression nullCaseExpression = substitutionFactory.getSubstitution(variable, valueNull)
                 .applyToBooleanExpression(expression);
 
-        return nullCaseExpression.evaluate(coreUtilsFactory.createDummyVariableNullability(expression))
+        return nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
                 .isEffectiveFalse();
     }
 
@@ -43,7 +43,7 @@ public class TermNullabilityEvaluatorImpl implements TermNullabilityEvaluator {
                                 v -> valueNull)))
                 .applyToBooleanExpression(expression);
 
-        return nullCaseExpression.evaluate(coreUtilsFactory.createDummyVariableNullability(expression))
+        return nullCaseExpression.evaluate2VL(coreUtilsFactory.createDummyVariableNullability(expression))
                 .isEffectiveFalse();
     }
 }
