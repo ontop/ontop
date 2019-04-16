@@ -239,7 +239,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                DB_FS_FACTORY.getDBConcat(2),
+                DB_FS_FACTORY.getNullRejectingDBConcat(2),
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation);
     }
@@ -254,7 +254,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
-        DBFunctionSymbol concat = DB_FS_FACTORY.getDBConcat(2);
+        DBFunctionSymbol concat = DB_FS_FACTORY.getNullRejectingDBConcat(2);
 
         assertEquals(TERM_FACTORY.getFunction(
                 concat,

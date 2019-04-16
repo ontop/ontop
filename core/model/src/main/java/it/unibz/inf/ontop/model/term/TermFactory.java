@@ -423,7 +423,7 @@ public interface TermFactory {
 	/**
 	 * At least two terms are expected
 	 */
-	ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);
+	ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms);
 
     ImmutableFunctionalTerm getCommonDenominatorFunctionalTerm(ImmutableList<ImmutableTerm> typeTerms);
 

@@ -7,10 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -23,9 +20,10 @@ import java.util.function.Function;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.DATE_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_TZ_STR;
 
 public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+
+    private static final String UNSUPPORTED_MSG = "Not supported by Oracle";
 
     @Inject
     protected OracleDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -126,6 +124,30 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new RuntimeException("TODO: support");
+    }
+
+    @Override
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        throw new RuntimeException("TODO: support null rejecting DB concat");
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    public DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        if (arity != 2)
+            throw new UnsupportedOperationException("CONCAT is a binary function in Oracle. Use || instead.");
+
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, 2, dbStringType, abstractRootDBType, false);
     }
 
     /**

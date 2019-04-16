@@ -88,7 +88,7 @@ public class UriTemplateTest {
 
         InnerJoinNode newJoinNode = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getStrictEquality(
-                        TERM_FACTORY.getDBConcatFunctionalTerm(
+                        TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(
                                 ImmutableList.of(TERM_FACTORY.getDBStringConstant(URI_TEMPLATE_STR_1_PREFIX), A)),
                         C));
 
