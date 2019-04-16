@@ -42,6 +42,10 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
+        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
+        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
         return ImmutableTable.copyOf(table);
     }
 
