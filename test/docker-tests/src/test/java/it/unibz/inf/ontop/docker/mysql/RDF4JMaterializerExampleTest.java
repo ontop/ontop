@@ -59,8 +59,8 @@ public class RDF4JMaterializerExampleTest {
 				.enableDBResultsStreaming(DO_STREAM_RESULTS)
 				.build();
 
-		RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer();
-		MaterializationGraphQuery graphQuery = materializer.materialize(configuration, materializationParams);
+		RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(configuration, materializationParams);
+		MaterializationGraphQuery graphQuery = materializer.materialize();
 		
 		/*
 		 * Print the triples into an external file.
