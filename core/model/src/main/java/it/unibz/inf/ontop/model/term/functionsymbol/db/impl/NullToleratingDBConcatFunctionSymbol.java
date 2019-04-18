@@ -1,7 +1,10 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 public class NullToleratingDBConcatFunctionSymbol extends AbstractDBConcatFunctionSymbol {
@@ -27,5 +30,13 @@ public class NullToleratingDBConcatFunctionSymbol extends AbstractDBConcatFuncti
     @Override
     protected boolean tolerateNulls() {
         return true;
+    }
+
+    /**
+     * Never returns NULL
+     */
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        return IncrementalEvaluation.declareIsTrue();
     }
 }

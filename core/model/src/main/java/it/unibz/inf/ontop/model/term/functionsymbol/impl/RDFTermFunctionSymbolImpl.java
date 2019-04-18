@@ -26,15 +26,6 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
         return true;
     }
 
-    /**
-     * TODO: implement seriously
-     */
-    @Override
-    public FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
-                                                         VariableNullability childNullability) {
-        return super.evaluateNullability(arguments, childNullability);
-    }
-
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         if (terms.size() != 2)

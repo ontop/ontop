@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
@@ -32,17 +33,40 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         this.expectedBaseTypes = expectedBaseTypes;
     }
 
-    /**
-     * TODO: REMOVE IT (TEMPORARY)
-     */
     @Override
     public FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
-                                                         VariableNullability childNullability) {
-        // TODO: implement it seriously
-        boolean isNullable = arguments.stream()
-                .filter(a -> a instanceof Variable)
-                .anyMatch(a -> childNullability.isPossiblyNullable((Variable) a));
-        return new FunctionalTermNullabilityImpl(isNullable);
+                                                         VariableNullability childNullability, TermFactory termFactory) {
+        IncrementalEvaluation evaluation = evaluateIsNotNull(transformIntoRegularArguments(arguments, termFactory), termFactory, childNullability);
+        switch (evaluation.getStatus()) {
+            case SIMPLIFIED_EXPRESSION:
+                return evaluation.getNewExpression()
+                        .filter(e -> e.getFunctionSymbol().equals(termFactory.getDBFunctionSymbolFactory().getDBIsNotNull()))
+                        .map(e -> e.getTerm(0))
+                        .filter(t -> t instanceof Variable)
+                        .map(t -> (Variable)t)
+                        // Bound to that variable
+                        .map(FunctionalTermNullabilityImpl::new)
+                        // Depends on multiple variables -> is not bound to a variable
+                        .orElseGet(() -> new FunctionalTermNullabilityImpl(true));
+            case IS_NULL:
+                throw new MinorOntopInternalBugException("An IS_NOT_NULL cannot evaluate to NULL");
+            case IS_TRUE:
+                return new FunctionalTermNullabilityImpl(false);
+            case IS_FALSE:
+            case SAME_EXPRESSION:
+            default:
+                return new FunctionalTermNullabilityImpl(true);
+        }
+    }
+
+    /**
+     * By default, reuses the same arguments
+     *
+     * Needed to be overridden by function symbols that require EXPRESSIONS for some of their arguments
+     */
+    protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
+            ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
+        return arguments;
     }
 
     @Override

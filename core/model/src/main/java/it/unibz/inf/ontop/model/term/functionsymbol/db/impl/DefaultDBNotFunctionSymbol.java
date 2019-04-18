@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -68,4 +69,16 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
     protected boolean tolerateNulls() {
         return false;
     }
+
+    /**
+     * Requires its arguments to be expressions
+     */
+    @Override
+    protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
+            ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
+        return arguments.stream()
+                .map(termFactory::getIsTrue)
+                .collect(ImmutableCollectors.toList());
+    }
+
 }
