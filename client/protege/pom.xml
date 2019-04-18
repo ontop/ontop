@@ -620,7 +620,7 @@
 
                         <Export-Package><!-- No need to export any package --></Export-Package>
 
-                        <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,*</Import-Package>
+                        <Import-Package>!org.antlr.stringtemplate,!net.sf.ehcache,!net.spy.memcached,!org.apache.commons.logging,!org.eclipse.rdf4j.http.client,!org.eclipse.rdf4j.repository.sparql,!org.eclipse.rdf4j.repository.sparql.query,!org.eclipse.rdf4j.repository.sail,!org.eclipse.rdf4j.sail,!org.eclipse.rdf4j.sail.memory,!org.mapdb,!org.osgi.service.cm,!sun.misc,!javax.servlet,!javax.servlet.http,!org.apache.xml.*,!sun.io,!com.codahale.metrics.*,!io.prometheus.client,!javassist.*,!org.hibernate.*,!org.apache.commons.beanutils.*,!org.apache.commons.text,!org.eclipse.rdf4j.repository.sparql.federation,!com.github.andrewoma.dexx.collection,!org.checkerframework.checker.*,*</Import-Package>
 
                         <!-- The name of the plugin for OSGi dependencies. It has to be singleton
                             or protege wont load it -->
