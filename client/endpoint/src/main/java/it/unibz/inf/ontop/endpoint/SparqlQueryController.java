@@ -219,6 +219,7 @@ public class SparqlQueryController {
 
     @ExceptionHandler({MalformedQueryException.class})
     public ResponseEntity<String> handleMalformedQueryException(Exception ex) {
+        ex.printStackTrace();
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -228,6 +229,7 @@ public class SparqlQueryController {
 
     @ExceptionHandler({RepositoryException.class, Exception.class})
     public ResponseEntity<String> handleRepositoryException(Exception ex) {
+        ex.printStackTrace();
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
