@@ -47,15 +47,17 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 public class SparqlQueryController {
 
     private final Repository repository;
+    private volatile boolean initialized = false;
 
     @Autowired
     public SparqlQueryController(@Value("${ontology}") String owlFile,
                                  @Value("${mapping}") String mappingFile,
-                                 @Value("${properties}") String propertiesFile) {
-        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile);
+                                 @Value("${properties}") String propertiesFile,
+                                 @Value("${lazy:false}") boolean lazy) {
+        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
     }
 
-    private static Repository setupVirtualRepository(String mappings, String ontology, String properties) throws RepositoryException {
+    private Repository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
         OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(mappings)
                 .ontologyFile(ontology)
@@ -63,7 +65,10 @@ public class SparqlQueryController {
                 .build();
         OntopRepository repository = OntopRepository.defaultRepository(configuration);
 
-        repository.initialize();
+        if (!lazy) {
+            repository.initialize();
+            this.initialized = true;
+        }
 
         return repository;
     }
@@ -115,6 +120,14 @@ public class SparqlQueryController {
 
     private ResponseEntity<String> execQuery(String accept,
                                              String query, String[] defaultGraphUri, String[] namedGraphUri) {
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    repository.initialize();
+                    initialized = true;
+                }
+            }
+        }
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.OK;
@@ -206,6 +219,7 @@ public class SparqlQueryController {
 
     @ExceptionHandler({MalformedQueryException.class})
     public ResponseEntity<String> handleMalformedQueryException(Exception ex) {
+        ex.printStackTrace();
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -215,6 +229,7 @@ public class SparqlQueryController {
 
     @ExceptionHandler({RepositoryException.class, Exception.class})
     public ResponseEntity<String> handleRepositoryException(Exception ex) {
+        ex.printStackTrace();
         String message = ex.getMessage();
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
