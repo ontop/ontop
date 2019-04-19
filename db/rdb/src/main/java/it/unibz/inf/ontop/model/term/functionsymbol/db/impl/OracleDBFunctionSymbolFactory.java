@@ -128,7 +128,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
-        throw new RuntimeException("TODO: support null rejecting DB concat");
+        return new OracleNullRejectingDBConcatFunctionSymbol(arity, dbStringType, abstractRootDBType);
     }
 
     /**

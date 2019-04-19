@@ -31,25 +31,8 @@ public class NullRejectingDBConcatFunctionSymbol extends AbstractDBConcatFunctio
         return false;
     }
 
-    @Override
-    public Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
-            ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonFreeVariables,
-            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
-
-        if (arguments.stream()
-                .filter(t -> (!(t instanceof GroundTerm)) || (!((GroundTerm) t).isDeterministic()))
-                .filter(t -> !nonFreeVariables.contains(t))
-                .count() <= 1) {
-            return Optional.of(decomposeInjectiveTopFunctionalTerm(arguments, nonFreeVariables, variableNullability,
-                    variableGenerator, termFactory));
-        } else
-            return Optional.empty();
-
-    }
-
     /**
      * TODO: allow post-processing
-     * @param arguments
      */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
