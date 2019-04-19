@@ -125,12 +125,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol subString2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 2, dbStringType,
                 false, abstractRootDBType);
         builder.put(SUBSTRING_STR, 2, subString2FunctionSymbol);
-        builder.put(SUBSTR_STR, 2, subString2FunctionSymbol);
+        DBFunctionSymbol subStr2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTR_STR, 2, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTR_STR, 2, subStr2FunctionSymbol);
 
         DBFunctionSymbol subString3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
                 false, abstractRootDBType);
         builder.put(SUBSTRING_STR, 3, subString3FunctionSymbol);
-        builder.put(SUBSTR_STR, 3, subString3FunctionSymbol);
+        DBFunctionSymbol subStr3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTR_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTR_STR, 3, subStr3FunctionSymbol);
 
         DBFunctionSymbol rightFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(RIGHT_STR, 2, dbStringType,
                 false, abstractRootDBType);
@@ -141,7 +145,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 false, abstractRootDBType);
         builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
         //TODO: move away this synonym as it is non-standard
-        builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+        DBFunctionSymbol lengthFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LENGTH_STR, 1, dbIntType,
+                false, abstractRootDBType);
+        builder.put(LENGTH_STR, 1, lengthFunctionSymbol);
 
         DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
                 dbDateTimestamp, true, abstractRootDBType);

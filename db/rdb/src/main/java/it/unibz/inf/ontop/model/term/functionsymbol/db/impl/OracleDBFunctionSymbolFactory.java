@@ -87,38 +87,67 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
     }
 
     @Override
-    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    public DBFunctionSymbol getDBSubString3() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCharLength() {
+        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    }
+
+    @Override
+    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(INSTR(%s,%s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String before = termConverter.apply(terms.get(1));
+
+        return String.format("NVL(SUBSTR(%s,0,INSTR(%s,%s)-1),'')", str, str, before);
     }
 
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        String str = termConverter.apply(terms.get(0));
+        String after = termConverter.apply(terms.get(1));
+        return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s),SIGN(INSTR(%s,%s))*LENGTH(%s)),'')",
+                str, str, after, after, str, after, str); //FIXME when no match found should return empty string
     }
 
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), 2))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH1))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH256))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH512))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
