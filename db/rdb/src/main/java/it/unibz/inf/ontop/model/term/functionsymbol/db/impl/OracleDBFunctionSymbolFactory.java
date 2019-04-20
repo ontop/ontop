@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.DATE_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
@@ -24,6 +25,7 @@ import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_L
 public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UNSUPPORTED_MSG = "Not supported by Oracle";
+    private static final String RANDOM_STR = "DBMS_RANDOM.VALUE";
 
     @Inject
     protected OracleDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -40,7 +42,8 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
@@ -99,6 +102,17 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     public DBFunctionSymbol getDBCharLength() {
         return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    }
+
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(RANDOM_STR, uuid, dbDoubleType,
+                (terms, termConverter, termFactory) -> RANDOM_STR);
+    }
+
+    @Override
+    protected String getRandNameInDialect() {
+        throw new UnsupportedOperationException("getRandNameInDialect() must not be called for Oracle");
     }
 
     @Override
@@ -238,9 +252,15 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new OracleTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 
+    /**
+     * TODO: fix it (dashes are not always inserted at the right places)
+     */
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
-        throw new RuntimeException("TODO: support");
+        return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
+                (terms, termConverter, termFactory) ->
+                        "REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"
+                );
     }
 
     @Override

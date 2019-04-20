@@ -93,6 +93,15 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     }
 
     @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.25\"^^xsd:decimal");
+        expectedValues.add("\"11.5\"^^xsd:decimal");
+        expectedValues.add("\"16.75\"^^xsd:decimal");
+        expectedValues.add("\"5\"^^xsd:decimal");
+        return expectedValues;    }
+
+    @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"0, 43\"^^xsd:string");
