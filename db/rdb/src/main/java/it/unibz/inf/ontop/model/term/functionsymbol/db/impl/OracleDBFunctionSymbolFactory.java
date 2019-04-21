@@ -164,9 +164,25 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 termConverter.apply(terms.get(0)));
     }
 
+    /**
+     * TODO: use a different implementation of the FunctionSymbol for simplifying in the presence of TIMESTAMP (has no TZ)
+     * Currently: Oracle throws a fatal error
+     */
+    @Override
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return super.createTzFunctionSymbol();
+    }
+
+    /**
+     * TODO: reformat the number into 05:00 instead of 5:0
+     */
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        String str = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN EXTRACT(TIMEZONE_HOUR FROM %s) IS NOT NULL \n" +
+                "     THEN EXTRACT(TIMEZONE_HOUR FROM %s) || ':' || EXTRACT(TIMEZONE_MINUTE FROM %s)\n" +
+                "     ELSE NULL\n" +
+                "END", str, str, str);
     }
 
     @Override

@@ -141,10 +141,10 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8:0\"");
-        expectedValues.add("\"1:0\"");
-        expectedValues.add("\"0:0\"");
-        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"8:0\"^^xsd:string");
+        expectedValues.add("\"1:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
+        expectedValues.add("\"1:0\"^^xsd:string");
 
         return expectedValues;
     }
