@@ -27,9 +27,22 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     private static final String UNSUPPORTED_MSG = "Not supported by Oracle";
     private static final String RANDOM_STR = "DBMS_RANDOM.VALUE";
 
+    // Created in init()
+    private DBFunctionSymbol dbRightFunctionSymbol;
+
     @Inject
     protected OracleDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createOracleRegularFunctionTable(typeFactory), typeFactory);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        dbRightFunctionSymbol = new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2, dbStringType, false,
+                abstractRootDBType,
+                ((terms, termConverter, termFactory) -> String.format("SUBSTR(%s,-1*%s)",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)))));
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createOracleRegularFunctionTable(
@@ -41,6 +54,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+        table.remove(RIGHT_STR, 2);
 
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
@@ -97,6 +111,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRight() {
+        return dbRightFunctionSymbol;
     }
 
     @Override

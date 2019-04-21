@@ -20,10 +20,10 @@ public class SimpleTypedDBFunctionSymbolImpl extends AbstractTypedDBFunctionSymb
     private final boolean isInjective;
     private final DBFunctionSymbolSerializer serializer;
 
-    protected SimpleTypedDBFunctionSymbolImpl(String nameInDialect, int arity, DBTermType targetType, boolean isInjective,
+    protected SimpleTypedDBFunctionSymbolImpl(String nameWithoutArity, int arity, DBTermType targetType, boolean isInjective,
                                               DBTermType rootDBTermType,
                                               DBFunctionSymbolSerializer serializer) {
-        super(nameInDialect + arity, IntStream.range(0, arity)
+        super(nameWithoutArity + arity, IntStream.range(0, arity)
                         .boxed()
                         .map(i -> (TermType) rootDBTermType)
                         .collect(ImmutableCollectors.toList()),
