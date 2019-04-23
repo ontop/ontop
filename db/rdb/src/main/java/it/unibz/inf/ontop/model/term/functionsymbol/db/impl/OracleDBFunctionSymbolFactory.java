@@ -26,6 +26,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private static final String UNSUPPORTED_MSG = "Not supported by Oracle";
     private static final String RANDOM_STR = "DBMS_RANDOM.VALUE";
+    private static final String TO_CHAR_STR = "TO_CHAR";
 
     // Created in init()
     private DBFunctionSymbol dbRightFunctionSymbol;
@@ -48,8 +49,7 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createOracleRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
-        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbStringType = dbTypeFactory.getDBStringType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
@@ -60,6 +60,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        // Default TO_CHAR (unknown input type)
+        DBFunctionSymbol toCharFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_CHAR_STR, 1, dbStringType,
+                false, abstractRootDBType);
+        table.put(TO_CHAR_STR, 1, toCharFunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
