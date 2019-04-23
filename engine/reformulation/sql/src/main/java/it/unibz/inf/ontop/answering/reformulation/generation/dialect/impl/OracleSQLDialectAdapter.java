@@ -116,11 +116,16 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		catch (NumberFormatException nfe) {
 		}
 
-		if (offset < 0) {
+		if ((limit < 0) && (offset) < 0)
+			return "";
+
+		if (offset <= 0) {
 			// If the offset is not specified
-			return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
-		} else
-		{
+			return String.format("FETCH NEXT %d ROWS ONLY", limit);
+		} else if (limit < 0) {
+			return String.format("OFFSET %d ROWS\nFETCH NEXT 99999999 ROWS ONLY", limit);
+		}
+		else {
 			return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
 		}
 	}
