@@ -84,12 +84,14 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     }
 
     @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Test
     @Override
     public void testBindWithBefore1() throws Exception {
         super.testBindWithBefore1();
     }
 
     @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Test
     @Override
     public void testBindWithAfter1() throws Exception {
         super.testBindWithAfter1();
