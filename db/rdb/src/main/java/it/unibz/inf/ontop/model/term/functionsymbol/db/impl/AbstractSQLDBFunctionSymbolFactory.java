@@ -22,6 +22,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
+    protected static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
     protected static final String AND_STR = "AND";
     protected static final String OR_STR = "OR";
     protected static final String NOT_STR = "NOT";
@@ -94,6 +95,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -151,6 +153,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
                 dbDateTimestamp, true, abstractRootDBType);
         builder.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        // Common for many dialects
+        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(REGEXP_LIKE_STR, 2, regexpLike2);
+
+        DBBooleanFunctionSymbol regexpLike3 = new RegexpLike3FunctionSymbol(dbBooleanType, abstractRootDBType);
+        builder.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
 
         return builder.build();
@@ -617,6 +627,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getNow() {
         return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
     /**

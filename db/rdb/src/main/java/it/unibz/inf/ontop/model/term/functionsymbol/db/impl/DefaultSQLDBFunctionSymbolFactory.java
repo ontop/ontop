@@ -70,16 +70,6 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
-    }
-
-    @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }

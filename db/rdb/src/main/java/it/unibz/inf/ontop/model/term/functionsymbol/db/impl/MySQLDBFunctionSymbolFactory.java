@@ -49,14 +49,6 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
-        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
-
         return ImmutableTable.copyOf(table);
     }
 

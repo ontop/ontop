@@ -87,26 +87,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return builder.build();
     }
 
-    /**
-     * TODO: check the regexp
-     */
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createSQLServerRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
-
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
-        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
         DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LEN_STR, 1, dbIntType,
                 false, abstractRootDBType);
@@ -128,6 +116,22 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBCharLength() {
         return getRegularDBFunctionSymbol(LEN_STR, 1);
+    }
+
+    /**
+     * TODO: update
+     */
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return super.getDBRegexpMatches2();
+    }
+
+    /**
+     * TODO: update
+     */
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return super.getDBRegexpMatches3();
     }
 
     @Override
@@ -209,22 +213,6 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("CONVERT(nvarchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",
                 termConverter.apply(terms.get(0)));
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
     /**

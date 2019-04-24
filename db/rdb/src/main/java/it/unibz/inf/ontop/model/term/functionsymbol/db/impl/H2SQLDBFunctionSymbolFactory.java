@@ -37,14 +37,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
-        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
-
         return ImmutableTable.copyOf(table);
     }
 
@@ -110,16 +102,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         // TODO: throw a better exception
         throw new UnsupportedOperationException(UNSUPPORTED_MSG);
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
     @Override
