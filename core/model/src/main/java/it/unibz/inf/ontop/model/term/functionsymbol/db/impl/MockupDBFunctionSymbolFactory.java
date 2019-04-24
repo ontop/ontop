@@ -71,11 +71,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
             case CONCAT_STR:
                 return createDBConcat(arity);
             default:
-                return new AbstractUntypedDBFunctionSymbol(nameInDialect,
-                        IntStream.range(0, arity)
-                                .boxed()
-                                .map(i -> abstractRootDBType)
-                                .collect(ImmutableCollectors.toList()));
+                return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, abstractRootDBType);
         }
     }
 

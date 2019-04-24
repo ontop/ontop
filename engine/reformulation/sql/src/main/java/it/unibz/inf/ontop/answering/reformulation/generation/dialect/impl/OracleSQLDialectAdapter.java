@@ -81,6 +81,9 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String sqlSlice(long limit, long offset) {
 
+		if ((limit < 0) && (offset < 0))
+			return "";
+
 		String version = databaseVersion.split("\\.")[0];
 		try {
 			int versionInt = Integer.parseInt(version);
@@ -115,9 +118,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 */
 		catch (NumberFormatException nfe) {
 		}
-
-		if ((limit < 0) && (offset) < 0)
-			return "";
 
 		if (offset <= 0) {
 			// If the offset is not specified

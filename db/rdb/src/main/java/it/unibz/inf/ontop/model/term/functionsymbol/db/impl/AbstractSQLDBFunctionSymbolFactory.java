@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFactory {
@@ -185,7 +184,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
             return createDBOr(arity);
         else if (isConcat(nameInDialect))
             return createRegularDBConcat(arity);
-        return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
+        return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
 
     @Override
