@@ -152,7 +152,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 ? termFactory.getDBStringConstant("")
                 : (termsToConcatenate.size() == 1)
                     ? termsToConcatenate.get(0)
-                    : termFactory.getNullRejectingDBConcatFunctionalTerm(termsToConcatenate);
+                    : termFactory.getNullRejectingDBConcatFunctionalTerm(termsToConcatenate).simplify();
 
         return termConverter.apply(concatTerm);
     }
