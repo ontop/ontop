@@ -7,10 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -20,31 +17,56 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.DATE_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.BIT_STR;
+import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.NUMBER_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_TZ_STR;
 
 public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
+
+    private static final String UNSUPPORTED_MSG = "Not supported by Oracle";
+    private static final String RANDOM_STR = "DBMS_RANDOM.VALUE";
+    private static final String TO_CHAR_STR = "TO_CHAR";
+
+    // Created in init()
+    private DBFunctionSymbol dbRightFunctionSymbol;
 
     @Inject
     protected OracleDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createOracleRegularFunctionTable(typeFactory), typeFactory);
     }
 
+    @Override
+    protected void init() {
+        super.init();
+        dbRightFunctionSymbol = new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2, dbStringType, false,
+                abstractRootDBType,
+                ((terms, termConverter, termFactory) -> String.format("SUBSTR(%s,-1*%s)",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)))));
+    }
+
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createOracleRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
-        DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbStringType = dbTypeFactory.getDBStringType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+        table.remove(RIGHT_STR, 2);
 
-        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+        // Default TO_CHAR (unknown input type)
+        DBFunctionSymbol toCharFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_CHAR_STR, 1, dbStringType,
+                false, abstractRootDBType);
+        table.put(TO_CHAR_STR, 1, toCharFunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
@@ -73,6 +95,12 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         DBTypeConversionFunctionSymbol dateNormFunctionSymbol = new OracleDateNormFunctionSymbol(dbDateType, dbStringType);
         table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateNormFunctionSymbol);
 
+        // NUMBER boolean normalization
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        DBTermType numberType = dbTypeFactory.getDBTermType(NUMBER_STR);
+        table.put(numberType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(numberType, dbStringType));
+
+
         return ImmutableTable.copyOf(table);
     }
 
@@ -89,43 +117,128 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
     }
 
     @Override
-    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    public DBFunctionSymbol getDBSubString3() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRight() {
+        return dbRightFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCharLength() {
+        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    }
+
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBRand(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(RANDOM_STR, uuid, dbDoubleType,
+                (terms, termConverter, termFactory) -> RANDOM_STR);
+    }
+
+    @Override
+    protected String getRandNameInDialect() {
+        throw new UnsupportedOperationException("getRandNameInDialect() must not be called for Oracle");
+    }
+
+    @Override
+    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(INSTR(%s,%s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
+    }
+
+    @Override
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String before = termConverter.apply(terms.get(1));
+
+        return String.format("NVL(SUBSTR(%s,0,INSTR(%s,%s)-1),'')", str, str, before);
     }
 
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        String str = termConverter.apply(terms.get(0));
+        String after = termConverter.apply(terms.get(1));
+        return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s),SIGN(INSTR(%s,%s))*LENGTH(%s)),'')",
+                str, str, after, after, str, after, str); //FIXME when no match found should return empty string
     }
 
     @Override
     protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), 2))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH1))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH256))))",
+                termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+        return String.format("LOWER(TO_CHAR(RAWTOHEX(SYS.DBMS_CRYPTO.HASH(UTL_I18N.STRING_TO_RAW(%s, 'AL32UTF8'), SYS.DBMS_CRYPTO.HASH_SH512))))",
+                termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * TODO: use a different implementation of the FunctionSymbol for simplifying in the presence of TIMESTAMP (has no TZ)
+     * Currently: Oracle throws a fatal error
+     */
+    @Override
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return super.createTzFunctionSymbol();
+    }
+
+    /**
+     * TODO: reformat the number into 05:00 instead of 5:0
+     */
+    @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        return String.format("CASE WHEN EXTRACT(TIMEZONE_HOUR FROM %s) IS NOT NULL \n" +
+                "     THEN EXTRACT(TIMEZONE_HOUR FROM %s) || ':' || EXTRACT(TIMEZONE_MINUTE FROM %s)\n" +
+                "     ELSE NULL\n" +
+                "END", str, str, str);
     }
 
     @Override
-    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        return new OracleNullRejectingDBConcatFunctionSymbol(arity, dbStringType, abstractRootDBType);
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    public DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        if (arity != 2)
+            throw new UnsupportedOperationException("CONCAT is a binary function in Oracle. Use || instead.");
+
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, 2, dbStringType, abstractRootDBType, false);
     }
 
     /**
@@ -187,9 +300,15 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new OracleTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 
+    /**
+     * TODO: fix it (dashes are not always inserted at the right places)
+     */
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
-        throw new RuntimeException("TODO: support");
+        return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
+                (terms, termConverter, termFactory) ->
+                        "REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"
+                );
     }
 
     @Override

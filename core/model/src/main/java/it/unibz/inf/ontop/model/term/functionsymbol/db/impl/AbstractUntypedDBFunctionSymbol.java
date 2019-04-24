@@ -46,9 +46,12 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
         return Optional.empty();
     }
 
+    /**
+     * May produce a NULL in an arbitrary manner, we don't know
+     */
     @Override
     protected boolean mayReturnNullWithoutNullArguments() {
-        return false;
+        return true;
     }
 
     @Override
@@ -57,16 +60,20 @@ public class AbstractUntypedDBFunctionSymbol extends FunctionSymbolImpl implemen
     }
 
     @Override
-    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String parameterString = terms.stream()
                 .map(termConverter::apply)
                 .collect(Collectors.joining(","));
         return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
     }
 
+    /**
+     * NULLs may be tolerated, we don't know
+     */
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return true;
     }
 
     /**

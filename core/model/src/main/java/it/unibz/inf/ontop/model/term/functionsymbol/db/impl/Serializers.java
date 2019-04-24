@@ -1,0 +1,31 @@
+package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
+
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
+
+import java.util.stream.Collectors;
+
+public class Serializers {
+
+    private static final String FUNCTIONAL_TEMPLATE = "%s(%s)";
+    private final static String IN_BRACKETS_TEMPLATE = "(%s)";
+
+    public static DBFunctionSymbolSerializer getRegularSerializer(String nameInDialect) {
+        return (terms, termConverter, termFactory) -> {
+            String parameterString = terms.stream()
+                    .map(termConverter::apply)
+                    .collect(Collectors.joining(","));
+            return String.format(FUNCTIONAL_TEMPLATE, nameInDialect, parameterString);
+        };
+    }
+
+    public static DBFunctionSymbolSerializer getOperatorSerializer(String operator) {
+        String separator = String.format(" %s ", operator);
+
+        return (terms, termConverter, termFactory) -> {
+            String expression = terms.stream()
+                    .map(termConverter::apply)
+                    .collect(Collectors.joining(separator));
+            return String.format(IN_BRACKETS_TEMPLATE, expression);
+        };
+    }
+}

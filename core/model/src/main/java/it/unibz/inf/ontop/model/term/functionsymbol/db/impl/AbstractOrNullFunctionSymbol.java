@@ -99,4 +99,15 @@ public abstract class AbstractOrNullFunctionSymbol extends DBBooleanFunctionSymb
         else
             return termFactory.getDBBooleanConstant(false);
     }
+
+    /**
+     * Requires its arguments to be expressions
+     */
+    @Override
+    protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
+            ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
+        return arguments.stream()
+                .map(termFactory::getIsTrue)
+                .collect(ImmutableCollectors.toList());
+    }
 }

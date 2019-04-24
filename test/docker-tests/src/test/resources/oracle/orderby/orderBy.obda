@@ -4,6 +4,6 @@
 
 [MappingDeclaration] @collection [[
 mappingId	Countries
-target		:Country-{country_name} a :Country ; :name <{country_name}> .
+target		:Country-{country_name} a :Country ; :name {country_name} .
 source		select country_name FROM hr.countries
 ]]

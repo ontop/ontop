@@ -76,10 +76,25 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     /*
 	 * Tests for hash functions. Oracle does not support any hash functions if DBMS CRYPTO is not enabled
 	 */
-    @Ignore("Not yet supported")
+    @Ignore("Require DBMS CRYPTO to be enabled")
     @Test
     @Override
-    public void testHash() {
+    public void testHash() throws Exception {
+        super.testHash();
+    }
+
+    @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Test
+    @Override
+    public void testBindWithBefore1() throws Exception {
+        super.testBindWithBefore1();
+    }
+
+    @Ignore("Find a way to distinguish empty strings and NULLs")
+    @Test
+    @Override
+    public void testBindWithAfter1() throws Exception {
+        super.testBindWithAfter1();
     }
 
     @Override
@@ -91,6 +106,15 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         expectedValues.add("\"6\"^^xsd:integer");
         return expectedValues;
     }
+
+    @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.25\"^^xsd:decimal");
+        expectedValues.add("\"11.5\"^^xsd:decimal");
+        expectedValues.add("\"16.75\"^^xsd:decimal");
+        expectedValues.add("\"5\"^^xsd:decimal");
+        return expectedValues;    }
 
     @Override
     protected List<String> getRoundExpectedValues() {
@@ -132,10 +156,10 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"8:0\"");
-        expectedValues.add("\"1:0\"");
-        expectedValues.add("\"0:0\"");
-        expectedValues.add("\"1:0\"");
+        expectedValues.add("\"8:0\"^^xsd:string");
+        expectedValues.add("\"1:0\"^^xsd:string");
+        expectedValues.add("\"0:0\"^^xsd:string");
+        expectedValues.add("\"1:0\"^^xsd:string");
 
         return expectedValues;
     }

@@ -7,10 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -47,6 +44,25 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         // Non-regular
         substr2FunctionSymbol = new DBFunctionSymbolWithSerializerImpl(SUBSTR_STR + "2",
                 ImmutableList.of(abstractRootDBType, abstractRootDBType), dbStringType, false, this::serializeSubString2);
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
+    }
+
+    /**
+     * Uses the operator +
+     *
+     * Assumes that the DB parameter CONCAT_NULL_YIELDS_NULL is ON
+     */
+    @Override
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        return new NullRejectingDBConcatFunctionSymbol("CONCAT+", arity, dbStringType, abstractRootDBType,
+                Serializers.getOperatorSerializer(ADD_STR));
     }
 
     @Override
@@ -97,7 +113,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         table.remove(CHAR_LENGTH_STR, 1);
         table.put(LEN_STR, 1, strlenFunctionSymbol);
 
-        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
@@ -111,6 +128,11 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBCharLength() {
         return getRegularDBFunctionSymbol(LEN_STR, 1);
+    }
+
+    @Override
+    public DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        return getNullRejectingDBConcat(arity);
     }
 
     @Override
@@ -167,6 +189,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("LOWER(CONVERT(VARCHAR(128), HASHBYTES('SHA2_512',%s),2))",
                 termConverter.apply(terms.get(0)));
+    }
+
+    /**
+     * TODO: use a different implementation of the FunctionSymbol for simplifying in the presence of DATETIME (has no TZ)
+     */
+    @Override
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return super.createTzFunctionSymbol();
     }
 
     /**

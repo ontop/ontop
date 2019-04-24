@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -909,11 +908,11 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
-	public ImmutableFunctionalTerm getDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {
+	public ImmutableFunctionalTerm getNullRejectingDBConcatFunctionalTerm(ImmutableList<? extends ImmutableTerm> terms) {
 		int arity = terms.size();
 		if (arity < 2)
-			throw new IllegalArgumentException("CONCAT needs at least two arguments");
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBConcat(arity), terms);
+			throw new IllegalArgumentException("String concatenation needs at least two arguments");
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullRejectingDBConcat(arity), terms);
 	}
 
 	@Override

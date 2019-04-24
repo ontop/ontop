@@ -106,8 +106,22 @@ public interface DBFunctionSymbolFactory {
 
     /**
      * arity must be >= 2
+     *
+     * Returns a function symbol that does NOT tolerate NULLs
+     *
      */
-    DBConcatFunctionSymbol getDBConcat(int arity);
+    DBConcatFunctionSymbol getNullRejectingDBConcat(int arity);
+
+    /**
+     * arity must be >= 2
+     *
+     * No guarantee on the semantics (dialect-specific!).
+     * Please consider the use of getNullRejectingDBConcat(...)
+     *
+     * Intended to be used by the mapping parser
+     *
+     */
+    DBConcatFunctionSymbol getDBConcatOperator(int arity);
 
     /**
      * arity must be >= 2

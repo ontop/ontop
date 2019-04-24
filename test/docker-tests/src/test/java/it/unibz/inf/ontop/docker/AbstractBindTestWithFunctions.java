@@ -902,10 +902,10 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getTZExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
-        expectedValues.add("\"0.0\"");
+        expectedValues.add("\"08:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        expectedValues.add("\"00:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
 
         return expectedValues;
     }

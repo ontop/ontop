@@ -288,7 +288,7 @@ public class VariableNullabilityImpl implements VariableNullability {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
             FunctionSymbol.FunctionalTermNullability results = functionalTerm.getFunctionSymbol().evaluateNullability(
                     (ImmutableList<NonFunctionalTerm>) functionalTerm.getTerms(),
-                    childNullability);
+                    childNullability, termFactory);
 
             return results.isNullable()
                     ? Optional.of(results.getBoundVariable()

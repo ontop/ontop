@@ -179,4 +179,18 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
     public boolean isPreferringToBePostProcessedOverBeingBlocked() {
         return false;
     }
+
+    /**
+     * Requires some of its arguments to be expressions
+     */
+    @Override
+    protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
+            ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
+        return IntStream.range(0, arguments.size())
+                .boxed()
+                .map(i -> i % 2 == 0
+                        ? termFactory.getIsTrue(arguments.get(i))
+                        : arguments.get(i))
+                .collect(ImmutableCollectors.toList());
+    }
 }
