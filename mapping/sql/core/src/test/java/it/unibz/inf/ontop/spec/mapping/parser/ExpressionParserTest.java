@@ -239,7 +239,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getFunction(
-                DB_FS_FACTORY.getDBConcat(2),
+                DB_FS_FACTORY.getNullRejectingDBConcat(2),
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation);
     }
@@ -254,7 +254,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), TERM_FACTORY, TYPE_FACTORY, DB_FS_FACTORY);
         Term translation = parser.parseTerm(getExpression(sql));
 
-        DBFunctionSymbol concat = DB_FS_FACTORY.getDBConcat(2);
+        DBFunctionSymbol concat = DB_FS_FACTORY.getNullRejectingDBConcat(2);
 
         assertEquals(TERM_FACTORY.getFunction(
                 concat,
@@ -1462,7 +1462,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString2(), v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 2), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1478,7 +1478,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBSubString3(), v,
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 3), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -1656,7 +1656,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getDBCharLength(), v), translation);
+        assertEquals(TERM_FACTORY.getFunction(DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1), v), translation);
     }
 
     @Ignore("TODO: shall we remove this test? Does not seem to be a common mistake")

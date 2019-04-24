@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -35,14 +36,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
-
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
-        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
         return ImmutableTable.copyOf(table);
     }
@@ -112,13 +105,21 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
+    protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        return getNullRejectingDBConcat(arity);
+    }
+
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
     /**

@@ -285,7 +285,7 @@ public class R2RMLParser {
 					case 1:
 						return terms.get(0);
 					default:
-					return termFactory.getDBConcatFunctionalTerm(terms);
+					return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
 				}
 			default:
 				throw new R2RMLParsingBugException("Unexpected type code: " + type);

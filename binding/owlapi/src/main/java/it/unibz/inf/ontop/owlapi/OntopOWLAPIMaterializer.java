@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.owlapi;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.impl.DefaultOntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
-import org.apache.commons.rdf.api.IRI;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLException;
 
 import javax.annotation.Nonnull;
@@ -15,41 +16,30 @@ public interface OntopOWLAPIMaterializer {
     /**
      * Materializes the saturated RDF graph
      */
-    MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                              @Nonnull MaterializationParams params)
+    MaterializedGraphOWLResultSet materialize()
             throws OWLException;
 
     /**
      * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
      */
-    MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                              @Nonnull ImmutableSet<IRI> selectedVocabulary,
-                                              @Nonnull MaterializationParams params)
+    MaterializedGraphOWLResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
             throws OWLException;
-
-    /**
-     * Materializes the saturated RDF graph with the default options
-     */
-    default MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration)
-            throws OWLException {
-        return materialize(configuration, MaterializationParams.defaultBuilder().build());
-    }
-
-    /**
-     * Materializes a sub-set of the saturated RDF graph corresponding the selected vocabulary
-     * with the default options
-     */
-    default MaterializedGraphOWLResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                      @Nonnull ImmutableSet<IRI> selectedVocabulary)
-            throws OWLException {
-        return materialize(configuration, selectedVocabulary, MaterializationParams.defaultBuilder().build());
-    }
 
     /**
      * Default implementation
      */
-    static OntopOWLAPIMaterializer defaultMaterializer() {
-        return new DefaultOntopOWLAPIMaterializer();
+    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+        return new DefaultOntopOWLAPIMaterializer(configuration, materializationParams);
     }
 
+    /**
+     * Default implementation with default parameters
+     */
+    static OntopOWLAPIMaterializer defaultMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+        return new DefaultOntopOWLAPIMaterializer(configuration);
+    }
+
+    ImmutableSet<IRI> getClasses();
+
+    ImmutableSet<IRI> getProperties();
 }

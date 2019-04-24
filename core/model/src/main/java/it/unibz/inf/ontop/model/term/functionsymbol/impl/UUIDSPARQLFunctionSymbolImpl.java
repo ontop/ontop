@@ -66,7 +66,7 @@ public class UUIDSPARQLFunctionSymbolImpl extends FunctionSymbolImpl implements 
                                                      TermFactory termFactory,
                                                      VariableNullability variableNullability) {
         ImmutableFunctionalTerm lexicalTerm =
-                termFactory.getDBConcatFunctionalTerm(
+                termFactory.getNullRejectingDBConcatFunctionalTerm(
                         ImmutableList.of(
                                 termFactory.getDBStringConstant(URN_UUID_PREFIX),
                                 termFactory.getDBUUID(uuid)));

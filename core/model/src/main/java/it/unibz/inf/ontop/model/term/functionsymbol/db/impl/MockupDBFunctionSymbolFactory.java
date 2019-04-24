@@ -71,11 +71,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
             case CONCAT_STR:
                 return createDBConcat(arity);
             default:
-                return new AbstractUntypedDBFunctionSymbol(nameInDialect,
-                        IntStream.range(0, arity)
-                                .boxed()
-                                .map(i -> abstractRootDBType)
-                                .collect(ImmutableCollectors.toList()));
+                return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, abstractRootDBType);
         }
     }
 
@@ -98,7 +94,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     private DBFunctionSymbol createDBConcat(int arity) {
-        return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
+        return new NullRejectingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
     @Override
@@ -354,10 +350,15 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    public DBConcatFunctionSymbol getDBConcat(int arity) {
+    public DBConcatFunctionSymbol getNullRejectingDBConcat(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
         return (DBConcatFunctionSymbol) getRegularDBFunctionSymbol(CONCAT_STR, arity);
+    }
+
+    @Override
+    public DBConcatFunctionSymbol getDBConcatOperator(int arity) {
+        return getNullRejectingDBConcat(arity);
     }
 
     @Override

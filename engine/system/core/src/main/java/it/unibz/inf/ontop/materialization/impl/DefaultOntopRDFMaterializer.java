@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -51,6 +50,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
@@ -63,6 +63,11 @@ import java.util.stream.Stream;
 public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
 	private static int FETCH_SIZE = 50000;
+	private final MaterializationParams params;
+	private final InputQueryFactory inputQueryFactory;
+	private final OntopQueryEngine queryEngine;
+
+	private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
 
 	private static final class VocabularyEntry {
         private final IRI name;
@@ -83,38 +88,46 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         }
     }
 
-	@Override
-	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-												  @Nonnull MaterializationParams params)
-			throws OBDASpecificationException {
-		OBDASpecification obdaSpecification = configuration.loadSpecification();
-		ImmutableMap<IRI, VocabularyEntry> vocabulary = extractVocabulary(obdaSpecification.getSaturatedMapping());
-		return apply(obdaSpecification, vocabulary, params, configuration);
-	}
-
-	@Override
-	public MaterializedGraphResultSet materialize(@Nonnull OntopSystemConfiguration configuration,
-												  @Nonnull ImmutableSet<IRI> selectedVocabulary,
-												  @Nonnull MaterializationParams params)
-			throws OBDASpecificationException {
-		OBDASpecification obdaSpecification = configuration.loadSpecification();
-
-		ImmutableMap<IRI, VocabularyEntry> vocabularyMap = extractVocabulary(obdaSpecification.getSaturatedMapping()).entrySet().stream()
-                .filter(e -> selectedVocabulary.contains(e.getKey()))
-				.collect(ImmutableCollectors.toMap());
-
-		return apply(obdaSpecification, vocabularyMap, params, configuration);
-	}
-
-	private MaterializedGraphResultSet apply(OBDASpecification obdaSpecification, ImmutableMap<IRI, VocabularyEntry> selectedVocabulary,
-											 MaterializationParams params, OntopSystemConfiguration configuration) {
-
+	public DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
 		Injector injector = configuration.getInjector();
 		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
-		OntopQueryEngine queryEngine = engineFactory.create(obdaSpecification, configuration.getExecutorRegistry());
-		InputQueryFactory inputQueryFactory = injector.getInstance(InputQueryFactory.class);
+		OBDASpecification specification = configuration.loadSpecification();
+		this.queryEngine = engineFactory.create(specification, configuration.getExecutorRegistry());
+		this.inputQueryFactory = injector.getInstance(InputQueryFactory.class);
+		this.vocabulary = extractVocabulary(specification.getSaturatedMapping());
+		this.params = materializationParams;
+	}
 
-		return new DefaultMaterializedGraphResultSet(selectedVocabulary, params, queryEngine, inputQueryFactory);
+	@Override
+	public MaterializedGraphResultSet materialize() {
+		return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, inputQueryFactory);
+	}
+
+	@Override
+	public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
+		return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, inputQueryFactory);
+	}
+
+	private ImmutableMap<IRI,VocabularyEntry> filterVocabularyEntries(ImmutableSet<IRI> selectedVocabulary) {
+		return vocabulary.entrySet().stream()
+				.filter(e -> selectedVocabulary.contains(e.getKey()))
+				.collect(ImmutableCollectors.toMap());
+	}
+
+	@Override
+	public ImmutableSet<IRI> getClasses() {
+		return vocabulary.entrySet().stream()
+				.filter(e -> e.getValue().arity == 1)
+				.map(Map.Entry::getKey)
+				.collect(ImmutableCollectors.toSet());
+	}
+
+	@Override
+	public ImmutableSet<IRI> getProperties() {
+		return vocabulary.entrySet().stream()
+				.filter(e -> e.getValue().arity == 2)
+				.map(Map.Entry::getKey)
+				.collect(ImmutableCollectors.toSet());
 	}
 
 	/**

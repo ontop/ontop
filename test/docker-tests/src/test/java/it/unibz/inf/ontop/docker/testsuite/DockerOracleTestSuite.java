@@ -20,30 +20,39 @@ package it.unibz.inf.ontop.docker.testsuite;
  * #L%
  */
 
-import it.unibz.inf.ontop.docker.QuestVirtualScenarioParent;
-import it.unibz.inf.ontop.docker.ScenarioManifestTestUtils;
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
+import it.unibz.inf.ontop.docker.utils.OntopTestCase;
+import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-public class DockerOracleTestSuite extends QuestVirtualScenarioParent {
+import java.util.Collection;
 
-	public DockerOracleTestSuite(String testURI, String name, String queryFileURL, String resultFileURL,
-			String owlFileURL, String obdaFileURL, String parameterFileURL) {
-		super(testURI, name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL);
+@RunWith(Parameterized.class)
+public class DockerOracleTestSuite extends OntopTestCase {
+
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q42: Datetime YYYY-MM-DDThh:mm:ssZ [in UTC] with xsd:datetime",
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q43: Datetime YYYY-MM-DDThh:mm:ss-hh:mm [in UTC minus offset - var 1] with xsd:datetime",
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q46: Datetime YYYY-MM-DDThh:mm:ss+hh:mm [in UTC plus offset - var 1] with xsd:datetime"
+
+	);
+	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
+
+	public DockerOracleTestSuite(String name, String queryFileURL, String resultFileURL, String owlFileURL,
+								 String obdaFileURL, String parameterFileURL, RepositoryRegistry registry,
+								 ImmutableSet<String> ignoredTests) {
+		super(name, queryFileURL, resultFileURL, owlFileURL, obdaFileURL, parameterFileURL, registry, ignoredTests);
 	}
 
-	public static Test suite() throws Exception {
-		return ScenarioManifestTestUtils.suite(new Factory() {
-
-			@Override
-			public QuestVirtualScenarioParent createQuestScenarioTest(String testURI, String name, String queryFileURL, 
-					String resultFileURL, String owlFileURL, String obdaFileURL, String parameterFileURL) {
-				return new DockerOracleTestSuite(testURI, name, queryFileURL, resultFileURL, owlFileURL,
-						obdaFileURL, parameterFileURL);
-			}
-			@Override
-			public String getMainManifestFile() {
-				return "/testcases-docker/manifest-scenario-oracle.ttl";
-			}
-		});
+	@Parameterized.Parameters(name="{0}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-docker/manifest-scenario-oracle.ttl",
+				IGNORE, REGISTRY);
 	}
 }

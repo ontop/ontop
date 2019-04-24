@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -42,5 +43,16 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                 .collect(ImmutableCollectors.toList());
 
         return buildTermAfterEvaluation(newSubTerms, termFactory, variableNullability);
+    }
+
+    /**
+     * Requires its arguments to be expressions
+     */
+    @Override
+    protected ImmutableList<? extends ImmutableTerm> transformIntoRegularArguments(
+            ImmutableList<? extends NonFunctionalTerm> arguments, TermFactory termFactory) {
+        return arguments.stream()
+                .map(termFactory::getIsTrue)
+                .collect(ImmutableCollectors.toList());
     }
 }

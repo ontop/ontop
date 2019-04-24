@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.function.Function;
@@ -69,13 +70,27 @@ public class DefaultSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
+    /**
+     * By default, we suppose that NULLs are tolerated
+     */
     @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        throw new UnsupportedOperationException(UNSUPPORTED_MSG);
+    public DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Minimal arity for string concatenation: 2");
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
+
+    }
+
+    /**
+     * By default, we suppose that NULLs are tolerated
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, 2, dbStringType, abstractRootDBType, false);
     }
 
     @Override

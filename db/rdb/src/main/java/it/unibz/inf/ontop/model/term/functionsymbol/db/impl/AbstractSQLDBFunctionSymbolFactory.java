@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -20,6 +22,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CONCAT_STR = "CONCAT";
     protected static final String REPLACE_STR = "REPLACE";
     protected static final String REGEXP_REPLACE_STR = "REGEXP_REPLACE";
+    protected static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
     protected static final String AND_STR = "AND";
     protected static final String OR_STR = "OR";
     protected static final String NOT_STR = "NOT";
@@ -38,6 +41,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String FLOOR_STR = "FLOOR";
     protected static final String RAND_STR = "RAND";
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
+    protected static final String CONCAT_OP_STR = "||";
 
 
     protected DBTypeFactory dbTypeFactory;
@@ -47,6 +51,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected final DBTermType dbDoubleType;
     protected final DBTermType abstractRootDBType;
     protected final TermType abstractRootType;
+    private final Map<Integer, DBConcatFunctionSymbol> nullRejectingConcatMap;
+    private final Map<Integer, DBConcatFunctionSymbol> concatOperatorMap;
+
     // Created in init()
     private DBFunctionSymbol ifThenElse;
     // Created in init()
@@ -57,7 +64,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private DBIsNullOrNotFunctionSymbol isNotNull;
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
-
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
         super(regularFunctionTable, typeFactory);
@@ -68,6 +74,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
+        this.nullRejectingConcatMap = Maps.newConcurrentMap();
+        this.concatOperatorMap = Maps.newConcurrentMap();
     }
 
     @Override
@@ -87,6 +95,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType dbDateTimestamp = dbTypeFactory.getDBDateTimestampType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
+        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
 
@@ -117,12 +126,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBFunctionSymbol subString2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 2, dbStringType,
                 false, abstractRootDBType);
         builder.put(SUBSTRING_STR, 2, subString2FunctionSymbol);
-        builder.put(SUBSTR_STR, 2, subString2FunctionSymbol);
+        DBFunctionSymbol subStr2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTR_STR, 2, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTR_STR, 2, subStr2FunctionSymbol);
 
         DBFunctionSymbol subString3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTRING_STR, 3, dbStringType,
                 false, abstractRootDBType);
         builder.put(SUBSTRING_STR, 3, subString3FunctionSymbol);
-        builder.put(SUBSTR_STR, 3, subString3FunctionSymbol);
+        DBFunctionSymbol subStr3FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(SUBSTR_STR, 3, dbStringType,
+                false, abstractRootDBType);
+        builder.put(SUBSTR_STR, 3, subStr3FunctionSymbol);
 
         DBFunctionSymbol rightFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(RIGHT_STR, 2, dbStringType,
                 false, abstractRootDBType);
@@ -133,15 +146,44 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 false, abstractRootDBType);
         builder.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
         //TODO: move away this synonym as it is non-standard
-        builder.put(LENGTH_STR, 1, strlenFunctionSymbol);
+        DBFunctionSymbol lengthFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LENGTH_STR, 1, dbIntType,
+                false, abstractRootDBType);
+        builder.put(LENGTH_STR, 1, lengthFunctionSymbol);
 
         DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0,
                 dbDateTimestamp, true, abstractRootDBType);
         builder.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
+        // Common for many dialects
+        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
+                abstractRootDBType);
+        builder.put(REGEXP_LIKE_STR, 2, regexpLike2);
+
+        DBBooleanFunctionSymbol regexpLike3 = new RegexpLike3FunctionSymbol(dbBooleanType, abstractRootDBType);
+        builder.put(REGEXP_LIKE_STR, 3, regexpLike3);
+
 
         return builder.build();
     }
+
+    @Override
+    public DBConcatFunctionSymbol getNullRejectingDBConcat(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
+        return nullRejectingConcatMap
+                .computeIfAbsent(arity, a -> createNullRejectingDBConcat(arity));
+    }
+
+    @Override
+    public DBConcatFunctionSymbol getDBConcatOperator(int arity) {
+        if (arity < 2)
+            throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
+        return concatOperatorMap
+                .computeIfAbsent(arity, a -> createDBConcatOperator(arity));
+    }
+
+    protected abstract DBConcatFunctionSymbol createNullRejectingDBConcat(int arity);
+    protected abstract DBConcatFunctionSymbol createDBConcatOperator(int arity);
 
     @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
@@ -151,8 +193,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         else if (isOr(nameInDialect))
             return createDBOr(arity);
         else if (isConcat(nameInDialect))
-            return createDBConcat(arity);
-        return new DefaultSQLUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
+            return createRegularDBConcat(arity);
+        return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
 
     @Override
@@ -172,9 +214,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return nameInDialect.equals(OR_STR);
     }
 
-    protected DBConcatFunctionSymbol createDBConcat(int arity) {
-        return new DefaultDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType);
-    }
+    /**
+     * CONCAT regular function symbol, not an operator (like || or +)
+     */
+    protected abstract DBConcatFunctionSymbol createRegularDBConcat(int arity);
 
     protected DBBooleanFunctionSymbol createDBAnd(int arity) {
         return new DefaultDBAndFunctionSymbol(AND_STR, arity, dbBooleanType);
@@ -538,13 +581,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBConcatFunctionSymbol getDBConcat(int arity) {
-        if (arity < 2)
-            throw new IllegalArgumentException("Arity of CONCAT must be >= 2");
-        return (DBConcatFunctionSymbol) getRegularDBFunctionSymbol(CONCAT_STR, arity);
-    }
-
-    @Override
     public DBAndFunctionSymbol getDBAnd(int arity) {
         if (arity < 2)
             throw new IllegalArgumentException("Arity of AND must be >= 2");
@@ -591,6 +627,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     public DBFunctionSymbol getNow() {
         return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
     /**

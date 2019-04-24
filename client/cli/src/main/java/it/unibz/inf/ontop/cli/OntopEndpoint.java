@@ -19,6 +19,10 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
             description = "CORS allowed origins")
     private String corsAllowedOrigins = ",";
 
+    @Option(type = OptionType.COMMAND, name = {"--lazy"}, title = "lazy",
+            description = "lazy initialization")
+    private boolean lazy = false;
+
     @Override
     public void run() {
         String[] args = {
@@ -26,7 +30,8 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
                 "--mapping=" + this.mappingFile,
                 "--properties=" + this.propertiesFile,
                 "--port=" + this.port,
-                "--cors-allowed-origins=" + this.corsAllowedOrigins
+                "--cors-allowed-origins=" + this.corsAllowedOrigins,
+                "--lazy=" + this.lazy
         };
 
         SpringApplication.run(OntopEndpointApplication.class, args);

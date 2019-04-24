@@ -7,10 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -49,6 +46,25 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                 ImmutableList.of(abstractRootDBType, abstractRootDBType), dbStringType, false, this::serializeSubString2);
     }
 
+    /**
+     * Treats NULLs as empty strings
+     */
+    @Override
+    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+        return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
+    }
+
+    /**
+     * Uses the operator +
+     *
+     * Assumes that the DB parameter CONCAT_NULL_YIELDS_NULL is ON
+     */
+    @Override
+    protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
+        return new NullRejectingDBConcatFunctionSymbol("CONCAT+", arity, dbStringType, abstractRootDBType,
+                Serializers.getOperatorSerializer(ADD_STR));
+    }
+
     @Override
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
@@ -71,33 +87,22 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return builder.build();
     }
 
-    /**
-     * TODO: check the regexp
-     */
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createSQLServerRegularFunctionTable(
             TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        DBTermType dbBooleanType = dbTypeFactory.getDBBooleanType();
         DBTermType dbIntType = dbTypeFactory.getDBLargeIntegerType();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBBooleanFunctionSymbol regexpLike2 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 2, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 2, regexpLike2);
-
-        DBBooleanFunctionSymbol regexpLike3 = new DefaultSQLSimpleDBBooleanFunctionSymbol(REGEXP_LIKE_STR, 3, dbBooleanType,
-                abstractRootDBType);
-        table.put(REGEXP_LIKE_STR, 3, regexpLike3);
-
         DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(LEN_STR, 1, dbIntType,
                 false, abstractRootDBType);
         table.remove(CHAR_LENGTH_STR, 1);
         table.put(LEN_STR, 1, strlenFunctionSymbol);
 
-        DBFunctionSymbol nowFunctionSymbol = new SQLServerCurrentTimestampFunctionSymbol(
+        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
@@ -111,6 +116,27 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBCharLength() {
         return getRegularDBFunctionSymbol(LEN_STR, 1);
+    }
+
+    /**
+     * TODO: update
+     */
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return super.getDBRegexpMatches2();
+    }
+
+    /**
+     * TODO: update
+     */
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        return super.getDBRegexpMatches3();
+    }
+
+    @Override
+    public DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+        return getNullRejectingDBConcat(arity);
     }
 
     @Override
@@ -170,6 +196,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     /**
+     * TODO: use a different implementation of the FunctionSymbol for simplifying in the presence of DATETIME (has no TZ)
+     */
+    @Override
+    protected DBFunctionSymbol createTzFunctionSymbol() {
+        return super.createTzFunctionSymbol();
+    }
+
+    /**
      * TODO: change strategy as it returns "00:00" when no timezone is specified instead of ""
      * If done on the string, then we could make the CAST between DB timestamps implicit
      * (DATEPART(TZ...) is not supported for DATETIME)
@@ -179,22 +213,6 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("CONVERT(nvarchar(5), DATEADD(minute, DATEPART(TZ, %s), 0), 114)",
                 termConverter.apply(terms.get(0)));
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 2);
-    }
-
-    /**
-     * TODO: update
-     */
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return (DBBooleanFunctionSymbol) getRegularDBFunctionSymbol(REGEXP_LIKE_STR, 3);
     }
 
     /**

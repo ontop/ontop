@@ -29,7 +29,7 @@ public interface FunctionSymbol extends Predicate {
             VariableGenerator variableGenerator, TermFactory termFactory);
 
     FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
-                               VariableNullability childNullability);
+                               VariableNullability childNullability, TermFactory termFactory);
 
 
     Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms);

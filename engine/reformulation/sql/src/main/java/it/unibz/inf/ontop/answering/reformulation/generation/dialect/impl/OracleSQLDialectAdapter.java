@@ -73,51 +73,61 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	}
 
-
+	/**
+	 * Versions < 12.1 are not supported
+	 *
+	 * Reason: In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
+	 */
 	@Override
 	public String sqlSlice(long limit, long offset) {
 
-			String version = databaseVersion.split("\\.")[0];
-			try {
-				int versionInt = Integer.parseInt(version);
-
-//			In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
-				if (versionInt < 12) {
-
-					if (limit == 0) {
-						return "WHERE 1 = 0";
-					}
-
-					if (limit < 0) {
-						if (offset < 0)
-						{
-							return "";
-						} else
-						{
-
-							return String.format("OFFSET %d ROWS", offset);
-						}
-					} else
-					{
-						if (offset < 0) {
-							// If the offset is not specified
-							return String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", limit);
-						} else
-						{
-							return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
-						}
-					}
-				}
-			} catch (NumberFormatException nfe) {
-				//not a number  use new concat
-
-			}
-
-		if (limit >= 0 )
-			return String.format("WHERE ROWNUM <= %s", limit);
-		else
+		if ((limit < 0) && (offset < 0))
 			return "";
 
+		String version = databaseVersion.split("\\.")[0];
+		try {
+			int versionInt = Integer.parseInt(version);
+//
+			if (versionInt < 12) {
+				throw new UnsupportedOperationException("LIMIT and OFFSET are not supported " +
+						"for Oracle DBs prior to 12.1");
+//					if (limit == 0) {
+//						return "WHERE 1 = 0";
+//					}
+//
+//					if (limit < 0) {
+//						if (offset < 0)
+//						{
+//							return "";
+//						} else
+//						{
+//
+//							return String.format("OFFSET %d ROWS", offset);
+//						}
+//					}
+//					else if (limit > 0 )
+//						return String.format("WHERE ROWNUM <= %s", limit);
+//					else
+//						// TODO: support offset!
+//						return "";
+//					}
+			}
+		}
+		/*
+		 * Happens also when the DB version is undefined
+		 */
+		catch (NumberFormatException nfe) {
+		}
+
+		if (offset <= 0) {
+			// If the offset is not specified
+			return String.format("FETCH NEXT %d ROWS ONLY", limit);
+		} else if (limit < 0) {
+			return String.format("OFFSET %d ROWS\nFETCH NEXT 99999999 ROWS ONLY", limit);
+		}
+		else {
+			return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+		}
 	}
 
 	@Override

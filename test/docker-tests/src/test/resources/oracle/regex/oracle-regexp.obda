@@ -13,11 +13,11 @@ source		select COUNTRY_NAME, POSITION FROM  (select COUNTRY_NAME, regexp_instr( 
 
 
 mappingId	CountriesWithSpaceNoWhere
-target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhere ; :position {POSITION} . 
+target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhere ; :position {POSITION}^^xsd:integer .
 source		select COUNTRY_NAME, POSITION FROM  (select COUNTRY_NAME, regexp_instr( COUNTRY_NAME, '\s+' ) as POSITION  from "HR"."COUNTRIES" ) tmp 
 
 mappingId	CountriesWithSpaceNoWhereNoSubquery
-target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhereNoSubquery ; :position {POSITION} . 
+target		:Country-{COUNTRY_NAME} a :CountriesWithSpaceNoWhereNoSubquery ; :position {POSITION}^^xsd:integer .
 source		select COUNTRY_NAME,  regexp_instr( COUNTRY_NAME, '\s+' ) as POSITION  from "HR"."COUNTRIES"  
 
 ]]

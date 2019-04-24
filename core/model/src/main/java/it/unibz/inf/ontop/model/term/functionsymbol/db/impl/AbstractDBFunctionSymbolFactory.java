@@ -826,7 +826,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBFunctionSymbol createTzFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_SECONDS", rootDBType, dbStringType, false,
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_TZ", rootDBType, dbStringType, false,
                 this::serializeTz);
     }
 
