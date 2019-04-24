@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -67,6 +68,25 @@ public class DefaultNumberNormAsBooleanFunctionSymbol extends AbstractDBTypeConv
                 termFactory.getNullConstant());
     }
 
+    @Override
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
+        ImmutableTerm term = terms.get(0);
+        ImmutableExpression zeroEquality = termFactory.getDBNonStrictNumericEquality(term,
+                termFactory.getDBIntegerConstant(0));
+        String valueString = otherTerm.getValue();
+        switch (valueString) {
+            case "false":
+                return zeroEquality.evaluate(variableNullability, true);
+            case "true":
+                return termFactory.getDBNot(zeroEquality)
+                        .evaluate(variableNullability, true);
+            default:
+                return termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(term)))
+                        .evaluate(variableNullability, true);
+        }
+    }
 
     private Map.Entry<ImmutableExpression, ? extends ImmutableTerm> buildEntry(ImmutableTerm term, boolean b,
                                                                                TermFactory termFactory) {

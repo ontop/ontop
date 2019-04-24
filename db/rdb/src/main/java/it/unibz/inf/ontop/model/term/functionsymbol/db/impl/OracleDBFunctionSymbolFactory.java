@@ -20,6 +20,8 @@ import java.util.function.Function;
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.DATE_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+import static it.unibz.inf.ontop.model.type.impl.MySQLDBTypeFactory.BIT_STR;
+import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.NUMBER_STR;
 import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.TIMESTAMP_LOCAL_TZ_STR;
 
 public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -92,6 +94,12 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
         DBTypeConversionFunctionSymbol dateNormFunctionSymbol = new OracleDateNormFunctionSymbol(dbDateType, dbStringType);
         table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateNormFunctionSymbol);
+
+        // NUMBER boolean normalization
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        DBTermType numberType = dbTypeFactory.getDBTermType(NUMBER_STR);
+        table.put(numberType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(numberType, dbStringType));
+
 
         return ImmutableTable.copyOf(table);
     }
