@@ -32,7 +32,15 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class DockerOracleTestSuite extends OntopTestCase {
 
-	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q42: Datetime YYYY-MM-DDThh:mm:ssZ [in UTC] with xsd:datetime",
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q43: Datetime YYYY-MM-DDThh:mm:ss-hh:mm [in UTC minus offset - var 1] with xsd:datetime",
+			// Disabled as no timezone is stored in the current DB
+			"datatypes-Q46: Datetime YYYY-MM-DDThh:mm:ss+hh:mm [in UTC plus offset - var 1] with xsd:datetime"
+
+	);
 	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
 
 	public DockerOracleTestSuite(String name, String queryFileURL, String resultFileURL, String owlFileURL,
