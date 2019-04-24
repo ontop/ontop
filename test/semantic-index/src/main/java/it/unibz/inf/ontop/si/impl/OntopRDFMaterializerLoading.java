@@ -43,12 +43,11 @@ public class OntopRDFMaterializerLoading {
             Ontology ontology = translatorOWL2QL.translateAndClassify(inputOntology);
             SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
 
-            OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
                     .enableDBResultsStreaming(true)
                     .build();
-            try (MaterializedGraphResultSet graphResultSet = materializer.materialize(
-                    obdaConfiguration, materializationParams)) {
+            OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(obdaConfiguration, materializationParams);
+            try (MaterializedGraphResultSet graphResultSet = materializer.materialize()) {
 
                 Connection connection = repo.createConnection();
                 int count = repo.insertData(connection,

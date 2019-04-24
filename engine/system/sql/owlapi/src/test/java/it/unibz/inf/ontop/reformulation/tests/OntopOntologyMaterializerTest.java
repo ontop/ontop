@@ -20,13 +20,12 @@ package it.unibz.inf.ontop.reformulation.tests;
  * #L%
  */
 
+import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 import it.unibz.inf.ontop.spec.ontology.ClassAssertion;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyAssertion;
-import it.unibz.inf.ontop.materialization.MaterializationParams;
-import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,10 +111,9 @@ public class OntopOntologyMaterializerTest extends TestCase {
 				.enableTestMode()
 				.build();
 		
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
 
-		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
+		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
 			int classAss = 0, propAss = 0, objAss = 0;
 
 			LOGGER.debug("Assertions:");
@@ -160,9 +158,8 @@ public class OntopOntologyMaterializerTest extends TestCase {
 		// System.out.println(onto.tbox().getSubObjectPropertyAxioms());
 		// System.out.println(onto.tbox().getSubDataPropertyAxioms());
 
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer();
-		MaterializationParams materializationParams = MaterializationParams.defaultBuilder().build();
-		try (MaterializedGraphResultSet resultSet = materializer.materialize(configuration, materializationParams)) {
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+		try (MaterializedGraphResultSet resultSet = materializer.materialize()) {
 
 			int classAss = 0, propAss = 0, objAss = 0;
 			while (resultSet.hasNext()) {

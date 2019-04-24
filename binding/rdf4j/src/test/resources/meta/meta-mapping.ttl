@@ -1,0 +1,19 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+@prefix test: <http://www.test.com/> .
+
+test:INSTANCE a rr:TriplesMap;
+  rr:logicalTable [ rr:tableName "TABLE1"; ];
+  rr:subjectMap [
+    rr:template "http://www.test.com/{COLUMN}/{ID}";
+    rr:class test:testClass;
+  ];
+  rr:predicateObjectMap [
+    rr:predicate rdf:type ;
+    rr:objectMap [
+      rr:template "http://www.test.com/class/{COLUMN}";
+      rr:termType rr:IRI;
+    ];
+  ];
+.

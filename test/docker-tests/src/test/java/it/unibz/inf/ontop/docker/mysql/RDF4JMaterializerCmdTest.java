@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.mysql;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
@@ -108,21 +109,21 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 	}
 
 	private void runRDF4JTestWithoutOntology(String filePath, Function<Writer, RDFHandler> handlerConstructor)
-			throws IOException {
+			throws IOException, OBDASpecificationException {
 		OntopSQLOWLAPIConfiguration configuration = createConfigurationBuilder()
 				.build();
 		runRDF4JTest(filePath, handlerConstructor, 27, 3, configuration);
 	}
 
 	private void runRDF4JTestWithOntology(String filePath, Function<Writer, RDFHandler> handlerConstructor)
-			throws IOException {
+			throws IOException, OBDASpecificationException {
 		OntopSQLOWLAPIConfiguration configuration = createConfigurationWithOntology();
 		runRDF4JTest(filePath, handlerConstructor, 51, 5, configuration);
 	}
 
 	private void runRDF4JTest(String filePath, Function<Writer, RDFHandler> handlerConstructor,
 							  long expectedTripleCount, int expectedVocabularySize,
-							  OntopSystemConfiguration configuration) throws IOException {
+							  OntopSystemConfiguration configuration) throws IOException, OBDASpecificationException {
 		// output
 		File out = new File(filePath);
 		Writer writer = null;
@@ -134,8 +135,11 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
-			RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer();
-			MaterializationGraphQuery graphQuery = materializer.materialize(configuration, materializationParams);
+			RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
+					configuration,
+					materializationParams
+			);
+			MaterializationGraphQuery graphQuery = materializer.materialize();
 
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(out), "UTF-8"));
 			RDFHandler handler = handlerConstructor.apply(writer);
@@ -154,7 +158,7 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 	}
 
 	private void runOWLAPITest(String filePath, long expectedTripleCount, int expectedVocabularySize,
-							   OntopSystemConfiguration configuration) throws IOException, OWLException {
+							   OntopSystemConfiguration configuration) throws IOException, OWLException, OBDASpecificationException {
 		File out = new File(filePath);
 		String outfile = out.getAbsolutePath();
 		System.out.println(outfile);
@@ -170,10 +174,12 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
-			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer();
+			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(
+					configuration,
+					materializationParams
+			);
 
-			try(MaterializedGraphOWLResultSet graphResultSet = materializer.materialize(configuration,
-					materializationParams)) {
+			try(MaterializedGraphOWLResultSet graphResultSet = materializer.materialize()) {
 
 				while (graphResultSet.hasNext())
 					manager.addAxiom(ontology, graphResultSet.next());

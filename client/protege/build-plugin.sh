@@ -16,4 +16,4 @@ cd $pwd
 mvn bundle:bundle
 
 # Copy the jar to Protege plugins.
-cp "$pwd/target/it.unibz.inf.ontop.protege-$version.jar" "$pwd/../../build/dependencies/protege/Protege-5.5.0-beta-8/plugins"
+cp "$pwd/target/it.unibz.inf.ontop.protege-*.jar" "$pwd/../../build/dependencies/protege/Protege-5.5.0/plugins"

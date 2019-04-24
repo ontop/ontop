@@ -91,7 +91,7 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithReasoning() throws Exception {
-        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasnoing.owl";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_with_reasoning.rdf";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
@@ -104,7 +104,7 @@ public class SimpleMaterializerTest {
 
     @Test
     public void runMaterializationWithoutReasoning() throws Exception {
-        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasnoing.owl";
+        String outFile = "src/test/resources/output/simplemapping_materialzed_no_reasoning.rdf";
         String ontoFile = "src/test/resources/test/simplemapping.owl";
         String mappingFile = "src/test/resources/test/simplemapping.obda";
         String propertiesFile = "src/test/resources/test/simplemapping.properties";
