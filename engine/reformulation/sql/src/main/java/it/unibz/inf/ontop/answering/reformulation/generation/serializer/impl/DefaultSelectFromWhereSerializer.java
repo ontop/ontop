@@ -146,7 +146,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             // Mainly for ASK queries
             if (projectedVariables.isEmpty())
-                return "TRUE AS uselessVariable";
+                return "1 AS uselessVariable";
 
             return projectedVariables.stream()
                     .map(v -> Optional.ofNullable(substitution.get(v))
