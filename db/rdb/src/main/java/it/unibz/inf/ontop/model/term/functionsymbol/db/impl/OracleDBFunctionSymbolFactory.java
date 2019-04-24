@@ -241,6 +241,13 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, 2, dbStringType, abstractRootDBType, false);
     }
 
+    @Override
+    protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
+        if (targetType.equals(dbStringType))
+            return createDefaultCastToStringFunctionSymbol(abstractRootDBType);
+        return super.createSimpleCastFunctionSymbol(targetType);
+    }
+
     /**
      * Made explicit, so as to enforce the use of the same character set
      */
