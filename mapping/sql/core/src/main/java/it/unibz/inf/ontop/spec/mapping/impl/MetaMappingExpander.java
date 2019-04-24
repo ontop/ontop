@@ -190,12 +190,6 @@ public class MetaMappingExpander {
 									" in the target do(es) not occur in the body of the mapping")));
 				}
 
-				List<SelectItem> newColumns = queryColumns.values().stream()
-						.filter(c -> !templateColumns.contains(c))
-						.collect(ImmutableCollectors.toList());
-				if (newColumns.isEmpty())   // avoid empty SELECT clause
-					newColumns = ImmutableList.of(new AllColumns());
-
 				String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
 				final int size = templateColumns.size();
 				try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
@@ -204,7 +198,7 @@ public class MetaMappingExpander {
 						for (int i = 1; i <= size; i++)
 							values.add(rs.getString(i));
 
-						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
+						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), templateColumns, values);
 
 						IRIConstant predicateTerm = termFactory.getConstantIRI(
 								rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
@@ -318,7 +312,6 @@ public class MetaMappingExpander {
 	 */
 
 	private static String getInstantiatedSQL(String sql,
-											 List<SelectItem> newColumns,
 											 List<SelectExpressionItem> templateColumns,
 											 List<String> values) throws JSQLParserException {
 
@@ -336,7 +329,6 @@ public class MetaMappingExpander {
 		}
 
 		plainSelect.setWhere(where); // where cannot be null
-		plainSelect.setSelectItems(newColumns);
 
 		return select.toString();
 	}
