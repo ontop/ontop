@@ -376,8 +376,8 @@ public class SparqlAlgebraToDatalogTranslator {
                 return sub;
 
             // Preserves the variable order of the SPARQL query (good practice)
-            ImmutableSet<Variable> vars = ImmutableSortedSet.copyOf(
-                    tVars.stream().map(t -> (Variable) t).collect(Collectors.toList()));
+            LinkedHashSet<Variable> orderedSet = tVars.stream().map(t -> (Variable) t).collect(Collectors.toCollection(LinkedHashSet::new));
+            ImmutableSet<Variable> vars = ImmutableSet.copyOf(orderedSet);
 
             if (noRenaming)
                 return new TranslationResult(sub.atoms, vars, false);
