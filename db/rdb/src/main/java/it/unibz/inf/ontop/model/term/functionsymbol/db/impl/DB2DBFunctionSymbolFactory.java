@@ -23,6 +23,9 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     private static final String CHAR_STR = "CHAR";
     private final DBFunctionSymbolSerializer numberToStringSerializer;
 
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for DB2";
+
+
     @Inject
     protected DB2DBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDB2RegularFunctionTable(typeFactory), typeFactory);
@@ -76,53 +79,101 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     }
 
     @Override
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBSubString3() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBCharLength() {
+        return getRegularDBFunctionSymbol(LENGTH_STR, 1);
+    }
+
+    @Override
     public DBFunctionSymbol getNow() {
         return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_SPACE_STR, 0);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
     protected String getUUIDNameInDialect() {
-        throw new RuntimeException("TODO: support");
+        throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
-    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(LOCATE(%2$s , %1$s) > 0)",
+                termConverter.apply(terms.get(0)),
+                termConverter.apply(terms.get(1)));
     }
 
     @Override
-    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms,
+                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String before = termConverter.apply(terms.get(1));
+        return String.format("LEFT(%s,SIGN(LOCATE(%s,%s)) * (LOCATE(%s,%s)-1))", str, before, str, before, str);
     }
 
     @Override
-    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String after = termConverter.apply(terms.get(1));
+        return String.format("RTRIM(SUBSTR(%s,LOCATE(%s,%s)+LENGTH(%s), SIGN(LOCATE(%s,%s))*LENGTH(%s)))",
+                str, after, str , after, after, str, str);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
-    protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms,
+                                  Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("MD5: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
-    protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA1: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
-    protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA256: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
-    protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms,
+                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA512: " + NOT_YET_SUPPORTED_MSG);
     }
 
+    /**
+     * TODO: try to support it
+     */
     @Override
-    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support");
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms,
+                                 Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Serialization of the time zone: " + NOT_YET_SUPPORTED_MSG);
     }
 
     /**
@@ -149,7 +200,7 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     protected DBTypeConversionFunctionSymbol createNonIntegerNumberToStringCastFunctionSymbol(DBTermType inputType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType, numberToStringSerializer);
     }
-    
+
     @Override
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
         return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
