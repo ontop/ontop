@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
@@ -11,14 +12,15 @@ import java.util.regex.Pattern;
 /**
  * Can simplify itself in case of strict equalities with a constant
  */
-public class SQLCastIntegerToStringFunctionSymbolImpl extends DefaultSQLSimpleDBCastFunctionSymbol {
+public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCastFunctionSymbol {
 
     @Nonnull
     private final DBTermType inputType;
     private final Pattern pattern;
 
-    protected SQLCastIntegerToStringFunctionSymbolImpl(@Nonnull DBTermType inputType, DBTermType dbStringType) {
-        super(inputType, dbStringType);
+    protected DefaultCastIntegerToStringFunctionSymbol(@Nonnull DBTermType inputType, DBTermType dbStringType,
+                                                       DBFunctionSymbolSerializer serializer) {
+        super(inputType, dbStringType, serializer);
         this.inputType = inputType;
         if (inputType.isAbstract())
             throw new IllegalArgumentException("Was expecting a concrete input type");

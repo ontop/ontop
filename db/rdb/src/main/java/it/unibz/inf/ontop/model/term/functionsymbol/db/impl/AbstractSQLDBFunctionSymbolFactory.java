@@ -254,13 +254,15 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), targetType);
+        return new DefaultSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), targetType,
+                Serializers.getCastSerializer(targetType));
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
         if (targetType.equals(dbBooleanType))
-            return new DefaultSQLSimpleDBBooleanCastFunctionSymbol(inputType, targetType);
+            return new DefaultSimpleDBBooleanCastFunctionSymbol(inputType, targetType,
+                    Serializers.getCastSerializer(targetType));
 
         DBTermType.Category inputCategory = inputType.getCategory();
         if (inputCategory.equals(targetType.getCategory())) {
@@ -276,7 +278,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 case DATETIME:
                     return createDatetimeToDatetimeCastFunctionSymbol(inputType, targetType);
                 default:
-                    return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+                    return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                            Serializers.getCastSerializer(targetType));
             }
         }
 
@@ -284,13 +287,18 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
             switch (inputCategory) {
                 case INTEGER:
                     return createIntegerToStringCastFunctionSymbol(inputType);
+                case DECIMAL:
+                    return createDecimalToStringCastFunctionSymbol(inputType);
+                case FLOAT_DOUBLE:
+                    return createFloatDoubleToStringCastFunctionSymbol(inputType);
                 default:
                     return createDefaultCastToStringFunctionSymbol(inputType);
             }
         }
 
 
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                Serializers.getCastSerializer(targetType));
     }
 
     /**
@@ -304,14 +312,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      * TODO: make it implicit by default?
      */
     protected DBTypeConversionFunctionSymbol createDecimalToDecimalCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                Serializers.getCastSerializer(targetType));
     }
 
     /**
      * TODO: make it implicit by default?
      */
     protected DBTypeConversionFunctionSymbol createFloatDoubleToFloatDoubleCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                Serializers.getCastSerializer(targetType));
     }
 
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
@@ -324,18 +334,34 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
      */
     protected DBTypeConversionFunctionSymbol createDatetimeToDatetimeCastFunctionSymbol(DBTermType inputType,
                                                                                     DBTermType targetType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType, Serializers.getCastSerializer(targetType));
     }
 
     /**
      * The returned function symbol can apply additional optimizations
      */
     protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
-        return new SQLCastIntegerToStringFunctionSymbolImpl(inputType, dbStringType);
+        return new DefaultCastIntegerToStringFunctionSymbol(inputType, dbStringType,
+                Serializers.getCastSerializer(dbStringType));
+    }
+
+    /**
+     * Hook
+     */
+    protected DBTypeConversionFunctionSymbol createDecimalToStringCastFunctionSymbol(DBTermType inputType) {
+        return createDefaultCastToStringFunctionSymbol(inputType);
+    }
+
+    /**
+     * Hook
+     */
+    protected DBTypeConversionFunctionSymbol createFloatDoubleToStringCastFunctionSymbol(DBTermType inputType) {
+        return createDefaultCastToStringFunctionSymbol(inputType);
     }
 
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
-        return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, dbStringType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
+                Serializers.getCastSerializer(dbStringType));
     }
 
     @Override

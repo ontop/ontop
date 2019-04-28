@@ -79,7 +79,8 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         // Forbids the post-processing of YEAR_TO_TEXT as the JDBC driver converts strangely the YEAR
         RDFDatatype xsdYear = typeFactory.getDatatype(XSD.GYEAR);
         DBTermType year = dbTypeFactory.getDBTermType(YEAR_STR);
-        table.put(year, xsdYear, new NonPostProcessedSQLSimpleDBCastFunctionSymbolImpl(year, dbStringType));
+        table.put(year, xsdYear, new NonPostProcessedSimpleDBCastFunctionSymbol(year, dbStringType,
+                Serializers.getCastSerializer(dbStringType)));
 
         return ImmutableTable.copyOf(table);
     }

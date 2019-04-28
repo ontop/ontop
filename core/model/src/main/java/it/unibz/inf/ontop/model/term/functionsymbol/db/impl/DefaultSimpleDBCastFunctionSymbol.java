@@ -6,25 +6,29 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.function.Function;
 
-public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
+public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
     @Nullable
     private final DBTermType inputType;
+    private final DBFunctionSymbolSerializer serializer;
 
-    protected AbstractSimpleDBCastFunctionSymbol(@Nonnull DBTermType inputBaseType,
-                                                 DBTermType targetType) {
+    protected DefaultSimpleDBCastFunctionSymbol(@Nonnull DBTermType inputBaseType,
+                                                DBTermType targetType, DBFunctionSymbolSerializer serializer) {
         super(inputBaseType.isAbstract()
                 ? "to" + targetType
                 : inputBaseType + "To" + targetType,
                 inputBaseType, targetType);
         this.inputType = inputBaseType.isAbstract() ? null : inputBaseType;
+        this.serializer = serializer;
     }
 
     @Override
@@ -84,5 +88,11 @@ public abstract class AbstractSimpleDBCastFunctionSymbol extends AbstractDBTypeC
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return getInputType().isPresent();
+    }
+
+    @Override
+    public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
+                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializer.getNativeDBString(terms, termConverter, termFactory);
     }
 }

@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -18,10 +20,14 @@ import java.util.function.Function;
 public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String CURRENT_TIMESTAMP_SPACE_STR = "CURRENT TIMESTAMP";
+    private static final String CHAR_STR = "CHAR";
+    private final DBFunctionSymbolSerializer numberToStringSerializer;
 
     @Inject
     protected DB2DBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDB2RegularFunctionTable(typeFactory), typeFactory);
+        this.numberToStringSerializer = (terms, termConverter, termFactory) ->
+                String.format("REPLACE(CHAR(%s),' ', '')", termConverter.apply(terms.get(0)));
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDB2RegularFunctionTable(
@@ -117,5 +123,36 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new RuntimeException("TODO: support");
+    }
+
+    /**
+     * Removes the padding added by DB2
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
+        return new DefaultCastIntegerToStringFunctionSymbol(inputType, dbStringType, numberToStringSerializer);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createDecimalToStringCastFunctionSymbol(DBTermType inputType) {
+        return createNonIntegerNumberToStringCastFunctionSymbol(inputType);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createFloatDoubleToStringCastFunctionSymbol(DBTermType inputType) {
+        return createNonIntegerNumberToStringCastFunctionSymbol(inputType);
+    }
+
+    /**
+     * Removes the padding added by DB2
+     */
+    protected DBTypeConversionFunctionSymbol createNonIntegerNumberToStringCastFunctionSymbol(DBTermType inputType) {
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType, numberToStringSerializer);
+    }
+    
+    @Override
+    protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
+                Serializers.getRegularSerializer(CHAR_STR));
     }
 }

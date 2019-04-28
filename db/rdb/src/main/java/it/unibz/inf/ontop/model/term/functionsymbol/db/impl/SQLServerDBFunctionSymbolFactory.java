@@ -263,7 +263,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         switch (inputType.getName()) {
             case NTEXT_STR:
             case TEXT_STR:
-                return new DefaultSQLSimpleDBCastFunctionSymbol(inputType, targetType);
+                return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                        Serializers.getCastSerializer(targetType));
             default:
                 // Implicit cast
                 return super.createStringToStringCastFunctionSymbol(inputType, targetType);

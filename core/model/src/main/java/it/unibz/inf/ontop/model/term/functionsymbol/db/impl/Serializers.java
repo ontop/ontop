@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.stream.Collectors;
 
@@ -8,6 +9,7 @@ public class Serializers {
 
     private static final String FUNCTIONAL_TEMPLATE = "%s(%s)";
     private final static String IN_BRACKETS_TEMPLATE = "(%s)";
+    private final static String CAST_TEMPLATE = "CAST(%s AS %s)";
 
     public static DBFunctionSymbolSerializer getRegularSerializer(String nameInDialect) {
         return (terms, termConverter, termFactory) -> {
@@ -27,5 +29,10 @@ public class Serializers {
                     .collect(Collectors.joining(separator));
             return String.format(IN_BRACKETS_TEMPLATE, expression);
         };
+    }
+
+    public static DBFunctionSymbolSerializer getCastSerializer(DBTermType targetType) {
+        return (terms, termConverter, termFactory) -> String.format(
+                CAST_TEMPLATE, termConverter.apply(terms.get(0)), targetType.getCastName());
     }
 }

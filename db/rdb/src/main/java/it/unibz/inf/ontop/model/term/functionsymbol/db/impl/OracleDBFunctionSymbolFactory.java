@@ -252,17 +252,19 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return new OracleCastToStringFunctionSymbol(inputType, dbStringType);
+        return createDefaultCastToStringFunctionSymbol(inputType);
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
-        return new OracleCastIntegerToStringFunctionSymbol(inputType, dbStringType);
+        return new DefaultCastIntegerToStringFunctionSymbol(inputType, dbStringType,
+                Serializers.getRegularSerializer(TO_CHAR_STR));
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
-        return new OracleCastToStringFunctionSymbol(inputType, dbStringType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
+                Serializers.getRegularSerializer(TO_CHAR_STR));
     }
 
     /**
