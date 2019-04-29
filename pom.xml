@@ -743,6 +743,18 @@
                 </exclusions>
             </dependency>
 
+            <!-- needed by jena -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>1.5</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.functionaljava</groupId>
                 <artifactId>functionaljava</artifactId>
