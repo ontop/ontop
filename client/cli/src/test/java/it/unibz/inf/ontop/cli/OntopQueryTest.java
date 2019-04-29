@@ -61,16 +61,4 @@ public class OntopQueryTest {
         Ontop.main(argv);
      }
 
-
-    @Test
-    public void temp(){
-        String[] argv = {"query",
-                "-m", "/home/julien/Desktop/ontop_ex/university-complete.obda",
-                "-p", "/home/julien/Desktop/ontop_ex/university-complete.properties",
-                "-q", "/home/julien/Desktop/ontop_ex/university-complete.q",
-                "-t", "/home/julien/Desktop/ontop_ex/university-complete.ttl"
-        };
-        Ontop.main(argv);
-    }
-
 }
