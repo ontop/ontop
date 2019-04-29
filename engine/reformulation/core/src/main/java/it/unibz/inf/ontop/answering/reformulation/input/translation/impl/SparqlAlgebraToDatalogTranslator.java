@@ -173,25 +173,25 @@ public class SparqlAlgebraToDatalogTranslator {
          */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
                                                  java.util.function.Function<? super T, Variable> varMapper,
-                                                 BiFunctionWithUnsupportedException<? super T, LinkedHashSet<Variable>, Term> exprMapper)
+                                                 BiFunctionWithUnsupportedException<? super T, Set<Variable>, Term> exprMapper)
                 throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
-//            Set<Variable> vars = new HashSet<>(variables);
+            Set<Variable> vars = new HashSet<>(variables);
 
             List<Function> eqAtoms = new ArrayList<>();
 
             // Functional-style replaced because of OntopUnsupportedInputQueryException
             for(T b : bindings.collect(Collectors.toList())) {
-                Term expr = exprMapper.apply(b, variables);
+                Term expr = exprMapper.apply(b, vars);
 
                 Variable v = varMapper.apply(b);
-                if (!variables.add(v))
+                if (!vars.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
 
                 eqAtoms.add(termFactory.getFunctionEQ(v, expr));
             }
 
-            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), variables, false);
+            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), new LinkedHashSet<>(vars), false);
         }
 
 
@@ -599,7 +599,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return term
      */
 
-	private Term getExpression(ValueExpr expr, LinkedHashSet<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+	private Term getExpression(ValueExpr expr, Set<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
