@@ -37,7 +37,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.eclipse.rdf4j.model.IRI;
@@ -154,10 +153,10 @@ public class SparqlAlgebraToDatalogTranslator {
     private class TranslationResult {
 
         final ImmutableList<Function> atoms;
-        final ImmutableSet<Variable> variables;
+        final LinkedHashSet<Variable> variables;
         final boolean isBGP;
 
-        TranslationResult(ImmutableList<Function> atoms, ImmutableSet<Variable> variables, boolean isBGP) {
+        TranslationResult(ImmutableList<Function> atoms, LinkedHashSet<Variable> variables, boolean isBGP) {
             this.atoms = atoms;
             this.variables = variables;
             this.isBGP = isBGP;
@@ -174,29 +173,29 @@ public class SparqlAlgebraToDatalogTranslator {
          */
         <T> TranslationResult extendWithBindings(Stream<T> bindings,
                                                  java.util.function.Function<? super T, Variable> varMapper,
-                                                 BiFunctionWithUnsupportedException<? super T, ImmutableSet<Variable>, Term> exprMapper)
+                                                 BiFunctionWithUnsupportedException<? super T, LinkedHashSet<Variable>, Term> exprMapper)
                 throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
-            Set<Variable> vars = new HashSet<>(variables);
+//            Set<Variable> vars = new HashSet<>(variables);
 
             List<Function> eqAtoms = new ArrayList<>();
 
             // Functional-style replaced because of OntopUnsupportedInputQueryException
             for(T b : bindings.collect(Collectors.toList())) {
-                Term expr = exprMapper.apply(b, ImmutableSet.copyOf(vars));
+                Term expr = exprMapper.apply(b, variables);
 
                 Variable v = varMapper.apply(b);
-                if (!vars.add(v))
+                if (!variables.add(v))
                     throw new IllegalArgumentException("Duplicate binding for variable " + v);
 
                 eqAtoms.add(termFactory.getFunctionEQ(v, expr));
             }
 
-            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), ImmutableSet.copyOf(vars), false);
+            return new TranslationResult(getAtomsExtended(eqAtoms.stream()), variables, false);
         }
 
 
-        ImmutableList<Function> getAtomsExtendedWithNulls(ImmutableSet<Variable> allVariables) {
+        ImmutableList<Function> getAtomsExtendedWithNulls(LinkedHashSet<Variable> allVariables) {
             Sets.SetView<Variable>  nullVariables = Sets.difference(allVariables, variables);
             if (nullVariables.isEmpty())
                 return atoms;
@@ -227,7 +226,7 @@ public class SparqlAlgebraToDatalogTranslator {
         return termFactory.getFunction(pred, terms);
     }
 
-    private TranslationResult createFreshNode(ImmutableSet<Variable> vars) {
+    private TranslationResult createFreshNode(LinkedHashSet<Variable> vars) {
         Function head = getFreshHead(new ArrayList<>(vars));
         return new TranslationResult(ImmutableList.of(head), vars, false);
     }
@@ -292,13 +291,15 @@ public class SparqlAlgebraToDatalogTranslator {
         }
         else if (node instanceof SingletonSet) {
             // the empty BGP has no variables and gives a single solution mapping on every non-empty graph
-            return new TranslationResult(ImmutableList.of(), ImmutableSet.of(), true);
+            return new TranslationResult(ImmutableList.of(), new LinkedHashSet<Variable>(), true);
         }
         else if (node instanceof Join) {     // JOIN algebra operation
             Join join = (Join) node;
             TranslationResult a1 = translate(join.getLeftArg());
             TranslationResult a2 = translate(join.getRightArg());
-            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+            LinkedHashSet<Variable> vars = new LinkedHashSet<>();
+            vars.addAll(a1.variables);
+            vars.addAll(a2.variables);
 
             if (a1.isBGP && a2.isBGP) {             // collect triple patterns into BGPs
                 ImmutableList<Function> atoms =
@@ -316,7 +317,9 @@ public class SparqlAlgebraToDatalogTranslator {
             LeftJoin lj = (LeftJoin) node;
             TranslationResult a1 = translate(lj.getLeftArg());
             TranslationResult a2 = translate(lj.getRightArg());
-            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+            LinkedHashSet<Variable> vars = new LinkedHashSet<>();
+            vars.addAll(a1.variables);
+            vars.addAll(a2.variables);
 
             Function body = datalogFactory.getSPARQLLeftJoin(wrapNonTriplePattern(a1),
                     wrapNonTriplePattern(a2));
@@ -333,7 +336,9 @@ public class SparqlAlgebraToDatalogTranslator {
             Union union = (Union) node;
             TranslationResult a1 = translate(union.getLeftArg());
             TranslationResult a2 = translate(union.getRightArg());
-            ImmutableSet<Variable> vars = Sets.union(a1.variables, a2.variables).immutableCopy();
+            LinkedHashSet<Variable> vars = new LinkedHashSet<>();
+            vars.addAll(a1.variables);
+            vars.addAll(a2.variables);
 
             TranslationResult res = createFreshNode(vars);
             appendRule(res.atoms.get(0), a1.getAtomsExtendedWithNulls(vars));
@@ -372,12 +377,11 @@ public class SparqlAlgebraToDatalogTranslator {
                 if (!sVar.equals(tVar))
                     noRenaming = false;
             }
-            if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
-                return sub;
+            // Preserves the answer variable order of the SPARQL query (if any), or the order of variable appearance (for SELECT *)
+            LinkedHashSet<Variable> vars = tVars.stream().map(t -> (Variable) t).collect(Collectors.toCollection(LinkedHashSet::new));
 
-            // Preserves the variable order of the SPARQL query (good practice)
-            LinkedHashSet<Variable> orderedSet = tVars.stream().map(t -> (Variable) t).collect(Collectors.toCollection(LinkedHashSet::new));
-            ImmutableSet<Variable> vars = ImmutableSet.copyOf(orderedSet);
+            if (noRenaming && sVars.containsAll(sub.variables)) // neither projection nor renaming
+                return new TranslationResult(sub.atoms, vars, sub.isBGP);
 
             if (noRenaming)
                 return new TranslationResult(sub.atoms, vars, false);
@@ -402,7 +406,7 @@ public class SparqlAlgebraToDatalogTranslator {
         else if (node instanceof BindingSetAssignment) { // VALUES in SPARQL
             BindingSetAssignment values = (BindingSetAssignment) node;
 
-            TranslationResult empty = new TranslationResult(ImmutableList.of(), ImmutableSet.of(), false);
+            TranslationResult empty = new TranslationResult(ImmutableList.of(), new LinkedHashSet<>(), false);
             List<TranslationResult> bindings = new ArrayList<>();
             for (BindingSet bs :values.getBindingSets()) {
                 bindings.add(empty.extendWithBindings(
@@ -411,9 +415,9 @@ public class SparqlAlgebraToDatalogTranslator {
                         (be, vars) -> getTermForLiteralOrIri(be.getValue())));
             }
 
-            ImmutableSet<Variable> allVars = bindings.stream()
+            LinkedHashSet<Variable> allVars = bindings.stream()
                     .flatMap(s -> s.variables.stream())
-                    .collect(ImmutableCollectors.toSet());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             TranslationResult res = createFreshNode(allVars);
             bindings.forEach(p ->
@@ -434,7 +438,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return
      */
 
-    private Function getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
+    private Function getFilterExpression(ValueExpr expr, LinkedHashSet<Variable> variables)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
         Term term = getExpression(expr, variables);
         // Effective Boolean Value (EBV): wrap in isTrue function if it is not a (Boolean) expression
@@ -452,7 +456,7 @@ public class SparqlAlgebraToDatalogTranslator {
         // VarOrTerm ::=  Var | GraphTerm
         // GraphTerm ::=  iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | NIL
 
-        ImmutableSet.Builder<Variable> variables = ImmutableSet.builder();
+        LinkedHashSet<Variable> variables = new LinkedHashSet<>();
         Function atom;
 
         Value s = triple.getSubjectVar().getValue();
@@ -494,10 +498,10 @@ public class SparqlAlgebraToDatalogTranslator {
 			// if predicate is a variable or literal
 			throw new OntopUnsupportedInputQueryException("Unsupported query syntax");
 
-        return new TranslationResult(ImmutableList.of(atom), variables.build(), true);
+        return new TranslationResult(ImmutableList.of(atom), variables, true);
 	}
 
-    private Term getTermForVariable(Var v, ImmutableSet.Builder<Variable> variables) {
+    private Term getTermForVariable(Var v, LinkedHashSet<Variable> variables) {
         Variable var = termFactory.getVariable(v.getName());
         variables.add(var);
         return var;
@@ -595,7 +599,7 @@ public class SparqlAlgebraToDatalogTranslator {
      * @return term
      */
 
-	private Term getExpression(ValueExpr expr, ImmutableSet<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+	private Term getExpression(ValueExpr expr, LinkedHashSet<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
