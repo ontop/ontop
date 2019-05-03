@@ -141,19 +141,7 @@ public class TargetQueryRenderer {
     }
 
     private static String displayURIConstant(Term term, PrefixManager prefixManager) {
-        StringBuilder sb = new StringBuilder();
-        String originalUri = term.toString();
-
-        String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
-        if (!shortenUri.equals(originalUri)) {
-            sb.append(shortenUri);
-        } else {
-            // If the URI can't be shorten then use the full URI within brackets
-            sb.append("<");
-            sb.append(originalUri);
-            sb.append(">");
-        }
-        return sb.toString();
+        return getAbbreviatedName(term.toString(), prefixManager, false); // shorten the URI if possible
     }
 
     private static String displayVariable(Variable term) {
@@ -162,7 +150,7 @@ public class TargetQueryRenderer {
 
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         FunctionSymbol functionSymbol = function.getFunctionSymbol();
-        if (functionSymbol instanceof RDFTermType) {
+        if (functionSymbol instanceof RDFTermFunctionSymbol) {
             ImmutableTerm lexicalTerm = function.getTerm(0);
 
             Optional<RDFDatatype> optionalDatatype = function.inferType()
@@ -178,9 +166,9 @@ public class TargetQueryRenderer {
                 ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
                 FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
                 if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
-                    return displayURITemplate((ImmutableFunctionalTerm)lexicalTerm, prefixManager);
+                    return displayURITemplate(lexicalFunctionalTerm, prefixManager);
                 else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
-                    return displayFunctionalBnode(function);
+                    return displayFunctionalBnode(lexicalFunctionalTerm);
             }
         }
         if (functionSymbol instanceof DBConcatFunctionSymbol)
