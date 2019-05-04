@@ -14,15 +14,15 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
 
+import java.util.UUID;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.NTEXT_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TEXT_STR;
 
 public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-    private static final String UUID_STR = "NEWID";
-    private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
     private static final String LEN_STR = "LEN";
     private static final String CEILING_STR = "CEILING";
 
@@ -116,6 +116,18 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBCharLength() {
         return getRegularDBFunctionSymbol(LEN_STR, 1);
+    }
+
+    @Override
+    public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
+        return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
+                (terms, termConverter, termFactory) ->
+                        "LOWER(CONVERT(NVARCHAR(100),NEWID()))");
+    }
+
+    @Override
+    protected String getUUIDNameInDialect() {
+        throw new UnsupportedOperationException("Do not call getUUIDNameInDialect for SQL Server");
     }
 
     /**
@@ -223,11 +235,6 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                            Function<ImmutableTerm, String> termConverter,
                                            TermFactory termFactory) {
         return String.format("CONVERT(nvarchar(50),%s,127)", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String getUUIDNameInDialect() {
-        return UUID_STR;
     }
 
     @Override

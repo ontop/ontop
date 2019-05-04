@@ -308,14 +308,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new OracleTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 
-    /**
-     * TODO: fix it (dashes are not always inserted at the right places)
-     */
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
                 (terms, termConverter, termFactory) ->
-                        "REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"
+                        "LOWER(REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5'))"
                 );
     }
 

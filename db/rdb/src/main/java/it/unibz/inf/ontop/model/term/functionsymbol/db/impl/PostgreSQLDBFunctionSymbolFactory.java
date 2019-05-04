@@ -79,10 +79,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
-
-    /**
-     * TODO: put dashes at the correct positions
-     */
+    
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
