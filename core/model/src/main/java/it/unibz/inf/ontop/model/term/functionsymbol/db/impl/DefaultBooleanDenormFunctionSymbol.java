@@ -40,11 +40,11 @@ public class DefaultBooleanDenormFunctionSymbol
     }
 
     /**
-     * Here we assume that the DB has only one way to represent the boolean value as a string
+     * "0" and "false" are equivalent lexical terms, "1" and "true" are also equivalent
      */
     @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return true;
+        return false;
     }
 
     @Override
@@ -95,15 +95,19 @@ public class DefaultBooleanDenormFunctionSymbol
 
     protected ImmutableFunctionalTerm transformIntoDBCase(ImmutableTerm subTerm, TermFactory termFactory) {
         return termFactory.getDBCase(Stream.of(
-                buildEntry(subTerm, true, termFactory),
-                buildEntry(subTerm, false, termFactory)),
+                buildEntry(subTerm, termFactory.getXsdBooleanLexicalConstant(true), true, termFactory),
+                buildEntry(subTerm, termFactory.getDBStringConstant("1"), true, termFactory),
+                buildEntry(subTerm, termFactory.getXsdBooleanLexicalConstant(false), false, termFactory),
+                buildEntry(subTerm, termFactory.getDBStringConstant("0"), false, termFactory)),
+                // TODO: unclear if it should return NULL
                 termFactory.getNullConstant());
     }
 
 
-    private Map.Entry<ImmutableExpression, ? extends ImmutableTerm> buildEntry(ImmutableTerm term, boolean b,
+    private Map.Entry<ImmutableExpression, ? extends ImmutableTerm> buildEntry(ImmutableTerm term, DBConstant lexicalConstant,
+                                                                               boolean b,
                                                                                TermFactory termFactory) {
-        return Maps.immutableEntry(termFactory.getStrictEquality(term, termFactory.getXsdBooleanLexicalConstant(b)),
+        return Maps.immutableEntry(termFactory.getStrictEquality(term, lexicalConstant),
                 termFactory.getDBBooleanConstant(b));
     }
 }
