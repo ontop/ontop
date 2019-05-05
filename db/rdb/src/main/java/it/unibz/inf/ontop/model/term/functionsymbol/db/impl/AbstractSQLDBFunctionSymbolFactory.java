@@ -456,8 +456,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
 
     @Override
-    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol() {
-        return new DefaultBooleanNormFunctionSymbol(dbBooleanType, dbStringType);
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new DefaultBooleanNormFunctionSymbol(booleanType, dbStringType);
     }
 
     @Override

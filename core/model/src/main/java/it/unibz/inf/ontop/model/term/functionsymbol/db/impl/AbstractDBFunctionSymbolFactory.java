@@ -283,8 +283,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
         builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
         // Boolean
-        builder.put(dbTypeFactory.getDBBooleanType(),
-                typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
+        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
 
         return builder.build();
     }
@@ -704,7 +703,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
-    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
 

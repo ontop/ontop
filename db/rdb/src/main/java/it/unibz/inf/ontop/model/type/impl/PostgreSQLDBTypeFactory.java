@@ -26,7 +26,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String NAME_STR = "NAME";
     protected static final String TIMESTAMPTZ_STR = "TIMESTAMPTZ";
     protected static final String TIMETZ_STR = "TIMETZ";
-    protected static final String BOOL_STR = "BOOL";
+    public static final String BOOL_STR = "BOOL";
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
