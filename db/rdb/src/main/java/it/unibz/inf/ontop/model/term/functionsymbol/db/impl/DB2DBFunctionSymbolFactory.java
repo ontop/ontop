@@ -13,9 +13,14 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerialize
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.function.Function;
+
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.INTEGER_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.SMALLINT_STR;
+import static it.unibz.inf.ontop.model.type.impl.OracleDBTypeFactory.NUMBER_STR;
 
 public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -49,6 +54,19 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
         table.remove(REGEXP_LIKE_STR, 3);
 
         return ImmutableTable.copyOf(table);
+    }
+
+    @Override
+    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+        builder.putAll(super.createNormalizationTable());
+
+        // SMALLINT boolean normalization
+        RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
+        DBTermType smallIntType = dbTypeFactory.getDBTermType(SMALLINT_STR);
+        builder.put(smallIntType, xsdBoolean, new DefaultNumberNormAsBooleanFunctionSymbol(smallIntType, dbStringType));
+
+        return builder.build();
     }
 
     @Override
