@@ -14,6 +14,11 @@
 #
 ########################################################################
 
+# user could invoke the script as 'sh build-release.sh'
+if [ ! -n "$BASH" ]; then
+    echo "Please run this script with bash or run it as ./$0"
+    exit 1
+fi
 
 if type -p java; then
     JAVA=java
