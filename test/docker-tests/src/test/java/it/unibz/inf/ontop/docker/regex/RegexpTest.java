@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker.regex;
  * #L%
  */
 
+import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.docker.service.QuestSPARQLRewriterTest;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
@@ -44,9 +45,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Scanner;
+import java.util.*;
 
 /***
  * Tests that the system can handle the SPARQL "regex" FILTER
@@ -72,13 +71,16 @@ public class RegexpTest extends TestCase {
 	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
 	private boolean isH2;
+	private final boolean acceptFlags;
+
 	/**
 	 * Constructor is necessary for parameterized test
 	 */
-	public RegexpTest(String database, boolean isH2){
+	public RegexpTest(String database, boolean isH2, boolean acceptFlags){
 		this.obdafile = ROOT_LOCATION +"stockexchange-" + database + ".obda";
 		this.propertyfile = ROOT_LOCATION +"stockexchange-" + database + ".properties";
 		this.isH2 = isH2;
+		this.acceptFlags = acceptFlags;
 	}
 
 
@@ -88,10 +90,11 @@ public class RegexpTest extends TestCase {
 	@Parameters
 	public static Collection<Object[]> getObdaFiles(){
 		return Arrays.asList(new Object[][] {
-				{"h2", true}, 
-				 {"mysql", false },
-				 {"pgsql", false},
-				 {"oracle", false },
+				{"h2", true, true},
+				// TODO: enable flags for MySQL >= 8
+				 {"mysql", false, false },
+				 {"pgsql", false, false},
+				 {"oracle", false, false },
 				 //no support for mssql and db2
 				 });
 	}
@@ -198,13 +201,15 @@ public class RegexpTest extends TestCase {
 		try {
 			st = conn.createStatement();
 
-			String[] queries = {
-					"'J[ano]*'", 
-					"'j[ANO]*', 'i'",
+			List<String> queries = Lists.newArrayList(
+					"'J[ano]*'",
 					"'^J[ano]*$'",
-					"'^J[ano]*$', 'm'",
-					"'J'"
-					};
+					"'J'");
+			if (acceptFlags) {
+				queries.add("'j[ANO]*', 'i'");
+				queries.add("'^J[ano]*$', 'm'");
+			}
+
 			for (String regex : queries){
 				String query = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#> SELECT DISTINCT ?x WHERE { ?x a :StockBroker. ?x :firstName ?name. FILTER regex (?name, " + regex + ")}";
 				String broker = runTest(st, query, true);

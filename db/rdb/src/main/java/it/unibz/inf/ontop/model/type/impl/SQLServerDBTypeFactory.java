@@ -62,11 +62,6 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
     }
 
     @Override
-    public Optional<String> getDBNaNLexicalValue() {
-        return Optional.of("NaN");
-    }
-
-    @Override
     public String getDBTrueLexicalValue() {
         return "1";
     }

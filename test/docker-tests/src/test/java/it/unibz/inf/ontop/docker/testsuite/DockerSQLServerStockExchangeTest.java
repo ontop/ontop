@@ -35,7 +35,10 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class DockerSQLServerStockExchangeTest extends OntopTestCase {
 
-	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of(
+			// Case-insensitive collation issue
+			"datatypes-Q61: String of Boolean equal to capital TRUE"
+	);
 	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
 
 	public DockerSQLServerStockExchangeTest(String name, String queryFileURL, String resultFileURL,

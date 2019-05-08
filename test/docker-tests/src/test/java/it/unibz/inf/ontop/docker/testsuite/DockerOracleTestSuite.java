@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.utils.ManifestTestUtils;
 import it.unibz.inf.ontop.docker.utils.OntopTestCase;
 import it.unibz.inf.ontop.docker.utils.RepositoryRegistry;
+import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -54,5 +55,10 @@ public class DockerOracleTestSuite extends OntopTestCase {
 		return ManifestTestUtils.parametersFromSuperManifest(
 				"/testcases-docker/manifest-scenario-oracle.ttl",
 				IGNORE, REGISTRY);
+	}
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
 	}
 }

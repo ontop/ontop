@@ -15,8 +15,9 @@ public class LexicalInequalityFunctionSymbolImpl extends AbstractLexicalNonStric
 
     protected LexicalInequalityFunctionSymbolImpl(InequalityLabel inequalityLabel, MetaRDFTermType metaRDFTermType, RDFDatatype xsdBooleanType,
                                                   RDFDatatype xsdDateTimeType, RDFDatatype xsdStringType, DBTermType dbStringType,
-                                                  DBTermType dbBooleanType) {
-        super("LEX_" + inequalityLabel, metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType, dbBooleanType);
+                                                  DBTermType dbBooleanType,
+                                                  RDFDatatype xsdDateTimeStampType) {
+        super("LEX_" + inequalityLabel, metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType, dbBooleanType, xsdDateTimeStampType);
         this.inequalityLabel = inequalityLabel;
     }
 

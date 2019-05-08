@@ -252,17 +252,19 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
      */
     @Override
     protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType, DBTermType targetType) {
-        return new OracleCastToStringFunctionSymbol(inputType, dbStringType);
+        return createDefaultCastToStringFunctionSymbol(inputType);
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createIntegerToStringCastFunctionSymbol(DBTermType inputType) {
-        return new OracleCastIntegerToStringFunctionSymbol(inputType, dbStringType);
+        return new DefaultCastIntegerToStringFunctionSymbol(inputType, dbStringType,
+                Serializers.getRegularSerializer(TO_CHAR_STR));
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createDefaultCastToStringFunctionSymbol(DBTermType inputType) {
-        return new OracleCastToStringFunctionSymbol(inputType, dbStringType);
+        return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
+                Serializers.getRegularSerializer(TO_CHAR_STR));
     }
 
     /**
@@ -306,14 +308,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new OracleTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
 
-    /**
-     * TODO: fix it (dashes are not always inserted at the right places)
-     */
     @Override
     public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
         return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
                 (terms, termConverter, termFactory) ->
-                        "REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5')"
+                        "LOWER(REGEXP_REPLACE(RAWTOHEX(SYS_GUID()), '([A-F0-9]{8})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{4})([A-F0-9]{12})', '\\1-\\2-\\3-\\4-\\5'))"
                 );
     }
 

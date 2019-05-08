@@ -78,6 +78,16 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
     public void testStrUuid() {
     }
 
+    @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.2500000000000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"11.5000000000000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"16.7500000000000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"5.0000000000000000000000000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
     @Ignore("Not yet supported")
     @Test
     @Override

@@ -62,7 +62,10 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                     .orElseThrow(() -> new MinorOntopInternalBugException(
                             "The second constant argument was expected to be a RDFTermTypeConstant"));
 
-            return termFactory.getRDFConstant(lexicalConstant.getValue(), rdfTermType);
+            return rdfTermType.isAbstract()
+                    // May still be temporarily abstract during some stages of the mapping processing
+                    ? termFactory.getImmutableFunctionalTerm(this, newTerms)
+                    : termFactory.getRDFConstant(lexicalConstant.getValue(), rdfTermType);
         }
         else
             // May block invalid cases such as RDF(NULL, IRI)

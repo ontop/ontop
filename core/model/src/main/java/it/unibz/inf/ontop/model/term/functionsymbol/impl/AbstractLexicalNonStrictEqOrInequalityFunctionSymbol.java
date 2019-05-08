@@ -13,17 +13,20 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     private final RDFDatatype xsdBooleanType;
     private final RDFDatatype xsdDateTimeType;
     private final RDFDatatype xsdStringType;
+    private final RDFDatatype xsdDateTimeStampType;
 
     protected AbstractLexicalNonStrictEqOrInequalityFunctionSymbol(String functionSymbolName, MetaRDFTermType metaRDFTermType,
                                                                    RDFDatatype xsdBooleanType, RDFDatatype xsdDateTimeType,
                                                                    RDFDatatype xsdStringType,
-                                                                   DBTermType dbStringType, DBTermType dbBooleanType) {
+                                                                   DBTermType dbStringType, DBTermType dbBooleanType,
+                                                                   RDFDatatype xsdDateTimeStampType) {
         super(functionSymbolName,
                 ImmutableList.of(dbStringType, metaRDFTermType, dbStringType, metaRDFTermType),
                 dbBooleanType);
         this.xsdBooleanType = xsdBooleanType;
         this.xsdDateTimeType = xsdDateTimeType;
         this.xsdStringType = xsdStringType;
+        this.xsdDateTimeStampType = xsdDateTimeStampType;
     }
 
     @Override
@@ -76,7 +79,7 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                     return computeBooleanEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
                 else if (termType1.equals(xsdStringType))
                     return computeStringEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
-                else if (termType1.equals(xsdDateTimeType))
+                else if (termType1.equals(xsdDateTimeType) || termType1.equals(xsdDateTimeStampType))
                     return computeDatetimeEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
                 else
                     return computeDefaultSameTypeEqualityOrInequality(termType1, dbTerm1, dbTerm2, termFactory,

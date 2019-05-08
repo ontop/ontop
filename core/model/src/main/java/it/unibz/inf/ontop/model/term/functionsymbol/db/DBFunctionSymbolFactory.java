@@ -206,4 +206,12 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSeconds();
     DBFunctionSymbol getDBTz();
     DBFunctionSymbol getNow();
+
+    /**
+     * The functional term using it may be simplifiable to a regular NULL or not, depending on the DB system.
+     *
+     * Useful for PostgreSQL which has limited type inference capabilities when it comes to NULL and UNION (ALL).
+     *
+     */
+    DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType);
 }

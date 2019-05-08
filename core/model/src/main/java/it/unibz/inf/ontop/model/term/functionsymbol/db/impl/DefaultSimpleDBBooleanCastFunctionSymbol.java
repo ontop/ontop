@@ -5,15 +5,17 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import javax.annotation.Nonnull;
 
-public class DefaultSQLSimpleDBBooleanCastFunctionSymbol extends DefaultSQLSimpleDBCastFunctionSymbol
+public class DefaultSimpleDBBooleanCastFunctionSymbol extends DefaultSimpleDBCastFunctionSymbol
         implements DBBooleanFunctionSymbol {
 
-    protected DefaultSQLSimpleDBBooleanCastFunctionSymbol(@Nonnull DBTermType inputBaseType, DBTermType booleanType) {
-        super(inputBaseType, booleanType);
+    protected DefaultSimpleDBBooleanCastFunctionSymbol(@Nonnull DBTermType inputBaseType, DBTermType booleanType,
+                                                       DBFunctionSymbolSerializer serializer) {
+        super(inputBaseType, booleanType, serializer);
     }
 
     @Override

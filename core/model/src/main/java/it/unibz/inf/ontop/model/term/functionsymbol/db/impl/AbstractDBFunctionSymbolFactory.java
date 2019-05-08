@@ -164,6 +164,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBFunctionSymbol> floorMap;
     private final Map<DBTermType, DBFunctionSymbol> roundMap;
 
+    private final Map<DBTermType, DBFunctionSymbol> typeNullMap;
+
     private final TypeFactory typeFactory;
     private final DBTermType rootDBType;
     private final DBTermType dbStringType;
@@ -230,6 +232,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.ceilMap = new ConcurrentHashMap<>();
         this.floorMap = new ConcurrentHashMap<>();
         this.roundMap = new ConcurrentHashMap<>();
+
+        this.typeNullMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -283,8 +287,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         builder.put(defaultDBDateTimestampType, xsdDatetime, datetimeNormFunctionSymbol);
         builder.put(defaultDBDateTimestampType, xsdDatetimeStamp, datetimeNormFunctionSymbol);
         // Boolean
-        builder.put(dbTypeFactory.getDBBooleanType(),
-                typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol());
+        builder.put(dbBooleanType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(dbBooleanType));
 
         return builder.build();
     }
@@ -703,8 +706,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return tzFunctionSymbol;
     }
 
+    @Override
+    public DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType) {
+        return typeNullMap
+                .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
+    }
+
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
-    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol();
+    protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
 
@@ -885,6 +894,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType);
     protected abstract DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType);
     protected abstract DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType);
+
+    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
+        return new SimplifiableTypedNullFunctionSymbol(termType);
+    }
 
 
     protected abstract String serializeContains(ImmutableList<? extends ImmutableTerm> terms,

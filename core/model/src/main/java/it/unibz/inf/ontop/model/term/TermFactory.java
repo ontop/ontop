@@ -30,10 +30,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
@@ -242,6 +239,14 @@ public interface TermFactory {
 	DBConstant getXsdBooleanLexicalConstant(boolean value);
 
 	Constant getNullConstant();
+
+	/**
+	 * The resulting functional term may simplify to a regular NULL or not, depending on the DB system.
+	 *
+	 * Useful for PostgreSQL which has limited type inference capabilities when it comes to NULL and UNION (ALL).
+	 *
+	 */
+	ImmutableFunctionalTerm getTypedNull(DBTermType termType);
 
 	DBConstant getDBIntegerConstant(int value);
 

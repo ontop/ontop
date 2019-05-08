@@ -17,16 +17,16 @@
       :decimal-1 :decimal-2 :decimal-3
       :pos-decimal-1 :pos-decimal-2 :pos-decimal-3
       :neg-decimal-1 :neg-decimal-2 :neg-decimal-3
-      :double-1 :double-2 :double-3						## Double test Queries were adjusted for DB2
-      :pos-double-1 :pos-double-2 :pos-double-3      	## There are rounding issues present in DB2 with comparing EQ on doubles
+      :double-1 :double-2 :double-3
+      :pos-double-1 :pos-double-2 :pos-double-3
       :neg-double-1 :neg-double-2 :neg-double-3
       :datetime-1a :datetime-1b :datetime-1c
       :datetime-2a :datetime-2b :datetime-2c
       :datetime-3a :datetime-3b :datetime-3c :datetime-3d # in UTC
       :datetime-3e :datetime-3f :datetime-3g
       :datetime-3h :datetime-3i :datetime-3j
-      :boolean-1a :boolean-1b :boolean-1c :boolean-1d	## DB2 doesnt have boolean data type, therefore we store 0/1
-      :boolean-2a :boolean-2b :boolean-2c :boolean-2d	## and change tests and mappings accordingly
+      :boolean-1a :boolean-1b :boolean-1c :boolean-1d	## DB2 didn't have boolean data type, therefore we store 0/1
+      :boolean-2a :boolean-2b :boolean-2c :boolean-2d
       :boolean-3a :boolean-3b :boolean-3c :boolean-3d	
     ) .
 
@@ -323,7 +323,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <double-2-DB2.rq> ] ;
+            [ qt:query <double-2.rq> ] ;
     mf:result <double-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -335,7 +335,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <double-3-DB2.rq> ] ;
+            [ qt:query <double-3.rq> ] ;
     mf:result <double-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -359,7 +359,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <pos-double-2-DB2.rq> ] ;
+            [ qt:query <pos-double-2.rq> ] ;
     mf:result <pos-double-2.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -371,7 +371,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <pos-double-3-DB2.rq> ] ;
+            [ qt:query <pos-double-3.rq> ] ;
     mf:result <pos-double-3.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -659,7 +659,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <boolean-2a-DB2.rq> ] ;
+            [ qt:query <boolean-2a.rq> ] ;
     mf:result <boolean-2a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -671,7 +671,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <boolean-2b-DB2.rq> ] ;
+            [ qt:query <boolean-2b.rq> ] ;
     mf:result <boolean-2b.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -695,7 +695,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <boolean-2d-DB2.rq> ] ;
+            [ qt:query <boolean-2d.rq> ] ;
     mf:result <boolean-2d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -707,7 +707,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <boolean-3a-DB2.rq> ] ;
+            [ qt:query <boolean-3a.rq> ] ;
     mf:result <boolean-3a.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;
@@ -743,7 +743,7 @@
     obdat:approval obdat:Approved ;
     obdat:approvedBy <-ontop-Team> ;
     mf:action
-            [ qt:query <boolean-3d-DB2.rq> ] ;
+            [ qt:query <boolean-3d.rq> ] ;
     mf:result <boolean-3d.ttl> ;
     mf:knowledgebase <stockexchange.owl> ;
     mf:mappings <stockexchange-db2.obda> ;

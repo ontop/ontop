@@ -73,10 +73,11 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    @Ignore("Not yet supported")
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
-    public void testHash() {
+    public void testHash() throws Exception {
+        super.testHash();
     }
 
     @Override
@@ -86,6 +87,19 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         expectedValues.add("\"12\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
         expectedValues.add("\"7\"^^xsd:integer");
+        return expectedValues;
+    }
+
+    /**
+     * TODO: re-ajust the DB entries (34 instead of 33.5, 23 instead of 22.5)
+     */
+    @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"11.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"17.0000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"5.0000000000000000\"^^xsd:decimal");
         return expectedValues;
     }
 
@@ -124,10 +138,10 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Override
     protected List<String> getTZExpectedValues() {
     List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
         return expectedValues;
     }
 

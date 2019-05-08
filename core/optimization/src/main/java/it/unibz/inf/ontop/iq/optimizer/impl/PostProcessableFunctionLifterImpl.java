@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -13,9 +14,12 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -23,6 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,13 +37,16 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
     protected final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final UniqueTermTypeExtractor typeExtractor;
 
     @Inject
     protected PostProcessableFunctionLifterImpl(IntermediateQueryFactory iqFactory,
-                                                SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                                SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                                UniqueTermTypeExtractor typeExtractor) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
+        this.typeExtractor = typeExtractor;
     }
 
     @Override
@@ -51,7 +59,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
      * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
      */
     protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(iqFactory, variableGenerator, substitutionFactory, termFactory);
+        return new FunctionLifterTransformer(iqFactory, variableGenerator, substitutionFactory, termFactory, typeExtractor);
     }
 
 
@@ -61,13 +69,16 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final VariableGenerator variableGenerator;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
+        private final UniqueTermTypeExtractor typeExtractor;
 
         protected FunctionLifterTransformer(IntermediateQueryFactory iqFactory, VariableGenerator variableGenerator,
-                                            SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                                            SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                                            UniqueTermTypeExtractor typeExtractor) {
             super(iqFactory);
             this.variableGenerator = variableGenerator;
             this.substitutionFactory = substitutionFactory;
             this.termFactory = termFactory;
+            this.typeExtractor = typeExtractor;
         }
 
         @Override
@@ -99,7 +110,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             }
 
             return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
-                        iqFactory, substitutionFactory, termFactory))
+                        iqFactory, substitutionFactory, termFactory, typeExtractor))
                     .generateTree(iqFactory)
                     .normalizeForOptimization(variableGenerator);
         }
@@ -171,19 +182,22 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         private final IntermediateQueryFactory iqFactory;
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
+        private final UniqueTermTypeExtractor typeExtractor;
 
         /**
          * Initial constructor
          */
         public LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
                          VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory,
-                         SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                         SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                         UniqueTermTypeExtractor typeExtractor) {
             this.children = children;
             this.unionVariables = unionVariables;
             this.variableGenerator = variableGenerator;
             this.iqFactory = iqFactory;
             this.substitutionFactory = substitutionFactory;
             this.termFactory = termFactory;
+            this.typeExtractor = typeExtractor;
             this.ancestors = ImmutableList.of();
             this.childIdVariable = null;
         }
@@ -191,7 +205,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected LiftState(ImmutableList<IQTree> children, ImmutableSet<Variable> unionVariables,
                             ImmutableList<ConstructionNode> ancestors, Variable childIdVariable,
                             VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory,
-                            SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+                            SubstitutionFactory substitutionFactory, TermFactory termFactory,
+                            UniqueTermTypeExtractor typeExtractor) {
             this.children = children;
             this.unionVariables = unionVariables;
             this.ancestors = ancestors;
@@ -200,6 +215,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             this.iqFactory = iqFactory;
             this.substitutionFactory = substitutionFactory;
             this.termFactory = termFactory;
+            this.typeExtractor = typeExtractor;
         }
 
         public IQTree generateTree(IntermediateQueryFactory iqFactory) {
@@ -242,8 +258,13 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .filter(v -> !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
+            ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap = newUnionVariables.stream()
+                    .collect(ImmutableCollectors.toMap(
+                            v -> v,
+                            v -> extractType(v, childDefinitionLifts)));
+
             ImmutableList<IQTree> newChildren = childDefinitionLifts.stream()
-                    .map(l -> padChild(l.getPartiallyPaddedChild(), newUnionVariables))
+                    .map(l -> padChild(l.getPartiallyPaddedChild(), newVarTypeMap))
                     .map(t -> t.normalizeForOptimization(variableGenerator))
                     .collect(ImmutableCollectors.toList());
 
@@ -256,7 +277,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .collect(ImmutableCollectors.toList());
 
             return new LiftState(newChildren, newUnionVariables, newAncestors, idVariable, variableGenerator, iqFactory,
-                    substitutionFactory, termFactory);
+                    substitutionFactory, termFactory, typeExtractor);
         }
 
         protected ChildDefinitionLift liftDefinition(IQTree childTree, int position, Variable variable,
@@ -327,21 +348,32 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     childDefinitionLifts.get(childDefinitionLifts.size() - 1).getLiftedDefinition());
         }
 
-        protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableSet<Variable> unionVariables) {
+        protected Optional<DBTermType> extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
+            return childDefinitionLifts.stream()
+                    .map(ChildDefinitionLift::getPartiallyPaddedChild)
+                    .filter(c -> c.getVariables().contains(variable))
+                    .findAny()
+                    .flatMap(t -> typeExtractor.extractUniqueTermType(variable, t))
+                    .filter(t -> t instanceof DBTermType)
+                    .map(t -> (DBTermType) t);
+        }
+
+        protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
             ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
-            Constant nullConstant = termFactory.getNullConstant();
 
             ImmutableSubstitution<ImmutableTerm> paddingSubstitution = substitutionFactory.getSubstitution(
-                    unionVariables.stream()
-                            .filter(v -> !childVariables.contains(v))
+                    newVarTypeMap.entrySet().stream()
+                            .filter(v -> !childVariables.contains(v.getKey()))
                             .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    v -> (ImmutableTerm) nullConstant)));
+                                    Map.Entry::getKey,
+                                    e -> e.getValue()
+                                            .map(t -> termFactory.getTypedNull(t).simplify())
+                                            .orElseGet(termFactory::getNullConstant))));
 
             return paddingSubstitution.isEmpty()
                     ? partiallyPaddedChild
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(unionVariables, paddingSubstitution),
+                            iqFactory.createConstructionNode(newVarTypeMap.keySet(), paddingSubstitution),
                             partiallyPaddedChild);
         }
     }

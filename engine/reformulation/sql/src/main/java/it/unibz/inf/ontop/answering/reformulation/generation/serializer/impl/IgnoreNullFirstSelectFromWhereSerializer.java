@@ -16,15 +16,19 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.stream.Collectors;
 
+/**
+ * Useful for instead for SQL Server which already treats NULLs as the lowest values
+ * Therefore it follows the semantics of  (ASC + NULLS FIRST) and (DESC + NULLS LAST)
+ */
 @Singleton
-public class SQLServerSelectFromWhereSerializer implements SelectFromWhereSerializer {
+public class IgnoreNullFirstSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     private final SQLTermSerializer sqlTermSerializer;
     private final SQLDialectAdapter dialectAdapter;
 
     @Inject
-    private SQLServerSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                               SQLDialectAdapter dialectAdapter) {
+    private IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
+                                                     SQLDialectAdapter dialectAdapter) {
         this.sqlTermSerializer = sqlTermSerializer;
         this.dialectAdapter = dialectAdapter;
     }
@@ -43,10 +47,6 @@ public class SQLServerSelectFromWhereSerializer implements SelectFromWhereSerial
             super(sqlTermSerializer, dialectAdapter, idFactory);
         }
 
-        /**
-         * SQL Server already treats NULLs as the lowest values
-         * Therefore it follows the semantics of  (ASC + NULLS FIRST) and (DESC + NULLS LAST)
-         */
         @Override
         protected String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,
                                           ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {

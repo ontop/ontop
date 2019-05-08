@@ -24,7 +24,8 @@ public class ViewGenerationParserTest extends AbstractVirtualModeTest {
     public void testComplexFunction2() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Customer}";
-        countResults(query, 93);
+        // NB: Two entries are not having the required "Address" value
+        countResults(query, 91);
     }
 
     @Test
