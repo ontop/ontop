@@ -90,6 +90,19 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
+    /**
+     * TODO: re-ajust the DB entries (34 instead of 33.5, 23 instead of 22.5)
+     */
+    @Override
+    protected List<String> getDivideExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"21.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"11.5000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"17.0000000000000000\"^^xsd:decimal");
+        expectedValues.add("\"5.0000000000000000\"^^xsd:decimal");
+        return expectedValues;
+    }
+
     @Override
     protected List<String> getRoundExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
