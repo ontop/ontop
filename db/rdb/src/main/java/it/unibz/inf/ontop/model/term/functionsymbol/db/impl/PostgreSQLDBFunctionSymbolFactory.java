@@ -60,13 +60,13 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
         builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
 
-        //TIMESTAMPTZ
-        DBTermType timeStampTz = dbTypeFactory.getDBTermType(TIMESTAMPTZ_STR);
+        //TIMESTAMP
+        DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStampTz);
-        builder.put(timeStampTz, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(timeStampTz, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
+        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
 
         //TIMETZ
         DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);

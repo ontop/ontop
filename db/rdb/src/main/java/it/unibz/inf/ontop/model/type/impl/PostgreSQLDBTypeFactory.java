@@ -91,6 +91,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static ImmutableMap<DefaultTypeCode, String> createPostgreSQLCodeMap() {
         Map<DefaultTypeCode, String> map = createDefaultSQLCodeMap();
         map.put(DefaultTypeCode.DOUBLE, DOUBLE_PREC_STR);
+        map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMPTZ_STR);
         return ImmutableMap.copyOf(map);
     }
 }
