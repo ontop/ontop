@@ -258,7 +258,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .filter(v -> !v.equals(variable))
                     .collect(ImmutableCollectors.toSet());
 
-            ImmutableMap<Variable, DBTermType> newVarTypeMap = newUnionVariables.stream()
+            ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap = newUnionVariables.stream()
                     .collect(ImmutableCollectors.toMap(
                             v -> v,
                             v -> extractType(v, childDefinitionLifts)));
@@ -348,18 +348,17 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     childDefinitionLifts.get(childDefinitionLifts.size() - 1).getLiftedDefinition());
         }
 
-        protected DBTermType extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
+        protected Optional<DBTermType> extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
             return childDefinitionLifts.stream()
                     .map(ChildDefinitionLift::getPartiallyPaddedChild)
                     .filter(c -> c.getVariables().contains(variable))
                     .findAny()
                     .flatMap(t -> typeExtractor.extractUniqueTermType(variable, t))
                     .filter(t -> t instanceof DBTermType)
-                    .map(t -> (DBTermType) t)
-                    .orElseThrow(() -> new MinorOntopInternalBugException("No DB term type inferred for " + variable));
+                    .map(t -> (DBTermType) t);
         }
 
-        protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, DBTermType> newVarTypeMap) {
+        protected IQTree padChild(IQTree partiallyPaddedChild, ImmutableMap<Variable, Optional<DBTermType>> newVarTypeMap) {
             ImmutableSet<Variable> childVariables = partiallyPaddedChild.getVariables();
 
             ImmutableSubstitution<ImmutableTerm> paddingSubstitution = substitutionFactory.getSubstitution(
@@ -367,7 +366,9 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                             .filter(v -> !childVariables.contains(v.getKey()))
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
-                                    e -> termFactory.getTypedNull(e.getValue()).simplify())));
+                                    e -> e.getValue()
+                                            .map(t -> termFactory.getTypedNull(t).simplify())
+                                            .orElseGet(termFactory::getNullConstant))));
 
             return paddingSubstitution.isEmpty()
                     ? partiallyPaddedChild
