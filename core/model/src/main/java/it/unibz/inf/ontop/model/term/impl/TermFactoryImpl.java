@@ -691,7 +691,12 @@ public class TermFactoryImpl implements TermFactory {
 		return valueNull;
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getTypedNull(DBTermType termType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getTypedNullFunctionSymbol(termType));
+    }
+
+    @Override
 	public DBConstant getDBIntegerConstant(int value) {
 		return getDBConstant(String.format("%d", value), typeFactory.getDBTypeFactory().getDBLargeIntegerType());
 	}

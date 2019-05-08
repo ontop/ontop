@@ -80,6 +80,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return builder.build();
     }
 
+    /**
+     * Requires sometimes to type NULLs
+     */
+    @Override
+    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
+        return new NonSimplifiableTypedNullFunctionSymbol(termType);
+    }
+
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return createDBConcatOperator(arity);
