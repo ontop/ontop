@@ -19,7 +19,9 @@ import java.util.function.Function;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.BOOL_STR;
+import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMESTAMPTZ_STR;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMETZ_STR;
 
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
@@ -57,6 +59,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         // BOOL
         DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
         builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
+
+        //TIMESTAMPTZ
+        DBTermType timeStampTz = dbTypeFactory.getDBTermType(TIMESTAMPTZ_STR);
+        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStampTz);
+        builder.put(timeStampTz, xsdDatetime, datetimeNormFunctionSymbol);
+        builder.put(timeStampTz, xsdDatetimeStamp, datetimeNormFunctionSymbol);
 
         //TIMETZ
         DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
