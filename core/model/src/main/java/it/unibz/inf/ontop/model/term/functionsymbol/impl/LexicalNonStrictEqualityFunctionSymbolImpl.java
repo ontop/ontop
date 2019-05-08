@@ -15,8 +15,9 @@ public class LexicalNonStrictEqualityFunctionSymbolImpl extends AbstractLexicalN
 
     protected LexicalNonStrictEqualityFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, RDFDatatype xsdBooleanType,
                                                          RDFDatatype xsdDateTimeType, RDFDatatype xsdStringType, DBTermType dbStringType,
-                                                         DBTermType dbBooleanType) {
-        super("LEX_NON_STRICT_EQ", metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType, dbBooleanType);
+                                                         DBTermType dbBooleanType, RDFDatatype xsdDateTimeStampType) {
+        super("LEX_NON_STRICT_EQ", metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType,
+                dbBooleanType, xsdDateTimeStampType);
     }
 
     @Override

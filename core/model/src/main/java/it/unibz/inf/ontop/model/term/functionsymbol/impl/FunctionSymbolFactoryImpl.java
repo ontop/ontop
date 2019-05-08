@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.Map;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 dbBooleanType, dbStringType);
         this.lexicalNonStrictEqualityFunctionSymbol = new LexicalNonStrictEqualityFunctionSymbolImpl(metaRDFType,
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
-                dbStringType, dbBooleanType);
+                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP));
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
@@ -213,7 +214,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     protected BooleanFunctionSymbol createLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel) {
         return new LexicalInequalityFunctionSymbolImpl(inequalityLabel, metaRDFType,
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
-                dbStringType, dbBooleanType);
+                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP));
     }
 
 
