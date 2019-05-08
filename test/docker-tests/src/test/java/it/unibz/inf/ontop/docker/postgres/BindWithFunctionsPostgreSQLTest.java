@@ -138,10 +138,10 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Override
     protected List<String> getTZExpectedValues() {
     List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
-        expectedValues.add("\"2:0\"^^xsd:string");
-        expectedValues.add("\"1:0\"^^xsd:string");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
+        expectedValues.add("\"02:00\"^^xsd:string");
+        expectedValues.add("\"01:00\"^^xsd:string");
         return expectedValues;
     }
 

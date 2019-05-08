@@ -184,13 +184,10 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return String.format("encode(digest(%s, 'sha512'), 'hex')", termConverter.apply(terms.get(0)));
     }
 
-    /**
-     * TODO: force the use of two digits for the hour and for the minute
-     */
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
-        return String.format("(EXTRACT(TIMEZONE_HOUR FROM %s) || ':' || EXTRACT(TIMEZONE_MINUTE FROM %s))", str, str);
+        return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
     }
 
     @Override
