@@ -29,6 +29,8 @@ public class LevelUpOptimizerTest {
     private static final DBMetadata DB_METADATA;
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
+    private static final RelationPredicate TABLE3_PREDICATE;
+    private static final RelationPredicate TABLE4_PREDICATE;
     private static final RelationPredicate NESTED_VIEW1;
     private static final RelationPredicate NESTED_VIEW2;
     private static final RelationPredicate NESTED_VIEW3;
@@ -69,6 +71,7 @@ public class LevelUpOptimizerTest {
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
+        // has nestedView1 as child, and no parent
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table1"));
         Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
         table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
@@ -76,11 +79,29 @@ public class LevelUpOptimizerTest {
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
+        // has no child and no parent
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table2"));
         Attribute col1T2 = table2Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
+
+        // has nestedView3 as child, and no parent
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
+        Attribute col1T3 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
+        TABLE3_PREDICATE = table3Def.getAtomPredicate();
+
+
+        // has nestedView4 and  nestedView5 as children, and no parent
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table4"));
+        Attribute col1T4 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table1Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
+        TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         // has table1 as parent, and nestedView2 as child
         NestedView nestedView1 = dbMetadata.createNestedView(
@@ -108,7 +129,7 @@ public class LevelUpOptimizerTest {
         nestedView2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N2));
         NESTED_VIEW2 = nestedView2.getAtomPredicate();
 
-        // has table1 as parent, and no child
+        // has table3 as parent, and no child
         NestedView nestedView3 = dbMetadata.createNestedView(
                 idFactory.createRelationID(null, "nestedView3"),
                 table1Def,
