@@ -72,7 +72,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 dbBooleanType, dbStringType);
         this.lexicalNonStrictEqualityFunctionSymbol = new LexicalNonStrictEqualityFunctionSymbolImpl(metaRDFType,
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
-                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP));
+                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP), typeFactory.getDatatype(XSD.DATE));
         this.langTypeFunctionSymbol = new LangTagFunctionSymbolImpl(metaRDFType, dbStringType);
         this.rdfDatatypeFunctionSymbol = new RDFDatatypeStringFunctionSymbolImpl(metaRDFType, dbStringType);
         this.lexicalLangMatchesFunctionSymbol = new LexicalLangMatchesFunctionSymbolImpl(dbStringType, dbBooleanType);
@@ -214,7 +214,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     protected BooleanFunctionSymbol createLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel) {
         return new LexicalInequalityFunctionSymbolImpl(inequalityLabel, metaRDFType,
                 typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype(), typeFactory.getXsdStringDatatype(),
-                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP));
+                dbStringType, dbBooleanType, typeFactory.getDatatype(XSD.DATETIMESTAMP), typeFactory.getDatatype(XSD.DATE));
     }
 
 

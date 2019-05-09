@@ -15,9 +15,10 @@ public class LexicalNonStrictEqualityFunctionSymbolImpl extends AbstractLexicalN
 
     protected LexicalNonStrictEqualityFunctionSymbolImpl(MetaRDFTermType metaRDFTermType, RDFDatatype xsdBooleanType,
                                                          RDFDatatype xsdDateTimeType, RDFDatatype xsdStringType, DBTermType dbStringType,
-                                                         DBTermType dbBooleanType, RDFDatatype xsdDateTimeStampType) {
+                                                         DBTermType dbBooleanType, RDFDatatype xsdDateTimeStampType,
+                                                         RDFDatatype xsdDate) {
         super("LEX_NON_STRICT_EQ", metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType,
-                dbBooleanType, xsdDateTimeStampType);
+                dbBooleanType, xsdDateTimeStampType, xsdDate);
     }
 
     @Override
@@ -47,6 +48,13 @@ public class LexicalNonStrictEqualityFunctionSymbolImpl extends AbstractLexicalN
                                                                 TermFactory termFactory,
                                                                 VariableNullability variableNullability) {
         return termFactory.getDBNonStrictDatetimeEquality(dbTerm1, dbTerm2)
+                .simplify(variableNullability);
+    }
+
+    @Override
+    protected ImmutableTerm computeDateEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                            TermFactory termFactory, VariableNullability variableNullability) {
+        return termFactory.getDBNonStrictDateEquality(dbTerm1, dbTerm2)
                 .simplify(variableNullability);
     }
 

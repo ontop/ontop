@@ -16,8 +16,10 @@ public class LexicalInequalityFunctionSymbolImpl extends AbstractLexicalNonStric
     protected LexicalInequalityFunctionSymbolImpl(InequalityLabel inequalityLabel, MetaRDFTermType metaRDFTermType, RDFDatatype xsdBooleanType,
                                                   RDFDatatype xsdDateTimeType, RDFDatatype xsdStringType, DBTermType dbStringType,
                                                   DBTermType dbBooleanType,
-                                                  RDFDatatype xsdDateTimeStampType) {
-        super("LEX_" + inequalityLabel, metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType, dbStringType, dbBooleanType, xsdDateTimeStampType);
+                                                  RDFDatatype xsdDateTimeStampType,
+                                                  RDFDatatype xsdDate) {
+        super("LEX_" + inequalityLabel, metaRDFTermType, xsdBooleanType, xsdDateTimeType, xsdStringType,
+                dbStringType, dbBooleanType, xsdDateTimeStampType, xsdDate);
         this.inequalityLabel = inequalityLabel;
     }
 
@@ -47,6 +49,13 @@ public class LexicalInequalityFunctionSymbolImpl extends AbstractLexicalNonStric
     protected ImmutableTerm computeDatetimeEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
                                                                 TermFactory termFactory, VariableNullability variableNullability) {
         return termFactory.getDBDatetimeInequality(inequalityLabel, dbTerm1, dbTerm2)
+                .simplify(variableNullability);
+    }
+
+    @Override
+    protected ImmutableTerm computeDateEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                            TermFactory termFactory, VariableNullability variableNullability) {
+        return termFactory.getDBDateInequality(inequalityLabel, dbTerm1, dbTerm2)
                 .simplify(variableNullability);
     }
 
