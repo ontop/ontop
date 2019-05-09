@@ -14,12 +14,13 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     private final RDFDatatype xsdDateTimeType;
     private final RDFDatatype xsdStringType;
     private final RDFDatatype xsdDateTimeStampType;
+    private final RDFDatatype xsdDate;
 
     protected AbstractLexicalNonStrictEqOrInequalityFunctionSymbol(String functionSymbolName, MetaRDFTermType metaRDFTermType,
                                                                    RDFDatatype xsdBooleanType, RDFDatatype xsdDateTimeType,
                                                                    RDFDatatype xsdStringType,
                                                                    DBTermType dbStringType, DBTermType dbBooleanType,
-                                                                   RDFDatatype xsdDateTimeStampType) {
+                                                                   RDFDatatype xsdDateTimeStampType, RDFDatatype xsdDate) {
         super(functionSymbolName,
                 ImmutableList.of(dbStringType, metaRDFTermType, dbStringType, metaRDFTermType),
                 dbBooleanType);
@@ -27,6 +28,7 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
         this.xsdDateTimeType = xsdDateTimeType;
         this.xsdStringType = xsdStringType;
         this.xsdDateTimeStampType = xsdDateTimeStampType;
+        this.xsdDate = xsdDate;
     }
 
     @Override
@@ -81,6 +83,8 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                     return computeStringEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
                 else if (termType1.equals(xsdDateTimeType) || termType1.equals(xsdDateTimeStampType))
                     return computeDatetimeEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+                else if (termType1.equals(xsdDate))
+                    return computeDateEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
                 else
                     return computeDefaultSameTypeEqualityOrInequality(termType1, dbTerm1, dbTerm2, termFactory,
                             variableNullability);
@@ -112,12 +116,15 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
     }
 
     protected abstract ImmutableTerm computeNumericEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
-                                                                        TermFactory termFactory, VariableNullability variableNullability);
+                                                                        TermFactory termFactory,
+                                                                        VariableNullability variableNullability);
 
     protected abstract ImmutableTerm computeBooleanEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
-                                                                        TermFactory termFactory, VariableNullability variableNullability);
+                                                                        TermFactory termFactory,
+                                                                        VariableNullability variableNullability);
 
-    protected abstract ImmutableTerm computeStringEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2, TermFactory termFactory,
+    protected abstract ImmutableTerm computeStringEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                                       TermFactory termFactory,
                                                                        VariableNullability variableNullability);
 
     protected abstract ImmutableTerm computeDatetimeEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
@@ -130,4 +137,8 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
 
     protected abstract ImmutableTerm computeDefaultDifferentTypeEqualityOrInequality(RDFTermType termType1, RDFTermType termType2,
                                                                                      TermFactory termFactory);
+
+    protected abstract ImmutableTerm computeDateEqualityOrInequality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
+                                                                     TermFactory termFactory,
+                                                                     VariableNullability variableNullability);
 }

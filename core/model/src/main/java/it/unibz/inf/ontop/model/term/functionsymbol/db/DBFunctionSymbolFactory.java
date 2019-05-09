@@ -149,12 +149,14 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getDBNonStrictNumericEquality();
     DBBooleanFunctionSymbol getDBNonStrictStringEquality();
     DBBooleanFunctionSymbol getDBNonStrictDatetimeEquality();
+    DBBooleanFunctionSymbol getDBNonStrictDateEquality();
     DBBooleanFunctionSymbol getDBNonStrictDefaultEquality();
 
     DBBooleanFunctionSymbol getDBNumericInequality(InequalityLabel inequalityLabel);
     DBBooleanFunctionSymbol getDBBooleanInequality(InequalityLabel inequalityLabel);
     DBBooleanFunctionSymbol getDBStringInequality(InequalityLabel inequalityLabel);
     DBBooleanFunctionSymbol getDBDatetimeInequality(InequalityLabel inequalityLabel);
+    DBBooleanFunctionSymbol getDBDateInequality(InequalityLabel inequalityLabel);
     DBBooleanFunctionSymbol getDBDefaultInequality(InequalityLabel inequalityLabel);
 
     DBBooleanFunctionSymbol getDBStartsWith();

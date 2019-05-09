@@ -617,7 +617,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDatetimeEquality(), dbDatetimeTerm1, dbDatetimeTerm2);
 	}
 
-    @Override
+	@Override
+	public ImmutableExpression getDBNonStrictDateEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDateEquality(), dbTerm1, dbTerm2);
+	}
+
+	@Override
 	public ImmutableExpression getDBNonStrictDefaultEquality(ImmutableTerm term1, ImmutableTerm term2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBNonStrictDefaultEquality(), term1, term2);
 	}
@@ -647,6 +652,13 @@ public class TermFactoryImpl implements TermFactory {
 													   ImmutableTerm dbDatetimeTerm2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBDatetimeInequality(inequalityLabel),
 				dbDatetimeTerm1, dbDatetimeTerm2);
+	}
+
+	@Override
+	public ImmutableExpression getDBDateInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDateTerm1,
+												   ImmutableTerm dbDateTerm2) {
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBDateInequality(inequalityLabel),
+				dbDateTerm1, dbDateTerm2);
 	}
 
 	@Override

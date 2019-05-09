@@ -176,6 +176,9 @@ public interface TermFactory {
 	ImmutableExpression getDBNonStrictNumericEquality(ImmutableTerm dbNumericTerm1, ImmutableTerm dbNumericTerm2);
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
+	ImmutableExpression getDBNonStrictDateEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
+
+
 
 	/**
 	 * Cannot be simplified --> has to be evaluated by the DB engine
@@ -192,6 +195,9 @@ public interface TermFactory {
 											  ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBDatetimeInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDatetimeTerm1,
 												ImmutableTerm dbDatetimeTerm2);
+	ImmutableExpression getDBDateInequality(InequalityLabel inequalityLabel, ImmutableTerm dbDateTerm1,
+											ImmutableTerm dbDateTerm2);
+
 	ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
 											   ImmutableTerm dbTerm2);
 

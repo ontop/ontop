@@ -83,6 +83,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBBooleanFunctionSymbol nonStrictDatetimeEqOperator;
     // Created in init()
+    private DBBooleanFunctionSymbol nonStrictDateEqOperator;
+    // Created in init()
     private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
     // Created in init()
     private DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
@@ -157,6 +159,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> booleanInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> stringInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> datetimeInequalityMap;
+    private final Map<InequalityLabel, DBBooleanFunctionSymbol> dateInequalityMap;
     private final Map<InequalityLabel, DBBooleanFunctionSymbol> defaultInequalityMap;
 
     private final Map<DBTermType, DBFunctionSymbol> absMap;
@@ -226,6 +229,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.booleanInequalityMap = new ConcurrentHashMap<>();
         this.stringInequalityMap = new ConcurrentHashMap<>();
         this.datetimeInequalityMap = new ConcurrentHashMap<>();
+        this.dateInequalityMap = new ConcurrentHashMap<>();
         this.defaultInequalityMap = new ConcurrentHashMap<>();
 
         this.absMap = new ConcurrentHashMap<>();
@@ -255,6 +259,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         nonStrictNumericEqOperator = createNonStrictNumericEquality();
         nonStrictStringEqOperator = createNonStrictStringEquality();
         nonStrictDatetimeEqOperator = createNonStrictDatetimeEquality();
+        nonStrictDateEqOperator = createNonStrictDateEquality();
         nonStrictDefaultEqOperator = createNonStrictDefaultEquality();
         r2rmlIRISafeEncodeFunctionSymbol = createR2RMLIRISafeEncode();
         strAfterFunctionSymbol = createStrAfterFunctionSymbol();
@@ -498,6 +503,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBBooleanFunctionSymbol getDBNonStrictDateEquality() {
+        return nonStrictDateEqOperator;
+    }
+
+    @Override
     public DBBooleanFunctionSymbol getDBNonStrictDefaultEquality() {
         return nonStrictDefaultEqOperator;
     }
@@ -524,6 +534,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     public DBBooleanFunctionSymbol getDBDatetimeInequality(InequalityLabel inequalityLabel) {
         return datetimeInequalityMap
                 .computeIfAbsent(inequalityLabel, this::createDatetimeInequality);
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBDateInequality(InequalityLabel inequalityLabel) {
+        return dateInequalityMap
+                .computeIfAbsent(inequalityLabel, this::createDateInequality);
     }
 
     @Override
@@ -852,12 +868,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBBooleanFunctionSymbol createNonStrictNumericEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictStringEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictDatetimeEquality();
+    protected abstract DBBooleanFunctionSymbol createNonStrictDateEquality();
     protected abstract DBBooleanFunctionSymbol createNonStrictDefaultEquality();
 
     protected abstract DBBooleanFunctionSymbol createNumericInequality(InequalityLabel inequalityLabel);
     protected abstract DBBooleanFunctionSymbol createBooleanInequality(InequalityLabel inequalityLabel);
     protected abstract DBBooleanFunctionSymbol createStringInequality(InequalityLabel inequalityLabel);
     protected abstract DBBooleanFunctionSymbol createDatetimeInequality(InequalityLabel inequalityLabel);
+    protected abstract DBBooleanFunctionSymbol createDateInequality(InequalityLabel inequalityLabel);
     protected abstract DBBooleanFunctionSymbol createDefaultInequality(InequalityLabel inequalityLabel);
 
     /**

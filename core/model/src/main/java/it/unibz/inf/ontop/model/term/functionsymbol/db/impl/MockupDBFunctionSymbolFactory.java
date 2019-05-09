@@ -401,6 +401,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createNonStrictDateEquality() {
+        return new DefaultDBNonStrictDateEqOperator(abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
     protected DBBooleanFunctionSymbol createNonStrictDefaultEquality() {
         return new DefaultDBNonStrictDefaultEqOperator(abstractRootDBType, dbBooleanType);
     }
@@ -423,6 +428,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBBooleanFunctionSymbol createDatetimeInequality(InequalityLabel inequalityLabel) {
         return new DefaultDBDatetimeInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDateInequality(InequalityLabel inequalityLabel) {
+        return new DefaultDBDateInequalityOperator(inequalityLabel, abstractRootDBType, dbBooleanType);
     }
 
     @Override
