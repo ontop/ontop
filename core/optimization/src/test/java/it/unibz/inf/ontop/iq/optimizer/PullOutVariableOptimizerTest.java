@@ -481,11 +481,11 @@ public class PullOutVariableOptimizerTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, C, X));
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, C, X));
         queryBuilder.addChild(rootNode, topFlattenNode);
 
         StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, B, X));
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, B, X));
         queryBuilder.addChild(topFlattenNode, subFlattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -505,7 +505,7 @@ public class PullOutVariableOptimizerTest {
         StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(
                 A,
                 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, C, X0)
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, C, X0)
         );
         expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
 
@@ -531,11 +531,11 @@ public class PullOutVariableOptimizerTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode topFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, X, X));
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X));
         queryBuilder.addChild(rootNode, topFlattenNode);
 
         StrictFlattenNode subFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, B, X));
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, B, X));
         queryBuilder.addChild(topFlattenNode, subFlattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -553,7 +553,7 @@ public class PullOutVariableOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, filterNode);
 
         StrictFlattenNode newTopFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getDataAtom(NESTED_REL_PRED_AR2, X0, X1));
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR2, X0, X1));
         expectedQueryBuilder.addChild(filterNode, newTopFlattenNode);
 
         expectedQueryBuilder.addChild(newTopFlattenNode, subFlattenNode);
@@ -579,7 +579,7 @@ public class PullOutVariableOptimizerTest {
         queryBuilder.init(projectionAtom, rootNode);
 
         StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, X, X));
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X));
         queryBuilder.addChild(rootNode, flattenNode);
 
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(
@@ -596,7 +596,7 @@ public class PullOutVariableOptimizerTest {
         expectedQueryBuilder.addChild(rootNode, filterNode);
 
         StrictFlattenNode newFlattenNode = IQ_FACTORY.createStrictFlattenNode(A, 0,
-                ATOM_FACTORY.getFlattenNodeDataAtom(NESTED_REL_PRED_AR2, X, X0));
+                ATOM_FACTORY.getFlattenNodeDataAtom(FLATTEN_NODE_PRED_AR2, X, X0));
         expectedQueryBuilder.addChild(filterNode, newFlattenNode);
 
         expectedQueryBuilder.addChild(newFlattenNode, dataNode);

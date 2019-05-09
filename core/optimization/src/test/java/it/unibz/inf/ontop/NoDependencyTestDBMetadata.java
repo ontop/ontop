@@ -35,10 +35,10 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationPredicate TABLE1_AR4;
 
-    public static final FlattenNodePredicate NESTED_REL_PRED_AR1;
-    public static final FlattenNodePredicate NESTED_REL_PRED_AR2;
-    public static final FlattenNodePredicate NESTED_REL_PRED_AR3;
-    public static final FlattenNodePredicate NESTED_REL_PRED_AR4;
+    public static final FlattenNodePredicate FLATTEN_NODE_PRED_AR1;
+    public static final FlattenNodePredicate FLATTEN_NODE_PRED_AR2;
+    public static final FlattenNodePredicate FLATTEN_NODE_PRED_AR3;
+    public static final FlattenNodePredicate FLATTEN_NODE_PRED_AR4;
 
     public static final BasicDBMetadata DB_METADATA;
 
@@ -57,7 +57,7 @@ public class NoDependencyTestDBMetadata {
                 idFactory.createRelationID(
                         null,
                         String.format(
-                                "nestedRel_arity_%s",
+                                "flatten_node_pred_arity_%s",
                                 arity
                         )),
                 createAttributeIds(idFactory, arity),
@@ -102,10 +102,10 @@ public class NoDependencyTestDBMetadata {
 
         TABLE1_AR4 = createRelationPredicate(dbMetadata, idFactory, 1, 4);
 
-        NESTED_REL_PRED_AR1 = createFlattenNodePredicate(dbMetadata, idFactory, 1);
-        NESTED_REL_PRED_AR2 = createFlattenNodePredicate(dbMetadata, idFactory, 2);
-        NESTED_REL_PRED_AR3 = createFlattenNodePredicate(dbMetadata, idFactory, 3);
-        NESTED_REL_PRED_AR4 = createFlattenNodePredicate(dbMetadata, idFactory, 4);
+        FLATTEN_NODE_PRED_AR1 = createFlattenNodePredicate(dbMetadata, idFactory, 1);
+        FLATTEN_NODE_PRED_AR2 = createFlattenNodePredicate(dbMetadata, idFactory, 2);
+        FLATTEN_NODE_PRED_AR3 = createFlattenNodePredicate(dbMetadata, idFactory, 3);
+        FLATTEN_NODE_PRED_AR4 = createFlattenNodePredicate(dbMetadata, idFactory, 4);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;

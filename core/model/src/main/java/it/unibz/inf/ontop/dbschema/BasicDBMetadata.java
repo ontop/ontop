@@ -94,13 +94,11 @@ public class BasicDBMetadata implements DBMetadata {
 
     public NestedView createNestedView(RelationID id, DatabaseRelationDefinition parentRelation,
                                        FlattenNodeRelationDefinition nestedRelation,
-                                       Integer indexInParentRelation,
-                                       ImmutableBiMap<Integer, Integer> view2ParentRelationIndexMap) {
+                                       Integer indexInParentRelation){
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        NestedView relation = new NestedView(id, typeMapper, parentRelation, nestedRelation, indexInParentRelation,
-                view2ParentRelationIndexMap);
+        NestedView relation = new NestedView(id, typeMapper, parentRelation, nestedRelation, indexInParentRelation);
         add(relation, tables);
         add(relation, relations);
         return relation;

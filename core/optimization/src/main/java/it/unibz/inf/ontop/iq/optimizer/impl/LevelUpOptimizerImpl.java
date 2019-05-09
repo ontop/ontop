@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
@@ -25,6 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -46,16 +46,18 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
     public IQ optimize(IQ query) {
         // Select the relation to expand
         Optional<DatabaseRelationDefinition> dR = selectLeafRelation(query.getTree());
-        return dR.isPresent() ?
-                iqFactory.createIQ(
-                        query.getProjectionAtom(),
-                        query.getTree().acceptTransformer(
-                                new TreeTransformer(
-                                        iqFactory,
-                                        dR.get(),
-                                        query.getVariableGenerator()
-                                ))) :
-                query;
+        if (dR.isPresent()){
+            return optimize(
+                    iqFactory.createIQ(
+                            query.getProjectionAtom(),
+                            query.getTree().acceptTransformer(
+                                    new TreeTransformer(
+                                            iqFactory,
+                                            dR.get(),
+                                            query.getVariableGenerator()
+                                    ))));
+        }
+        return query;
     }
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -64,7 +66,7 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
         private final DatabaseRelationDefinition dR;
         private final VariableGenerator variableGenerator;
 
-        protected TreeTransformer(IntermediateQueryFactory iqFactory, DatabaseRelationDefinition dR, VariableGenerator variableGenerator) {
+        TreeTransformer(IntermediateQueryFactory iqFactory, DatabaseRelationDefinition dR, VariableGenerator variableGenerator) {
             super(iqFactory);
             this.dR = dR;
             this.variableGenerator = variableGenerator;
@@ -87,17 +89,15 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
             RelationDefinition rDef = dataAtom.getPredicate().getRelationDefinition();
             if (rDef instanceof NestedView) {
                 NestedView nv = (NestedView) rDef;
-                ImmutableList<? extends VariableOrGroundTerm> args = dataAtom.getArguments();
-                ImmutableBiMap<Integer, Integer> map = nv.getView2ParentRelationIndexMap();
-                VariableOrGroundTerm[] parentArguments = new VariableOrGroundTerm[map.size() + 1];
-                parentArguments[nv.getIndexInParentRelation()] = var;
-                map.entrySet().forEach(
-                        e -> parentArguments[e.getValue()] = args.get(e.getKey())
-                );
+                ImmutableList<Variable> vars = IntStream.range(0, nv.getParentRelation().getAttributes().size()).boxed()
+                        .map(i -> i == nv.getIndexInParentRelation()?
+                                var:
+                                variableGenerator.generateNewVariable())
+                        .collect(ImmutableCollectors.toList());
                 return iqFactory.createExtensionalDataNode(
                         atomFactory.getDataAtom(
                                 ((NestedView)rDef).getParentRelation().getAtomPredicate(),
-                                ImmutableList.copyOf(parentArguments)
+                                vars
                 ));
             }
             throw new LevelUpException("The database relation definition is expected to be a nested view");
@@ -122,7 +122,7 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
         ImmutableSet<DatabaseRelationDefinition> rDefs = retrieveAllRelations(Stream.of(), tree)
                 .collect(ImmutableCollectors.toSet());
         return rDefs.stream()
-                .filter(r -> !hasChildIn(r, rDefs))
+                .filter(r -> !hasChildIn(r, rDefs) && r instanceof NestedView)
                 .findFirst();
     }
 
@@ -157,7 +157,7 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
         return rDefs.stream()
                 .filter(r -> r instanceof NestedView)
                 .map(r -> (NestedView)r)
-                .map(n -> n.getParentRelation())
+                .map(NestedView::getParentRelation)
                 .anyMatch(r -> r.equals(rDef));
     }
 
