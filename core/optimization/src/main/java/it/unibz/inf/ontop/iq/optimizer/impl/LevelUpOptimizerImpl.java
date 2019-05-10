@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.NestedView;
@@ -23,7 +24,6 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -44,21 +44,37 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
 
     @Override
     public IQ optimize(IQ query) {
-        // Select the relation to expand
-        Optional<DatabaseRelationDefinition> dR = selectLeafRelation(query.getTree());
-        if (dR.isPresent()){
-            return optimize(
-                    iqFactory.createIQ(
+
+        // Relations partitioned by depth (ordered by decreasing depth):
+        // - relations at depth 0 have no parent relations,
+        // - relations at depth 1 have their parent relation at depth 0,
+        // etc.
+        ImmutableList<ImmutableList<DatabaseRelationDefinition>> relationPartition = partitionRelations(query.getTree());
+
+        // If there are nested relations
+        if(relationPartition.size() > 1) {
+            // Level up all relations with maximal depth
+            UnmodifiableIterator<DatabaseRelationDefinition> it = relationPartition.get(0).iterator();
+            return optimizeRec(it, query);
+        }
+        return query;
+    }
+
+    private IQ optimizeRec(UnmodifiableIterator<DatabaseRelationDefinition> it, IQ query) {
+        if(it.hasNext()){
+            query = iqFactory.createIQ(
                             query.getProjectionAtom(),
                             query.getTree().acceptTransformer(
                                     new TreeTransformer(
                                             iqFactory,
-                                            dR.get(),
+                                            it.next(),
                                             query.getVariableGenerator()
-                                    ))));
+                                    )));
+            return optimizeRec(it, query);
         }
         return query;
     }
+
 
     private class TreeTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
@@ -118,12 +134,31 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
         }
     }
 
-    private Optional<DatabaseRelationDefinition> selectLeafRelation(IQTree tree) {
+    private ImmutableList<ImmutableList<DatabaseRelationDefinition>> partitionRelations(IQTree tree) {
         ImmutableSet<DatabaseRelationDefinition> rDefs = retrieveAllRelations(Stream.of(), tree)
                 .collect(ImmutableCollectors.toSet());
+
+        return partitionRelationsRec(rDefs, getRootRelations(rDefs)).build();
+    }
+
+
+    private ImmutableList<DatabaseRelationDefinition> getRootRelations(ImmutableSet<DatabaseRelationDefinition> rDefs) {
         return rDefs.stream()
-                .filter(r -> !hasChildIn(r, rDefs) && r instanceof NestedView)
-                .findFirst();
+                .filter(r -> !(r instanceof NestedView))
+                .collect(ImmutableCollectors.toList());
+    }
+
+    private ImmutableList.Builder<ImmutableList<DatabaseRelationDefinition>> partitionRelationsRec(ImmutableSet<DatabaseRelationDefinition> rDefs,
+                                                                                  ImmutableList<DatabaseRelationDefinition> parents) {
+        ImmutableList<DatabaseRelationDefinition> children = rDefs.stream()
+                .filter(r -> r instanceof NestedView && parents.contains(((NestedView) r).getParentRelation()))
+                .collect(ImmutableCollectors.toList());
+        ImmutableList.Builder<ImmutableList<DatabaseRelationDefinition>> builder = children.isEmpty()?
+                ImmutableList.builder():
+                partitionRelationsRec(rDefs, children);
+        builder.add(parents);
+        return builder;
+
     }
 
     private Stream<DatabaseRelationDefinition> retrieveAllRelations(Stream<DatabaseRelationDefinition> rDefs, IQTree tree) {
@@ -151,14 +186,6 @@ public class LevelUpOptimizerImpl implements LevelUpOptimizer {
                     getAncestorRelations(((NestedView)rDef).getParentRelation()));
         }
         return Stream.of(rDef);
-    }
-
-    private boolean hasChildIn(DatabaseRelationDefinition rDef, ImmutableSet<DatabaseRelationDefinition> rDefs) {
-        return rDefs.stream()
-                .filter(r -> r instanceof NestedView)
-                .map(r -> (NestedView)r)
-                .map(NestedView::getParentRelation)
-                .anyMatch(r -> r.equals(rDef));
     }
 
     private static class LevelUpException extends OntopInternalBugException {

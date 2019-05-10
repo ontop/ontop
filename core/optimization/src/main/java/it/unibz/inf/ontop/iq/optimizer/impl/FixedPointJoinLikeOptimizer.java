@@ -29,7 +29,7 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
     @Inject
     private FixedPointJoinLikeOptimizer(InnerJoinOptimizer joinOptimizer, LeftJoinOptimizer leftJoinOptimizer,
-                                        IQConverter iqConverter, LevelUpOptimizer levelUpOptimizer, FlattenLifter flattenLifter){
+                                        IQConverter iqConverter){
         this.joinOptimizer = joinOptimizer;
         this.leftJoinOptimizer = leftJoinOptimizer;
         this.iqConverter = iqConverter;

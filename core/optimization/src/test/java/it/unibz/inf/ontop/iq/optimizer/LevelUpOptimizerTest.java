@@ -88,19 +88,19 @@ public class LevelUpOptimizerTest {
 
         // has nestedView3 as child, and no parent
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
-        Attribute col1T3 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
-        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
+        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+        table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
 
         // has nestedView4 and  nestedView5 as children, and no parent
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table4"));
-        Attribute col1T4 = table1Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table1Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table1Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
+        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        table4Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table4Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
+        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         // has table1 as parent, and nestedView2 as child
