@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  *
  * TODO: further explain
  *
+ * See IntermediateQueryFactory for creating a new instance.
+ *
  */
 public interface ConstructionNode extends ExplicitVariableProjectionNode, UnaryOperatorNode {
 

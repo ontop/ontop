@@ -15,6 +15,9 @@ import org.apache.commons.rdf.api.IRI;
 
 /**
  * To be built by Guice (Assisted inject pattern)
+ *
+ * Accessible through Guice (recommended) or through MappingCoreSingletons.
+ *
  */
 public interface SpecificationFactory {
 

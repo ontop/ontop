@@ -5,6 +5,7 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -68,6 +69,8 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
+
+        bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(

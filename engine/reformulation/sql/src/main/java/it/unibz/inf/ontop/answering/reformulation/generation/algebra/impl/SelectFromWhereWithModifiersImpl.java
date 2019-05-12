@@ -15,6 +15,9 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
 
+/**
+ * See SQLAlgebraFactory for creating a new instance.
+ */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModifiers {
 

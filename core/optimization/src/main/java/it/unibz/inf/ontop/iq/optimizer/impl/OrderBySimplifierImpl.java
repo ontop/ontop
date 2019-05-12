@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -28,18 +30,13 @@ import java.util.stream.Stream;
 
 public class OrderBySimplifierImpl implements OrderBySimplifier {
 
+    private final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
-    private final OptimizerFactory optimizerFactory;
-    private final TypeFactory typeFactory;
 
     @Inject
-    protected OrderBySimplifierImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                    OptimizerFactory optimizerFactory, TypeFactory typeFactory) {
+    protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
+        this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.optimizerFactory = optimizerFactory;
-        this.typeFactory = typeFactory;
     }
 
     @Override
@@ -50,26 +47,26 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     }
 
     protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new OrderBySimplifyingTransformer(variableGenerator, iqFactory, termFactory, optimizerFactory, typeFactory);
+        return new OrderBySimplifyingTransformer(variableGenerator, optimizationSingletons);
     }
 
 
     protected static class OrderBySimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final VariableGenerator variableGenerator;
-        private final TermFactory termFactory;
-        private final OptimizerFactory optimizerFactory;
-        private final TypeFactory typeFactory;
-        private final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
+        protected final VariableGenerator variableGenerator;
+        protected final TermFactory termFactory;
+        protected final OptimizerFactory optimizerFactory;
+        protected final TypeFactory typeFactory;
+        protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
         protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator,
-                                                IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                                OptimizerFactory optimizerFactory, TypeFactory typeFactory) {
-            super(iqFactory);
+                                                OptimizationSingletons optimizationSingletons) {
+            super(optimizationSingletons.getCoreSingletons());
             this.variableGenerator = variableGenerator;
-            this.termFactory = termFactory;
-            this.optimizerFactory = optimizerFactory;
-            this.typeFactory = typeFactory;
+            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+            this.termFactory = coreSingletons.getTermFactory();
+            this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
+            this.typeFactory = coreSingletons.getTypeFactory();
             this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
                     typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
 

@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TODO: explain
+ *
+ * See TranslationFactory for creating a new instance.
+ *
  */
 public class LegacySQLGenerator implements NativeQueryGenerator {
 

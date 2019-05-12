@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 /**
  * Already serialized
+ *
+ * See SQLAlgebraFactory for creating a new instance.
  */
 public interface SQLSerializedQuery extends SQLExpression {
 

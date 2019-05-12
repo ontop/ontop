@@ -19,6 +19,8 @@ import java.util.Optional;
  *
  * Immutable
  *
+ * See SpecificationFactory for creating a new instance.
+ *
  */
 public interface Mapping {
 

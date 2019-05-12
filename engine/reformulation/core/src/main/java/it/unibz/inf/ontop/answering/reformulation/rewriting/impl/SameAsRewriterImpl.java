@@ -25,6 +25,8 @@ import java.util.*;
  *
  * TODO: make it work with quads and so on.
  *
+ * See TranslationFactory for creating a new instance.
+ *
  */
 public class SameAsRewriterImpl implements SameAsRewriter{
 

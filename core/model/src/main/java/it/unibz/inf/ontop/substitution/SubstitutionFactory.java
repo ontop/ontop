@@ -10,6 +10,9 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface SubstitutionFactory {
 
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(ImmutableMap<Variable, T> newSubstitutionMap);

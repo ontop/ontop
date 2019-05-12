@@ -11,6 +11,8 @@ import java.util.Optional;
  * Follows a NULLS FIRST semantics (if ascending, NULLS LAST otherwise), similarly to SPARQL
  *
  * See https://www.w3.org/TR/sparql11-query/#modOrderBy
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface OrderByNode extends QueryModifierNode {
 

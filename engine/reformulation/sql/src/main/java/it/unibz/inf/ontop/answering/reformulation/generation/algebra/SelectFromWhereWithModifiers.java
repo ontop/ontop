@@ -12,6 +12,9 @@ import java.util.Optional;
 
 /**
  * TODO: find a better name
+ *
+ * See SQLAlgebraFactory for creating a new instance.
+ *
  */
 public interface SelectFromWhereWithModifiers extends SQLExpression {
 

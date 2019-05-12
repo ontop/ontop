@@ -8,6 +8,8 @@ package it.unibz.inf.ontop.iq;
  * Immutable
  *
  * TODO: enrich it
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface IQProperties {
 

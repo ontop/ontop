@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 /**
  * TODO: explain
  * TODO: find a better name
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface IntensionalDataNode extends DataNode<AtomPredicate> {
 

@@ -9,6 +9,8 @@ import java.util.UUID;
 
 /**
  * Factory for DBFunctionSymbols
+ *
+ * Accessible through Guice (recommended) or through CoreSingletons.
  */
 public interface DBFunctionSymbolFactory {
 

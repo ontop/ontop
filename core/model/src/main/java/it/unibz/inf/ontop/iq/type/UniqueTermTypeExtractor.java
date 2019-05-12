@@ -14,6 +14,8 @@ import java.util.Optional;
  * Term types of variables are normally unique in SQL queries (due to strong typing enforced by RDBMS)
  * but NOT in SPARQL queries (dynamic typing).
  *
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ *
  */
 public interface UniqueTermTypeExtractor {
 

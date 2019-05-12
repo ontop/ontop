@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import org.apache.commons.rdf.api.IRI;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface AtomFactory {
 
     AtomPredicate getRDFAnswerPredicate(int arity);

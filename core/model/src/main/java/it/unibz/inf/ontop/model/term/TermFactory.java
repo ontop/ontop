@@ -40,6 +40,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface TermFactory {
 
 	/*

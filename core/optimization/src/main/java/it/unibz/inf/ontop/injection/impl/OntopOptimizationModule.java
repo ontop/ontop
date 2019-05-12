@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
+import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
@@ -65,6 +66,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(TermTypeTermLifter.class);
         bindFromSettings(OrderBySimplifier.class);
         bindFromSettings(PostProcessableFunctionLifter.class);
+
+        bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
         Module optimizerModule = buildFactory(ImmutableList.of(
                 ExplicitEqualityTransformer.class,

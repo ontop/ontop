@@ -4,6 +4,9 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface TargetAtomFactory {
 
     TargetAtom getTripleTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object);

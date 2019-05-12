@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableMap;
 
 /**
  * Abstracts the prefix mapping mechanism.
+ *
+ * See SpecificationFactory for creating a new instance.
  */
 public interface PrefixManager {
 
