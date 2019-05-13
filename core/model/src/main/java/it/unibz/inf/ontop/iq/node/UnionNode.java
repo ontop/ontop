@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 
 /**
  * All its children are expected to project its projected variables
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorNode {
 

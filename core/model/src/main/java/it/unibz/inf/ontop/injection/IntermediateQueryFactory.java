@@ -26,6 +26,9 @@ import java.util.Optional;
  * Factory following the Guice AssistedInject pattern.
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
+ *
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ *
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {

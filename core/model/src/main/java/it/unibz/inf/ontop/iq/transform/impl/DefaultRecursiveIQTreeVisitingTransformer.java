@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
@@ -17,6 +18,10 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
 
     protected DefaultRecursiveIQTreeVisitingTransformer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
+    }
+
+    protected DefaultRecursiveIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override

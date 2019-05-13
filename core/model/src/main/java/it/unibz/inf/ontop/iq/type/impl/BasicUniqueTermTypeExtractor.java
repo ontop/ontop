@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.type.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.NonUniqueTermTypeException;
@@ -23,6 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+@Singleton
 public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
     @Inject

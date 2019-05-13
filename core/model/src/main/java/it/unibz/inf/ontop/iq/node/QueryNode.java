@@ -14,6 +14,8 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  *
  * Only "QueryNode.equals(this)" returns true since multiple clones of a node
  * may appear in the same IntermediateQuery and they must absolutely be distinguished.
+ *
+ * See IntermediateQueryFactory for creating new instances.
  */
 public interface QueryNode extends Cloneable {
 

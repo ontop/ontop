@@ -28,7 +28,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -37,6 +36,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TODO: rename it QueryTranslatorImpl ?
+ *
+ * See ReformulationFactory for creating a new instance.
+ *
  */
 public class QuestQueryProcessor implements QueryReformulator {
 
@@ -61,7 +63,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final IQConverter iqConverter;
     private final DatalogProgram2QueryConverter datalogConverter;
-	private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
 	private final IntermediateQueryFactory iqFactory;
 	private final OrderBySimplifier orderBySimplifier;
@@ -81,7 +82,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
 								InputQueryTranslator inputQueryTranslator,
 								IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter,
-								TermFactory termFactory, AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
+								AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
 								OrderBySimplifier orderBySimplifier) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
@@ -94,7 +95,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.iqConverter = iqConverter;
 		this.rewriter = queryRewriter;
         this.datalogConverter = datalogConverter;
-		this.termFactory = termFactory;
 		this.atomFactory = atomFactory;
 		this.iqFactory = iqFactory;
 		this.orderBySimplifier = orderBySimplifier;
@@ -251,8 +251,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
 		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
 		try {
-            IQ converetedIQ = preProcess(translation);
-			IQ rewrittenIQ = rewriter.rewrite(converetedIQ);
+            IQ convertedIQ = preProcess(translation);
+			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 			return rewrittenIQ.toString();
 		}
 		catch (EmptyQueryException e) {

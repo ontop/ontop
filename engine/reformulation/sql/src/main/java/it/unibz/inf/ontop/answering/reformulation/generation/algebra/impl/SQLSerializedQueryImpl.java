@@ -7,6 +7,9 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelation
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.model.term.Variable;
 
+/**
+ * See SQLAlgebraFactory for creating a new instance.
+ */
 public class SQLSerializedQueryImpl implements SQLSerializedQuery {
 
     private final String sqlQueryString;

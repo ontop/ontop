@@ -11,6 +11,9 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface CoreUtilsFactory {
 
     VariableGenerator createVariableGenerator(Collection<Variable> knownVariables);

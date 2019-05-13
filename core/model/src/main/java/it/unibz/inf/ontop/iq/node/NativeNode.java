@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 
 /**
  * Represents a serialized query that can be executed by the DB engine
+ *
+ * See IntermediateQueryFactory for creating a new instance.
  */
 public interface NativeNode extends LeafIQTree {
 

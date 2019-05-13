@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
  *
  * Immutable
  *
+ * See ProvenanceMappingFactory for creating a new instance.
+ *
  */
 public interface MappingWithProvenance {
 

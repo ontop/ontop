@@ -3,11 +3,8 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.QueryUnionSplitter;
-import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
@@ -45,6 +42,8 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingSameAsInverseRewriter.class);
         bindFromSettings(QueryUnionSplitter.class);
         bindFromSettings(MappingCaster.class);
+
+        bind(MappingCoreSingletons.class).to(MappingCoreSingletonsImpl.class);
 
         Module factoryModule = buildFactory(ImmutableList.of(MappingWithProvenance.class),
                 ProvenanceMappingFactory.class);

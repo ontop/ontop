@@ -24,6 +24,9 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 
+/**
+ * See TargetQueryParserFactory for creating a new instance.
+ */
 public interface TargetQueryParser {
 
 	ImmutableList<TargetAtom> parse(String input) throws TargetQueryParserException;

@@ -11,7 +11,9 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import java.util.Optional;
 import java.util.function.Function;
 
-
+/**
+ * Accessible through Guice (recommended) or through CoreSingletons.
+ */
 public interface FunctionSymbolFactory {
 
     RDFTermFunctionSymbol getRDFTermFunctionSymbol();
