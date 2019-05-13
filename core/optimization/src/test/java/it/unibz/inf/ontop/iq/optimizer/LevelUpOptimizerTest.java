@@ -30,10 +30,10 @@ public class LevelUpOptimizerTest {
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
     private static final RelationPredicate TABLE3_PREDICATE;
-    private static final RelationPredicate TABLE4_PREDICATE;
     private static final RelationPredicate NESTED_VIEW1;
     private static final RelationPredicate NESTED_VIEW2;
     private static final RelationPredicate NESTED_VIEW3;
+    private static final RelationPredicate NESTED_VIEW4;
 
     private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
@@ -79,35 +79,25 @@ public class LevelUpOptimizerTest {
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        // has no child and no parent
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table2"));
         Attribute col1T2 = table2Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
         table2Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        // has nestedView3 as child, and no parent
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
+
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table4"));
         Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
         table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
+        table3Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
-
-        // has nestedView4 and  nestedView5 as children, and no parent
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
-        table4Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
-        table4Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        TABLE4_PREDICATE = table4Def.getAtomPredicate();
-
-        // has table1 as parent, and nestedView2 as child
+        // has table1 as parent
         NestedView nestedView1 = dbMetadata.createNestedView(
                 idFactory.createRelationID(null, "nestedView1"),
                 table1Def,
-                FLATTEN_NODE_PRED_AR2.getRelationDefinition(),
+                FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
                 2
         );
         Attribute col1N1 = nestedView1.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
@@ -116,7 +106,7 @@ public class LevelUpOptimizerTest {
         nestedView1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N1));
         NESTED_VIEW1 = nestedView1.getAtomPredicate();
 
-        // has nestedView1 as parent, and no child
+        // has nestedView1 as parent
         NestedView nestedView2 = dbMetadata.createNestedView(
                 idFactory.createRelationID(null, "nestedView2"),
                 nestedView1,
@@ -129,7 +119,7 @@ public class LevelUpOptimizerTest {
         nestedView2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N2));
         NESTED_VIEW2 = nestedView2.getAtomPredicate();
 
-        // has table3 as parent, and no child
+        // has table3 as parent
         NestedView nestedView3 = dbMetadata.createNestedView(
                 idFactory.createRelationID(null, "nestedView3"),
                 table1Def,
@@ -142,6 +132,21 @@ public class LevelUpOptimizerTest {
         nestedView3.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
         nestedView3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
         NESTED_VIEW3 = nestedView3.getAtomPredicate();
+
+        // has table3 as parent
+        NestedView nestedView4 = dbMetadata.createNestedView(
+                idFactory.createRelationID(null, "nestedView4"),
+                table1Def,
+                FLATTEN_NODE_PRED_AR4.getRelationDefinition(),
+                3
+        );
+
+        Attribute col1N4 = nestedView4.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
+        nestedView4.addAttribute(idFactory.createAttributeID("col1"), Types.INTEGER, null, true);
+        nestedView4.addAttribute(idFactory.createAttributeID("col2"), Types.INTEGER, null, false);
+        nestedView4.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1N3));
+        NESTED_VIEW4 = nestedView3.getAtomPredicate();
+
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;
     }
@@ -184,7 +189,7 @@ public class LevelUpOptimizerTest {
 
 
         ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(NESTED_VIEW3, X, B, C));
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW1, X, B, C));
         queryBuilder.addChild(rootNode, leftDataNode);
 
 
@@ -197,6 +202,62 @@ public class LevelUpOptimizerTest {
         expectedQueryBuilder.addChild(rootNode,flattenNode);
         expectedQueryBuilder.addChild(flattenNode, IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F1, F2, F0)));
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+    @Test
+    public void testLevelUp2() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+
+        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW2, X, B, C));
+        queryBuilder.addChild(rootNode, leftDataNode);
+
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(F0, 0,
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, X, B, C));
+        expectedQueryBuilder.addChild(rootNode,flattenNode);
+        expectedQueryBuilder.addChild(flattenNode, IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW1, F1, F2, F0)));
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+    @Test
+    public void testLevelUpRecurs1() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+
+        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW2, X, B, C));
+        queryBuilder.addChild(rootNode, leftDataNode);
+
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        StrictFlattenNode flattenNode = IQ_FACTORY.createStrictFlattenNode(F0, 0,
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, X, B, C));
+        expectedQueryBuilder.addChild(rootNode,flattenNode);
+        expectedQueryBuilder.addChild(flattenNode, IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW1, F1, F2, F0)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
