@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
@@ -198,9 +199,11 @@ public class AboxMaterializationAction extends ProtegeAction {
                             break;
                         case TURTLE:
                             handler = new TurtleWriter(writer);
+                            ((TurtleWriter) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
                             break;
                         case N3:
                             handler = new N3Writer(writer);
+                            ((N3Writer) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
                             break;
                         default:
                             throw new Exception("Unknown format: " + format);
