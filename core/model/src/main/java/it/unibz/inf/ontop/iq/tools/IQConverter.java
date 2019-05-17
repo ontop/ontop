@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.tools;
 
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -13,5 +12,5 @@ public interface IQConverter {
 
     IQTree convertTree(IntermediateQuery query, QueryNode rootNode);
 
-    IntermediateQuery convert(IQ query, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException;
+    IntermediateQuery convert(IQ query, ExecutorRegistry executorRegistry) throws EmptyQueryException;
 }
