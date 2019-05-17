@@ -58,6 +58,8 @@ public class LevelUpOptimizerTest {
     private final static Variable F1 = TERM_FACTORY.getVariable("f1");
     private final static Variable F2 = TERM_FACTORY.getVariable("f2");
     private final static Variable F3 = TERM_FACTORY.getVariable("f3");
+    private final static Variable F4 = TERM_FACTORY.getVariable("f4");
+    private final static Variable F5 = TERM_FACTORY.getVariable("f5");
     private final static Variable G = TERM_FACTORY.getVariable("G");
     private final static Variable N = TERM_FACTORY.getVariable("N");
     private final static Variable X = TERM_FACTORY.getVariable("X");
@@ -86,7 +88,7 @@ public class LevelUpOptimizerTest {
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table4"));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "table3"));
         Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("pk"), Types.INTEGER, null, false);
         table3Def.addAttribute(idFactory.createAttributeID("arr1"), Types.ARRAY, null, true);
         table3Def.addAttribute(idFactory.createAttributeID("arr2"), Types.ARRAY, null, true);
@@ -122,7 +124,7 @@ public class LevelUpOptimizerTest {
         // has table3 as parent
         NestedView nestedView3 = dbMetadata.createNestedView(
                 idFactory.createRelationID(null, "nestedView3"),
-                table1Def,
+                table3Def,
                 FLATTEN_NODE_PRED_AR3.getRelationDefinition(),
                 2
         );
@@ -230,6 +232,45 @@ public class LevelUpOptimizerTest {
         expectedQueryBuilder.addChild(rootNode,flattenNode);
         expectedQueryBuilder.addChild(flattenNode, IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(NESTED_VIEW1, F1, F2, F0)));
+
+        IntermediateQuery expectedQuery = expectedQueryBuilder.build();
+
+        optimizeAndCompare(query, expectedQuery);
+    }
+
+    @Test
+    public void testLevelUp3() throws EmptyQueryException {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        queryBuilder.init(projectionAtom, rootNode);
+
+        InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
+        queryBuilder.addChild(rootNode, joinNode);
+
+        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW1, X, B, C));
+        queryBuilder.addChild(joinNode, leftDataNode);
+
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(NESTED_VIEW3, X, B, D));
+        queryBuilder.addChild(joinNode, rightDataNode);
+
+        IntermediateQuery query = queryBuilder.build();
+
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        expectedQueryBuilder.init(projectionAtom, rootNode);
+        expectedQueryBuilder.addChild(rootNode, joinNode);
+        StrictFlattenNode flattenNode1 = IQ_FACTORY.createStrictFlattenNode(F0, 0,
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, X, B, C));
+        expectedQueryBuilder.addChild(joinNode,flattenNode1);
+        StrictFlattenNode flattenNode2 = IQ_FACTORY.createStrictFlattenNode(F3, 0,
+                ATOM_FACTORY.getDataAtom(FLATTEN_NODE_PRED_AR3, X, B, D));
+        expectedQueryBuilder.addChild(joinNode,flattenNode2);
+        expectedQueryBuilder.addChild(flattenNode1, IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F1, F2, F0)));
+        expectedQueryBuilder.addChild(flattenNode2, IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F4, F5, F3)));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
