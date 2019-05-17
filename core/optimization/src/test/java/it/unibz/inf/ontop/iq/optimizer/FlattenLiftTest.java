@@ -725,7 +725,6 @@ public class FlattenLiftTest {
         IQ optimizedIQ = FLATTEN_LIFTER.optimize(IQ_CONVERTER.convert(query));
         IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
                 optimizedIQ,
-                query.getDBMetadata(),
                 query.getExecutorRegistry()
         );
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
