@@ -27,6 +27,6 @@ public class LegacyBindingLiftOptimizer implements BindingLiftOptimizer {
 
         IQ liftedIQ = optimizer.optimize(initialIQ);
 
-        return iqConverter.convert(liftedIQ, query.getDBMetadata(), query.getExecutorRegistry());
+        return iqConverter.convert(liftedIQ, query.getExecutorRegistry());
     }
 }

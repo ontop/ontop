@@ -365,7 +365,7 @@ public class OneShotSQLGeneratorEngine {
 		try {
 			IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(iqConverter.convert(
 					iqFactory.createIQ(flattenIQ.getProjectionAtom(), treeAfterPullOut),
-					intermediateQuery.getDBMetadata(), intermediateQuery.getExecutorRegistry()));
+					intermediateQuery.getExecutorRegistry()));
 			log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullUp);
 			return iqConverter.convert(queryAfterPullUp);
 
