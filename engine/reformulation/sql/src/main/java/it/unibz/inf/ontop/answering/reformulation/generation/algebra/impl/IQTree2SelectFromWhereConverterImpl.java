@@ -120,6 +120,11 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             String sqlQuery = nativeNode.getNativeQueryString();
             return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames()));
         }
+        else if (rootNode instanceof  ExtensionalDataNode){
+            ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
+
+            return null;
+        }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
     }
