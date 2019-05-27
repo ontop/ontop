@@ -182,7 +182,7 @@ public class OptimizationTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
-        return IQ_FACTORY.createIQBuilder(metadata, EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static BasicDBMetadata createDummyMetadata() {

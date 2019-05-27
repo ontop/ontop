@@ -56,7 +56,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
 
     @Override
     protected Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                   RelationPredicate predicate, DBMetadata dbMetadata,
+                                                                   RelationPredicate predicate,
                                                                    ImmutableList<Variable> priorityVariables,
                                                                    IntermediateQuery query)
             throws AtomUnificationException {

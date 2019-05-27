@@ -14,6 +14,11 @@
 #
 ########################################################################
 
+# user could invoke the script as 'sh build-release.sh'
+if [ ! -n "$BASH" ]; then
+    echo "Please run this script with bash or run it as ./$0"
+    exit 1
+fi
 
 if type -p java; then
     JAVA=java
@@ -178,7 +183,7 @@ cd ${ONTOP_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/webapps
 cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
 cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
-cp ${ONTOP_DEP_HOME}/README-ontop.TXT ${JETTY_FOLDER}
+cp ${ONTOP_DEP_HOME}/README-ontop.txt ${JETTY_FOLDER}
 
 zip -rq ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ || exit 1
 

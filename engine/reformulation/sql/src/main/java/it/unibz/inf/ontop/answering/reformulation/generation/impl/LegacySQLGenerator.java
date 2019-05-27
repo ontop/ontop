@@ -100,7 +100,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
         PostProcessingProjectionSplitter.PostProcessingSplit split = projectionSplitter.split(liftedIQ);
 
-        IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), metadata, executorRegistry);
+        IQTree normalizedSubTree = normalizeSubTree(split.getSubTree(), split.getVariableGenerator(), executorRegistry);
         NativeNode nativeNode = generateNativeNode(normalizedSubTree);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getPostProcessingConstructionNode(), nativeNode);
@@ -112,7 +112,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
      * TODO: what about the distinct?
      * TODO: move the distinct and slice lifting to the post-processing splitter
      */
-    private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator, DBMetadata dbMetadata,
+    private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator,
                                     ExecutorRegistry executorRegistry) {
 
         IQTree sliceLiftedTree = liftSlice(subTree);
@@ -137,7 +137,7 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
             //   - there the context may be concrete enough for evaluating certain expressions
             //   - useful for dealing with SPARQL EBVs for instance
             IntermediateQuery pushedDownQuery = pushDownExpressionOptimizer.optimize(
-                    iqConverter.convert(pulledOutSubQuery, dbMetadata, executorRegistry));
+                    iqConverter.convert(pulledOutSubQuery, executorRegistry));
             log.debug("New query after pushing down the boolean expressions (temporary): \n" + pushedDownQuery);
 
 

@@ -180,7 +180,7 @@ public class EmptyNodeRemovalTest {
             queryBuilder.addChild(unionNode, leftConstructionNode);
 
             queryBuilder.addChild(leftConstructionNode, DATA_NODE_1);
-        };
+        }
         queryBuilder.addChild(unionNode, emptyNode);
 
         return queryBuilder.build();
@@ -380,7 +380,7 @@ public class EmptyNodeRemovalTest {
         System.out.println("\n Unsatisfiable query: \n" +  query);
         IQ newQuery = IQ_CONVERTER.convert(query).normalizeForOptimization();
         // Must throw an EmptyQueryException
-        IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery, query.getDBMetadata(), query.getExecutorRegistry());
+        IntermediateQuery convertedQuery = IQ_CONVERTER.convert(newQuery, query.getExecutorRegistry());
         System.err.println("Unexpected query: " + convertedQuery);
     }
 
@@ -794,7 +794,7 @@ public class EmptyNodeRemovalTest {
 
         IntermediateQuery optimizedQuery = IQ_CONVERTER.convert(
                 IQ_CONVERTER.convert(query).normalizeForOptimization(),
-                query.getDBMetadata(), query.getExecutorRegistry());
+                query.getExecutorRegistry());
 
         System.out.println("\n Optimized query: \n" +  optimizedQuery);
 

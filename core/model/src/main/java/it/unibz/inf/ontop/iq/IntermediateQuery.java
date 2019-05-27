@@ -22,8 +22,6 @@ import java.util.stream.Stream;
  */
 public interface IntermediateQuery {
 
-    DBMetadata getDBMetadata();
-
     QueryNode getRootNode();
 
     ImmutableList<QueryNode> getNodesInBottomUpOrder();

@@ -55,8 +55,6 @@ public class IntermediateQueryImpl implements IntermediateQuery {
      */
     private final QueryTreeComponent treeComponent;
 
-    private final DBMetadata dbMetadata;
-
     private final DistinctVariableOnlyDataAtom projectionAtom;
 
     private final ExecutorRegistry executorRegistry;
@@ -71,11 +69,10 @@ public class IntermediateQueryImpl implements IntermediateQuery {
     /**
      * For IntermediateQueryBuilders ONLY!!
      */
-    public IntermediateQueryImpl(DBMetadata dbMetadata, DistinctVariableOnlyDataAtom projectionAtom,
+    public IntermediateQueryImpl(DistinctVariableOnlyDataAtom projectionAtom,
                                  QueryTreeComponent treeComponent, ExecutorRegistry executorRegistry,
                                  IntermediateQueryValidator validator, OntopModelSettings settings,
                                  IntermediateQueryFactory iqFactory) {
-        this.dbMetadata = dbMetadata;
         this.projectionAtom = projectionAtom;
         this.treeComponent = treeComponent;
         this.executorRegistry = executorRegistry;
@@ -99,7 +96,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery createSnapshot() {
-        return new IntermediateQueryImpl(dbMetadata, projectionAtom, treeComponent.createSnapshot(),
+        return new IntermediateQueryImpl(projectionAtom, treeComponent.createSnapshot(),
                 executorRegistry, validator, settings, iqFactory);
     }
 
@@ -129,12 +126,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQueryBuilder newBuilder() {
-        return iqFactory.createIQBuilder(dbMetadata, executorRegistry);
-    }
-
-    @Override
-    public DBMetadata getDBMetadata() {
-        return dbMetadata;
+        return iqFactory.createIQBuilder(executorRegistry);
     }
 
     @Override
@@ -359,7 +351,7 @@ public class IntermediateQueryImpl implements IntermediateQuery {
 
     @Override
     public IntermediateQuery getSubquery(QueryNode subQueryRoot, DistinctVariableOnlyDataAtom projectionAtom) {
-        IntermediateQueryBuilder builder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        IntermediateQueryBuilder builder = iqFactory.createIQBuilder(executorRegistry);
         builder.init(projectionAtom, subQueryRoot);
         builder.appendSubtree(subQueryRoot, this);
         return builder.build();

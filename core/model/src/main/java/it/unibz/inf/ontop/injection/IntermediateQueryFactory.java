@@ -33,7 +33,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface IntermediateQueryFactory {
 
-    IntermediateQueryBuilder createIQBuilder(DBMetadata metadata, ExecutorRegistry executorRegistry);
+    IntermediateQueryBuilder createIQBuilder(ExecutorRegistry executorRegistry);
 
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables);
 
