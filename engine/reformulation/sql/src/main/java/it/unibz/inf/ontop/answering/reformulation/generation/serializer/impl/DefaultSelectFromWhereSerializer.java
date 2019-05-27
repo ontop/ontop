@@ -77,13 +77,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             // Assumes that from expressions all use different variables
             ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();
 
-            ImmutableMap<Variable, QualifiedAttributeID> projectedColumnMap = extractProjectionColumnMap(
+            ImmutableMap<Variable, QualifiedAttributeID> columnsInProjectionIds = extractProjectionColumnMap(
                     selectFromWhere.getProjectedVariables(), fromColumnIDs);
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
             String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
-                    projectedColumnMap, selectFromWhere.getSubstitution(), fromColumnIDs);
+                    columnsInProjectionIds, selectFromWhere.getSubstitution(), fromColumnIDs);
 
             String fromString = fromQuerySerialization.getString();
 
@@ -98,7 +98,14 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, orderByString, sliceString);
 
-            return new QuerySerializationImpl(sql, projectedColumnMap);
+            // Creates an alias for this SQLExpression and uses it for the projected columns
+            RelationID alias = generateFreshViewAlias();
+            ImmutableMap<Variable, QualifiedAttributeID> aliasedProjectedColumnIds = columnsInProjectionIds.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> createQualifiedAttributeId(alias, e.getValue().getAttribute().getName())
+                    ));
+            return new QuerySerializationImpl(sql, aliasedProjectedColumnIds);
         }
 
         protected RelationID generateFreshViewAlias() {
