@@ -84,7 +84,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .map(e -> Maps.immutableEntry(e.getKey(), createQualifiedAttributeId(fromE.getKey(), e.getValue()))))
                     .collect(ImmutableCollectors.toMap());
 
-            ImmutableMap<Variable, String> projectedColumnMap = extractProjectionColumnMap(
+            ImmutableMap<Variable, QualifiedAttributeID> projectedColumnMap = extractProjectionColumnMap(
                     selectFromWhere.getProjectedVariables(), fromColumnMap);
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
@@ -105,7 +105,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, orderByString, sliceString);
 
-            return new QuerySerializationImpl(sql, projectedColumnMap);
+            return new QuerySerializationImpl(sql, projectedColumnMap.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().getAttribute().getSQLRendering())));
         }
 
         protected RelationID generateFreshViewAlias() {
@@ -119,7 +122,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         /**
          * TODO: simplify it
          */
-        private ImmutableMap<Variable, String> extractProjectionColumnMap(
+        private ImmutableMap<Variable, QualifiedAttributeID> extractProjectionColumnMap(
                 ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             // Mutable, initialized with the column names projected by the "from" relations
             Set<String> quotedColumnNames = fromColumnMap.values().stream()
@@ -131,17 +134,17 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             v -> v,
                             v -> {
                                 if (fromColumnMap.containsKey(v))
-                                    return sqlTermSerializer.serialize(v, fromColumnMap);
+                                return fromColumnMap.get(v);
 
                                 String newColumnName = dialectAdapter.nameTopVariable(v.getName(), quotedColumnNames);
                                 quotedColumnNames.add(newColumnName);
-                                return newColumnName;
+                                return createQualifiedAttributeId(null, newColumnName);
                             }));
         }
 
 
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables,
-                                             ImmutableMap<Variable, String> projectedColumnMap,
+                                             ImmutableMap<Variable, QualifiedAttributeID> projectedColumnMap,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             // Mainly for ASK queries
@@ -152,7 +155,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v)))
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering()))
                     .collect(Collectors.joining(", "));
         }
 
