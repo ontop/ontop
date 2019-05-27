@@ -198,6 +198,10 @@ public class MetaMappingExpander {
 						for (int i = 1; i <= size; i++)
 							values.add(rs.getString(i));
 
+						// Cannot build an IRI out of nulls
+						if (values.contains(null))
+							continue;
+
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), newColumns, templateColumns, values);
 
 						ImmutableList<Variable> templateVariables = templateAtom.getTerms().stream()
