@@ -123,7 +123,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof  ExtensionalDataNode){
             ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
 
-            return null;
+            return ImmutableList.of(sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom()));
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLTable;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
@@ -17,6 +18,8 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -187,6 +190,22 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
             return new QuerySerializationImpl(sqlSerializedQuery.getSQLString(), sqlSerializedQuery.getColumnNames());
+        }
+
+        @Override
+        public QuerySerialization visit(SQLTable sqlTable) {
+            DataAtom<RelationPredicate> atom = sqlTable.getAtom();
+
+            RelationID relationId = atom.getPredicate().getRelationDefinition().getID();
+
+            return new QuerySerializationImpl(relationId.getSQLRendering(),
+                    atom.getArguments().stream()
+                            // Ground terms must have been already removed from atoms
+                            .map(a -> (Variable)a)
+                            .collect(ImmutableCollectors.toMap(
+                                    v -> v,
+                                    v -> createQualifiedAttributeId(null, v.getName()).getSQLRendering()
+                            )));
         }
     }
 
