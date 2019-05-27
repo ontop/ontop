@@ -13,10 +13,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromW
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
-import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -194,10 +191,18 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         public QuerySerialization visit(SQLTable sqlTable) {
             DataAtom<RelationPredicate> atom = sqlTable.getAtom();
 
-            RelationID originalRelationId = atom.getPredicate().getRelationDefinition().getID();
             RelationID aliasId = generateFreshViewAlias();
+            RelationDefinition relationDefinition = atom.getPredicate().getRelationDefinition();
 
-            String sqlSubString = String.format("%s %s",originalRelationId.getSQLRendering(), aliasId.getSQLRendering());
+            String relationRendering = Optional.of(relationDefinition)
+                    // Black-box view: we use the definition
+                    .filter(r -> r instanceof ParserViewDefinition)
+                    .map(r -> ((ParserViewDefinition) r).getStatement())
+                    .map(s -> String.format("(%s)", s))
+                    // For regular relations, their ID is known by the DB so we use it
+                    .orElseGet(() -> relationDefinition.getID().getSQLRendering());
+
+            String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
             return new QuerySerializationImpl(sqlSubString,
                     atom.getArguments().stream()
