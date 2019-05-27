@@ -55,7 +55,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
         protected static final String VIEW_PREFIX = "v";
-        private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM (%s)\n%s%s%s";
+        private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
         private final AtomicInteger viewCounter;
         protected final SQLTermSerializer sqlTermSerializer;
         protected final SQLDialectAdapter dialectAdapter;
@@ -185,7 +185,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> createQualifiedAttributeId(alias, e.getValue())
                     ));
 
-            return new QuerySerializationImpl(sqlSerializedQuery.getSQLString(), columnIDs);
+            String sqlSubString = String.format("(%s) %s",sqlSerializedQuery.getSQLString(), alias.getSQLRendering());
+
+            return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
 
         @Override
@@ -195,7 +197,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationID originalRelationId = atom.getPredicate().getRelationDefinition().getID();
             RelationID aliasId = generateFreshViewAlias();
 
-            return new QuerySerializationImpl(originalRelationId.getSQLRendering(),
+            String sqlSubString = String.format("%s %s",originalRelationId.getSQLRendering(), aliasId.getSQLRendering());
+
+            return new QuerySerializationImpl(sqlSubString,
                     atom.getArguments().stream()
                             // Ground terms must have been already removed from atoms
                             .map(a -> (Variable)a)
