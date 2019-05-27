@@ -22,7 +22,7 @@ public interface SQLAlgebraFactory {
 
     SelectFromWhereWithModifiers createSelectFromWhere(ImmutableSortedSet<Variable> projectedVariables,
                                                        ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                                       @Assisted("fromRelations") ImmutableList<? extends SQLExpression> fromRelations,
+                                                       @Assisted("fromExpression") SQLExpression fromExpression,
                                                        @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
                                                        boolean isDistinct,
                                                        @Assisted("limit") Optional<Long> limit,

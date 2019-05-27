@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.model.term.Variable;
 
 public interface SelectFromWhereSerializer {
@@ -11,6 +12,6 @@ public interface SelectFromWhereSerializer {
 
     interface QuerySerialization {
         String getString();
-        ImmutableMap<Variable, String> getColumnNames();
+        ImmutableMap<Variable, QualifiedAttributeID> getColumnIDs();
     }
 }

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2Sele
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -22,11 +23,15 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
     private final SQLAlgebraFactory sqlAlgebraFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private IQTree2SelectFromWhereConverterImpl(SQLAlgebraFactory sqlAlgebraFactory, SubstitutionFactory substitutionFactory) {
+    private IQTree2SelectFromWhereConverterImpl(SQLAlgebraFactory sqlAlgebraFactory,
+                                                SubstitutionFactory substitutionFactory,
+                                                IntermediateQueryFactory iqFactory) {
         this.sqlAlgebraFactory = sqlAlgebraFactory;
         this.substitutionFactory = substitutionFactory;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -81,7 +86,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .map(ConstructionNode::getSubstitution)
                 .orElseGet(substitutionFactory::getSubstitution);
 
-        ImmutableList<? extends SQLExpression> fromRelations = convertIntoFromRelations(
+        SQLExpression fromExpression = convertIntoFromExpression(
                 firstNonSliceDistinctConstructionOrderByTree);
 
         /*
@@ -94,7 +99,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(n -> (InnerJoinNode) n)
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
-        return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromRelations, whereExpression,
+        return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromExpression, whereExpression,
                 distinctNode.isPresent(),
                 sliceNode
                         .flatMap(SliceNode::getLimit),
@@ -107,23 +112,36 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     /**
-     * TODO: implement it seriously
      *
      * Ignores the top filtering expression of the root node if the latter is an inner join,
      * as this expression will be used as WHERE expression instead.
      *
      */
-    private ImmutableList<? extends SQLExpression> convertIntoFromRelations(IQTree tree) {
+    private SQLExpression convertIntoFromExpression(IQTree tree) {
+        QueryNode rootNode = tree.getRootNode();
+        if (rootNode instanceof InnerJoinNode) {
+            InnerJoinNode innerJoinNode = (InnerJoinNode) rootNode;
+            // Removes the joining condition
+            InnerJoinNode newInnerJoinNode = innerJoinNode.changeOptionalFilterCondition(Optional.empty());
+
+            return convertIntoOrdinaryExpression(iqFactory.createNaryIQTree(newInnerJoinNode,
+                    tree.getChildren()));
+        }
+        else
+            return convertIntoOrdinaryExpression(tree);
+    }
+
+    private SQLExpression convertIntoOrdinaryExpression(IQTree tree) {
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof NativeNode) {
             NativeNode nativeNode = (NativeNode) rootNode;
             String sqlQuery = nativeNode.getNativeQueryString();
-            return ImmutableList.of(sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames()));
+            return sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames());
         }
         else if (rootNode instanceof  ExtensionalDataNode){
             ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
 
-            return ImmutableList.of(sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom()));
+            return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom());
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
