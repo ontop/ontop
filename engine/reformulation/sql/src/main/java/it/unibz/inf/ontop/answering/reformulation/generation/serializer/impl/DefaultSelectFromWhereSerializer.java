@@ -6,10 +6,8 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLTable;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl.SQLSerializedQueryImpl;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
@@ -149,7 +147,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering()))
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + v.getName()))
                     .collect(Collectors.joining(", "));
         }
 
@@ -210,8 +208,55 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .map(a -> (Variable)a)
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
-                                    v -> createQualifiedAttributeId(aliasId, v.getName())
+                                    v -> createQualifiedAttributeId(aliasId, relationDefinition.getAttribute(atom.getArguments().indexOf(v) + 1).getID().getName())
                             )));
+        }
+
+        @Override
+        public QuerySerialization visit(SQLNaryJoinExpression sqlNaryJoinExpression) {
+            ImmutableList<QuerySerialization> querySerializationList = sqlNaryJoinExpression.getJoinedExpressions().stream()
+                    .map(e -> e.acceptVisitor(this))
+                    .collect(ImmutableCollectors.toList());
+
+            String sqlSubString = querySerializationList.stream()
+                    .map(QuerySerialization::getString)
+                    .collect(Collectors.joining(", "));
+
+
+            //TODO:check if this is actually needed
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
+                    .copyOf(querySerializationList.stream()
+                            .flatMap(m -> m.getColumnIDs().entrySet().stream())
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+            return new QuerySerializationImpl(sqlSubString, columnIDs);
+        }
+
+        //TODO:implement
+        @Override
+        public QuerySerialization visit(SQLUnionExpression sqlUnionExpression) {
+            ImmutableList<QuerySerialization> querySerializationList = sqlUnionExpression.getSubExpressions().stream()
+                    .map(e -> e.acceptVisitor(this))
+                    .collect(ImmutableCollectors.toList());
+
+            String sqlSubString = querySerializationList.stream()
+                    .map(QuerySerialization::getString)
+                    .collect(Collectors.joining("UNION ALL \n"));
+
+            RelationID alias = generateFreshViewAlias();
+
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = sqlUnionExpression.getProjectedVariables().stream()
+                    .collect(ImmutableCollectors.toMap(v -> v, v -> createQualifiedAttributeId(alias, v.getName())));
+
+            sqlSubString = String.format("(%s) %s",sqlSubString, alias.getSQLRendering());
+
+//            ImmutableMap<Variable, String> columnNames = sqlUnionExpression.getProjectedVariables().stream()
+//                    .collect(ImmutableCollectors.toMap(v -> v, Variable::getName));
+//
+//
+//            SQLSerializedQuery sqlSerializedQuery = new SQLSerializedQueryImpl(sqlSubString, columnNames);
+
+            return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
     }
 

@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -16,8 +13,11 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
@@ -87,7 +87,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .orElseGet(substitutionFactory::getSubstitution);
 
         SQLExpression fromExpression = convertIntoFromExpression(
-                firstNonSliceDistinctConstructionOrderByTree);
+                childTree);
 
         /*
          * Where expression: from the filter node or from the top inner join of the child tree
@@ -142,6 +142,28 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
 
             return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom());
+        }
+        //TODO:consider the case when a binary join is a must
+        else if (rootNode instanceof InnerJoinNode){
+            List<SQLExpression> joinedExpressions = tree.getChildren().stream()
+                    .filter(e -> (e instanceof ExtensionalDataNode) || (e instanceof InnerJoinNode))
+                    .map(this::convertIntoFromExpression)
+                    .collect(Collectors.toList());;
+
+            joinedExpressions.addAll(tree.getChildren().stream()
+                    .filter(e -> !((e instanceof ExtensionalDataNode) || (e instanceof InnerJoinNode)))
+                    .map(this::convertIntoFromExpression)
+            .collect(Collectors.toList()));
+
+            return sqlAlgebraFactory.createSQLNaryJoinExpression(ImmutableList.copyOf(joinedExpressions));
+        }
+        else if (rootNode instanceof UnionNode){
+            UnionNode unionNode = (UnionNode) rootNode;
+            ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
+            ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
+                    .map(e-> convert(e, signature))
+                    .collect(ImmutableCollectors.toList());;
+            return sqlAlgebraFactory.createSQLUnionExpression(subExpressions,unionNode.getVariables());
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");

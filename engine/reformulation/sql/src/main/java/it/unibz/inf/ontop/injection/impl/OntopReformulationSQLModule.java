@@ -34,7 +34,9 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
                 ImmutableList.of(
                         SelectFromWhereWithModifiers.class,
                         SQLSerializedQuery.class,
-                        SQLTable.class),
+                        SQLTable.class,
+                        SQLNaryJoinExpression.class,
+                        SQLUnionExpression.class),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
     }

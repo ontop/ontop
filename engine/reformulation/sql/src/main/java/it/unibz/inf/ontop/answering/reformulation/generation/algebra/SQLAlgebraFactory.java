@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
@@ -32,4 +33,8 @@ public interface SQLAlgebraFactory {
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
 
     SQLTable createSQLTable(DataAtom<RelationPredicate> atom);
+
+    SQLNaryJoinExpression createSQLNaryJoinExpression(ImmutableList<SQLExpression> joinedExpressions);
+
+    SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
 }

@@ -8,4 +8,8 @@ public interface SQLRelationVisitor<T> {
     T visit(SQLSerializedQuery sqlSerializedQuery);
 
     T visit(SQLTable sqlTable);
+
+    T visit(SQLNaryJoinExpression sqlNaryJoinExpression);
+
+    T visit(SQLUnionExpression sqlUnionExpression);
 }
