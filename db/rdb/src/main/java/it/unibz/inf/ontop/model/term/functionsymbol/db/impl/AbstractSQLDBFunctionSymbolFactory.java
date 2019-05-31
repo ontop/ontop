@@ -195,8 +195,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
             return createDBOr(arity);
         else if (isConcat(nameInDialect))
             return createRegularDBConcat(arity);
-        else if (isCoalesce(nameInDialect))
-            return getDBCoalesce(arity);
+        // TODO: allow its recognition in the mapping. Challenging for detecting that NULLs are fitered out.
+//        else if (isCoalesce(nameInDialect))
+//            return getDBCoalesce(arity);
         return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
 
