@@ -112,7 +112,7 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
     }
 
     @Override
-    public DBFunctionSymbol getNow() {
+    public DBFunctionSymbol getDBNow() {
         return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_SPACE_STR, 0);
     }
 
