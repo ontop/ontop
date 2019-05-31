@@ -579,7 +579,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getDBNow() {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNow());
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
     }
 
     @Override
@@ -876,7 +876,14 @@ public class TermFactoryImpl implements TermFactory {
 		return getDBCase(whenPairs, valueNull);
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 1)
+			throw new IllegalArgumentException("At least one argument is expected");
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoalesce(terms.size()), terms);
+    }
+
+    @Override
 	public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
 	}

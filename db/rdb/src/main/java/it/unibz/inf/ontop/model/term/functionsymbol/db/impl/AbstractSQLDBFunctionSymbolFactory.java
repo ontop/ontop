@@ -41,6 +41,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String FLOOR_STR = "FLOOR";
     protected static final String RAND_STR = "RAND";
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
+    protected static final String COALESCE_STR = "COALESCE";
     protected static final String CONCAT_OP_STR = "||";
 
 
@@ -194,6 +195,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
             return createDBOr(arity);
         else if (isConcat(nameInDialect))
             return createRegularDBConcat(arity);
+        // TODO: allow its recognition in the mapping. Challenging for detecting that NULLs are fitered out.
+//        else if (isCoalesce(nameInDialect))
+//            return getDBCoalesce(arity);
         return new DefaultUntypedDBFunctionSymbol(nameInDialect, arity, dbTypeFactory.getAbstractRootDBType());
     }
 
@@ -212,6 +216,10 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected boolean isOr(String nameInDialect) {
         return nameInDialect.equals(OR_STR);
+    }
+
+    protected boolean isCoalesce(String nameInDialect) {
+        return nameInDialect.equals(COALESCE_STR);
     }
 
     /**
@@ -367,6 +375,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createDBCase(int arity) {
         return new DefaultSQLCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createCoalesceFunctionSymbol(int arity) {
+        return new DefaultDBCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
+                Serializers.getRegularSerializer(COALESCE_STR));
     }
 
     @Override
@@ -661,7 +675,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    public DBFunctionSymbol getNow() {
+    public DBFunctionSymbol getDBNow() {
         return getRegularDBFunctionSymbol(CURRENT_TIMESTAMP_STR, 0);
     }
 
