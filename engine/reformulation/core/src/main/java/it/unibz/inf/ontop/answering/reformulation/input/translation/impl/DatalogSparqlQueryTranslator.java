@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
@@ -44,13 +45,15 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
 
 
     @Override
-    public InternalSparqlQuery translate(ParsedQuery inputParsedQuery)
+    public IQ translate(ParsedQuery inputParsedQuery)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
 
         SparqlAlgebraToDatalogTranslator mutableTranslator =
                 new SparqlAlgebraToDatalogTranslator(atomFactory, termFactory,
                         typeFactory, functionSymbolFactory, datalogFactory, immutabilityTools, rdfFactory);
 
-        return mutableTranslator.translate(inputParsedQuery);
+        mutableTranslator.translate(inputParsedQuery);
+
+        return null;
     }
 }
