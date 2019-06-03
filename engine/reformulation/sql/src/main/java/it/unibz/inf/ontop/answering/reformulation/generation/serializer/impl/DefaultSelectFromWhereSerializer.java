@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.sun.tools.javac.util.List;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl.SQLSerializedQueryImpl;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
@@ -232,7 +233,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
 
-        //TODO:implement
         @Override
         public QuerySerialization visit(SQLUnionExpression sqlUnionExpression) {
             ImmutableList<QuerySerialization> querySerializationList = sqlUnionExpression.getSubExpressions().stream()
@@ -250,13 +250,64 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             sqlSubString = String.format("(%s) %s",sqlSubString, alias.getSQLRendering());
 
-//            ImmutableMap<Variable, String> columnNames = sqlUnionExpression.getProjectedVariables().stream()
-//                    .collect(ImmutableCollectors.toMap(v -> v, Variable::getName));
-//
-//
-//            SQLSerializedQuery sqlSerializedQuery = new SQLSerializedQueryImpl(sqlSubString, columnNames);
-
             return new QuerySerializationImpl(sqlSubString, columnIDs);
+        }
+
+        //TODO:implement
+        @Override
+        public QuerySerialization visit(SQLInnerJoinExpression sqlInnerJoinExpression) {
+            QuerySerialization left = sqlInnerJoinExpression.getLeft().acceptVisitor(this);
+            QuerySerialization right = sqlInnerJoinExpression.getRight().acceptVisitor(this);
+
+            String sqlSubString = left.getString() + "\n JOIN \n" + right.getString() + " ON 1 = 1";
+
+            //TODO:check if this is actually needed
+
+            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.copyOf(List.of(left,right));
+
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
+                    .copyOf(querySerializationList.stream()
+                            .flatMap(m -> m.getColumnIDs().entrySet().stream())
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+           return new QuerySerializationImpl(sqlSubString, columnIDs);
+
+//            throw new RuntimeException("TODO: support inner join serialization");
+        }
+
+        @Override
+        public QuerySerialization visit(SQLLeftJoinExpression sqlLeftJoinExpression) {
+            QuerySerialization left = sqlLeftJoinExpression.getLeft().acceptVisitor(this);
+            QuerySerialization right = sqlLeftJoinExpression.getRight().acceptVisitor(this);
+
+            String sqlSubString = left.getString() + "\n LEFT OUTER JOIN \n" + right.getString() + "\n";
+
+
+            //TODO:check if this is actually needed
+
+            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.copyOf(List.of(left,right));
+
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
+                    .copyOf(querySerializationList.stream()
+                            .flatMap(m -> m.getColumnIDs().entrySet().stream())
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+
+            String onString = sqlLeftJoinExpression.getFilterCondition()
+                    .map(e -> sqlTermSerializer.serialize(e, columnIDs))
+                    .map(s -> String.format("ON %s\n", s))
+                    .orElse("");
+
+
+            sqlSubString = sqlSubString + onString;
+            return new QuerySerializationImpl(sqlSubString, columnIDs);
+        }
+
+        //TODO:implement it properly
+        @Override
+        public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
+
+            return new QuerySerializationImpl("(SELECT 1) tdummy", ImmutableMap.of());
         }
     }
 

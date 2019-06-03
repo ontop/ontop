@@ -12,4 +12,10 @@ public interface SQLRelationVisitor<T> {
     T visit(SQLNaryJoinExpression sqlNaryJoinExpression);
 
     T visit(SQLUnionExpression sqlUnionExpression);
+
+    T visit(SQLInnerJoinExpression sqlInnerJoinExpression);
+
+    T visit(SQLLeftJoinExpression sqlLeftJoinExpression);
+
+    T visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression);
 }

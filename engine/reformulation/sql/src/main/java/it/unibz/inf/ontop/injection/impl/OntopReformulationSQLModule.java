@@ -35,8 +35,11 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
                         SelectFromWhereWithModifiers.class,
                         SQLSerializedQuery.class,
                         SQLTable.class,
+                        SQLInnerJoinExpression.class,
+                        SQLLeftJoinExpression.class,
                         SQLNaryJoinExpression.class,
-                        SQLUnionExpression.class),
+                        SQLUnionExpression.class,
+                        SQLOneTupleDummyQueryExpression.class),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
     }

@@ -32,6 +32,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -525,6 +526,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     public String getDummyTable() {
         // TODO: check whether this inherited implementation from JDBCUtilities is OK
         return "SELECT 1";
+    }
+
+    @Override
+    public Optional<String> getTrueTable() {
+        return Optional.empty();
     }
 
     /**

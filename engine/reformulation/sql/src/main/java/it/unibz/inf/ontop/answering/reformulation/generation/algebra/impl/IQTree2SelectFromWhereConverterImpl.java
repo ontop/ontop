@@ -146,26 +146,65 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         //TODO:consider the case when a binary join is a must
         else if (rootNode instanceof InnerJoinNode){
             List<SQLExpression> joinedExpressions = tree.getChildren().stream()
-                    .filter(e -> (e instanceof ExtensionalDataNode) || (e instanceof InnerJoinNode))
+            //        .filter(e -> (e instanceof ExtensionalDataNode) || (e instanceof JoinLikeNode))
                     .map(this::convertIntoFromExpression)
-                    .collect(Collectors.toList());;
+                    .collect(Collectors.toList());
 
-            joinedExpressions.addAll(tree.getChildren().stream()
-                    .filter(e -> !((e instanceof ExtensionalDataNode) || (e instanceof InnerJoinNode)))
-                    .map(this::convertIntoFromExpression)
-            .collect(Collectors.toList()));
+//            //TODO:check how to pass signature as parameter
+//            joinedExpressions.addAll(tree.getChildren().stream()
+//                    .filter(e -> !((e instanceof ExtensionalDataNode) || (e instanceof JoinLikeNode)))
+//                    .map(e->convert(e, null))
+//            .collect(Collectors.toList()));
 
             return sqlAlgebraFactory.createSQLNaryJoinExpression(ImmutableList.copyOf(joinedExpressions));
+        }
+        else if (rootNode instanceof LeftJoinNode){
+            LeftJoinNode leftJoinNode = (LeftJoinNode) rootNode;
+            IQTree leftSubTree = tree.getChildren().get(0);
+            IQTree rightSubTree = tree.getChildren().get(1);
+
+            SQLExpression leftExpression = getSubExpressionOfLeftJoinExpression(leftSubTree);
+            SQLExpression rightExpression = getSubExpressionOfLeftJoinExpression(rightSubTree);
+
+            /*
+             * Where expression: from the filter node or from the top inner join of the child tree
+             */
+            Optional<ImmutableExpression> joinCondition = leftJoinNode.getOptionalFilterCondition();
+
+            return sqlAlgebraFactory.createSQLLeftJoinExpression(leftExpression, rightExpression, joinCondition);
         }
         else if (rootNode instanceof UnionNode){
             UnionNode unionNode = (UnionNode) rootNode;
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
                     .map(e-> convert(e, signature))
-                    .collect(ImmutableCollectors.toList());;
+                    .collect(ImmutableCollectors.toList());
             return sqlAlgebraFactory.createSQLUnionExpression(subExpressions,unionNode.getVariables());
+        }
+        else if (rootNode instanceof TrueNode){
+            return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
         }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
+    }
+
+    private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree){
+        if (tree.getRootNode() instanceof InnerJoinNode){
+            ImmutableList<IQTree> childrenList = tree.getChildren();
+
+            SQLExpression firstExp = null;
+            SQLExpression secondExp = null;
+            for(IQTree child:childrenList.reverse()){
+                if (firstExp == null){
+                    firstExp = convertIntoOrdinaryExpression(child);
+                } else {
+                    secondExp = convertIntoOrdinaryExpression(child);
+                    firstExp = sqlAlgebraFactory.createSQLInnerJoinExpression(firstExp, secondExp);
+                }
+
+            }
+            return firstExp;
+        }
+        return convertIntoOrdinaryExpression(tree);
     }
 }

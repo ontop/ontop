@@ -34,7 +34,13 @@ public interface SQLAlgebraFactory {
 
     SQLTable createSQLTable(DataAtom<RelationPredicate> atom);
 
+    SQLInnerJoinExpression createSQLInnerJoinExpression(@Assisted("leftExpression") SQLExpression left, @Assisted("rightExpression") SQLExpression right);
+
+    SQLLeftJoinExpression createSQLLeftJoinExpression(@Assisted("leftExpression") SQLExpression leftExpression, @Assisted("rightExpression") SQLExpression rightExpression, Optional<ImmutableExpression> joinCondition);
+
     SQLNaryJoinExpression createSQLNaryJoinExpression(ImmutableList<SQLExpression> joinedExpressions);
 
     SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
+
+    SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
 }
