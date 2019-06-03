@@ -474,7 +474,6 @@ public class PullOutVariableOptimizerTest {
                         iq.getProjectionAtom(),
                         eet.transform(iq.getTree())
                 ),
-                query.getDBMetadata(),
                 query.getExecutorRegistry()
         );
     }

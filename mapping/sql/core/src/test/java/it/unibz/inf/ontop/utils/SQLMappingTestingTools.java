@@ -53,7 +53,7 @@ public class SQLMappingTestingTools {
     }
 
     public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(dbMetadata, EXECUTOR_REGISTRY);
+        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static RDBMetadata createDummyMetadata() {
