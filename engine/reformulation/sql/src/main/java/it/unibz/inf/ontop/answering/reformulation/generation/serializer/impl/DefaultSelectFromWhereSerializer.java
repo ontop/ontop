@@ -127,7 +127,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             v -> v,
                             v -> {
                                 if (fromColumnMap.containsKey(v))
-                                return fromColumnMap.get(v);
+                                    return fromColumnMap.get(v);
 
                                 String newColumnName = dialectAdapter.nameTopVariable(v.getName(), quotedColumnNames);
                                 quotedColumnNames.add(newColumnName);
@@ -303,11 +303,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
 
-        //TODO:implement it properly
         @Override
         public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
+            Optional<String> trueTable = dialectAdapter.getTrueTable();
+            String fromString ="";
+            if(trueTable.isPresent())
+                fromString = "FROM " + trueTable;
+            String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
 
-            return new QuerySerializationImpl("(SELECT 1) tdummy", ImmutableMap.of());
+            return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
     }
 
