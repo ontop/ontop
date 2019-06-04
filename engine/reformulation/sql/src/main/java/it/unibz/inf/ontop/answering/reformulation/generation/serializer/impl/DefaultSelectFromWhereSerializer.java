@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.sun.tools.javac.util.List;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl.SQLSerializedQueryImpl;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
@@ -263,7 +262,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             //TODO:check if this is actually needed
 
-            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.copyOf(List.of(left,right));
+            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
                     .copyOf(querySerializationList.stream()
@@ -285,7 +284,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             //TODO:check if this is actually needed
 
-            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.copyOf(List.of(left,right));
+            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
                     .copyOf(querySerializationList.stream()
