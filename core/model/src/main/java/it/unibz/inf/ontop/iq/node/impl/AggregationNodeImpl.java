@@ -45,9 +45,20 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
                         .collect(ImmutableCollectors.toSet())).immutableCopy();
     }
 
+    /**
+     * TODO: blocks distinct. May block some bindings and some filter conditions
+     */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        throw new RuntimeException("TODO: implement");
+        IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
+
+        QueryNode rootNode = normalizedChild.getRootNode();
+        // TODO: deal with construction node
+
+        // TODO: we may consider remove distincts in the sub-tree when cardinality does not affect the substitution definitions
+        // TODO: consider distincts and filters
+
+        throw new RuntimeException("TODO: continue");
     }
 
     @Override
@@ -78,9 +89,13 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
         return true;
     }
 
+    /**
+     * By default does not lift.
+     * TODO: see if in some cases we could lift
+     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override
@@ -120,22 +135,28 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
 
     @Override
     public boolean isVariableNullable(IntermediateQuery query, Variable variable) {
-        throw new RuntimeException("TODO: implement");
+        // TODO: implement seriously!
+        return true;
     }
 
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
-        throw new RuntimeException("TODO: implement");
+        return Optional.of(node)
+                .filter(n -> n instanceof AggregationNode)
+                .map(n -> (AggregationNode) n)
+                .filter(n -> n.getGroupingVariables().equals(groupingVariables))
+                .filter(n -> n.getSubstitution().equals(substitution))
+                .isPresent();
     }
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        throw new RuntimeException("TODO: implement");
+        return getChildVariables();
     }
 
     @Override
     public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
-        throw new RuntimeException("TODO: implement");
+        return getLocallyRequiredVariables();
     }
 
     @Override
@@ -145,7 +166,7 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        throw new RuntimeException("TODO: implement");
+        return isSyntacticallyEquivalentTo(queryNode);
     }
 
     /**
@@ -161,15 +182,13 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
         throw new RuntimeException("TODO: implement");
     }
 
+    /**
+     * By default, blocks the distinct removal
+     * TODO: detect when we can do it (absence of cardinality-sensitive aggregation functions)
+     */
     @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
-        IQTree newChild = child.removeDistincts();
-
-        IQProperties newProperties = newChild.isEquivalentTo(child)
-                ? iqProperties.declareDistinctRemovalWithoutEffect()
-                : iqProperties.declareDistinctRemovalWithEffect();
-
-        return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+        return iqFactory.createUnaryIQTree(this, child, iqProperties.declareDistinctRemovalWithoutEffect());
     }
 
     @Override
@@ -194,6 +213,6 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
 
     @Override
     public AggregationNode clone() {
-        throw new RuntimeException("TODO: implement");
+        return iqFactory.createAggregationNode(groupingVariables, substitution);
     }
 }
