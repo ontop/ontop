@@ -202,13 +202,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
+
+            //TODO:check this
             return new QuerySerializationImpl(sqlSubString,
                     atom.getArguments().stream()
                             // Ground terms must have been already removed from atoms
                             .map(a -> (Variable)a)
                             .collect(ImmutableCollectors.toMap(
                                     v -> v,
-                                    v -> createQualifiedAttributeId(aliasId, relationDefinition.getAttribute(atom.getArguments().indexOf(v) + 1).getID().getName())
+                                    v -> createQualifiedAttributeId(aliasId, relationDefinition.getAttribute(atom.getArguments().indexOf(v) + 1).getID().getSQLRendering())
                             )));
         }
 

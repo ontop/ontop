@@ -48,9 +48,10 @@ public class QualifiedAttributeID {
 	public RelationID getRelation() {
 		return relation;
 	}
-	
+
+	//TODO: check if this is really correct
 	public String getSQLRendering() {
-		return ((relation == null) ? "" : (relation.getSQLRendering() + ".")) + attribute.getSQLRendering();
+		return ((relation == null) ? "" : (relation.getTableName() + ".")) + attribute.getSQLRendering();
 	}
 	
 	@Override 
