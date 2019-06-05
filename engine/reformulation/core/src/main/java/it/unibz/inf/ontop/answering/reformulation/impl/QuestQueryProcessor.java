@@ -160,10 +160,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 			return cachedQuery;
 
 		try {
-            InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
+
+			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
+			//InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 
             try {
-                IQ convertedIQ = preProcess(translation);
+             //   IQ convertedIQ = preProcess(translation);
 
                 log.debug("Start the rewriting process...");
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
@@ -208,7 +210,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			}
 			catch (EmptyQueryException e) {
-				ImmutableList<Variable> signature = translation.getSignature();
+				ImmutableList<Variable> signature = convertedIQ.getProjectionAtom().getArguments();
 
 				DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
 						atomFactory.getRDFAnswerPredicate(signature.size()),
@@ -249,9 +251,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 */
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
+		IQ convertedIQ = query.translate(inputQueryTranslator);
 		try {
-            IQ convertedIQ = preProcess(translation);
+          //  IQ convertedIQ = preProcess(translation);
 			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 			return rewrittenIQ.toString();
 		}

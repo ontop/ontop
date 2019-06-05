@@ -12,14 +12,13 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -45,6 +44,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -81,14 +81,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         // Assumption: the binding names in the parsed query are in the desired order
         ImmutableList<Variable> projectedVars = pq.getTupleExpr().getBindingNames().stream()
-                .map(s -> termFactory.getVariable(s))
+                .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toList());
         IQTree tree = null;
         try {
             tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
-        } catch (OntopInvalidInputQueryException e) {
-            e.printStackTrace();
-        } catch (OntopUnsupportedInputQueryException e) {
+        } catch (OntopInvalidInputQueryException | OntopUnsupportedInputQueryException e) {
             e.printStackTrace();
         }
         if (tree.getVariables().containsAll(projectedVars)) {
@@ -501,7 +499,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private ConstructionNode getJoinOperandCN(IQTree tree, InjectiveVar2VarSubstitution sub) {
         return iqFactory.createConstructionNode(
                 tree.getVariables().stream()
-                        .map(v -> sub.applyToVariable(v))
+                        .map(sub::applyToVariable)
                         .collect(ImmutableCollectors.toSet()),
                 (ImmutableSubstitution) sub
         );
@@ -553,7 +551,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                        subQuery
                 ),
                 child.nullableVariables.stream()
-                        .map(v -> topSubstitution.applyToVariable(v))
+                        .map(topSubstitution::applyToVariable)
                         .filter(t -> t instanceof Variable)
                         .map(t -> (Variable) t)
                         .collect(ImmutableCollectors.toSet())
@@ -640,7 +638,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 node.getElements().stream()
                         .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())))
                         .collect(ImmutableCollectors.toMap(
-                                x -> termFactory.getVariable(((ExtensionElem)x).getName()),
+                                x -> termFactory.getVariable(x.getName()),
                                 x -> getExpression(
                                         x.getExpr(),
                                         childQuery.getVariables())
@@ -650,8 +648,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 childNullableVars.stream(),
                 extSubstitution.getImmutableMap().entrySet().stream()
                         .filter(e -> e.getValue().getVariableStream()
-                                .anyMatch(v -> childNullableVars.contains(v)))
-                .map(e -> e.getKey())
+                                .anyMatch(childNullableVars::contains))
+                .map(Map.Entry::getKey)
         ).collect(ImmutableCollectors.toSet());
 
         ImmutableSet<Variable> projectedVariables = Stream.concat(
@@ -692,7 +690,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         Optional<String> lang = literal.getLanguage();
 
         if (lang.isPresent()) {
-            return termFactory.getRDFLiteralFunctionalTerm(termFactory.getDBStringConstant(value), lang.get());
+            return termFactory.getRDFLiteralConstant(value, lang.get());
 
         } else {
             RDFDatatype type;
@@ -721,9 +719,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 throw new OntopUnsupportedInputQueryException(
                         String.format("Invalid lexical forms are not accepted. Found for %s: %s", type.toString(), value));
 
-            Term constant = termFactory.getDBStringConstant(value);
-
-            return termFactory.getRDFLiteralMutableFunctionalTerm(constant, type);
+            return termFactory.getRDFLiteralConstant(value, type);
 
         }
     }
@@ -732,11 +728,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
      * @param expr      expression
      * @param variables the set of variables that can occur in the expression
      *                  (the rest will be replaced with NULL)
-     * @return
      */
 
-    private ImmutableExpression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables)
-            throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+    private ImmutableExpression getFilterExpression(ValueExpr expr, ImmutableSet<Variable> variables) {
 
         ImmutableTerm term = getExpression(expr, variables);
 
@@ -981,8 +975,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private Variable getVariable(Var v) {
-        Variable var = termFactory.getVariable(v.getName());
-        return var;
+        return termFactory.getVariable(v.getName());
     }
 
 
@@ -1038,7 +1031,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private static class Sparql2IqConversionException extends OntopInternalBugException {
 
-        protected Sparql2IqConversionException(String s) {
+        Sparql2IqConversionException(String s) {
             super(s);
         }
     }
