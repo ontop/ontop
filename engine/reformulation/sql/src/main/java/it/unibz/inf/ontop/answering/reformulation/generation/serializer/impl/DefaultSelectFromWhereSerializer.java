@@ -297,7 +297,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String onString = sqlLeftJoinExpression.getFilterCondition()
                     .map(e -> sqlTermSerializer.serialize(e, columnIDs))
                     .map(s -> String.format("ON %s\n", s))
-                    .orElse("");
+                    .orElse("ON 1 = 1 \n");
 
 
             sqlSubString = sqlSubString + onString;
