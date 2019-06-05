@@ -534,8 +534,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 substitutionFactory.getSubstitution(projectionElems.stream()
                         .filter(pe -> !pe.getTargetName().equals(pe.getSourceName()))
                         .collect(ImmutableCollectors.toMap(
-                                pe -> termFactory.getVariable(pe.getSourceName()),
-                                pe -> termFactory.getVariable(pe.getTargetName())
+                                pe -> termFactory.getVariable(pe.getTargetName()),
+                                pe -> termFactory.getVariable(pe.getSourceName())
                         )));
 
         ImmutableList<Variable> projectedVariables = projectionElems.stream()
