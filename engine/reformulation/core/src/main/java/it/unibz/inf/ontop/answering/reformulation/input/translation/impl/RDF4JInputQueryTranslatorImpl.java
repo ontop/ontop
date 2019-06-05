@@ -19,10 +19,13 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -35,6 +38,7 @@ import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
@@ -55,10 +59,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
+    private final FunctionSymbolFactory functionSymbolFactory;
 
     @Inject
     public RDF4JInputQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory) {
+                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory,
+                                         FunctionSymbolFactory functionSymbolFactory) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -66,6 +72,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.rdfFactory = rdfFactory;
+        this.functionSymbolFactory = functionSymbolFactory;
     }
 
     @Override
@@ -76,7 +83,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableList<Variable> projectedVars = pq.getTupleExpr().getBindingNames().stream()
                 .map(s -> termFactory.getVariable(s))
                 .collect(ImmutableCollectors.toList());
-        IQTree tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
+        IQTree tree = null;
+        try {
+            tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
+        } catch (OntopInvalidInputQueryException e) {
+            e.printStackTrace();
+        } catch (OntopUnsupportedInputQueryException e) {
+            e.printStackTrace();
+        }
         if (tree.getVariables().containsAll(projectedVars)) {
             return iqFactory.createIQ(
                     atomFactory.getDistinctVariableOnlyDataAtom(
@@ -188,7 +202,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, VariableGenerator variableGenerator) {
+    private TranslationResult translateDistinctOrReduced(TupleExpr genNode, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult child;
         if (genNode instanceof Distinct) {
             child = translate(((Distinct) genNode).getArg(), variableGenerator);
@@ -206,7 +220,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateSlice(Slice node, VariableGenerator variableGenerator) {
+    private TranslationResult translateSlice(Slice node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult child = translate(node.getArg(), variableGenerator);
         return new TranslationResult(
                 iqFactory.createUnaryIQTree(
@@ -235,7 +249,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
 
-    private TranslationResult translateOptional(LeftJoin leftJoin, VariableGenerator variableGenerator) {
+    private TranslationResult translateOptional(LeftJoin leftJoin, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
         TranslationResult leftTranslation = translate(leftJoin.getLeftArg(), variableGenerator);
         TranslationResult rightTranslation = translate(leftJoin.getRightArg(), variableGenerator);
@@ -268,8 +282,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(toCoalesce.stream()
                 .collect(ImmutableCollectors.toMap(
                         x -> x,
-                        x -> termFactory.getImmutableExpression(
-                                COALESCE,
+                        x -> termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.COALESCE, 2).get(),
                                 leftRenamingSubstitution.get(x),
                                 rightRenamingSubstitution.get(x)
                         ))));
@@ -282,11 +296,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (filterCondition != null) {
             ImmutableSet<Variable> knownVariables =
                     Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()).immutableCopy();
-            ImmutableExpression filterExpressionBeforeSubst =
-                    termFactory.getImmutableExpression(getFilterExpression(filterCondition, knownVariables));
-
-            filterExpression =
-                    Optional.of(topSubstitution.applyToBooleanExpression(filterExpressionBeforeSubst));
+            ImmutableExpression filterExpressionBeforeSubst = getFilterExpression(filterCondition, knownVariables);
+            filterExpression = Optional.of(topSubstitution.applyToBooleanExpression(filterExpressionBeforeSubst));
         } else {
             filterExpression = Optional.empty();
         }
@@ -328,7 +339,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 )));
     }
 
-    private TranslationResult translateJoin(Join join, VariableGenerator variableGenerator) {
+    private TranslationResult translateJoin(Join join, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
         TranslationResult leftTranslation = translate(join.getLeftArg(), variableGenerator);
         TranslationResult rightTranslation = translate(join.getRightArg(), variableGenerator);
@@ -354,8 +365,11 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(bothSideNullableVars.stream()
                 .collect(ImmutableCollectors.toMap(
                         x -> x,
-                        x -> termFactory.getImmutableExpression(COALESCE, leftRenamingSubstitution.get(x),
-                                rightRenamingSubstitution.get(x)))));
+                        x -> termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.COALESCE,2).get(),
+                                leftRenamingSubstitution.get(x),
+                                rightRenamingSubstitution.get(x)
+                        ))));
 
         InnerJoinNode joinNode;
         ImmutableSet<Variable> newSetOfNullableVars;
@@ -513,7 +527,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         throw new Sparql2IqConversionException("Left or inner join expected");
     }
 
-    private TranslationResult translateProjection(Projection node, VariableGenerator variableGenerator) {
+    private TranslationResult translateProjection(Projection node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult child = translate(node.getArg(), variableGenerator);
         IQTree subQuery = child.iqTree;
 
@@ -546,7 +560,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateUnion(Union union, VariableGenerator variableGenerator) {
+    private TranslationResult translateUnion(Union union, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult leftTranslation = translate(union.getLeftArg(), variableGenerator);
         TranslationResult rightTranslation = translate(union.getRightArg(), variableGenerator);
 
@@ -616,18 +630,21 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private TranslationResult translateExtension(Extension node, VariableGenerator variableGenerator) {
+    private TranslationResult translateExtension(Extension node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
         TranslationResult childTranslation = translate(node.getArg(), variableGenerator);
         IQTree childQuery = childTranslation.iqTree;
         ImmutableSet<Variable> childNullableVars = childTranslation.nullableVariables;
 
-        ImmutableSubstitution<ImmutableTerm> extSubstitution = substitutionFactory.getSubstitution(node.getElements().stream()
-                .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())))
-                .collect(ImmutableCollectors.toMap(
-                        x -> termFactory.getVariable(x.getName()),
-                        x -> getExpression(x.getExpr(), childQuery.getVariables()))
-                ));
+        ImmutableSubstitution<ImmutableTerm> extSubstitution = substitutionFactory.getSubstitution(
+                node.getElements().stream()
+                        .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())))
+                        .collect(ImmutableCollectors.toMap(
+                                x -> termFactory.getVariable(((ExtensionElem)x).getName()),
+                                x -> getExpression(
+                                        x.getExpr(),
+                                        childQuery.getVariables())
+                        )));
 
         ImmutableSet<Variable> nullableVars = Stream.concat(
                 childNullableVars.stream(),
@@ -654,14 +671,19 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private ImmutableTerm getTermForLiteralOrIri(Value v) {
+    private ImmutableTerm getTermForLiteralOrIri(Value v)  {
 
-        if (v instanceof Literal)
-            return getTermForLiteral((Literal) v);
-        else if (v instanceof IRI)
+        if (v instanceof Literal) {
+            try {
+                return getTermForLiteral((Literal) v);
+            } catch (OntopUnsupportedInputQueryException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (v instanceof IRI)
             return getTermForIri((IRI) v);
 
-        throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
+        throw new RuntimeException(new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!"));
     }
 
     private ImmutableTerm getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
@@ -686,8 +708,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             if (type == null)
                 // ROMAN (27 June 2016): type1 in open-eq-05 test would not be supported in OWL
                 // the actual value is LOST here
-                return immutabilityTools.convertToMutableTerm(
-                        termFactory.getConstantIRI(rdfFactory.createIRI(typeURI.stringValue())));
+                return termFactory.getConstantIRI(rdfFactory.createIRI(typeURI.stringValue()));
             // old strict version:
             // throw new RuntimeException("Unsupported datatype: " + typeURI);
 
@@ -730,15 +751,15 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm);
     }
 
-
     /**
-     * @param expr      expression
+     *
+     * @param expr expression
      * @param variables the set of variables that can occur in the expression
      *                  (the rest will be replaced with NULL)
      * @return term
      */
 
-    private ImmutableTerm getExpression(ValueExpr expr, Set<Variable> variables) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+    private ImmutableTerm getExpression(ValueExpr expr, Set<Variable> variables) {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
@@ -747,63 +768,72 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (expr instanceof Var) {
             Var v = (Var) expr;
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? var : valueNull;
-        } else if (expr instanceof ValueConstant) {
+            return variables.contains(var) ? var : termFactory.getNullConstant();
+        }
+        else if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
-            if (v instanceof Literal)
-                return getTermForLiteral((Literal) v);
-            else if (v instanceof IRI)
-                return getTermForIri((IRI) v);
-
-            throw new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!");
-        } else if (expr instanceof Bound) {
+            return getTermForLiteralOrIri(v);
+        }
+        else if (expr instanceof Bound) {
             // BOUND (Sec 17.4.1.1)
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var)
-                    ? termFactory.getFunction(
-                    functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.BOUND, 1), var)
-                    : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
-        } else if (expr instanceof UnaryValueOperator) {
-            Term term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
+            return variables.contains(var) ?
+                    termFactory.getImmutableFunctionalTerm(
+                            functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                    SPARQL.BOUND,
+                                    1
+                            ),
+                            var
+                    ) :
+                    termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
+        }
+        else if (expr instanceof UnaryValueOperator) {
+            ImmutableTerm term = getExpression(((UnaryValueOperator) expr).getArg(), variables);
 
             if (expr instanceof Not) {
-                return termFactory.getFunction(
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
                         convertToXsdBooleanTerm(term));
-            } else if (expr instanceof IsNumeric) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof IsNumeric) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_NUMERIC, 1),
                         term);
-            } else if (expr instanceof IsLiteral) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof IsLiteral) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_LITERAL, 1),
                         term);
-            } else if (expr instanceof IsURI) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof IsURI) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_IRI, 1),
                         term);
-            } else if (expr instanceof Str) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof Str) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.STR, 1),
                         term);
-            } else if (expr instanceof Datatype) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof Datatype) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.DATATYPE, 1),
                         term);
-            } else if (expr instanceof IsBNode) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof IsBNode) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.IS_BLANK, 1),
                         term);
-            } else if (expr instanceof Lang) {
+            }
+            else if (expr instanceof Lang) {
                 ValueExpr arg = ((UnaryValueOperator) expr).getArg();
                 if (arg instanceof Var)
-                    return termFactory.getFunction(
+                    return termFactory.getImmutableFunctionalTerm(
                             functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG, 1),
                             term);
-                else
-                    throw new RuntimeException("A variable or a value is expected in " + expr);
+                throw new RuntimeException(new OntopUnsupportedInputQueryException("A variable or a value is expected in " + expr));
             }
             // other subclasses
             // IRIFunction: IRI (Sec 17.4.2.8) for constructing IRIs
@@ -814,47 +844,52 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             // LocalName: ??
             // Namespace: ??
             // Label: ??
-        } else if (expr instanceof BinaryValueOperator) {
+        }
+        else if (expr instanceof BinaryValueOperator) {
             BinaryValueOperator bexpr = (BinaryValueOperator) expr;
-            Term term1 = getExpression(bexpr.getLeftArg(), variables);
-            Term term2 = getExpression(bexpr.getRightArg(), variables);
+            ImmutableTerm term1 = getExpression(bexpr.getLeftArg(), variables);
+            ImmutableTerm term2 = getExpression(bexpr.getRightArg(), variables);
 
             if (expr instanceof And) {
-                return termFactory.getFunction(
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_AND, 2),
                         convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            } else if (expr instanceof Or) {
-                return termFactory.getFunction(
+            }
+            else if (expr instanceof Or) {
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LOGICAL_OR, 2),
                         convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            } else if (expr instanceof SameTerm) {
+            }
+            else if (expr instanceof SameTerm) {
                 // sameTerm (Sec 17.4.1.8)
                 // Corresponds to the STRICT equality (same lexical value, same type)
-                return termFactory.getFunction(
+                return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.SAME_TERM, 2),
                         term1, term2);
-            } else if (expr instanceof Regex) {
+            }
+            else if (expr instanceof Regex) {
                 // REGEX (Sec 17.4.3.14)
                 // xsd:boolean  REGEX (string literal text, simple literal pattern)
                 // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
                 Regex reg = (Regex) expr;
                 return (reg.getFlagsArg() != null)
-                        ? termFactory.getFunction(
+                        ? termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 3),
                         term1, term2,
                         getExpression(reg.getFlagsArg(), variables))
-                        : termFactory.getFunction(
+                        : termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
                         term1, term2);
-            } else if (expr instanceof Compare) {
+            }
+            else if (expr instanceof Compare) {
                 // TODO: make it a SPARQLFunctionSymbol
-                final FunctionSymbol p;
+                final SPARQLFunctionSymbol p;
 
                 switch (((Compare) expr).getOperator()) {
                     case NE:
-                        return termFactory.getFunction(
+                        return termFactory.getImmutableFunctionalTerm(
                                 functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getFunction(
+                                termFactory.getImmutableFunctionalTerm(
                                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.EQ, 2),
                                         term1, term2));
                     case EQ:
@@ -864,28 +899,29 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2);
                         break;
                     case LE:
-                        return termFactory.getFunction(
+                        return termFactory.getImmutableFunctionalTerm(
                                 functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getFunction(
+                                termFactory.getImmutableFunctionalTerm(
                                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2),
                                         term1, term2));
                     case GE:
-                        return termFactory.getFunction(
+                        return termFactory.getImmutableFunctionalTerm(
                                 functionSymbolFactory.getRequiredSPARQLFunctionSymbol(XPathFunction.NOT.getIRIString(), 1),
-                                termFactory.getFunction(
+                                termFactory.getImmutableFunctionalTerm(
                                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LESS_THAN, 2),
                                         term1, term2));
                     case GT:
                         p = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.GREATER_THAN, 2);
                         break;
                     default:
-                        throw new OntopUnsupportedInputQueryException("Unsupported operator: " + expr);
+                        throw new RuntimeException(new OntopUnsupportedInputQueryException("Unsupported operator: " + expr));
                 }
-                return termFactory.getFunction(p, term1, term2);
-            } else if (expr instanceof MathExpr) {
+                return termFactory.getImmutableFunctionalTerm(p, term1, term2);
+            }
+            else if (expr instanceof MathExpr) {
                 SPARQLFunctionSymbol f = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                        NumericalOperations.get(((MathExpr) expr).getOperator()), 2);
-                return termFactory.getFunction(f, term1, term2);
+                        NumericalOperations.get(((MathExpr)expr).getOperator()), 2);
+                return termFactory.getImmutableFunctionalTerm(f, term1, term2);
             }
             /*
              * Restriction: the first argument must be LANG(...) and the second  a constant
@@ -896,28 +932,29 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         && ((Function) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol))
                         || (!((term2 instanceof Function)
                         // TODO: support "real" constants (not wrapped into a functional term)
-                        && ((Function) term2).getFunctionSymbol() instanceof RDFTermFunctionSymbol))) {
-                    throw new OntopUnsupportedInputQueryException("The function langMatches is " +
-                            "only supported with lang(..) function for the first argument and a constant for the second");
+                        && ((Function) term2).getFunctionSymbol() instanceof RDFTermFunctionSymbol)) ) {
+                    throw new RuntimeException(new OntopUnsupportedInputQueryException("The function langMatches is " +
+                            "only supported with lang(..) function for the first argument and a constant for the second")
+                        );
                 }
 
                 SPARQLFunctionSymbol langMatchesFunctionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.LANG_MATCHES, 2);
 
-                return termFactory.getFunction(langMatchesFunctionSymbol, term1, term2);
+                return termFactory.getImmutableFunctionalTerm(langMatchesFunctionSymbol, term1, term2);
             }
-        } else if (expr instanceof FunctionCall) {
+        }
+        else if (expr instanceof FunctionCall) {
             FunctionCall f = (FunctionCall) expr;
 
-            int arity = f.getArgs().size();
-            List<Term> terms = new ArrayList<>(arity);
-            for (ValueExpr a : f.getArgs())
-                terms.add(getExpression(a, variables));
+            ImmutableList<ImmutableTerm> terms = f.getArgs().stream()
+                    .map(a -> getExpression(a,variables))
+                    .collect(ImmutableCollectors.toList());
 
             Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
                     f.getURI(), terms.size());
 
             if (optionalFunctionSymbol.isPresent()) {
-                return termFactory.getFunction(optionalFunctionSymbol.get(), terms);
+                return termFactory.getImmutableFunctionalTerm(optionalFunctionSymbol.get(), terms);
             }
         }
         // other subclasses
@@ -925,8 +962,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // If
         // BNodeGenerator
         // NAryValueOperator (ListMemberOperator and Coalesce)
-        throw new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!");
+        throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
     }
+
 
 
     /**
@@ -942,8 +980,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 getVariable(var);
     }
 
-    private static Variable getVariable(Var v) {
-        Variable var = DATA_FACTORY.getVariable(v.getName());
+    private Variable getVariable(Var v) {
+        Variable var = termFactory.getVariable(v.getName());
         return var;
     }
 
@@ -954,7 +992,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
      * @return term (URI template)
      */
 
-    private Term getTermForIri(IRI v) {
+    private ImmutableTerm getTermForIri(IRI v) {
 
         // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
         // string of an IRI might be a part of an IRI template, but not from database value.
@@ -962,6 +1000,31 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         //String uri = v.stringValue();
         return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
     }
+
+
+    private ImmutableTerm convertToXsdBooleanTerm(ImmutableTerm term) {
+
+        return term.inferType()
+                .flatMap(TermTypeInference::getTermType)
+                .filter(t -> t instanceof RDFDatatype)
+                .filter(t -> ((RDFDatatype) t).isA(XSD.BOOLEAN))
+                .isPresent()?
+                term :
+                termFactory.getSPARQLEffectiveBooleanValue(term);
+    }
+
+//    private void uncheckAndThrow(OntopUnsupportedInputQueryException e){
+//        throw new RuntimeException(e);
+//    }
+
+
+    private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
+            new ImmutableMap.Builder<MathExpr.MathOp, String>()
+                    .put(MathExpr.MathOp.PLUS, SPARQL.NUMERIC_ADD)
+                    .put(MathExpr.MathOp.MINUS, SPARQL.NUMERIC_SUBSTRACT)
+                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.NUMERIC_MULTIPLY)
+                    .put(MathExpr.MathOp.DIVIDE, SPARQL.NUMERIC_DIVIDE)
+                    .build();
 
     private static class TranslationResult {
         final IQTree iqTree;
