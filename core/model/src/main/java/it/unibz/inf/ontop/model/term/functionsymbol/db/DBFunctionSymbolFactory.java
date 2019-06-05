@@ -140,6 +140,11 @@ public interface DBFunctionSymbolFactory {
     DBIsNullOrNotFunctionSymbol getDBIsNull();
     DBIsNullOrNotFunctionSymbol getDBIsNotNull();
 
+    /**
+     * Min arity is 1
+     */
+    DBFunctionSymbol getDBCoalesce(int arity);
+
     FalseOrNullFunctionSymbol getFalseOrNullFunctionSymbol(int arity);
 
     TrueOrNullFunctionSymbol getTrueOrNullFunctionSymbol(int arity);
@@ -209,7 +214,7 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBMinutes();
     DBFunctionSymbol getDBSeconds();
     DBFunctionSymbol getDBTz();
-    DBFunctionSymbol getNow();
+    DBFunctionSymbol getDBNow();
 
     /**
      * The functional term using it may be simplifiable to a regular NULL or not, depending on the DB system.

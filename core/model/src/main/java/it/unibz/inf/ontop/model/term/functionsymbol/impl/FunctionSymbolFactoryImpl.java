@@ -34,6 +34,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
+    private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
@@ -65,6 +66,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
         this.commonDenominatorMap = new ConcurrentHashMap<>();
         this.concatMap = new ConcurrentHashMap<>();
+        this.coalesceMap = new ConcurrentHashMap<>();
         this.isAMap = new ConcurrentHashMap<>();
         this.lexicalInequalityFunctionSymbolMap = new ConcurrentHashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
@@ -241,6 +243,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 return Optional.of(createSPARQLUUIDFunctionSymbol());
             case SPARQL.STRUUID:
                 return Optional.of(createSPARQLStrUUIDFunctionSymbol());
+            case SPARQL.COALESCE:
+                return getSPARQLCoalesceFunctionSymbol(arity);
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
@@ -259,6 +263,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 ? Optional.empty()
                 : Optional.of(concatMap
                         .computeIfAbsent(arity, a -> new ConcatSPARQLFunctionSymbolImpl(a, typeFactory.getXsdStringDatatype())));
+    }
+
+    private Optional<SPARQLFunctionSymbol> getSPARQLCoalesceFunctionSymbol(int arity) {
+        return arity < 1
+                ? Optional.empty()
+                : Optional.of(coalesceMap
+                .computeIfAbsent(arity, a -> new CoalesceSPARQLFunctionSymbolImpl(a, typeFactory.getAbstractRDFTermType())));
     }
 
     /**

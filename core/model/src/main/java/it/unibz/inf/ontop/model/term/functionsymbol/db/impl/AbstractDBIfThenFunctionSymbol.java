@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  *
  * Arguments are an alternation of (ImmutableExpression, ImmutableTerm) plus optionally an ImmutableTerm for the default case
  */
-public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl implements DBFunctionSymbol {
+public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol {
 
     protected AbstractDBIfThenFunctionSymbol(@Nonnull String name, int arity, DBTermType dbBooleanType,
                                              DBTermType rootDBTermType) {
@@ -49,31 +49,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends FunctionSymbolImpl 
         return false;
     }
 
-    /**
-     * Is supposed to be strongly typed: does not compare the types of the possible values because
-     * they are supposed to be the sames.
-     */
     @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-
-        ImmutableList<TermTypeInference> typeInferences = extractPossibleValues(terms)
-                .map(t -> (t instanceof Variable)
-                        ? Optional.of(TermTypeInference.declareRedirectionToVariable((Variable) t))
-                        : t.inferType())
-                .flatMap(o -> o
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toList());
-
-        // Gives a preference to type inferences that determine the type (over the ones that redirect it to a variable)
-        return typeInferences.stream()
-                .filter(t -> t.getTermType().isPresent())
-                .map(Optional::of)
-                .findAny()
-                .orElseGet(() -> typeInferences.stream()
-                        .findAny());
-    }
-
     protected Stream<ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
         return IntStream.range(1, terms.size())
                 .filter(i -> i % 2 == 1)
