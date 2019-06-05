@@ -29,7 +29,9 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
@@ -52,16 +54,18 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private final TypeFactory typeFactory;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
+    private final RDF rdfFactory;
 
     @Inject
     public RDF4JInputQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory) {
+                                         TypeFactory typeFactory, IntermediateQueryFactory iqFactory, AtomFactory atomFactory, RDF rdfFactory) {
         this.coreUtilsFactory = coreUtilsFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.typeFactory = typeFactory;
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
+        this.rdfFactory = rdfFactory;
     }
 
     @Override
@@ -546,14 +550,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         TranslationResult leftTranslation = translate(union.getLeftArg(), variableGenerator);
         TranslationResult rightTranslation = translate(union.getRightArg(), variableGenerator);
 
-        IntermediateQuery leftQuery = leftTranslation.iqTree;
-        IntermediateQuery rightQuery = rightTranslation.iqTree;
+        IQTree leftQuery = leftTranslation.iqTree;
+        IQTree rightQuery = rightTranslation.iqTree;
 
         ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
         ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
 
-        ImmutableSet<Variable> leftVariables = leftQuery.getProjectionAtom().getVariables();
-        ImmutableSet<Variable> rightVariables = rightQuery.getProjectionAtom().getVariables();
+        ImmutableSet<Variable> leftVariables = leftQuery.getVariables();
+        ImmutableSet<Variable> rightVariables = rightQuery.getVariables();
 
         ImmutableSet<Variable> nullOnLeft = Sets.difference(rightVariables, leftVariables).immutableCopy();
         ImmutableSet<Variable> nullOnRight = Sets.difference(leftVariables, rightVariables).immutableCopy();
@@ -562,113 +566,92 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ImmutableSet<Variable> rootVariables = Sets.union(leftVariables, rightVariables).immutableCopy();
 
-        ImmutableSubstitution<ImmutableTerm> leftSubstitution = DATA_FACTORY.getSubstitution(nullOnLeft.stream()
+        ImmutableSubstitution<ImmutableTerm> leftSubstitution = substitutionFactory.getSubstitution(nullOnLeft.stream()
                 .collect(ImmutableCollectors.toMap(
                         x -> x,
-                        x -> NULL)));
+                        x -> termFactory.getNullConstant()
+                )));
 
-        ImmutableSubstitution<ImmutableTerm> rightSubstitution = DATA_FACTORY.getSubstitution(nullOnRight.stream()
+        ImmutableSubstitution<ImmutableTerm> rightSubstitution = substitutionFactory.getSubstitution(nullOnRight.stream()
                 .collect(ImmutableCollectors.toMap(
                         x -> x,
-                        x -> NULL)));
+                        x -> termFactory.getNullConstant()
+                )));
 
-        ConstructionNode leftNode = iqFactory.createConstructionNode(rootVariables, leftSubstitution);
-        ConstructionNode rightNode = iqFactory.createConstructionNode(rootVariables, rightSubstitution);
-
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                generateFreshPredicate("union", rootVariables.size()),
-                ImmutableList.copyOf(rootVariables));
+        ConstructionNode leftCn = iqFactory.createConstructionNode(rootVariables, leftSubstitution);
+        ConstructionNode rightCn = iqFactory.createConstructionNode(rootVariables, rightSubstitution);
 
         UnionNode unionNode = iqFactory.createUnionNode(rootVariables);
 
         ConstructionNode rootNode = iqFactory.createConstructionNode(rootVariables);
 
-        IntensionalDataNode leftIChild = iqFactory.createIntensionalDataNode(leftQuery.getProjectionAtom());//subsLeftAtom);;
-        IntensionalDataNode rightIChild = iqFactory.createIntensionalDataNode(rightQuery.getProjectionAtom());//subsRightAtom);;
-
-        IntermediateQueryBuilder queryBuilder = leftQuery.newBuilder();
-        queryBuilder.init(projectionAtom, rootNode);
-        queryBuilder.addChild(rootNode, unionNode);
-        queryBuilder.addChild(unionNode, leftNode);
-        queryBuilder.addChild(unionNode, rightNode);
-        queryBuilder.addChild(leftNode, leftIChild);
-        queryBuilder.addChild(rightNode, rightIChild);
-
-        IntermediateQuery newQuery = mergeChildren(queryBuilder.build(),
-                ImmutableMap.of(leftIChild, leftQuery, rightIChild, rightQuery));
-
-        return new TranslationResult(newQuery, allNullable, projectedVariables);
+        return new TranslationResult(
+                iqFactory.createUnaryIQTree(
+                        rootNode,
+                        iqFactory.createNaryIQTree(
+                                unionNode,
+                                ImmutableList.of(
+                                        iqFactory.createUnaryIQTree(
+                                                leftCn,
+                                                leftQuery
+                                        ),
+                                        iqFactory.createUnaryIQTree(
+                                                rightCn,
+                                                rightQuery
+                                        )))),
+                allNullable
+        );
     }
 
     private TranslationResult translateTriplePattern(StatementPattern triple) {
 
-        // A triple pattern is member of the set (RDF-T + V) x (I + V) x (RDF-T + V)
-        // VarOrTerm ::=  Var | GraphTerm
-        // GraphTerm ::=  iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | NIL
-
-
-        ImmutableList<Var> args = ImmutableList.of(
-                triple.getSubjectVar(),
-                triple.getPredicateVar(),
-                triple.getObjectVar());
-
-        final ImmutableList<VariableOrGroundTerm> terms = args.stream()
-                .map(this::translateVar)
-                .map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
-                .collect(ImmutableCollectors.toList());
-
-        final DataAtom dataAtom = DATA_FACTORY.getDataAtom(TRIPLE_PRED, terms);
-
-        final ImmutableList<Variable> signature = terms.stream()
-                .filter(Variable.class::isInstance)
-                .map(Variable.class::cast)
-                .collect(ImmutableCollectors.toList());
-
-        ConstructionNode root = iqFactory.createConstructionNode(ImmutableSet.copyOf(signature));
-
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                generateFreshPredicate("project", signature.size()),
-                signature
+        return new TranslationResult(
+                iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalTripleAtom(
+                                translateVar(triple.getSubjectVar()),
+                                translateVar(triple.getPredicateVar()),
+                                translateVar(triple.getObjectVar())
+                        )),
+                ImmutableSet.of()
         );
-
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(metadata, executorRegistry);
-        IntensionalDataNode atomNode = iqFactory.createIntensionalDataNode(dataAtom);
-
-        queryBuilder.init(projectionAtom, root);
-
-        queryBuilder.addChild(root, atomNode);
-
-        IntermediateQuery newQuery = queryBuilder.build();
-
-        return new TranslationResult(newQuery, ImmutableSet.of(), projectedVariables);
     }
 
     private TranslationResult translateExtension(Extension node, VariableGenerator variableGenerator) {
+
         TranslationResult childTranslation = translate(node.getArg(), variableGenerator);
-        IntermediateQuery childQuery = childTranslation.iqTree;
-        ImmutableSubstitution<ImmutableTerm> extSubstitution = DATA_FACTORY.getSubstitution(node.getElements().stream()
+        IQTree childQuery = childTranslation.iqTree;
+        ImmutableSet<Variable> childNullableVars = childTranslation.nullableVariables;
+
+        ImmutableSubstitution<ImmutableTerm> extSubstitution = substitutionFactory.getSubstitution(node.getElements().stream()
                 .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())))
                 .collect(ImmutableCollectors.toMap(
-                        x -> DATA_FACTORY.getVariable(x.getName()),
-                        x -> ImmutabilityTools.convertIntoImmutableTerm(getExpression(x.getExpr(), childQuery.getProjectionAtom().getVariables()))
-                )));
+                        x -> termFactory.getVariable(x.getName()),
+                        x -> getExpression(x.getExpr(), childQuery.getVariables()))
+                ));
 
-        ImmutableSet<Variable> projectedVariables =
-                Sets.union(childQuery.getProjectionAtom().getVariables(), extSubstitution.getDomain()).immutableCopy();
+        ImmutableSet<Variable> nullableVars = Stream.concat(
+                childNullableVars.stream(),
+                extSubstitution.getImmutableMap().entrySet().stream()
+                        .filter(e -> e.getValue().getVariableStream()
+                                .anyMatch(v -> childNullableVars.contains(v)))
+                .map(e -> e.getKey())
+        ).collect(ImmutableCollectors.toSet());
 
-        DistinctVariableOnlyDataAtom projectionAtom = DATA_FACTORY.getDistinctVariableOnlyDataAtom(
-                generateFreshPredicate("value", projectedVariables.size()),
-                ImmutableList.copyOf(projectedVariables)
+        ImmutableSet<Variable> projectedVariables = Stream.concat(
+                childQuery.getVariables().stream(),
+                extSubstitution.getDomain().stream()
+        ).collect(ImmutableCollectors.toSet());
+
+        return new TranslationResult(
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(
+                                projectedVariables,
+                                extSubstitution
+                        ),
+                        childQuery
+                ),
+                nullableVars
         );
-        ConstructionNode rootConstuction = iqFactory.createConstructionNode(projectedVariables, extSubstitution);
-        IntermediateQueryBuilder queryBuilder = childQuery.newBuilder();
-        queryBuilder.init(projectionAtom, rootConstuction);
-        IntensionalDataNode childNode = iqFactory.createIntensionalDataNode(childQuery.getProjectionAtom());
-        queryBuilder.addChild(rootConstuction, childNode);
-
-        IntermediateQuery newQuery = mergeChildren(queryBuilder.build(), ImmutableMap.of(childNode, childQuery));
-
-        return new TranslationResult(newQuery, ImmutableSet.of(), projectedVariables);
     }
 
     private ImmutableTerm getTermForLiteralOrIri(Value v) {
@@ -943,6 +926,41 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // BNodeGenerator
         // NAryValueOperator (ListMemberOperator and Coalesce)
         throw new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!");
+    }
+
+
+    /**
+     * translates a RDF4J var, which can be a variable or a constant, into a Ontop term.
+     *
+     * @param var RDF4J var, which can be a variable or a constant
+     */
+    private VariableOrGroundTerm translateVar(Var var) {
+        return (var.hasValue())?
+                ImmutabilityTools.convertIntoVariableOrGroundTerm(
+                        getTermForLiteralOrIri(var.getValue())
+                ):
+                getVariable(var);
+    }
+
+    private static Variable getVariable(Var v) {
+        Variable var = DATA_FACTORY.getVariable(v.getName());
+        return var;
+    }
+
+
+    /**
+     *
+     * @param v URI object
+     * @return term (URI template)
+     */
+
+    private Term getTermForIri(IRI v) {
+
+        // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
+        // string of an IRI might be a part of an IRI template, but not from database value.
+        String uri = R2RMLIRISafeEncoder.decode(v.stringValue());
+        //String uri = v.stringValue();
+        return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
     }
 
     private static class TranslationResult {
