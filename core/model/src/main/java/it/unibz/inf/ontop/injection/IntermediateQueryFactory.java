@@ -71,10 +71,6 @@ public interface IntermediateQueryFactory {
     AggregationNode createAggregationNode(ImmutableSet<Variable> groupingVariables,
                                           ImmutableSubstitution<ImmutableFunctionalTerm> substitution);
 
-    AggregationNode createAggregationNode(ImmutableSet<Variable> groupingVariables,
-                                          ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
-                                          ImmutableExpression havingCondition);
-
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
 

@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class AggregationNodeImpl extends CompositeQueryNodeImpl implements AggregationNode {
@@ -31,38 +30,14 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     private final ImmutableSet<Variable> groupingVariables;
     private final ImmutableSubstitution<ImmutableFunctionalTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
-    @Nullable
-    private final ImmutableExpression havingCondition;
 
-    /**
-     * No HAVING expression
-     */
     @AssistedInject
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
                                   SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
-        this(null, groupingVariables, substitution, substitutionFactory, iqFactory);
-    }
-
-    /**
-     * No HAVING expression
-     */
-    @AssistedInject
-    protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
-                                  @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
-                                  @Assisted ImmutableExpression havingCondition,
-                                  SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
-        this(havingCondition, groupingVariables, substitution, substitutionFactory, iqFactory);
-    }
-
-    protected AggregationNodeImpl(@Nullable ImmutableExpression havingCondition,
-                                ImmutableSet<Variable> groupingVariables,
-                                ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
-                                SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
         super(substitutionFactory, iqFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
-        this.havingCondition = havingCondition;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
         this.childVariables = Sets.union(groupingVariables,
                 substitution.getImmutableMap().values().stream()
@@ -131,11 +106,6 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     @Override
     public AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
         throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public Optional<ImmutableExpression> getOptionalHavingCondition() {
-        return Optional.ofNullable(havingCondition);
     }
 
     @Override

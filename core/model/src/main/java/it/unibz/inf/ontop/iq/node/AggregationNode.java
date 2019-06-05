@@ -29,7 +29,4 @@ public interface AggregationNode extends ExtendedProjectionNode {
     @Override
     AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
             throws QueryNodeTransformationException;
-
-
-    Optional<ImmutableExpression> getOptionalHavingCondition();
 }
