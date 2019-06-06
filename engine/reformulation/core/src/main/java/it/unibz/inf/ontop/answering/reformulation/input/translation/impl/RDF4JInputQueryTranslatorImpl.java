@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import io.mikael.urlbuilder.util.UrlParameterMultimap;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
@@ -281,13 +280,27 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private TranslationResult translateSlice(Slice node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult child = translate(node.getArg(), variableGenerator);
+
         return new TranslationResult(
                 iqFactory.createUnaryIQTree(
-                        iqFactory.createSliceNode(node.getOffset(), node.getLimit()),
+                        getSliceNode(node),
                         child.iqTree
                 ),
                 child.nullableVariables
         );
+    }
+
+    private SliceNode getSliceNode(Slice node) {
+        // Assumption: at least the limit or the offset is not -1 (otherwise the rdf4j parser would not generate a slice node)
+        long offset = node.getOffset() == -1?
+                0:
+                node.getOffset();
+        return node.getLimit() == -1?
+                iqFactory.createSliceNode(offset):
+                iqFactory.createSliceNode(
+                        offset,
+                        node.getLimit()
+                );
     }
 
     private TranslationResult translateFilter(Filter filter, VariableGenerator variableGenerator)
@@ -380,9 +393,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         IQTree joinQuery = buildJoinQuery(
                 ljNode,
-                leftQuery,
-                rightQuery,
-                leftRenamingSubstitution, rightRenamingSubstitution, topSubstitution
+                leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
+                rightQuery.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution),
+                topSubstitution,
+                toCoalesce
         );
 
         return new TranslationResult(joinQuery, newSetOfNullableVars);
@@ -444,12 +458,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         IQTree joinQuery = buildJoinQuery(
                 joinNode,
-                leftQuery,
-                rightQuery,
-                leftRenamingSubstitution,
-                rightRenamingSubstitution,
-                topSubstitution
-        );
+                leftQuery.applyDescendingSubstitutionWithoutOptimizing(leftRenamingSubstitution),
+                rightQuery.applyDescendingSubstitutionWithoutOptimizing(rightRenamingSubstitution),
+                topSubstitution,
+                bothSideNullableVars);
 
         return new TranslationResult(joinQuery, newSetOfNullableVars);
     }
@@ -521,29 +533,17 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private IQTree buildJoinQuery(JoinLikeNode joinNode,
                                   IQTree leftQuery,
                                   IQTree rightQuery,
-                                  InjectiveVar2VarSubstitution leftRenamingSubstitution,
-                                  InjectiveVar2VarSubstitution rightRenamingSubstitution,
-                                  ImmutableSubstitution<ImmutableTerm> topSubstitution
-    ) {
+                                  ImmutableSubstitution<ImmutableTerm> topSubstitution,
+                                  ImmutableSet<Variable> toCoalesce) {
 
-        IQTree leftTree = iqFactory.createUnaryIQTree(
-                getJoinOperandCN(
-                        leftQuery,
-                        leftRenamingSubstitution
-                ),
-                leftQuery
-        );
-        IQTree rightTree = iqFactory.createUnaryIQTree(
-                getJoinOperandCN(
-                        rightQuery,
-                        rightRenamingSubstitution
-                ),
-                rightQuery
-        );
+        ImmutableSet<Variable> projectedVariables = Stream.concat(
+                Stream.concat(
+                        leftQuery.getVariables().stream(),
+                        rightQuery.getVariables().stream()
+                ).filter(v -> !toCoalesce.contains(v)),
+                topSubstitution.getImmutableMap().keySet().stream())
+                .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> projectedVariables =
-                Sets.union(leftTree.getVariables(), rightTree.getVariables())
-                        .immutableCopy();
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(
@@ -552,19 +552,19 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 ),
                 getJoinTree(
                         joinNode,
-                        leftTree,
-                        rightTree
+                        leftQuery,
+                        rightQuery
                 ));
     }
 
-    private ConstructionNode getJoinOperandCN(IQTree tree, InjectiveVar2VarSubstitution sub) {
-        return iqFactory.createConstructionNode(
-                tree.getVariables().stream()
-                        .map(sub::applyToVariable)
-                        .collect(ImmutableCollectors.toSet()),
-                (ImmutableSubstitution) sub
-        );
-    }
+//    private ConstructionNode getJoinOperandCN(IQTree tree, InjectiveVar2VarSubstitution sub) {
+//        return iqFactory.createConstructionNode(
+//                tree.getVariables().stream()
+//                        .map(sub::applyToVariable)
+//                        .collect(ImmutableCollectors.toSet()),
+//                (ImmutableSubstitution) sub
+//        );
+//    }
 
     private IQTree getJoinTree(JoinLikeNode joinNode, IQTree leftTree, IQTree rightTree) {
         if (joinNode instanceof LeftJoinNode) {
@@ -600,7 +600,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                 pe -> termFactory.getVariable(pe.getTargetName())
                         )));
 
-        subQuery = subQuery.applyDescendingSubstitution(substitution, Optional.empty());
+        subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution);
         ConstructionNode projectNode = iqFactory.createConstructionNode(
                 projectionElems.stream()
                         .map(pe -> termFactory.getVariable(pe.getTargetName()))
