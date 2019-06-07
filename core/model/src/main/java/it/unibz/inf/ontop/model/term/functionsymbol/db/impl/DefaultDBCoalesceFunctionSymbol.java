@@ -132,12 +132,13 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 .map(Optional::of)
                 .map(oe -> oe
                         .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
-                                && ((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull())
+                                && !((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull())
                         // We extract the sub-term of the IS_NOT_NULL expression
                         .map(e -> e.getTerm(0)))
                 // Same expression (IS_NOT_NULL(term))
                 .orElseGet(() -> Optional.of(term))
                 // Currently we only consider the case where the sub-term is a variable
+                // TODO: generalize it
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable) t);
 
