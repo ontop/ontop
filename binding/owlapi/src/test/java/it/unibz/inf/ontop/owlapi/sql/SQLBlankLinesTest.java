@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.owlapi.sql;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
@@ -13,6 +16,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Scanner;
 
 import static org.junit.Assert.assertFalse;
@@ -97,8 +101,14 @@ public class SQLBlankLinesTest {
 		OntopOWLStatement st = conn.createStatement();
 
 
-		String sql = st.getExecutableQuery(query).toString();
-		boolean m = sql.matches("(?ms)(.*)\\n\\n(.*)");
+		NativeNode nativeNode = Optional.of(st.getExecutableQuery(query))
+				.map(IQ::getTree)
+				.filter(t -> t instanceof UnaryIQTree)
+				.map(t -> ((UnaryIQTree) t).getChild().getRootNode())
+				.filter(n -> n instanceof NativeNode)
+				.map(n -> (NativeNode)n)
+				.orElseThrow(() -> new RuntimeException("Test failed: no native node returned"));
+		boolean m = nativeNode.getNativeQueryString().matches("(?ms)(.*)\\n\\n(.*)");
 		assertFalse(m);
 	}
 
