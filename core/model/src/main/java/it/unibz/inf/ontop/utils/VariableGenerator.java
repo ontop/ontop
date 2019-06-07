@@ -13,6 +13,8 @@ import java.util.Collection;
  *
  * Do not expect implementations to be thread-safe!
  *
+ * See CoreUtilsFactory for building new instances
+ *
  */
 public interface VariableGenerator {
 

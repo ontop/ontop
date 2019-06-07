@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 /**
  * Beware: not thread-safe!
+ *
+ * See CoreUtilsFactory for building new instances
  */
 public class VariableGeneratorImpl implements VariableGenerator {
 
