@@ -2,19 +2,18 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class CoalesceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public class CoalesceSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
 
     protected CoalesceSPARQLFunctionSymbolImpl(int arity, RDFTermType rootRDFTermType) {
         super("SP_COALESCE" + arity, SPARQL.COALESCE,
@@ -24,17 +23,29 @@ public class CoalesceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPAR
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                               ImmutableTerm returnedTypeTerm) {
-        return termFactory.getDBCoalesce(subLexicalTerms);
-    }
+    protected final ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                           TermFactory termFactory, VariableNullability variableNullability) {
+        if (newTerms.stream().allMatch(ImmutableTerm::isNull))
+            return termFactory.getNullConstant();
 
-    @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
-                                            ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                            VariableNullability variableNullability) {
-        return termFactory.getDBCoalesce(typeTerms);
+        if (newTerms.stream()
+                .allMatch(t -> isRDFFunctionalTerm(t) || (t instanceof Constant))) {
+            ImmutableList<ImmutableTerm> typeTerms = newTerms.stream()
+                    .map(t -> extractRDFTermTypeTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableList<ImmutableTerm> subLexicalTerms = newTerms.stream()
+                    .map(t -> extractLexicalTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableTerm typeTerm = termFactory.getDBCoalesce(typeTerms);
+            ImmutableTerm lexicalTerm = termFactory.getDBCoalesce(subLexicalTerms);
+
+            return termFactory.getRDFFunctionalTerm(lexicalTerm, typeTerm)
+                    .simplify(variableNullability);
+        }
+        else
+            return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
     @Override
@@ -53,5 +64,10 @@ public class CoalesceSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPAR
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
+    }
+
+    @Override
+    protected boolean tolerateNulls() {
+        return true;
     }
 }
