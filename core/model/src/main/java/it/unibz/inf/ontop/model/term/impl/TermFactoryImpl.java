@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -492,6 +493,11 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public DBFunctionSymbolFactory getDBFunctionSymbolFactory() {
 		return dbFunctionSymbolFactory;
+	}
+
+	@Override
+	public <T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map) {
+		return new SimpleProtoSubstitutionImpl<>(map, this);
 	}
 
 	@Override

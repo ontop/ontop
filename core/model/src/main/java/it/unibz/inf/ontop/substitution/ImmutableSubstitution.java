@@ -13,32 +13,12 @@ import it.unibz.inf.ontop.model.term.*;
 
 /**
  * Declaration that the substitution is immutable and only refer to ImmutableTerms.
+ *
+ * See SubstitutionFactory for creating new instances
+ *
+ * NB: implementations depend of the AtomFactory
  */
-public interface ImmutableSubstitution<T extends ImmutableTerm> {
-
-    ImmutableMap<Variable, T> getImmutableMap();
-
-    boolean isDefining(Variable variable);
-
-    ImmutableSet<Variable> getDomain();
-
-    T get(Variable variable);
-
-    boolean isEmpty();
-
-    /**
-     * Applies the substitution to an immutable term.
-     */
-    ImmutableTerm apply(ImmutableTerm term);
-
-    /**
-     * This method can be applied to simple variables
-     */
-    ImmutableTerm applyToVariable(Variable variable);
-
-    ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm);
-
-    ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
+public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSubstitution<T> {
 
     /**
      * Only guaranteed for T extends VariableOrGroundTerm.
@@ -47,8 +27,6 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> {
      * a substituted term is not a VariableOrGroundTerm.
      */
     DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
-
-    ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;
