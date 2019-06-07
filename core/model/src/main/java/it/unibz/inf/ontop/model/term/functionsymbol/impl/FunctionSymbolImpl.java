@@ -96,7 +96,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      */
     private Optional<ImmutableTerm> simplifyIfElseNull(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
                                                        VariableNullability variableNullability) {
-        if (tolerateNulls()
+        if ((!enableIfElseNullLifting())
+                || tolerateNulls()
                 // Avoids infinite loops
                 || (this instanceof DBIfElseNullFunctionSymbol))
             return Optional.empty();
@@ -295,6 +296,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      *   2. May produce NULLs but it is always due to a NULL argument
      */
     protected abstract boolean mayReturnNullWithoutNullArguments();
+
+    /**
+     * Returns false if IfElseNullLifting must be disabled althrough it may have been technically possible.
+     *
+     * False by defaults
+     */
+    protected boolean enableIfElseNullLifting() {
+        return false;
+    }
 
     /**
      * To be overridden when is sometimes but not always injective in the absence of non-injective functional terms

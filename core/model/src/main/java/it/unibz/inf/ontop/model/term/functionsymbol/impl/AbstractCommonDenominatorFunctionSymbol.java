@@ -137,4 +137,9 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
     protected abstract Optional<RDFTermTypeConstant> evaluateCombination(ImmutableList<RDFTermTypeConstant> constants,
                                                                          Optional<RDFTermTypeConstant> optionalMergedTypeConstant,
                                                                          TermFactory termFactory);
+
+    @Override
+    protected boolean enableIfElseNullLifting() {
+        return true;
+    }
 }
