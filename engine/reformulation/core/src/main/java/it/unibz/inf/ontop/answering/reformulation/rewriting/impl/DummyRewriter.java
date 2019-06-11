@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.util.*;
@@ -71,14 +72,16 @@ public class DummyRewriter implements QueryRewriter {
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
                 // optimise with Sigma ABox dependencies
+                // mutable copy
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(list.get(i).getProjectionAtom(), sigma);
+                    final DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
+                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(atom, sigma);
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++)
                             if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
-                                list.remove(j);
+                                //list.remove(j);
                                 j--;
                             }
                     }
