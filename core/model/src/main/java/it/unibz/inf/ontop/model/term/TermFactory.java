@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -521,6 +522,14 @@ public interface TermFactory {
 																		ImmutableTerm rdfTypeTerm2);
 
 	DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+	/**
+	 * Minimalist substitution with minimal dependencies.
+	 * Designed to be used by FunctionSymbols.
+	 *
+	 * See the SubstitutionFactory for richer substitutions
+	 */
+	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
 	 * TODO: find a better name

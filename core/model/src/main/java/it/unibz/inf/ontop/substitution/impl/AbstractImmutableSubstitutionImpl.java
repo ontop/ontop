@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -22,63 +21,18 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm>
-        implements ImmutableSubstitution<T> {
+        extends AbstractProtoSubstitution<T> implements ImmutableSubstitution<T> {
 
     final AtomFactory atomFactory;
-    final TermFactory termFactory;
     final SubstitutionFactory substitutionFactory;
 
     protected AbstractImmutableSubstitutionImpl(AtomFactory atomFactory, TermFactory termFactory,
                                                 SubstitutionFactory substitutionFactory) {
+        super(termFactory);
         this.atomFactory = atomFactory;
-        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
     }
 
-    @Override
-    public ImmutableTerm apply(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            return term;
-        }
-        else if (term instanceof Variable) {
-            return applyToVariable((Variable) term);
-        }
-        else if (term instanceof ImmutableFunctionalTerm) {
-            return applyToFunctionalTerm((ImmutableFunctionalTerm) term);
-        }
-        else {
-            throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
-        }
-    }
-
-    @Override
-    public ImmutableFunctionalTerm applyToFunctionalTerm(ImmutableFunctionalTerm functionalTerm) {
-        if (isEmpty())
-            return functionalTerm;
-
-        ImmutableList.Builder<ImmutableTerm> subTermsBuilder = ImmutableList.builder();
-
-        for (ImmutableTerm subTerm : functionalTerm.getTerms()) {
-            subTermsBuilder.add(apply(subTerm));
-        }
-        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-
-        /*
-         * Distinguishes the BooleanExpression from the other functional terms.
-         */
-        if (functionSymbol instanceof BooleanFunctionSymbol) {
-            return termFactory.getImmutableExpression((BooleanFunctionSymbol) functionSymbol,
-                    subTermsBuilder.build());
-        }
-        else {
-            return termFactory.getImmutableFunctionalTerm(functionSymbol, subTermsBuilder.build());
-        }
-    }
-
-    @Override
-    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression) {
-        return (ImmutableExpression) apply(booleanExpression);
-    }
 
     @Override
     public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
@@ -92,13 +46,6 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         return atomFactory.getDataAtom(atom.getPredicate(),
                 (ImmutableList<? extends VariableOrGroundTerm>) newArguments);
-    }
-
-    @Override
-    public ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
-        return terms.stream()
-                .map(this::apply)
-                .collect(ImmutableCollectors.toList());
     }
 
     @Override
