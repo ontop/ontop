@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.owlapi;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,7 +49,7 @@ import static junit.framework.TestCase.*;
 /***
  * Check how the optional filter is converted in left join
  * We do not support this kind of SPARQL query because it is not a well designed graph pattern
- * 
+ *
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
  */
@@ -122,11 +122,12 @@ public class CompanyTest  {
 		sqlConnection.commit();
 	}
 
-	private void runOptionalTest() throws Exception {
+	@Test
+	public void runOptionalTest() throws Exception {
 
 		OWLStatement st = conn.createStatement();
 
-		
+
 		String queryEx =  "PREFIX : <http://it.unibz.krdb/obda/test/company#> SELECT * WHERE"
 				+ "{  ?v ?w  ?x } ";
 
@@ -135,11 +136,11 @@ public class CompanyTest  {
 				"}}}";
 
 		try {
-		
+
 			System.out.println(query);
-			
+
 			TupleOWLResultSet rs2 = st.executeSelectQuery(query);
-//
+
 			assertTrue(rs2.hasNext());
             final OWLBindingSet bindingSet = rs2.next();
             OWLObject ind2 = bindingSet.getOWLIndividual("z");
@@ -147,7 +148,7 @@ public class CompanyTest  {
 
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#1>", ind3.toString());
-			
+
 			assertFalse(rs2.hasNext());
 
 		} catch (Exception e) {
@@ -161,7 +162,8 @@ public class CompanyTest  {
 		}
 	}
 
-	private void runOptionalFilterTest() throws Exception {
+	@Test
+	public void runOptionalFilterTest() throws Exception {
 
 		OWLStatement st = conn.createStatement();
 
@@ -183,10 +185,7 @@ public class CompanyTest  {
 
 			assertEquals("HR", ind1.getLiteral());
 			assertEquals("<http://it.unibz.krdb/obda/test/company#mark>", ind2.toString());
-
-
 			assertFalse(rs2.hasNext());
-
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -195,13 +194,32 @@ public class CompanyTest  {
 	}
 
 	@Test
-	public void testViEqSig() throws Exception {
+	public void runSPOWithFilterTest() throws Exception {
+
+		OWLStatement st = conn.createStatement();
+
+		String query = "PREFIX : <http://it.unibz.krdb/obda/test/company#> " +
+				" SELECT * WHERE"
+				+ "{ ?c a :Department . ?c ?p ?o .}";
+
+
 		try {
-			runOptionalTest();
-			runOptionalFilterTest();
+
+			System.out.println(query);
+
+			TupleOWLResultSet  rs2 = st.executeSelectQuery(query);
+
+			while(rs2.hasNext()){
+				final OWLBindingSet bindings = rs2.next();
+				System.out.println(bindings);
+			}
+
+
+		} catch (Exception e) {
+			throw e;
 		} finally {
-			conn.close();
-			reasoner.dispose();
+			st.close();
 		}
 	}
+
 }
