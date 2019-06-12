@@ -77,13 +77,16 @@ public class DummyRewriter implements QueryRewriter {
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
                     final DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
-                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(atom, sigma);
+//                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtom(atom, sigma);
+                    ImmutableSet<DataAtom> derived = inclusionDependencyTools.chaseAtomUsingDLAxioms(atom, sigma);
                     if (!derived.isEmpty()) {
-                        for (int j = 0; j < list.size(); j++)
-                            if (i != j && derived.contains(list.get(j).getProjectionAtom())) {
-                                //list.remove(j);
+                        for (int j = 0; j < list.size(); j++){
+                            final DataAtom<AtomPredicate> potentialRedundantAtom = list.get(j).getProjectionAtom();
+                            if (i != j && derived.contains(potentialRedundantAtom)) {
+                                list.remove(j);
                                 j--;
                             }
+                        }
                     }
                 }
                 return ImmutableList.copyOf(list);

@@ -135,4 +135,18 @@ public class ImmutableLinearInclusionDependenciesTools {
                 .collect(ImmutableCollectors.toSet());
     }
 
+    /**
+     * Hotfix
+     * FIXME(xiao)
+     * @param atom
+     * @param dependencies
+     * @return
+     */
+    public ImmutableSet<DataAtom> chaseAtomUsingDLAxioms(DataAtom atom, ImmutableCollection<ImmutableLinearInclusionDependency<AtomPredicate>> dependencies) {
+        if (atom.getArguments().stream().allMatch(x -> x instanceof Variable)){
+            return ImmutableSet.of(atom);
+        } else {
+            return chaseAtom(atom, dependencies);
+        }
+    }
 }

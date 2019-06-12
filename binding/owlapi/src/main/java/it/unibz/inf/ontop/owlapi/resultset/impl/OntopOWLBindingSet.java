@@ -135,4 +135,9 @@ public class OntopOWLBindingSet implements OWLBindingSet {
         else
             return translator.translate((ValueConstant) c);
     }
+
+    @Override
+    public String toString() {
+        return ontopBindingSet.toString();
+    }
 }
