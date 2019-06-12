@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -193,6 +194,7 @@ public class CompanyTest  {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void runSPOWithFilterTest() throws Exception {
 
