@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -42,6 +41,8 @@ import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -57,6 +58,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private final AtomFactory atomFactory;
     private final RDF rdfFactory;
     private final FunctionSymbolFactory functionSymbolFactory;
+
+    private static final Logger log = LoggerFactory.getLogger(RDF4JInputQueryTranslatorImpl.class);
 
     @Inject
     public RDF4JInputQueryTranslatorImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
@@ -74,6 +77,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     @Override
     public IQ translate(ParsedQuery pq) {
+
+        log.debug("Parsed query:\n{}", pq.toString());
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableList.of());
 
         IQTree tree = null;
@@ -99,6 +104,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 ),
                 tree
         );
+//        ).normalizeForOptimization();
     }
 
     private TranslationResult translate(TupleExpr node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
@@ -956,7 +962,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
                         term1, term2);
             } else if (expr instanceof Compare) {
-                // TODO: make it a SPARQLFunctionSymbol
                 final SPARQLFunctionSymbol p;
 
                 switch (((Compare) expr).getOperator()) {
@@ -1001,11 +1006,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
              * (for guaranteeing that the langMatches logic is not delegated to the native query)
              */
             else if (expr instanceof LangMatches) {
-                if ((!((term1 instanceof Function)
-                        && ((Function) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol))
-                        || (!((term2 instanceof Function)
-                        // TODO: support "real" constants (not wrapped into a functional term)
-                        && ((Function) term2).getFunctionSymbol() instanceof RDFTermFunctionSymbol))) {
+                if (!(term1 instanceof ImmutableFunctionalTerm
+                        && ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
+                        || !(term2 instanceof RDFConstant)){
                     throw new RuntimeException(new OntopUnsupportedInputQueryException("The function langMatches is " +
                             "only supported with lang(..) function for the first argument and a constant for the second")
                     );

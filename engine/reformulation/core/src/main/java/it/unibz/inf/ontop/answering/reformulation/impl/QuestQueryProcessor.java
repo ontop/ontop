@@ -162,6 +162,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		try {
 
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
+			log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
 			//InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 
             try {

@@ -307,7 +307,7 @@ public abstract class QuestStatement implements OntopStatement {
 	private <R extends OBDAResultSet, Q extends InputQuery<R>> R executeInThread(Q inputQuery, Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
 
-		log.debug("Executing SPARQL query: \n{}", inputQuery);
+		log.debug("Executing SPARQL query: \n{}", inputQuery.getInputString());
 
 		CountDownLatch monitor = new CountDownLatch(1);
 		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery);
