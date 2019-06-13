@@ -409,83 +409,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 Optional.empty();
     }
 
-//    private TranslationResult translateOptional(LeftJoin leftJoin, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
-//
-//        TranslationResult leftTranslation = translate(leftJoin.getLeftArg(), variableGenerator);
-//        TranslationResult rightTranslation = translate(leftJoin.getRightArg(), variableGenerator);
-//
-//        IQTree leftQuery = leftTranslation.iqTree;
-//        IQTree rightQuery = rightTranslation.iqTree;
-//
-//        ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
-//        ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
-//
-//        ImmutableSet<Variable> projectedFromRight = rightTranslation.iqTree.getVariables();
-//        ImmutableSet<Variable> projectedFromLeft = leftTranslation.iqTree.getVariables();
-//
-//        ImmutableSet<Variable> toCoalesce = projectedFromLeft.stream()
-//                .filter(v -> projectedFromRight.contains(v))
-//                .filter(v -> nullableFromLeft.contains(v) || nullableFromRight.contains(v))
-//                .collect(ImmutableCollectors.toSet());
-//
-//        InjectiveVar2VarSubstitution leftRenamingSubstitution = generateVariableSubstitution(
-//                toCoalesce, variableGenerator);
-//        InjectiveVar2VarSubstitution rightRenamingSubstitution = generateVariableSubstitution(
-//                toCoalesce, variableGenerator);
-//
-//        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(toCoalesce.stream()
-//                .collect(ImmutableCollectors.toMap(
-//                        x -> x,
-//                        x -> termFactory.getImmutableFunctionalTerm(
-//                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.COALESCE, 2).get(),
-//                                leftRenamingSubstitution.get(x),
-//                                rightRenamingSubstitution.get(x)
-//                        ))));
-//
-//        LeftJoinNode ljNode;
-//        ImmutableSet<Variable> newSetOfNullableVars;
-//
-//        Optional<ImmutableExpression> filterExpression;
-//        ValueExpr filterCondition = leftJoin.getCondition();
-//        if (filterCondition != null) {
-//            ImmutableSet<Variable> knownVariables =
-//                    Sets.union(leftQuery.getKnownVariables(), rightQuery.getKnownVariables()).immutableCopy();
-//            ImmutableExpression filterExpressionBeforeSubst = getFilterExpression(filterCondition, knownVariables);
-//            filterExpression = Optional.of(topSubstitution.applyToBooleanExpression(filterExpressionBeforeSubst));
-//        } else {
-//            filterExpression = Optional.empty();
-//        }
-//
-//        Optional<ImmutableExpression> joinCondition = generateJoinCondition(
-//                leftRenamingSubstitution,
-//                rightRenamingSubstitution,
-//                toCoalesce,
-//                filterExpression
-//        );
-//
-//        ljNode = iqFactory.createLeftJoinNode(joinCondition);
-//
-//        ImmutableSet<Variable> newNullableVars =
-//                Sets.difference(rightQuery.getVariables(), leftQuery.getVariables())
-//                        .immutableCopy();
-//
-//        newSetOfNullableVars =
-//                Sets.union(Sets.union(nullableFromLeft, nullableFromRight), newNullableVars)
-//                        .immutableCopy();
-//
-//        IQTree joinQuery = buildJoinQuery(
-//                ljNode,
-//                leftQuery,
-//                rightQuery,
-//                topSubstitution,
-//                leftRenamingSubstitution,
-//                rightRenamingSubstitution,
-//                toCoalesce
-//        );
-//
-//        return new TranslationResult(joinQuery, newSetOfNullableVars);
-//    }
-
     private InjectiveVar2VarSubstitution generateVariableSubstitution(
             ImmutableSet<Variable> nullableVariables, VariableGenerator variableGenerator) {
 
@@ -495,62 +418,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         variableGenerator::generateNewVariableFromVar
                 )));
     }
-
-//    private TranslationResult translateJoin(Join join, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
-//
-//        TranslationResult leftTranslation = translate(join.getLeftArg(), variableGenerator);
-//        TranslationResult rightTranslation = translate(join.getRightArg(), variableGenerator);
-//
-//        IQTree leftQuery = leftTranslation.iqTree;
-//        IQTree rightQuery = rightTranslation.iqTree;
-//
-//        ImmutableSet<Variable> nullableFromLeft = leftTranslation.nullableVariables;
-//        ImmutableSet<Variable> nullableFromRight = rightTranslation.nullableVariables;
-//
-//        ImmutableSet<Variable> toSubstituteLeft =
-//                Sets.intersection(nullableFromLeft, rightQuery.getVariables()).immutableCopy();
-//        ImmutableSet<Variable> toSubstituteRight =
-//                Sets.intersection(nullableFromRight, leftQuery.getVariables()).immutableCopy();
-//
-//        InjectiveVar2VarSubstitution leftRenamingSubstitution = generateVariableSubstitution(toSubstituteLeft,
-//                variableGenerator);
-//        InjectiveVar2VarSubstitution rightRenamingSubstitution = generateVariableSubstitution(toSubstituteRight,
-//                variableGenerator);
-//
-//        ImmutableSet<Variable> bothSideNullableVars = Sets.intersection(nullableFromLeft, nullableFromRight).immutableCopy();
-//
-//        ImmutableSubstitution<ImmutableTerm> topSubstitution = substitutionFactory.getSubstitution(bothSideNullableVars.stream()
-//                .collect(ImmutableCollectors.toMap(
-//                        x -> x,
-//                        x -> termFactory.getImmutableFunctionalTerm(
-//                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.COALESCE, 2).get(),
-//                                leftRenamingSubstitution.get(x),
-//                                rightRenamingSubstitution.get(x)
-//                        ))));
-//
-//        InnerJoinNode joinNode;
-//        ImmutableSet<Variable> newSetOfNullableVars;
-//
-//        joinNode = iqFactory.createInnerJoinNode(generateJoinCondition(
-//                leftRenamingSubstitution,
-//                rightRenamingSubstitution,
-//                bothSideNullableVars,
-//                Optional.empty())
-//        );
-//
-//        newSetOfNullableVars = Sets.union(nullableFromLeft, nullableFromRight).immutableCopy();
-//
-//        IQTree joinQuery = buildJoinQuery(
-//                joinNode,
-//                leftQuery,
-//                rightQuery,
-//                topSubstitution,
-//                leftRenamingSubstitution,
-//                rightRenamingSubstitution,
-//                bothSideNullableVars);
-//
-//        return new TranslationResult(joinQuery, newSetOfNullableVars);
-//    }
 
     private Optional<ImmutableExpression> generateJoinCondition(InjectiveVar2VarSubstitution leftRenamingSubstitution,
                                                                 InjectiveVar2VarSubstitution rightRenamingSubstitution,
@@ -668,6 +535,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                 pe -> termFactory.getVariable(pe.getTargetName())
                         )));
 
+        ImmutableSet<Variable> projectedVars = projectionElems.stream()
+                .map(pe -> termFactory.getVariable(pe.getTargetName()))
+                .collect(ImmutableCollectors.toSet());
+
+        if(substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())){
+            return child;
+        }
+
         subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution);
         ConstructionNode projectNode = iqFactory.createConstructionNode(
                 projectionElems.stream()
@@ -766,7 +641,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // Warning: an ExtensionElement might reference a variable appearing in a previous ExtensionElement
         // So we may need to nest them
 
-        // Assumption: the query is well-formed: every variable used is defined either in the subtree of in a previous ExtensionElem
+        // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
         ImmutableList<VarDef> varDefs = ImmutableList.copyOf(
                 getVarDefs(
                         node.getElements().iterator(),
@@ -782,42 +657,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 mergedVarDefs.reverse().iterator(),
                 childTranslation
         );
-
-
-//
-//        ImmutableSubstitution<ImmutableTerm> extSubstitution = substitutionFactory.getSubstitution(
-//                node.getElements().stream()
-//                        .filter(ee -> !(ee.getExpr() instanceof Var && ee.getName().equals(((Var) ee.getExpr()).getName())))
-//                        .collect(ImmutableCollectors.toMap(
-//                                x -> termFactory.getVariable(x.getName()),
-//                                x -> getTerm(
-//                                        x.getExpr(),
-//                                        childQuery.getVariables())
-//                        )));
-//
-//        ImmutableSet<Variable> nullableVars = Stream.concat(
-//                childNullableVars.stream(),
-//                extSubstitution.getImmutableMap().entrySet().stream()
-//                        .filter(e -> e.getValue().getVariableStream()
-//                                .anyMatch(childNullableVars::contains))
-//                        .map(Map.Entry::getKey)
-//        ).collect(ImmutableCollectors.toSet());
-//
-//        ImmutableSet<Variable> projectedVariables = Stream.concat(
-//                childQuery.getVariables().stream(),
-//                extSubstitution.getDomain().stream()
-//        ).collect(ImmutableCollectors.toSet());
-//
-//        return new TranslationResult(
-//                iqFactory.createUnaryIQTree(
-//                        iqFactory.createConstructionNode(
-//                                projectedVariables,
-//                                extSubstitution
-//                        ),
-//                        childQuery
-//                ),
-//                nullableVars
-//        );
     }
 
     private List<VarDef> getVarDefs(Iterator<ExtensionElem> it, Set<Variable> allowedVars) {
@@ -847,18 +686,21 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private TranslationResult translateExtensionElems(UnmodifiableIterator<ImmutableSubstitution> it, TranslationResult subquery) {
         if (it.hasNext()) {
             ImmutableSubstitution sub = it.next();
-            TranslationResult childCn = translateExtensionElems(it,subquery);
-            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub.getImmutableMap(), childCn.nullableVariables);
+            TranslationResult child = translateExtensionElems(it,subquery);
+            ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub.getImmutableMap(), child.nullableVariables);
             return new TranslationResult(
                     iqFactory.createUnaryIQTree(
                             iqFactory.createConstructionNode(
-                                    childCn.iqTree.getVariables(),
+                                    Sets.union(
+                                            child.iqTree.getVariables(),
+                                            sub.getDomain()
+                                    ).immutableCopy(),
                                     sub
                             ),
-                            childCn.iqTree
+                            child.iqTree
                     ),
                     Sets.union(
-                            childCn.nullableVariables,
+                            child.nullableVariables,
                             newNullableVariables
                     ).immutableCopy()
             );
@@ -1214,11 +1056,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 term :
                 termFactory.getSPARQLEffectiveBooleanValue(term);
     }
-
-//    private void uncheckAndThrow(OntopUnsupportedInputQueryException e){
-//        throw new RuntimeException(e);
-//    }
-
 
     private static final ImmutableMap<MathExpr.MathOp, String> NumericalOperations =
             new ImmutableMap.Builder<MathExpr.MathOp, String>()
