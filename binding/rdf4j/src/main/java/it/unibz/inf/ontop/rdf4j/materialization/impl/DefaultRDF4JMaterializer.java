@@ -30,9 +30,11 @@ import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
+import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.Statement;
@@ -52,16 +54,21 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
 	private final OntopRDFMaterializer materializer;
 
-	public DefaultRDF4JMaterializer() {
-		materializer = OntopRDFMaterializer.defaultMaterializer();
+	public DefaultRDF4JMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+		materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);
+	}
+
+	/**
+	 * Materializes the saturated RDF graph with the default options
+	 */
+	public DefaultRDF4JMaterializer(OntopSystemConfiguration configuration) throws OBDASpecificationException {
+		this(configuration, MaterializationParams.defaultBuilder().build());
 	}
 
 	@Override
-	public MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-                                                 @Nonnull MaterializationParams params) throws RepositoryException {
+	public MaterializationGraphQuery materialize() throws RepositoryException {
 		try {
-			MaterializedGraphResultSet graphResultSet = materializer.materialize(
-					configuration, params);
+			MaterializedGraphResultSet graphResultSet = materializer.materialize();
 
 			return new DefaultMaterializedGraphQuery(graphResultSet);
 
@@ -71,19 +78,26 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 	}
 
 	@Override
-	public MaterializationGraphQuery materialize(@Nonnull OntopSystemConfiguration configuration,
-												 @Nonnull ImmutableSet<IRI> selectedVocabulary,
-												 @Nonnull MaterializationParams params)
+	public MaterializationGraphQuery materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary)
 			throws RepositoryException {
 		try {
-			MaterializedGraphResultSet graphResultSet = materializer.materialize(configuration, selectedVocabulary,
-					params);
+			MaterializedGraphResultSet graphResultSet = materializer.materialize(selectedVocabulary);
 
 			return new DefaultMaterializedGraphQuery(graphResultSet);
 
 		} catch (OBDASpecificationException e) {
 			throw new RepositoryException(e);
 		}
+	}
+
+	@Override
+	public ImmutableSet<IRI> getClasses() {
+		return materializer.getClasses();
+	}
+
+	@Override
+	public ImmutableSet<IRI> getProperties() {
+		return materializer.getProperties();
 	}
 
 	/**

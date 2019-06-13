@@ -115,5 +115,4 @@ public class ImmutableLinearInclusionDependenciesTools {
             return translate(property, variableXname, existentialVariableName);
         }
     }
-
 }

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import fj.P2;
 import fj.data.List;
@@ -13,11 +14,8 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -44,9 +42,6 @@ public class DatalogRule2QueryConverter {
             dataAndCompositeAtoms = datalogTools.filterDataAndCompositeAtoms(atoms);
             List<Function> otherAtoms = datalogTools.filterNonDataAndCompositeAtoms(atoms);
             booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
-
-            if (dataAndCompositeAtoms.isEmpty())
-                throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("No data or composite atom in " + atoms);
 
             /*
              * May throw a NotSupportedConversionException
@@ -236,7 +231,10 @@ public class DatalogRule2QueryConverter {
                 classification.booleanAtoms);
 
         if (classification.dataAndCompositeAtoms.isEmpty()) {
-            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Empty join found");
+            return optionalFilterCondition
+                    .map(ImmutableFunctionalTerm::getVariables)
+                    .map(iqFactory::createEmptyNode)
+                    .orElseGet(() -> iqFactory.createEmptyNode(ImmutableSet.of()));
         }
         /*
          * May happen because this method can also be called after the LJ conversion
