@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -42,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -74,17 +74,13 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     @Override
-    public IQ translate(ParsedQuery pq) {
+    public IQ translate(ParsedQuery pq) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
-        log.debug("Parsed query:\n{}", pq.toString());
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableList.of());
 
-        IQTree tree = null;
-        try {
-            tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
-        } catch (OntopInvalidInputQueryException | OntopUnsupportedInputQueryException e) {
-            e.printStackTrace();
-        }
+        log.debug("Parsed query:\n{}", pq.toString());
+
+        IQTree tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
 
         ImmutableSet<Variable> vars = tree.getVariables();
 
@@ -103,6 +99,39 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 tree
         );
 //        ).normalizeForOptimization();
+    }
+
+    @Override
+    public IQ translateAskQuery(ParsedQuery pq) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+
+        VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableList.of());
+
+        log.debug("Parsed query:\n{}", pq.toString());
+
+        IQTree tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
+
+        return iqFactory.createIQ(
+                atomFactory.getDistinctVariableOnlyDataAtom(
+                        atomFactory.getRDFAnswerPredicate(0),
+                        ImmutableList.of()
+                ),
+                projectOutAllVars(tree)
+        );
+    }
+
+    private IQTree projectOutAllVars(IQTree tree) {
+        if (tree.getRootNode() instanceof QueryModifierNode) {
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) tree.getRootNode(),
+                    projectOutAllVars(((UnaryIQTree) tree).getChild())
+            );
+        }
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(
+                        ImmutableSet.of()
+                ),
+                tree
+        );
     }
 
     private TranslationResult translate(TupleExpr node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
@@ -539,7 +568,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .map(pe -> termFactory.getVariable(pe.getTargetName()))
                 .collect(ImmutableCollectors.toSet());
 
-        if(substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())){
+        if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
 
@@ -650,7 +679,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
                 .map(m -> ImmutableMap.copyOf(m))
-                .map(m ->substitutionFactory.getSubstitution(m))
+                .map(m -> substitutionFactory.getSubstitution(m))
                 .collect(ImmutableCollectors.toList());
 
         return translateExtensionElems(
@@ -686,7 +715,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private TranslationResult translateExtensionElems(UnmodifiableIterator<ImmutableSubstitution> it, TranslationResult subquery) {
         if (it.hasNext()) {
             ImmutableSubstitution sub = it.next();
-            TranslationResult child = translateExtensionElems(it,subquery);
+            TranslationResult child = translateExtensionElems(it, subquery);
             ImmutableSet<Variable> newNullableVariables = getNewNullableVars(sub.getImmutableMap(), child.nullableVariables);
             return new TranslationResult(
                     iqFactory.createUnaryIQTree(
@@ -723,8 +752,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     private List<HashMap<Variable, ImmutableTerm>> mergeVarDefs(UnmodifiableIterator<VarDef> it) {
         if (it.hasNext()) {
             VarDef varDef = it.next();
-            List <HashMap<Variable, ImmutableTerm>> subs = mergeVarDefs(it);
-            HashMap<Variable, ImmutableTerm> currentsub = subs.get(subs.size() -1);
+            List<HashMap<Variable, ImmutableTerm>> subs = mergeVarDefs(it);
+            HashMap<Variable, ImmutableTerm> currentsub = subs.get(subs.size() - 1);
             if (varDef.term.getVariableStream()
                     .anyMatch(v -> currentsub.containsKey(v))) {
                 HashMap<Variable, ImmutableTerm> map = new HashMap<>();

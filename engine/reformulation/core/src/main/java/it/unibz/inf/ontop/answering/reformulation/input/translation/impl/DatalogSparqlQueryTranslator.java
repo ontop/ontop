@@ -56,4 +56,9 @@ public class DatalogSparqlQueryTranslator implements RDF4JInputQueryTranslator {
 
         return null;
     }
+
+    @Override
+    public IQ translateAskQuery(ParsedQuery parsedQuery) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
+        return null;
+    }
 }

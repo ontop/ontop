@@ -12,4 +12,7 @@ public interface RDF4JInputQueryTranslator extends InputQueryTranslator {
      */
     IQ translate(ParsedQuery inputParsedQuery)
             throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
+
+    IQ translateAskQuery(ParsedQuery parsedQuery)
+            throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 }

@@ -320,6 +320,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		DatalogProgram program = iqConverter.translate(query);
 
+		log.debug("Input Datalog program:\n{}",program);
+
 		List<CQIE> outputRules = new LinkedList<>();
 		Multimap<Predicate, CQIE> ccDP = null;
 		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
