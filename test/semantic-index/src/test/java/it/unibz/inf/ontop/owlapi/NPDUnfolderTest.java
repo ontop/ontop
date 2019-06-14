@@ -247,7 +247,7 @@ public class NPDUnfolderTest extends TestCase {
 	 */
 	private String getRewriting(String query) throws Exception {
         Properties p = new Properties();
-//        p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
+        p.put(OntopReformulationSettings.EXISTENTIAL_REASONING, true);
 
 
         OntopOWLFactory fac = OntopOWLFactory.defaultFactory();

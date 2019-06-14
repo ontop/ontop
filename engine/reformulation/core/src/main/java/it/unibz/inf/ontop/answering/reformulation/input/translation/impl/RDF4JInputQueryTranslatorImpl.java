@@ -98,6 +98,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 ),
                 tree
         ).normalizeForOptimization();
+//        );
     }
 
     @Override
