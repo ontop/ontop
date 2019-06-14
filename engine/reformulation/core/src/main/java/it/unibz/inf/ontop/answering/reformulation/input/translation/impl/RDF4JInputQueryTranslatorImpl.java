@@ -97,8 +97,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         projectedVars
                 ),
                 tree
-        );
-//        ).normalizeForOptimization();
+//        );
+        ).normalizeForOptimization();
     }
 
     @Override
@@ -116,7 +116,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ImmutableList.of()
                 ),
                 projectOutAllVars(tree)
-        );
+//        );
+        ).normalizeForOptimization();
     }
 
     private IQTree projectOutAllVars(IQTree tree) {

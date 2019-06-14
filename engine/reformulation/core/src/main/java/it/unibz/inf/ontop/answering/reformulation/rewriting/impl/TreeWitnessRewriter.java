@@ -29,6 +29,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableCQ;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.exception.UnsupportedFeatureForDatalogConversionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -318,7 +319,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		
 		double startime = System.currentTimeMillis();
 
-		DatalogProgram program = iqConverter.translate(query);
+		DatalogProgram program = null;
+		try {
+			program = iqConverter.translate(query);
+		} catch (UnsupportedFeatureForDatalogConversionException e) {
+			throw new RuntimeException("Some features of the input query are not compatible with existential reasoning");
+		}
 
 		log.debug("Input Datalog program:\n{}",program);
 

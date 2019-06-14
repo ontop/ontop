@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
+import it.unibz.inf.ontop.datalog.exception.UnsupportedFeatureForDatalogConversionException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -51,7 +49,13 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
 
     private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
         return unionSplitter.splitUnion(unionNormalizer.optimize(mappingQuery))
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                .flatMap(q -> {
+                    try {
+                        return iq2DatalogTranslator.translate(q).getRules().stream();
+                    } catch (UnsupportedFeatureForDatalogConversionException e) {
+                        throw new RuntimeException("Unsupported feature in mapping source query: "+e.getMessage());
+                    }
+                })
                 .collect(ImmutableCollectors.toSet())
                 .stream();
     }
