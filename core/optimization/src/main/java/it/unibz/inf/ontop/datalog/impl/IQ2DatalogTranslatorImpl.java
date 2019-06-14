@@ -182,14 +182,14 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
                 }else if(root instanceof SliceNode){
                     slice++;
                 }
-                checkQueryModifiers(((UnaryIQTree) tree).getChild(),fullTree,  slice, distinct, order, nonCnOrQm);
-            }
-            if (!(root instanceof ConstructionNode)){
-                nonCnOrQm++;
-            }
-
-            for (IQTree child : tree.getChildren()) {
-                checkQueryModifiers(child, fullTree, slice, distinct, order, nonCnOrQm);
+              checkQueryModifiers(((UnaryIQTree) tree).getChild(),fullTree,  slice, distinct, order, nonCnOrQm);
+            } else {
+                if (!(root instanceof ConstructionNode)) {
+                    nonCnOrQm++;
+                }
+                for (IQTree child : tree.getChildren()) {
+                    checkQueryModifiers(child, fullTree, slice, distinct, order, nonCnOrQm);
+                }
             }
         }
     }

@@ -323,7 +323,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		try {
 			program = iqConverter.translate(query);
 		} catch (UnsupportedFeatureForDatalogConversionException e) {
-			throw new RuntimeException("Some features of the input query are not compatible with existential reasoning");
+			throw new RuntimeException("Some features of the input query are not compatible with existential reasoning",e);
 		}
 
 		log.debug("Input Datalog program:\n{}",program);

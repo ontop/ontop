@@ -97,7 +97,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         projectedVars
                 ),
                 tree
-//        );
         ).normalizeForOptimization();
     }
 
@@ -116,7 +115,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ImmutableList.of()
                 ),
                 projectOutAllVars(tree)
-//        );
         ).normalizeForOptimization();
     }
 
@@ -863,9 +861,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // iriOrFunction ::= iri ArgList?
 
         if (expr instanceof Var) {
-            Var v = (Var) expr;
-            Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ? var : termFactory.getNullConstant();
+            return translateVar((Var)expr);
         } else if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
             return getTermForLiteralOrIri(v);

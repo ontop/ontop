@@ -254,7 +254,9 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 */
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
+		log.debug("SPARQL query:\n{}", query.getInputString());
 		IQ convertedIQ = query.translate(inputQueryTranslator);
+		log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
 		try {
           //  IQ convertedIQ = preProcess(translation);
 			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);

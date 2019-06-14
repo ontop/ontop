@@ -53,7 +53,7 @@ public class Mapping2DatalogConverterImpl implements Mapping2DatalogConverter {
                     try {
                         return iq2DatalogTranslator.translate(q).getRules().stream();
                     } catch (UnsupportedFeatureForDatalogConversionException e) {
-                        throw new RuntimeException("Unsupported feature in mapping source query: "+e.getMessage());
+                        throw new RuntimeException("Unsupported feature in mapping source query",e);
                     }
                 })
                 .collect(ImmutableCollectors.toSet())
