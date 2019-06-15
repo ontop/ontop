@@ -38,7 +38,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.eclipse.rdf4j.query.algebra.Distinct;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -62,6 +61,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
     private final TermFactory termFactory;
     private final OrderByLifter orderByLifter;
     private final SliceLifter sliceLifter;
+    private final DistinctLifter distinctLifter;
 
     private static class RuleHead {
         public final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -83,7 +83,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
     private IQ2DatalogTranslatorImpl(IntermediateQueryFactory iqFactory, AtomFactory atomFactory,
                                      SubstitutionFactory substitutionFactory, DatalogFactory datalogFactory,
                                      ImmutabilityTools immutabilityTools, TermFactory termFactory,
-                                     OrderByLifter orderByLifter, SliceLifter sliceLifter) {
+                                     OrderByLifter orderByLifter, SliceLifter sliceLifter, DistinctLifter distinctLifter) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
@@ -92,6 +92,7 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
         this.termFactory = termFactory;
         this.orderByLifter = orderByLifter;
         this.sliceLifter = sliceLifter;
+        this.distinctLifter = distinctLifter;
         this.subQueryCounter = 0;
         this.dummyPredCounter = 0;
     }
@@ -117,8 +118,8 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 
         checkQueryModifiers(initialTree, initialTree, 0, 0, 0, 0);
 
-        // Assumption: the unique slice node (if present) is above the unique order by node (if present)
-        IQTree sliceLiftedTree = liftSlice(initialTree);
+        IQTree distinctLiftedTree = liftDistinct(initialTree);
+        IQTree sliceLiftedTree = liftSlice(distinctLiftedTree);
         IQTree orderLiftedTree = liftOrderBy(sliceLiftedTree);
         Optional<MutableQueryModifiers> optionalModifiers = extractTopQueryModifiers(orderLiftedTree);
 
@@ -227,8 +228,10 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
 
 
     /**
-     * Assumes that ORDER BY is ABOVE the first construction node
-     * and the order between these operators is respected and they appear ONE time maximum
+     * Assumes that:
+     * - modifiers are above the first construction node
+     * - the order between modifiers (if present is) is Distinct - Slice - OrderBy
+     * - each modifier appears at most once
      */
     private Optional<MutableQueryModifiers> extractTopQueryModifiers(IQTree tree) {
         QueryNode rootNode = tree.getRootNode();
@@ -596,16 +599,20 @@ public class IQ2DatalogTranslatorImpl implements IQ2DatalogTranslator {
      * Move ORDER BY above the highest construction node (required by Datalog)
      */
     private IQTree liftOrderBy(IQTree tree) {
-        IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(tree);
-        if ((topNonQueryModifierTree instanceof UnaryIQTree)
-                && (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByNode)) {
-            return orderByLifter.liftOrderBy(tree);
-        }
-        return tree;
+        return orderByLifter.liftOrderBy(tree);
+//        IQTree topNonQueryModifierTree = getFirstNonQueryModifierTree(tree);
+//        if ((topNonQueryModifierTree instanceof UnaryIQTree)
+//                && (((UnaryIQTree) topNonQueryModifierTree).getChild().getRootNode() instanceof OrderByNode)) {
+//            return orderByLifter.liftOrderBy(tree);
+//        }
+//        return tree;
     }
 
     private IQTree liftSlice(IQTree iqTree) {
         return sliceLifter.liftSlice(iqTree);
     }
 
+    private IQTree liftDistinct(IQTree iqTree) {
+        return distinctLifter.liftDistinct(iqTree);
+    }
 }
