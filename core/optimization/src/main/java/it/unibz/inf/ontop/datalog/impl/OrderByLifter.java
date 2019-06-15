@@ -28,7 +28,10 @@ public class OrderByLifter {
         QueryNode root = iqTree.getRootNode();
 
         if(root instanceof DistinctNode || root instanceof SliceNode){
-            return liftOrderBy(((UnaryIQTree) iqTree).getChild());
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) root,
+                    liftOrderBy(((UnaryIQTree) iqTree).getChild())
+            );
         }
         if (root instanceof ConstructionNode) {
             IQTree child = liftOrderBy(((UnaryIQTree) iqTree).getChild());

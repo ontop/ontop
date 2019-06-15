@@ -25,7 +25,10 @@ public class SliceLifter {
         QueryNode root = iqTree.getRootNode();
 
         if(root instanceof DistinctNode){
-            return liftSlice(((UnaryIQTree) iqTree).getChild());
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) root,
+                    liftSlice(((UnaryIQTree) iqTree).getChild())
+            );
         }
         if (root instanceof ConstructionNode) {
             IQTree child = liftSlice(((UnaryIQTree) iqTree).getChild());
