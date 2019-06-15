@@ -72,4 +72,6 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
 
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
+
+
 }

@@ -8,7 +8,9 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
@@ -82,7 +84,56 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if ((!tolerateNulls()) && newTerms.stream().anyMatch(t -> (t instanceof Constant) && t.isNull()))
             return termFactory.getNullConstant();
 
-        return buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+        return simplifyIfElseNull(newTerms, termFactory, variableNullability)
+                .orElseGet(() -> buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    /**
+     * If one arguments is a IF_ELSE_NULL(...) functional term, tries to lift the IF_ELSE_NULL above.
+     *
+     * Lifting is only possible for function symbols that do not tolerate nulls.
+     *
+     */
+    private Optional<ImmutableTerm> simplifyIfElseNull(ImmutableList<ImmutableTerm> terms, TermFactory termFactory,
+                                                       VariableNullability variableNullability) {
+        if ((!enableIfElseNullLifting())
+                || tolerateNulls()
+                // Avoids infinite loops
+                || (this instanceof DBIfElseNullFunctionSymbol))
+            return Optional.empty();
+
+        return IntStream.range(0, terms.size())
+                .filter(i -> {
+                    ImmutableTerm term = terms.get(i);
+                    return (term instanceof ImmutableFunctionalTerm)
+                            && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol);
+                })
+                .boxed()
+                .findAny()
+                .map(i -> liftIfElseNull(terms, i, termFactory, variableNullability));
+    }
+
+    /**
+     * Lifts the IF_ELSE_NULL above the current functional term
+     */
+    private ImmutableTerm liftIfElseNull(ImmutableList<ImmutableTerm> terms, int index, TermFactory termFactory,
+                                         VariableNullability variableNullability) {
+        ImmutableFunctionalTerm ifElseNullTerm = (ImmutableFunctionalTerm) terms.get(index);
+        ImmutableExpression condition = (ImmutableExpression) ifElseNullTerm.getTerm(0);
+        ImmutableTerm conditionalTerm = ifElseNullTerm.getTerm(1);
+
+        ImmutableList<ImmutableTerm> newTerms = IntStream.range(0, terms.size())
+                .boxed()
+                .map(i -> i == index ? conditionalTerm : terms.get(i))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableFunctionalTerm newFunctionalTerm = (this instanceof BooleanFunctionSymbol)
+                ? termFactory.getBooleanIfElseNull(condition,
+                termFactory.getImmutableExpression((BooleanFunctionSymbol) this, newTerms))
+                : termFactory.getIfElseNull(condition,
+                termFactory.getImmutableFunctionalTerm(this, newTerms));
+
+        return newFunctionalTerm.simplify(variableNullability);
     }
 
     /**
@@ -245,6 +296,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      *   2. May produce NULLs but it is always due to a NULL argument
      */
     protected abstract boolean mayReturnNullWithoutNullArguments();
+
+    /**
+     * Returns false if IfElseNullLifting must be disabled althrough it may have been technically possible.
+     *
+     * False by defaults
+     */
+    protected boolean enableIfElseNullLifting() {
+        return false;
+    }
 
     /**
      * To be overridden when is sometimes but not always injective in the absence of non-injective functional terms
