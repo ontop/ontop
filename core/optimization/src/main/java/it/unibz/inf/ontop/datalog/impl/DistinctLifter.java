@@ -40,6 +40,10 @@ public class DistinctLifter {
                             ));
                 }
             }
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) root,
+                    child
+            );
         }
         return iqTree;
     }

@@ -42,6 +42,10 @@ public class SliceLifter {
                                 sliceChild
                         ));
             }
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) root,
+                    child
+            );
         }
         return iqTree;
     }

@@ -50,6 +50,10 @@ public class OrderByLifter {
                             ));
                 }
             }
+            return iqFactory.createUnaryIQTree(
+                    (UnaryOperatorNode) root,
+                    child
+            );
         }
         return iqTree;
     }
