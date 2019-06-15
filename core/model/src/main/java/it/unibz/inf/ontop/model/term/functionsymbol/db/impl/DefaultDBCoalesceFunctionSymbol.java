@@ -160,4 +160,14 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                         variableNullability, termFactory));
     }
 
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        Optional<ImmutableExpression> disjunction = termFactory.getDisjunction(terms.stream()
+                .map(termFactory::getDBIsNotNull));
+
+        return disjunction
+                .map(IncrementalEvaluation::declareSimplifiedExpression)
+                .orElseGet(IncrementalEvaluation::declareIsFalse);
+    }
 }
