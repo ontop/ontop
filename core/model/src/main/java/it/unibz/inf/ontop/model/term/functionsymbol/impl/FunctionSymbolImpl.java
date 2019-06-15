@@ -202,6 +202,16 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
+     * By default, assume it is not an aggregation function symbol
+     *
+     * To be overridden when needed
+     */
+    @Override
+    public boolean isAggregation() {
+        return false;
+    }
+
+    /**
      * Conservative by default
      *
      * Can be overridden

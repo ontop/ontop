@@ -61,6 +61,11 @@ public interface FunctionSymbol extends Predicate {
 
     boolean isDeterministic();
 
+    /**
+     * Returns true for SUM, AVG, etc.
+     */
+    boolean isAggregation();
+
     boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 
     /**
