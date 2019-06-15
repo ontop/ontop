@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -653,9 +652,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return new TranslationResult(
                 iqFactory.createIntensionalDataNode(
                         atomFactory.getIntensionalTripleAtom(
-                                translateVar(triple.getSubjectVar()),
-                                translateVar(triple.getPredicateVar()),
-                                translateVar(triple.getObjectVar())
+                                translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true)
                         )),
                 ImmutableSet.of()
         );
@@ -772,7 +771,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         return list;
     }
 
-    private ImmutableTerm getTermForLiteralOrIri(Value v) {
+    private GroundTerm getTermForLiteralOrIri(Value v) {
 
         if (v instanceof Literal) {
             try {
@@ -787,7 +786,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The value " + v + " is not supported yet!"));
     }
 
-    private ImmutableTerm getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
+    private GroundTerm getTermForLiteral(Literal literal) throws OntopUnsupportedInputQueryException {
         IRI typeURI = literal.getDatatype();
         String value = literal.getLabel();
         Optional<String> lang = literal.getLanguage();
@@ -850,19 +849,19 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     /**
      * @param expr      expression
-     * @param variables the set of variables that can occur in the expression
+     * @param knownVariables the set of variables that can occur in the expression
      *                  (the rest will be replaced with NULL)
      * @return term
      */
 
-    private ImmutableTerm getTerm(ValueExpr expr, Set<Variable> variables) {
+    private ImmutableTerm getTerm(ValueExpr expr, Set<Variable> knownVariables) {
 
         // PrimaryExpression ::= BrackettedExpression | BuiltInCall | iriOrFunction |
         //                          RDFLiteral | NumericLiteral | BooleanLiteral | Var
         // iriOrFunction ::= iri ArgList?
 
         if (expr instanceof Var) {
-            return translateVar((Var)expr);
+            return translateRDF4JVar((Var)expr, knownVariables, false);
         } else if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
             return getTermForLiteralOrIri(v);
@@ -871,7 +870,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             // xsd:boolean  BOUND (variable var)
             Var v = ((Bound) expr).getArg();
             Variable var = termFactory.getVariable(v.getName());
-            return variables.contains(var) ?
+            return knownVariables.contains(var) ?
                     termFactory.getImmutableFunctionalTerm(
                             functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                                     SPARQL.BOUND,
@@ -881,7 +880,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     ) :
                     termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
         } else if (expr instanceof UnaryValueOperator) {
-            ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), variables);
+            ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables);
 
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -930,8 +929,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             // Label: ??
         } else if (expr instanceof BinaryValueOperator) {
             BinaryValueOperator bexpr = (BinaryValueOperator) expr;
-            ImmutableTerm term1 = getTerm(bexpr.getLeftArg(), variables);
-            ImmutableTerm term2 = getTerm(bexpr.getRightArg(), variables);
+            ImmutableTerm term1 = getTerm(bexpr.getLeftArg(), knownVariables);
+            ImmutableTerm term2 = getTerm(bexpr.getRightArg(), knownVariables);
 
             if (expr instanceof And) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -956,7 +955,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ? termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 3),
                         term1, term2,
-                        getTerm(reg.getFlagsArg(), variables))
+                        getTerm(reg.getFlagsArg(), knownVariables))
                         : termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.REGEX, 2),
                         term1, term2);
@@ -1021,7 +1020,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             FunctionCall f = (FunctionCall) expr;
 
             ImmutableList<ImmutableTerm> terms = f.getArgs().stream()
-                    .map(a -> getTerm(a, variables))
+                    .map(a -> getTerm(a, knownVariables))
                     .collect(ImmutableCollectors.toList());
 
             Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
@@ -1041,29 +1040,29 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
 
     /**
-     * translates a RDF4J var, which can be a variable or a constant, into a Ontop term.
-     *
-     * @param var RDF4J var, which can be a variable or a constant
+     * Translates a RDF4J "Var" (which can be a variable or a constant) into a Ontop term.
      */
-    private VariableOrGroundTerm translateVar(Var var) {
-        return (var.hasValue()) ?
-                ImmutabilityTools.convertIntoVariableOrGroundTerm(
-                        getTermForLiteralOrIri(var.getValue())
-                ) :
-                getVariable(var);
+    private VariableOrGroundTerm translateRDF4JVar(Var v, Set<Variable> subtreeVariables, boolean leafNode) {
+        // If this "Var" is a constant
+        if((v.hasValue()))
+           return getTermForLiteralOrIri(v.getValue());
+        // Otherwise, this "Var" is a variable
+        Variable var = termFactory.getVariable(v.getName());
+        // If the subtree is empty, create a variable
+        if (leafNode)
+            return var;
+        // Otherwise, check whether the variable is projected
+        return subtreeVariables.contains(var)?
+                var:
+                termFactory.getNullConstant();
     }
-
-    private Variable getVariable(Var v) {
-        return termFactory.getVariable(v.getName());
-    }
-
 
     /**
      * @param v URI object
      * @return term (URI template)
      */
 
-    private ImmutableTerm getTermForIri(IRI v) {
+    private GroundTerm getTermForIri(IRI v) {
 
         // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
         // string of an IRI might be a part of an IRI template, but not from database value.
