@@ -55,7 +55,7 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
         return false;
     }
 
-    public Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
+    public Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> analyzeInjectivity(
             ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonFreeVariables,
             VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
 

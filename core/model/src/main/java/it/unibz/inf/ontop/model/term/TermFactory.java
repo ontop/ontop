@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
@@ -139,10 +138,10 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
-	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
-	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
 			ImmutableFunctionalTerm injectiveFunctionalTerm,
-			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap);
+			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
 

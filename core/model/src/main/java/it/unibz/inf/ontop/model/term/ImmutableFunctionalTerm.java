@@ -41,10 +41,13 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
 
     /**
      * Returns an empty optional when no decomposition is possible
+     *
+     * In the decomposition, the liftable term is injective.
+     *
      */
-    Optional<InjectivityDecomposition> analyzeInjectivity(ImmutableSet<Variable> nonFreeVariables,
-                                                          VariableNullability variableNullability,
-                                                          VariableGenerator variableGenerator);
+    Optional<FunctionalTermDecomposition> analyzeInjectivity(ImmutableSet<Variable> nonFreeVariables,
+                                                             VariableNullability variableNullability,
+                                                             VariableGenerator variableGenerator);
 
     /**
      * Returns some variables are required to non-null for the functional term to be non-null.
@@ -55,17 +58,17 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
      */
     Stream<Variable> proposeProvenanceVariables();
 
-    interface InjectivityDecomposition {
+    interface FunctionalTermDecomposition {
 
         /**
-         * Part of the functional that is injective
+         * Part of the functional that is liftable (e.g. injective)
          */
-        ImmutableFunctionalTerm getInjectiveTerm();
+        ImmutableFunctionalTerm getLiftableTerm();
 
         /**
-         * Contains the sub-terms that are not injective.
+         * Contains the sub-terms that are not liftable.
          * For each of them, a fresh variable has been created.
          */
-        Optional<ImmutableMap<Variable, ImmutableTerm>> getSubTermSubstitutionMap();
+        Optional<ImmutableMap<Variable, ImmutableFunctionalTerm>> getSubTermSubstitutionMap();
     }
 }
