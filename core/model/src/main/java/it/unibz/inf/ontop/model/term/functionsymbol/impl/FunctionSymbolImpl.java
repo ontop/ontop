@@ -7,7 +7,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
@@ -202,6 +202,16 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     }
 
     /**
+     * By default, assume it is not an aggregation function symbol
+     *
+     * To be overridden when needed
+     */
+    @Override
+    public boolean isAggregation() {
+        return false;
+    }
+
+    /**
      * Conservative by default
      *
      * Can be overridden
@@ -310,11 +320,11 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
      * To be overridden when is sometimes but not always injective in the absence of non-injective functional terms
      */
     @Override
-    public Optional<InjectivityDecomposition> analyzeInjectivity(ImmutableList<? extends ImmutableTerm> arguments,
-                                                                 ImmutableSet<Variable> nonFreeVariables,
-                                                                 VariableNullability variableNullability,
-                                                                 VariableGenerator variableGenerator,
-                                                                 TermFactory termFactory) {
+    public Optional<FunctionalTermDecomposition> analyzeInjectivity(ImmutableList<? extends ImmutableTerm> arguments,
+                                                                    ImmutableSet<Variable> nonFreeVariables,
+                                                                    VariableNullability variableNullability,
+                                                                    VariableGenerator variableGenerator,
+                                                                    TermFactory termFactory) {
         if (!isDeterministic())
             return Optional.empty();
 
@@ -334,12 +344,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     /**
      * Only when injectivity of the top function symbol is proved!
      */
-    protected InjectivityDecomposition decomposeInjectiveTopFunctionalTerm(ImmutableList<? extends ImmutableTerm> arguments,
-                                                                           ImmutableSet<Variable> nonFreeVariables,
-                                                                           VariableNullability variableNullability,
-                                                                           VariableGenerator variableGenerator,
-                                                                           TermFactory termFactory) {
-        ImmutableMap<Integer, Optional<InjectivityDecomposition>> subTermDecompositions = IntStream.range(0, getArity())
+    protected FunctionalTermDecomposition decomposeInjectiveTopFunctionalTerm(ImmutableList<? extends ImmutableTerm> arguments,
+                                                                              ImmutableSet<Variable> nonFreeVariables,
+                                                                              VariableNullability variableNullability,
+                                                                              VariableGenerator variableGenerator,
+                                                                              TermFactory termFactory) {
+        ImmutableMap<Integer, Optional<FunctionalTermDecomposition>> subTermDecompositions = IntStream.range(0, getArity())
                 .filter(i -> arguments.get(i) instanceof ImmutableFunctionalTerm)
                 .boxed()
                 .collect(ImmutableCollectors.toMap(
@@ -353,7 +363,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 .map(i -> Optional.ofNullable(subTermDecompositions.get(i))
                         .map(optionalDecomposition -> optionalDecomposition
                                 // Injective functional sub-term
-                                .map(InjectivityDecomposition::getInjectiveTerm)
+                                .map(FunctionalTermDecomposition::getLiftableTerm)
                                 .map(t -> (ImmutableTerm) t)
                                 // Otherwise a fresh variable
                                 .orElseGet(variableGenerator::generateNewVariable))
@@ -361,7 +371,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         .orElseGet(() -> arguments.get(i)))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
+        ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = subTermDecompositions.entrySet().stream()
                 .flatMap(e -> e.getValue()
                         // Decomposition case
                         .map(d -> d.getSubTermSubstitutionMap()
@@ -370,7 +380,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         // Not decomposed: new entry (new variable -> functional term)
                         .orElseGet(() -> Stream.of(Maps.immutableEntry(
                                 (Variable) newArguments.get(e.getKey()),
-                                arguments.get(e.getKey())))))
+                                (ImmutableFunctionalTerm) arguments.get(e.getKey())))))
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(this, newArguments);

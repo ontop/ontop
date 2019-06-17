@@ -145,9 +145,9 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public Optional<InjectivityDecomposition> analyzeInjectivity(ImmutableSet<Variable> nonFreeVariables,
-                                                                 VariableNullability variableNullability,
-                                                                 VariableGenerator variableGenerator) {
+    public Optional<FunctionalTermDecomposition> analyzeInjectivity(ImmutableSet<Variable> nonFreeVariables,
+                                                                    VariableNullability variableNullability,
+                                                                    VariableGenerator variableGenerator) {
         return getFunctionSymbol().analyzeInjectivity(getTerms(), nonFreeVariables, variableNullability, variableGenerator, termFactory);
     }
 
