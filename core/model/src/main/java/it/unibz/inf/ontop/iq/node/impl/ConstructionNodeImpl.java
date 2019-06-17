@@ -336,20 +336,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return iqFactory.createUnaryIQTree(this, newChild, newProperties);
     }
 
-    /**
-     * TODO: involve the function to reduce the number of false positive
-     */
-    private boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableChildVariables) {
-        if (term instanceof Constant)
-            return term.equals(termFactory.getNullConstant());
-        // TODO: improve this
-        else if (term.isGround())
-            return false;
-        // TODO: improve this
-        return term.getVariableStream()
-                .anyMatch(nullableChildVariables::contains);
-    }
-
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
         return query.getFirstChild(this)
                 .map(c -> c.isVariableNullable(query, variable))
@@ -403,12 +389,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof ConstructionNode))
-            return false;
-        ConstructionNode node = (ConstructionNode) queryNode;
-
-        return projectedVariables.equals(node.getVariables())
-                && substitution.equals(node.getSubstitution());
+        return isSyntacticallyEquivalentTo(queryNode);
     }
 
     @Override

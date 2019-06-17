@@ -22,7 +22,7 @@ public interface FunctionSymbol extends Predicate {
      */
     boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
 
-    Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
+    Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> analyzeInjectivity(
             ImmutableList<? extends ImmutableTerm> arguments,
             ImmutableSet<Variable> nonFreeVariables,
             VariableNullability variableNullability,
@@ -60,6 +60,11 @@ public interface FunctionSymbol extends Predicate {
     boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments);
 
     boolean isDeterministic();
+
+    /**
+     * Returns true for SUM, AVG, etc.
+     */
+    boolean isAggregation();
 
     boolean isNullable(ImmutableSet<Integer> nullableIndexes);
 

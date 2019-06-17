@@ -195,7 +195,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     @Override
-    public Optional<ImmutableFunctionalTerm.InjectivityDecomposition> analyzeInjectivity(
+    public Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> analyzeInjectivity(
             ImmutableList<? extends ImmutableTerm> arguments, ImmutableSet<Variable> nonFreeVariables,
             VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
 
@@ -221,7 +221,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                 ImmutableFunctionalTerm newFunctionalTerm = termFactory.getIfElseNull(
                         termFactory.getIsTrue(newVariable),
                         thenValue);
-                ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap = ImmutableMap.of(newVariable, thenCondition);
+                ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = ImmutableMap.of(newVariable, thenCondition);
 
                 return Optional.of(termFactory.getInjectivityDecomposition(newFunctionalTerm, subTermSubstitutionMap));
             }
