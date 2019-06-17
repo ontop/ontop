@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
+import javafx.collections.FXCollections;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,16 +27,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class InjectiveBindingLiftState {
+public class InjectiveBindingLiftState {
 
     // The parent (closest ancestor) is first
-    protected final ImmutableList<ConstructionNode> ancestors;
+    private final ImmutableList<ConstructionNode> ancestors;
     // First descendent tree not starting with a construction node
-    protected final IQTree grandChildTree;
+    private final IQTree grandChildTree;
     @Nullable
-    protected final ConstructionNode childConstructionNode;
-    protected final VariableGenerator variableGenerator;
-    protected final CoreSingletons coreSingletons;
+    private final ConstructionNode childConstructionNode;
+    private final VariableGenerator variableGenerator;
+    private final CoreSingletons coreSingletons;
 
     /**
      * Initial state
@@ -49,7 +50,7 @@ public abstract class InjectiveBindingLiftState {
         this.variableGenerator = variableGenerator;
     }
 
-    protected InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
+    private InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         this.ancestors = ancestors;
         this.grandChildTree = grandChildTree;
@@ -58,7 +59,7 @@ public abstract class InjectiveBindingLiftState {
         this.variableGenerator = variableGenerator;
     }
 
-    protected InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
+    private InjectiveBindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
                                       VariableGenerator variableGenerator,
                                       @Nonnull ConstructionNode childConstructionNode, CoreSingletons coreSingletons) {
         this.ancestors = ancestors;
@@ -66,6 +67,18 @@ public abstract class InjectiveBindingLiftState {
         this.childConstructionNode = childConstructionNode;
         this.variableGenerator = variableGenerator;
         this.coreSingletons = coreSingletons;
+    }
+
+    public IQTree getGrandChildTree() {
+        return grandChildTree;
+    }
+
+    public ConstructionNode getChildConstructionNode() {
+        return childConstructionNode;
+    }
+
+    public ImmutableList<ConstructionNode> getAncestors() {
+        return ancestors;
     }
 
     public InjectiveBindingLiftState liftBindings() {
@@ -151,14 +164,7 @@ public abstract class InjectiveBindingLiftState {
                 .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"));
 
         return newChildConstructionNode
-                .map(c -> newState(newAncestors, grandChildTree, c))
-                .orElseGet(() -> newState(newAncestors, grandChildTree));
+                .map(c -> new InjectiveBindingLiftState(newAncestors, grandChildTree, variableGenerator, c, coreSingletons))
+                .orElseGet(() -> new InjectiveBindingLiftState(newAncestors, grandChildTree, variableGenerator, coreSingletons));
     }
-
-    protected abstract InjectiveBindingLiftState newState(ImmutableList<ConstructionNode> newAncestors, IQTree grandChildTree);
-
-    protected abstract InjectiveBindingLiftState newState(ImmutableList<ConstructionNode> newAncestors, IQTree grandChildTree,
-                                                          ConstructionNode childConstructionNode);
-
-    public abstract IQTree createNormalizedTree(IQProperties currentIQProperties);
 }
