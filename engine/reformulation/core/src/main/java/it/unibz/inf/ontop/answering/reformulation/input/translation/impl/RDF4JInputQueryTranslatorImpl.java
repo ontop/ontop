@@ -977,7 +977,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
             ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables);
 
-            //unary count
+            //Unary count
             if(expr instanceof Count) {
                 Count count = (Count) expr;
                 if (count.isDistinct())
@@ -988,6 +988,16 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                                 SPARQL.COUNT,
+                                1
+                        ),
+                        term
+                );
+            }
+            if(expr instanceof Avg) {
+                Avg avg = (Avg) expr;
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.AVG,
                                 1
                         ),
                         term
