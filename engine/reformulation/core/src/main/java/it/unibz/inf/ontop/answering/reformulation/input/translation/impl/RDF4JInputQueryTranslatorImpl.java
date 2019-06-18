@@ -783,9 +783,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         new HashSet<>(childQuery.getVariables())
                 ));
         ImmutableSet<Variable> childVars = childQuery.getVariables();
-        if (varDefs.stream()
-                .map(vd -> vd.var)
-                .anyMatch(v -> childVars.contains(v))) {
+        varDefs = varDefs.stream()
+                .filter(vd -> !childVars.contains(vd.var))
+                .collect(ImmutableCollectors.toList());
+        if(varDefs.isEmpty()){
             return childTranslation;
         }
         ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
@@ -1328,7 +1329,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private class VarDef {
-        private final Variable var;
+        final Variable var;
         private final ImmutableTerm term;
 
         private VarDef(Variable var, ImmutableTerm term) {
