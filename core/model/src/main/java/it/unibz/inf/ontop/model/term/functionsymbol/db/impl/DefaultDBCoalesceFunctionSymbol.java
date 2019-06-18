@@ -209,6 +209,15 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 else
                     return terms;
             }
+            // The first "then" is never null
+            else if (!thenValueFirstTerm.isNullable(variableNullability.getNullableVariables())) {
+                ImmutableTerm mergedTerm =
+                        // Uses a IF-THEN-ELSE
+                        termFactory.getIfThenElse(firstCondition, thenValueFirstTerm, secondTerm)
+                        .simplify(variableNullability);
+
+                return ImmutableList.of(mergedTerm);
+            }
             else
                 return terms;
         }
