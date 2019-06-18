@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -303,44 +304,52 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
 
-    private TranslationResult translateBindingSetAssignment(BindingSetAssignment node) {
+    private TranslationResult translateBindingSetAssignment(BindingSetAssignment node) throws OntopUnsupportedInputQueryException {
 
-//        ImmutableSet<Variable> valueVars = node.getBindingNames().stream()
-//                .map(termFactory::getVariable)
-//                .collect(ImmutableCollectors.toSet());
-        ImmutableSet<Variable> valueVars = node.getAssuredBindingNames().stream()
+        ImmutableSet<Variable> allVars = node.getAssuredBindingNames().stream()
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        if (containsDuplicateBinding(node)) {
-            throw new Sparql2IqConversionException("Unexpected input: two bindings for are associated to the same variable:"
-                    + node.getBindingSets().toString());
+        ImmutableSet<ImmutableSet<Variable>> varSets = StreamSupport.stream(
+                node.getBindingSets().spliterator(),
+                false
+        ).map(bs -> getBsMap(bs).keySet())
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableSet<Variable> nullableVars = varSets.iterator().next().stream()
+                .filter(v -> varSets.stream().anyMatch(s -> !s.contains(v)))
+                .collect(ImmutableCollectors.toSet());
+        if(varSets.size() > 1 && nullableVars.size() > 1){
+            throw new OntopUnsupportedInputQueryException("Some assignments in a VALUES block have different UNDEF variables:\n"
+                    +node.getBindingSets());
         }
-        ImmutableMap<Variable, ImmutableTerm> map = StreamSupport.stream(node.getBindingSets().spliterator(), false)
-                .flatMap(bs -> getBsMap(bs, valueVars).entrySet().stream())
-                .collect(ImmutableCollectors.toMap());
+        ImmutableList<IQTree> subtrees = StreamSupport.stream(node.getBindingSets().spliterator(), false)
+                .map(bs -> getBsMap(bs))
+                .map(map -> substitutionFactory.getSubstitution(map))
+                .map(sub -> iqFactory.createConstructionNode(
+                        sub.getDomain(),
+                        sub
+                ))
+                .map(cn -> iqFactory.createUnaryIQTree(
+                        cn,
+                        iqFactory.createTrueNode()
+                ))
+                .collect(ImmutableCollectors.toList());
 
         return new TranslationResult(
-                iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(
-                                valueVars,
-                                substitutionFactory.getSubstitution(map)),
-                        iqFactory.createTrueNode()
-                ),
-                valueVars
-                //             Sets.difference(valueVars, valueVars).immutableCopy()
+                subtrees.size() == 1?
+                        subtrees.iterator().next():
+                        iqFactory.createNaryIQTree(
+                                iqFactory.createUnionNode(allVars),
+                                subtrees
+                        ),
+                nullableVars
         );
     }
 
-    private boolean containsDuplicateBinding(BindingSetAssignment node) {
-        Set<String> s = new HashSet();
-        return StreamSupport.stream(node.getBindingSets().spliterator(), false)
-                .flatMap(bs -> bs.getBindingNames().stream())
-                .anyMatch(n -> !s.add(n));
-    }
-
-    private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs, ImmutableSet<Variable> valueVars) {
+    private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs) {
         return bs.getBindingNames().stream()
+                .filter(n -> bs.getBinding(n) != null)
                 .collect(ImmutableCollectors.toMap(
                         termFactory::getVariable,
                         x -> getTermForBinding(
