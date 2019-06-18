@@ -244,7 +244,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .map(m -> substitutionFactory.getSubstitution(m))
                 .collect(ImmutableCollectors.toList());
         if (mergedVarDefs.size() > 1) {
-            throw new OntopUnsupportedInputQueryException("");
+            throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
+                    "within an RDF4J Group node: "+groupNode);
         }
         return iqFactory.createAggregationNode(
                 groupNode.getGroupBindingNames().stream()
