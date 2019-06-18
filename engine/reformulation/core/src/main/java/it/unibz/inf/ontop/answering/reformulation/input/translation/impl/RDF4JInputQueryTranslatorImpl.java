@@ -320,10 +320,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableSet<Variable> nullableVars = varSets.iterator().next().stream()
                 .filter(v -> varSets.stream().anyMatch(s -> !s.contains(v)))
                 .collect(ImmutableCollectors.toSet());
-        if(varSets.size() > 1 && nullableVars.size() > 1){
-            throw new OntopUnsupportedInputQueryException("Some assignments in a VALUES block have different UNDEF variables:\n"
-                    +node.getBindingSets());
-        }
+
         ImmutableList<IQTree> subtrees = StreamSupport.stream(node.getBindingSets().spliterator(), false)
                 .map(bs -> getBsMap(bs))
                 .map(map -> substitutionFactory.getSubstitution(map))
@@ -350,7 +347,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs) {
         return bs.getBindingNames().stream()
-                .filter(n -> bs.getBinding(n) != null)
                 .collect(ImmutableCollectors.toMap(
                         termFactory::getVariable,
                         x -> getTermForBinding(
