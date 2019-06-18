@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 public class InjectiveBindingLiftState {
 
-    // The parent (closest ancestor) is first
+    // The oldest ancestor is first
     private final ImmutableList<ConstructionNode> ancestors;
     // First descendent tree not starting with a construction node
     private final IQTree grandChildTree;
@@ -73,10 +73,13 @@ public class InjectiveBindingLiftState {
         return grandChildTree;
     }
 
-    public ConstructionNode getChildConstructionNode() {
-        return childConstructionNode;
+    public Optional<ConstructionNode> getChildConstructionNode() {
+        return Optional.ofNullable(childConstructionNode);
     }
 
+    /**
+     * The oldest ancestor is first
+     */
     public ImmutableList<ConstructionNode> getAncestors() {
         return ancestors;
     }

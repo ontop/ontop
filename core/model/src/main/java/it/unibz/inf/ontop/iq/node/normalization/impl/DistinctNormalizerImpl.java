@@ -75,7 +75,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
         IQTree grandChildTree = state.getGrandChildTree();
 
-        IQTree newChildTree = Optional.ofNullable(state.getChildConstructionNode())
+        IQTree newChildTree = state.getChildConstructionNode()
                 .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChildTree,
                         iqFactory.createIQProperties().declareNormalizedForOptimization()))
                 .orElse(grandChildTree);
