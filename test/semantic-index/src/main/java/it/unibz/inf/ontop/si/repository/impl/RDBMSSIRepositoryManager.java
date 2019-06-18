@@ -756,7 +756,7 @@ public class RDBMSSIRepositoryManager {
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.objectProperties().contains(ope.getIRI().getIRIString()))
+			if (!reasonerDag.objectProperties().contains(ope.getIRI()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -795,7 +795,7 @@ public class RDBMSSIRepositoryManager {
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.dataProperties().contains(dpe.getIRI().getIRIString()))
+			if (!reasonerDag.dataProperties().contains(dpe.getIRI()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);

@@ -33,7 +33,7 @@ import it.unibz.inf.ontop.model.term.ObjectConstant;
 
 public interface ClassAssertion extends Assertion {
 
-	public OClass getConcept();
+	OClass getConcept();
 	
-	public ObjectConstant getIndividual();
+	ObjectConstant getIndividual();
 }

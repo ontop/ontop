@@ -566,7 +566,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private void checkSignature(ClassExpression desc) {
         if (desc instanceof OClass) {
             OClass cl = (OClass) desc;
-            if (!classes.contains(cl.getIRI().getIRIString()))
+            if (!classes.contains(cl.getIRI()))
                 throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
         }
         else if (desc instanceof ObjectSomeValuesFrom) {
@@ -591,17 +591,17 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         if (prop.isInverse())
             prop = prop.getInverse();
 
-        if (!objectProperties.contains(prop.getIRI().getIRIString()) && !auxObjectProperties.contains(prop))
+        if (!objectProperties.contains(prop.getIRI()) && !auxObjectProperties.contains(prop))
             throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(DataPropertyExpression prop) {
-        if (!dataProperties.contains(prop.getIRI().getIRIString()))
+        if (!dataProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(AnnotationProperty prop) {
-        if (!annotationProperties.contains(prop.getIRI().getIRIString()))
+        if (!annotationProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
     }
 

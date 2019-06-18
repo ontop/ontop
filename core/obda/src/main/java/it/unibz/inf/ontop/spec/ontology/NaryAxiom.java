@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 import com.google.common.collect.ImmutableList;
 
-import java.io.Serializable;
-
 /**
  * Represents the following from OWL 2 QL Specification:
  * 
@@ -40,8 +38,8 @@ import java.io.Serializable;
  *
  */
 
-public interface NaryAxiom<T> extends Serializable {
+public interface NaryAxiom<T> {
 
-	public ImmutableList<T> getComponents();
+	ImmutableList<T> getComponents();
 
 }

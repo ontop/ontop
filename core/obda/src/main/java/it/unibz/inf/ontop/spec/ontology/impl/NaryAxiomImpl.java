@@ -26,8 +26,6 @@ import it.unibz.inf.ontop.spec.ontology.NaryAxiom;
 
 public class NaryAxiomImpl<T> implements NaryAxiom<T> {
 
-	private static final long serialVersionUID = 4576840836473365808L;
-	
 	private final ImmutableList<T> components;
 	
 	NaryAxiomImpl(ImmutableList<T> components) {

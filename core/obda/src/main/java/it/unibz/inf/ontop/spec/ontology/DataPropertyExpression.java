@@ -34,7 +34,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 import java.util.Collection;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.apache.commons.rdf.api.IRI;
 
 /**
