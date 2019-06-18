@@ -121,15 +121,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                 return this;
 
             ImmutableSet<Variable> groupingVariables = aggregationNode.getGroupingVariables();
+            // NB: non grouping variables that are USED by the aggregation node (we can safely ignore the non-used ones)
             ImmutableSet<Variable> nonGroupingVariables = Sets.difference(
                     aggregationNode.getChildVariables(),
                     groupingVariables).immutableCopy();
 
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
                     .reduceDomainToIntersectionWith(nonGroupingVariables);
-
-            if (nonGroupingSubstitution.isEmpty())
-                return this;
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
@@ -170,6 +168,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             }
 
             // Only projecting grouping variables
+            // (mimicking the special case when GROUP BY reduces itself to a DISTINCT and a projection)
             ConstructionNode groupingConstructionNode = iqFactory.createConstructionNode(groupingVariables, substitution);
 
             // Non-final
@@ -227,14 +226,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ConstructionNode newChildConstructionNode = subState.getChildConstructionNode()
                     // Only keeps the child construction node if it has a substitution
                     .filter(n -> !n.getSubstitution().isEmpty())
-                    .map(n -> iqFactory.createConstructionNode(
-                            Stream.concat(
-                                    n.getVariables().stream(),
-                                    // Appends the variables required by the substitution of the aggregation node
-                                    newAggregationNode.getSubstitution().getImmutableMap().values().stream()
-                                        .flatMap(ImmutableTerm::getVariableStream))
-                                    .collect(ImmutableCollectors.toSet()),
-                            n.getSubstitution()))
+                    .map(n -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), n.getSubstitution()))
                     .orElse(null);
 
 
@@ -248,6 +240,8 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
          * an aggregation function symbol.
          */
         public AggregationNormalizationState simplifyAggregationSubstitution() {
+            // NB: use ImmutableSubstitution.simplifyValues()
+            // NB: look at FunctionSymbol.isAggregation()
             throw new RuntimeException("TODO: implement simplifyAggregationSubstitution()");
         }
 

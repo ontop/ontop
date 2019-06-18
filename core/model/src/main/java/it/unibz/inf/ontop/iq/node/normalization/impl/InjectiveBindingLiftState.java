@@ -27,6 +27,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Out of a child construction node and a grand child tree, tries to lift injective definitions above
+ * (that is inside ancestor construction nodes).
+ *
+ * Typically used when the implicit "central" node (the parent of the child construction node) is a DISTINCT.
+ * Also used for the normalization of AggregationNodes.
+ *
+ */
 public class InjectiveBindingLiftState {
 
     // The oldest ancestor is first
