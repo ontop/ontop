@@ -25,8 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.COL_TYPE;
 import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -38,9 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,14 +62,14 @@ public class RDBMSSIRepositoryManager {
 		private final String insertCommand;
 		private final String selectCommand;
 		
-		final List<String> createIndexCommands = new ArrayList<>(3);
-		final List<String> dropIndexCommands = new ArrayList<>(3);
+		private final List<String> createIndexCommands = new ArrayList<>(3);
+		private final List<String> dropIndexCommands = new ArrayList<>(3);
 		
-		final String dropCommand;
+		//private final String dropCommand;
 		
 		TableDescription(String tableName, ImmutableMap<String, String> columnDefintions, String selectColumns) {
 			this.tableName = tableName;
-			this.dropCommand = "DROP TABLE " + tableName;
+			//this.dropCommand = "DROP TABLE " + tableName;
 			this.createCommand = "CREATE TABLE " + tableName + 
 					" ( " + Joiner.on(", ").withKeyValueSeparator(" ").join(columnDefintions) + " )";
 			this.insertCommand = "INSERT INTO " + tableName + 
@@ -139,7 +134,7 @@ public class RDBMSSIRepositoryManager {
 	
     final static ImmutableList<TableDescription> attributeTables;
     final static TableDescription ROLE_TABLE;
-	final static  ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
+	final static ImmutableMap<IRI, TableDescription> ATTRIBUTE_TABLE_MAP;
 	
 	private static final class AttributeTableDescritpion {
 		final IRI datatypeIRI;
@@ -297,7 +292,7 @@ public class RDBMSSIRepositoryManager {
 		insertMetadata(conn);
 	}
 
-	private boolean isDBSchemaDefined(Connection conn) throws SQLException {
+	private boolean isDBSchemaDefined(Connection conn)  {
 		
 		try (Statement st = conn.createStatement()) {
 			st.executeQuery(String.format("SELECT 1 FROM %s WHERE 1=0", classTable.tableName));
@@ -320,7 +315,7 @@ public class RDBMSSIRepositoryManager {
 		return false; // there was an exception if we have got here
 	}
 	
-
+/*
 	public void dropDBSchema(Connection conn) throws SQLException {
 
 		try (Statement st = conn.createStatement()) {
@@ -340,6 +335,7 @@ public class RDBMSSIRepositoryManager {
 			// no-op: ignore all exceptions here
 		}
 	}
+*/
 
 	public int insertData(Connection conn, Iterator<Assertion> data, int commitLimit, int batchLimit) throws SQLException {
 		log.debug("Inserting data into DB");
@@ -647,10 +643,11 @@ public class RDBMSSIRepositoryManager {
 		return uri_id;
 	}
 
-	
 	public final static int CLASS_TYPE = 1;
 	public final static int ROLE_TYPE = 2;
 	
+/* ROMAN: commented out dead code
+
 	private void setIndex(String iri, int type, int idx) {
 		if (type == CLASS_TYPE) {
 			OClass c = reasonerDag.classes().get(iri);
@@ -734,7 +731,7 @@ public class RDBMSSIRepositoryManager {
 
 		range.addRange(intervals);	
 	}
-
+*/
 
 	public ImmutableList<SQLPPTriplesMap> getMappings() {
 
@@ -1091,7 +1088,7 @@ public class RDBMSSIRepositoryManager {
 	
 	
 	
-
+/* dead code
 	public void createIndexes(Connection conn) throws SQLException {
 		log.debug("Creating indexes");
 		try (Statement st = conn.createStatement()) {
@@ -1110,11 +1107,6 @@ public class RDBMSSIRepositoryManager {
 			st.executeBatch();
 		}
 	}
-	
-	/**
-	 *  DROP indexes	
-	 */
-		
 
 	public void dropIndexes(Connection conn) throws SQLException {
 		log.debug("Dropping indexes");
@@ -1130,4 +1122,5 @@ public class RDBMSSIRepositoryManager {
 			st.executeBatch();
 		}
 	}
+ */
 }

@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
-import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,25 +51,19 @@ public class DAGTest extends TestCase {
 	private static final String owl_inverse = "::__inverse__::";
 
 
-	public List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) {
+	public List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) throws Exception {
 		String resfile = owlloc + resname + ".si";
 		File results = new File(resfile);
-		Document doc = null;
 
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			doc = db.parse(results);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(results);
 
 		doc.getDocumentElement().normalize();
 		List<Description> cls = get_dag_type(reasoner, doc, "classes");
-		List<Description> roles = get_dag_type(reasoner, doc, "rolles");
+		List<Description> roles = get_dag_type(reasoner, doc, "roles");
 
-		List<List<Description>> rv = new ArrayList<List<Description>>(2);
+		List<List<Description>> rv = new ArrayList<>(2);
 		rv.add(cls);
 		rv.add(roles);
 		return rv;

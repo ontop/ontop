@@ -21,9 +21,6 @@ package it.unibz.inf.ontop.spec.ontology.impl;
  */
 
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
@@ -55,11 +52,12 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	private final SimpleDirectedGraph <Equivalences<T>,DefaultEdge> dag;
 	private final ImmutableMap<T, Equivalences<T>> vertexIndex;
 	
-	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced  DAG
+	// maps all Ts (even from the non-reduced DAG) to the vertices of the possibly reduced DAG
 	private final ImmutableMap<T, Equivalences<T>> fullVertexIndex;   
 
-	private final LoadingCache<Equivalences<T>, ImmutableSet<T>> subRep;
-	private final LoadingCache<Equivalences<T>, ImmutableSet<Equivalences<T>>> sub;
+	// caches
+	private final Map<Equivalences<T>, ImmutableSet<T>> subRep = new HashMap<>();
+	private final Map<Equivalences<T>, ImmutableSet<Equivalences<T>>> sub = new HashMap<>();
 
 	private DefaultDirectedGraph<T,DefaultEdge> graph; // used in tests only
 	
@@ -68,20 +66,6 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		this.dag = dag;
 		this.vertexIndex = vertexIndex;
 		this.fullVertexIndex = fullVertexIndex;
-
-		this.subRep = CacheBuilder.newBuilder().build(new CacheLoader<Equivalences<T>, ImmutableSet<T>>(){
-			@Override
-			public ImmutableSet<T> load(Equivalences<T> eq) {
-				return immutableSetOfRepresentatives(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), eq));
-			}
-		});
-
-		this.sub = CacheBuilder.newBuilder().build(new CacheLoader<Equivalences<T>, ImmutableSet<Equivalences<T>>>() {
-			@Override
-			public ImmutableSet<Equivalences<T>> load(Equivalences<T> v) {
-				return immutableSetOf(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), v));
-			}
-		});
 	}
 
 	private static <T> ImmutableSet<T> immutableSetOf(BreadthFirstIterator<T, DefaultEdge>  iterator) {
@@ -136,7 +120,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 	 */
 	@Override
 	public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
-		return sub.getUnchecked(v);
+		return sub.computeIfAbsent(v,
+				n -> immutableSetOf(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), n)));
 	}
 
 	/** 
@@ -148,7 +133,8 @@ public class EquivalencesDAGImpl<T> implements EquivalencesDAG<T> {
 		if (eq == null)
 			return ImmutableSet.of(v);
 
-		return subRep.getUnchecked(eq);
+		return subRep.computeIfAbsent(eq,
+				n -> immutableSetOfRepresentatives(new BreadthFirstIterator<>(new EdgeReversedGraph<>(dag), n)));
 	}
 	
 
