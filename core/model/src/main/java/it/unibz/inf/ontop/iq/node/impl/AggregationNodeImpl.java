@@ -26,6 +26,8 @@ import java.util.Optional;
 public class AggregationNodeImpl extends CompositeQueryNodeImpl implements AggregationNode {
 
 
+    private static final String AGGREGATE_NODE_STR = "AGGREGATE";
+
     private final ImmutableSet<Variable> projectedVariables;
     private final ImmutableSet<Variable> groupingVariables;
     private final ImmutableSubstitution<ImmutableFunctionalTerm> substitution;
@@ -214,5 +216,11 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     @Override
     public AggregationNode clone() {
         return iqFactory.createAggregationNode(groupingVariables, substitution);
+    }
+
+    @Override
+    public String toString() {
+        // TODO: display the query modifiers
+        return AGGREGATE_NODE_STR + " " + groupingVariables + " " + "[" + substitution + "]" ;
     }
 }

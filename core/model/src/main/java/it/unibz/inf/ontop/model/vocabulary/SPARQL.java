@@ -34,4 +34,5 @@ public class SPARQL {
     public static final String NOW = "NOW";
     public static final String SAME_TERM = "sameTerm";
     public static final String COALESCE = "COALESCE";
+    public static final String COUNT = "COUNT";
 }
