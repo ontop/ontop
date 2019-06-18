@@ -53,9 +53,6 @@ public interface DataPropertyExpression extends DescriptionBT {
 
 	IRI getIRI();
 
-	@Deprecated
-	String getName();
-	
 	/**
 	 * returns the DataSomeValuesFrom for the domain of the data property
 	 * 

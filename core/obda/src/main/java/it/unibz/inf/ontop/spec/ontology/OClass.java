@@ -30,8 +30,5 @@ import org.apache.commons.rdf.api.IRI;
  */
 public interface OClass extends ClassExpression {
 
-    @Deprecated
-	String getName();
-
     IRI getIRI();
 }

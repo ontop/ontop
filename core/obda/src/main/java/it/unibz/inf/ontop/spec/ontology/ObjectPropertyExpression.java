@@ -52,9 +52,6 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	
 	IRI getIRI();
 
-	@Deprecated
-	String getName();
-	
 	/**
 	 * the inverse of the object property
 	 * <p>

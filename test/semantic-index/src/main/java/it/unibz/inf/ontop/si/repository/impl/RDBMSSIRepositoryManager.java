@@ -756,7 +756,7 @@ public class RDBMSSIRepositoryManager {
 				continue;
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.objectProperties().contains(ope.getName()))
+			if (!reasonerDag.objectProperties().contains(ope.getIRI().getIRIString()))
 				continue;
 
 			SemanticIndexRange range = cacheSI.getEntry(ope);
@@ -795,7 +795,7 @@ public class RDBMSSIRepositoryManager {
 			DataPropertyExpression dpe = set.getRepresentative();
 			
 			// no mappings for auxiliary roles, which are introduced by the ontology translation process
-			if (!reasonerDag.dataProperties().contains(dpe.getName()))
+			if (!reasonerDag.dataProperties().contains(dpe.getIRI().getIRIString()))
 				continue;
 			
 			SemanticIndexRange range = cacheSI.getEntry(dpe);
@@ -1023,19 +1023,19 @@ public class RDBMSSIRepositoryManager {
 			// inserting index data for classes and properties 
 			try (PreparedStatement stm = conn.prepareStatement(indexTable.getINSERT("?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
-					stm.setString(1, concept.getKey().getName());
+					stm.setString(1, concept.getKey().getIRI().getIRIString());
 					stm.setInt(2, concept.getValue().getIndex());
 					stm.setInt(3, CLASS_TYPE);
 					stm.addBatch();
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getName());
+					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
-					stm.setString(1, role.getKey().getName());
+					stm.setString(1, role.getKey().getIRI().getIRIString());
 					stm.setInt(2, role.getValue().getIndex());
 					stm.setInt(3, ROLE_TYPE);
 					stm.addBatch();
@@ -1047,7 +1047,7 @@ public class RDBMSSIRepositoryManager {
 			try (PreparedStatement stm = conn.prepareStatement(intervalTable.getINSERT("?, ?, ?, ?"))) {
 				for (Entry<OClass,SemanticIndexRange> concept : cacheSI.getClassIndexEntries()) {
 					for (Interval it : concept.getValue().getIntervals()) {
-						stm.setString(1, concept.getKey().getName());
+						stm.setString(1, concept.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, CLASS_TYPE);
@@ -1056,7 +1056,7 @@ public class RDBMSSIRepositoryManager {
 				}
 				for (Entry<ObjectPropertyExpression, SemanticIndexRange> role : cacheSI.getObjectPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getName());
+						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);
@@ -1065,7 +1065,7 @@ public class RDBMSSIRepositoryManager {
 				}
 				for (Entry<DataPropertyExpression, SemanticIndexRange> role : cacheSI.getDataPropertyIndexEntries()) {
 					for (Interval it : role.getValue().getIntervals()) {
-						stm.setString(1, role.getKey().getName());
+						stm.setString(1, role.getKey().getIRI().getIRIString());
 						stm.setInt(2, it.getStart());
 						stm.setInt(3, it.getEnd());
 						stm.setInt(4, ROLE_TYPE);

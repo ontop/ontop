@@ -45,7 +45,7 @@ public class OWLAPIIndividualTranslator {
 	private final OWLDataFactory dataFactory = new OWLDataFactoryImpl();
 
 	public OWLIndividualAxiom translate(ClassAssertion ca) {
-		IRI conceptIRI = IRI.create(ca.getConcept().getName());
+		IRI conceptIRI = IRI.create(ca.getConcept().getIRI().getIRIString());
 
 		OWLClass description = dataFactory.getOWLClass(conceptIRI);
 		OWLIndividual object = translate(ca.getIndividual());
@@ -53,7 +53,7 @@ public class OWLAPIIndividualTranslator {
 	} 
 	
 	public OWLIndividualAxiom translate(ObjectPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getName());
+		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
 
 		OWLObjectProperty property = dataFactory.getOWLObjectProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());
@@ -62,7 +62,7 @@ public class OWLAPIIndividualTranslator {
 	}
 	
 	public OWLIndividualAxiom translate(DataPropertyAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getName());
+		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
 
 		OWLDataProperty property = dataFactory.getOWLDataProperty(roleIRI);
 		OWLIndividual subject = translate(opa.getSubject());
@@ -71,7 +71,7 @@ public class OWLAPIIndividualTranslator {
 	}
 
 	public OWLAnnotationAssertionAxiom translate(AnnotationAssertion opa) {
-		IRI roleIRI = IRI.create(opa.getProperty().getName());
+		IRI roleIRI = IRI.create(opa.getProperty().getIRI().getIRIString());
 
 		OWLAnnotationProperty property = dataFactory.getOWLAnnotationProperty(roleIRI);
 		OWLAnnotationSubject subject = translateAnnotationSubject(opa.getSubject());
