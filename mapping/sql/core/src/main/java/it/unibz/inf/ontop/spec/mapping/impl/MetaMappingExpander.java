@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -197,6 +198,10 @@ public class MetaMappingExpander {
 						List<String> values = Lists.newArrayListWithCapacity(size);
 						for (int i = 1; i <= size; i++)
 							values.add(rs.getString(i));
+
+						// Cannot build an IRI out of nulls
+						if (values.contains(null))
+							continue;
 
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), templateColumns, values);
 
@@ -374,18 +379,20 @@ public class MetaMappingExpander {
 
 	private static String getPredicateName(ImmutableTerm lexicalTerm, List<String> values) {
 		if (lexicalTerm instanceof Variable) {
+			// Hacky!! TODO: clean this code
 			return values.get(0);
+		} else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+			FunctionSymbol functionSymbol = functionalLexicalTerm.getFunctionSymbol();
+			if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
+				String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
+						functionalLexicalTerm.getFunctionSymbol()).getTemplate();
+				return URITemplates.format(iriTemplate, values);
+			} else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
+					&& ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
+				return getPredicateName(functionalLexicalTerm.getTerm(0), values);
+			}
 		}
-		else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
-				&& ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol) {
-
-			String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
-					((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol())
-					.getTemplate();
-			return URITemplates.format(iriTemplate, values);
-		}
-		else {
-			throw new MinorOntopInternalBugException("Unexpected lexical template term: " + lexicalTerm);
-		}
+		throw new MinorOntopInternalBugException("Unexpected lexical template term: " + lexicalTerm);
 	}
 }

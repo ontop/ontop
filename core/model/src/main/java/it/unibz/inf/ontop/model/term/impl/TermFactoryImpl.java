@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -349,19 +350,19 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
-    public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+    public ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
     		ImmutableFunctionalTerm injectiveFunctionalTerm) {
-		return new InjectivityDecompositionImpl(injectiveFunctionalTerm);
+		return new FunctionalTermDecompositionImpl(injectiveFunctionalTerm);
     }
 
 	@Override
-	public ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+	public ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
 			ImmutableFunctionalTerm injectiveFunctionalTerm,
-			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap) {
+			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
 
 		return (subTermSubstitutionMap.isEmpty())
 				? getInjectivityDecomposition(injectiveFunctionalTerm)
-				: new InjectivityDecompositionImpl(injectiveFunctionalTerm, subTermSubstitutionMap);
+				: new FunctionalTermDecompositionImpl(injectiveFunctionalTerm, subTermSubstitutionMap);
 	}
 
 	@Override
@@ -495,6 +496,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public <T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map) {
+		return new SimpleProtoSubstitutionImpl<>(map, this);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
 																		 ImmutableTerm lexicalTerm1,
 																		 ImmutableTerm lexicalTerm2,
@@ -579,7 +585,7 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm getDBNow() {
-        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNow());
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBNow());
     }
 
     @Override
@@ -876,7 +882,14 @@ public class TermFactoryImpl implements TermFactory {
 		return getDBCase(whenPairs, valueNull);
 	}
 
-	@Override
+    @Override
+    public ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms) {
+		if (terms.size() < 1)
+			throw new IllegalArgumentException("At least one argument is expected");
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCoalesce(terms.size()), terms);
+    }
+
+    @Override
 	public ImmutableFunctionalTerm getDBReplace(ImmutableTerm text, ImmutableTerm from, ImmutableTerm to) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBReplace(), text, from, to);
 	}

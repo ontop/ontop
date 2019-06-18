@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.tools.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
@@ -14,9 +13,9 @@ import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.*;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
+import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 
 @Singleton
 public class IQConverterImpl implements IQConverter {
@@ -67,11 +66,11 @@ public class IQConverterImpl implements IQConverter {
 
 
     @Override
-    public IntermediateQuery convert(IQ query, DBMetadata dbMetadata, ExecutorRegistry executorRegistry) throws EmptyQueryException {
+    public IntermediateQuery convert(IQ query, ExecutorRegistry executorRegistry) throws EmptyQueryException {
         if (query.getTree().isDeclaredAsEmpty())
             throw new EmptyQueryException();
 
-        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(dbMetadata, executorRegistry);
+        IntermediateQueryBuilder queryBuilder = iqFactory.createIQBuilder(executorRegistry);
         IQTree topTree = query.getTree();
         QueryNode rootNode = topTree.getRootNode();
         queryBuilder.init(query.getProjectionAtom(), rootNode);

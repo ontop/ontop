@@ -62,6 +62,6 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
     private IntermediateQuery liftBinding(IntermediateQuery query) throws EmptyQueryException {
         IQ iq = iqConverter.convert(query);
-        return iqConverter.convert(iq.normalizeForOptimization(), query.getDBMetadata(), query.getExecutorRegistry());
+        return iqConverter.convert(iq.normalizeForOptimization(), query.getExecutorRegistry());
     }
 }

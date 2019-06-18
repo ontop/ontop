@@ -30,7 +30,7 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet implements TupleR
                               DistinctVariableOnlyDataAtom answerAtom,
                               TermFactory termFactory,
                               SubstitutionFactory substitutionFactory) {
-        super(rs, ImmutableSortedSet.copyOf(answerAtom.getArguments()));
+        super(rs, answerAtom.getArguments());
         this.sqlSignature = sqlSignature;
         this.sqlTypeMap = sqlTypeMap;
         this.substitutionFactory = substitutionFactory;

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.InjectivityDecomposition;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -127,7 +127,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
             ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
 
-            ImmutableMap<Variable, Optional<InjectivityDecomposition>> injectivityDecompositionMap =
+            ImmutableMap<Variable, Optional<FunctionalTermDecomposition>> injectivityDecompositionMap =
                     childSubstitution.getImmutableMap().entrySet().stream()
                             .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
                             .collect(ImmutableCollectors.toMap(
@@ -145,7 +145,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                     injectivityDecompositionMap.entrySet().stream()
                             .filter(e -> e.getValue().isPresent())
                             .map(e -> Maps.immutableEntry(e.getKey(),
-                                    (ImmutableTerm) e.getValue().get().getInjectiveTerm())))
+                                    (ImmutableTerm) e.getValue().get().getLiftableTerm())))
                     .collect(ImmutableCollectors.toMap());
 
             Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitutionMap)
@@ -162,7 +162,8 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                             .flatMap(e -> e.getValue()
                                     // Sub-term substitution entries from injectivity decompositions
                                 .map(d -> d.getSubTermSubstitutionMap()
-                                        .map(s -> s.entrySet().stream())
+                                        .map(s -> s.entrySet().stream()
+                                                .map(subE -> (Map.Entry<Variable, ImmutableTerm>)(Map.Entry<Variable, ?>) subE))
                                         .orElseGet(Stream::empty))
                                     // Non-decomposable entries
                                 .orElseGet(() -> Stream.of(Maps.immutableEntry(

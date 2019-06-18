@@ -9,30 +9,30 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class InjectivityDecompositionImpl implements ImmutableFunctionalTerm.InjectivityDecomposition {
+public class FunctionalTermDecompositionImpl implements ImmutableFunctionalTerm.FunctionalTermDecomposition {
 
     private final ImmutableFunctionalTerm injectiveFunctionalTerm;
     @Nullable
-    private final ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap;
+    private final ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap;
 
-    protected InjectivityDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm,
-                                           @Nonnull ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap) {
+    protected FunctionalTermDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm,
+                                              @Nonnull ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
         this.injectiveFunctionalTerm = injectiveFunctionalTerm;
         this.subTermSubstitutionMap = subTermSubstitutionMap;
     }
 
-    protected InjectivityDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm) {
+    protected FunctionalTermDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm) {
         this.injectiveFunctionalTerm = injectiveFunctionalTerm;
         this.subTermSubstitutionMap = null;
     }
 
     @Override
-    public ImmutableFunctionalTerm getInjectiveTerm() {
+    public ImmutableFunctionalTerm getLiftableTerm() {
         return injectiveFunctionalTerm;
     }
 
     @Override
-    public Optional<ImmutableMap<Variable, ImmutableTerm>> getSubTermSubstitutionMap() {
+    public Optional<ImmutableMap<Variable, ImmutableFunctionalTerm>> getSubTermSubstitutionMap() {
         return Optional.ofNullable(subTermSubstitutionMap);
     }
 }

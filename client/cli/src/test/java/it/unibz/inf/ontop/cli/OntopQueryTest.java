@@ -61,6 +61,4 @@ public class OntopQueryTest {
         Ontop.main(argv);
      }
 
-
-
 }

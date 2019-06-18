@@ -119,4 +119,9 @@ public class AbstractRDF4JTest {
         result.close();
         return count;
     }
+
+    protected TupleQueryResult evaluate(String queryString) {
+        TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+        return query.evaluate();
+    }
 }

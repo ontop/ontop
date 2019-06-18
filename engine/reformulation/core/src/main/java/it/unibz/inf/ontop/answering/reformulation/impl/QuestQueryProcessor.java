@@ -178,7 +178,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
                 // Non-final
-                IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, dbMetadata, executorRegistry);
+                IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, executorRegistry);
 
                 //lift bindings and union when it is possible
                 intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);

@@ -336,20 +336,6 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         return iqFactory.createUnaryIQTree(this, newChild, newProperties);
     }
 
-    /**
-     * TODO: involve the function to reduce the number of false positive
-     */
-    private boolean isNullable(ImmutableTerm term, ImmutableSet<Variable> nullableChildVariables) {
-        if (term instanceof Constant)
-            return term.equals(termFactory.getNullConstant());
-        // TODO: improve this
-        else if (term.isGround())
-            return false;
-        // TODO: improve this
-        return term.getVariableStream()
-                .anyMatch(nullableChildVariables::contains);
-    }
-
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
         return query.getFirstChild(this)
                 .map(c -> c.isVariableNullable(query, variable))
@@ -403,12 +389,7 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        if (!(queryNode instanceof ConstructionNode))
-            return false;
-        ConstructionNode node = (ConstructionNode) queryNode;
-
-        return projectedVariables.equals(node.getVariables())
-                && substitution.equals(node.getSubstitution());
+        return isSyntacticallyEquivalentTo(queryNode);
     }
 
     @Override
@@ -691,12 +672,13 @@ public class ConstructionNodeImpl extends CompositeQueryNodeImpl implements Cons
         IQTree grandChild = childIQ.getChild();
 
         AscendingSubstitutionNormalization ascendingNormalization = substitutionNormalizer.normalizeAscendingSubstitution(
-                childConstructionNode.getSubstitution().composeWith(substitution), projectedVariables);
+                childConstructionNode.getSubstitution().composeWith(substitution).simplifyValues(grandChild.getVariableNullability()),
+                projectedVariables
+        );
 
         IQTree newGrandChild = ascendingNormalization.updateChild(grandChild);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution()
-                .simplifyValues(newGrandChild.getVariableNullability());
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);

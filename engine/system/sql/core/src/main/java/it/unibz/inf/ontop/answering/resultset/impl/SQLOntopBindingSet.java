@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.answering.resultset.impl;
 
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.answering.resultset.OntopBinding;
 import it.unibz.inf.ontop.answering.resultset.OntopBindingSet;
@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 
 public class SQLOntopBindingSet extends AbstractOntopBindingSet implements OntopBindingSet {
 
-    SQLOntopBindingSet(ImmutableSortedSet<Variable> signature,
+    SQLOntopBindingSet(ImmutableList<Variable> signature,
                        ImmutableSubstitution<Constant> sqlVar2Constant,
                        ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
         super(computeBindingMap(signature, sqlVar2Constant, sparqlVar2Term));
     }
 
-    private static LinkedHashMap<String, OntopBinding> computeBindingMap(ImmutableSortedSet<Variable> signature,
+    private static LinkedHashMap<String, OntopBinding> computeBindingMap(ImmutableList<Variable> signature,
                                                                     ImmutableSubstitution<Constant> sqlVar2Constant,
                                                                     ImmutableSubstitution<ImmutableTerm> sparqlVar2Term) {
 

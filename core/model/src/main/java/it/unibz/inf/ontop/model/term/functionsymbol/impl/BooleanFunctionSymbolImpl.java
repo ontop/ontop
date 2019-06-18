@@ -50,4 +50,9 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
         }
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
+
+    @Override
+    protected boolean enableIfElseNullLifting() {
+        return true;
+    }
 }

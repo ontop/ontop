@@ -31,7 +31,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.List;
@@ -138,10 +138,10 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
-	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
-	ImmutableFunctionalTerm.InjectivityDecomposition getInjectivityDecomposition(
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
 			ImmutableFunctionalTerm injectiveFunctionalTerm,
-			ImmutableMap<Variable, ImmutableTerm> subTermSubstitutionMap);
+			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
 
@@ -419,6 +419,8 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
+
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
 
 	ImmutableFunctionalTerm getDBRegexpReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
@@ -519,6 +521,14 @@ public interface TermFactory {
 																		ImmutableTerm rdfTypeTerm2);
 
 	DBFunctionSymbolFactory getDBFunctionSymbolFactory();
+
+	/**
+	 * Minimalist substitution with minimal dependencies.
+	 * Designed to be used by FunctionSymbols.
+	 *
+	 * See the SubstitutionFactory for richer substitutions
+	 */
+	<T extends ImmutableTerm> ProtoSubstitution<T> getProtoSubstitution(ImmutableMap<Variable, T> map);
 
 	/**
 	 * TODO: find a better name
