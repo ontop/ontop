@@ -43,7 +43,7 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	 * @return true if the property is the inverse (false otherwise)
 	 */
 	
-	public boolean isInverse();
+	boolean isInverse();
 
 	/**
 	 * the IRI of the object property
@@ -53,7 +53,7 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	IRI getIRI();
 
 	@Deprecated
-	public String getName();
+	String getName();
 	
 	/**
 	 * the inverse of the object property
@@ -66,7 +66,7 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	 * @return
 	 */
 	
-	public ObjectPropertyExpression getInverse();
+	ObjectPropertyExpression getInverse();
 
 	/**
 	 * the domain class expression for the object property 
@@ -76,7 +76,7 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	 * @return class expression for the domain
 	 */
 	
-	public ObjectSomeValuesFrom getDomain();
+	ObjectSomeValuesFrom getDomain();
 	
 	/**
 	 * the range class expression for the object property
@@ -88,5 +88,5 @@ public interface ObjectPropertyExpression extends DescriptionBT {
 	 * @return class expression for the range
 	 */
 	
-	public ObjectSomeValuesFrom getRange();
+	ObjectSomeValuesFrom getRange();
 }

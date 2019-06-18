@@ -53,7 +53,8 @@ public interface DataPropertyExpression extends DescriptionBT {
 
 	IRI getIRI();
 
-	public String getName();
+	@Deprecated
+	String getName();
 	
 	/**
 	 * returns the DataSomeValuesFrom for the domain of the data property
@@ -61,14 +62,14 @@ public interface DataPropertyExpression extends DescriptionBT {
 	 * @return
 	 */
 	
-	public DataSomeValuesFrom getDomainRestriction(Datatype datatype);
+	DataSomeValuesFrom getDomainRestriction(Datatype datatype);
 	
-	public Collection<DataSomeValuesFrom> getAllDomainRestrictions();
+	Collection<DataSomeValuesFrom> getAllDomainRestrictions();
 
 	/**
 	 * returns the DataPropertyRangeExpression for the range of the data property
 	 * 
 	 * @return
 	 */
-	public DataPropertyRangeExpression getRange();
+	DataPropertyRangeExpression getRange();
 }
