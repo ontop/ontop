@@ -177,22 +177,25 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
 
-//        QueryModifierSplit queryModifierSplit = splitQueryModifiers(normalizedSubTree);
-//
+        QueryModifierSplit queryModifierSplit = splitQueryModifiers(normalizedSubTree);
+
 //        NativeNode subNativeNode = legacyIQTree2NativeNodeGenerator.generate(
 //                queryModifierSplit.treeToConvertUsingLegacyConverter, metadata);
-//
-//        if (queryModifierSplit.ancestors.isEmpty())
-//            return subNativeNode;
-//
-//        IQTree tree = queryModifierSplit.ancestors.reverse().stream()
-//                .reduce((IQTree) subNativeNode,
-//                        (t, n) -> iqFactory.createUnaryIQTree(n, t),
-//                        (t1, t2) -> {
-//                            throw new MinorOntopInternalBugException("No combination expected");
-//                        });
 
-        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, metadata.getDBParameters());
+        NativeNode subNativeNode = defaultIQTree2NativeNodeGenerator.generate(
+                queryModifierSplit.treeToConvertUsingLegacyConverter, metadata.getDBParameters());
+
+        if (queryModifierSplit.ancestors.isEmpty())
+            return subNativeNode;
+
+        IQTree tree = queryModifierSplit.ancestors.reverse().stream()
+                .reduce((IQTree) subNativeNode,
+                        (t, n) -> iqFactory.createUnaryIQTree(n, t),
+                        (t1, t2) -> {
+                            throw new MinorOntopInternalBugException("No combination expected");
+                        });
+
+        return defaultIQTree2NativeNodeGenerator.generate(tree, metadata.getDBParameters());
 
     }
 
