@@ -71,8 +71,9 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                                                          IQTree grandChild,
                                                                          VariableGenerator variableGenerator) {
         return new AggregationNormalizationState(aggregationNode, childConstructionNode, grandChild, variableGenerator)
-                .liftNonGroupingBindings()
-                .liftGroupingBindings();
+                .propagateNonGroupingBindingsIntoToAggregationSubstitution()
+                .liftGroupingBindings()
+                .simplifyAggregationSubstitution();
 
     }
 
@@ -112,16 +113,47 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         }
 
         /**
-         * TODO: implement
+         * All the bindings of non-grouping variables in the child construction node are propagated to
+         * the aggregation substitution
          */
-        public AggregationNormalizationState liftNonGroupingBindings() {
-            throw new RuntimeException("TODO: implement it");
+        public AggregationNormalizationState propagateNonGroupingBindingsIntoToAggregationSubstitution() {
+            if (childConstructionNode == null)
+                return this;
+
+            ImmutableSet<Variable> groupingVariables = aggregationNode.getGroupingVariables();
+            ImmutableSet<Variable> nonGroupingVariables = Sets.difference(
+                    aggregationNode.getChildVariables(),
+                    groupingVariables).immutableCopy();
+
+            ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
+                    .reduceDomainToIntersectionWith(nonGroupingVariables);
+
+            if (nonGroupingSubstitution.isEmpty())
+                return this;
+
+            ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
+                    (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
+                    nonGroupingSubstitution.composeWith(aggregationNode.getSubstitution());
+
+            AggregationNode newAggregationNode = iqFactory.createAggregationNode(
+                    aggregationNode.getGroupingVariables(),
+                    newAggregationSubstitution);
+
+            // Nullable
+            ConstructionNode newChildConstructionNode = Optional.of(childConstructionNode.getSubstitution()
+                    .reduceDomainToIntersectionWith(groupingVariables))
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> iqFactory.createConstructionNode(newAggregationNode.getChildVariables(), s))
+                    .orElse(null);
+
+            return new AggregationNormalizationState(ancestors, newAggregationNode, newChildConstructionNode, grandChild,
+                    variableGenerator);
         }
 
         /**
          * Lifts (fragments of) bindings that are injective.
          *
-         * liftNonGroupingBindings() is expected to have been called before
+         * propagateNonGroupingBindingsIntoToAggregationSubstitution() is expected to have been called before
          *
          */
         public AggregationNormalizationState liftGroupingBindings() {
@@ -193,6 +225,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             // Nullable
             ConstructionNode newChildConstructionNode = subState.getChildConstructionNode()
+                    // Only keeps the child construction node if it has a substitution
                     .filter(n -> !n.getSubstitution().isEmpty())
                     .map(n -> iqFactory.createConstructionNode(
                             Stream.concat(
@@ -207,6 +240,15 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
 
             return new AggregationNormalizationState(newAncestors, newAggregationNode, newChildConstructionNode,
                     subState.getGrandChildTree(), variableGenerator);
+        }
+
+        /**
+         * Simplifies the substitution of the aggregation node and partially lift some bindings
+         * so as to guarantee that all the values of the substitution are functional terms using
+         * an aggregation function symbol.
+         */
+        public AggregationNormalizationState simplifyAggregationSubstitution() {
+            throw new RuntimeException("TODO: implement simplifyAggregationSubstitution()");
         }
 
 
