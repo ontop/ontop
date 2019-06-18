@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -37,6 +38,7 @@ import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.Count;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +110,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         IQTree tree = translate(pq.getTupleExpr(), variableGenerator).iqTree;
 
+        log.debug(tree.toString());
         return iqFactory.createIQ(
                 atomFactory.getDistinctVariableOnlyDataAtom(
                         atomFactory.getRDFAnswerPredicate(0),
@@ -191,14 +194,39 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private ImmutableSet<Variable> getAggregateOutputNullableVars(AggregationNode an, ImmutableSet<Variable> childNullableVars) {
-        return Sets.union(
-                childNullableVars,
+        return Stream.concat(
+                an.getGroupingVariables().stream()
+                        .filter(v -> childNullableVars.contains(v)),
                 an.getSubstitution().getImmutableMap().entrySet().stream()
-                        .filter(e -> e.getValue().getVariables().stream()
-                                .anyMatch(v -> childNullableVars.contains(v)))
+                        .filter(e -> isAggregateNullable(e.getValue(), childNullableVars))
                         .map(e -> e.getKey())
-                        .collect(ImmutableCollectors.toSet())
-        ).immutableCopy();
+        ).collect(ImmutableCollectors.toSet());
+
+    }
+
+    private boolean isAggregateNullable(ImmutableFunctionalTerm function, ImmutableSet<Variable> childNullableVars) {
+        if (function.getFunctionSymbol() instanceof DummyCountSPARQLFunctionSymbol) {
+            return false;
+        }
+        if (function.getFunctionSymbol() instanceof DummySumSPARQLFunctionSymbol) {
+            return false;
+        }
+        if (function.getFunctionSymbol() instanceof DummyAvgSPARQLFunctionSymbol) {
+            return false;
+        }
+        if (function.getFunctionSymbol() instanceof DummyMinSPARQLFunctionSymbol) {
+            return false;
+        }
+        if (function.getFunctionSymbol() instanceof DummyMaxSPARQLFunctionSymbol) {
+            return false;
+        }
+        if (function.getFunctionSymbol() instanceof DummySampleSPARQLFunctionSymbol) {
+            return function.isNullable(childNullableVars);
+        }
+        if (function.getFunctionSymbol() instanceof DummyGroupConcatSPARQLFunctionSymbol) {
+            return false;
+        }
+        throw new RuntimeException("TODO: implement");
     }
 
     private AggregationNode getAggregationNode(Group groupNode, ImmutableSet<Variable> childVariables) throws OntopUnsupportedInputQueryException {
@@ -214,7 +242,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .map(m -> ImmutableMap.copyOf(m))
                 .map(m -> substitutionFactory.getSubstitution(m))
                 .collect(ImmutableCollectors.toList());
-        if(mergedVarDefs.size() > 1){
+        if (mergedVarDefs.size() > 1) {
             throw new OntopUnsupportedInputQueryException("");
         }
         return iqFactory.createAggregationNode(
@@ -730,18 +758,18 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private TranslationResult translateExtension(Extension node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
-        return (node.getArg() instanceof Group)?
+        return (node.getArg() instanceof Group) ?
                 translateAggregate(
                         (Group) node.getArg(),
                         variableGenerator
-                ):
-                translateAggregateFreeExtension(
+                ) :
+                translateAggregationFreeExtension(
                         node,
                         variableGenerator
                 );
     }
 
-    private TranslationResult translateAggregateFreeExtension(Extension node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+    private TranslationResult translateAggregationFreeExtension(Extension node, VariableGenerator variableGenerator) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult childTranslation = translate(node.getArg(), variableGenerator);
         IQTree childQuery = childTranslation.iqTree;
 
@@ -755,9 +783,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         new HashSet<>(childQuery.getVariables())
                 ));
         ImmutableSet<Variable> childVars = childQuery.getVariables();
-        if(varDefs.stream()
+        if (varDefs.stream()
                 .map(vd -> vd.var)
-                .anyMatch(v -> childVars.contains(v))){
+                .anyMatch(v -> childVars.contains(v))) {
             return childTranslation;
         }
         ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
@@ -932,9 +960,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     /**
-     * @param expr      expression
+     * @param expr           expression
      * @param knownVariables the set of variables that can occur in the expression
-     *                  (the rest will be replaced with NULL)
+     *                       (the rest will be replaced with NULL)
      * @return term
      */
 
@@ -945,7 +973,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // iriOrFunction ::= iri ArgList?
 
         if (expr instanceof Var)
-            return translateRDF4JVar((Var)expr, knownVariables, false);
+            return translateRDF4JVar((Var) expr, knownVariables, false);
         if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
             return getTermForLiteralOrIri(v);
@@ -967,7 +995,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         }
         if (expr instanceof UnaryValueOperator) {
             // O-ary count
-            if(expr instanceof Count && ((Count) expr).getArg() == null){
+            if (expr instanceof Count && ((Count) expr).getArg() == null) {
                 return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                                 SPARQL.COUNT,
@@ -978,7 +1006,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             ImmutableTerm term = getTerm(((UnaryValueOperator) expr).getArg(), knownVariables);
 
             //Unary count
-            if(expr instanceof Count) {
+            if (expr instanceof Count) {
                 Count count = (Count) expr;
                 if (count.isDistinct())
                     return termFactory.getImmutableFunctionalTerm(
@@ -993,8 +1021,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         term
                 );
             }
-            if(expr instanceof Avg) {
-                Avg avg = (Avg) expr;
+            if (expr instanceof Avg) {
                 return termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                                 SPARQL.AVG,
@@ -1002,6 +1029,63 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ),
                         term
                 );
+            }
+            if (expr instanceof Sum) {
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.SUM,
+                                1
+                        ),
+                        term
+                );
+            }
+            if (expr instanceof Min) {
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.MIN,
+                                1
+                        ),
+                        term
+                );
+            }
+            if (expr instanceof Max) {
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.MAX,
+                                1
+                        ),
+                        term
+                );
+            }
+            if (expr instanceof Sample) {
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.SAMPLE,
+                                1
+                        ),
+                        term
+                );
+            }
+            if (expr instanceof GroupConcat) {
+                ValueExpr sep = ((GroupConcat) expr).getSeparator();
+                return sep == null ?
+                        termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                        SPARQL.GROUP_CONCAT,
+                                        1
+                                ),
+                                term
+                        ) :
+                        termFactory.getImmutableFunctionalTerm(
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                        SPARQL.GROUP_CONCAT,
+                                        2
+                                ),
+                                term,
+                                getTerm(
+                                        sep,
+                                        ImmutableSet.of()
+                                ));
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1179,16 +1263,16 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
      */
     private VariableOrGroundTerm translateRDF4JVar(Var v, Set<Variable> subtreeVariables, boolean leafNode) {
         // If this "Var" is a constant
-        if((v.hasValue()))
-           return getTermForLiteralOrIri(v.getValue());
+        if ((v.hasValue()))
+            return getTermForLiteralOrIri(v.getValue());
         // Otherwise, this "Var" is a variable
         Variable var = termFactory.getVariable(v.getName());
         // If the subtree is empty, create a variable
         if (leafNode)
             return var;
         // Otherwise, check whether the variable is projected
-        return subtreeVariables.contains(var)?
-                var:
+        return subtreeVariables.contains(var) ?
+                var :
                 termFactory.getNullConstant();
     }
 

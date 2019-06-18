@@ -165,7 +165,14 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
                 new DummyCountSPARQLFunctionSymbol(abstractRDFType),
-                new DummyCountSPARQLFunctionSymbol()
+                new DummyCountSPARQLFunctionSymbol(),
+                new DummySumSPARQLFunctionSymbol(abstractRDFType),
+                new DummyMinSPARQLFunctionSymbol(abstractRDFType),
+                new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
+                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new DummySampleSPARQLFunctionSymbol(abstractRDFType),
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
