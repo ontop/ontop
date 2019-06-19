@@ -242,12 +242,28 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
         public AggregationNormalizationState simplifyAggregationSubstitution() {
             // NB: use ImmutableSubstitution.simplifyValues()
             // NB: look at FunctionSymbol.isAggregation()
-            throw new RuntimeException("TODO: implement simplifyAggregationSubstitution()");
+            // TODO: implement seriously
+            return this;
         }
 
 
         protected IQTree createNormalizedTree(IQProperties normalizedProperties) {
-            throw new RuntimeException("TODO: continue");
+            IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
+
+            IQTree newChildTree = Optional.ofNullable(childConstructionNode)
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChild,
+                            iqFactory.createIQProperties().declareNormalizedForOptimization()))
+                    .orElse(grandChild);
+
+            IQTree aggregationTree = iqFactory.createUnaryIQTree(aggregationNode, newChildTree,
+                    normalizedProperties);
+
+            return ancestors.reverse().stream()
+                    .reduce(aggregationTree,
+                            (t, a) -> iqFactory.createUnaryIQTree(a, t),
+                            (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); })
+                    // Recursive (for merging top construction nodes)
+                    .normalizeForOptimization(variableGenerator);
         }
     }
 
