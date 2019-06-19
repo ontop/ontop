@@ -34,72 +34,61 @@ public class ImmutableLinearInclusionDependenciesTools {
 
         final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
 
-        traverseDAG(reasoner.objectPropertiesDAG(),
-                p -> !p.isInverse(),
-                p -> translate(p, "x", "y"),
-                p -> translate(p, "x", "y"),
-                builder);
+        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
 
-        traverseDAG(reasoner.dataPropertiesDAG(),
-                p -> true,
-                p -> translate(p, "x", "y"),
-                p -> translate(p, "x", "y"),
-                builder);
+        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, this::translate, builder);
 
-        traverseDAG(reasoner.classesDAG(),
-                c -> (c instanceof OClass),
-                sc -> translate(sc, "x", "y"),
-                c -> translate(c, "x", null), // no existential var in the head
-                builder);
+        // the head will have no existential variables
+        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), this::translate, builder);
 
         return builder.build();
     }
 
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
-                                        Function<T, DataAtom<AtomPredicate>> translateBody,
-                                        Function<T, DataAtom<AtomPredicate>> translateHead,
+                                        Function<T, DataAtom<AtomPredicate>> translate,
                                         LinearInclusionDependencies.Builder<AtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)
                     for (T e : node)
                         if (e != sub && filter.test(e)) {
-                            DataAtom<AtomPredicate> body = translateBody.apply(sub);
-                            DataAtom<AtomPredicate> head = translateHead.apply(e);
+                            DataAtom<AtomPredicate> body = translate.apply(sub);
+                            DataAtom<AtomPredicate> head = translate.apply(e);
                             builder.add(head, body);
                         }
     }
 
-    private DataAtom<AtomPredicate> translate(ObjectPropertyExpression property, String x, String y) {
-        Variable varX = termFactory.getVariable(x);
-        Variable varY = termFactory.getVariable(y);
-
-        if (property.isInverse())
-            return atomFactory.getIntensionalTripleAtom(varY, property.getIRI(), varX);
-        else
-            return atomFactory.getIntensionalTripleAtom(varX, property.getIRI(), varY);
+    private DataAtom<AtomPredicate> translate(ObjectPropertyExpression property) {
+        return property.isInverse()
+            ? atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("y"),
+                    property.getIRI(),
+                    termFactory.getVariable("x"))
+            : atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("x"),
+                    property.getIRI(),
+                    termFactory.getVariable("y"));
     }
 
-    private DataAtom<AtomPredicate> translate(DataPropertyExpression property, String x, String y) {
-        Variable varX = termFactory.getVariable(x);
-        Variable varY = termFactory.getVariable(y);
-
-        return atomFactory.getIntensionalTripleAtom(varX, property.getIRI(), varY);
+    private DataAtom<AtomPredicate> translate(DataPropertyExpression property) {
+        return atomFactory.getIntensionalTripleAtom(
+                termFactory.getVariable("x"),
+                property.getIRI(),
+                termFactory.getVariable("y"));
     }
 
-    private DataAtom<AtomPredicate> translate(ClassExpression description, String x, String existentialVariableName) {
+    private DataAtom<AtomPredicate> translate(ClassExpression description) {
         if (description instanceof OClass) {
-            final Variable varX = termFactory.getVariable(x);
-            return atomFactory.getIntensionalTripleAtom(varX, ((OClass) description).getIRI());
+            return atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("x"),
+                    ((OClass) description).getIRI());
         }
         else if (description instanceof ObjectSomeValuesFrom) {
-            ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
-            return translate(property, x, existentialVariableName);
+            return translate(((ObjectSomeValuesFrom) description).getProperty());
         }
         else {
-            DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            return translate(property, x, existentialVariableName);
+            return translate(((DataSomeValuesFrom) description).getProperty());
         }
     }
 }
