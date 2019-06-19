@@ -60,7 +60,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
         int count = count(ImmutableList.of(owl));
-		assertTrue("Count: " + count, count == 9);
+		assertEquals(9, count);
 	}
 
 	public void testAssertionIterable() throws Exception {
@@ -71,13 +71,13 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
         int count = count(ImmutableList.of(owl));
-		assertTrue("Count: " + count, count == 9);
+		assertEquals(9, count);
 	}
 	
 	public void testAssertionEmptyIterable() throws Exception {
 
         int count = count(ImmutableList.of());
-		assertTrue("Count: " + count, count == 0);
+		assertEquals(0, count);
 	}
 
 	
@@ -89,7 +89,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new File(owlfile));
 
         int count = count(ImmutableList.of(owl));
-		assertTrue("Count: " + count, count == 9);
+		assertEquals(9, count);
 	}
 	
 	public void testAssertionEmptyOntology() throws Exception {
@@ -98,7 +98,7 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		OWLOntology owl = manager.createOntology();
 
         int count = count(ImmutableList.of(owl));
-		assertTrue("Count: " + count, count == 0);
+		assertEquals(0, count);
 	}
 	
 	public void testAssertionOntologies() throws Exception {
@@ -113,13 +113,13 @@ public class OWLAPIABoxIteratorTest extends TestCase {
 		manager.loadOntologyFromOntologyDocument((new File(owlfile3)));
 
         int count = count(manager.getOntologies());
-		assertTrue("Count: " + count, count == 9);
+		assertEquals(9, count);
 	}
 	
 	public void testAssertionEmptyOntologySet() {
 
 		int count = count(ImmutableList.of());
-		assertTrue("Count: " + count, count == 0);
+		assertEquals(0, count);
 	}
 
 
