@@ -1,42 +1,32 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
-import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Singleton
 public class DistinctNormalizerImpl implements DistinctNormalizer {
 
     private static final int MAX_ITERATIONS = 10000;
     private final IntermediateQueryFactory iqFactory;
-    private final SubstitutionFactory substitutionFactory;
+    private final CoreSingletons coreSingletons;
 
     @Inject
-    private DistinctNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private DistinctNormalizerImpl(IntermediateQueryFactory iqFactory, CoreSingletons coreSingletons) {
         this.iqFactory = iqFactory;
-        this.substitutionFactory = substitutionFactory;
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -65,156 +55,40 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
                                                 IQProperties currentIQProperties, UnaryIQTree child,
                                                 VariableGenerator variableGenerator) {
         // Non-final
-        BindingLiftState state = new BindingLiftState(constructionNode, child.getChild(), variableGenerator);
+        InjectiveBindingLiftState state = new InjectiveBindingLiftState(constructionNode, child.getChild(), variableGenerator,
+                coreSingletons);
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-            BindingLiftState newState = state.liftBindings();
+            InjectiveBindingLiftState newState = state.liftBindings();
 
             if (newState.equals(state))
-                return newState.createNormalizedTree(currentIQProperties);
+                return createNormalizedTree(newState, currentIQProperties, variableGenerator);
             state = newState;
         }
         throw new MinorOntopInternalBugException("DistinctNormalizerImpl.liftBindingConstructionChild() " +
                 "did not converge after " + MAX_ITERATIONS);
     }
 
-    private class BindingLiftState {
-        // Parent first
-        private final ImmutableList<ConstructionNode> ancestors;
-        // First descendent tree not starting with a construction node
-        private final IQTree grandChildTree;
-        @Nullable
-        private final ConstructionNode childConstructionNode;
-        private final VariableGenerator variableGenerator;
+    public IQTree createNormalizedTree(InjectiveBindingLiftState state, IQProperties currentIQProperties,
+                                       VariableGenerator variableGenerator) {
+        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
-        /**
-         * Initial state
-         */
-        public BindingLiftState(@Nonnull ConstructionNode childConstructionNode, IQTree grandChildTree,
-                                VariableGenerator variableGenerator) {
-            this.ancestors = ImmutableList.of();
-            this.grandChildTree = grandChildTree;
-            this.childConstructionNode = childConstructionNode;
-            this.variableGenerator = variableGenerator;
-        }
+        IQTree grandChildTree = state.getGrandChildTree();
 
-        private BindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
-                                 VariableGenerator variableGenerator) {
-            this.ancestors = ancestors;
-            this.grandChildTree = grandChildTree;
-            this.childConstructionNode = null;
-            this.variableGenerator = variableGenerator;
-        }
+        IQTree newChildTree = state.getChildConstructionNode()
+                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChildTree,
+                        iqFactory.createIQProperties().declareNormalizedForOptimization()))
+                .orElse(grandChildTree);
 
-        private BindingLiftState(ImmutableList<ConstructionNode> ancestors, IQTree grandChildTree,
-                                 VariableGenerator variableGenerator,
-                                 @Nonnull ConstructionNode childConstructionNode) {
-            this.ancestors = ancestors;
-            this.grandChildTree = grandChildTree;
-            this.childConstructionNode = childConstructionNode;
-            this.variableGenerator = variableGenerator;
-        }
+        IQTree distinctTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), newChildTree,
+                currentIQProperties.declareNormalizedForOptimization());
 
-        public BindingLiftState liftBindings() {
-            if (childConstructionNode == null)
-                return this;
-
-            ImmutableSubstitution<ImmutableTerm> childSubstitution = childConstructionNode.getSubstitution();
-            if (childSubstitution.isEmpty())
-                return this;
-
-            VariableNullability grandChildVariableNullability = grandChildTree.getVariableNullability();
-
-            ImmutableSet<Variable> nonFreeVariables = childConstructionNode.getVariables();
-
-            ImmutableMap<Variable, Optional<FunctionalTermDecomposition>> injectivityDecompositionMap =
-                    childSubstitution.getImmutableMap().entrySet().stream()
-                            .filter(e -> e.getValue() instanceof ImmutableFunctionalTerm)
-                            .collect(ImmutableCollectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> ((ImmutableFunctionalTerm) e.getValue())
-                                            // Analyzes injectivity
-                                            .analyzeInjectivity(nonFreeVariables, grandChildVariableNullability,
-                                                    variableGenerator)));
-
-            ImmutableMap<Variable, ImmutableTerm> liftedSubstitutionMap = Stream.concat(
-                    // All variables and constants
-                    childSubstitution.getImmutableMap().entrySet().stream()
-                            .filter(e -> e.getValue() instanceof NonFunctionalTerm),
-                    // (Possibly decomposed) injective functional terms
-                    injectivityDecompositionMap.entrySet().stream()
-                            .filter(e -> e.getValue().isPresent())
-                            .map(e -> Maps.immutableEntry(e.getKey(),
-                                    (ImmutableTerm) e.getValue().get().getLiftableTerm())))
-                    .collect(ImmutableCollectors.toMap());
-
-            Optional<ConstructionNode> liftedConstructionNode = Optional.of(liftedSubstitutionMap)
-                    .filter(m -> !m.isEmpty())
-                    .map(substitutionFactory::getSubstitution)
-                    .map(s -> iqFactory.createConstructionNode(childConstructionNode.getVariables(), s));
-
-            ImmutableSet<Variable> newChildVariables = liftedConstructionNode
-                    .map(ConstructionNode::getChildVariables)
-                    .orElseGet(childConstructionNode::getVariables);
-
-            ImmutableMap<Variable, ImmutableTerm> newChildSubstitutionMap =
-                    injectivityDecompositionMap.entrySet().stream()
-                            .flatMap(e -> e.getValue()
-                                    // Sub-term substitution entries from injectivity decompositions
-                                .map(d -> d.getSubTermSubstitutionMap()
-                                        .map(s -> s.entrySet().stream()
-                                                .map(subE -> (Map.Entry<Variable, ImmutableTerm>)(Map.Entry<Variable, ?>) subE))
-                                        .orElseGet(Stream::empty))
-                                    // Non-decomposable entries
-                                .orElseGet(() -> Stream.of(Maps.immutableEntry(
-                                        e.getKey(),
-                                        childSubstitution.get(e.getKey())))))
-                            .collect(ImmutableCollectors.toMap());
-
-            Optional<ConstructionNode> newChildConstructionNode = Optional.of(newChildSubstitutionMap)
-                    .filter(m -> !m.isEmpty())
-                    .map(substitutionFactory::getSubstitution)
-                    .map(s -> iqFactory.createConstructionNode(newChildVariables, s))
-                    .map(Optional::of)
-                    .orElseGet(() -> newChildVariables.equals(grandChildTree.getVariables())
-                            ? Optional.empty()
-                            : Optional.of(iqFactory.createConstructionNode(newChildVariables)));
-
-            // Nothing lifted
-            if (newChildConstructionNode
-                    .filter(n -> n.isEquivalentTo(childConstructionNode))
-                    .isPresent()) {
-                if (liftedConstructionNode.isPresent())
-                    throw new MinorOntopInternalBugException("Unexpected lifted construction node");
-                return this;
-            }
-
-            ImmutableList<ConstructionNode> newAncestors = liftedConstructionNode
-                    .map(n -> Stream.concat(ancestors.stream(), Stream.of(n))
-                            .collect(ImmutableCollectors.toList()))
-                    .orElseThrow(() -> new MinorOntopInternalBugException("A lifted construction node was expected"));
-
-            return newChildConstructionNode
-                    .map(c -> new BindingLiftState(newAncestors, grandChildTree, variableGenerator, c))
-                    .orElseGet(() -> new BindingLiftState(newAncestors, grandChildTree, variableGenerator));
-        }
-
-        public IQTree createNormalizedTree(IQProperties currentIQProperties) {
-            IQTree newChildTree = Optional.ofNullable(childConstructionNode)
-                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChildTree,
-                            iqFactory.createIQProperties().declareNormalizedForOptimization()))
-                    .orElse(grandChildTree);
-
-            IQTree distinctTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), newChildTree,
-                    currentIQProperties.declareNormalizedForOptimization());
-
-            return ancestors.reverse().stream()
-                    .reduce(distinctTree,
-                            (t, a) -> iqFactory.createUnaryIQTree(a, t),
-                            (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); })
-                    // Recursive (for merging top construction nodes)
-                    .normalizeForOptimization(variableGenerator);
-        }
+        return state.getAncestors().reverse().stream()
+                .reduce(distinctTree,
+                        (t, a) -> iqFactory.createUnaryIQTree(a, t),
+                        (t1, t2) -> { throw new MinorOntopInternalBugException("No merge was expected"); })
+                // Recursive (for merging top construction nodes)
+                .normalizeForOptimization(variableGenerator);
     }
 
 }

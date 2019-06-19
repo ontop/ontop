@@ -223,7 +223,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
                         thenValue);
                 ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap = ImmutableMap.of(newVariable, thenCondition);
 
-                return Optional.of(termFactory.getInjectivityDecomposition(newFunctionalTerm, subTermSubstitutionMap));
+                return Optional.of(termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap));
             }
 
         }

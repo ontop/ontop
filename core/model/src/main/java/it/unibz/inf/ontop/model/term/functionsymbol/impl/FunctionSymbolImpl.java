@@ -331,7 +331,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         if (arguments.stream()
                 .allMatch(t -> ((t instanceof GroundTerm) && ((GroundTerm) t).isDeterministic())
                         || nonFreeVariables.contains(t)))
-            return Optional.of(termFactory.getInjectivityDecomposition(
+            return Optional.of(termFactory.getFunctionalTermDecomposition(
                     termFactory.getImmutableFunctionalTerm(this, arguments)));
 
         if (!isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms())
@@ -386,8 +386,8 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         ImmutableFunctionalTerm newFunctionalTerm = termFactory.getImmutableFunctionalTerm(this, newArguments);
 
         return subTermSubstitutionMap.isEmpty()
-                ? termFactory.getInjectivityDecomposition(newFunctionalTerm)
-                : termFactory.getInjectivityDecomposition(newFunctionalTerm, subTermSubstitutionMap);
+                ? termFactory.getFunctionalTermDecomposition(newFunctionalTerm)
+                : termFactory.getFunctionalTermDecomposition(newFunctionalTerm, subTermSubstitutionMap);
     }
 
     protected final boolean isInjective(ImmutableList<? extends ImmutableTerm> arguments,

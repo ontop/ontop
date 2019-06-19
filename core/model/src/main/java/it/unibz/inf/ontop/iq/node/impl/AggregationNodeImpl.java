@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -32,14 +33,17 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     private final ImmutableSet<Variable> groupingVariables;
     private final ImmutableSubstitution<ImmutableFunctionalTerm> substitution;
     private final ImmutableSet<Variable> childVariables;
+    private final AggregationNormalizer aggregationNormalizer;
 
     @AssistedInject
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
-                                  SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
+                                  SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
+                                  AggregationNormalizer aggregationNormalizer) {
         super(substitutionFactory, iqFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
+        this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
         this.childVariables = Sets.union(groupingVariables,
                 substitution.getImmutableMap().values().stream()
@@ -47,20 +51,10 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
                         .collect(ImmutableCollectors.toSet())).immutableCopy();
     }
 
-    /**
-     * TODO: blocks distinct. May block some bindings and some filter conditions
-     */
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
-
-        QueryNode rootNode = normalizedChild.getRootNode();
-        // TODO: deal with construction node
-
-        // TODO: we may consider remove distincts in the sub-tree when cardinality does not affect the substitution definitions
-        // TODO: consider distincts and filters
-
-        throw new RuntimeException("TODO: continue");
+        return aggregationNormalizer.normalizeForOptimization(this, child, variableGenerator,
+                currentIQProperties);
     }
 
     @Override
