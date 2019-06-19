@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -21,10 +20,6 @@ public class ImmutableLinearInclusionDependenciesTools {
     private final ImmutableUnificationTools immutableUnificationTools;
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
-
-    private static final String variableXname = "x";
-    private static final String variableYname = "y";
-    private static final String variableZname = "z";
 
     @Inject
     private ImmutableLinearInclusionDependenciesTools(AtomFactory atomFactory, TermFactory termFactory, ImmutableUnificationTools immutableUnificationTools, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
@@ -40,22 +35,23 @@ public class ImmutableLinearInclusionDependenciesTools {
         final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
 
         traverseDAG(reasoner.objectPropertiesDAG(),
-                prop -> !prop.isInverse(),
-                subprop -> translate(subprop, variableXname, variableYname),
-                prop -> translate(prop, variableXname, variableYname),
+                p -> !p.isInverse(),
+                p -> translate(p, "x", "y"),
+                p -> translate(p, "x", "y"),
                 builder);
 
         traverseDAG(reasoner.dataPropertiesDAG(),
-                e -> true,
-                subprop -> translate(subprop, variableXname, variableYname),
-                prop -> translate(prop, variableXname, variableYname),
+                p -> true,
+                p -> translate(p, "x", "y"),
+                p -> translate(p, "x", "y"),
                 builder);
 
         traverseDAG(reasoner.classesDAG(),
-                cla -> !(!(cla instanceof OClass) && !(!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom)))),
-                subclass -> translate(subclass, variableYname),
+                cla -> (cla instanceof OClass)
+                        || (!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))),
+                subclass -> translate(subclass, "x", "y"),
                 // use a different variable name in case the body has an existential as well
-                cla -> translate(cla, variableZname),
+                cla -> translate(cla, "x", "z"),
                 builder);
 
         return builder.build();
@@ -94,19 +90,19 @@ public class ImmutableLinearInclusionDependenciesTools {
         return atomFactory.getIntensionalTripleAtom(varX, property.getIRI(), varY);
     }
 
-    private DataAtom<AtomPredicate> translate(ClassExpression description, String existentialVariableName) {
+    private DataAtom<AtomPredicate> translate(ClassExpression description, String x, String existentialVariableName) {
         if (description instanceof OClass) {
-            final Variable varX = termFactory.getVariable(variableXname);
+            final Variable varX = termFactory.getVariable(x);
             OClass klass = (OClass) description;
             return atomFactory.getIntensionalTripleAtom(varX, klass.getIRI());
         }
         else if (description instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();
-            return translate(property, variableXname, existentialVariableName);
+            return translate(property, x, existentialVariableName);
         }
         else {
             DataPropertyExpression property = ((DataSomeValuesFrom) description).getProperty();
-            return translate(property, variableXname, existentialVariableName);
+            return translate(property, x, existentialVariableName);
         }
     }
 }
