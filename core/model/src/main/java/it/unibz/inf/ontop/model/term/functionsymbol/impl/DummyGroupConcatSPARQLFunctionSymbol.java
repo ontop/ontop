@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -43,5 +44,10 @@ public class DummyGroupConcatSPARQLFunctionSymbol extends SPARQLFunctionSymbolIm
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return false;
+    }
+
+    @Override
+    public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
+        return true;
     }
 }

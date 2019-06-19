@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -38,4 +39,8 @@ public class DummyCountSPARQLFunctionSymbol extends SPARQLFunctionSymbolImpl{
         return false;
     }
 
+    @Override
+    public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
+        return false;
+    }
 }

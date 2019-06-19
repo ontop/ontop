@@ -164,7 +164,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			log.debug("SPARQL query:\n{}", inputQuery.getInputString());
 			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
-			log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
+			log.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
 			//InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 
             try {
@@ -173,7 +173,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 log.debug("Start the rewriting process...");
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 
-                log.debug("Directly translated (SPARQL) IQ: \n" + rewrittenIQ.toString());
+                log.debug("Rewritten IQ:\n{}",rewrittenIQ);
 
                 log.debug("Start the unfolding...");
 
