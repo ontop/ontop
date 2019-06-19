@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -307,23 +306,24 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private TranslationResult translateBindingSetAssignment(BindingSetAssignment node) throws OntopUnsupportedInputQueryException {
 
+        Constant nullConstant = termFactory.getNullConstant();
+
         ImmutableSet<Variable> allVars = node.getAssuredBindingNames().stream()
                 .map(termFactory::getVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<ImmutableSet<Variable>> varSets = StreamSupport.stream(
+        ImmutableSet<ImmutableMap<Variable, ImmutableTerm>> maps = StreamSupport.stream(
                 node.getBindingSets().spliterator(),
                 false
-        ).map(bs -> getBsMap(bs).keySet())
+        ).map(bs -> getBsMap(bs, nullConstant))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> nullableVars = varSets.iterator().next().stream()
-                .filter(v -> varSets.stream().anyMatch(s -> !s.contains(v)))
+        ImmutableSet<Variable> nullableVars = maps.iterator().next().keySet().stream()
+                .filter(v -> maps.stream().anyMatch(m -> m.get(v).equals(nullConstant)))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQTree> subtrees = StreamSupport.stream(node.getBindingSets().spliterator(), false)
-                .map(bs -> getBsMap(bs))
-                .map(map -> substitutionFactory.getSubstitution(map))
+        ImmutableList<IQTree> subtrees = maps.stream()
+                .map(substitutionFactory::getSubstitution)
                 .map(sub -> iqFactory.createConstructionNode(
                         sub.getDomain(),
                         sub
@@ -345,21 +345,22 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs) {
+    private ImmutableMap<Variable, ImmutableTerm> getBsMap(BindingSet bs, Constant nullConstant) {
         return bs.getBindingNames().stream()
                 .collect(ImmutableCollectors.toMap(
                         termFactory::getVariable,
                         x -> getTermForBinding(
                                 x,
-                                bs
+                                bs,
+                                nullConstant
                         )));
     }
 
-    private ImmutableTerm getTermForBinding(String x, BindingSet bindingSet) {
+    private ImmutableTerm getTermForBinding(String x, BindingSet bindingSet, Constant nullConstant) {
         Binding binding = bindingSet.getBinding(x);
         return binding == null
-                ? termFactory.getNullConstant()
-                : getTermForLiteralOrIri(binding.getValue());
+                ? nullConstant:
+                getTermForLiteralOrIri(binding.getValue());
     }
 
     private TranslationResult translateSingletonSet() {
@@ -447,7 +448,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         ImmutableSet<Variable> projectedFromLeft = leftTranslation.iqTree.getVariables();
 
         ImmutableSet<Variable> toCoalesce = projectedFromLeft.stream()
-                .filter(v -> projectedFromRight.contains(v))
+                .filter(projectedFromRight::contains)
                 .filter(v -> nullableFromLeft.contains(v) || nullableFromRight.contains(v))
                 .collect(ImmutableCollectors.toSet());
 
@@ -460,7 +461,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 .collect(ImmutableCollectors.toMap(
                         x -> x,
                         x -> termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getSPARQLFunctionSymbol(SPARQL.COALESCE, 2).get(),
+                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(SPARQL.COALESCE, 2),
                                 leftRenamingSubstitution.get(x),
                                 rightRenamingSubstitution.get(x)
                         ))));
@@ -796,8 +797,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             return childTranslation;
         }
         ImmutableList<ImmutableSubstitution> mergedVarDefs = mergeVarDefs(varDefs.iterator()).stream()
-                .map(m -> ImmutableMap.copyOf(m))
-                .map(m -> substitutionFactory.getSubstitution(m))
+                .map(ImmutableMap::copyOf)
+                .map(substitutionFactory::getSubstitution)
                 .collect(ImmutableCollectors.toList());
 
         return translateExtensionElems(
