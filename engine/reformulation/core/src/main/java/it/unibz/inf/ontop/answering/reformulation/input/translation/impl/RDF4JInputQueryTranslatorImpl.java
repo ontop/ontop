@@ -194,35 +194,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 an.getGroupingVariables().stream()
                         .filter(childNullableVars::contains),
                 an.getSubstitution().getImmutableMap().entrySet().stream()
-                        .filter(e -> isAggregateNullable(e.getValue(), childNullableVars))
+                        .filter(e -> e.getValue().getFunctionSymbol().isNullable(ImmutableSet.of(0)))
                         .map(Map.Entry::getKey)
         ).collect(ImmutableCollectors.toSet());
 
-    }
-
-    private boolean isAggregateNullable(ImmutableFunctionalTerm function, ImmutableSet<Variable> childNullableVars) {
-        if (function.getFunctionSymbol() instanceof DummyCountSPARQLFunctionSymbol) {
-            return false;
-        }
-        if (function.getFunctionSymbol() instanceof DummySumSPARQLFunctionSymbol) {
-            return false;
-        }
-        if (function.getFunctionSymbol() instanceof DummyAvgSPARQLFunctionSymbol) {
-            return false;
-        }
-        if (function.getFunctionSymbol() instanceof DummyMinSPARQLFunctionSymbol) {
-            return false;
-        }
-        if (function.getFunctionSymbol() instanceof DummyMaxSPARQLFunctionSymbol) {
-            return false;
-        }
-        if (function.getFunctionSymbol() instanceof DummySampleSPARQLFunctionSymbol) {
-            return function.isNullable(childNullableVars);
-        }
-        if (function.getFunctionSymbol() instanceof DummyGroupConcatSPARQLFunctionSymbol) {
-            return false;
-        }
-        throw new RuntimeException("TODO: implement");
     }
 
     private AggregationNode getAggregationNode(Group groupNode, ImmutableSet<Variable> childVariables) {
