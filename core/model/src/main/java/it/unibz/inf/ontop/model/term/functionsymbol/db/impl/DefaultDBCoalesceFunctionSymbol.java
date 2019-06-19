@@ -180,34 +180,24 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
             ImmutableExpression firstCondition = (ImmutableExpression) firstFunctionalTerm.getTerm(0);
             ImmutableTerm thenValueFirstTerm = firstFunctionalTerm.getTerm(1);
 
+            /*
+             * Tries to merge 2 IF-ELSE-NULL having the same condition
+             * TODO: generalize it to the common part
+             */
             if ((secondTerm instanceof ImmutableFunctionalTerm) &&
                     ((ImmutableFunctionalTerm) secondTerm).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol) {
                 ImmutableFunctionalTerm secondFunctionalTerm = (ImmutableFunctionalTerm) secondTerm;
                 ImmutableExpression secondCondition = (ImmutableExpression) secondFunctionalTerm.getTerm(0);
-                ImmutableTerm thenValueSecondTerm = secondFunctionalTerm.getTerm(1);
 
-                // Same "then" value
-                if (thenValueFirstTerm.equals(thenValueSecondTerm)) {
+                if (firstCondition.equals(secondCondition)) {
+                    ImmutableTerm thenValueSecondTerm = secondFunctionalTerm.getTerm(1);
                     ImmutableTerm mergedTerm = termFactory.getIfElseNull(
-                            termFactory.getDisjunction(firstCondition, secondCondition),
-                            thenValueFirstTerm)
+                            firstCondition,
+                            termFactory.getDBCoalesce(ImmutableList.of(thenValueFirstTerm, thenValueSecondTerm)))
                             .simplify(variableNullability);
 
                     return ImmutableList.of(mergedTerm);
                 }
-                // The first "then" is never null
-                else if (!thenValueFirstTerm.isNullable(variableNullability.getNullableVariables())) {
-                    ImmutableTerm mergedTerm = termFactory.getIfElseNull(
-                            termFactory.getDisjunction(firstCondition, secondCondition),
-                            // Uses a IF-THEN-ELSE
-                            termFactory.getIfThenElse(firstCondition, thenValueFirstTerm, thenValueSecondTerm))
-                            .simplify(variableNullability);
-
-                    return ImmutableList.of(mergedTerm);
-                }
-                // Otherwise would be a IF-ELSE-IF-ELSE-NULL which is not interesting
-                else
-                    return terms;
             }
             // The first "then" is never null
             else if (!thenValueFirstTerm.isNullable(variableNullability.getNullableVariables())) {
@@ -218,11 +208,8 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
 
                 return ImmutableList.of(mergedTerm);
             }
-            else
-                return terms;
         }
-        else
-            return terms;
+        return terms;
     }
 
     @Override
