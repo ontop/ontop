@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -429,6 +428,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         rightQuery.getKnownVariables()
                 )
         );
+        // May update the variable generator!!
         InjectiveVar2VarSubstitution leftRenamingSubstitution = generateVariableSubstitution(toCoalesce, variableGenerator);
         InjectiveVar2VarSubstitution rightRenamingSubstitution = generateVariableSubstitution(toCoalesce, variableGenerator);
 
@@ -451,7 +451,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         ).immutableCopy()
                 ) :
                 Optional.empty();
-
 
         Optional<ImmutableExpression> joinCondition = generateJoinCondition(
                 leftRenamingSubstitution,
@@ -490,7 +489,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         nullableVarsUnion,
                         sharedVars
                 ).immutableCopy();
-
 
         IQTree joinQuery = buildJoinQuery(
                 joinLikeNode,
@@ -622,8 +620,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     ImmutableList.of(
                             leftTree,
                             rightTree
-                    )
-            );
+                    ));
         }
         throw new Sparql2IqConversionException("Left or inner join expected");
     }
@@ -911,7 +908,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                         String.format("Invalid lexical forms are not accepted. Found for %s: %s", type.toString(), value));
 
             return termFactory.getRDFLiteralConstant(value, type);
-
         }
     }
 
