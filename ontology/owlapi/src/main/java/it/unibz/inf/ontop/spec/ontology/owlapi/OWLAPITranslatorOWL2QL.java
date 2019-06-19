@@ -1248,46 +1248,41 @@ public class OWLAPITranslatorOWL2QL {
     }
 
 
+    
 
+	private Set<org.apache.commons.rdf.api.IRI> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
 
-
-	private Set<String> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
-
-        final Set<String> punnedPredicates = new HashSet<>();
+        final Set<org.apache.commons.rdf.api.IRI> punnedPredicates = new HashSet<>();
 
         // add all definitions for classes and properties
         for (OWLClass entity : owl.getClassesInSignature())  {
-            String uri = entity.getIRI().toString();
-            builder.declareClass(uri);
+            builder.declareClass(iri2iri(entity.getIRI()));
         }
 
         for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            org.apache.commons.rdf.api.IRI iri = rdfFactory.createIRI(uri);
+            org.apache.commons.rdf.api.IRI iri = iri2iri(prop.getIRI());
             if (builder.dataProperties().contains(iri))  {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareObjectProperty(uri);
+                builder.declareObjectProperty(iri);
             }
         }
 
         for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
-            String uri = prop.getIRI().toString();
-            org.apache.commons.rdf.api.IRI iri =  rdfFactory.createIRI(uri);
+            org.apache.commons.rdf.api.IRI iri =  iri2iri(prop.getIRI());
             if (builder.objectProperties().contains(iri)) {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareDataProperty(uri);
+                builder.declareDataProperty(iri);
             }
         }
 
         for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            builder.declareAnnotationProperty(uri);
+            builder.declareAnnotationProperty(iri2iri(prop.getIRI()));
         }
 
 		return punnedPredicates;

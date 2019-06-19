@@ -407,20 +407,20 @@ public class OWL2QLTranslatorTest {
 	public void test_R6() {
 		OntologyBuilder builder = OntologyBuilderImpl.builder(rdfFactory);
 		
-		ObjectPropertyExpression top = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#topObjectProperty"));
 		ObjectPropertyExpression topInv = top.getInverse();
 		ObjectPropertyExpression topInvInv = topInv.getInverse();
 		assertTrue(topInv == topInvInv);
 
-		ObjectPropertyExpression top2 = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#topObjectProperty");
+		ObjectPropertyExpression top2 = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#topObjectProperty"));
 		assertEquals(top2, topInv);
 		
-		ObjectPropertyExpression bot = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
 		ObjectPropertyExpression botInv = bot.getInverse();
 		ObjectPropertyExpression botInvInv = botInv.getInverse();
 		assertTrue(botInv == botInvInv);
 		
-		ObjectPropertyExpression bot2 = builder.declareObjectProperty("http://www.w3.org/2002/07/owl#bottomObjectProperty");
+		ObjectPropertyExpression bot2 = builder.declareObjectProperty(rdfFactory.createIRI("http://www.w3.org/2002/07/owl#bottomObjectProperty"));
 		assertEquals(bot2, botInv);		
 		
 		assertFalse(bot.equals(top));

@@ -16,12 +16,12 @@ public class TMappingExclusionConfigTest {
     public void testParseFile() throws Exception {
         TMappingExclusionConfig conf = TMappingExclusionConfig.parseFile("src/test/resources/tmappingExclusionConf/good.conf");
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-        OClass A = builder.declareClass("http://www.example.org/A");
-        OClass B = builder.declareClass("http://wwww.example.org/B");
-        OClass Pc = builder.declareClass("http://wwww.example.org/P");
-        ObjectPropertyExpression P = builder.declareObjectProperty("http://www.example.org/P");
-        ObjectPropertyExpression Q = builder.declareObjectProperty("http://www.example.org/Q");
-        ObjectPropertyExpression Ac = builder.declareObjectProperty("http://www.example.org/A");
+        OClass A = builder.declareClass(RDF_FACTORY.createIRI("http://www.example.org/A"));
+        OClass B = builder.declareClass(RDF_FACTORY.createIRI("http://wwww.example.org/B"));
+        OClass Pc = builder.declareClass(RDF_FACTORY.createIRI("http://wwww.example.org/P"));
+        ObjectPropertyExpression P = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/P"));
+        ObjectPropertyExpression Q = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/Q"));
+        ObjectPropertyExpression Ac = builder.declareObjectProperty(RDF_FACTORY.createIRI("http://www.example.org/A"));
         // in the config
         assertTrue(conf.contains(A));
         // not in the config

@@ -154,23 +154,23 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
 
     @Override
-    public OClass declareClass(String uri) {
-        return classes.create(rdfFactory.createIRI(uri));
+    public OClass declareClass(IRI iri) {
+        return classes.create(iri);
     }
 
     @Override
-    public ObjectPropertyExpression declareObjectProperty(String uri) {
-        return objectProperties.create(rdfFactory.createIRI(uri));
+    public ObjectPropertyExpression declareObjectProperty(IRI iri) {
+        return objectProperties.create(iri);
     }
 
     @Override
-    public DataPropertyExpression declareDataProperty(String uri) {
-        return dataProperties.create(rdfFactory.createIRI(uri));
+    public DataPropertyExpression declareDataProperty(IRI uri) {
+        return dataProperties.create(uri);
     }
 
     @Override
-    public AnnotationProperty declareAnnotationProperty(String uri) {
-        return annotationProperties.create(rdfFactory.createIRI(uri));
+    public AnnotationProperty declareAnnotationProperty(IRI iri) {
+        return annotationProperties.create(iri);
     }
 
     @Override

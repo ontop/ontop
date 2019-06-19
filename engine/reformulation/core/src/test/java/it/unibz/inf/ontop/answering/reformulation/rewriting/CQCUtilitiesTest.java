@@ -214,8 +214,8 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- C(y), with A ISA C
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             builder.addSubClassOfAxiom(
-                    builder.declareClass(classA.getIRIString()),
-                    builder.declareClass(classC.getIRIString()));
+                    builder.declareClass(classA),
+                    builder.declareClass(classC));
 			ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -233,8 +233,8 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
 			builder.addSubClassOfAxiom(
-			        builder.declareClass(classA.getIRIString()),
-                    builder.declareObjectProperty(propertyR.getIRIString()).getDomain());
+			        builder.declareClass(classA),
+                    builder.declareObjectProperty(propertyR).getDomain());
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -252,8 +252,8 @@ public class CQCUtilitiesTest {
 			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
 			builder.addSubClassOfAxiom(
-					builder.declareClass(classA.getIRIString()),
-					builder.declareObjectProperty(propertyR.getIRIString()).getInverse().getDomain());
+					builder.declareClass(classA),
+					builder.declareObjectProperty(propertyR).getInverse().getDomain());
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -271,8 +271,8 @@ public class CQCUtilitiesTest {
 			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
 			builder.addSubClassOfAxiom(
-			        builder.declareObjectProperty(propertyR.getIRIString()).getDomain(),
-                    builder.declareClass(classA.getIRIString()));
+			        builder.declareObjectProperty(propertyR).getDomain(),
+                    builder.declareClass(classA));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -290,8 +290,8 @@ public class CQCUtilitiesTest {
 			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
 			builder.addSubClassOfAxiom(
-			        builder.declareObjectProperty(propertyR.getIRIString()).getInverse().getDomain(),
-                    builder.declareClass(classA.getIRIString()));
+			        builder.declareObjectProperty(propertyR).getInverse().getDomain(),
+                    builder.declareClass(classA));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -308,13 +308,13 @@ public class CQCUtilitiesTest {
         {
             // q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            OClass B = builder.declareClass(classB.getIRIString());
+            OClass B = builder.declareClass(classB);
             builder.addSubClassOfAxiom(
-                    builder.declareClass(classA.getIRIString()),
+                    builder.declareClass(classA),
                     B);
             builder.addSubClassOfAxiom(
                     B,
-                    builder.declareClass(classC.getIRIString()));
+                    builder.declareClass(classC));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -331,13 +331,13 @@ public class CQCUtilitiesTest {
         {
             // q(x) :- A(x), q(y) :- C(y), with A ISA exists R, exists R ISA C
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectSomeValuesFrom ER = builder.declareObjectProperty(propertyR.getIRIString()).getDomain();
+            ObjectSomeValuesFrom ER = builder.declareObjectProperty(propertyR).getDomain();
             builder.addSubClassOfAxiom(
-                    builder.declareClass(classA.getIRIString()),
+                    builder.declareClass(classA),
                     ER);
             builder.addSubClassOfAxiom(
                     ER,
-                    builder.declareClass(classC.getIRIString()));
+                    builder.declareClass(classC));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -354,13 +354,13 @@ public class CQCUtilitiesTest {
         {
             // q(x) :- A(x), q(y) :- C(y), with A ISA exists inv(R), exists inv(R) ISA C
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectSomeValuesFrom EIR = builder.declareObjectProperty(propertyR.getIRIString()).getInverse().getDomain();
+            ObjectSomeValuesFrom EIR = builder.declareObjectProperty(propertyR).getInverse().getDomain();
             builder.addSubClassOfAxiom(
-                    builder.declareClass(classA.getIRIString()),
+                    builder.declareClass(classA),
                     EIR);
             builder.addSubClassOfAxiom(
                     EIR,
-                    builder.declareClass(classC.getIRIString()));
+                    builder.declareClass(classC));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -378,8 +378,8 @@ public class CQCUtilitiesTest {
             // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA S
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
             builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR.getIRIString()),
-                    builder.declareObjectProperty(propertyS.getIRIString()));
+                    builder.declareObjectProperty(propertyR),
+                    builder.declareObjectProperty(propertyS));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
@@ -396,13 +396,13 @@ public class CQCUtilitiesTest {
         {
             // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA M, M ISA S
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT.getIRIString());
+            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
             builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR.getIRIString()),
+                    builder.declareObjectProperty(propertyR),
                     M);
             builder.addSubPropertyOfAxiom(
                     M,
-                    builder.declareObjectProperty(propertyS.getIRIString()));
+                    builder.declareObjectProperty(propertyS));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
@@ -419,13 +419,13 @@ public class CQCUtilitiesTest {
         {
             // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA inv(M), inv(M) ISA S
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT.getIRIString());
+            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
             builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR.getIRIString()),
+                    builder.declareObjectProperty(propertyR),
                     M.getInverse());
             builder.addSubPropertyOfAxiom(
                     M.getInverse(),
-                    builder.declareObjectProperty(propertyS.getIRIString()));
+                    builder.declareObjectProperty(propertyS));
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
@@ -442,13 +442,13 @@ public class CQCUtilitiesTest {
         {
             // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA M, M ISA inv(S)
             OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT.getIRIString());
+            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
             builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR.getIRIString()),
+                    builder.declareObjectProperty(propertyR),
                     M.getInverse());
             builder.addSubPropertyOfAxiom(
                     M,
-                    builder.declareObjectProperty(propertyS.getIRIString()).getInverse());
+                    builder.declareObjectProperty(propertyS).getInverse());
             ClassifiedTBox tbox = builder.build().tbox();
 
             ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
