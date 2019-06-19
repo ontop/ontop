@@ -20,12 +20,9 @@ public interface OntologyVocabularyCategory<T> extends Iterable<T> {
     /**
      * check whether the entity has been declared
      *
-     * @param uri
+     * @param iri
      * @return
      */
-
-    @Deprecated
-    boolean contains(String uri);
 
     boolean contains(IRI iri);
 }

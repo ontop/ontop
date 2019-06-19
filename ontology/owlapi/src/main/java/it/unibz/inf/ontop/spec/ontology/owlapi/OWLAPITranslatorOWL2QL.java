@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -1247,7 +1248,7 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
-	private static Set<String> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
+	private Set<String> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
 
         final Set<String> punnedPredicates = new HashSet<>();
 
@@ -1259,7 +1260,8 @@ public class OWLAPITranslatorOWL2QL {
 
         for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
             String uri = prop.getIRI().toString();
-            if (builder.dataProperties().contains(uri))  {
+            org.apache.commons.rdf.api.IRI iri = rdfFactory.createIRI(uri);
+            if (builder.dataProperties().contains(iri))  {
                 punnedPredicates.add(uri);
                 log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
             }
@@ -1270,7 +1272,8 @@ public class OWLAPITranslatorOWL2QL {
 
         for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
             String uri = prop.getIRI().toString();
-            if (builder.objectProperties().contains(uri)) {
+            org.apache.commons.rdf.api.IRI iri =  rdfFactory.createIRI(uri);
+            if (builder.objectProperties().contains(iri)) {
                 punnedPredicates.add(uri);
                 log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
             }

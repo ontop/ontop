@@ -21,11 +21,14 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import com.github.jsonldjava.shaded.com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import junit.framework.TestCase;
+import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.simple.SimpleRDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -36,9 +39,11 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.rdf.api.IRI;
+
 
 public class DAGTest extends TestCase {
 
@@ -50,6 +55,7 @@ public class DAGTest extends TestCase {
 	private static final String owl_inverse_exists = "::__inverse__exists__::";
 	private static final String owl_inverse = "::__inverse__::";
 
+	private static final RDF rdf = new SimpleRDF();
 
 	public List<List<Description>> get_results(ClassifiedTBox reasoner, String resname) throws Exception {
 		String resfile = owlloc + resname + ".si";
@@ -61,12 +67,9 @@ public class DAGTest extends TestCase {
 
 		doc.getDocumentElement().normalize();
 		List<Description> cls = get_dag_type(reasoner, doc, "classes");
-		List<Description> roles = get_dag_type(reasoner, doc, "roles");
+		List<Description> roles = get_dag_type(reasoner, doc, "rolles"); // the spelling is essential
 
-		List<List<Description>> rv = new ArrayList<>(2);
-		rv.add(cls);
-		rv.add(roles);
-		return rv;
+		return ImmutableList.of(cls, roles);
 	}
 
 	/**
@@ -88,7 +91,6 @@ public class DAGTest extends TestCase {
 
 				boolean inverse = false;
 				boolean exists = false;
-				Description description;
 
 				if (uri.startsWith(owl_exists)) {
 					uri = uri.substring(owl_exists.length());
@@ -104,37 +106,33 @@ public class DAGTest extends TestCase {
 					inverse = true;
 				}
 
+				IRI iri = rdf.createIRI(uri);
+				final Description description;
 				if (type.equals("classes")) {
 					if (exists) {
-						if (reasoner.objectProperties().contains(uri)) {
-							ObjectPropertyExpression prop = reasoner.objectProperties().get(uri);
-							if (inverse)
-								prop = prop.getInverse();
-							description = prop.getDomain();
+						if (reasoner.objectProperties().contains(iri)) {
+							ObjectPropertyExpression prop = reasoner.objectProperties().get(iri);
+							description = inverse ? prop.getRange() : prop.getDomain();
 						}
 						else {
-							DataPropertyExpression prop = reasoner.dataProperties().get(uri);
+							DataPropertyExpression prop = reasoner.dataProperties().get(iri);
 							description = prop.getDomainRestriction(DatatypeImpl.rdfsLiteral);
 						}
 					}
 					else
-						description = reasoner.classes().get(uri);
+						description = reasoner.classes().get(iri);
 				}
 				else {
-					if (reasoner.objectProperties().contains(uri)) {
-						ObjectPropertyExpression prop = reasoner.objectProperties().get(uri);
-						if (inverse)
-							description = prop.getInverse();
-						else
-							description = prop;
+					if (reasoner.objectProperties().contains(iri)) {
+						ObjectPropertyExpression prop = reasoner.objectProperties().get(iri);
+						description = inverse ? prop.getInverse() : prop;
 					}
 					else {
-						description = reasoner.dataProperties().get(uri);
+						description = reasoner.dataProperties().get(iri);
 					}
 				}
 
-				Description _node = description;
-				rv.add(_node);
+				rv.add(description);
 			}
 		}
 		return rv;

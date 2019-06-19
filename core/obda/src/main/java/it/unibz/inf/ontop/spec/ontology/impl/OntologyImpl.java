@@ -124,13 +124,8 @@ public class OntologyImpl implements Ontology {
 		}
 
 		@Override
-        public boolean contains(String uri) {
-            return map.containsKey(uri);
-        }
-
-		@Override
 		public boolean contains(IRI iri) {
-			return contains(iri.getIRIString());
+			return map.containsKey(iri.getIRIString());
 		}
 
 		@Override
