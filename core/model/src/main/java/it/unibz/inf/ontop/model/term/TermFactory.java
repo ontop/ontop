@@ -138,9 +138,9 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
-	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(ImmutableFunctionalTerm injectiveFunctionalTerm);
-	ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
-			ImmutableFunctionalTerm injectiveFunctionalTerm,
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm liftableFunctionalTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
+			ImmutableFunctionalTerm liftableFunctionalTerm,
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
