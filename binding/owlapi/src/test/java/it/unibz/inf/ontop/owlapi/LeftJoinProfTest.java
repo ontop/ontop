@@ -428,8 +428,7 @@ public class LeftJoinProfTest {
         );
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
-
-    @Ignore("Support preferences")
+    
     @Test
     public void testPreferences() throws Exception {
 
@@ -453,7 +452,7 @@ public class LeftJoinProfTest {
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(sql.toUpperCase().contains("LEFT"));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
     @Test
