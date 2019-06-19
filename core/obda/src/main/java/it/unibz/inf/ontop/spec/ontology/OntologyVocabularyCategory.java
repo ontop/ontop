@@ -7,13 +7,10 @@ public interface OntologyVocabularyCategory<T> extends Iterable<T> {
     /**
      * check whether the entity has been declared and return the entity object
      *
-     * @param uri
+     * @param iri
      * @return
      * @throws RuntimeException if the entity has not been declared
      */
-
-    @Deprecated
-    T get(String uri);
 
     T get(IRI iri);
 

@@ -36,7 +36,7 @@ public class OWL2QLTranslatorTest {
 	private static final String xsd = "http://www.w3.org/2001/XMLSchema#";
 	private static final String rdfs = "http://www.w3.org/2000/01/rdf-schema#";
 
-	private final RDF rdfFactory = new SimpleRDF();
+	private static final RDF rdfFactory = new SimpleRDF();
 	
 	@Test
 	public void test_R1_2() throws Exception {
@@ -881,7 +881,7 @@ public class OWL2QLTranslatorTest {
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
 		for (BinaryAxiom<ClassExpression> ax : axs) {
-			if (ax.getSuper().equals(dlliteonto.classes().get("http://example/B"))) {
+			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
 				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				ope = e.getProperty();
@@ -890,17 +890,17 @@ public class OWL2QLTranslatorTest {
 		assertNotNull(ope);
 		// second pass - verify the axioms
 		for (BinaryAxiom<ClassExpression> ax : axs) {
-			if (ax.getSuper().equals(dlliteonto.classes().get("http://example/B"))) {
+			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
 				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				assertEquals(e.getProperty(), ope);
 				assertEquals(ope.isInverse(), false);
 			}
-			else if (ax.getSub().equals(dlliteonto.classes().get("http://example/C"))) {
+			else if (ax.getSub().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/C")))) {
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
 			}
 			else {
-				assertEquals(ax.getSub(), dlliteonto.classes().get("http://example/A"));
+				assertEquals(ax.getSub(), dlliteonto.classes().get(rdfFactory.createIRI("http://example/A")));
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
 			}
 		}
@@ -910,7 +910,7 @@ public class OWL2QLTranslatorTest {
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
 		assertEquals(ax1.getSub(), ope.getInverse());
-		assertEquals(ax1.getSuper(), dlliteonto.objectProperties().get("http://example/R").getInverse());
+		assertEquals(ax1.getSuper(), dlliteonto.objectProperties().get(rdfFactory.createIRI("http://example/R")).getInverse());
 	}	
 
 	@Test
@@ -947,16 +947,16 @@ public class OWL2QLTranslatorTest {
 		Iterator<BinaryAxiom<ClassExpression>> it = axs.iterator();
 
         it.forEachRemaining(ax -> {
-            if (ax.getSuper().equals(dlliteonto.classes().get("http://example/B"))){
+            if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))){
                 // E AUX.ROLE1^- ISA http://example/B
                 assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
                 ObjectPropertyExpression opep = ((ObjectSomeValuesFrom) ax.getSub()).getProperty();
                 assertTrue(opep.isInverse());
-            } else if (ax.getSuper().equals(dlliteonto.classes().get("http://example/D"))){
+            } else if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/D")))){
                 // E AUX.ROLE0 ISA http://example/D
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSub()).getProperty();
                 assertFalse(ope.isInverse());
-            } else if (ax.getSub().equals(dlliteonto.classes().get("http://example/A"))){
+            } else if (ax.getSub().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/A")))){
                 // http://example/A ISA E AUX.ROLE0^-
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)ax.getSuper()).getProperty();
                 assertTrue(ope.isInverse());
@@ -980,10 +980,10 @@ public class OWL2QLTranslatorTest {
 		assertEquals(2, axs1.size());
 
         axs1.iterator().forEachRemaining(ax -> {
-            if(ax.getSuper().equals(dlliteonto.objectProperties().get("http://example/S"))){
+            if(ax.getSuper().equals(dlliteonto.objectProperties().get(rdfFactory.createIRI("http://example/S")))){
                 // AUX.ROLE1 ISA http://example/S
                 assertFalse(ax.getSub().isInverse());
-            } else if(ax.getSuper().equals(dlliteonto.objectProperties().get("http://example/R").getInverse())){
+            } else if(ax.getSuper().equals(dlliteonto.objectProperties().get(rdfFactory.createIRI("http://example/R")).getInverse())){
                 // AUX.ROLE0^- ISA http://example/R^-
                 assertTrue(ax.getSub().isInverse());
             } else {
@@ -1038,7 +1038,7 @@ public class OWL2QLTranslatorTest {
 		assertEquals(3, axs.size()); // surrogates for existential restrictions are re-used
 		// first pass - find ope
 		for (BinaryAxiom<ClassExpression> ax : axs) {
-			if (ax.getSuper().equals(dlliteonto.classes().get("http://example/B"))) {
+			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
 				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				ope = e.getProperty();
@@ -1047,17 +1047,17 @@ public class OWL2QLTranslatorTest {
 		assertNotNull(ope);
 		// second pass - verify the axioms
 		for (BinaryAxiom<ClassExpression> ax : axs) {
-			if (ax.getSuper().equals(dlliteonto.classes().get("http://example/B"))) {
+			if (ax.getSuper().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/B")))) {
 				assertEquals(ax.getSub() instanceof ObjectSomeValuesFrom, true);
 				ObjectSomeValuesFrom e = (ObjectSomeValuesFrom)ax.getSub();
 				assertEquals(e.getProperty(), ope);
 				assertEquals(ope.isInverse(), false);
 			}
-			else if (ax.getSub().equals(dlliteonto.classes().get("http://example/C"))) {
+			else if (ax.getSub().equals(dlliteonto.classes().get(rdfFactory.createIRI("http://example/C")))) {
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
 			}
 			else {
-				assertEquals(ax.getSub(), dlliteonto.classes().get("http://example/A"));
+				assertEquals(ax.getSub(), dlliteonto.classes().get(rdfFactory.createIRI("http://example/A")));
 				assertEquals(ax.getSuper(), ope.getInverse().getDomain());
 			}
 		}
@@ -1067,7 +1067,7 @@ public class OWL2QLTranslatorTest {
 		
 		BinaryAxiom<ObjectPropertyExpression> ax1 = axs1.iterator().next();
 		assertEquals(ax1.getSub(), ope.getInverse());
-		assertEquals(ax1.getSuper(), dlliteonto.objectProperties().get("http://example/R").getInverse());
+		assertEquals(ax1.getSuper(), dlliteonto.objectProperties().get(rdfFactory.createIRI("http://example/R")).getInverse());
 	}
 
 
@@ -1215,4 +1215,8 @@ public class OWL2QLTranslatorTest {
         Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
         return onto.tbox();
     }
+
+    public static org.apache.commons.rdf.api.IRI getIRI(String prefix, String suffix) {
+    	return rdfFactory.createIRI(prefix + suffix);
+	}
 }

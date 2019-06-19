@@ -110,17 +110,13 @@ public class OntologyImpl implements Ontology {
             this.NOT_FOUND = NOT_FOUND;
         }
 
-        @Override
-        public T get(String uri) {
-            T oc = map.get(uri);
-            if (oc == null)
-                throw new RuntimeException(NOT_FOUND + uri);
-            return oc;
-        }
-
 		@Override
 		public T get(IRI iri) {
-			return get(iri.getIRIString());
+			String uri = iri.getIRIString();
+			T oc = map.get(uri);
+			if (oc == null)
+				throw new RuntimeException(NOT_FOUND + uri);
+			return oc;
 		}
 
 		@Override

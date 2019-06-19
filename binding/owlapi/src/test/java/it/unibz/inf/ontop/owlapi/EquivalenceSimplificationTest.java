@@ -27,6 +27,8 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
 import junit.framework.TestCase;
 
+import static it.unibz.inf.ontop.owlapi.OWL2QLTranslatorTest.getIRI;
+
 public class EquivalenceSimplificationTest extends TestCase {
 
 	private final String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
@@ -48,15 +50,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(2, classDAG.edgeSetSize());  // A1 <- B1 <- C1
 		assertEquals(0, propDAG.edgeSetSize());  // no properties
 
-		ClassExpression A1 = simple.classes().get(testURI + "A1");
-		ClassExpression B1 = simple.classes().get(testURI + "B1");
-		ClassExpression C1 = simple.classes().get(testURI + "C1");
-		ClassExpression A2 = simple.classes().get(testURI + "A2");
-		ClassExpression A3 = simple.classes().get(testURI + "A3");
-		ClassExpression B2 = simple.classes().get(testURI + "B2");
-		ClassExpression B3 = simple.classes().get(testURI + "B3");
-		ClassExpression C2 = simple.classes().get(testURI + "C2");
-		ClassExpression C3 = simple.classes().get(testURI + "C3");
+		ClassExpression A1 = simple.classes().get(getIRI(testURI, "A1"));
+		ClassExpression B1 = simple.classes().get(getIRI(testURI, "B1"));
+		ClassExpression C1 = simple.classes().get(getIRI(testURI, "C1"));
+		ClassExpression A2 = simple.classes().get(getIRI(testURI, "A2"));
+		ClassExpression A3 = simple.classes().get(getIRI(testURI, "A3"));
+		ClassExpression B2 = simple.classes().get(getIRI(testURI, "B2"));
+		ClassExpression B3 = simple.classes().get(getIRI(testURI, "B3"));
+		ClassExpression C2 = simple.classes().get(getIRI(testURI, "C2"));
+		ClassExpression C3 = simple.classes().get(getIRI(testURI, "C3"));
 
 		EquivalencesDAG<ClassExpression> classes = simple.classesDAG();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -90,15 +92,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 <- B1 <- C1, A1^- <- B1^- <- C1^-
 
 		
-		ObjectPropertyExpression A1 = simple.objectProperties().get(testURI + "A1");
-		ObjectPropertyExpression B1 = simple.objectProperties().get(testURI + "B1");
-		ObjectPropertyExpression C1 = simple.objectProperties().get(testURI + "C1");
-		ObjectPropertyExpression A2 = simple.objectProperties().get(testURI + "A2");
-		ObjectPropertyExpression A3 = simple.objectProperties().get(testURI + "A3");
-		ObjectPropertyExpression B2 = simple.objectProperties().get(testURI + "B2");
-		ObjectPropertyExpression B3 = simple.objectProperties().get(testURI + "B3");
-		ObjectPropertyExpression C2 = simple.objectProperties().get(testURI + "C2");
-		ObjectPropertyExpression C3 = simple.objectProperties().get(testURI + "C3");
+		ObjectPropertyExpression A1 = simple.objectProperties().get(getIRI(testURI, "A1"));
+		ObjectPropertyExpression B1 = simple.objectProperties().get(getIRI(testURI, "B1"));
+		ObjectPropertyExpression C1 = simple.objectProperties().get(getIRI(testURI, "C1"));
+		ObjectPropertyExpression A2 = simple.objectProperties().get(getIRI(testURI, "A2"));
+		ObjectPropertyExpression A3 = simple.objectProperties().get(getIRI(testURI, "A3"));
+		ObjectPropertyExpression B2 = simple.objectProperties().get(getIRI(testURI, "B2"));
+		ObjectPropertyExpression B3 = simple.objectProperties().get(getIRI(testURI, "B3"));
+		ObjectPropertyExpression C2 = simple.objectProperties().get(getIRI(testURI, "C2"));
+		ObjectPropertyExpression C3 = simple.objectProperties().get(getIRI(testURI, "C3"));
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectPropertiesDAG();
 		assertEquals(ops.getCanonicalForm(A1), A1);
@@ -130,12 +132,12 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(0, propDAG.edgeSetSize()); // 
 		assertEquals(2, classDAG.edgeSetSize()); // A1 <- B1 <- C1
 
-		ClassExpression A1 = simple.classes().get(testURI + "A1");
-		ClassExpression B1 = simple.classes().get(testURI + "B1");
-		ClassExpression C1 = simple.classes().get(testURI + "C1");
-		ClassExpression A3 = simple.classes().get(testURI + "A3");
-		ClassExpression B3 = simple.classes().get(testURI + "B3");
-		ClassExpression C3 = simple.classes().get(testURI + "C3");
+		ClassExpression A1 = simple.classes().get(getIRI(testURI, "A1"));
+		ClassExpression B1 = simple.classes().get(getIRI(testURI, "B1"));
+		ClassExpression C1 = simple.classes().get(getIRI(testURI, "C1"));
+		ClassExpression A3 = simple.classes().get(getIRI(testURI, "A3"));
+		ClassExpression B3 = simple.classes().get(getIRI(testURI, "B3"));
+		ClassExpression C3 = simple.classes().get(getIRI(testURI, "C3"));
 
 		EquivalencesDAG<ClassExpression> classes = simple.classesDAG();
 		assertEquals(classes.getCanonicalForm(A1), A1);
@@ -162,15 +164,15 @@ public class EquivalenceSimplificationTest extends TestCase {
 		assertEquals(4, classDAG.edgeSetSize()); // A1 >= B1 >= C1, A1^- >= B1^- >= C1^-
 		assertEquals(4, propDAG.edgeSetSize()); //
 
-		ObjectPropertyExpression A1 = simple.objectProperties().get(testURI + "A1");
-		ObjectPropertyExpression B1 = simple.objectProperties().get(testURI + "B1");
-		ObjectPropertyExpression C1 = simple.objectProperties().get(testURI + "C1");
-		ObjectPropertyExpression A2 = simple.objectProperties().get(testURI + "A2");
-		ObjectPropertyExpression A3 = simple.objectProperties().get(testURI + "A3");
-		ObjectPropertyExpression B2 = simple.objectProperties().get(testURI + "B2");
-		ObjectPropertyExpression B3 = simple.objectProperties().get(testURI + "B3");
-		ObjectPropertyExpression C2 = simple.objectProperties().get(testURI + "C2");
-		ObjectPropertyExpression C3 = simple.objectProperties().get(testURI + "C3");
+		ObjectPropertyExpression A1 = simple.objectProperties().get(getIRI(testURI, "A1"));
+		ObjectPropertyExpression B1 = simple.objectProperties().get(getIRI(testURI, "B1"));
+		ObjectPropertyExpression C1 = simple.objectProperties().get(getIRI(testURI, "C1"));
+		ObjectPropertyExpression A2 = simple.objectProperties().get(getIRI(testURI, "A2"));
+		ObjectPropertyExpression A3 = simple.objectProperties().get(getIRI(testURI, "A3"));
+		ObjectPropertyExpression B2 = simple.objectProperties().get(getIRI(testURI, "B2"));
+		ObjectPropertyExpression B3 = simple.objectProperties().get(getIRI(testURI, "B3"));
+		ObjectPropertyExpression C2 = simple.objectProperties().get(getIRI(testURI, "C2"));
+		ObjectPropertyExpression C3 = simple.objectProperties().get(getIRI(testURI, "C3"));
 
 		EquivalencesDAG<ObjectPropertyExpression> ops = simple.objectPropertiesDAG();
 		assertEquals(ops.getCanonicalForm(A1), A1);

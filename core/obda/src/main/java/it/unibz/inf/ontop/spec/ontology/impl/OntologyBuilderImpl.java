@@ -107,17 +107,14 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             this.EXISTS = EXISTS;
         }
 
+
         @Override
-        public T get(String uri) {
+        public T get(IRI iri) {
+            String uri = iri.getIRIString();
             T oc = map.get(uri);
             if (oc == null)
                 throw new RuntimeException(NOT_FOUND + uri);
             return oc;
-        }
-
-        @Override
-        public T get(IRI iri) {
-            return get(iri.getIRIString());
         }
 
         @Override

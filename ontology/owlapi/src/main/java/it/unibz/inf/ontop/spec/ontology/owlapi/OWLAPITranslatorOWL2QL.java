@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.spec.ontology.impl.DataPropertyExpressionImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.DatatypeImpl;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWL2Datatype;
 import org.slf4j.Logger;
@@ -1040,36 +1039,40 @@ public class OWLAPITranslatorOWL2QL {
 
     // PRIVATE METHODS FOR TRANSLATING COMPONENTS OF ASSERTIONS
 
-    private static OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
-        String uri = clExpression.getIRI().toString();
-        return voc.get(uri);
+    private org.apache.commons.rdf.api.IRI iri2iri(IRI iri) {
+        return rdfFactory.createIRI(iri.toString());
     }
+
+    private OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
+        return voc.get(iri2iri(clExpression.getIRI()));
+    }
+
 
     /**
      * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
      * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
      */
 
-    private static ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
+    private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
 
         if (opeExpression instanceof OWLObjectProperty) {
-            return voc.get(opeExpression.asOWLObjectProperty().getIRI().toString());
+            return voc.get(iri2iri(opeExpression.asOWLObjectProperty().getIRI()));
         }
         else {
             assert(opeExpression instanceof OWLObjectInverseOf);
 
             OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-            return voc.get(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+            return voc.get(iri2iri(aux.getInverse().asOWLObjectProperty().getIRI())).getInverse();
         }
     }
 
-    private static DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
+    private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
         assert (dpeExpression instanceof OWLDataProperty);
-        return voc.get(dpeExpression.asOWLDataProperty().getIRI().toString());
+        return voc.get(iri2iri(dpeExpression.asOWLDataProperty().getIRI()));
     }
 
-    private static AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
-        return voc.get(ap.getIRI().toString());
+    private AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
+        return voc.get(iri2iri(ap.getIRI()));
     }
 
 

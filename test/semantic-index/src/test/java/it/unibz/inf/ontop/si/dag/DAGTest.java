@@ -44,6 +44,8 @@ import java.util.List;
 
 import org.apache.commons.rdf.api.IRI;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 
 public class DAGTest extends TestCase {
 
@@ -140,7 +142,7 @@ public class DAGTest extends TestCase {
 
 	private void test_dag_index_nodes(String testname) throws Exception {
 
-		ClassifiedTBox reasoner = DAGEquivalenceTest.loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
+		ClassifiedTBox reasoner = loadOntologyFromFileAndClassify(owlloc + testname + ".owl");
 		List<List<Description>> exp_idx = get_results(reasoner, testname);
 
 		List<Description> classes = new LinkedList<>();
@@ -153,7 +155,7 @@ public class DAGTest extends TestCase {
 				classes.add(c);
 		}
 		
-		List<Description> roles = new LinkedList<Description>();
+		List<Description> roles = new LinkedList<>();
 		for (Equivalences<ObjectPropertyExpression> node : reasoner.objectPropertiesDAG()) {
 			for (ObjectPropertyExpression r : node)
 				roles.add(r);
