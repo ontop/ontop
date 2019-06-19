@@ -30,7 +30,7 @@ public class ImmutableLinearInclusionDependenciesTools {
         this.substitutionFactory = substitutionFactory;
     }
 
-    public LinearInclusionDependencies<AtomPredicate> getABoxDependencies(ClassifiedTBox reasoner, boolean full) {
+    public LinearInclusionDependencies<AtomPredicate> getABoxDependencies(ClassifiedTBox reasoner) {
 
         final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
 
@@ -47,11 +47,34 @@ public class ImmutableLinearInclusionDependenciesTools {
                 builder);
 
         traverseDAG(reasoner.classesDAG(),
-                cla -> (cla instanceof OClass)
-                        || (!full && ((cla instanceof ObjectSomeValuesFrom) || (cla instanceof DataSomeValuesFrom))),
-                subclass -> translate(subclass, "x", "y"),
-                // use a different variable name in case the body has an existential as well
-                cla -> translate(cla, "x", "z"),
+                c -> true,
+                sc -> translate(sc, "x", "y"),
+                c -> translate(c, "x", "z"), // use a different variable name in case the body has an existential as well
+                builder);
+
+        return builder.build();
+    }
+
+    public LinearInclusionDependencies<AtomPredicate> getABoxFullDependencies(ClassifiedTBox reasoner) {
+
+        final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
+
+        traverseDAG(reasoner.objectPropertiesDAG(),
+                p -> !p.isInverse(),
+                p -> translate(p, "x", "y"),
+                p -> translate(p, "x", "y"),
+                builder);
+
+        traverseDAG(reasoner.dataPropertiesDAG(),
+                p -> true,
+                p -> translate(p, "x", "y"),
+                p -> translate(p, "x", "y"),
+                builder);
+
+        traverseDAG(reasoner.classesDAG(),
+                c -> (c instanceof OClass),
+                sc -> translate(sc, "x", "y"),
+                c -> translate(c, "x", "z"), // use a different variable name in case the body has an existential as well
                 builder);
 
         return builder.build();
@@ -93,8 +116,7 @@ public class ImmutableLinearInclusionDependenciesTools {
     private DataAtom<AtomPredicate> translate(ClassExpression description, String x, String existentialVariableName) {
         if (description instanceof OClass) {
             final Variable varX = termFactory.getVariable(x);
-            OClass klass = (OClass) description;
-            return atomFactory.getIntensionalTripleAtom(varX, klass.getIRI());
+            return atomFactory.getIntensionalTripleAtom(varX, ((OClass) description).getIRI());
         }
         else if (description instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression property = ((ObjectSomeValuesFrom) description).getProperty();

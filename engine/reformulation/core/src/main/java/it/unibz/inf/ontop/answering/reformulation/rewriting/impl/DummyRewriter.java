@@ -59,7 +59,7 @@ public class DummyRewriter implements QueryRewriter {
 
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
-        sigma = inclusionDependencyTools.getABoxDependencies(reasoner, true);
+        sigma = inclusionDependencyTools.getABoxFullDependencies(reasoner);
     }
 
     protected LinearInclusionDependencies<AtomPredicate> getSigma() {
