@@ -23,21 +23,23 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 /***
  * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
@@ -45,24 +47,41 @@ import java.util.stream.Collectors;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private LinearInclusionDependencies<AtomPredicate> sigma;
+    private FullLinearInclusionDependencies<AtomPredicate> sigma;
 
-    protected final ImmutableLinearInclusionDependenciesTools inclusionDependencyTools;
     protected final IntermediateQueryFactory iqFactory;
+    protected final AtomFactory atomFactory;
+    protected final TermFactory termFactory;
+    protected final ImmutableUnificationTools immutableUnificationTools;
+    protected final CoreUtilsFactory coreUtilsFactory;
+    protected final SubstitutionFactory substitutionFactory;
 
     @Inject
-    protected DummyRewriter(ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
-                            IntermediateQueryFactory iqFactory) {
-        this.inclusionDependencyTools = inclusionDependencyTools;
+    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, ImmutableUnificationTools immutableUnificationTools, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
+        this.atomFactory = atomFactory;
+        this.termFactory = termFactory;
+        this.immutableUnificationTools = immutableUnificationTools;
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
-        sigma = inclusionDependencyTools.getABoxFullDependencies(reasoner);
+
+        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
+
+        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
+
+        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, this::translate, builder);
+
+        // the head will have no existential variables
+        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), this::translate, builder);
+
+        sigma = builder.build();
     }
 
-    protected LinearInclusionDependencies<AtomPredicate> getSigma() {
+    protected FullLinearInclusionDependencies<AtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -95,4 +114,53 @@ public class DummyRewriter implements QueryRewriter {
             }
         }));
 	}
+
+    private static <T> void traverseDAG(EquivalencesDAG<T> dag,
+                                        java.util.function.Predicate<T> filter,
+                                        Function<T, DataAtom<AtomPredicate>> translate,
+                                        FullLinearInclusionDependencies.Builder<AtomPredicate> builder) {
+        for (Equivalences<T> node : dag)
+            for (Equivalences<T> subNode : dag.getSub(node))
+                for (T sub : subNode)
+                    for (T e : node)
+                        if (e != sub && filter.test(e)) {
+                            DataAtom<AtomPredicate> head = translate.apply(e);
+                            DataAtom<AtomPredicate> body = translate.apply(sub);
+                            builder.add(head, body);
+                        }
+    }
+
+    private DataAtom<AtomPredicate> translate(ObjectPropertyExpression property) {
+        return property.isInverse()
+                ? atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("y"),
+                    property.getIRI(),
+                    termFactory.getVariable("x"))
+                : atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("x"),
+                    property.getIRI(),
+                    termFactory.getVariable("y"));
+    }
+
+    private DataAtom<AtomPredicate> translate(DataPropertyExpression property) {
+        return atomFactory.getIntensionalTripleAtom(
+                termFactory.getVariable("x"),
+                property.getIRI(),
+                termFactory.getVariable("y"));
+    }
+
+    private DataAtom<AtomPredicate> translate(ClassExpression description) {
+        if (description instanceof OClass) {
+            return atomFactory.getIntensionalTripleAtom(
+                    termFactory.getVariable("x"),
+                    ((OClass) description).getIRI());
+        }
+        else if (description instanceof ObjectSomeValuesFrom) {
+            return translate(((ObjectSomeValuesFrom) description).getProperty());
+        }
+        else {
+            return translate(((DataSomeValuesFrom) description).getProperty());
+        }
+    }
+
 }

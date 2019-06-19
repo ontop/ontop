@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
@@ -35,7 +34,6 @@ public class ReformulationTestingTools {
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
-    public static final ImmutableLinearInclusionDependenciesTools IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -58,7 +56,6 @@ public class ReformulationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
-        IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);

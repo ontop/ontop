@@ -27,7 +27,6 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -53,8 +52,11 @@ import java.util.*;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,8 +74,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private Collection<TreeWitnessGenerator> generators;
 	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
 
-	private final AtomFactory atomFactory;
-	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
     private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
@@ -83,18 +83,20 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     private final DatalogProgram2QueryConverter datalogConverter;
 
     @Inject
-	private TreeWitnessRewriter(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
+	private TreeWitnessRewriter(AtomFactory atomFactory,
+								TermFactory termFactory,
+								DatalogFactory datalogFactory,
                                 EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
                                 SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools,
-                                ImmutableLinearInclusionDependenciesTools inclusionDependencyTools,
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
-                                IQ2DatalogTranslator iqConverter) {
-        super(inclusionDependencyTools, iqFactory);
+                                IQ2DatalogTranslator iqConverter,
+								ImmutableUnificationTools immutableUnificationTools,
+								CoreUtilsFactory coreUtilsFactory,
+								SubstitutionFactory substitutionFactory) {
+        super(iqFactory, atomFactory, termFactory, immutableUnificationTools, coreUtilsFactory, substitutionFactory);
 
-        this.atomFactory = atomFactory;
-		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
         this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;

@@ -64,13 +64,14 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
             super(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
         }
 
-        public LinearInclusionDependencies.Builder add(DataAtom<P> head, DataAtom<P> body) {
-            if (!head.getVariables().containsAll(body.getVariables()))
+        public Builder add(DataAtom<P> head, DataAtom<P> body) {
+            if (!body.getVariables().containsAll(head.getVariables()))
                 throw new IllegalArgumentException();
-            return super.add(head, body);
+            super.add(head, body);
+            return this;
         }
 
-        public LinearInclusionDependencies build() {
+        public FullLinearInclusionDependencies build() {
             return new FullLinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, builder.build());
         }
     }
