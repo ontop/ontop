@@ -1248,7 +1248,7 @@ public class OWLAPITranslatorOWL2QL {
     }
 
 
-    
+
 
 	private Set<org.apache.commons.rdf.api.IRI> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
 
