@@ -141,7 +141,7 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
         private State liftChildConstructionNode(ConstructionNode childRoot, UnaryIQTree child, OrderByNode orderBy) {
             return updateParentOrderByAndChild(childRoot,
                     orderBy.applySubstitution(childRoot.getSubstitution())
-                            .flatMap(o -> simplifyOrderByNode(o, child.getVariableNullability())),
+                            .flatMap(o -> simplifyOrderByNode(o, child.getChild().getVariableNullability())),
                     child.getChild());
         }
 
