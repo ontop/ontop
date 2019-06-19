@@ -27,8 +27,6 @@ import it.unibz.inf.ontop.constraints.impl.ImmutableCQSyntacticContainmentCheck;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
 
@@ -48,15 +46,18 @@ public class CQCUtilitiesTest {
     IRI classB = RDF_FACTORY.createIRI("http://example.com/B");
 	IRI classC = RDF_FACTORY.createIRI("http://example.com/C");
 
+    Variable x = TERM_FACTORY.getVariable("x");
+    Variable y = TERM_FACTORY.getVariable("y");
+    Variable z = TERM_FACTORY.getVariable("z");
+    Variable s = TERM_FACTORY.getVariable("s");
+    Variable t = TERM_FACTORY.getVariable("t");
+    Variable n = TERM_FACTORY.getVariable("n");
+    Variable m = TERM_FACTORY.getVariable("m");
+    Variable o = TERM_FACTORY.getVariable("o");
+
+
     @Test
 	public void testContainment1() {
-
-	    Variable x = TERM_FACTORY.getVariable("x");
-	    Variable y = TERM_FACTORY.getVariable("y");
-        Variable z = TERM_FACTORY.getVariable("z");
-	    Variable m = TERM_FACTORY.getVariable("m");
-	    Variable n = TERM_FACTORY.getVariable("n");
-        Variable o = TERM_FACTORY.getVariable("o");
 
 		// Query 1 - q(x,y) :- R(x,y), R(y,z)
 		ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
@@ -127,9 +128,6 @@ public class CQCUtilitiesTest {
 
     @Test
 	public void testSyntacticContainmentCheck() {
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-        Variable z = TERM_FACTORY.getVariable("z");
 
 		// Query 1 - q(x) :- R(x,y), R(y,z), A(x)
         ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -155,10 +153,6 @@ public class CQCUtilitiesTest {
 
     @Test
 	public void testRemovalOfSyntacticContainmentCheck() {
-
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-        Variable z = TERM_FACTORY.getVariable("z");
 
         // Query 1 - q(x) :- R(x,y), R(y,z), A(x)
         ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
@@ -202,272 +196,292 @@ public class CQCUtilitiesTest {
 	}
 
     @Test
-	public void testSemanticContainment() throws Exception {
+    public void testSemanticContainment_1() throws Exception {
+        // q(x) :- A(x), q(y) :- C(y), with A ISA C
 
-        Variable x = TERM_FACTORY.getVariable("x");
-        Variable y = TERM_FACTORY.getVariable("y");
-        Variable z = TERM_FACTORY.getVariable("z");
-        Variable s = TERM_FACTORY.getVariable("s");
-        Variable t = TERM_FACTORY.getVariable("t");
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-		{
-			// q(x) :- A(x), q(y) :- C(y), with A ISA C
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            LinearInclusionDependencies<AtomPredicate> dependencies =
-                    LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
-                    .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
-                            ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
-                    .build();
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
-			
-			assertTrue(cqc.isContainedIn(q1, q2));
-			assertFalse(cqc.isContainedIn(q2, q1));
-		}
-		{
-			// q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
+    @Test
+    public void testSemanticContainment_2() throws Exception {
+        // q(x) :- A(x), q(y) :- R(y,z), with A ISA exists R
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
 
-            LinearInclusionDependencies<AtomPredicate> dependencies =
-                    LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
-                            .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
-                                    ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
-                            .build();
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
-			
-			assertTrue(cqc.isContainedIn(q1, q2));
-			assertFalse(cqc.isContainedIn(q2, q1));
-		}
-		{
-			// q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
+    @Test
+    public void testSemanticContainment_3() throws Exception {
+        // q(x) :- A(x), q(y) :- R(z,y), with A ISA exists inv(R)
 
-            LinearInclusionDependencies<AtomPredicate> dependencies =
-                    LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
-                            .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
-                                    ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
-                            .build();
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
 
-			assertTrue(cqc.isContainedIn(q1, q2));
-			assertFalse(cqc.isContainedIn(q2, q1));
-		}
-		{
-			// q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            LinearInclusionDependencies<AtomPredicate> dependencies =
-                    LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
-                            .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
-                                    ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t))
-                            .build();
+    @Test
+    public void testSemanticContainment_4() throws Exception {
+        // q(x) :- R(x,y), q(z) :- A(z), with exists R ISA A
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
-			
-			assertTrue(cqc.isContainedIn(q1, q2));
-			assertFalse(cqc.isContainedIn(q2, q1));
-		}
-		{
-			// q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t))
+                        .build();
 
-            LinearInclusionDependencies<AtomPredicate> dependencies =
-                    LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
-                            .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
-                                    ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s))
-                            .build();
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-			assertTrue(cqc.isContainedIn(q1, q2));
-			assertFalse(cqc.isContainedIn(q2, q1));
-		}
-        {
-            // q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            OClass B = builder.declareClass(classB);
-            builder.addSubClassOfAxiom(
-                    builder.declareClass(classA),
-                    B);
-            builder.addSubClassOfAxiom(
-                    B,
-                    builder.declareClass(classC));
-            ClassifiedTBox tbox = builder.build().tbox();
+    @Test
+    public void testSemanticContainment_5() throws Exception {
+        // q(y) :- R(x,y), q(z) :- A(z), with exists inv(R) ISA A
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(z), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
+                                ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s))
+                        .build();
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x) :- A(x), q(y) :- C(y), with A ISA exists R, exists R ISA C
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectSomeValuesFrom ER = builder.declareObjectProperty(propertyR).getDomain();
-            builder.addSubClassOfAxiom(
-                    builder.declareClass(classA),
-                    ER);
-            builder.addSubClassOfAxiom(
-                    ER,
-                    builder.declareClass(classC));
-            ClassifiedTBox tbox = builder.build().tbox();
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
+    @Test
+    public void testSemanticContainment_6() throws Exception {
+        // q(x) :- A(x), q(y) :- C(y), with A ISA B, B ISA C
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x) :- A(x), q(y) :- C(y), with A ISA exists inv(R), exists inv(R) ISA C
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectSomeValuesFrom EIR = builder.declareObjectProperty(propertyR).getInverse().getDomain();
-            builder.addSubClassOfAxiom(
-                    builder.declareClass(classA),
-                    EIR);
-            builder.addSubClassOfAxiom(
-                    EIR,
-                    builder.declareClass(classC));
-            ClassifiedTBox tbox = builder.build().tbox();
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classB),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classB))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA S
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR),
-                    builder.declareObjectProperty(propertyS));
-            ClassifiedTBox tbox = builder.build().tbox();
+    @Test
+    public void testSemanticContainment_7() throws Exception {
+        // q(x) :- A(x), q(y) :- C(y), with A ISA exists R, exists R ISA C
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA M, M ISA S
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
-            builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR),
-                    M);
-            builder.addSubPropertyOfAxiom(
-                    M,
-                    builder.declareObjectProperty(propertyS));
-            ClassifiedTBox tbox = builder.build().tbox();
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+    @Test
+    public void testSemanticContainment_8() throws Exception {
+        // q(x) :- A(x), q(y) :- C(y), with A ISA exists inv(R), exists inv(R) ISA C
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, classA)));
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA inv(M), inv(M) ISA S
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
-            builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR),
-                    M.getInverse());
-            builder.addSubPropertyOfAxiom(
-                    M.getInverse(),
-                    builder.declareObjectProperty(propertyS));
-            ClassifiedTBox tbox = builder.build().tbox();
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
+                                ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
+                        .build();
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-        {
-            // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA M, M ISA inv(S)
-            OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
-            ObjectPropertyExpression M = builder.declareObjectProperty(propertyT);
-            builder.addSubPropertyOfAxiom(
-                    builder.declareObjectProperty(propertyR),
-                    M.getInverse());
-            builder.addSubPropertyOfAxiom(
-                    M,
-                    builder.declareObjectProperty(propertyS).getInverse());
-            ClassifiedTBox tbox = builder.build().tbox();
+    @Test
+    public void testSemanticContainment_9() throws Exception {
+        // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA S
 
-            ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
 
-            ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
-                    ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
-            ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS.getABoxDependencies(tbox));
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
+                        .build();
 
-            assertTrue(cqc.isContainedIn(q1, q2));
-            assertFalse(cqc.isContainedIn(q2, q1));
-        }
-	}
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
+
+    @Test
+    public void testSemanticContainment_10() throws Exception {
+        // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA T, T ISA S
+
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
+                        .build();
+
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
+
+    @Test
+    public void testSemanticContainment_11() throws Exception {
+        // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with R ISA inv(T), inv(T) ISA S
+
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, n),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, n))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
+                        .build();
+
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
+
+    @Test
+    public void testSemanticContainment_12() throws Exception {
+        // q(x,y) :- R(x,y), q(s,t) :- S(s,t), with inv(R) ISA T, T ISA inv(S)
+
+        ImmutableCQ q1 = new ImmutableCQ(ImmutableList.of(x, y), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(x, propertyR, y)));
+
+        ImmutableCQ q2 = new ImmutableCQ(ImmutableList.of(s, t), ImmutableList.of(
+                ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
+
+        LinearInclusionDependencies<AtomPredicate> dependencies =
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
+                                ATOM_FACTORY.getIntensionalTripleAtom(o, propertyR, n))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyS, n),
+                                ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o))
+                        .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyS, n),
+                                ATOM_FACTORY.getIntensionalTripleAtom(o, propertyR, n))
+                        .build();
+
+        ImmutableCQContainmentCheckUnderLIDs cqc = new ImmutableCQContainmentCheckUnderLIDs(dependencies);
+
+        assertTrue(cqc.isContainedIn(q1, q2));
+        assertFalse(cqc.isContainedIn(q2, q1));
+    }
 /*
     //Facts should not be removed by the CQC_UTILITIES
     // ROMAN (18 Sep 2018): do not understand the purpose of the test

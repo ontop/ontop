@@ -30,31 +30,6 @@ public class ImmutableLinearInclusionDependenciesTools {
         this.substitutionFactory = substitutionFactory;
     }
 
-    public LinearInclusionDependencies<AtomPredicate> getABoxDependencies(ClassifiedTBox reasoner) {
-
-        final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
-
-        traverseDAG(reasoner.objectPropertiesDAG(),
-                p -> !p.isInverse(),
-                p -> translate(p, "x", "y"),
-                p -> translate(p, "x", "y"),
-                builder);
-
-        traverseDAG(reasoner.dataPropertiesDAG(),
-                p -> true,
-                p -> translate(p, "x", "y"),
-                p -> translate(p, "x", "y"),
-                builder);
-
-        traverseDAG(reasoner.classesDAG(),
-                c -> true,
-                sc -> translate(sc, "x", "y"),
-                c -> translate(c, "x", "z"), // use a different variable name in case the body has an existential as well
-                builder);
-
-        return builder.build();
-    }
-
     public LinearInclusionDependencies<AtomPredicate> getABoxFullDependencies(ClassifiedTBox reasoner) {
 
         final LinearInclusionDependencies.Builder<AtomPredicate> builder = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
@@ -74,7 +49,7 @@ public class ImmutableLinearInclusionDependenciesTools {
         traverseDAG(reasoner.classesDAG(),
                 c -> (c instanceof OClass),
                 sc -> translate(sc, "x", "y"),
-                c -> translate(c, "x", "z"), // use a different variable name in case the body has an existential as well
+                c -> translate(c, "x", null), // no existential var in the head
                 builder);
 
         return builder.build();
