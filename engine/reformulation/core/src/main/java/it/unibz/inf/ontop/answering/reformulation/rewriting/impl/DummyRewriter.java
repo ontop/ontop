@@ -33,13 +33,16 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /***
  * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
@@ -85,6 +88,9 @@ public class DummyRewriter implements QueryRewriter {
         return sigma;
     }
 
+    /*
+        optimise with Sigma ABox dependencies
+     */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
 
@@ -92,20 +98,26 @@ public class DummyRewriter implements QueryRewriter {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
-                // optimise with Sigma ABox dependencies
                 // mutable copy
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    final DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
+                    DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
                     ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
                     if (!derived.isEmpty()) {
-                        for (int j = 0; j < list.size(); j++){
-                            // TODO: careful with variables that occur only in atom j
-                            final DataAtom<AtomPredicate> potentialRedundantAtom = list.get(j).getProjectionAtom();
-                            if (i != j && derived.contains(potentialRedundantAtom)) {
-                                list.remove(j);
-                                j--;
+                        ImmutableList<DataAtom<AtomPredicate>> rest = list.stream()
+                                .map(t -> t.getProjectionAtom())
+                                .filter(c -> (c != atom))
+                                .collect(ImmutableCollectors.toList());
+                        boolean found = rest.stream().anyMatch(a -> derived.contains(a));
+                        if (found) {
+                            // atom to be removed cannot contain a variable occurring nowhere else
+                            ImmutableSet<Variable> variables = rest.stream()
+                                    .flatMap(a -> a.getVariables().stream())
+                                    .collect(ImmutableCollectors.toSet());
+                            if (variables.containsAll(atom.getVariables())) {
+                                list.remove(i);
+                                i--;
                             }
                         }
                     }
