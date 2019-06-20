@@ -111,31 +111,10 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
         return Optional.of(subConditionExpression)
                 .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
                         && !((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull())
-                .filter(e -> nullify(possibleValue, e.getTerm(0), termFactory)
+                .filter(e -> Nullifiers.nullify(possibleValue, e.getTerm(0), termFactory)
                         .simplify()
                         .isNull())
                 .isPresent();
-    }
-
-    /**
-     * Recursive
-     */
-    private ImmutableTerm nullify(ImmutableTerm term,
-                                  ImmutableTerm termToReplaceByNull,
-                                  TermFactory termFactory) {
-        if (termToReplaceByNull.equals(term))
-            return termFactory.getNullConstant();
-        else if (term instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-            return termFactory.getImmutableFunctionalTerm(
-                    functionalTerm.getFunctionSymbol(),
-                    functionalTerm.getTerms().stream()
-                            // Recursive
-                        .map(t -> nullify(t, termToReplaceByNull, termFactory))
-                        .collect(ImmutableCollectors.toList()));
-        }
-        else
-            return term;
     }
 
     /**
