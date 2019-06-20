@@ -78,7 +78,7 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                         .filter(t -> t instanceof ImmutableExpression)
                         .map(t -> (ImmutableExpression) t)
                         .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
-                                && (e.isNull() == lookForIsNull))
+                                && (((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull() == lookForIsNull))
                         .map(e -> e.getTerm(0))))
                 .filter(e -> e.getValue().isPresent())
                 .collect(ImmutableCollectors.toMap(
