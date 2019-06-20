@@ -72,7 +72,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
+        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
 
         traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
 
@@ -100,24 +100,31 @@ public class DummyRewriter implements QueryRewriter {
 
                 // mutable copy
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
+                //System.out.println("DUMMY: " + list + " WITH " + sigma);
                 // this loop has to remain sequential (no streams)
+                // TODO: CAREFUL WITH J < I
                 for (int i = 0; i < list.size(); i++) {
                     DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
                     ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
+                    //System.out.println("DUMMY: " + atom + " CHASED: " + derived);
                     if (!derived.isEmpty()) {
-                        ImmutableList<DataAtom<AtomPredicate>> rest = list.stream()
-                                .map(t -> t.getProjectionAtom())
-                                .filter(c -> (c != atom))
-                                .collect(ImmutableCollectors.toList());
-                        boolean found = rest.stream().anyMatch(a -> derived.contains(a));
-                        if (found) {
-                            // atom to be removed cannot contain a variable occurring nowhere else
-                            ImmutableSet<Variable> variables = rest.stream()
-                                    .flatMap(a -> a.getVariables().stream())
-                                    .collect(ImmutableCollectors.toSet());
-                            if (variables.containsAll(atom.getVariables())) {
-                                list.remove(i);
-                                i--;
+                        for (int j = 0; j < list.size(); j++) {
+                            DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
+                            if (i != j && derived.contains(curr)) {
+                                ImmutableSet<Variable> variables = list.stream()
+                                        .map(t -> t.getProjectionAtom())
+                                        .filter(a -> (a != curr))
+                                        .flatMap(a -> a.getVariables().stream())
+                                        .collect(ImmutableCollectors.toSet());
+                                // atom to be removed cannot contain a variable occurring nowhere else
+                                if (variables.containsAll(curr.getVariables())) {
+                                    list.remove(j);
+                                    j--;
+                                    //System.out.println("DUMMY: REMOVE " + curr);
+                                }
+                                //else
+                                    //System.out.println("DUMMY: BLOCKED " + curr);
+
                             }
                         }
                     }

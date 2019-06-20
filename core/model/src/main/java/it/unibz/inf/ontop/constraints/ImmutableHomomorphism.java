@@ -27,6 +27,10 @@ public class ImmutableHomomorphism {
         return map.entrySet();
     }
 
+    public VariableOrGroundTerm apply(VariableOrGroundTerm term) {
+        return (term instanceof Variable) ? map.get(term) : term;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other != null && other instanceof ImmutableHomomorphism) {

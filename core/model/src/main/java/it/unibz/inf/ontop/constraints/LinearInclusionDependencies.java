@@ -104,6 +104,11 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
 
 
 
+    @Override
+    public String toString() {
+        return dependencies.toString();
+    }
+
 
 
     public static class Builder<P extends AtomPredicate> {
