@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import junit.framework.TestCase;
 import org.junit.Test;
 

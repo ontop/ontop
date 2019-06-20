@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting;
+package it.unibz.inf.ontop.constraints;
 
 /*
  * #%L
@@ -21,10 +21,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQSyntacticContainmentCheck;
-import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import org.apache.commons.rdf.api.IRI;
@@ -33,7 +31,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unibz.inf.ontop.utils.ReformulationTestingTools.*;
+import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 import static org.junit.Assert.*;
 
 public class CQCUtilitiesTest {
