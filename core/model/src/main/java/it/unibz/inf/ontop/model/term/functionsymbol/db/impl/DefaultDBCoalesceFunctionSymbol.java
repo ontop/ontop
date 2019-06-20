@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -9,7 +8,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerialize
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -131,7 +129,7 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 // continue
         }
 
-        Optional<Variable> variableToNullify = evaluation.getNewExpression()
+        Optional<ImmutableTerm> nullifyingTerm = evaluation.getNewExpression()
                 // New expression
                 .map(Optional::of)
                 .map(oe -> oe
@@ -140,18 +138,11 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                         // We extract the sub-term of the IS_NOT_NULL expression
                         .map(e -> e.getTerm(0)))
                 // Same expression (IS_NOT_NULL(term))
-                .orElseGet(() -> Optional.of(term))
-                // Currently we only consider the case where the sub-term is a variable
-                // TODO: generalize it
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
+                .orElseGet(() -> Optional.of(term));
 
-        Optional<ProtoSubstitution<Constant>> nullifyingSubstitution = variableToNullify
-                .map(v -> termFactory.getProtoSubstitution(ImmutableMap.of(v, termFactory.getNullConstant())));
-
-        ImmutableList<ImmutableTerm> substitutedFollowingTerms = nullifyingSubstitution
-                .map(s ->followingTerms.stream()
-                        .map(s::apply)
+        ImmutableList<ImmutableTerm> substitutedFollowingTerms = nullifyingTerm
+                .map(termToSubstitute ->followingTerms.stream()
+                        .map(t -> Nullifiers.nullify(t, termToSubstitute, termFactory))
                         .map(t -> t.simplify(variableNullability))
                         .collect(ImmutableCollectors.toList()))
                 .orElse(followingTerms);
