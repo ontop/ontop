@@ -188,12 +188,20 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                     ((ImmutableFunctionalTerm) secondTerm).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol) {
                 ImmutableFunctionalTerm secondFunctionalTerm = (ImmutableFunctionalTerm) secondTerm;
                 ImmutableExpression secondCondition = (ImmutableExpression) secondFunctionalTerm.getTerm(0);
+                ImmutableTerm thenValueSecondTerm = secondFunctionalTerm.getTerm(1);
 
                 if (firstCondition.equals(secondCondition)) {
-                    ImmutableTerm thenValueSecondTerm = secondFunctionalTerm.getTerm(1);
                     ImmutableTerm mergedTerm = termFactory.getIfElseNull(
                             firstCondition,
                             termFactory.getDBCoalesce(ImmutableList.of(thenValueFirstTerm, thenValueSecondTerm)))
+                            .simplify(variableNullability);
+
+                    return ImmutableList.of(mergedTerm);
+                }
+                else if (thenValueFirstTerm.equals(thenValueSecondTerm)) {
+                    ImmutableTerm mergedTerm = termFactory.getIfElseNull(
+                            termFactory.getDisjunction(firstCondition, secondCondition),
+                            thenValueFirstTerm)
                             .simplify(variableNullability);
 
                     return ImmutableList.of(mergedTerm);
