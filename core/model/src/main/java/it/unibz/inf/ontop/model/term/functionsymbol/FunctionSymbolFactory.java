@@ -53,6 +53,15 @@ public interface FunctionSymbolFactory {
                         + " is not available for the arity " + arity));
     }
 
+    Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName);
+
+    default SPARQLFunctionSymbol getRequiredSPARQLDistinctAggregateFunctionSymbol(String officialName){
+        return getSPARQLDistinctAggregateFunctionSymbol(officialName)
+                .orElseThrow(() -> new IllegalArgumentException("The SPARQL distinct aggregate function " + officialName
+                        + " is not available"));
+    }
+
+
     /**
      * Special function capturing the EBV logic
      * https://www.w3.org/TR/sparql11-query/#ebv

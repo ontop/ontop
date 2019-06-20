@@ -160,15 +160,20 @@ public class QuestQueryProcessor implements QueryReformulator {
 			return cachedQuery;
 
 		try {
-            InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
+
+
+			log.debug("SPARQL query:\n{}", inputQuery.getInputString());
+			IQ convertedIQ = inputQuery.translate(inputQueryTranslator);
+			log.debug("Parsed query converted into IQ (after normalization):\n{}", convertedIQ);
+			//InternalSparqlQuery translation = inputQuery.translate(inputQueryTranslator);
 
             try {
-                IQ convertedIQ = preProcess(translation);
+             //   IQ convertedIQ = preProcess(translation);
 
                 log.debug("Start the rewriting process...");
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 
-                log.debug("Directly translated (SPARQL) IQ: \n" + rewrittenIQ.toString());
+                log.debug("Rewritten IQ:\n{}",rewrittenIQ);
 
                 log.debug("Start the unfolding...");
 
@@ -208,7 +213,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 			}
 			catch (EmptyQueryException e) {
-				ImmutableList<Variable> signature = translation.getSignature();
+				ImmutableList<Variable> signature = convertedIQ.getProjectionAtom().getArguments();
 
 				DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
 						atomFactory.getRDFAnswerPredicate(signature.size()),
@@ -249,9 +254,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 	 */
 	@Override
 	public String getRewritingRendering(InputQuery query) throws OntopReformulationException {
-		InternalSparqlQuery translation = query.translate(inputQueryTranslator);
+		log.debug("SPARQL query:\n{}", query.getInputString());
+		IQ convertedIQ = query.translate(inputQueryTranslator);
+		log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
 		try {
-            IQ convertedIQ = preProcess(translation);
+          //  IQ convertedIQ = preProcess(translation);
 			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 			return rewrittenIQ.toString();
 		}

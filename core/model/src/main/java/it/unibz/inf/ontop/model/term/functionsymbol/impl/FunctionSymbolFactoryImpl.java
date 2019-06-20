@@ -163,7 +163,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBSeconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_TZ", SPARQL.TZ,
                 xsdDatetime, xsdString, false, TermFactory::getDBTz),
-                new NowSPARQLFunctionSymbolImpl(xsdDatetime)
+                new NowSPARQLFunctionSymbolImpl(xsdDatetime),
+                new DummyCountSPARQLFunctionSymbol(abstractRDFType),
+                new DummyCountSPARQLFunctionSymbol(),
+                new DummySumSPARQLFunctionSymbol(abstractRDFType),
+                new DummyMinSPARQLFunctionSymbol(abstractRDFType),
+                new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
+                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new DummySampleSPARQLFunctionSymbol(abstractRDFType),
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -248,6 +257,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
             default:
                 return Optional.ofNullable(regularSparqlFunctionTable.get(officialName, arity));
         }
+    }
+
+    @Override
+    public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName) {
+        throw new RuntimeException("TODO: implement");
     }
 
     @Override

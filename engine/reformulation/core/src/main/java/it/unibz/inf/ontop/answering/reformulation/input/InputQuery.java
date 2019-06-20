@@ -2,10 +2,10 @@ package it.unibz.inf.ontop.answering.reformulation.input;
 
 
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
+import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
-import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
-import it.unibz.inf.ontop.datalog.InternalSparqlQuery;
+import it.unibz.inf.ontop.iq.IQ;
 
 /**
  * Must throw an OntopInvalidInputQueryException at CONSTRUCTION time if the input query is invalid.
@@ -17,8 +17,5 @@ public interface InputQuery<R extends OBDAResultSet> {
 
     String getInputString();
 
-    /**
-     * TODO: return an IntermediateQuery instead!
-     */
-    InternalSparqlQuery translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
+    IQ translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException;
 }

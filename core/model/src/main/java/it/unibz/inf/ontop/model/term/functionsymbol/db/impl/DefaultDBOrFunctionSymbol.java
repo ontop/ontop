@@ -40,7 +40,8 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        return computeNewDisjunction(newTerms, termFactory);
+        ImmutableList<ImmutableTerm> simplifiedTerms = simplifyInteractions(newTerms, termFactory, variableNullability);
+        return computeNewDisjunction(simplifiedTerms, termFactory);
     }
 
     /**
@@ -48,6 +49,8 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
      * TODO: hide it again
      */
     public static ImmutableTerm computeNewDisjunction(ImmutableList<ImmutableTerm> evaluatedTerms, TermFactory termFactory) {
+
+
         DBConstant trueValue = termFactory.getDBBooleanConstant(true);
         if (evaluatedTerms.stream()
                 .anyMatch(trueValue::equals))
@@ -75,6 +78,14 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
                 :  optionalNull
                 .map(n -> (ImmutableTerm) termFactory.getTrueOrNullFunctionalTerm(others))
                 .orElseGet(() -> others.size() == 1 ? others.get(0) : termFactory.getDisjunction(others));
+    }
+
+    /**
+     * Look at the interaction between disjuncts
+     */
+    protected ImmutableList<ImmutableTerm> simplifyInteractions(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                                VariableNullability variableNullability) {
+        return simplifyIsNullOrIsNotNull(newTerms, termFactory, variableNullability, false);
     }
 
     @Override
