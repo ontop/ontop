@@ -108,7 +108,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, m)));
 
-		ImmutableCQContainmentCheckUnderLIDs cqcu = new ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY).build());
+		ImmutableCQContainmentCheckUnderLIDs cqcu = new ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY).build());
 
 		assertTrue(cqcu.isContainedIn(q6, q5));
 		assertTrue(cqcu.isContainedIn(q5, q6));
@@ -204,7 +204,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
@@ -226,7 +226,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(y, propertyR, z)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
@@ -248,7 +248,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(z, propertyR, y)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .build();
@@ -270,7 +270,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t))
                         .build();
@@ -292,7 +292,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(z, classA)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classA),
                                 ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s))
                         .build();
@@ -314,7 +314,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classB),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -340,7 +340,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, propertyR, t),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -366,7 +366,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(y, classC)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(t, propertyR, s),
                                 ATOM_FACTORY.getIntensionalTripleAtom(s, classA))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(s, classC),
@@ -392,7 +392,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .build();
@@ -414,7 +414,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
@@ -440,7 +440,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyT, n),
                                 ATOM_FACTORY.getIntensionalTripleAtom(n, propertyR, o))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyS, o),
@@ -466,7 +466,7 @@ public class CQCUtilitiesTest {
                 ATOM_FACTORY.getIntensionalTripleAtom(s, propertyS, t)));
 
         LinearInclusionDependencies<AtomPredicate> dependencies =
-                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY)
+                LinearInclusionDependencies.builder(IMMUTABLE_UNIFICATION_TOOLS, CORE_UTILS_FACTORY, SUBSTITUTION_FACTORY, ATOM_FACTORY)
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(n, propertyT, o),
                                 ATOM_FACTORY.getIntensionalTripleAtom(o, propertyR, n))
                         .add(ATOM_FACTORY.getIntensionalTripleAtom(o, propertyS, n),

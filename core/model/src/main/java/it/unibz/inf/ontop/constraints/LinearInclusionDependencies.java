@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.constraints;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -23,6 +24,8 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     protected final ImmutableUnificationTools immutableUnificationTools;
     protected final CoreUtilsFactory coreUtilsFactory;
     protected final SubstitutionFactory substitutionFactory;
+    protected final AtomFactory atomFactory;
+
 
     public static final class LinearInclusionDependency<P extends AtomPredicate> {
         private final DataAtom<P> head, body;
@@ -44,20 +47,22 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     private final VariableGenerator variableGenerator;
 
     protected LinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
-                                        CoreUtilsFactory coreUtilsFactory,
-                                        SubstitutionFactory substitutionFactory,
-                                        ImmutableList<LinearInclusionDependency<P>> dependencies) {
+                                          CoreUtilsFactory coreUtilsFactory,
+                                          SubstitutionFactory substitutionFactory,
+                                          AtomFactory atomFactory, ImmutableList<LinearInclusionDependency<P>> dependencies) {
         this.immutableUnificationTools = immutableUnificationTools;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
+        this.atomFactory = atomFactory;
         this.dependencies = dependencies;
         this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
     }
 
     public static Builder builder(ImmutableUnificationTools immutableUnificationTools,
                                   CoreUtilsFactory coreUtilsFactory,
-                                  SubstitutionFactory substitutionFactory) {
-        return new Builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
+                                  SubstitutionFactory substitutionFactory,
+                                  AtomFactory atomFactory) {
+        return new Builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
     }
 
     /**
@@ -71,28 +76,46 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
      */
 
     public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
-        // TODO: register variables
+        variableGenerator.registerAdditionalVariables(atom.getVariables());
+
         return dependencies.stream()
-                .map(dependency -> immutableUnificationTools.computeAtomMGU(dependency.getBody(), atom)
-                        .map(theta -> (DataAtom<P>)theta.applyToDataAtom(
-                                freshLabelledNulls(dependency)
-                                        .applyToDataAtom(dependency.getHead()))))
+                .map(id -> chase(id, atom))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private ImmutableSubstitution<VariableOrGroundTerm> freshLabelledNulls(LinearInclusionDependency<P> dependency) {
-        ImmutableSet<Variable> bodyVariables = dependency.getBody().getVariables();
+    protected Optional<DataAtom<P>> chase(LinearInclusionDependency<P> id, DataAtom<P> atom) {
+        if (!id.getBody().getPredicate().equals(atom.getPredicate()))
+            return Optional.empty();
 
-        return substitutionFactory.getSubstitution(dependency.getHead().getVariables().stream()
+        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder()
+                .extend(id.getBody().getArguments(), atom.getArguments());
+        if (!builder.isValid())
+            return Optional.empty();
+
+        ImmutableHomomorphism h = extendWithLabelledNulls(id, builder.build());
+        ImmutableList<VariableOrGroundTerm> newArguments = id.getHead().getArguments().stream()
+                .map(t -> h.apply(t))
+                .collect(ImmutableCollectors.toList());
+
+        return Optional.of(atomFactory.getDataAtom(id.getHead().getPredicate(), newArguments));
+    }
+
+
+    protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
+        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder(h);
+        ImmutableSet<Variable> bodyVariables = id.getBody().getVariables();
+        id.getHead().getVariables().stream()
                 .filter(v -> !bodyVariables.contains(v))
-                .collect(ImmutableCollectors.toMap(Function.identity(), variableGenerator::generateNewVariableFromVar)));
+                .forEach(v -> builder.extend(v, variableGenerator.generateNewVariableFromVar(v)));
+        return builder.build();
     }
 
     public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
-        Stream<Variable> s = atoms.stream().flatMap(a -> a.getVariables().stream());
-        ImmutableSet<Variable> v = s.collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> v = atoms.stream()
+                .flatMap(a -> a.getVariables().stream())
+                .collect(ImmutableCollectors.toSet());
         variableGenerator.registerAdditionalVariables(v);
 
         return Stream.concat(
@@ -117,13 +140,15 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         protected final ImmutableUnificationTools immutableUnificationTools;
         protected final CoreUtilsFactory coreUtilsFactory;
         protected final SubstitutionFactory substitutionFactory;
+        protected final AtomFactory atomFactory;
 
         protected Builder(ImmutableUnificationTools immutableUnificationTools,
-                        CoreUtilsFactory coreUtilsFactory,
-                        SubstitutionFactory substitutionFactory) {
+                          CoreUtilsFactory coreUtilsFactory,
+                          SubstitutionFactory substitutionFactory, AtomFactory atomFactory) {
             this.immutableUnificationTools = immutableUnificationTools;
             this.coreUtilsFactory = coreUtilsFactory;
             this.substitutionFactory = substitutionFactory;
+            this.atomFactory = atomFactory;
         }
 
         public Builder add(DataAtom<P> head, DataAtom<P> body) {
@@ -132,7 +157,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         }
 
         public LinearInclusionDependencies<P> build() {
-            return new LinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, builder.build());
+            return new LinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory, builder.build());
         }
     }
 }

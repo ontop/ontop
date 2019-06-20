@@ -22,15 +22,12 @@ import java.util.stream.Stream;
 
 public class FullLinearInclusionDependencies<P extends AtomPredicate> extends LinearInclusionDependencies<P> {
 
-    private final AtomFactory atomFactory;
-
     private FullLinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
                                         CoreUtilsFactory coreUtilsFactory,
                                         SubstitutionFactory substitutionFactory,
                                         AtomFactory atomFactory,
                                         ImmutableList<LinearInclusionDependency<P>> dependencies) {
-        super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, dependencies);
-        this.atomFactory = atomFactory;
+        super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory, dependencies);
     }
 
     public static Builder builder(ImmutableUnificationTools immutableUnificationTools,
@@ -40,32 +37,20 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
         return new Builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
     }
 
-    /**
-     * @param atom
-     * @return
-     */
     @Override
     public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
         return dependencies.stream()
-                .filter(id -> id.getBody().getPredicate().equals(atom.getPredicate()))
-                .map(id -> apply(id, atom))
+                .map(id -> chase(id, atom))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableCollectors.toSet());
     }
 
-    private Optional<DataAtom<P>> apply(LinearInclusionDependency<P> id, DataAtom<P> atom) {
-        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder().extend(id.getBody().getArguments(), atom.getArguments());
-        if (!builder.isValid())
-            return Optional.empty();
-
-        ImmutableHomomorphism h = builder.build();
-        ImmutableList<VariableOrGroundTerm> newArguments = id.getHead().getArguments().stream()
-                .map(t -> h.apply(t))
-                .collect(ImmutableCollectors.toList());
-
-        return Optional.of(atomFactory.getDataAtom(atom.getPredicate(), newArguments));
+    @Override
+    protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
+        return h;
     }
+
 
     @Override
     public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
@@ -78,14 +63,11 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
 
     public static class Builder<P extends AtomPredicate> extends LinearInclusionDependencies.Builder<P> {
 
-        private final AtomFactory atomFactory;
-
         protected Builder(ImmutableUnificationTools immutableUnificationTools,
                           CoreUtilsFactory coreUtilsFactory,
                           SubstitutionFactory substitutionFactory,
                           AtomFactory atomFactory) {
-            super(immutableUnificationTools, coreUtilsFactory, substitutionFactory);
-            this.atomFactory = atomFactory;
+            super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
         }
 
         public Builder add(DataAtom<P> head, DataAtom<P> body) {
