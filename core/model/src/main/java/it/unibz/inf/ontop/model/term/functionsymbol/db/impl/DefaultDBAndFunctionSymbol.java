@@ -40,16 +40,19 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
+
+        ImmutableList<ImmutableTerm> simplifiedTerms = simplifyInteractions(newTerms, termFactory, variableNullability);
+
         DBConstant falseValue = termFactory.getDBBooleanConstant(false);
-        if (newTerms.stream()
+        if (simplifiedTerms.stream()
                 .anyMatch(falseValue::equals))
             return falseValue;
 
-        Optional<ImmutableTerm> optionalNull = newTerms.stream()
+        Optional<ImmutableTerm> optionalNull = simplifiedTerms.stream()
                 .filter(t -> (t instanceof Constant) && t.isNull())
                 .findFirst();
 
-        ImmutableList<ImmutableExpression> others = newTerms.stream()
+        ImmutableList<ImmutableExpression> others = simplifiedTerms.stream()
                 .map(t -> (t instanceof Variable) ? termFactory.getIsTrue((Variable)t) : t)
                 // We don't care about TRUE
                 .filter(t -> (t instanceof ImmutableExpression))
@@ -68,6 +71,16 @@ public class DefaultDBAndFunctionSymbol extends AbstractDBBooleanConnectorFuncti
                 .map(n -> (ImmutableTerm) termFactory.getFalseOrNullFunctionalTerm(others))
                 .orElseGet(() -> others.size() == 1 ? others.get(0) : termFactory.getConjunction(others));
     }
+
+    /**
+     * Look at the interaction between conjuncts
+     */
+    protected ImmutableList<ImmutableTerm> simplifyInteractions(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                              VariableNullability variableNullability) {
+        return simplifyIsNullOrIsNotNull(newTerms, termFactory, variableNullability, true);
+    }
+
+
 
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {

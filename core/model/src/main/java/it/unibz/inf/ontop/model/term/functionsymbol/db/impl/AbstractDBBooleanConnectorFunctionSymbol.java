@@ -1,14 +1,20 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonFunctionalTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -54,5 +60,43 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
         return arguments.stream()
                 .map(termFactory::getIsTrue)
                 .collect(ImmutableCollectors.toList());
+    }
+
+
+    /**
+     * Look for conjuncts that are IS_NULL(...) or disjuncts that are IS_NOT_NULL(...)
+     * and uses them to nullify some terms
+     */
+    protected ImmutableList<ImmutableTerm> simplifyIsNullOrIsNotNull(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                                     VariableNullability variableNullability,
+                                                                     boolean lookForIsNull) {
+
+        // { index -> termToNullify }
+        ImmutableMap<Integer, ImmutableTerm> termToNullifyMap = IntStream.range(0, newTerms.size())
+                .boxed()
+                .map(i -> Maps.immutableEntry(i, Optional.of(newTerms.get(i))
+                        .filter(t -> t instanceof ImmutableExpression)
+                        .map(t -> (ImmutableExpression) t)
+                        .filter(e -> (e.getFunctionSymbol() instanceof DBIsNullOrNotFunctionSymbol)
+                                && (((DBIsNullOrNotFunctionSymbol) e.getFunctionSymbol()).isTrueWhenNull() == lookForIsNull))
+                        .map(e -> e.getTerm(0))))
+                .filter(e -> e.getValue().isPresent())
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().get()));
+
+        return termToNullifyMap.entrySet().stream()
+                .reduce(newTerms,
+                        (ts, e) -> IntStream.range(0, newTerms.size())
+                                .boxed()
+                                .map(i -> e.getKey().equals(i)
+                                        ? ts.get(i)
+                                        // Only tries to nullify other entries
+                                        : Nullifiers.nullify(ts.get(i), e.getValue(), termFactory)
+                                            .simplify(variableNullability))
+                                .collect(ImmutableCollectors.toList()),
+                        (ts1, ts2) -> {
+                            throw new MinorOntopInternalBugException("No merging was expected");
+                        });
     }
 }
