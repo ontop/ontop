@@ -8,22 +8,15 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class LinearInclusionDependencies<P extends AtomPredicate> {
 
-    protected final ImmutableUnificationTools immutableUnificationTools;
-    protected final CoreUtilsFactory coreUtilsFactory;
-    protected final SubstitutionFactory substitutionFactory;
     protected final AtomFactory atomFactory;
 
 
@@ -46,23 +39,16 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     protected final ImmutableList<LinearInclusionDependency<P>> dependencies;
     private final VariableGenerator variableGenerator;
 
-    protected LinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
-                                          CoreUtilsFactory coreUtilsFactory,
-                                          SubstitutionFactory substitutionFactory,
-                                          AtomFactory atomFactory, ImmutableList<LinearInclusionDependency<P>> dependencies) {
-        this.immutableUnificationTools = immutableUnificationTools;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
+    protected LinearInclusionDependencies(CoreUtilsFactory coreUtilsFactory,
+                                          AtomFactory atomFactory,
+                                          ImmutableList<LinearInclusionDependency<P>> dependencies) {
         this.atomFactory = atomFactory;
         this.dependencies = dependencies;
         this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
     }
 
-    public static Builder builder(ImmutableUnificationTools immutableUnificationTools,
-                                  CoreUtilsFactory coreUtilsFactory,
-                                  SubstitutionFactory substitutionFactory,
-                                  AtomFactory atomFactory) {
-        return new Builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
+    public static Builder builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+        return new Builder(coreUtilsFactory, atomFactory);
     }
 
     /**
@@ -137,17 +123,11 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     public static class Builder<P extends AtomPredicate> {
         protected final ImmutableList.Builder<LinearInclusionDependency<P>> builder = ImmutableList.builder();
 
-        protected final ImmutableUnificationTools immutableUnificationTools;
         protected final CoreUtilsFactory coreUtilsFactory;
-        protected final SubstitutionFactory substitutionFactory;
         protected final AtomFactory atomFactory;
 
-        protected Builder(ImmutableUnificationTools immutableUnificationTools,
-                          CoreUtilsFactory coreUtilsFactory,
-                          SubstitutionFactory substitutionFactory, AtomFactory atomFactory) {
-            this.immutableUnificationTools = immutableUnificationTools;
+        protected Builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
             this.coreUtilsFactory = coreUtilsFactory;
-            this.substitutionFactory = substitutionFactory;
             this.atomFactory = atomFactory;
         }
 
@@ -157,7 +137,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         }
 
         public LinearInclusionDependencies<P> build() {
-            return new LinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory, builder.build());
+            return new LinearInclusionDependencies(coreUtilsFactory, atomFactory, builder.build());
         }
     }
 }

@@ -52,8 +52,6 @@ import java.util.*;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -86,16 +84,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private TreeWitnessRewriter(AtomFactory atomFactory,
 								TermFactory termFactory,
 								DatalogFactory datalogFactory,
-                                EQNormalizer eqNormalizer, UnifierUtilities unifierUtilities,
+                                EQNormalizer eqNormalizer,
+								UnifierUtilities unifierUtilities,
                                 SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools,
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
                                 IQ2DatalogTranslator iqConverter,
-								ImmutableUnificationTools immutableUnificationTools,
-								CoreUtilsFactory coreUtilsFactory,
-								SubstitutionFactory substitutionFactory) {
-        super(iqFactory, atomFactory, termFactory, immutableUnificationTools, coreUtilsFactory, substitutionFactory);
+								CoreUtilsFactory coreUtilsFactory) {
+        super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
 
 		this.datalogFactory = datalogFactory;
         this.eqNormalizer = eqNormalizer;

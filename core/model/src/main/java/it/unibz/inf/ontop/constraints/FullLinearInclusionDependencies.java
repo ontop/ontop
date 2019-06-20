@@ -6,9 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -22,19 +19,14 @@ import java.util.stream.Stream;
 
 public class FullLinearInclusionDependencies<P extends AtomPredicate> extends LinearInclusionDependencies<P> {
 
-    private FullLinearInclusionDependencies(ImmutableUnificationTools immutableUnificationTools,
-                                        CoreUtilsFactory coreUtilsFactory,
-                                        SubstitutionFactory substitutionFactory,
+    private FullLinearInclusionDependencies(CoreUtilsFactory coreUtilsFactory,
                                         AtomFactory atomFactory,
                                         ImmutableList<LinearInclusionDependency<P>> dependencies) {
-        super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory, dependencies);
+        super(coreUtilsFactory, atomFactory, dependencies);
     }
 
-    public static Builder builder(ImmutableUnificationTools immutableUnificationTools,
-                                  CoreUtilsFactory coreUtilsFactory,
-                                  SubstitutionFactory substitutionFactory,
-                                  AtomFactory atomFactory) {
-        return new Builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
+    public static Builder builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+        return new Builder(coreUtilsFactory, atomFactory);
     }
 
     @Override
@@ -63,11 +55,9 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
 
     public static class Builder<P extends AtomPredicate> extends LinearInclusionDependencies.Builder<P> {
 
-        protected Builder(ImmutableUnificationTools immutableUnificationTools,
-                          CoreUtilsFactory coreUtilsFactory,
-                          SubstitutionFactory substitutionFactory,
+        protected Builder(CoreUtilsFactory coreUtilsFactory,
                           AtomFactory atomFactory) {
-            super(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
+            super(coreUtilsFactory, atomFactory);
         }
 
         public Builder add(DataAtom<P> head, DataAtom<P> body) {
@@ -78,8 +68,7 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
         }
 
         public FullLinearInclusionDependencies build() {
-            return new FullLinearInclusionDependencies(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory, builder.build());
+            return new FullLinearInclusionDependencies(coreUtilsFactory, atomFactory, builder.build());
         }
     }
-
 }

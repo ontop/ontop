@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
+import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -35,14 +36,11 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /***
  * A query rewriter that used Sigma ABox dependencies to optimise BGPs.
@@ -55,24 +53,20 @@ public class DummyRewriter implements QueryRewriter {
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
     protected final TermFactory termFactory;
-    protected final ImmutableUnificationTools immutableUnificationTools;
     protected final CoreUtilsFactory coreUtilsFactory;
-    protected final SubstitutionFactory substitutionFactory;
 
     @Inject
-    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, ImmutableUnificationTools immutableUnificationTools, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+    protected DummyRewriter(IntermediateQueryFactory iqFactory, AtomFactory atomFactory, TermFactory termFactory, CoreUtilsFactory coreUtilsFactory) {
         this.iqFactory = iqFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.immutableUnificationTools = immutableUnificationTools;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
+        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
         traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
 
@@ -97,22 +91,18 @@ public class DummyRewriter implements QueryRewriter {
         return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
-
-                // mutable copy
-                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns);
-                //System.out.println("DUMMY: " + list + " WITH " + sigma);
+                
+                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
                 // this loop has to remain sequential (no streams)
-                // TODO: CAREFUL WITH J < I
                 for (int i = 0; i < list.size(); i++) {
                     DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
                     ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
-                    //System.out.println("DUMMY: " + atom + " CHASED: " + derived);
                     if (!derived.isEmpty()) {
                         for (int j = 0; j < list.size(); j++) {
                             DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
-                            if (i != j && derived.contains(curr)) {
+                            if (j != i && derived.contains(curr)) {
                                 ImmutableSet<Variable> variables = list.stream()
-                                        .map(t -> t.getProjectionAtom())
+                                        .map(DataNode::getProjectionAtom)
                                         .filter(a -> (a != curr))
                                         .flatMap(a -> a.getVariables().stream())
                                         .collect(ImmutableCollectors.toSet());
@@ -120,11 +110,9 @@ public class DummyRewriter implements QueryRewriter {
                                 if (variables.containsAll(curr.getVariables())) {
                                     list.remove(j);
                                     j--;
-                                    //System.out.println("DUMMY: REMOVE " + curr);
+                                    if (j < i) // removing in front of the atom
+                                        i--; // shift the atom position too
                                 }
-                                //else
-                                    //System.out.println("DUMMY: BLOCKED " + curr);
-
                             }
                         }
                     }

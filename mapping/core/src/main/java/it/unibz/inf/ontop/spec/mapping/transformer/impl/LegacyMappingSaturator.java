@@ -65,7 +65,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        LinearInclusionDependencies.Builder<AtomPredicate> b = LinearInclusionDependencies.builder(immutableUnificationTools, coreUtilsFactory, substitutionFactory, atomFactory);
+        LinearInclusionDependencies.Builder<AtomPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
         dbMetadata.getDatabaseRelations().stream()
                 .map(DatabaseRelationDefinition::getForeignKeys)
