@@ -67,7 +67,7 @@ public class CQContainmentCheckUnderLIDs {
 		return factMap;
 	}
 
-	public Substitution computeHomomorphsim(Function h1, ImmutableList<DataAtom<AtomPredicate>> b1, Function h2, List<Function> b2) {
+	public Substitution computeHomomorphsim(Function h1, ImmutableList<DataAtom<AtomPredicate>> b1, Function h2, ImmutableList<DataAtom<AtomPredicate>> b2) {
 
 		SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
 
@@ -78,7 +78,7 @@ public class CQContainmentCheckUnderLIDs {
 		if (!headResult)
 			return null;
 
-		Substitution sub = computeSomeHomomorphism(sb, b2, getFactMap(b1));
+		Substitution sub = computeSomeHomomorphism(sb, fromI(b2), getFactMap(b1));
 
 		return sub;
 	}

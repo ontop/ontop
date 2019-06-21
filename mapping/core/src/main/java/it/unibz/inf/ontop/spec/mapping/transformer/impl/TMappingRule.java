@@ -166,7 +166,7 @@ public class TMappingRule {
 
 		//System.out.println("CH: " + head + " v " + other.head);
 
-		return cqc.computeHomomorphsim(head, databaseAtoms, other.head, other.getDatabaseAtoms());
+		return cqc.computeHomomorphsim(head, databaseAtoms, other.head, other.databaseAtoms);
 	}
 	
 	public CQIE asCQIE() {
