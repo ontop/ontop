@@ -38,41 +38,32 @@ public class CQContainmentCheckUnderLIDs {
 	}
 
 
-	private Map<Predicate, List<Function>> index(Collection<Function> body) {
-
-		Map<Predicate, List<Function>> factMap = new HashMap<>(body.size() * 2);
-		for (Function atom : body)
-			// not boolean, not algebra, not arithmetic, not datatype
-			if (atom != null && atom.isDataFunction()) {
-				Predicate pred = atom.getFunctionSymbol();
-				List<Function> facts = factMap.get(pred);
-				if (facts == null) {
-					facts = new LinkedList<>();
-					factMap.put(pred, facts);
-				}
-				facts.add(atom);
-			}
-		return factMap;
-	}
-
-	private Map<Predicate, List<Function>> getFactMap(List<Function> b) {
-		Map<Predicate, List<Function>> factMap1 = indexedCQcache.get(b);
-		if (factMap1 == null) {
-			ImmutableList<DataAtom<AtomPredicate>> matoms = b.stream()
+	private Map<Predicate, List<Function>> getFactMap(List<Function> body) {
+		Map<Predicate, List<Function>> factMap = indexedCQcache.get(body);
+		if (factMap == null) {
+			ImmutableList<DataAtom<AtomPredicate>> matoms = body.stream()
 					.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
 							a.getTerms().stream()
 									.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
 									.collect(ImmutableCollectors.toList())))
 					.collect(ImmutableCollectors.toList());
 
-			Collection<Function> q1body = dependencies.chaseAllAtoms(matoms).stream()
+			Collection<Function> chased = dependencies.chaseAllAtoms(matoms).stream()
 					.map(immutabilityTools::convertToMutableFunction)
 					.collect(ImmutableCollectors.toSet());
 
-			factMap1 = index(q1body);
-			indexedCQcache.put(b, factMap1);
+			factMap = new HashMap<>(body.size() * 2);
+			for (Function atom : chased)
+				// not boolean, not algebra, not arithmetic, not datatype
+				if (atom != null && atom.isDataFunction()) {
+					List<Function> facts = factMap.computeIfAbsent(
+							atom.getFunctionSymbol(),
+							p -> new LinkedList<>());
+					facts.add(atom);
+				}
+			indexedCQcache.put(body, factMap);
 		}
-		return factMap1;
+		return factMap;
 	}
 
 	public Substitution computeHomomorphsim(Function h1, List<Function> b1, Function h2, List<Function> b2) {
@@ -113,7 +104,21 @@ public class CQContainmentCheckUnderLIDs {
 		
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
-			if (checkRedundant(databaseAtoms, groundTerms, atomToBeRemoved)) {
+
+			List<Function> atomsToLeave = new ArrayList<>(databaseAtoms.size() - 1);
+			Set<Term> variablesInAtomsToLeave = new HashSet<>();
+			for (Function a: databaseAtoms)
+				if (a != atomToBeRemoved) {
+					atomsToLeave.add(a);
+					collectVariables(variablesInAtomsToLeave, a);
+				}
+
+			if (!variablesInAtomsToLeave.containsAll(groundTerms))
+				continue;
+
+			SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
+			Substitution sub = computeSomeHomomorphism(sb, databaseAtoms, getFactMap(atomsToLeave));
+			if (sub != null) {
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
 				i--;
@@ -123,28 +128,6 @@ public class CQContainmentCheckUnderLIDs {
 		return query;
 	}
 	
-	private boolean checkRedundant(List<Function> body, Set<Term> groundTerms, Function atomToBeRemoved) {
-		List<Function> atomsToLeave = new ArrayList<>(body.size() - 1);
-		Set<Term> variablesInAtomsToLeave = new HashSet<>();
-		for (Function a: body)
-			if (a != atomToBeRemoved) {
-				atomsToLeave.add(a);
-				collectVariables(variablesInAtomsToLeave, a);
-			}
-		
-		if (!variablesInAtomsToLeave.containsAll(groundTerms)) {
-			return false;
-		}
-
-		SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
-		Substitution sub = computeSomeHomomorphism(sb, body, getFactMap(atomsToLeave));
-		if (sub != null)
-			return true;
-
-		return false;
-	}
-
-
 	private static void collectVariables(Set<Term> vars, Function atom) {
 		Deque<Term> terms = new LinkedList<>(atom.getTerms());
 		while (!terms.isEmpty()) {
