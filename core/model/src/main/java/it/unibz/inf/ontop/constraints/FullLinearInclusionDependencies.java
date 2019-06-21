@@ -2,15 +2,10 @@ package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  *    these dependencies are full (that is, contain no existentially quantified variables)
@@ -30,28 +25,20 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
     }
 
     @Override
-    public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
-        return dependencies.stream()
-                .map(id -> chase(id, atom))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
     protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
         return h;
     }
 
+    @Override
+    protected void registerVariables(DataAtom<P> atom) {
+        // NO-OP
+    }
 
     @Override
-    public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
-        return Stream.concat(
-                atoms.stream(),
-                atoms.stream()
-                        .flatMap(a -> chaseAtom(a).stream()))
-                .collect(ImmutableCollectors.toSet());
+    protected void registerVariables(ImmutableCollection<DataAtom<P>> atoms) {
+        // NO-OP
     }
+
 
     public static class Builder<P extends AtomPredicate> extends LinearInclusionDependencies.Builder<P> {
 

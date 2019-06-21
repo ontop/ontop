@@ -19,7 +19,6 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
 
     protected final AtomFactory atomFactory;
 
-
     public static final class LinearInclusionDependency<P extends AtomPredicate> {
         private final DataAtom<P> head, body;
 
@@ -62,22 +61,34 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
      */
 
     public ImmutableSet<DataAtom<P>> chaseAtom(DataAtom<P> atom) {
-        variableGenerator.registerAdditionalVariables(atom.getVariables());
-
-        return dependencies.stream()
-                .map(id -> chase(id, atom))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        registerVariables(atom);
+        return Stream.concat(
+                    Stream.of(atom),
+                    dependencies.stream()
+                        .map(id -> chase(id, atom))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get))
                 .collect(ImmutableCollectors.toSet());
     }
 
-    protected Optional<DataAtom<P>> chase(LinearInclusionDependency<P> id, DataAtom<P> atom) {
+    public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
+        registerVariables(atoms);
+        return Stream.concat(
+                atoms.stream(),
+                atoms.stream()
+                        .flatMap(a -> dependencies.stream()
+                                        .map(id -> chase(id, a))
+                                        .filter(Optional::isPresent)
+                                        .map(Optional::get)))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private Optional<DataAtom<P>> chase(LinearInclusionDependency<P> id, DataAtom<P> atom) {
         if (!id.getBody().getPredicate().equals(atom.getPredicate()))
             return Optional.empty();
 
-        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder()
-                .extend(id.getBody().getArguments(), atom.getArguments());
-        if (!builder.isValid())
+        ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
+        if (!builder.extend(id.getBody().getArguments(), atom.getArguments()).isValid())
             return Optional.empty();
 
         ImmutableHomomorphism h = extendWithLabelledNulls(id, builder.build());
@@ -88,6 +99,13 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         return Optional.of(atomFactory.getDataAtom(id.getHead().getPredicate(), newArguments));
     }
 
+    protected void registerVariables(DataAtom<P> atom) {
+        variableGenerator.registerAdditionalVariables(atom.getVariables());
+    }
+
+    protected void registerVariables(ImmutableCollection<DataAtom<P>> atoms) {
+        atoms.stream().forEach(this::registerVariables);
+    }
 
     protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
         ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder(h);
@@ -98,18 +116,6 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         return builder.build();
     }
 
-    public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
-        ImmutableSet<Variable> v = atoms.stream()
-                .flatMap(a -> a.getVariables().stream())
-                .collect(ImmutableCollectors.toSet());
-        variableGenerator.registerAdditionalVariables(v);
-
-        return Stream.concat(
-                atoms.stream(),
-                atoms.stream()
-                        .flatMap(a -> chaseAtom(a).stream()))
-                .collect(ImmutableCollectors.toSet());
-    }
 
 
 

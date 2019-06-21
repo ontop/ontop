@@ -97,22 +97,20 @@ public class DummyRewriter implements QueryRewriter {
                 for (int i = 0; i < list.size(); i++) {
                     DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
                     ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
-                    if (!derived.isEmpty()) {
-                        for (int j = 0; j < list.size(); j++) {
-                            DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
-                            if (j != i && derived.contains(curr)) {
-                                ImmutableSet<Variable> variables = list.stream()
-                                        .map(DataNode::getProjectionAtom)
-                                        .filter(a -> (a != curr))
-                                        .flatMap(a -> a.getVariables().stream())
-                                        .collect(ImmutableCollectors.toSet());
-                                // atom to be removed cannot contain a variable occurring nowhere else
-                                if (variables.containsAll(curr.getVariables())) {
-                                    list.remove(j);
-                                    j--;
-                                    if (j < i) // removing in front of the atom
-                                        i--; // shift the atom position too
-                                }
+                    for (int j = 0; j < list.size(); j++) {
+                        DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
+                        if (j != i && derived.contains(curr)) {
+                            ImmutableSet<Variable> variables = list.stream()
+                                    .map(DataNode::getProjectionAtom)
+                                    .filter(a -> (a != curr))
+                                    .flatMap(a -> a.getVariables().stream())
+                                    .collect(ImmutableCollectors.toSet());
+                            // atom to be removed cannot contain a variable occurring nowhere else
+                            if (variables.containsAll(curr.getVariables())) {
+                                list.remove(j);
+                                j--;
+                                if (j < i) // removing in front of the atom
+                                    i--; // shift the atom position too
                             }
                         }
                     }
