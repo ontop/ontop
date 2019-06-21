@@ -32,7 +32,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final TMappingExclusionConfig tMappingExclusionConfig;
     private final TermFactory termFactory;
     private final TMappingProcessor tMappingProcessor;
-    private final DatalogFactory datalogFactory;
     private final AtomFactory atomFactory;
     private final ImmutabilityTools immutabilityTools;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -48,7 +47,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
-        this.datalogFactory = datalogFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -64,7 +62,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .flatMap(List::stream)
                 .forEach(fk -> getLinearInclusionDependency(b, fk));
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(b.build(), datalogFactory,
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(b.build(),
                 atomFactory, termFactory, immutabilityTools);
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig);

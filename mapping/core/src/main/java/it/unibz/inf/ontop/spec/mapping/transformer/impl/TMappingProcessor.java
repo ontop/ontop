@@ -102,7 +102,7 @@ public class TMappingProcessor {
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .map(m -> cqc.removeRedundantAtoms(m))
                 .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
-                        m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory)));
+                        m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory, atomFactory, immutabilityTools)));
 
         ImmutableMap.Builder<IRI, ImmutableList<TMappingRule>> builder = ImmutableMap.builder();
 
