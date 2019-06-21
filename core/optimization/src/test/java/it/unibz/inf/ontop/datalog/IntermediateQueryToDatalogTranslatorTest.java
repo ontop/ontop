@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.datalog.exception.UnsupportedFeatureForDatalogConversionException;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -78,10 +79,9 @@ public class IntermediateQueryToDatalogTranslatorTest {
         DatalogProgram dp = null;
         try {
             dp = translator.translate(IQ_CONVERTER.convert(inputQuery));
-        } catch (ClassCastException e) {
+        } catch (ClassCastException | UnsupportedFeatureForDatalogConversionException e) {
             thrownException = e;
         }
-
         System.out.println("Datalog rewriting:\n" + dp);
 
 

@@ -28,6 +28,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLAdapterFactory;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.exception.UnsupportedFeatureForDatalogConversionException;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -118,7 +119,12 @@ public class LegacySQLIQTree2NativeNodeGenerator {
 		SQLDialectAdapter sqladapter = SQLAdapterFactory.getSQLDialectAdapter(driverURI, metadata.getDbmsVersion(),
 				settings);
 
-		DatalogProgram queryProgram = iq2DatalogTranslator.translate(iqTree, ImmutableList.copyOf(signature));
+		DatalogProgram queryProgram = null;
+		try {
+			queryProgram = iq2DatalogTranslator.translate(iqTree, ImmutableList.copyOf(signature));
+		} catch (UnsupportedFeatureForDatalogConversionException e) {
+			throw new RuntimeException(e);
+		}
 
 		for (CQIE cq : queryProgram.getRules()) {
 			datalogNormalizer.addMinimalEqualityToLeftOrNestedInnerJoin(cq);

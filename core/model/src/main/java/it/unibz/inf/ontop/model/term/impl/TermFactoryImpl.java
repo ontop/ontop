@@ -350,19 +350,19 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
-    public ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
-    		ImmutableFunctionalTerm injectiveFunctionalTerm) {
-		return new FunctionalTermDecompositionImpl(injectiveFunctionalTerm);
+    public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
+    		ImmutableFunctionalTerm liftableFunctionalTerm) {
+		return new FunctionalTermDecompositionImpl(liftableFunctionalTerm);
     }
 
 	@Override
-	public ImmutableFunctionalTerm.FunctionalTermDecomposition getInjectivityDecomposition(
-			ImmutableFunctionalTerm injectiveFunctionalTerm,
+	public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
+			ImmutableFunctionalTerm liftableFunctionalTerm,
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
 
 		return (subTermSubstitutionMap.isEmpty())
-				? getInjectivityDecomposition(injectiveFunctionalTerm)
-				: new FunctionalTermDecompositionImpl(injectiveFunctionalTerm, subTermSubstitutionMap);
+				? getFunctionalTermDecomposition(liftableFunctionalTerm)
+				: new FunctionalTermDecompositionImpl(liftableFunctionalTerm, subTermSubstitutionMap);
 	}
 
 	@Override

@@ -34,4 +34,11 @@ public class SPARQL {
     public static final String NOW = "NOW";
     public static final String SAME_TERM = "sameTerm";
     public static final String COALESCE = "COALESCE";
+    public static final String COUNT = "COUNT";
+    public static final String AVG = "AVG";
+    public static final String SUM = "SUM";
+    public static final String MIN = "MIN";
+    public static final String MAX = "MAX";
+    public static final String SAMPLE = "SAMPLE";
+    public static final String GROUP_CONCAT = "GROUP_CONCAT";
 }

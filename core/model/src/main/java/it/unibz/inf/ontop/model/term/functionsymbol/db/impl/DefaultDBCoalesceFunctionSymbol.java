@@ -1,14 +1,13 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -81,9 +80,12 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
 
         ImmutableTerm firstRemainingTerm = remainingTerms.get(0);
 
-        ImmutableList<ImmutableTerm> simplifiedTerms = propagateNullConstraints(firstRemainingTerm,
+        ImmutableList<ImmutableTerm> termsAfterNullConstraintPropagation = propagateNullConstraints(firstRemainingTerm,
                 remainingTerms.subList(1, remainingTerms.size()), variableNullability, termFactory)
                 .collect(ImmutableCollectors.toList());
+
+        ImmutableList<ImmutableTerm> simplifiedTerms = mergeIfElseNulls(termsAfterNullConstraintPropagation,
+                variableNullability, termFactory);
 
         switch (simplifiedTerms.size()) {
             case 0:
@@ -127,7 +129,7 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 // continue
         }
 
-        Optional<Variable> variableToNullify = evaluation.getNewExpression()
+        Optional<ImmutableTerm> nullifyingTerm = evaluation.getNewExpression()
                 // New expression
                 .map(Optional::of)
                 .map(oe -> oe
@@ -136,18 +138,11 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                         // We extract the sub-term of the IS_NOT_NULL expression
                         .map(e -> e.getTerm(0)))
                 // Same expression (IS_NOT_NULL(term))
-                .orElseGet(() -> Optional.of(term))
-                // Currently we only consider the case where the sub-term is a variable
-                // TODO: generalize it
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable) t);
+                .orElseGet(() -> Optional.of(term));
 
-        Optional<ProtoSubstitution<Constant>> nullifyingSubstitution = variableToNullify
-                .map(v -> termFactory.getProtoSubstitution(ImmutableMap.of(v, termFactory.getNullConstant())));
-
-        ImmutableList<ImmutableTerm> substitutedFollowingTerms = nullifyingSubstitution
-                .map(s ->followingTerms.stream()
-                        .map(s::apply)
+        ImmutableList<ImmutableTerm> substitutedFollowingTerms = nullifyingTerm
+                .map(termToSubstitute ->followingTerms.stream()
+                        .map(t -> Nullifiers.nullify(t, termToSubstitute, termFactory))
                         .map(t -> t.simplify(variableNullability))
                         .collect(ImmutableCollectors.toList()))
                 .orElse(followingTerms);
@@ -158,6 +153,62 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 propagateNullConstraints(substitutedFollowingTerms.get(0),
                         substitutedFollowingTerms.subList(1, substitutedFollowingTerms.size()),
                         variableNullability, termFactory));
+    }
+
+    /**
+     * TODO: generalize to arity > 2
+     */
+    private ImmutableList<ImmutableTerm> mergeIfElseNulls(ImmutableList<ImmutableTerm> terms,
+                                                   VariableNullability variableNullability, TermFactory termFactory) {
+        if (terms.size() != 2)
+            return terms;
+
+        ImmutableTerm firstTerm = terms.get(0);
+        ImmutableTerm secondTerm = terms.get(1);
+        if ((firstTerm instanceof ImmutableFunctionalTerm) &&
+                ((ImmutableFunctionalTerm) firstTerm).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol) {
+            ImmutableFunctionalTerm firstFunctionalTerm = (ImmutableFunctionalTerm) firstTerm;
+            ImmutableExpression firstCondition = (ImmutableExpression) firstFunctionalTerm.getTerm(0);
+            ImmutableTerm thenValueFirstTerm = firstFunctionalTerm.getTerm(1);
+
+            /*
+             * Tries to merge 2 IF-ELSE-NULL having the same condition
+             * TODO: generalize it to the common part
+             */
+            if ((secondTerm instanceof ImmutableFunctionalTerm) &&
+                    ((ImmutableFunctionalTerm) secondTerm).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol) {
+                ImmutableFunctionalTerm secondFunctionalTerm = (ImmutableFunctionalTerm) secondTerm;
+                ImmutableExpression secondCondition = (ImmutableExpression) secondFunctionalTerm.getTerm(0);
+                ImmutableTerm thenValueSecondTerm = secondFunctionalTerm.getTerm(1);
+
+                if (firstCondition.equals(secondCondition)) {
+                    ImmutableTerm mergedTerm = termFactory.getIfElseNull(
+                            firstCondition,
+                            termFactory.getDBCoalesce(ImmutableList.of(thenValueFirstTerm, thenValueSecondTerm)))
+                            .simplify(variableNullability);
+
+                    return ImmutableList.of(mergedTerm);
+                }
+                else if (thenValueFirstTerm.equals(thenValueSecondTerm)) {
+                    ImmutableTerm mergedTerm = termFactory.getIfElseNull(
+                            termFactory.getDisjunction(firstCondition, secondCondition),
+                            thenValueFirstTerm)
+                            .simplify(variableNullability);
+
+                    return ImmutableList.of(mergedTerm);
+                }
+            }
+            // The first "then" is never null
+            else if (!thenValueFirstTerm.isNullable(variableNullability.getNullableVariables())) {
+                ImmutableTerm mergedTerm =
+                        // Uses a IF-THEN-ELSE
+                        termFactory.getIfThenElse(firstCondition, thenValueFirstTerm, secondTerm)
+                        .simplify(variableNullability);
+
+                return ImmutableList.of(mergedTerm);
+            }
+        }
+        return terms;
     }
 
     @Override
