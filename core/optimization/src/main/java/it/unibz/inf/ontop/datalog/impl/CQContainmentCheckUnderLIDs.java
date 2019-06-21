@@ -65,6 +65,9 @@ public class CQContainmentCheckUnderLIDs {
 							p -> new LinkedList<>());
 					facts.add(atom);
 				}
+				else {
+					System.out.println("CQC NON-DATA: " + atom);
+				}
 			indexedCQcache.put(body, factMap);
 		}
 		return factMap;
