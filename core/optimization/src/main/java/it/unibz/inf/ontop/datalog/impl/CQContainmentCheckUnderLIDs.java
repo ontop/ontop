@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import java.util.*;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.*;
@@ -37,23 +38,26 @@ public class CQContainmentCheckUnderLIDs {
 		this.immutabilityTools = immutabilityTools;
 	}
 
+	private ImmutableList<DataAtom<AtomPredicate>> toI(List<Function> body) {
+		return body.stream()
+				.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
+						a.getTerms().stream()
+								.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
+								.collect(ImmutableCollectors.toList())))
+				.collect(ImmutableCollectors.toList());
+	}
+
+	private ImmutableList<Function> fromI(ImmutableCollection<DataAtom<AtomPredicate>> c) {
+		return c.stream()
+				.map(immutabilityTools::convertToMutableFunction)
+				.collect(ImmutableCollectors.toList());
+	}
 
 	private Map<Predicate, List<Function>> getFactMap(List<Function> body) {
 		Map<Predicate, List<Function>> factMap = indexedCQcache.get(body);
 		if (factMap == null) {
-			ImmutableList<DataAtom<AtomPredicate>> matoms = body.stream()
-					.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
-							a.getTerms().stream()
-									.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
-									.collect(ImmutableCollectors.toList())))
-					.collect(ImmutableCollectors.toList());
-
-			Collection<Function> chased = dependencies.chaseAllAtoms(matoms).stream()
-					.map(immutabilityTools::convertToMutableFunction)
-					.collect(ImmutableCollectors.toSet());
-
 			factMap = new HashMap<>(body.size() * 2);
-			for (Function atom : chased)
+			for (Function atom : fromI(dependencies.chaseAllAtoms(toI(body))))
 				// not boolean, not algebra, not arithmetic, not datatype
 				if (atom != null && atom.isDataFunction()) {
 					List<Function> facts = factMap.computeIfAbsent(
