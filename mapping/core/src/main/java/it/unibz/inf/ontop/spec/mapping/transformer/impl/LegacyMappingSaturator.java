@@ -40,7 +40,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    TermFactory termFactory,
                                    TMappingProcessor tMappingProcessor,
-                                   DatalogFactory datalogFactory,
                                    AtomFactory atomFactory,
                                    ImmutabilityTools immutabilityTools,
                                    CoreUtilsFactory coreUtilsFactory) {

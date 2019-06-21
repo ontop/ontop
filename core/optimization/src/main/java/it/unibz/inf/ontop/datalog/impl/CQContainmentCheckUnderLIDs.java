@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import java.util.*;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -18,7 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class CQContainmentCheckUnderLIDs {
 
-	private final Map<List<Function>, Map<Predicate, List<Function>>> indexedCQcache = new HashMap<>();
+	private final Map<List<Function>, Multimap<Predicate, Function>> indexedCQcache = new HashMap<>();
 	
 	private final LinearInclusionDependencies<AtomPredicate> dependencies;
 	private final AtomFactory atomFactory;
@@ -53,21 +55,13 @@ public class CQContainmentCheckUnderLIDs {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private Map<Predicate, List<Function>> getFactMap(List<Function> body) {
-		Map<Predicate, List<Function>> factMap = indexedCQcache.get(body);
+	private Multimap<Predicate, Function> getFactMap(List<Function> body) {
+		Multimap<Predicate, Function> factMap = indexedCQcache.get(body);
 		if (factMap == null) {
-			factMap = new HashMap<>(body.size() * 2);
+			factMap = HashMultimap.create();
 			for (Function atom : fromI(dependencies.chaseAllAtoms(toI(body))))
-				// not boolean, not algebra, not arithmetic, not datatype
-				if (atom != null && atom.isDataFunction()) {
-					List<Function> facts = factMap.computeIfAbsent(
-							atom.getFunctionSymbol(),
-							p -> new LinkedList<>());
-					facts.add(atom);
-				}
-				else {
-					System.out.println("CQC NON-DATA: " + atom);
-				}
+				factMap.put(atom.getFunctionSymbol(), atom);
+
 			indexedCQcache.put(body, factMap);
 		}
 		return factMap;
@@ -199,7 +193,7 @@ public class CQContainmentCheckUnderLIDs {
 	 * @param to
 	 * @return
 	 */
-	private static Substitution computeSomeHomomorphism(SubstitutionBuilder sb, List<Function> from, Map<Predicate, List<Function>> to) {
+	private static Substitution computeSomeHomomorphism(SubstitutionBuilder sb, List<Function> from, Multimap<Predicate, Function> to) {
 
 		int fromSize = from.size();
 		if (fromSize == 0)
@@ -221,7 +215,7 @@ public class CQContainmentCheckUnderLIDs {
 				// initializing the stack
 				choices = new Stack<>();
 				// add all choices for the current predicate symbol
-				choices.addAll(to.getOrDefault(currentAtom.getFunctionSymbol(), ImmutableList.of()));
+				choices.addAll(to.get(currentAtom.getFunctionSymbol()));
 				choicesMap.add(currentAtomIdx, choices);
 			}
 			else
@@ -246,7 +240,7 @@ public class CQContainmentCheckUnderLIDs {
 			if (!choiceMade) {
 				// backtracking
 				// restore all choices for the current predicate symbol
-				choices.addAll(to.getOrDefault(currentAtom.getFunctionSymbol(), ImmutableList.of()));
+				choices.addAll(to.get(currentAtom.getFunctionSymbol()));
 				sb = sbStack.pop();   // restore the partial homomorphism
 				currentAtomIdx--;   // move to the previous atom
 			}

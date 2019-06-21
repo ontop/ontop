@@ -46,6 +46,7 @@ public class MappingTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
+    public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
@@ -102,6 +103,7 @@ public class MappingTestingTools {
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
+        CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
