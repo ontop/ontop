@@ -23,7 +23,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
     @Override
     public IQ optimize(IQ query) {
-        System.out.println(query);
+        // System.out.println(query);
 
         query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
 
