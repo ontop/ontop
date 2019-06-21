@@ -7,16 +7,16 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 
 import java.util.*;
 
-public class ImmutableHomomorphismIterator implements Iterator<ImmutableHomomorphism> {
-    private final ListIterator<DataAtom> iterator;
+public class ImmutableHomomorphismIterator<P extends AtomPredicate> implements Iterator<ImmutableHomomorphism> {
+    private final ListIterator<DataAtom<P>> iterator;
     private final Deque<State> stack; // the current state is at the top
 
     private boolean movedToNext;
     private ImmutableHomomorphism next; // null means reached the end
 
-    private final ImmutableCollection<DataAtom> to;
+    private final ImmutableCollection<DataAtom<P>> to;
 
-    public ImmutableHomomorphismIterator(ImmutableHomomorphism baseHomomorphism, ImmutableList<DataAtom> from, ImmutableCollection<DataAtom> to) {
+    public ImmutableHomomorphismIterator(ImmutableHomomorphism baseHomomorphism, ImmutableList<DataAtom<P>> from, ImmutableCollection<DataAtom<P>> to) {
         this.iterator = from.listIterator();
         this.stack = new ArrayDeque<>(from.size());
         this.to = to;

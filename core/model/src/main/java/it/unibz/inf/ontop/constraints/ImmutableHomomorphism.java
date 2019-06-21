@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.HashMap;
@@ -15,16 +14,18 @@ public class ImmutableHomomorphism {
         this.map = map;
     }
 
+    /*
+        start a new homomorphism
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /*
+        extend an existing homomorphism
+     */
     public static Builder builder(ImmutableHomomorphism homomorphism) {
         return new Builder(homomorphism);
-    }
-
-    public ImmutableSet<Map.Entry<Variable, VariableOrGroundTerm>> entrySet() {
-        return map.entrySet();
     }
 
     public VariableOrGroundTerm apply(VariableOrGroundTerm term) {
@@ -74,33 +75,32 @@ public class ImmutableHomomorphism {
                 if (from.equals(to))
                     return this;
             }
-            else /*if (from instanceof GroundFunctionalTerm)*/ {
-                // the to term must also be a function
+            else {
+                // the from term can now only be a GroundFunctionalTerm
+                GroundFunctionalTerm fromF = (GroundFunctionalTerm)from;
                 if (to instanceof GroundFunctionalTerm) {
-                    GroundFunctionalTerm fromF = (GroundFunctionalTerm)from;
-                    GroundFunctionalTerm toF = (GroundFunctionalTerm)to;
+                    // then the to term must be a GroundFunctionalTerm - no match otherwise
+                    GroundFunctionalTerm toF = (GroundFunctionalTerm) to;
                     if (fromF.getFunctionSymbol().equals(toF.getFunctionSymbol()))
                         return extend(fromF.getTerms(), toF.getTerms());
                 }
             }
-            return invalidate();
+
+            valid = false;
+            return this;
         }
 
         public Builder extend(ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
             int arity = from.size();
             if (arity == to.size()) {
                 for (int i = 0; i < arity; i++) {
-                    // if we cannot find a match, terminate the process and return false
+                    // if we cannot find a match, then terminate the process and return false
                     extend(from.get(i), to.get(i));
                     if (!valid)
                         return this;
                 }
                 return this;
             }
-            return invalidate();
-        }
-
-        private Builder invalidate() {
             valid = false;
             return this;
         }

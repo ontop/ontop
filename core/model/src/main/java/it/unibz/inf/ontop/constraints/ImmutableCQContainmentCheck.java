@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.constraints;
 
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public interface ImmutableCQContainmentCheck {
+public interface ImmutableCQContainmentCheck<P extends AtomPredicate> {
 
     /**
      * Returns true if the query cq1 is contained in the query cq2
@@ -15,7 +17,7 @@ public interface ImmutableCQContainmentCheck {
      * @return true if the first query is contained in the second query
      */
 
-    boolean isContainedIn(ImmutableCQ cq1, ImmutableCQ cq2);
+    boolean isContainedIn(ImmutableCQ<P> cq1, ImmutableCQ<P> cq2);
 
     /***
      * Removes queries that are contained syntactically, using the method
@@ -27,14 +29,14 @@ public interface ImmutableCQContainmentCheck {
      * @param queries
      */
 
-    default void removeContainedQueries(List<ImmutableCQ> queries) {
+    default void removeContainedQueries(List<ImmutableCQ<P>> queries) {
 
         // first pass - from the start
         {
-            Iterator<ImmutableCQ> iterator = queries.iterator();
+            Iterator<ImmutableCQ<P>> iterator = queries.iterator();
             while (iterator.hasNext()) {
                 ImmutableCQ query = iterator.next();
-                ListIterator<ImmutableCQ> iterator2 = queries.listIterator(queries.size());
+                ListIterator<ImmutableCQ<P>> iterator2 = queries.listIterator(queries.size());
                 while (iterator2.hasPrevious()) {
                     ImmutableCQ query2 = iterator2.previous();
                     if (query2 == query)
@@ -48,10 +50,10 @@ public interface ImmutableCQContainmentCheck {
         }
         // second pass - from the end
         {
-            ListIterator<ImmutableCQ> iterator = queries.listIterator(queries.size());
+            ListIterator<ImmutableCQ<P>> iterator = queries.listIterator(queries.size());
             while (iterator.hasPrevious()) {
                 ImmutableCQ query = iterator.previous();
-                Iterator<ImmutableCQ> iterator2 = queries.iterator();
+                Iterator<ImmutableCQ<P>> iterator2 = queries.iterator();
                 while (iterator2.hasNext()) {
                     ImmutableCQ query2 = iterator2.next();
                     if (query2 == query)
