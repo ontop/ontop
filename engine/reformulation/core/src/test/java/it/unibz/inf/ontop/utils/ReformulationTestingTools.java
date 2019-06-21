@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
@@ -31,13 +30,11 @@ public class ReformulationTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
-    public static final ImmutableUnificationTools IMMUTABLE_UNIFICATION_TOOLS;
 
     public static final RDF RDF_FACTORY;
 
@@ -60,16 +57,11 @@ public class ReformulationTestingTools {
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
-        IMMUTABLE_UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
 
         RDF_FACTORY = injector.getInstance(RDF.class);
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 }

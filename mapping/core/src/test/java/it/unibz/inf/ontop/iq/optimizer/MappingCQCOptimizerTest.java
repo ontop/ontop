@@ -46,7 +46,6 @@ public class MappingCQCOptimizerTest {
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
-    public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -67,7 +66,6 @@ public class MappingCQCOptimizerTest {
 
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
-        SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);

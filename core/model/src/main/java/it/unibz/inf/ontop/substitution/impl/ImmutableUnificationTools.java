@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 @Singleton
 public class ImmutableUnificationTools {
 
-    private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
@@ -34,10 +33,9 @@ public class ImmutableUnificationTools {
     private final TypeFactory typeFactory;
 
     @Inject
-    private ImmutableUnificationTools(TermFactory termFactory, SubstitutionFactory substitutionFactory,
+    private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
                                       ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
                                       ImmutabilityTools immutabilityTools, TypeFactory typeFactory) {
-        this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;

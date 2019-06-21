@@ -91,7 +91,7 @@ public class DummyRewriter implements QueryRewriter {
         return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
-                
+
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {

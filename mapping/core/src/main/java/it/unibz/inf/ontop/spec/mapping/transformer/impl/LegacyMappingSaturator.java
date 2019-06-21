@@ -19,12 +19,7 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.List;
 
@@ -38,28 +33,25 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final TermFactory termFactory;
     private final TMappingProcessor tMappingProcessor;
     private final DatalogFactory datalogFactory;
-    private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final ImmutabilityTools immutabilityTools;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final ImmutableUnificationTools immutableUnificationTools;
 
     @Inject
     private LegacyMappingSaturator(TMappingExclusionConfig tMappingExclusionConfig,
                                    TermFactory termFactory,
-                                   TMappingProcessor tMappingProcessor, DatalogFactory datalogFactory,
-                                   SubstitutionFactory substitutionFactory, AtomFactory atomFactory,
-                                   ImmutabilityTools immutabilityTools, CoreUtilsFactory coreUtilsFactory,
-                                   ImmutableUnificationTools immutableUnificationTools) {
+                                   TMappingProcessor tMappingProcessor,
+                                   DatalogFactory datalogFactory,
+                                   AtomFactory atomFactory,
+                                   ImmutabilityTools immutabilityTools,
+                                   CoreUtilsFactory coreUtilsFactory) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
         this.datalogFactory = datalogFactory;
-        this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.immutableUnificationTools = immutableUnificationTools;
     }
 
     @Override
