@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class CQContainmentCheckUnderLIDs {
 
-	private final Map<List<Function>, Multimap<Predicate, Function>> indexedCQcache = new HashMap<>();
+	private final Map<ImmutableList<DataAtom<AtomPredicate>>, Multimap<Predicate, Function>> indexedCQcache = new HashMap<>();
 	
 	private final LinearInclusionDependencies<AtomPredicate> dependencies;
 	private final AtomFactory atomFactory;
@@ -55,11 +55,11 @@ public class CQContainmentCheckUnderLIDs {
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private Multimap<Predicate, Function> getFactMap(List<Function> body) {
+	private Multimap<Predicate, Function> getFactMap(ImmutableList<DataAtom<AtomPredicate>> body) {
 		Multimap<Predicate, Function> factMap = indexedCQcache.get(body);
 		if (factMap == null) {
 			factMap = HashMultimap.create();
-			for (Function atom : fromI(dependencies.chaseAllAtoms(toI(body))))
+			for (Function atom : fromI(dependencies.chaseAllAtoms(body)))
 				factMap.put(atom.getFunctionSymbol(), atom);
 
 			indexedCQcache.put(body, factMap);
@@ -67,7 +67,7 @@ public class CQContainmentCheckUnderLIDs {
 		return factMap;
 	}
 
-	public Substitution computeHomomorphsim(Function h1, List<Function> b1, Function h2, List<Function> b2) {
+	public Substitution computeHomomorphsim(Function h1, ImmutableList<DataAtom<AtomPredicate>> b1, Function h2, List<Function> b2) {
 
 		SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
 
@@ -118,7 +118,7 @@ public class CQContainmentCheckUnderLIDs {
 				continue;
 
 			SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
-			Substitution sub = computeSomeHomomorphism(sb, databaseAtoms, getFactMap(atomsToLeave));
+			Substitution sub = computeSomeHomomorphism(sb, databaseAtoms, getFactMap(toI(atomsToLeave)));
 			if (sub != null) {
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
