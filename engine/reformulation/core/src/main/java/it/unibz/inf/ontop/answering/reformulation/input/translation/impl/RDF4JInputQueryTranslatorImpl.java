@@ -141,6 +141,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (node instanceof LeftJoin)
             return translateJoinLikeNode((LeftJoin) node);
 
+        if (node instanceof Difference)
+            return translateDifference((Difference) node);
+
         if (node instanceof Union)
             return translateUnion((Union) node);
 
@@ -172,6 +175,39 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             return translateOrder((Order) node);
 
         throw new Sparql2IqConversionException("Unexpected SPARQL operator : " + node.toString());
+    }
+
+    private TranslationResult translateDifference(Difference diff) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
+
+        TranslationResult leftTranslation = translate(diff.getLeftArg());
+        TranslationResult rightTranslation = translate(diff.getRightArg());
+
+        ImmutableSet<Variable> leftVars = leftTranslation.iqTree.getVariables();
+        ImmutableSet<Variable> rightSpecificVars = rightTranslation.iqTree.getVariables().stream()
+                .filter(v -> !leftVars.contains(v))
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableExpression filter = termFactory.getRDF2DBBooleanFunctionalTerm(
+                termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
+                                SPARQL.LOGICAL_AND,
+                                rightSpecificVars.size()
+                        ),
+                        ImmutableList.copyOf(rightSpecificVars)
+                ));
+
+        return new TranslationResult(
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createFilterNode(
+                        filter
+                ),
+                        iqFactory.createBinaryNonCommutativeIQTree(
+                                iqFactory.createLeftJoinNode(),
+                                leftTranslation.iqTree,
+                                rightTranslation.iqTree
+                        )),
+                leftTranslation.nullableVariables
+        );
     }
 
     private TranslationResult translateAggregate(Group groupNode) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
