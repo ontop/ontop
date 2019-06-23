@@ -24,6 +24,8 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.junit.Test;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 /* 
  * Test class for infinite loop in the ontology "final_project_original.owl"
  * after the method eliominateCycles is called there is still a cycle in the graph with the nodes
@@ -36,6 +38,6 @@ public class DAGLoopTest {
 	@Test
 	public void testLoop() throws Exception {
 		// generate DAG
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify("src/test/resources/test/dag/final_project_original.owl");
 	}
 }

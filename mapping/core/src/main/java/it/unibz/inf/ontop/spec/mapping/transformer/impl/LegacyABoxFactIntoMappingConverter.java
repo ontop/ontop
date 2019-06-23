@@ -8,22 +8,18 @@ import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.ValueConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
@@ -54,20 +50,48 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
                            UriTemplateMatcher uriTemplateMatcher) {
 
-        List<AnnotationAssertion> annotationAssertions = isOntologyAnnotationQueryingEnabled ?
-                ontology.getAnnotationAssertions() :
-                Collections.emptyList();
+        // ROMAN (22 Sep 2018): no streams - uriTemplateMatcher is mutable
 
-        // Mutable !!
-//        UriTemplateMatcher uriTemplateMatcher = UriTemplateMatcher.create(Stream.empty());
+        // blank nodes are NOT supported here
 
-        ImmutableList<CQIE> rules = convertAssertions(
-                ontology.getClassAssertions(),
-                ontology.getObjectPropertyAssertions(),
-                ontology.getDataPropertyAssertions(),
-                annotationAssertions,
-                uriTemplateMatcher
-        );
+        ImmutableList.Builder<Function> heads = ImmutableList.builder();
+
+        for (ClassAssertion ca : ontology.getClassAssertions()) {
+            heads.add(convertClassAssertion(
+                    ((IRIConstant) ca.getIndividual()).getIRI(),
+                    ca.getConcept().getIRI(), uriTemplateMatcher));
+        }
+        LOGGER.debug("Appended {} class assertions from ontology as fact rules", ontology.getClassAssertions().size());
+
+        for (ObjectPropertyAssertion pa : ontology.getObjectPropertyAssertions()) {
+            heads.add(convertObjectPropertyAssertion(
+                    ((IRIConstant) pa.getSubject()).getIRI(),
+                    pa.getProperty().getIRI(),
+                    ((IRIConstant) pa.getObject()).getIRI(), uriTemplateMatcher));
+        }
+        LOGGER.debug("Appended {} object property assertions as fact rules", ontology.getObjectPropertyAssertions().size());
+
+        for (DataPropertyAssertion da : ontology.getDataPropertyAssertions()) {
+            heads.add(convertDataPropertyAssertion(
+                    ((IRIConstant) da.getSubject()).getIRI(),
+                    da.getProperty().getIRI(),
+                    da.getValue()));
+        }
+        LOGGER.debug("Appended {} data property assertions as fact rules", ontology.getDataPropertyAssertions().size());
+
+        if (isOntologyAnnotationQueryingEnabled) {
+            for (AnnotationAssertion aa : ontology.getAnnotationAssertions()) {
+                heads.add(convertAnnotationAssertion(
+                        ((IRIConstant) aa.getSubject()).getIRI(),
+                        aa.getProperty().getIRI(),
+                        aa.getValue()));
+            }
+            LOGGER.debug("Appended {} annotation assertions as fact rules", ontology.getAnnotationAssertions().size());
+        }
+
+        ImmutableList<CQIE> rules = heads.build().stream()
+                .map(h -> datalogFactory.getCQIE(h, Collections.emptyList()))
+                .collect(ImmutableCollectors.toList());
 
         return datalog2QueryMappingConverter.convertMappingRules(
                 rules,
@@ -78,113 +102,49 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 ));
     }
 
-    /***
-     * Adding ontology assertions (ABox) as rules (facts, head with no body).
-     */
-    private ImmutableList<CQIE> convertAssertions(Iterable<ClassAssertion> cas,
-                                                  Iterable<ObjectPropertyAssertion> pas,
-                                                  Iterable<DataPropertyAssertion> das,
-                                                  Iterable<AnnotationAssertion> aas,
-                                                  UriTemplateMatcher uriTemplateMatcher) {
+    private Function convertClassAssertion(IRI object, IRI klass, UriTemplateMatcher uriTemplateMatcher) {
+        return atomFactory.getMutableTripleHeadAtom(
+                immutabilityTools.convertToMutableFunction(uriTemplateMatcher.generateURIFunction(object.getIRIString())),
+                klass);
 
-        List<CQIE> mutableMapping = new ArrayList<>();
+    }
 
-        int count = 0;
-        for (ClassAssertion ca : cas) {
-            // no blank nodes are supported here
-            IRIConstant c = (IRIConstant) ca.getIndividual();
-            IRI classIRI = ca.getConcept().getIRI();
-            Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableFunction(
-                            uriTemplateMatcher.generateURIFunction(c.getIRI().getIRIString())), classIRI);
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
+    private Function convertObjectPropertyAssertion(IRI s, IRI p, IRI o, UriTemplateMatcher uriTemplateMatcher) {
+        return atomFactory.getMutableTripleHeadAtom(
+                immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(s.getIRIString())),
+                p,
+                immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(o.getIRIString())));
+    }
 
-            mutableMapping.add(rule);
-            count++;
+    private Function convertDataPropertyAssertion(IRI s, IRI p, ValueConstant o) {
+        Term v = o.getType().getLanguageTag()
+                .map(lang ->
+                        termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString()))
+                .orElseGet(() ->
+                        termFactory.getTypedTerm(o, o.getType()));
+
+        return atomFactory.getMutableTripleHeadAtom(
+                // ROMAN (22 Sep 2018) - why is there no convertToMutableTerm?
+                termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRIString())), p, v);
+    }
+
+    private Function convertAnnotationAssertion(IRI s, IRI p, Constant v) {
+        Term vv;
+        if (v instanceof ValueConstant) {
+            ValueConstant o = (ValueConstant) v;
+            vv = o.getType().getLanguageTag()
+                    .map(lang ->
+                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString()))
+                    .orElseGet(() ->
+                            termFactory.getTypedTerm(o, o.getType()));
         }
-        LOGGER.debug("Appended {} class assertions from ontology as fact rules", count);
+        else {
+            IRIConstant o = (IRIConstant) v;
+            vv = termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getIRI().getIRIString()));
 
-        count = 0;
-        for (ObjectPropertyAssertion pa : pas) {
-            // no blank nodes are supported here
-            IRIConstant s = (IRIConstant) pa.getSubject();
-            IRIConstant o = (IRIConstant) pa.getObject();
-            IRI propertyIRI = pa.getProperty().getIRI();
-            Function head = atomFactory.getMutableTripleHeadAtom(
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(s.getIRI().getIRIString())),
-                    propertyIRI,
-                    immutabilityTools.convertToMutableTerm(uriTemplateMatcher.generateURIFunction(o.getIRI().getIRIString())));
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
         }
-        LOGGER.debug("Appended {} object property assertions as fact rules", count);
-
-
-        count = 0;
-        for (DataPropertyAssertion da : das) {
-            // no blank nodes are supported here
-            IRIConstant s = (IRIConstant) da.getSubject();
-            ValueConstant o = da.getValue();
-            IRI propertyIRI = da.getProperty().getIRI();
-
-
-            Function head = o.getType().getLanguageTag()
-                    .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                            propertyIRI,
-                            termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                    .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                            termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                            propertyIRI,
-                            termFactory.getTypedTerm(o, o.getType())));
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-
-        LOGGER.debug("Appended {} data property assertions as fact rules", count);
-
-        count = 0;
-        for (AnnotationAssertion aa : aas) {
-            // no blank nodes are supported here
-
-            IRIConstant s = (IRIConstant) aa.getSubject();
-            IRI propertyIRI = aa.getProperty().getIRI();
-
-            Function head;
-            if (aa.getValue() instanceof ValueConstant) {
-
-                ValueConstant o = (ValueConstant) aa.getValue();
-
-                head = o.getType().getLanguageTag()
-                        .map(lang -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                    termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                                    propertyIRI,
-                                    termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString())))
-                        .orElseGet(() -> atomFactory.getMutableTripleHeadAtom(termFactory.getUriTemplate(
-                                termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                                propertyIRI,
-                                termFactory.getTypedTerm(o, o.getType())));
-            } else {
-
-                IRIConstant o = (IRIConstant) aa.getValue();
-                head = atomFactory.getMutableTripleHeadAtom(
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRI().getIRIString())),
-                        propertyIRI,
-                        termFactory.getUriTemplate(termFactory.getConstantLiteral(o.getIRI().getIRIString())));
-
-
-            }
-            CQIE rule = datalogFactory.getCQIE(head, Collections.emptyList());
-
-            mutableMapping.add(rule);
-            count++;
-        }
-
-        LOGGER.debug("Appended {} annotation assertions as fact rules", count);
-        return ImmutableList.copyOf(mutableMapping);
+        return atomFactory.getMutableTripleHeadAtom(
+                // ROMAN (22 Sep 2018) - why is there no convertToMutableTerm?
+                termFactory.getUriTemplate(termFactory.getConstantLiteral(s.getIRIString())), p, vv);
     }
 }

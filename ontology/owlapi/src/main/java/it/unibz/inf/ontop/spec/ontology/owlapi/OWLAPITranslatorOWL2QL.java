@@ -1039,36 +1039,40 @@ public class OWLAPITranslatorOWL2QL {
 
     // PRIVATE METHODS FOR TRANSLATING COMPONENTS OF ASSERTIONS
 
-    private static OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
-        String uri = clExpression.getIRI().toString();
-        return voc.get(uri);
+    private org.apache.commons.rdf.api.IRI iri2iri(IRI iri) {
+        return rdfFactory.createIRI(iri.toString());
     }
+
+    private OClass getOClass(OWLClass clExpression, OntologyVocabularyCategory<OClass> voc) {
+        return voc.get(iri2iri(clExpression.getIRI()));
+    }
+
 
     /**
      * ObjectPropertyExpression := ObjectProperty | InverseObjectProperty
      * InverseObjectProperty := 'ObjectInverseOf' '(' ObjectProperty ')'
      */
 
-    private static ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
+    private ObjectPropertyExpression getPropertyExpression(OWLObjectPropertyExpression opeExpression, OntologyVocabularyCategory<ObjectPropertyExpression> voc) {
 
         if (opeExpression instanceof OWLObjectProperty) {
-            return voc.get(opeExpression.asOWLObjectProperty().getIRI().toString());
+            return voc.get(iri2iri(opeExpression.asOWLObjectProperty().getIRI()));
         }
         else {
             assert(opeExpression instanceof OWLObjectInverseOf);
 
             OWLObjectInverseOf aux = (OWLObjectInverseOf) opeExpression;
-            return voc.get(aux.getInverse().asOWLObjectProperty().getIRI().toString()).getInverse();
+            return voc.get(iri2iri(aux.getInverse().asOWLObjectProperty().getIRI())).getInverse();
         }
     }
 
-    private static DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
+    private DataPropertyExpression getPropertyExpression(OWLDataPropertyExpression dpeExpression, OntologyVocabularyCategory<DataPropertyExpression> voc)  {
         assert (dpeExpression instanceof OWLDataProperty);
-        return voc.get(dpeExpression.asOWLDataProperty().getIRI().toString());
+        return voc.get(iri2iri(dpeExpression.asOWLDataProperty().getIRI()));
     }
 
-    private static AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
-        return voc.get(ap.getIRI().toString());
+    private AnnotationProperty getPropertyExpression(OWLAnnotationProperty ap, OntologyVocabularyCategory<AnnotationProperty> voc)  {
+        return voc.get(iri2iri(ap.getIRI()));
     }
 
 
@@ -1246,42 +1250,39 @@ public class OWLAPITranslatorOWL2QL {
 
 
 
+	private Set<org.apache.commons.rdf.api.IRI> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
 
-	private static Set<String> extractOntoloyVocabulary(OWLOntology owl, OntologyBuilder builder) {
-
-        final Set<String> punnedPredicates = new HashSet<>();
+        final Set<org.apache.commons.rdf.api.IRI> punnedPredicates = new HashSet<>();
 
         // add all definitions for classes and properties
         for (OWLClass entity : owl.getClassesInSignature())  {
-            String uri = entity.getIRI().toString();
-            builder.declareClass(uri);
+            builder.declareClass(iri2iri(entity.getIRI()));
         }
 
         for (OWLObjectProperty prop : owl.getObjectPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            if (builder.dataProperties().contains(uri))  {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+            org.apache.commons.rdf.api.IRI iri = iri2iri(prop.getIRI());
+            if (builder.dataProperties().contains(iri))  {
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareObjectProperty(uri);
+                builder.declareObjectProperty(iri);
             }
         }
 
         for (OWLDataProperty prop : owl.getDataPropertiesInSignature())  {
-            String uri = prop.getIRI().toString();
-            if (builder.objectProperties().contains(uri)) {
-                punnedPredicates.add(uri);
-                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + uri);
+            org.apache.commons.rdf.api.IRI iri =  iri2iri(prop.getIRI());
+            if (builder.objectProperties().contains(iri)) {
+                punnedPredicates.add(iri);
+                log.warn("Quest can become unstable with properties declared as both data and object. Offending property: " + iri);
             }
             else {
-                builder.declareDataProperty(uri);
+                builder.declareDataProperty(iri);
             }
         }
 
         for (OWLAnnotationProperty prop : owl.getAnnotationPropertiesInSignature()) {
-            String uri = prop.getIRI().toString();
-            builder.declareAnnotationProperty(uri);
+            builder.declareAnnotationProperty(iri2iri(prop.getIRI()));
         }
 
 		return punnedPredicates;

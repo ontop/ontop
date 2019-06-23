@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -177,11 +178,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 						return new Equivalences<Description>(equivalences);
 					}
 			}*/
-			return new Equivalences<T>(ImmutableSet.of(desc), desc, false);
+			return new Equivalences<>(ImmutableSet.of(desc), desc, false);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
 			// I want to consider also the children of the equivalent nodes
@@ -219,11 +220,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 				}
 			}
 		
-			return Collections.unmodifiableSet(result);
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
 			
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(
@@ -243,11 +244,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
-			return Collections.unmodifiableSet(result);
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 
 
@@ -285,11 +286,11 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 				}
 			}
 
-			return Collections.unmodifiableSet(result);
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v) {
 			
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 			BreadthFirstIterator<T, DefaultEdge> iterator = new BreadthFirstIterator<T, DefaultEdge>(graph, v.getRepresentative());
@@ -308,11 +309,16 @@ public class TestClassifiedTBoxImpl_OnGraph implements ClassifiedTBox {
 				result.add(new Equivalences<T>(ImmutableSet.of(node)));
 			}
 			// add each of them to the result
-			return Collections.unmodifiableSet(result);
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<T> getSubRepresentatives(T v) {
+		public Stream<Equivalences<T>> stream() {
+			return null;
+		}
+
+		@Override
+		public ImmutableSet<T> getSubRepresentatives(T v) {
 			// TODO Auto-generated method stub
 			return null;
 		}

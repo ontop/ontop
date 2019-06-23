@@ -24,6 +24,7 @@ package it.unibz.inf.ontop.si.dag;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import junit.framework.TestCase;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class S_Equivalences_NewDAGTest extends TestCase{
 
-	ArrayList<String> input= new ArrayList<String>();
-	ArrayList<String> output= new ArrayList<String>();
 
 	Logger log = LoggerFactory.getLogger(S_Equivalences_NewDAGTest.class);
 
@@ -43,8 +44,8 @@ public class S_Equivalences_NewDAGTest extends TestCase{
 		super(name);
 	}
 
-	public void setUp(){
-//		
+	public void testEquivalences() throws OWLOntologyCreationException {
+		ArrayList<String> input= new ArrayList<>();
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/role-equivalence.owl");
@@ -83,12 +84,10 @@ public class S_Equivalences_NewDAGTest extends TestCase{
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-	}
 
-	public void testEquivalences() throws Exception {
 		for (String fileInput: input) {
 
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph graphReasoner = new TestClassifiedTBoxImpl_OnGraph(reasoner);
 
 			log.debug("Input {}", fileInput);
@@ -114,9 +113,7 @@ public class S_Equivalences_NewDAGTest extends TestCase{
 			assertTrue(testParents(reasoner.objectPropertiesDAG(), graphReasoner.objectPropertiesDAG()));
 			assertTrue(checkVertexReduction(graphReasoner, reasoner));
 			assertTrue(checkEdgeReduction(graphReasoner, reasoner));
-
 		}
-
 	}
 	
 	private static <T> boolean coincide(Set<Equivalences<T>> setd1, Set<Equivalences<T>> setd2) {

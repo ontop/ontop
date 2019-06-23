@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 public class UnionFlattenerTest {
 
@@ -47,7 +47,6 @@ public class UnionFlattenerTest {
     );
 
     private static Constant uriTemplate1 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}");
-    private static Constant uriTemplate2 = TERM_FACTORY.getConstantLiteral("http://example.org/ds1/{}{}");
 
     @Test
     public void testMergeUnions() {
@@ -80,7 +79,7 @@ public class UnionFlattenerTest {
                         )));
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue(optimizedIQ.equals(expectedIQ));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -125,7 +124,7 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -184,7 +183,7 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -252,6 +251,6 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union3);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 }

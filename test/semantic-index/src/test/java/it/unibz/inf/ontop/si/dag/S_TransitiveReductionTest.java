@@ -34,9 +34,10 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class S_TransitiveReductionTest extends TestCase {
+import static it.unibz.inf.ontop.utils.SITestingTools.getIRI;
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
 
-	ArrayList<String> input= new ArrayList<>();
+public class S_TransitiveReductionTest extends TestCase {
 
 	Logger log = LoggerFactory.getLogger(S_TransitiveReductionTest.class);
 
@@ -44,13 +45,52 @@ public class S_TransitiveReductionTest extends TestCase {
 		super(name);
 	}
 
-	public void setUp() {
+
+	public void testR() throws OWLOntologyCreationException {
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
+
+		ClassExpression A = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "A"));
+		ClassExpression B = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "B"));
+		ClassExpression C = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "C"));
 		
+		EquivalencesDAG<ClassExpression> classes = dag.classesDAG();
+		
+		Equivalences<ClassExpression> vA = classes.getVertex(A);
+		Equivalences<ClassExpression> vB = classes.getVertex(B);
+		Equivalences<ClassExpression> vC = classes.getVertex(C);
+		
+		assertEquals(ImmutableSet.of(vB), classes.getDirectSuper(vC));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
+	}
+
+	public void testR2() throws Exception {
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
+
+		ClassExpression A = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "A"));
+		ClassExpression B = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "B"));
+		ClassExpression C = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "C"));
+		ClassExpression D = dag.classes().get(getIRI("http://www.kro.com/ontologies/", "D"));
+		
+		EquivalencesDAG<ClassExpression> classes = dag.classesDAG();
+		
+		Equivalences<ClassExpression> vA = classes.getVertex(A);
+		Equivalences<ClassExpression> vB = classes.getVertex(B);
+		Equivalences<ClassExpression> vC = classes.getVertex(C);
+		Equivalences<ClassExpression> vD = classes.getVertex(D);
+		
+		assertEquals(ImmutableSet.of(vB, vD), classes.getDirectSuper(vC));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
+		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vD));
+	}
+	
+	
+	public void testSimplification() throws Exception {
+		ArrayList<String> input= new ArrayList<>();
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/role-equivalence.owl");
-		
+
 		/** C -> B  -> A  C->A*/
 		input.add("src/test/resources/test/newDag/transitive.owl");
 		/** C -> B  -> A  C->D ->A C->A */
@@ -89,50 +129,9 @@ public class S_TransitiveReductionTest extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-	}
-	
-	
-	public void testR() throws OWLOntologyCreationException {
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive.owl");
 
-		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
-		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
-		ClassExpression C = dag.classes().get("http://www.kro.com/ontologies/C");
-		
-		EquivalencesDAG<ClassExpression> classes = dag.classesDAG();
-		
-		Equivalences<ClassExpression> vA = classes.getVertex(A);
-		Equivalences<ClassExpression> vB = classes.getVertex(B);
-		Equivalences<ClassExpression> vC = classes.getVertex(C);
-		
-		assertEquals(ImmutableSet.of(vB), classes.getDirectSuper(vC));
-		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
-	}
-
-	public void testR2() throws Exception {
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify("src/test/resources/test/newDag/transitive2.owl");
-
-		ClassExpression A = dag.classes().get("http://www.kro.com/ontologies/A");
-		ClassExpression B = dag.classes().get("http://www.kro.com/ontologies/B");
-		ClassExpression C = dag.classes().get("http://www.kro.com/ontologies/C");
-		ClassExpression D = dag.classes().get("http://www.kro.com/ontologies/D");
-		
-		EquivalencesDAG<ClassExpression> classes = dag.classesDAG();
-		
-		Equivalences<ClassExpression> vA = classes.getVertex(A);
-		Equivalences<ClassExpression> vB = classes.getVertex(B);
-		Equivalences<ClassExpression> vC = classes.getVertex(C);
-		Equivalences<ClassExpression> vD = classes.getVertex(D);
-		
-		assertEquals(ImmutableSet.of(vB, vD), classes.getDirectSuper(vC));
-		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vB));
-		assertEquals(ImmutableSet.of(vA), classes.getDirectSuper(vD));
-	}
-	
-	
-	public void testSimplification() throws Exception{
 		for (String fileInput: input) {
-			ClassifiedTBox dag2 = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag2 = loadOntologyFromFileAndClassify(fileInput);
 			TestClassifiedTBoxImpl_OnGraph reasonerd1 = new TestClassifiedTBoxImpl_OnGraph((ClassifiedTBoxImpl)dag2);
 
 			log.debug("Input number {}", fileInput);

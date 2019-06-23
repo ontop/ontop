@@ -14,15 +14,14 @@ import java.io.File;
 import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ImplicitDBConstraintsTest {
 
 	private BasicDBMetadata md;
 	private QuotedIDFactory idfac;
 
-	private static PreProcessedImplicitRelationalDBConstraintExtractor CONSTRAINT_EXTRACTOR = Guice.createInjector()
+	private static final PreProcessedImplicitRelationalDBConstraintExtractor CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(BasicPreProcessedImplicitRelationalDBConstraintExtractor.class);
 	
 	@Before
@@ -44,7 +43,7 @@ public class ImplicitDBConstraintsTest {
 				new File("src/test/resources/userconstraints/empty_constraints.lst"));
 
 		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 0);
+		assertEquals(0, refs.size());
 	}
 
 	@Test
@@ -52,7 +51,7 @@ public class ImplicitDBConstraintsTest {
 		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/pkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 0);
+		assertEquals(0, refs.size());
 	}
 
 	@Test
@@ -62,7 +61,7 @@ public class ImplicitDBConstraintsTest {
 		uc.insertUniqueConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		Attribute attr = dd.getAttribute(idfac.createAttributeID("KEYNAME"));
-		assertTrue(dd.getUniqueConstraints().get(0).getAttributes().equals(ImmutableList.of(attr)));
+		assertEquals(ImmutableList.of(attr), dd.getUniqueConstraints().get(0).getAttributes());
 	}
 
 
@@ -71,7 +70,7 @@ public class ImplicitDBConstraintsTest {
 		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
 				new File("src/test/resources/userconstraints/fkeys.lst"));
 		Set<RelationID> refs = uc.getReferredTables(idfac);
-		assertTrue(refs.size() == 1);
+		assertEquals(1, refs.size());
 		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
 	}
 
@@ -82,10 +81,10 @@ public class ImplicitDBConstraintsTest {
 		uc.insertForeignKeyConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
-		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(),
-				idfac.createRelationID(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
+		assertNotNull(fk);
+		Attribute ref = fk.getComponents().get(0).getReference();
+		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
+		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
 	}
 
 	@Test
@@ -96,12 +95,12 @@ public class ImplicitDBConstraintsTest {
 		uc.insertForeignKeyConstraints(this.md);
 		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
 		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
-		assertTrue(fk != null);
-		assertEquals(fk.getComponents().get(0).getReference().getRelation().getID(),
-						idfac.createRelationID(null, "TABLE2"));
-		assertEquals(fk.getComponents().get(0).getReference().getID(), idfac.createAttributeID("KEY1"));
-		assertEquals(dd.getUniqueConstraints().get(0).getAttributes(),
-							ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))));
+		assertNotNull(fk);
+		Attribute ref = fk.getComponents().get(0).getReference();
+		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
+		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
+		assertEquals(ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))),
+						dd.getUniqueConstraints().get(0).getAttributes());
 	}
 
 	

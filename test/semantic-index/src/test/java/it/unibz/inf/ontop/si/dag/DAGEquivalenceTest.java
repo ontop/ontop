@@ -21,21 +21,17 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.si.repository.impl.Interval;
 import it.unibz.inf.ontop.si.repository.impl.SemanticIndexBuilder;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import junit.framework.TestCase;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 
-import java.io.File;
 import java.util.List;
 
-import static it.unibz.inf.ontop.utils.SITestingTools.OWLAPI_TRANSLATOR;
-
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+import static it.unibz.inf.ontop.utils.SITestingTools.getIRI;
 
 public class DAGEquivalenceTest extends TestCase {
 
@@ -54,194 +50,106 @@ public class DAGEquivalenceTest extends TestCase {
 	 */
 	private final String testEquivalenceClasses = "src/test/resources/test/dag/test-equivalence-classes.owl";
 
-	public void setUp() {
-		// NO-OP
-	}
-
 	public void testIndexClasses() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/test.owl#";
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceClasses);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceClasses);
 
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 		List<Interval> nodeInterval = engine.getRange((OClass)dag.classesDAG()
-					.getVertex(dag.classes().get(testURI + "B1")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		Interval interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+					.getVertex(dag.classes().get(getIRI(testURI, "B1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange((OClass)dag.classesDAG()
-				.getVertex(dag.classes().get(testURI + "B2")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.classes().get(getIRI(testURI, "B2"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange((OClass)dag.classesDAG()
-				.getVertex(dag.classes().get(testURI + "B3")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.classes().get(getIRI(testURI, "B3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange((OClass)dag.classesDAG()
-				.getVertex(dag.classes().get(testURI + "A1")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.classes().get(getIRI(testURI, "A1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange((OClass)dag.classesDAG()
-				.getVertex(dag.classes().get(testURI + "A2")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.classes().get(getIRI(testURI, "A2"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange((OClass)dag.classesDAG()
-				.getVertex(dag.classes().get(testURI + "A3")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.classes().get(getIRI(testURI, "A3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 	}
 
 	public void testIntervalsRoles() throws Exception {
 		String testURI = "http://it.unibz.inf/obda/ontologies/Ontology1314774461138.owl#";
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceRoles);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceRoles);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 
 		List<Interval> nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "R1")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		Interval interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "R1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "R2")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "R2"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "R3")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 2);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "R3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "S1")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "S1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "S2")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "S2"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 
 		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "S3")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(interval.getStart(), 1);
-		assertEquals(interval.getEnd(), 2);
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "S3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 2)), nodeInterval);
 	}
 
 	public void testIntervalsRolesWithInverse() throws Exception {
 		String testURI = "http://obda.inf.unibz.it/ontologies/tests/dllitef/test.owl#";
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(testEquivalenceRolesInverse);
 		// generate named DAG
 		SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
-		
-		List<Interval> nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "A1")).getRepresentative()).getIntervals();
-
-		assertEquals(nodeInterval.size(), 1);
-		Interval interval = nodeInterval.get(0);
-		assertEquals(1, interval.getStart());
-		assertEquals(3, interval.getEnd());
-
 		EquivalencesDAG<ObjectPropertyExpression> properties = dag.objectPropertiesDAG();
-		
-		ObjectPropertyExpression d = properties.getVertex(dag.objectProperties().get(testURI + "A2")).getRepresentative();
-		assertTrue(d.equals(dag.objectProperties().get(testURI + "A1").getInverse()));
-
-		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "A3")).getRepresentative()).getIntervals();
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(1, interval.getStart());
-		assertEquals(3, interval.getEnd());
-
-		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "C1")).getRepresentative()).getIntervals();
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(3, interval.getStart());
-		assertEquals(3, interval.getEnd());
-
-		d = properties.getVertex(dag.objectProperties().get(testURI + "C2")).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(dag.objectProperties().get(testURI + "C1").getInverse()).getRepresentative()));
-
-		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "C3")).getRepresentative()).getIntervals();
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(3, interval.getStart());
-		assertEquals(3, interval.getEnd());
-
-		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "B1")).getRepresentative()).getIntervals();
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-
-		assertEquals(2, interval.getStart());
-		assertEquals(3, interval.getEnd());
-
-		d = properties.getVertex(dag.objectProperties().get(testURI + "B2")).getRepresentative();
-		assertTrue(d.equals(properties.getVertex(dag.objectProperties().get(testURI + "B3").getInverse()).getRepresentative()));
-
-		nodeInterval = engine.getRange(dag.objectPropertiesDAG()
-				.getVertex(dag.objectProperties().get(testURI + "B3")).getRepresentative()).getIntervals();
-		assertEquals(nodeInterval.size(), 1);
-		interval = nodeInterval.get(0);
-		assertEquals(2, interval.getStart());
-		assertEquals(3, interval.getEnd());
-	}
 
 
-	/**
-	 * USE FOR TESTS ONLY
-	 *
-	 * @param filename
-	 * @return
-	 * @throws OWLOntologyCreationException
-	 */
+		List<Interval> nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "A1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 3)), nodeInterval);
 
-	public static ClassifiedTBox loadOntologyFromFileAndClassify(String filename) throws OWLOntologyCreationException {
-		OWLOntologyManager man = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = man.loadOntologyFromOntologyDocument(new File(filename));
-		Ontology onto = OWLAPI_TRANSLATOR.translateAndClassify(owl);
-		return onto.tbox();
+		assertEquals(dag.objectProperties().get(getIRI(testURI, "A1")).getInverse(),
+				properties.getVertex(dag.objectProperties().get(getIRI(testURI, "A2"))).getRepresentative());
+
+		nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "A3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(1, 3)), nodeInterval);
+
+		nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "C1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(3, 3)), nodeInterval);
+
+		assertEquals(properties.getVertex(dag.objectProperties().get(getIRI(testURI, "C1")).getInverse()).getRepresentative(),
+				properties.getVertex(dag.objectProperties().get(getIRI(testURI, "C2"))).getRepresentative());
+
+		nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "C3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(3, 3)), nodeInterval);
+
+		nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "B1"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 3)), nodeInterval);
+
+		assertEquals(properties.getVertex(dag.objectProperties().get(getIRI(testURI, "B3")).getInverse()).getRepresentative(),
+					properties.getVertex(dag.objectProperties().get(getIRI(testURI, "B2"))).getRepresentative());
+
+		nodeInterval = engine.getRange(properties
+				.getVertex(dag.objectProperties().get(getIRI(testURI, "B3"))).getRepresentative()).getIntervals();
+		assertEquals(ImmutableList.of(new Interval(2, 3)), nodeInterval);
 	}
 }

@@ -36,11 +36,9 @@ import org.apache.commons.rdf.api.IRI;
 
 public class AnnotationPropertyImpl implements AnnotationProperty {
 
-	private final String name;
 	private IRI iri;
 
 	AnnotationPropertyImpl(IRI iri) {
-		this.name = iri.getIRIString();
 		this.iri = iri;
 	}
 
@@ -50,18 +48,13 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 	}
 
 	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)
 			return true;
 		
 		if (obj instanceof AnnotationPropertyImpl) {
 			AnnotationPropertyImpl other = (AnnotationPropertyImpl) obj;
-			return name.equals(other.name);
+			return iri.equals(other.iri);
 		}
 
 		return false;
@@ -69,11 +62,11 @@ public class AnnotationPropertyImpl implements AnnotationProperty {
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return iri.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return iri.getIRIString();
 	}
 }

@@ -24,11 +24,12 @@ package it.unibz.inf.ontop.spec.ontology;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Iterator;
-import java.util.Set;
+import java.util.stream.Stream;
 
 public class Equivalences<T> implements Iterable<T> {
 	
 	final private ImmutableSet<T> members;
+	// two mutables
 	private T representative;
 	private boolean isIndexed;
 
@@ -58,9 +59,11 @@ public class Equivalences<T> implements Iterable<T> {
 		isIndexed = true;
 	}
 	
-	public Set<T> getMembers() {
+	public ImmutableSet<T> getMembers() {
 		return members;
 	}
+
+	public Stream<T> stream() { return members.stream(); }
 	
 	public int size() {
 		return members.size();
