@@ -199,7 +199,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         InjectiveVar2VarSubstitution sub = generateVariableSubstitution(sharedVars, vGen);
 
-        ImmutableExpression ljCond = getLJConditionForDifference(sharedVars, sub);
+        ImmutableExpression ljCond = getLJConditionForDifference(
+                sharedVars,
+                sub,
+                leftTranslation.nullableVariables,
+                rightTranslation.nullableVariables
+        );
         ImmutableExpression filter = getFilterConditionForDifference(sub);
 
         return new TranslationResult(
@@ -216,12 +221,31 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         );
     }
 
-    private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub) {
-        return getDisjunction(sharedVars.stream()
-                .map(v -> termFactory.getStrictEquality(v, sub.get(v)))
+    private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
+                                                            ImmutableSet<Variable> leftNullableVars, ImmutableSet<Variable> rightNullableVars) {
+        return getConjunction(sharedVars.stream()
+                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars))
                 .collect(ImmutableCollectors.toList())
         );
     }
+
+    private ImmutableExpression getEqOrNullable(Variable leftVar, Variable renamedVar, ImmutableSet<Variable> leftNullableVars,
+                                   ImmutableSet<Variable> rightNullableVars) {
+
+        List<ImmutableExpression> disjuncts = new ArrayList<>();
+        disjuncts.add(termFactory.getStrictEquality(
+                leftVar,
+                renamedVar
+        ));
+        if(leftNullableVars.contains(leftVar)){
+            disjuncts.add(termFactory.getDBIsNull(leftVar));
+        }
+        if(rightNullableVars.contains(leftVar)){
+            disjuncts.add(termFactory.getDBIsNull(renamedVar));
+        }
+        return getDisjunction(ImmutableList.copyOf(disjuncts));
+    }
+
 
     private ImmutableExpression getFilterConditionForDifference(InjectiveVar2VarSubstitution sub) {
         return getConjunction(sub.getImmutableMap().values().stream()
