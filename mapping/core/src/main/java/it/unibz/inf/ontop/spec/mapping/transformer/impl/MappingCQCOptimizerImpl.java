@@ -89,37 +89,41 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         return query;
                     }
 
-                    List<IQTree> children = new ArrayList<>(joinTree.getChildren());
+                    ImmutableList<Variable> avList = ImmutableList.copyOf(answerVariables);
+
+                    List<IQTree> children = joinTree.getChildren();
                     int currentIndex = 0;
                     while (currentIndex < children.size()) {
-                        List<IQTree> toLeave = new ArrayList<>(children.size() - 1);
+                        ImmutableList.Builder<IQTree> builder = ImmutableList.builder();
                         for (int j = 0; j < children.size(); j++)
                             if (currentIndex != j)
-                                toLeave.add(children.get(j));
+                                builder.add(children.get(j));
+                        ImmutableList<IQTree> subChildren = builder.build();
 
-                        ImmutableSet<Variable> variablesInToLeave = toLeave.stream().flatMap(a -> a.getVariables().stream()).collect(ImmutableCollectors.toSet());
-                        if (!variablesInToLeave.containsAll(answerVariables))
+                        if (!subChildren.stream()
+                                .flatMap(a -> a.getVariables().stream())
+                                .collect(ImmutableCollectors.toSet())
+                                .containsAll(answerVariables))
                             continue;
-                        
-                        System.out.println("CHECK H: " + children + " TO " + toLeave);
 
-                        ImmutableList<Variable> avList = ImmutableList.copyOf(answerVariables);
-                        ImmutableList<DataAtom<AtomPredicate>> from = children.stream()
+                        System.out.println("CHECK H: " + children + " TO " + subChildren);
+
+                        ImmutableList<DataAtom<AtomPredicate>> atoms = children.stream()
                                 .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());
-                        ImmutableList<DataAtom<AtomPredicate>> to = toLeave.stream()
+                        ImmutableList<DataAtom<AtomPredicate>> subAtoms = subChildren.stream()
                                 .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());
-                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(avList, to), new ImmutableCQ<>(avList, from))) {
+                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(avList, subAtoms), new ImmutableCQ<>(avList, atoms))) {
                             System.out.println("POSITIVE");
-                            children.remove(currentIndex);
+                            children = subChildren;
                             if (children.size() < 2)
                                 break;
                             currentIndex = 0; // reset
                         }
                         else {
-                            currentIndex++;
                             System.out.println("NEGATIVE");
+                            currentIndex++;
                         }
                     }
 
