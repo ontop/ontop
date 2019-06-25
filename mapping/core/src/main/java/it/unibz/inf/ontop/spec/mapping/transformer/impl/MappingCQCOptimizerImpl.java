@@ -61,7 +61,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                                 .collect(ImmutableCollectors.toList()));
             }
         });
-        System.out.println("CQC PULL UP: " + tree0);
 
         IQTree tree = tree0.acceptTransformer(new FilterChildNormalizer());
 
@@ -131,18 +130,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
         }
 
-        query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
-            @Override
-            public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-                System.out.println("CQC Q:" + query + "\nCQC T: " + tree + "\nCQC N:" + rootNode);
-
-                return iqFactory.createNaryIQTree(
-                        rootNode,
-                        children.stream()
-                                .map(t -> t.acceptTransformer(this))
-                                .collect(ImmutableCollectors.toList()));
-            }
-        });
         return query;
     }
 
