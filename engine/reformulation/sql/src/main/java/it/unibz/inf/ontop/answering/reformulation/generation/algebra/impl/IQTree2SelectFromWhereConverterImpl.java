@@ -184,6 +184,10 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof TrueNode){
             return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
         }
+        else if (rootNode instanceof ConstructionNode){
+            ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
+            return convert(tree, signature);
+        }
         else
             throw new RuntimeException("TODO: support arbitrary relations");
     }

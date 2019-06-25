@@ -3,11 +3,9 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl.SQLSerializedQueryImpl;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
@@ -98,7 +96,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             ImmutableMap<Variable, QualifiedAttributeID> aliasedProjectedColumnIds = columnsInProjectionIds.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> createQualifiedAttributeId(alias, e.getValue().getAttribute().getName())
+                            e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(e.getKey().getName()))
                     ));
             return new QuerySerializationImpl(sql, aliasedProjectedColumnIds);
         }
@@ -109,6 +107,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         private QualifiedAttributeID createQualifiedAttributeId(RelationID relationID, String columnName) {
             return new QualifiedAttributeID(relationID, idFactory.createAttributeID(columnName));
+        }
+
+        private String removeSpaceFromAlias(String columnName){
+            //return columnName.replace(" ", "-");
+            return columnName;
         }
 
         /**
@@ -147,7 +150,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + v.getName()))
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + removeSpaceFromAlias(v.getName())))
                     .collect(Collectors.joining(", "));
         }
 
@@ -217,7 +220,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         @Override
         public QuerySerialization visit(SQLNaryJoinExpression sqlNaryJoinExpression) {
             ImmutableList<QuerySerialization> querySerializationList = sqlNaryJoinExpression.getJoinedExpressions().stream()
-                    .map(e -> e.acceptVisitor(this))
+                    .map(this::getSQLSerializationForChild)
                     .collect(ImmutableCollectors.toList());
 
             String sqlSubString = querySerializationList.stream()
@@ -254,11 +257,28 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
 
+        private QuerySerialization getSQLSerializationForChild(SQLExpression expression){
+            if (expression instanceof SelectFromWhereWithModifiers){
+                QuerySerialization serialization = expression.acceptVisitor(this);
+                RelationID alias = generateFreshViewAlias();
+                ImmutableMap<Variable, QualifiedAttributeID> aliasedColumnIds = serialization.getColumnIDs().entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(
+                                Map.Entry::getKey,
+                                e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(e.getKey().getName()))
+                        ));
+
+                String sql = String.format("(%s) %s",serialization.getString(), alias.getSQLRendering());
+
+                return new QuerySerializationImpl(sql, aliasedColumnIds);
+            }
+            return expression.acceptVisitor(this);
+        }
+
         //TODO:implement
         @Override
         public QuerySerialization visit(SQLInnerJoinExpression sqlInnerJoinExpression) {
-            QuerySerialization left = sqlInnerJoinExpression.getLeft().acceptVisitor(this);
-            QuerySerialization right = sqlInnerJoinExpression.getRight().acceptVisitor(this);
+            QuerySerialization left = getSQLSerializationForChild(sqlInnerJoinExpression.getLeft());
+            QuerySerialization right = getSQLSerializationForChild(sqlInnerJoinExpression.getRight());
 
             String sqlSubString = left.getString() + "\n JOIN \n" + right.getString() + " ON 1 = 1";
 
@@ -272,14 +292,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
            return new QuerySerializationImpl(sqlSubString, columnIDs);
-
-//            throw new RuntimeException("TODO: support inner join serialization");
         }
 
         @Override
         public QuerySerialization visit(SQLLeftJoinExpression sqlLeftJoinExpression) {
-            QuerySerialization left = sqlLeftJoinExpression.getLeft().acceptVisitor(this);
-            QuerySerialization right = sqlLeftJoinExpression.getRight().acceptVisitor(this);
+            QuerySerialization left = getSQLSerializationForChild(sqlLeftJoinExpression.getLeft());
+            QuerySerialization right = getSQLSerializationForChild(sqlLeftJoinExpression.getRight());
 
             String sqlSubString = left.getString() + "\n LEFT OUTER JOIN \n" + right.getString() + "\n";
 
