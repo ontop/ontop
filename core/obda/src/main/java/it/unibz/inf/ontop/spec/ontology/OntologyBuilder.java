@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.ontology;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
+import org.apache.commons.rdf.api.IRI;
 
 public interface OntologyBuilder {
 
@@ -20,17 +21,17 @@ public interface OntologyBuilder {
     /**
      * declare an entity
      *
-     * @param uri
+     * @param iri
      * @return entity object
      */
 
-    OClass declareClass(String uri);
+    OClass declareClass(IRI iri);
 
-    ObjectPropertyExpression declareObjectProperty(String uri);
+    ObjectPropertyExpression declareObjectProperty(IRI iri);
 
-    DataPropertyExpression declareDataProperty(String uri);
+    DataPropertyExpression declareDataProperty(IRI iri);
 
-    AnnotationProperty declareAnnotationProperty(String uri);
+    AnnotationProperty declareAnnotationProperty(IRI iri);
 
 
 

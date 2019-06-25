@@ -32,9 +32,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 
-	ArrayList<String> input = new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_EquivalenceOverNamed_NewDAG_Test.class);
 
@@ -42,8 +43,8 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 		super(name);
 	}
 
-	public void setUp() {
-
+	public void testNamedAndEquivalences() throws Exception {
+		ArrayList<String> input = new ArrayList<>();
 		input.add("src/test/resources/test/stockexchange-unittest.owl");
 		input.add("src/test/resources/test/dag/test-equivalence-roles-inverse.owl");
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
@@ -82,12 +83,10 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseEquivalents7.owl");
 		/** B->A=ET- ->ER- C->ES- = D->A*/
 		input.add("src/test/resources/test/newDag/inverseEquivalents8.owl");
-	}
-	
-	public void testNamedAndEquivalences() throws Exception {
+
 		//for each file in the input
 		for (String fileInput : input){
-			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBoxImpl reasoner = (ClassifiedTBoxImpl) loadOntologyFromFileAndClassify(fileInput);
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG namedDag2 = new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
 			log.debug("Input {}", fileInput);
@@ -122,14 +121,14 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 	
 	private static <T> boolean coincide(Set<Equivalences<T>> setd1, Set<Equivalences<T>> setd2) {
 		
-		Set<T> set1 = new HashSet<T>();
-		Iterator<Equivalences<T>> it1 =setd1.iterator();
+		Set<T> set1 = new HashSet<>();
+		Iterator<Equivalences<T>> it1 = setd1.iterator();
 		while (it1.hasNext()) {
 			set1.addAll(it1.next().getMembers());	
 		}
 		
-		Set<T> set2 = new HashSet<T>();
-		Iterator<Equivalences<T>> it2 =setd2.iterator();
+		Set<T> set2 = new HashSet<>();
+		Iterator<Equivalences<T>> it2 = setd2.iterator();
 		while (it2.hasNext()) {
 			set2.addAll(it2.next().getMembers());	
 		}
@@ -150,107 +149,6 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 		return true;
 	}
 
-/*			
-			private boolean testDescendants(Test_NamedTBoxReasonerImpl d1, DefaultDirectedGraph<Description,DefaultEdge> d2, boolean named){
-				boolean result = false;
-				TestTBoxReasonerImplOnGraph reasonerd2 = new TestTBoxReasonerImplOnGraph(d2);
-				Set<Equivalences<Description>> setd1 = null;
-				Set<Equivalences<Description>> setd2 = null;
-
-				for(Equivalences<Description> node : d1.getNodes()) {
-					Description vertex = node.getRepresentative();
-					if(named){
-
-						if(d1.isNamed(vertex)) {
-							setd1	= d1.getDescendants(vertex);
-							log.info("vertex {}", vertex);
-							log.debug("descendants {} ", setd1);
-							setd2	=reasonerd2.getDescendants(vertex, named);
-							log.debug("descendants {} ", setd2);
-						}
-					}
-					else{
-						setd1	= d1.getDescendants(vertex);
-						log.info("vertex {}", vertex);
-						log.debug("descendants {} ", setd1);
-
-
-						setd2	=reasonerd2.getDescendants(vertex, named);
-						log.debug("descendants {} ", setd2);
-					}
-					Set<Description> set2 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it1 =setd2.iterator();
-					while (it1.hasNext()) {
-						set2.addAll(it1.next().getMembers());	
-					}
-					Set<Description> set1 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it2 =setd1.iterator();
-					while (it2.hasNext()) {
-						set1.addAll(it2.next().getMembers());	
-					}
-					result=set2.equals(set1);
-
-
-
-					if(!result)
-						break;
-				}
-
-				return result;
-
-			}
-
-			private boolean testChildren(DefaultDirectedGraph<Description,DefaultEdge> d1, Test_NamedTBoxReasonerImpl d2, boolean named){
-				boolean result = false;
-				TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
-				Set<Equivalences<Description>> setd1 = new HashSet<Equivalences<Description>>();
-				Set<Equivalences<Description>> setd2 = new HashSet<Equivalences<Description>>();
-
-				for(Description vertex: d1.vertexSet()){
-					if(named){
-
-						if(reasonerd1.isNamed(vertex)){
-
-							setd1	=reasonerd1.getDirectChildren(vertex, named);
-							log.info("vertex {}", vertex);
-							log.debug("children {} ", setd1);
-
-							setd2	= d2.getDirectChildren(vertex);
-							log.debug("children {} ", setd2);
-
-
-						}
-					}
-					else{
-						setd1	=reasonerd1.getDirectChildren(vertex, named);
-						log.info("vertex {}", vertex);
-						log.debug("children {} ", setd1);
-
-						setd2	= d2.getDirectChildren(vertex);
-						log.debug("children {} ", setd2);
-
-					}
-					Set<Description> set1 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it1 =setd1.iterator();
-					while (it1.hasNext()) {
-						set1.addAll(it1.next().getMembers());	
-					}
-					Set<Description> set2 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it2 =setd2.iterator();
-					while (it2.hasNext()) {
-						set2.addAll(it2.next().getMembers());	
-					}
-					result=set1.equals(set2);
-
-
-					if(!result)
-						break;
-				}
-
-				return result;
-
-			}
-*/
 	private <T> boolean testChildren(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2){
 
 		for(Equivalences<T> node : d1) {
@@ -267,62 +165,6 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 	}
 			
 	
-/*
-			private boolean testAncestors(DefaultDirectedGraph<Description,DefaultEdge> d1, Test_NamedTBoxReasonerImpl d2, boolean named){
-				boolean result = false;
-				TestTBoxReasonerImplOnGraph reasonerd1= new TestTBoxReasonerImplOnGraph(d1);
-				Set<Equivalences<Description>> setd1 = new HashSet<Equivalences<Description>>();
-				Set<Equivalences<Description>> setd2 = new HashSet<Equivalences<Description>>();
-
-				for(Description vertex: d1.vertexSet()){
-					if(named){
-
-						if(reasonerd1.isNamed(vertex)){
-
-							setd1	=reasonerd1.getAncestors(vertex, named);
-							log.info("vertex {}", vertex);
-							log.debug("ancestors {} ", setd1);
-
-							setd2	= d2.getAncestors(vertex);
-
-							log.debug("ancestors {} ", setd2);
-
-
-
-						}
-					}
-					else{
-						setd1	=reasonerd1.getAncestors(vertex, named);
-						log.info("vertex {}", vertex);
-						log.debug("ancestors {} ", setd1);
-
-						setd2	= d2.getAncestors(vertex);
-
-						log.debug("ancestors {} ", setd2);
-
-
-					}
-					Set<Description> set1 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it1 =setd1.iterator();
-					while (it1.hasNext()) {
-						set1.addAll(it1.next().getMembers());	
-					}
-					Set<Description> set2 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it2 =setd2.iterator();
-					while (it2.hasNext()) {
-						set2.addAll(it2.next().getMembers());	
-					}
-					result=set1.equals(set2);
-
-
-					if(!result)
-						break;
-				}
-
-				return result;
-
-			}
-*/
 	private <T> boolean testAncestors(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 		
 		for(Equivalences<T> v: d1){
@@ -338,59 +180,6 @@ public class S_EquivalenceOverNamed_NewDAG_Test extends TestCase {
 		return true;
 	}
 
-/*
-			private boolean testParents(DefaultDirectedGraph<Description,DefaultEdge> d1, Test_NamedTBoxReasonerImpl d2, boolean named){
-				boolean result = false;
-				TestTBoxReasonerImplOnGraph reasonerd1 = new TestTBoxReasonerImplOnGraph(d1);
-				Set<Equivalences<Description>> setd1 = new HashSet<Equivalences<Description>>();
-				Set<Equivalences<Description>> setd2 = new HashSet<Equivalences<Description>>();
-
-				for(Description vertex: d1.vertexSet()){
-					if(named){
-
-						if(reasonerd1.isNamed(vertex)){
-
-							setd1	=reasonerd1.getDirectParents(vertex, named);
-							log.info("vertex {}", vertex);
-							log.debug("parents {} ", setd1);
-
-							setd2	= d2.getDirectParents(vertex);
-							log.debug("parents {} ", setd2);
-
-
-						}
-					}
-					else{
-						setd1	=reasonerd1.getDirectParents(vertex, named);
-						log.info("vertex {}", vertex);
-						log.debug("parents {} ", setd1);
-
-						setd2	= d2.getDirectParents(vertex);
-						log.debug("parents {} ", setd2);
-
-
-					}
-					Set<Description> set1 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it1 =setd1.iterator();
-					while (it1.hasNext()) {
-						set1.addAll(it1.next().getMembers());	
-					}
-					Set<Description> set2 = new HashSet<Description>();
-					Iterator<Equivalences<Description>> it2 =setd2.iterator();
-					while (it2.hasNext()) {
-						set2.addAll(it2.next().getMembers());	
-					}
-					result=set1.equals(set2);
-
-
-					if(!result)
-						break;
-				}
-
-				return result;
-
-			}
-*/
 	private <T> boolean testParents(EquivalencesDAG<T> d1, EquivalencesDAG<T> d2) {
 	
 		for(Equivalences<T> node : d1) {

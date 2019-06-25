@@ -23,32 +23,21 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.ontology.OClass;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
 
 public class ClassImpl implements OClass {
 
 	private final IRI iri;
-	private final String name;
 	private final boolean isNothing, isThing;
 	
     public static final OClass owlThing = new ClassImpl(OWL.THING);
     public static final OClass owlNothing = new ClassImpl(OWL.NOTHING);
 
-	ClassImpl(String name, RDF rdfFactory) {
-		this(rdfFactory.createIRI(name));
-	}
-
 	ClassImpl(IRI iri) {
 		this.iri = iri;
-		this.name = iri.getIRIString();
 		this.isNothing = iri.equals(OWL.NOTHING);
 		this.isThing = iri.equals(OWL.THING);
 	}
 
-	@Override
-	public String getName() {
-		return name;
-	}
 
 	@Override
 	public IRI getIRI() {
@@ -62,19 +51,19 @@ public class ClassImpl implements OClass {
 		
 		if (obj instanceof ClassImpl) {
 			ClassImpl other = (ClassImpl) obj;
-			return name.equals(other.name);
+			return iri.equals(other.iri);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return iri.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return iri.getIRIString();
 	}
 
 	@Override

@@ -1,14 +1,15 @@
-package it.unibz.inf.ontop.answering.reformulation.rewriting;
+package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 
-public class ImmutableCQ {
+public class ImmutableCQ<P extends AtomPredicate> {
     private final ImmutableList<Variable> answerVariables;
-    private final ImmutableList<DataAtom> atoms;
+    private final ImmutableList<DataAtom<P>> atoms;
 
-    public ImmutableCQ(ImmutableList<Variable> answerVariables, ImmutableList<DataAtom> atoms) {
+    public ImmutableCQ(ImmutableList<Variable> answerVariables, ImmutableList<DataAtom<P>> atoms) {
         this.answerVariables = answerVariables;
         this.atoms = atoms;
     }
@@ -17,7 +18,7 @@ public class ImmutableCQ {
         return answerVariables;
     }
 
-    public ImmutableList<DataAtom> getAtoms() {
+    public ImmutableList<DataAtom<P>> getAtoms() {
         return atoms;
     }
 

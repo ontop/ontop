@@ -51,20 +51,17 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private final ImmutableList.Builder<AnnotationAssertion> annotationAssertions = ImmutableList.builder();
 
     private OntologyBuilderImpl(RDF rdfFactory) {
-        classes = new OntologyCategoryImpl<>(s -> new ClassImpl(rdfFactory.createIRI(s)),
-                        CLASS_NOT_FOUND,"");
-        objectProperties = new OntologyCategoryImpl<>(s -> new ObjectPropertyExpressionImpl(rdfFactory.createIRI(s)),
-                        OBJECT_PROPERTY_NOT_FOUND,"");
-        dataProperties = new OntologyCategoryImpl<>(s -> new DataPropertyExpressionImpl(rdfFactory.createIRI(s)),
-                DATA_PROPERTY_NOT_FOUND,"");
-        annotationProperties = new OntologyCategoryImpl<>(s -> new AnnotationPropertyImpl(rdfFactory.createIRI(s)),
-                ANNOTATION_PROPERTY_NOT_FOUND,"");
-        classes.map.put(OWL.THING.getIRIString(), ClassImpl.owlThing);
-        classes.map.put(OWL.NOTHING.getIRIString(), ClassImpl.owlNothing);
-        objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlTopObjectProperty);
-        objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY.getIRIString(), ObjectPropertyExpressionImpl.owlBottomObjectProperty);
-        dataProperties.map.put(OWL.TOP_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlTopDataProperty);
-        dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY.getIRIString(), DataPropertyExpressionImpl.owlBottomDataProperty);
+        classes = new OntologyCategoryImpl<>(ClassImpl::new, CLASS_NOT_FOUND,"");
+        objectProperties = new OntologyCategoryImpl<>(ObjectPropertyExpressionImpl::new, OBJECT_PROPERTY_NOT_FOUND,"");
+        dataProperties = new OntologyCategoryImpl<>(DataPropertyExpressionImpl::new, DATA_PROPERTY_NOT_FOUND,"");
+        annotationProperties = new OntologyCategoryImpl<>(AnnotationPropertyImpl::new, ANNOTATION_PROPERTY_NOT_FOUND,"");
+
+        classes.map.put(OWL.THING, ClassImpl.owlThing);
+        classes.map.put(OWL.NOTHING, ClassImpl.owlNothing);
+        objectProperties.map.put(OWL.TOP_OBJECT_PROPERTY, ObjectPropertyExpressionImpl.owlTopObjectProperty);
+        objectProperties.map.put(OWL.BOTTOM_OBJECT_PROPERTY, ObjectPropertyExpressionImpl.owlBottomObjectProperty);
+        dataProperties.map.put(OWL.TOP_DATA_PROPERTY, DataPropertyExpressionImpl.owlTopDataProperty);
+        dataProperties.map.put(OWL.BOTTOM_DATA_PROPERTY, DataPropertyExpressionImpl.owlBottomDataProperty);
 
         this.rdfFactory = rdfFactory;
     }
@@ -96,38 +93,29 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
 
     static final class OntologyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
-        private final Map<String, T> map = new HashMap<>();
+        private final Map<IRI, T> map = new HashMap<>();
 
         private final String NOT_FOUND, EXISTS;
-        private final Function<String, ? extends T> ctor;
+        private final Function<IRI, ? extends T> ctor;
 
-        OntologyCategoryImpl(Function<String, ? extends T> ctor, String NOT_FOUND, String EXISTS) {
+        OntologyCategoryImpl(Function<IRI, ? extends T> ctor, String NOT_FOUND, String EXISTS) {
             this.ctor = ctor;
             this.NOT_FOUND = NOT_FOUND;
             this.EXISTS = EXISTS;
         }
 
+
         @Override
-        public T get(String uri) {
-            T oc = map.get(uri);
+        public T get(IRI iri) {
+            T oc = map.get(iri);
             if (oc == null)
-                throw new RuntimeException(NOT_FOUND + uri);
+                throw new RuntimeException(NOT_FOUND + iri);
             return oc;
         }
 
         @Override
-        public T get(IRI iri) {
-            return get(iri.getIRIString());
-        }
-
-        @Override
-        public boolean contains(String uri) {
-            return map.containsKey(uri);
-        }
-
-        @Override
         public boolean contains(IRI iri) {
-            return contains(iri.getIRIString());
+            return map.containsKey(iri);
         }
 
         @Override
@@ -135,7 +123,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
             return map.values().iterator();
         }
 
-        private T create(String uri) {
+        private T create(IRI uri) {
             // TODO: check for built-in
             //if (map.containsKey(uri))
             //    throw new RuntimeException(EXISTS + uri);
@@ -166,23 +154,23 @@ public class OntologyBuilderImpl implements OntologyBuilder {
 
 
     @Override
-    public OClass declareClass(String uri) {
-        return classes.create(uri);
+    public OClass declareClass(IRI iri) {
+        return classes.create(iri);
     }
 
     @Override
-    public ObjectPropertyExpression declareObjectProperty(String uri) {
-        return objectProperties.create(uri);
+    public ObjectPropertyExpression declareObjectProperty(IRI iri) {
+        return objectProperties.create(iri);
     }
 
     @Override
-    public DataPropertyExpression declareDataProperty(String uri) {
+    public DataPropertyExpression declareDataProperty(IRI uri) {
         return dataProperties.create(uri);
     }
 
     @Override
-    public AnnotationProperty declareAnnotationProperty(String uri) {
-        return annotationProperties.create(uri);
+    public AnnotationProperty declareAnnotationProperty(IRI iri) {
+        return annotationProperties.create(iri);
     }
 
     @Override
@@ -566,7 +554,7 @@ public class OntologyBuilderImpl implements OntologyBuilder {
     private void checkSignature(ClassExpression desc) {
         if (desc instanceof OClass) {
             OClass cl = (OClass) desc;
-            if (!classes.contains(cl.getName()))
+            if (!classes.contains(cl.getIRI()))
                 throw new IllegalArgumentException(CLASS_NOT_FOUND + desc);
         }
         else if (desc instanceof ObjectSomeValuesFrom) {
@@ -591,17 +579,17 @@ public class OntologyBuilderImpl implements OntologyBuilder {
         if (prop.isInverse())
             prop = prop.getInverse();
 
-        if (!objectProperties.contains(prop.getName()) && !auxObjectProperties.contains(prop))
+        if (!objectProperties.contains(prop.getIRI()) && !auxObjectProperties.contains(prop))
             throw new IllegalArgumentException(OBJECT_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(DataPropertyExpression prop) {
-        if (!dataProperties.contains(prop.getName()))
+        if (!dataProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(DATA_PROPERTY_NOT_FOUND + prop);
     }
 
     private void checkSignature(AnnotationProperty prop) {
-        if (!annotationProperties.contains(prop.getName()))
+        if (!annotationProperties.contains(prop.getIRI()))
             throw new IllegalArgumentException(ANNOTATION_PROPERTY_NOT_FOUND + prop);
     }
 

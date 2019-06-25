@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.ImmutableLinearInclusionDependenciesTools;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.ImmutableHomomorphismUtilities;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
@@ -34,9 +32,8 @@ public class ReformulationTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
-    public static final ImmutableLinearInclusionDependenciesTools IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS;
+    public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -58,20 +55,16 @@ public class ReformulationTestingTools {
         FS_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        IMMUTABLE_LINEAR_INCLUSION_DEPENDENCIES_TOOLS = injector.getInstance(ImmutableLinearInclusionDependenciesTools.class);
+        CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
 
         RDF_FACTORY = injector.getInstance(RDF.class);
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 }

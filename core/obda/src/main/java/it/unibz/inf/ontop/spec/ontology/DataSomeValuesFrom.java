@@ -10,7 +10,7 @@ package it.unibz.inf.ontop.spec.ontology;
 
 public interface DataSomeValuesFrom extends ClassExpression {
 
-	public DataPropertyExpression getProperty();	
+	DataPropertyExpression getProperty();
 	
-	public Datatype getDatatype();
+	Datatype getDatatype();
 }

@@ -34,7 +34,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 import java.util.Collection;
 
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import org.apache.commons.rdf.api.IRI;
 
 /**
@@ -53,22 +52,20 @@ public interface DataPropertyExpression extends DescriptionBT {
 
 	IRI getIRI();
 
-	public String getName();
-	
 	/**
 	 * returns the DataSomeValuesFrom for the domain of the data property
 	 * 
 	 * @return
 	 */
 	
-	public DataSomeValuesFrom getDomainRestriction(Datatype datatype);
+	DataSomeValuesFrom getDomainRestriction(Datatype datatype);
 	
-	public Collection<DataSomeValuesFrom> getAllDomainRestrictions();
+	Collection<DataSomeValuesFrom> getAllDomainRestrictions();
 
 	/**
 	 * returns the DataPropertyRangeExpression for the range of the data property
 	 * 
 	 * @return
 	 */
-	public DataPropertyRangeExpression getRange();
+	DataPropertyRangeExpression getRange();
 }

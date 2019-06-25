@@ -22,16 +22,13 @@ package it.unibz.inf.ontop.spec.ontology.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.ontology.*;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -111,9 +108,6 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
                 onto.getIrreflexiveObjectPropertyAxioms(),
                 onto.getFunctionalObjectProperties(),
                 onto.getFunctionalDataProperties());
-//		if (equivalenceReduced) {
-//			r = getEquivalenceSimplifiedReasoner(r);
-//		}
 		return r;
 	}
 
@@ -242,33 +236,24 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 
 
 	// lexicographical comparison of property names (a property is before its inverse)
-	private static final Comparator<DataPropertyExpression> dataPropertyComparator = new Comparator<DataPropertyExpression>() {
-		@Override
-		public int compare(DataPropertyExpression o1, DataPropertyExpression o2) {
-			int compared = o1.getName().compareTo(o2.getName());
-			return compared;
-		}
-	};
+	private static final Comparator<DataPropertyExpression> dataPropertyComparator = Comparator.comparing(o -> o.getIRI().getIRIString());
 
 	// lexicographical comparison of property names (a property is before its inverse)
-	private static final Comparator<ObjectPropertyExpression> objectPropertyComparator = new Comparator<ObjectPropertyExpression>() {
-		@Override
-		public int compare(ObjectPropertyExpression o1, ObjectPropertyExpression o2) {
-			int compared = o1.getName().compareTo(o2.getName());
-			if (compared == 0) {
-				if (o1.isInverse() == o2.isInverse())
-					return 0;
-				else if (o2.isInverse())
-					return -1;
-				else
-					return 1;
-			}
-			return compared;
+	private static final Comparator<ObjectPropertyExpression> objectPropertyComparator = (o1, o2) -> {
+		int compared = o1.getIRI().getIRIString().compareTo(o2.getIRI().getIRIString());
+		if (compared == 0) {
+			if (o1.isInverse() == o2.isInverse())
+				return 0;
+			else if (o2.isInverse())
+				return -1;
+			else
+				return 1;
 		}
+		return compared;
 	};
 
 
-	private static void chooseObjectPropertyRepresentatives(EquivalencesDAGImpl<ObjectPropertyExpression> dag) {
+	private static void chooseObjectPropertyRepresentatives(EquivalencesDAG<ObjectPropertyExpression> dag) {
 
 		for (Equivalences<ObjectPropertyExpression> set : dag) {
 
@@ -300,7 +285,7 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 	}
 
-	private static void chooseDataPropertyRepresentatives(EquivalencesDAGImpl<DataPropertyExpression> dag) {
+	private static void chooseDataPropertyRepresentatives(EquivalencesDAG<DataPropertyExpression> dag) {
 
 		for (Equivalences<DataPropertyExpression> set : dag) {
 			// skip if has already been done
@@ -308,38 +293,26 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 				continue;
 
 			DataPropertyExpression rep = Collections.min(set.getMembers(), dataPropertyComparator);
-
 			set.setIndexed();
-
 			set.setRepresentative(rep);
 		}
 	}
 
 
 	// lexicographical comparison of class names
-	private static final Comparator<OClass> classComparator = new Comparator<OClass>() {
-		@Override
-		public int compare(OClass o1, OClass o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
+	private static final Comparator<OClass> classComparator = Comparator.comparing(o -> o.getIRI().getIRIString());
 
 	// lexicographical comparison of class names
-	private static final Comparator<Datatype> datatypeComparator = new Comparator<Datatype>() {
-		@Override
-		public int compare(Datatype o1, Datatype o2) {
-			return o1.getIRI().getIRIString().compareTo(o2.getIRI().getIRIString());
-		}
-	};
+	private static final Comparator<Datatype> datatypeComparator = Comparator.comparing(o -> o.getIRI().getIRIString());
 
 
-	private static void chooseClassRepresentatives(EquivalencesDAGImpl<ClassExpression> dag,
+	private static void chooseClassRepresentatives(EquivalencesDAG<ClassExpression> dag,
 												   EquivalencesDAG<ObjectPropertyExpression> objectPropertyDAG,
 												   EquivalencesDAG<DataPropertyExpression> dataPropertyDAG) {
 
 		for (Equivalences<ClassExpression> equivalenceSet : dag) {
 
-			ClassExpression representative = null;
+			final ClassExpression representative;
 			if (equivalenceSet.size() <= 1) {
 				representative = equivalenceSet.iterator().next();
 			}
@@ -378,12 +351,12 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 		}
 	}
 
-	private static void chooseDataRangeRepresentatives(EquivalencesDAGImpl<DataRangeExpression> dag,
+	private static void chooseDataRangeRepresentatives(EquivalencesDAG<DataRangeExpression> dag,
 													   EquivalencesDAG<DataPropertyExpression> dataPropertyDAG) {
 
 		for (Equivalences<DataRangeExpression> equivalenceSet : dag) {
 
-			DataRangeExpression representative = null;
+			final DataRangeExpression representative;
 			if (equivalenceSet.size() <= 1) {
 				representative = equivalenceSet.iterator().next();
 			}
@@ -417,117 +390,6 @@ public class ClassifiedTBoxImpl implements ClassifiedTBox {
 				equivalenceSet.setIndexed();
 		}
 	}
-
-	/**
-	 * constructs a ClassifiedTBox that has a reduced number of classes and properties in each equivalent class
-	 *
-	 *   - each object property equivalence class contains one property (representative)
-	 *     except when the representative property is equivalent to its inverse, in which
-	 *     case the equivalence class contains both the property and its inverse
-	 *
-	 *   - each data property equivalence class contains a single property (representative)
-	 *
-	 *   - each class equivalence class contains the representative and all domains / ranges
-	 *     of the representatives of property equivalence classes
-	 *
-	 *  in other words, the constructed ClassifiedTBox is the restriction to the vocabulary of the representatives
-	 *     all other symbols are mapped to the nodes via *Equivalences hash-maps
-	 *
-	 * @param reasoner
-	 * @return reduced reasoner
-	 */
-
-
-	private static ClassifiedTBoxImpl getEquivalenceSimplifiedReasoner(ClassifiedTBox reasoner) {
-
-		// OBJECT PROPERTIES
-		//
-		SimpleDirectedGraph<Equivalences<ObjectPropertyExpression>, DefaultEdge> objectProperties
-				= new SimpleDirectedGraph<>(DefaultEdge.class);
-
-		// classify vertices for properties
-		for(Equivalences<ObjectPropertyExpression> node : reasoner.objectPropertiesDAG()) {
-			ObjectPropertyExpression rep = node.getRepresentative();
-			ObjectPropertyExpression repInv = rep.getInverse();
-
-			Equivalences<ObjectPropertyExpression> reducedNode;
-			if (!node.contains(repInv))
-				reducedNode = new Equivalences<>(ImmutableSet.of(rep), rep, node.isIndexed());
-			else
-				// the object property is equivalent to its inverse
-				reducedNode = new Equivalences<>(ImmutableSet.of(rep, repInv), rep, node.isIndexed());
-
-			objectProperties.addVertex(reducedNode);
-		}
-
-		EquivalencesDAGImpl<ObjectPropertyExpression> objectPropertyDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<ObjectPropertyExpression>)reasoner.objectPropertiesDAG(), objectProperties);
-
-		// DATA PROPERTIES
-		//
-		SimpleDirectedGraph<Equivalences<DataPropertyExpression>, DefaultEdge> dataProperties
-				= new SimpleDirectedGraph<>(DefaultEdge.class);
-
-		// classify vertices for properties
-		for(Equivalences<DataPropertyExpression> node : reasoner.dataPropertiesDAG()) {
-			DataPropertyExpression rep = node.getRepresentative();
-
-			Equivalences<DataPropertyExpression> reducedNode = new Equivalences<>(ImmutableSet.of(rep), rep, node.isIndexed());
-			dataProperties.addVertex(reducedNode);
-		}
-
-		EquivalencesDAGImpl<DataPropertyExpression> dataPropertyDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<DataPropertyExpression>)reasoner.dataPropertiesDAG(), dataProperties);
-
-		// CLASSES
-		//
-		SimpleDirectedGraph<Equivalences<ClassExpression>, DefaultEdge> classes = new SimpleDirectedGraph<>(DefaultEdge.class);
-
-		// classify vertices for classes
-		for(Equivalences<ClassExpression> node : reasoner.classesDAG()) {
-			ClassExpression rep = node.getRepresentative();
-
-			ImmutableSet.Builder<ClassExpression> reduced = new ImmutableSet.Builder<>();
-			for (ClassExpression equi : node) {
-				if (equi.equals(rep)) {
-					reduced.add(equi);
-				}
-				else if (equi instanceof OClass) {
-					// an entry is created for a named class
-					//OClass equiClass = (OClass) equi;
-					//classEquivalenceMap.put(equiClass.getName(), (OClass)rep);
-				}
-				else if (equi instanceof ObjectSomeValuesFrom) {
-					// the property of the existential is a representative of its equivalence class
-					if (objectPropertyDAG.getVertex(((ObjectSomeValuesFrom) equi).getProperty()) != null)
-						reduced.add(equi);
-				}
-				else  {
-					// the property of the existential is a representative of its equivalence class
-					if (dataPropertyDAG.getVertex(((DataSomeValuesFrom) equi).getProperty()) != null)
-						reduced.add(equi);
-				}
-			}
-
-			Equivalences<ClassExpression> reducedNode = new Equivalences<>(reduced.build(), rep, node.isIndexed());
-			classes.addVertex(reducedNode);
-		}
-
-		EquivalencesDAGImpl<ClassExpression> classDAG = EquivalencesDAGImpl.reduce(
-				(EquivalencesDAGImpl<ClassExpression>)reasoner.classesDAG(), classes);
-
-		// DATA RANGES
-		//
-		// TODO: a proper implementation is in order here
-
-        ClassifiedTBoxImpl impl = (ClassifiedTBoxImpl)reasoner;
-		return new ClassifiedTBoxImpl(impl.classes, impl.objectProperties, impl.dataProperties, impl.annotationProperties,
-		        classDAG, objectPropertyDAG, dataPropertyDAG, impl.dataRangeDAG,
-                impl.classDisjointness, impl.objectPropertyDisjointness, impl.dataPropertyDisjointness,
-                impl.reflexiveObjectProperties, impl.irreflexiveObjectProperties,
-                impl.functionalObjectProperties, impl.functionalDataProperties);
-	}
-
 
 
 

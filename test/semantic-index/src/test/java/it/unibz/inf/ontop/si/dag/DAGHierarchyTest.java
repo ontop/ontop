@@ -28,6 +28,9 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.getIRI;
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class DAGHierarchyTest extends TestCase {
 	/**
 	 * A -> B, B -> {E, F}, {C, D} -> {E, F} with A, B, C, D, E, F are atomic
@@ -55,18 +58,18 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classesDAG();
 		
-		ClassExpression A = dag.classes().get(ontoURI + "A");
-		ClassExpression B = dag.classes().get(ontoURI + "B");
-		ClassExpression C = dag.classes().get(ontoURI + "C");
-		ClassExpression D = dag.classes().get(ontoURI + "D");
-		ClassExpression E = dag.classes().get(ontoURI + "E");
-		ClassExpression F = dag.classes().get(ontoURI + "F");
+		ClassExpression A = dag.classes().get(getIRI(ontoURI, "A"));
+		ClassExpression B = dag.classes().get(getIRI(ontoURI, "B"));
+		ClassExpression C = dag.classes().get(getIRI(ontoURI, "C"));
+		ClassExpression D = dag.classes().get(getIRI(ontoURI, "D"));
+		ClassExpression E = dag.classes().get(getIRI(ontoURI, "E"));
+		ClassExpression F = dag.classes().get(getIRI(ontoURI, "F"));
 		
 		/**
 		 * The initial node is Node A.
@@ -82,7 +85,7 @@ public class DAGHierarchyTest extends TestCase {
 		initialNode = classes.getVertex(B);
 		descendants = classes.getSub(initialNode);
 
-		assertEquals(descendants.size(), 2);  // getDescendants is reflexive
+		assertEquals(2, descendants.size());  // getDescendants is reflexive
 
 		assertTrue(descendants.contains(classes.getVertex(A)));
 
@@ -117,7 +120,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = classes.getVertex(F);
 		descendants = classes.getSub(initialNode);
-		assertEquals(sizeOf(descendants), 6); // getDescendants is reflexive
+		assertEquals(6, sizeOf(descendants)); // getDescendants is reflexive
 
 		assertTrue(descendants.contains(classes.getVertex(A)));
 		assertTrue(descendants.contains(classes.getVertex(B)));
@@ -134,18 +137,18 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorClasses() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-class-hierarchy.owl#";
 
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile1);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(inputFile1);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ClassExpression> classes = namedReasoner.classesDAG();
 		
-		ClassExpression A = dag.classes().get(ontoURI + "A");
-		ClassExpression B = dag.classes().get(ontoURI + "B");
-		ClassExpression C = dag.classes().get(ontoURI + "C");
-		ClassExpression D = dag.classes().get(ontoURI + "D");
-		ClassExpression E = dag.classes().get(ontoURI + "E");
-		ClassExpression F = dag.classes().get(ontoURI + "F");
+		ClassExpression A = dag.classes().get(getIRI(ontoURI, "A"));
+		ClassExpression B = dag.classes().get(getIRI(ontoURI, "B"));
+		ClassExpression C = dag.classes().get(getIRI(ontoURI, "C"));
+		ClassExpression D = dag.classes().get(getIRI(ontoURI, "D"));
+		ClassExpression E = dag.classes().get(getIRI(ontoURI, "E"));
+		ClassExpression F = dag.classes().get(getIRI(ontoURI, "F"));
 	
 		/**
 		 * The initial node is Node A.
@@ -153,7 +156,7 @@ public class DAGHierarchyTest extends TestCase {
 
 		Equivalences<ClassExpression> initialNode = classes.getVertex(A);
 		Set<Equivalences<ClassExpression>> ancestors = classes.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 4);   // ancestors is now reflexive
+		assertEquals(4, sizeOf(ancestors));   // ancestors is now reflexive
 
 		assertTrue(ancestors.contains(classes.getVertex(B)));
 															// class
@@ -165,7 +168,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = classes.getVertex(B);
 		ancestors = classes.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 3); // ancestors is now reflexive
+		assertEquals(3, sizeOf(ancestors)); // ancestors is now reflexive
 
 		assertTrue(ancestors.contains(classes.getVertex(F)));
 		assertTrue(ancestors.contains(classes.getVertex(E)));
@@ -183,7 +186,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = classes.getVertex(D);
 		ancestors = classes.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 4); // ancestors is now reflexive
+		assertEquals(4, sizeOf(ancestors)); // ancestors is now reflexive
 
 		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(C, D)))); // ancestor is reflexive now
 		assertTrue(ancestors.contains(classes.getVertex(E)));
@@ -203,7 +206,7 @@ public class DAGHierarchyTest extends TestCase {
 		initialNode = classes.getVertex(F);
 		ancestors = classes.getSuper(initialNode);
 
-		assertEquals(ancestors.size(), 1);
+		assertEquals(1, ancestors.size());
 
 		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(E, F))));// ancestor is reflexive now
 	}
@@ -215,18 +218,18 @@ public class DAGHierarchyTest extends TestCase {
 	public void testDescendantRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectPropertiesDAG();
 		
-		ObjectPropertyExpression P = dag.objectProperties().get(ontoURI + "P");
-		ObjectPropertyExpression S = dag.objectProperties().get(ontoURI + "S");
-		ObjectPropertyExpression R = dag.objectProperties().get(ontoURI + "R");
-		ObjectPropertyExpression Q = dag.objectProperties().get(ontoURI + "Q");
-		ObjectPropertyExpression T = dag.objectProperties().get(ontoURI + "T");
-		ObjectPropertyExpression U = dag.objectProperties().get(ontoURI + "U");
+		ObjectPropertyExpression P = dag.objectProperties().get(getIRI(ontoURI, "P"));
+		ObjectPropertyExpression S = dag.objectProperties().get(getIRI(ontoURI, "S"));
+		ObjectPropertyExpression R = dag.objectProperties().get(getIRI(ontoURI, "R"));
+		ObjectPropertyExpression Q = dag.objectProperties().get(getIRI(ontoURI, "Q"));
+		ObjectPropertyExpression T = dag.objectProperties().get(getIRI(ontoURI, "T"));
+		ObjectPropertyExpression U = dag.objectProperties().get(getIRI(ontoURI, "U"));
 		
 		
 		/**
@@ -234,7 +237,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		Equivalences<ObjectPropertyExpression> initialNode = properties.getVertex(P);
 		Set<Equivalences<ObjectPropertyExpression>> descendants = properties.getSub(initialNode);
-		assertEquals(descendants.size(), 1);  // getDescendants is reflexive
+		assertEquals(1, descendants.size());  // getDescendants is reflexive
 
 		/**
 		 * The initial node is Node Q.
@@ -259,7 +262,7 @@ public class DAGHierarchyTest extends TestCase {
 		initialNode = properties.getVertex(S);
 		descendants = properties.getSub(initialNode);
 
-		assertEquals(descendants.size(), 1);
+		assertEquals(1, descendants.size());
 
 		assertTrue(descendants.contains(new Equivalences<>(ImmutableSet.of(R, S)))); // getDescendants is reflexive
 
@@ -276,7 +279,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = properties.getVertex(U);
 		descendants = properties.getSub(initialNode);
-		assertEquals(sizeOf(descendants), 6);  // getDescendants is reflexive
+		assertEquals(6, sizeOf(descendants));  // getDescendants is reflexive
 		
 		assertTrue(descendants.contains(properties.getVertex(P)));
 		assertTrue(descendants.contains(properties.getVertex(Q)));
@@ -292,25 +295,25 @@ public class DAGHierarchyTest extends TestCase {
 	public void testAncestorRoles() throws Exception {
 		final String ontoURI = "http://obda.inf.unibz.it/ontologies/test-role-hierarchy.owl#";
 
-		ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(inputFile2);
+		ClassifiedTBox dag = loadOntologyFromFileAndClassify(inputFile2);
 		// generate named DAG
 		TestClassifiedTBoxImpl_OnNamedDAG namedReasoner = new TestClassifiedTBoxImpl_OnNamedDAG(dag);
 		
 		EquivalencesDAG<ObjectPropertyExpression> properties = namedReasoner.objectPropertiesDAG();
 		
-		ObjectPropertyExpression P = dag.objectProperties().get(ontoURI + "P");
-		ObjectPropertyExpression S = dag.objectProperties().get(ontoURI + "S");
-		ObjectPropertyExpression R = dag.objectProperties().get(ontoURI + "R");
-		ObjectPropertyExpression Q = dag.objectProperties().get(ontoURI + "Q");
-		ObjectPropertyExpression T = dag.objectProperties().get(ontoURI + "T");
-		ObjectPropertyExpression U = dag.objectProperties().get(ontoURI + "U");
+		ObjectPropertyExpression P = dag.objectProperties().get(getIRI(ontoURI, "P"));
+		ObjectPropertyExpression S = dag.objectProperties().get(getIRI(ontoURI, "S"));
+		ObjectPropertyExpression R = dag.objectProperties().get(getIRI(ontoURI, "R"));
+		ObjectPropertyExpression Q = dag.objectProperties().get(getIRI(ontoURI, "Q"));
+		ObjectPropertyExpression T = dag.objectProperties().get(getIRI(ontoURI, "T"));
+		ObjectPropertyExpression U = dag.objectProperties().get(getIRI(ontoURI, "U"));
 	
 		/**
 		 * The initial node is Node P.
 		 */
 		Equivalences<ObjectPropertyExpression> initialNode = properties.getVertex(P);
 		Set<Equivalences<ObjectPropertyExpression>> ancestors = properties.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 4); // ancestor is reflexive now
+		assertEquals(4, sizeOf(ancestors)); // ancestor is reflexive now
 
 		assertTrue(ancestors.contains(properties.getVertex(Q)));
 		assertTrue(ancestors.contains(properties.getVertex(T)));
@@ -321,7 +324,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = properties.getVertex(Q);
 		ancestors = properties.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors), 3); // ancestor is reflexive now
+		assertEquals(3, sizeOf(ancestors)); // ancestor is reflexive now
 
 		assertTrue(ancestors.contains(properties.getVertex(T)));
 		assertTrue(ancestors.contains(properties.getVertex(U)));
@@ -339,7 +342,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = properties.getVertex(S);
 		ancestors = properties.getSuper(initialNode);
-		assertEquals(sizeOf(ancestors),4); // ancestor is reflexive now
+		assertEquals(4, sizeOf(ancestors)); // ancestor is reflexive now
 
 		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(R, S)))); // ancestor is reflexive now
 		
@@ -359,7 +362,7 @@ public class DAGHierarchyTest extends TestCase {
 		 */
 		initialNode = properties.getVertex(U);
 		ancestors = properties.getSuper(initialNode);
-		assertEquals(ancestors.size(), 1);
+		assertEquals(1, ancestors.size());
 
 		assertTrue(ancestors.contains(new Equivalences<>(ImmutableSet.of(T, U))));		// ancestor is reflexive now
 	}

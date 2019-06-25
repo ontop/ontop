@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.spec.ontology.impl.ClassifiedTBoxImpl;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Representation of the named part of the property and class DAGs  
@@ -151,7 +152,7 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 
 		
 		@Override
-		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getDirectSub(v)) {
@@ -164,11 +165,11 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 				else 
 					result.addAll(getDirectSub(e)); // recursive call if the child is not empty
 			}
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getSub(v)) {
@@ -176,11 +177,11 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 				if (nodes != null)
 					result.add(nodes);			
 			}
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<T> getSubRepresentatives(T v) {
+		public ImmutableSet<T> getSubRepresentatives(T v) {
 			Equivalences<T> eq = reasonerDAG.getVertex(v);
 			LinkedHashSet<T> result = new LinkedHashSet<>();
 			
@@ -189,11 +190,11 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 				if (nodes != null)
 					result.add(nodes.getRepresentative());			
 			}
-			return result;
+			return ImmutableSet.copyOf(result);
 		}		
 
 		@Override
-		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 			
 			for (Equivalences<T> e : reasonerDAG.getDirectSuper(v)) {
@@ -206,11 +207,11 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 				else 
 					result.addAll(getDirectSuper(e)); // recursive call if the parent is not named
 			}
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 		
 		@Override
-		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (Equivalences<T> e : reasonerDAG.getSuper(v)) {
@@ -219,7 +220,12 @@ public class TestClassifiedTBoxImpl_Named implements ClassifiedTBox {
 					result.add(nodes);			
 			}
 			
-			return result;
+			return ImmutableSet.copyOf(result);
+		}
+
+		@Override
+		public Stream<Equivalences<T>> stream() {
+			return null;
 		}
 
 		@Override

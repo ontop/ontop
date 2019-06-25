@@ -83,8 +83,7 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		this.isTop = false; // cannot be the top property
 		this.isBottom = false; // cannot be the bottom property
 		this.inverseProperty = inverseProperty;
-		// always inverted
-		this.string = new StringBuilder().append(this.iri.getIRIString()).append("^-").toString();
+		this.string = iri.getIRIString() + "^-"; // always inverted
 		this.domain = new ObjectSomeValuesFromImpl(this);
 	}
 
@@ -98,11 +97,6 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 		return iri;
 	}
 
-	@Override
-	public String getName() {
-		return iri.getIRIString();
-	}
-	
 	@Override
 	public ObjectPropertyExpression getInverse() {
 		return inverseProperty;
@@ -127,13 +121,13 @@ public class ObjectPropertyExpressionImpl implements ObjectPropertyExpression {
 
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
-			return string.equals(other.string) && (isInverse == other.isInverse);
+			return (isInverse == other.isInverse) && iri.equals(other.iri);
 		}
 		
 		// the two types of properties share the same name space
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return (isInverse == false) && getName().equals(other.getName());
+			return !isInverse && iri.equals(other.getIRI());
 		}
 		return false;
 	}

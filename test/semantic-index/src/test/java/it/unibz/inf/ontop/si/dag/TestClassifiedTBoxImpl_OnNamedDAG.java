@@ -37,6 +37,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Representation of the named part of the property and class DAGs  
@@ -168,11 +169,11 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 		}
 
 		@Override
-		public Set<Equivalences<T>> getDirectSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSub(Equivalences<T> v) {
 			return getDirectSub(v.getRepresentative());
 		}
-		public Set<Equivalences<T>> getDirectSub(T node) {
-			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
+		public ImmutableSet<Equivalences<T>> getDirectSub(T node) {
+			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<>();
 
 			for (T source : Graphs.predecessorListOf(dag, node)) {
 
@@ -184,11 +185,11 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 					result.addAll(getDirectSub(source));
 			}
 
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getSub(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSub(Equivalences<T> v) {
 			
 			T node = v.getRepresentative();
 			
@@ -206,15 +207,15 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 					result.add(sources);
 			}
 			
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getDirectSuper(Equivalences<T> v) {
 			return getDirectSuper(v.getRepresentative());
 		}
-		
-		public Set<Equivalences<T>> getDirectSuper(T node) {
+
+		public ImmutableSet<Equivalences<T>> getDirectSuper(T node) {
 			LinkedHashSet<Equivalences<T>> result = new LinkedHashSet<Equivalences<T>>();
 			
 			for (T target : Graphs.successorListOf(dag, node)) {
@@ -227,11 +228,11 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 					result.addAll(getDirectSuper(target));
 			}
 
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<Equivalences<T>> getSuper(Equivalences<T> v) {
+		public ImmutableSet<Equivalences<T>> getSuper(Equivalences<T> v) {
 
 			T node = v.getRepresentative();
 			
@@ -247,11 +248,16 @@ public class TestClassifiedTBoxImpl_OnNamedDAG implements ClassifiedTBox {
 					result.add(sources);
 			}
 
-			return result;
+			return ImmutableSet.copyOf(result);
 		}
 
 		@Override
-		public Set<T> getSubRepresentatives(T v) {
+		public Stream<Equivalences<T>> stream() {
+			return null;
+		}
+
+		@Override
+		public ImmutableSet<T> getSubRepresentatives(T v) {
 			// TODO Auto-generated method stub
 			return null;
 		}

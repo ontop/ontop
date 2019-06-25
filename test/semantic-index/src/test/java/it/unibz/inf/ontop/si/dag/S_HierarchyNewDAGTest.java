@@ -29,8 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Set;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class S_HierarchyNewDAGTest extends TestCase {
-	ArrayList<String> input = new ArrayList<>();
 
 	Logger log = LoggerFactory.getLogger(S_HierarchyNewDAGTest.class);
 
@@ -38,8 +39,8 @@ public class S_HierarchyNewDAGTest extends TestCase {
 		super(name);
 	}
 
-	public void setUp(){
-
+	public void testReachability() throws Exception {
+		ArrayList<String> input = new ArrayList<>();
 		input.add("src/test/resources/test/dag/test-role-hierarchy.owl");
 		input.add("src/test/resources/test/dag/role-equivalence.owl");
 		input.add("src/test/resources/test/dag/test-class-hierarchy.owl");
@@ -60,12 +61,9 @@ public class S_HierarchyNewDAGTest extends TestCase {
 		input.add("src/test/resources/test/newDag/inverseAncestor3.owl");
 		/**Graph B->A->ER C->ES->A->ER */
 		input.add("src/test/resources/test/newDag/inverseAncestor4.owl");
-	}
 
-
-	public void testReachability() throws Exception {
 		for (String fileInput: input) {
-			ClassifiedTBox reasoner = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox reasoner = loadOntologyFromFileAndClassify(fileInput);
 
 			//transform in a named graph
 			TestClassifiedTBoxImpl_OnNamedDAG dag2= new TestClassifiedTBoxImpl_OnNamedDAG(reasoner);
