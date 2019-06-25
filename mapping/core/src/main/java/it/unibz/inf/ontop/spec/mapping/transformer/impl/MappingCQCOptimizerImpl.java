@@ -90,8 +90,10 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             iqFactory.createUnaryIQTree(
                                 (ConstructionNode)tree.getRootNode(),
                                     (children.size() < 2)
-                                            ? children.get(0)
-                                            : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
+                                        ? (joinNode.getOptionalFilterCondition().isPresent()
+                                            ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get()), children.get(0))
+                                            : children.get(0))
+                                        : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
                 }
             }
 

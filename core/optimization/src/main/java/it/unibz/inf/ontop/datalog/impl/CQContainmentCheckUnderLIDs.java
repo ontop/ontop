@@ -123,6 +123,7 @@ public class CQContainmentCheckUnderLIDs {
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
 				i--;
+				System.out.println("OLDCQC!" + query);
 			}
 		}
 		
