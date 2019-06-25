@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransf
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
@@ -42,7 +43,27 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     @Override
     public IQ optimize(ImmutableCQContainmentCheck cqContainmentCheck, IQ query) {
 
-        IQTree tree = query.getTree().acceptTransformer(new FilterChildNormalizer());
+        IQTree tree0 = query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+            @Override
+            public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+                ImmutableList<IQTree> joinChildren = children.stream().filter(c -> c.getRootNode() instanceof InnerJoinNode).collect(ImmutableCollectors.toList());
+
+                ImmutableList<ImmutableExpression> filters = joinChildren.stream()
+                        .map(c -> ((InnerJoinNode)c.getRootNode()).getOptionalFilterCondition())
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(ImmutableCollectors.toList());
+
+                return iqFactory.createNaryIQTree(
+                        filters.isEmpty() ? rootNode : iqFactory.createInnerJoinNode(Optional.of(getConjunction(rootNode.getOptionalFilterCondition(), filters.stream()))),
+                        Stream.concat(children.stream().filter(c -> !(c.getRootNode() instanceof InnerJoinNode)), joinChildren.stream().flatMap(c -> c.getChildren().stream()))
+                                .map(t -> t.acceptTransformer(this))
+                                .collect(ImmutableCollectors.toList()));
+            }
+        });
+        System.out.println("CQC PULL UP: " + tree0);
+
+        IQTree tree = tree0.acceptTransformer(new FilterChildNormalizer());
 
         if (tree.getRootNode() instanceof ConstructionNode) {
             ConstructionNode constructionNode = (ConstructionNode)tree.getRootNode();
@@ -51,11 +72,11 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
                 ImmutableSet<Variable> answerVariables = Stream.concat(
                         constructionNode.getSubstitution().getImmutableMap().values().stream()
-                                .flatMap(t -> t.getVariableStream()),
+                                .flatMap(ImmutableTerm::getVariableStream),
                         joinNode.getOptionalFilterCondition()
-                                .map(f -> f.getVariableStream()).orElse(Stream.of()))
+                                .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
                             .collect(ImmutableCollectors.toSet());
-                System.out.println("CQC " + query + " WITH " + answerVariables);
+                System.out.println("CQC " + tree + " WITH " + answerVariables);
                 if (joinTree.getChildren().stream().anyMatch(c -> !(c.getRootNode() instanceof DataNode))) {
                     System.out.println("CQC PANIC - NOT A JOIN OF DATA ATOMS");
                 }
@@ -179,8 +200,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                                             filterChildExpressions))),
                     children.stream()
                             .map(this::trimRootFilter)
-                            .collect(ImmutableCollectors.toList())
-            );
+                            .collect(ImmutableCollectors.toList()));
         }
 
         @Override
@@ -234,18 +254,18 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
             return childTransformer.transform(tree);
         }
 
-        private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
-            return expressions.reduce(null,
-                            (a, b) -> (a == null)
-                                    ? b
-                                    : termFactory.getImmutableExpression(AND, a, b));
-        }
-
-        private ImmutableExpression getConjunction(Optional<ImmutableExpression> optExpression, Stream<ImmutableExpression> expressions) {
-            return getConjunction(optExpression.isPresent()
-                    ? Stream.concat(Stream.of(optExpression.get()), expressions)
-                    : expressions);
-        }
     }
 
+    private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
+        return expressions.reduce(null,
+                (a, b) -> (a == null)
+                        ? b
+                        : termFactory.getImmutableExpression(AND, a, b));
+    }
+
+    private ImmutableExpression getConjunction(Optional<ImmutableExpression> optExpression, Stream<ImmutableExpression> expressions) {
+        return getConjunction(optExpression.isPresent()
+                ? Stream.concat(Stream.of(optExpression.get()), expressions)
+                : expressions);
+    }
 }
