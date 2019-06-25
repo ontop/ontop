@@ -96,12 +96,6 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 		return "SELECT 1";
 	}
 
-//	@Override
-//	public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
-//		return signatureVariableName;
-//	}
-
-
 	@Override 
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";

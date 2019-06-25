@@ -96,7 +96,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             ImmutableMap<Variable, QualifiedAttributeID> aliasedProjectedColumnIds = columnsInProjectionIds.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(dialectAdapter.sqlQuote(e.getKey().getName())))
+                            e -> createQualifiedAttributeId(alias, dialectAdapter.sqlQuote(e.getKey().getName()))
                     ));
             return new QuerySerializationImpl(sql, aliasedProjectedColumnIds);
         }
@@ -107,11 +107,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         private QualifiedAttributeID createQualifiedAttributeId(RelationID relationID, String columnName) {
             return new QualifiedAttributeID(relationID, idFactory.createAttributeID(columnName));
-        }
-
-        private String removeSpaceFromAlias(String columnName){
-            //return columnName.replace(" ", "-");
-            return columnName;
         }
 
         /**
@@ -150,7 +145,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + removeSpaceFromAlias(dialectAdapter.sqlQuote(v.getName()))))
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + dialectAdapter.sqlQuote(v.getName())))
                     .collect(Collectors.joining(", "));
         }
 
@@ -264,7 +259,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 ImmutableMap<Variable, QualifiedAttributeID> aliasedColumnIds = serialization.getColumnIDs().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
-                                e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(dialectAdapter.sqlQuote(e.getKey().getName())))
+                                e -> createQualifiedAttributeId(alias, dialectAdapter.sqlQuote(e.getKey().getName()))
                         ));
 
                 String sql = String.format("(%s) %s",serialization.getString(), alias.getSQLRendering());
