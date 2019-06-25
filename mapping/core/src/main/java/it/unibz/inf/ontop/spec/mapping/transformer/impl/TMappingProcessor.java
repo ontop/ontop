@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -67,7 +68,7 @@ public class TMappingProcessor {
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
 
-	@Inject
+    @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                               SubstitutionUtilities substitutionUtilities,
                               ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer) {
@@ -91,14 +92,14 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheck cqContainmentCheck) {
 
 		// Creates an index of all mappings based on the predicate of the head of
 		// the mapping. The returned map can be used for fast access to the mapping list.
         ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
-                .map(q -> mappingCqcOptimizer.optimize(q))
+                .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .map(m -> cqc.removeRedundantAtoms(m))
                 .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),

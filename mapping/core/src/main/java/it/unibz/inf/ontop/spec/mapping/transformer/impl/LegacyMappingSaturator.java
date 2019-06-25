@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -61,10 +63,13 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .flatMap(List::stream)
                 .forEach(fk -> getLinearInclusionDependency(b, fk));
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(b.build(),
-                atomFactory, termFactory, immutabilityTools);
+        LinearInclusionDependencies<AtomPredicate> lids = b.build();
 
-        return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig);
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(lids, atomFactory, termFactory, immutabilityTools);
+
+        ImmutableCQContainmentCheck cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
+
+        return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig, cqContainmentCheck);
     }
 
 
