@@ -23,12 +23,11 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
     @Override
     public IQ optimize(IQ query) {
-        // System.out.println(query);
-
         query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
-
             @Override
             public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+                System.out.println("CQC Q:" + query + "\nCQC T: " + tree + "\nCQC N:" + rootNode);
+
                 return iqFactory.createNaryIQTree(
                         rootNode,
                         children.stream()
