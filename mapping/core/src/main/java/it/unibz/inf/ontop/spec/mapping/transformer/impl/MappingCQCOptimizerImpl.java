@@ -97,13 +97,12 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             if (currentIndex != j)
                                 toLeave.add(children.get(j));
 
+                        ImmutableSet<Variable> variablesInToLeave = toLeave.stream().flatMap(a -> a.getVariables().stream()).collect(ImmutableCollectors.toSet());
+                        if (!variablesInToLeave.containsAll(answerVariables))
+                            continue;
+                        
                         System.out.println("CHECK H: " + children + " TO " + toLeave);
 
-                        ImmutableSet<Variable> variablesInToLeave = toLeave.stream().flatMap(a -> a.getVariables().stream()).collect(ImmutableCollectors.toSet());
-                        if (!variablesInToLeave.containsAll(answerVariables)) {
-                            System.out.println("VARIABLES " + variablesInToLeave + " NOT " + answerVariables);
-                            continue;
-                        }
                         ImmutableList<Variable> avList = ImmutableList.copyOf(answerVariables);
                         ImmutableList<DataAtom<AtomPredicate>> from = children.stream()
                                 .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
