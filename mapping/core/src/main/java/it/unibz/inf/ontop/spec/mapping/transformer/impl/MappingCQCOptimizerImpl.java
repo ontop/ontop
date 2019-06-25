@@ -73,12 +73,13 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         ImmutableList<DataAtom<AtomPredicate>> from = children.stream()
                                 .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());
-                        ImmutableList<DataAtom<AtomPredicate>> to = children.stream()
+                        ImmutableList<DataAtom<AtomPredicate>> to = toLeave.stream()
                                 .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());
                         if (cqContainmentCheck.isContainedIn(
-                                new ImmutableCQ<>(answerVariablesList, from),
-                                new ImmutableCQ<>(answerVariablesList, to))) {
+                                new ImmutableCQ<>(answerVariablesList, to),
+                                new ImmutableCQ<>(answerVariablesList, from))) {
+                            System.out.println("CQC: " + to + " IS CONTAINED IN " + from);
                             children.remove(toBeRemoved);
                             i--;
                         }
@@ -88,7 +89,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             query.getProjectionAtom(),
                             iqFactory.createUnaryIQTree(
                                 (ConstructionNode)tree.getRootNode(),
-                                iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
+                                    (children.size() < 2)
+                                            ? children.get(0)
+                                            : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
                 }
             }
 
