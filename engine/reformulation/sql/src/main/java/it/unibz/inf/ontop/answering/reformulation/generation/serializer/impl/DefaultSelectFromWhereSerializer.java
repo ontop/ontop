@@ -96,7 +96,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             ImmutableMap<Variable, QualifiedAttributeID> aliasedProjectedColumnIds = columnsInProjectionIds.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(e.getKey().getName()))
+                            e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(dialectAdapter.sqlQuote(e.getKey().getName())))
                     ));
             return new QuerySerializationImpl(sql, aliasedProjectedColumnIds);
         }
@@ -150,7 +150,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + removeSpaceFromAlias(v.getName())))
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + removeSpaceFromAlias(dialectAdapter.sqlQuote(v.getName()))))
                     .collect(Collectors.joining(", "));
         }
 
@@ -250,7 +250,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationID alias = generateFreshViewAlias();
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = sqlUnionExpression.getProjectedVariables().stream()
-                    .collect(ImmutableCollectors.toMap(v -> v, v -> createQualifiedAttributeId(alias, v.getName())));
+                    .collect(ImmutableCollectors.toMap(v -> v, v -> createQualifiedAttributeId(alias, dialectAdapter.sqlQuote(v.getName()))));
 
             sqlSubString = String.format("(%s) %s",sqlSubString, alias.getSQLRendering());
 
@@ -264,7 +264,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 ImmutableMap<Variable, QualifiedAttributeID> aliasedColumnIds = serialization.getColumnIDs().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
                                 Map.Entry::getKey,
-                                e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(e.getKey().getName()))
+                                e -> createQualifiedAttributeId(alias, removeSpaceFromAlias(dialectAdapter.sqlQuote(e.getKey().getName())))
                         ));
 
                 String sql = String.format("(%s) %s",serialization.getString(), alias.getSQLRendering());
