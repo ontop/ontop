@@ -55,8 +55,12 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         .collect(ImmutableCollectors.toList());
 
                 return iqFactory.createNaryIQTree(
-                        filters.isEmpty() ? rootNode : iqFactory.createInnerJoinNode(Optional.of(getConjunction(rootNode.getOptionalFilterCondition(), filters.stream()))),
-                        Stream.concat(children.stream().filter(c -> !(c.getRootNode() instanceof InnerJoinNode)), joinChildren.stream().flatMap(c -> c.getChildren().stream()))
+                        filters.isEmpty()
+                            ? rootNode
+                            : iqFactory.createInnerJoinNode(getConjunction(rootNode.getOptionalFilterCondition(), filters)),
+                        Stream.concat(
+                            children.stream().filter(c -> !(c.getRootNode() instanceof InnerJoinNode)),
+                            joinChildren.stream().flatMap(c -> c.getChildren().stream()))
                                 .map(t -> t.acceptTransformer(this))
                                 .collect(ImmutableCollectors.toList()));
             }
@@ -87,12 +91,10 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
                     List<IQTree> children = new ArrayList<>(joinTree.getChildren());
                     for (int i = 0; i < children.size(); i++) {
-                        IQTree toBeRemoved = children.get(i);
-
                         List<IQTree> toLeave = new ArrayList<>(children.size() - 1);
-                        for (IQTree a: children)
-                            if (a != toBeRemoved)
-                                toLeave.add(a);
+                        for (int j = 0; j < children.size(); j++)
+                            if (i != j)
+                                toLeave.add(children.get(j));
 
                         ImmutableSet<Variable> variablesInToLeave = toLeave.stream().flatMap(a -> a.getVariables().stream()).collect(ImmutableCollectors.toSet());
                         if (!variablesInToLeave.containsAll(answerVariables))
@@ -110,9 +112,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         if (cqContainmentCheck.isContainedIn(
                                 new ImmutableCQ<>(answerVariablesList, to),
                                 new ImmutableCQ<>(answerVariablesList, from))) {
-                            System.out.println("CQC: " + to + " IS CONTAINED IN " + from);
-                            children.remove(toBeRemoved);
-                            i--;
+                            System.out.println("POSITIVE");
+                            children.remove(i);
+                            i = 0;
                         }
                     }
 
@@ -163,9 +165,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
             IQTree leftJoinTree = iqFactory.createBinaryNonCommutativeIQTree(
                     rightChildExpression.isPresent()
-                                ? iqFactory.createLeftJoinNode(Optional.of(updateJoinCondition(
+                                ? iqFactory.createLeftJoinNode(getConjunction(
                                                         rootNode.getOptionalFilterCondition(),
-                                                        ImmutableList.of(rightChildExpression.get()))))
+                                                        ImmutableList.of(rightChildExpression.get())))
                                 : rootNode,
                     trimRootFilter(leftChild),
                     trimRootFilter(rightChild));
@@ -182,9 +184,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 return tree;
 
             return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(Optional.of(updateJoinCondition(
+                    iqFactory.createInnerJoinNode(getConjunction(
                                             rootNode.getOptionalFilterCondition(),
-                                            filterChildExpressions))),
+                                            filterChildExpressions)),
                     children.stream()
                             .map(this::trimRootFilter)
                             .collect(ImmutableCollectors.toList()));
@@ -197,9 +199,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 return tree;
 
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createFilterNode(updateJoinCondition(
+                    iqFactory.createFilterNode(getConjunction(
                                     Optional.of(rootNode.getFilterCondition()),
-                                    filterChildExpressions)),
+                                    filterChildExpressions).get()),
                     trimRootFilter(child));
         }
 
@@ -223,12 +225,6 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                     : tree;
         }
 
-        private ImmutableExpression updateJoinCondition(Optional<ImmutableExpression> joinCondition, ImmutableList<ImmutableExpression> additionalConditions) {
-            if (additionalConditions.isEmpty())
-                throw new RuntimeException("Nonempty list of filters expected");
-            return getConjunction(joinCondition, additionalConditions.stream());
-        }
-
         protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
             return childTransformer.transform(tree);
         }
@@ -243,16 +239,15 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
     }
 
-    private ImmutableExpression getConjunction(Stream<ImmutableExpression> expressions) {
-        return expressions.reduce(null,
-                (a, b) -> (a == null)
-                        ? b
-                        : termFactory.getImmutableExpression(AND, a, b));
-    }
+    private Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optExpression, List<ImmutableExpression> expressions) {
+        if (expressions.isEmpty())
+            throw new IllegalArgumentException("Nonempty list of filters expected");
 
-    private ImmutableExpression getConjunction(Optional<ImmutableExpression> optExpression, Stream<ImmutableExpression> expressions) {
-        return getConjunction(optExpression.isPresent()
-                ? Stream.concat(Stream.of(optExpression.get()), expressions)
-                : expressions);
+        ImmutableExpression result = (optExpression.isPresent()
+                    ? Stream.concat(Stream.of(optExpression.get()), expressions.stream())
+                    : expressions.stream())
+                .reduce(null,
+                    (a, b) -> (a == null) ? b : termFactory.getImmutableExpression(AND, a, b));
+        return Optional.of(result);
     }
 }
