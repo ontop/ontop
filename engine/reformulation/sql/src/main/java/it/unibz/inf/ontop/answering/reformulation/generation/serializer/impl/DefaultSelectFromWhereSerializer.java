@@ -246,6 +246,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
 
+        //this function is required in case at least one of the children is
+        // SelectFromWhereWithModifiers expression
         private QuerySerialization getSQLSerializationForChild(SQLExpression expression){
             if (expression instanceof SelectFromWhereWithModifiers){
                 QuerySerialization serialization = expression.acceptVisitor(this);
