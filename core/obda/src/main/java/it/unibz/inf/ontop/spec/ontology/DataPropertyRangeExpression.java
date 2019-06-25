@@ -10,6 +10,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 public interface DataPropertyRangeExpression extends DataRangeExpression {
 
-	public DataPropertyExpression getProperty();
+	DataPropertyExpression getProperty();
 	
 }

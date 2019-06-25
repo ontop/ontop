@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.spec.ontology;
  * #L%
  */
 
-import java.io.Serializable;
-
 /***
  * An entity descriptor, either role or class.
  */

@@ -37,7 +37,7 @@ public interface DescriptionBT extends Description {
 	 * 
 	 * @return true if the expression is equivalent to the smallest element 
 	 */
-	public boolean isBottom();
+	boolean isBottom();
 	
 	/**
 	 * checks (syntactically, irrespective of any ontology) whether the class or property expression 
@@ -45,5 +45,5 @@ public interface DescriptionBT extends Description {
 	 * 
 	 * @return true if the expression is equivalent to largest element
 	 */
-	public boolean isTop();
+	boolean isTop();
 }

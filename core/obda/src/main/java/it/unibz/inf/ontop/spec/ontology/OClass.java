@@ -29,8 +29,6 @@ import org.apache.commons.rdf.api.IRI;
  * 
  */
 public interface OClass extends ClassExpression {
-	
-	public String getName();
 
     IRI getIRI();
 }

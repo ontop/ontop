@@ -457,7 +457,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		
 		for (ObjectPropertyExpression pfa : translatedOntologyMerge.functionalObjectProperties()) {
 			// TODO: handle inverses
-			String propFunc = pfa.getName();
+			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);
@@ -468,7 +468,7 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		}
 		
 		for (DataPropertyExpression pfa : translatedOntologyMerge.functionalDataProperties()) {
-			String propFunc = pfa.getName();
+			String propFunc = pfa.getIRI().getIRIString();
 			String strQuery = String.format(strQueryFunc, propFunc, propFunc);
 			
 			boolean isConsistent = executeConsistencyQuery(strQuery);

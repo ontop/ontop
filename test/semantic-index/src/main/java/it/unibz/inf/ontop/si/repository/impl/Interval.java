@@ -21,17 +21,13 @@ package it.unibz.inf.ontop.si.repository.impl;
  */
 
 
-import java.io.Serializable;
-
 /**
  * Contiguous interval
  *
  * @author Sergejs Pugacs
  */
-public class Interval implements Comparable<Interval>, Serializable {
+public class Interval implements Comparable<Interval> {
 
-	private static final long serialVersionUID = 3982860811012207357L;
-	
 	private final int start;
 	private final int end;
 

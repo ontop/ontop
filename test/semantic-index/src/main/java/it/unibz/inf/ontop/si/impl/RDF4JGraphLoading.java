@@ -65,8 +65,10 @@ public class RDF4JGraphLoading {
 
     private static final class CollectRDFVocabulary extends AbstractRDFHandler {
         private final OntologyBuilder vb;
+        private final RDF rdfFactory;
 
         CollectRDFVocabulary(RDF rdfFactory) {
+            this.rdfFactory = rdfFactory;
             this.vb = OntologyBuilderImpl.builder(rdfFactory);
         }
 
@@ -75,13 +77,13 @@ public class RDF4JGraphLoading {
             String predicateName = st.getPredicate().stringValue();
             Value obj = st.getObject();
             if (predicateName.equals(org.eclipse.rdf4j.model.vocabulary.RDF.TYPE.stringValue())) {
-                vb.declareClass(obj.stringValue());
+                vb.declareClass(rdfFactory.createIRI(obj.stringValue()));
             }
             else if (obj instanceof Literal) {
-                vb.declareDataProperty(predicateName);
+                vb.declareDataProperty(rdfFactory.createIRI(predicateName));
             }
             else {
-                vb.declareObjectProperty(predicateName);
+                vb.declareObjectProperty(rdfFactory.createIRI(predicateName));
             }
         }
     }
