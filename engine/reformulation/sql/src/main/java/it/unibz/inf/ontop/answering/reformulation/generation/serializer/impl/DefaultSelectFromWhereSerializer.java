@@ -109,9 +109,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QualifiedAttributeID(relationID, idFactory.createAttributeID(columnName));
         }
 
-        /**
-         * TODO: simplify it
-         */
+
         private ImmutableMap<Variable, QualifiedAttributeID> extractProjectionColumnMap(
                 ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             // Mutable, initialized with the column names projected by the "from" relations
@@ -200,8 +198,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
-
-            //TODO:check this
             return new QuerySerializationImpl(sqlSubString,
                     atom.getArguments().stream()
                             // Ground terms must have been already removed from atoms
@@ -222,8 +218,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(QuerySerialization::getString)
                     .collect(Collectors.joining(", "));
 
-
-            //TODO:check if this is actually needed
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
                     .copyOf(querySerializationList.stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
@@ -269,15 +263,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return expression.acceptVisitor(this);
         }
 
-        //TODO:implement
         @Override
         public QuerySerialization visit(SQLInnerJoinExpression sqlInnerJoinExpression) {
             QuerySerialization left = getSQLSerializationForChild(sqlInnerJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(sqlInnerJoinExpression.getRight());
 
             String sqlSubString = left.getString() + "\n JOIN \n" + right.getString() + " ON 1 = 1";
-
-            //TODO:check if this is actually needed
 
             ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 
@@ -295,9 +286,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             QuerySerialization right = getSQLSerializationForChild(sqlLeftJoinExpression.getRight());
 
             String sqlSubString = left.getString() + "\n LEFT OUTER JOIN \n" + right.getString() + "\n";
-
-
-            //TODO:check if this is actually needed
 
             ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 

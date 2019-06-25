@@ -143,18 +143,10 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
             return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom());
         }
-        //TODO:consider the case when a binary join is a must
         else if (rootNode instanceof InnerJoinNode){
             List<SQLExpression> joinedExpressions = tree.getChildren().stream()
-            //        .filter(e -> (e instanceof ExtensionalDataNode) || (e instanceof JoinLikeNode))
                     .map(this::convertIntoFromExpression)
                     .collect(Collectors.toList());
-
-//            //TODO:check how to pass signature as parameter
-//            joinedExpressions.addAll(tree.getChildren().stream()
-//                    .filter(e -> !((e instanceof ExtensionalDataNode) || (e instanceof JoinLikeNode)))
-//                    .map(e->convert(e, null))
-//            .collect(Collectors.toList()));
 
             return sqlAlgebraFactory.createSQLNaryJoinExpression(ImmutableList.copyOf(joinedExpressions));
         }
