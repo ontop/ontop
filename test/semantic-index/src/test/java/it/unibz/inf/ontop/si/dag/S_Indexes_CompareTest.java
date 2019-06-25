@@ -34,23 +34,22 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import static it.unibz.inf.ontop.utils.SITestingTools.loadOntologyFromFileAndClassify;
+
 public class S_Indexes_CompareTest extends TestCase {
 	
-	ArrayList<String> input = new ArrayList<>();
-
 	Logger log = LoggerFactory.getLogger(S_Indexes_CompareTest.class);
 
 	public S_Indexes_CompareTest (String name){
 		super(name);
 	}
 	
-	public void setUp() {
-		input.add("src/test/resources/completeness/equivalence/test_404.owl");
-	}
-
 	public void testIndexes() throws Exception {
+		ArrayList<String> input = new ArrayList<>();
+		input.add("src/test/resources/completeness/equivalence/test_404.owl");
+
 		for (String fileInput: input) {
-			ClassifiedTBox dag = DAGEquivalenceTest.loadOntologyFromFileAndClassify(fileInput);
+			ClassifiedTBox dag = loadOntologyFromFileAndClassify(fileInput);
 
 			SemanticIndexBuilder engine = new SemanticIndexBuilder(dag);
 

@@ -101,36 +101,26 @@ public class OntologyImpl implements Ontology {
 
 
     static final class ImmutableOntologyVocabularyCategoryImpl<T> implements OntologyVocabularyCategory<T> {
-        private final ImmutableMap<String, T> map;
+        private final ImmutableMap<IRI, T> map;
 
         private final String NOT_FOUND;
 
-        ImmutableOntologyVocabularyCategoryImpl(ImmutableMap<String, T> map, String NOT_FOUND) {
+        ImmutableOntologyVocabularyCategoryImpl(ImmutableMap<IRI, T> map, String NOT_FOUND) {
             this.map = map;
             this.NOT_FOUND = NOT_FOUND;
         }
 
-        @Override
-        public T get(String uri) {
-            T oc = map.get(uri);
-            if (oc == null)
-                throw new RuntimeException(NOT_FOUND + uri);
-            return oc;
-        }
-
 		@Override
 		public T get(IRI iri) {
-			return get(iri.getIRIString());
+			T oc = map.get(iri);
+			if (oc == null)
+				throw new RuntimeException(NOT_FOUND + iri);
+			return oc;
 		}
 
 		@Override
-        public boolean contains(String uri) {
-            return map.containsKey(uri);
-        }
-
-		@Override
 		public boolean contains(IRI iri) {
-			return contains(iri.getIRIString());
+			return map.containsKey(iri);
 		}
 
 		@Override

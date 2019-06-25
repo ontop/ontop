@@ -3,82 +3,46 @@ package it.unibz.inf.ontop.datalog.impl;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionBuilder;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CQContainmentCheckUnderLIDs {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CQContainmentCheckUnderLIDs.class);
-	
 	private final Map<CQIE,IndexedCQ> indexedCQcache = new HashMap<>();
 	
-	private final ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies;
+	private final LinearInclusionDependencies<AtomPredicate> dependencies;
 	private final DatalogFactory datalogFactory;
-	private final UnifierUtilities unifierUtilities;
-	private final SubstitutionUtilities substitutionUtilities;
+	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
+	private final ImmutabilityTools immutabilityTools;
 
 	/**
 	 * *@param sigma
 	 * A set of ABox dependencies
 	 */
-	public CQContainmentCheckUnderLIDs(ImmutableList<LinearInclusionDependency> dependencies, DatalogFactory datalogFactory,
-                                       UnifierUtilities unifierUtilities, SubstitutionUtilities substitutionUtilities,
-                                       TermFactory termFactory) {
+	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies, DatalogFactory datalogFactory,
+									   AtomFactory atomFactory, TermFactory termFactory, ImmutabilityTools immutabilityTools) {
 	    // index dependencies
-		this.dependencies = dependencies.stream()
-				.collect(ImmutableCollectors.toMultimap(
-						d -> d.getHead().getFunctionSymbol(),
-						d -> d));
+		this.dependencies = dependencies;
 		this.datalogFactory = datalogFactory;
-		this.unifierUtilities = unifierUtilities;
-		this.substitutionUtilities = substitutionUtilities;
+		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
+		this.immutabilityTools = immutabilityTools;
 	}
 
 
 
-    /**
-	 * This method is used to chase foreign key constraint rule in which the rule
-	 * has only one atom in the body.
-	 * 
-	 * IMPORTANT: each rule is applied only ONCE to each atom
-	 * 
-	 * @param atoms
-	 * @return set of atoms
-	 */
-	private Set<Function> chaseAtoms(Collection<Function> atoms) {
 
-		Set<Function> derivedAtoms = new HashSet<>();
-		for (Function fact : atoms) {
-			derivedAtoms.add(fact);
-			for (LinearInclusionDependency d : dependencies.get(fact.getFunctionSymbol())) {
-				CQIE rule = datalogFactory.getFreshCQIECopy(datalogFactory.getCQIE(d.getHead(), d.getBody()));
-				Function ruleBody = rule.getBody().get(0);
-				Substitution theta = unifierUtilities.getMGU(ruleBody, fact);
-				if (theta != null && !theta.isEmpty()) {
-					Function ruleHead = rule.getHead();
-					Function newFact = (Function)ruleHead.clone();
-					// unify to get fact is needed because the dependencies are not necessarily full
-					// (in other words, they may contain existentials in the head)
-					substitutionUtilities.applySubstitution(newFact, theta);
-					derivedAtoms.add(newFact);
-				}
-			}
-		}
-		return derivedAtoms;
-	}
-	
+
 	public final class IndexedCQ {
 		
 		private final Function head;
@@ -107,7 +71,7 @@ public class CQContainmentCheckUnderLIDs {
 					Predicate pred = atom.getFunctionSymbol();
 					List<Function> facts = factMap.get(pred);
 					if (facts == null) {
-						facts = new LinkedList<Function>();
+						facts = new LinkedList<>();
 						factMap.put(pred, facts);
 					}
 					facts.add(atom);
@@ -136,10 +100,17 @@ public class CQContainmentCheckUnderLIDs {
 
         IndexedCQ indexedQ1 = indexedCQcache.get(q1);
         if (indexedQ1 == null) {
-        	Collection<Function> q1body = q1.getBody();
-        	if (dependencies != null)
-        		q1body = chaseAtoms(q1body);
-        	
+			ImmutableList<DataAtom<AtomPredicate>> matoms = q1.getBody().stream()
+					.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
+							a.getTerms().stream()
+									.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
+									.collect(ImmutableCollectors.toList())))
+					.collect(ImmutableCollectors.toList());
+
+			Collection<Function> q1body = dependencies.chaseAllAtoms(matoms).stream()
+					.map(immutabilityTools::convertToMutableFunction)
+					.collect(ImmutableCollectors.toSet());
+
         	indexedQ1 = new IndexedCQ(q1.getHead(), q1body);
     		indexedCQcache.put(q1, indexedQ1);
         }
@@ -154,10 +125,6 @@ public class CQContainmentCheckUnderLIDs {
 		return indexedQ1.computeHomomorphism(q2);
 	}	
 
-	static int redundantCounter = 0;
-	public static int twoAtomQs = 0;
-	public static int oneAtomQs = 0;
-	
 	public CQIE removeRedundantAtoms(CQIE query) {
 		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
 		
@@ -172,7 +139,6 @@ public class CQContainmentCheckUnderLIDs {
 			}
 
 		if (databaseAtoms.size() < 2) {
-			oneAtomQs++;
 			return query;
 		}
 		
@@ -183,14 +149,12 @@ public class CQContainmentCheckUnderLIDs {
 		for (int i = 0; i < databaseAtoms.size(); i++) {
 			Function atomToBeRemoved = databaseAtoms.get(i);
 			if (checkRedundant(db, groundTerms, atomToBeRemoved)) {
-				LOGGER.warn("  REDUNDANT " + ++redundantCounter + ": " + atomToBeRemoved + " IN " + query);
 				query.getBody().remove(atomToBeRemoved);
 				databaseAtoms.remove(atomToBeRemoved);
 				i--;
 			}
 		}
 		
-		twoAtomQs++;
 		return query;
 	}
 	
@@ -210,7 +174,6 @@ public class CQContainmentCheckUnderLIDs {
 		CQIE q0 = datalogFactory.getCQIE(db.getHead(), atomsToLeave);
 		// if db is homomorphically embeddable into q0
 		if (computeHomomorphsim(q0, db) != null) {
-			oneAtomQs++;
 			return true;
 		}
 		return false;
@@ -235,9 +198,6 @@ public class CQContainmentCheckUnderLIDs {
 		
 		return "(empty)";
 	}
-
-	public ImmutableMultimap<Predicate, LinearInclusionDependency> dependencies() { return dependencies; }
-
 
 
 

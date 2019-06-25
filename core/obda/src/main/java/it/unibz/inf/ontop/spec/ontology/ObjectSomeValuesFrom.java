@@ -12,6 +12,6 @@ package it.unibz.inf.ontop.spec.ontology;
 
 public interface ObjectSomeValuesFrom extends ClassExpression {
 	
-	public ObjectPropertyExpression getProperty();	
+	ObjectPropertyExpression getProperty();
 
 }

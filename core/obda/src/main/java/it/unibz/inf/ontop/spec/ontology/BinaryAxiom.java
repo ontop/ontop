@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.spec.ontology;
 
-import java.io.Serializable;
-
 /*
  * #%L
  * ontop-obdalib-core
@@ -44,9 +42,9 @@ import java.io.Serializable;
  *
  */
 
-public interface BinaryAxiom<T> extends Serializable {
+public interface BinaryAxiom<T> {
 
-	public T getSub();
+	T getSub();
 
-	public T getSuper();
+	T getSuper();
 }

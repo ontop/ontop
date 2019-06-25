@@ -44,8 +44,7 @@ import java.util.Map;
 
 public class DataPropertyExpressionImpl implements DataPropertyExpression {
 
-	private final String name;
-	
+	private final IRI iri;
 	private final boolean isTop, isBottom;
 	
 	private final Map<Datatype, DataSomeValuesFrom> domains = new HashMap<>();
@@ -53,10 +52,8 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 	
     public static final DataPropertyExpression owlTopDataProperty = new DataPropertyExpressionImpl(OWL.TOP_DATA_PROPERTY);
     public static final DataPropertyExpression owlBottomDataProperty = new DataPropertyExpressionImpl(OWL.BOTTOM_DATA_PROPERTY);
-	private final IRI iri;
 
 	DataPropertyExpressionImpl(IRI iri) {
-		this.name = iri.getIRIString();
 		this.iri = iri;
 		this.isTop = iri.equals(OWL.TOP_DATA_PROPERTY);
 		this.isBottom = iri.equals(OWL.BOTTOM_DATA_PROPERTY);
@@ -70,11 +67,6 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		return iri;
 	}
 
-	@Override
-	public String getName() {
-		return name;
-	}
-	
 	@Override
 	public DataSomeValuesFrom getDomainRestriction(Datatype datatype) {
 		DataSomeValuesFrom domain = domains.get(datatype);
@@ -113,24 +105,24 @@ public class DataPropertyExpressionImpl implements DataPropertyExpression {
 		
 		if (obj instanceof DataPropertyExpressionImpl) {
 			DataPropertyExpressionImpl other = (DataPropertyExpressionImpl) obj;
-			return name.equals(other.name);
+			return iri.equals(other.iri);
 		}
 		
 		// object and data properties share the same name space	
 		if (obj instanceof ObjectPropertyExpressionImpl) {
 			ObjectPropertyExpressionImpl other = (ObjectPropertyExpressionImpl) obj;
-			return (false == other.isInverse()) && name.equals(other.getName());
+			return !other.isInverse() && iri.equals(other.getIRI());
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return iri.hashCode();
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return iri.getIRIString();
 	}
 }

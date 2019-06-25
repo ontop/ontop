@@ -34,7 +34,4 @@ import org.apache.commons.rdf.api.IRI;
 public interface AnnotationProperty extends Description {
 
     IRI getIRI();
-
-
-    String getName();
 }

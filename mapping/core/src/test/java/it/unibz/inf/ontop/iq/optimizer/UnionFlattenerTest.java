@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.junit.Test;
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 public class UnionFlattenerTest {
 
@@ -85,7 +85,7 @@ public class UnionFlattenerTest {
                         )));
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue(optimizedIQ.equals(expectedIQ));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union2);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     @Test
@@ -254,7 +254,7 @@ public class UnionFlattenerTest {
         IQ expectedIQ = IQ_FACTORY.createIQ(PROJECTION_ATOM2, union3);
         System.out.println("\nExpected: \n" + expectedIQ);
 
-        assertTrue((optimizedIQ.equals(expectedIQ)));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
     private static ImmutableFunctionalTerm generateURI2(VariableOrGroundTerm argument1, VariableOrGroundTerm argument2) {

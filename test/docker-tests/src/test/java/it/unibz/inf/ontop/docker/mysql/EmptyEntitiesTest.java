@@ -73,9 +73,9 @@ public class EmptyEntitiesTest {
 	@Before
 	public void setUp() throws Exception {
 
-		String owlFileName =  this.getClass().getResource(owlFile).toString();
-		String obdaFileName =  this.getClass().getResource(obdaFile).toString();
-		String propertyFileName =  this.getClass().getResource(propertyFile).toString();
+		String owlFileName =  getClass().getResource(owlFile).toString();
+		String obdaFileName =  getClass().getResource(obdaFile).toString();
+		String propertyFileName = getClass().getResource(propertyFile).toString();
 
 		// Creating a new instance of the reasoner
         // Creating a new instance of the reasoner
@@ -175,7 +175,7 @@ public class EmptyEntitiesTest {
 	public void testEmptyConcepts() throws Exception {
 		int c = 0; // number of empty concepts
 		for (OClass cl : onto.classes()) {
-			String concept = cl.getName();
+			String concept = cl.getIRI().getIRIString();
 			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
 				emptyConcepts.add(concept);
 				c++;
@@ -194,7 +194,7 @@ public class EmptyEntitiesTest {
 	public void testEmptyRoles() throws Exception {
 		int r = 0; // number of empty roles
 		for (ObjectPropertyExpression prop : onto.objectProperties()) {
-			String role = prop.getName();
+			String role = prop.getIRI().getIRIString();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
 				r++;
@@ -204,7 +204,7 @@ public class EmptyEntitiesTest {
 
 		r = 0; // number of empty roles
 		for (DataPropertyExpression prop : onto.dataProperties()) {
-			String role = prop.getName();
+			String role = prop.getIRI().getIRIString();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
 				r++;
@@ -223,7 +223,7 @@ public class EmptyEntitiesTest {
 
 		int c = 0; // number of empty concepts
 		for (OClass cl : onto.classes()) {
-			String concept = cl.getName();
+			String concept = cl.getIRI().getIRIString();
 			if (!runSPARQLConceptsQuery("<" + concept + ">")) {
 				emptyConcepts.add(concept);
 				c++;
@@ -233,7 +233,7 @@ public class EmptyEntitiesTest {
 
 		int r = 0; // number of empty roles
 		for (ObjectPropertyExpression prop : onto.objectProperties()) {
-			String role = prop.getName();
+			String role = prop.getIRI().getIRIString();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
 				r++;
@@ -243,7 +243,7 @@ public class EmptyEntitiesTest {
 
 		r = 0; // number of empty roles
 		for (DataPropertyExpression prop : onto.dataProperties()) {
-			String role = prop.getName();
+			String role = prop.getIRI().getIRIString();
 			if (!runSPARQLRolesQuery("<" + role + ">")) {
 				emptyRoles.add(role);
 				r++;
@@ -266,7 +266,7 @@ public class EmptyEntitiesTest {
 		int c = 0; // number of empty concepts
 		for (Equivalences<ClassExpression> concept : onto.classesDAG()) {
 			ClassExpression representative = concept.getRepresentative();
-			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative().toString() + ">")) {
+			if ((!(representative instanceof Datatype)) && !runSPARQLConceptsQuery("<" + concept.getRepresentative() + ">")) {
 				emptyBasicConcepts.addAll(concept.getMembers());
 				c += concept.size();
 			}
@@ -276,7 +276,7 @@ public class EmptyEntitiesTest {
 		{
 			int r = 0; // number of empty roles
 			for (Equivalences<ObjectPropertyExpression> properties : onto.objectPropertiesDAG()) {
-				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+				if (!runSPARQLRolesQuery("<" + properties.getRepresentative() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();
 				}
@@ -286,7 +286,7 @@ public class EmptyEntitiesTest {
 		{
 			int r = 0; // number of empty roles
 			for (Equivalences<DataPropertyExpression> properties : onto.dataPropertiesDAG()) {
-				if (!runSPARQLRolesQuery("<" + properties.getRepresentative().toString() + ">")) {
+				if (!runSPARQLRolesQuery("<" + properties.getRepresentative() + ">")) {
 					emptyProperties.addAll(properties.getMembers());
 					r += properties.size();
 				}
