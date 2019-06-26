@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -223,4 +224,13 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getTypedNullFunctionSymbol(DBTermType termType);
+
+    //-------------
+    // Aggregation
+    //-------------
+
+    /**
+     * arity <= 1
+     */
+    DBFunctionSymbol getDBCount(int arity, boolean isDistinct);
 }

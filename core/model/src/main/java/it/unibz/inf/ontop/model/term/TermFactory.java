@@ -570,4 +570,11 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBNow();
+
+	//-------------
+	// Aggregation
+	//-------------
+
+	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
+    ImmutableFunctionalTerm getDBCount(ImmutableTerm immutableTerm, boolean isDistinct);
 }

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -11,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
@@ -108,6 +107,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
     /**
+     * Created in init()
+     */
+    private ImmutableTable<Integer, Boolean, DBFunctionSymbol> countTable;
+
+    /**
      * Only for SIMPLE casts to DB string.
      * (Source DB type -> function symbol)
      *
@@ -195,6 +199,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
@@ -253,6 +258,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected void init() {
         normalizationTable = createNormalizationTable();
         deNormalizationTable = createDenormalizationTable();
+        countTable = createDBCountTable();
 
         temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(rootDBType, dbStringType);
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
@@ -285,6 +291,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         secondsFunctionSymbol = createSecondsFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
     }
+
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -319,6 +326,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(), createBooleanDenormFunctionSymbol());
 
+        return builder.build();
+    }
+
+    protected ImmutableTable<Integer, Boolean, DBFunctionSymbol> createDBCountTable() {
+
+        ImmutableTable.Builder<Integer, Boolean, DBFunctionSymbol> builder = ImmutableTable.builder();
+        Stream.of(false, true)
+                .forEach(isUnary -> Stream.of(false, true)
+                        .forEach(isDistinct ->
+                                builder.put(isUnary ? 1 : 0, isDistinct, createDBCount(isUnary, isDistinct))));
         return builder.build();
     }
 
@@ -743,6 +760,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
     }
 
+    @Override
+    public DBFunctionSymbol getDBCount(int arity, boolean isDistinct) {
+        if (arity > 1) {
+            throw new IllegalArgumentException("COUNT is 0-ary or unary");
+        }
+        return countTable.get(arity, isDistinct);
+    }
+
+    protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);

@@ -90,6 +90,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         isTrue = createDBIsTrue(dbBooleanType);
     }
 
+    @Override
+    protected DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct) {
+        DBTermType integerType = dbTypeFactory.getDBLargeIntegerType();
+        return isUnary
+                ? new DBCountFunctionSymbolImpl(abstractRootDBType, integerType, isDistinct)
+                : new DBCountFunctionSymbolImpl(integerType, isDistinct);
+    }
+
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
