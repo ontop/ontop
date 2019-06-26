@@ -21,8 +21,8 @@
     :exists-02
     #:full-minuend # DISABLED DUE TO ORDER OVER IRI
     #:partial-minuend # DISABLED DUE TO ORDER OVER IRI
-    :full-minuend-modified
-    :partial-minuend-modified
+    #:full-minuend-modified # TODO: enable them
+    #:partial-minuend-modified # TODO: enable them
    ) .
 
 
