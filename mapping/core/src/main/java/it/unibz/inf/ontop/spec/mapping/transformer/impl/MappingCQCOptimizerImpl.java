@@ -103,8 +103,10 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         if (!subChildren.stream()
                                 .flatMap(a -> a.getVariables().stream())
                                 .collect(ImmutableCollectors.toSet())
-                                .containsAll(answerVariables))
+                                .containsAll(answerVariables)) {
+                            currentIndex++;
                             continue;
+                        }
 
                         System.out.println("CHECK H: " + children + " TO " + subChildren);
 
