@@ -61,7 +61,10 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        DBTermType integerType = dbTypeFactory.getDBLargeIntegerType();
+        return isUnary
+                ? new DBCountFunctionSymbolImpl(abstractRootDBType, integerType, isDistinct)
+                : new DBCountFunctionSymbolImpl(integerType, isDistinct);
     }
 
     @Override
