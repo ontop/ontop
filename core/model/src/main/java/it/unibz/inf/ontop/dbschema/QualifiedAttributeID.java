@@ -48,7 +48,7 @@ public class QualifiedAttributeID {
 	public RelationID getRelation() {
 		return relation;
 	}
-	
+
 	public String getSQLRendering() {
 		return ((relation == null) ? "" : (relation.getSQLRendering() + ".")) + attribute.getSQLRendering();
 	}

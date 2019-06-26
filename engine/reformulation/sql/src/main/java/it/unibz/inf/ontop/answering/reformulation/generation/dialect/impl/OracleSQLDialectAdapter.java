@@ -261,8 +261,13 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	public String getDummyTable() {
 		return "SELECT 1 from dual";
 	}
-	
-	@Override 
+
+	@Override
+	public Optional<String> getTrueTable() {
+		return Optional.of("dual");
+	}
+
+	@Override
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"1" : "0";
 	}
