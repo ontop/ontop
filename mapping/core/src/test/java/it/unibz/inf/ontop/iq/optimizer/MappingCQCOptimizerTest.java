@@ -2,8 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -82,13 +81,12 @@ public class MappingCQCOptimizerTest {
         b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
                 ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(b.build(),
-                ATOM_FACTORY, TERM_FACTORY, IMMUTABILITY_TOOLS);
+        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
 
-        CQIE q0 = INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR.translate(q).getRules().get(0);
-        foreignKeyCQC.removeRedundantAtoms(q0);
+        IQ r = MAPPING_CQC_OPTIMIZER.optimize(foreignKeyCQC, q);
 
-        assertEquals(1, q0.getBody().size());
+        assertEquals(1, r.getTree().getChildren().size());
+        assertEquals(companyReservesNode, r.getTree().getChildren().get(0));
     }
 
 }

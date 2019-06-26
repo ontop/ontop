@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
-import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -84,62 +83,6 @@ public class CQContainmentCheckUnderLIDs {
 	}
 
 
-	public CQIE removeRedundantAtoms(CQIE query) {
-		List<Function> databaseAtoms = new ArrayList<>(query.getBody().size());
-		
-		Set<Term> groundTerms = new HashSet<>();
-		for (Function atom : query.getBody())
-			// non-database atom
-			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
-				collectVariables(groundTerms, atom);
-			}
-			else {
-				databaseAtoms.add(atom);
-			}
-
-		if (databaseAtoms.size() < 2) {
-			return query;
-		}
-		
-		collectVariables(groundTerms, query.getHead());
-		
-		for (int i = 0; i < databaseAtoms.size(); i++) {
-			Function atomToBeRemoved = databaseAtoms.get(i);
-
-			List<Function> atomsToLeave = new ArrayList<>(databaseAtoms.size() - 1);
-			Set<Term> variablesInAtomsToLeave = new HashSet<>();
-			for (Function a: databaseAtoms)
-				if (a != atomToBeRemoved) {
-					atomsToLeave.add(a);
-					collectVariables(variablesInAtomsToLeave, a);
-				}
-
-			if (!variablesInAtomsToLeave.containsAll(groundTerms))
-				continue;
-
-			SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
-			Substitution sub = computeSomeHomomorphism(sb, databaseAtoms, getFactMap(toI(atomsToLeave)));
-			if (sub != null) {
-				query.getBody().remove(atomToBeRemoved);
-				databaseAtoms.remove(atomToBeRemoved);
-				i--;
-				System.out.println("OLDCQC!" + query);
-			}
-		}
-		
-		return query;
-	}
-	
-	private static void collectVariables(Set<Term> vars, Function atom) {
-		Deque<Term> terms = new LinkedList<>(atom.getTerms());
-		while (!terms.isEmpty()) {
-			Term t = terms.pollFirst();
-			if (t instanceof Variable)
-				vars.add(t);
-			else if (!(t instanceof Constant))
-				terms.addAll(((Function)t).getTerms());
-		}		
-	}
 
 	@Override
 	public String toString() {

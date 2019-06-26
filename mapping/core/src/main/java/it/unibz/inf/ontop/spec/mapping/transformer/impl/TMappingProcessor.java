@@ -101,7 +101,6 @@ public class TMappingProcessor {
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .map(m -> cqc.removeRedundantAtoms(m))
                 .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
                         m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory, atomFactory, immutabilityTools)));
 

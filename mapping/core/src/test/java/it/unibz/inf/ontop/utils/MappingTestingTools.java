@@ -68,6 +68,8 @@ public class MappingTestingTools {
     public static final SpecificationFactory SPECIFICATION_FACTORY;
     public static final IQConverter IQ_CONVERTER;
 
+    public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
+
 
     public static final RelationPredicate TABLE1_AR2;
     public static final RelationPredicate TABLE2_AR2;
@@ -113,6 +115,8 @@ public class MappingTestingTools {
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
+
+        MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
