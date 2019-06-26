@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;

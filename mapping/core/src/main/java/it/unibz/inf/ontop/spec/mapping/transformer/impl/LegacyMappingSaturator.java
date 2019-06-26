@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -65,7 +64,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         LinearInclusionDependencies<AtomPredicate> lids = b.build();
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(lids, atomFactory, termFactory, immutabilityTools);
+        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(lids, termFactory, immutabilityTools);
 
         ImmutableCQContainmentCheck cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
 

@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -22,7 +21,6 @@ public class CQContainmentCheckUnderLIDs {
 	private final Map<ImmutableList<DataAtom<AtomPredicate>>, Multimap<Predicate, Function>> indexedCQcache = new HashMap<>();
 	
 	private final LinearInclusionDependencies<AtomPredicate> dependencies;
-	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final ImmutabilityTools immutabilityTools;
 
@@ -31,21 +29,11 @@ public class CQContainmentCheckUnderLIDs {
 	 * A set of ABox dependencies
 	 */
 	public CQContainmentCheckUnderLIDs(LinearInclusionDependencies<AtomPredicate> dependencies,
-									   AtomFactory atomFactory, TermFactory termFactory, ImmutabilityTools immutabilityTools) {
-	    // index dependencies
+									   TermFactory termFactory,
+									   ImmutabilityTools immutabilityTools) {
 		this.dependencies = dependencies;
-		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.immutabilityTools = immutabilityTools;
-	}
-
-	private ImmutableList<DataAtom<AtomPredicate>> toI(List<Function> body) {
-		return body.stream()
-				.map(a -> atomFactory.getDataAtom((AtomPredicate)a.getFunctionSymbol(),
-						a.getTerms().stream()
-								.map(t -> (VariableOrGroundTerm)immutabilityTools.convertIntoImmutableTerm(t))
-								.collect(ImmutableCollectors.toList())))
-				.collect(ImmutableCollectors.toList());
 	}
 
 	private ImmutableList<Function> fromI(ImmutableCollection<DataAtom<AtomPredicate>> c) {
