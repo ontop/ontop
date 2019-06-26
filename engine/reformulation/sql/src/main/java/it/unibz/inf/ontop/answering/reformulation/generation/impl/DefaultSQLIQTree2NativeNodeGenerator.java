@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGe
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl.DefaultSelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -16,6 +17,8 @@ import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Map;
 
 public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGenerator {
 
@@ -45,7 +48,12 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
 
         ImmutableMap<Variable, DBTermType> variableTypeMap = extractVariableTypeMap(iqTree);
 
-        return iqFactory.createNativeNode(signature, variableTypeMap, serializedQuery.getColumnNames(),
+        ImmutableMap<Variable, String> columnNames = serializedQuery.getColumnIDs().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().getAttribute().getSQLRendering()));
+
+        return iqFactory.createNativeNode(signature, variableTypeMap, columnNames,
                 serializedQuery.getString(), iqTree.getVariableNullability());
     }
 

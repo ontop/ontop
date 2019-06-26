@@ -23,7 +23,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
 
     private final ImmutableSortedSet<Variable> projectedVariables;
     private final ImmutableSubstitution<? extends ImmutableTerm> substitution;
-    private final ImmutableList<? extends SQLExpression> fromRelations;
+    private final SQLExpression fromExpression;
     private final Optional<ImmutableExpression> whereExpression;
     private final boolean isDistinct;
     private final Optional<Long> limit;
@@ -33,7 +33,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     @AssistedInject
     private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSortedSet<Variable> projectedVariables,
                                              @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                             @Assisted("fromRelations") ImmutableList<? extends SQLExpression> fromRelations,
+                                             @Assisted("fromExpression") SQLExpression fromExpression,
                                              @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
                                              @Assisted boolean isDistinct,
                                              @Assisted("limit") Optional<Long> limit,
@@ -41,7 +41,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
                                              @Assisted("sortConditions") ImmutableList<OrderByNode.OrderComparator> sortConditions) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.fromRelations = fromRelations;
+        this.fromExpression = fromExpression;
         this.whereExpression = whereExpression;
         this.isDistinct = isDistinct;
         this.limit = limit;
@@ -61,8 +61,8 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     }
 
     @Override
-    public ImmutableList<? extends SQLExpression> getFromSQLExpressions() {
-        return fromRelations;
+    public SQLExpression getFromSQLExpression() {
+        return fromExpression;
     }
 
     @Override

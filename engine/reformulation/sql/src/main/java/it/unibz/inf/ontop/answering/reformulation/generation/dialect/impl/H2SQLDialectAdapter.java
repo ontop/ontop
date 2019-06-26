@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  * #L%
  */
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
@@ -94,7 +95,7 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 	public String getDummyTable() {
 		return "SELECT 1";
 	}
-	
+
 	@Override 
 	public String getSQLLexicalFormBoolean(boolean value) {
 		return value ? 	"TRUE" : "FALSE";
