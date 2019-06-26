@@ -244,7 +244,7 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			/* NEGATION
 			not supported yet */
             negationManifest + "subset-by-exclusion-nex-1",
-			negationManifest + "subset-by-exclusion-minus-1",
+//			negationManifest + "subset-by-exclusion-minus-1",
 			negationManifest + "temporal-proximity-by-exclusion-nex-1",
 			negationManifest + "subset-01",
 			negationManifest + "subset-02",
@@ -252,8 +252,8 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 			negationManifest + "subset-03",
 			negationManifest + "exists-01",
 			negationManifest + "exists-02",
-			negationManifest + "full-minuend",
-			negationManifest + "partial-minuend",
+//			negationManifest + "full-minuend",
+//			negationManifest + "partial-minuend",
 
 			/* EXISTS
 			not supported yet */
