@@ -72,72 +72,65 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
             ConstructionNode constructionNode = (ConstructionNode)tree.getRootNode();
             if (tree.getChildren().size() == 1 && tree.getChildren().get(0).getRootNode() instanceof InnerJoinNode) {
                 IQTree joinTree = tree.getChildren().get(0);
-                InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
-                ImmutableSet<Variable> answerVariables = Stream.concat(
-                        constructionNode.getSubstitution().getImmutableMap().values().stream()
-                                .flatMap(ImmutableTerm::getVariableStream),
-                        joinNode.getOptionalFilterCondition()
-                                .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
-                            .collect(ImmutableCollectors.toSet());
-                System.out.println("CQC " + tree + " WITH " + answerVariables);
+                if (joinTree.getChildren().size() < 2) {
+                    System.out.println("CQC: NOTHING TO OPTIMIZE");
+                    return query;
+                }
                 if (joinTree.getChildren().stream().anyMatch(c -> !(c.getRootNode() instanceof DataNode))) {
                     System.out.println("CQC PANIC - NOT A JOIN OF DATA ATOMS");
                 }
                 else {
-                    if (joinTree.getChildren().size() < 2) {
-                        System.out.println("CQC: NOTHING TO OPTIMIZE");
-                        return query;
-                    }
-
-                    ImmutableList<Variable> avList = ImmutableList.copyOf(answerVariables);
+                    InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
+                    ImmutableList<Variable> answerVariables = Stream.concat(
+                            constructionNode.getSubstitution().getImmutableMap().values().stream()
+                                    .flatMap(ImmutableTerm::getVariableStream),
+                            joinNode.getOptionalFilterCondition()
+                                    .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
+                            .collect(ImmutableCollectors.toSet()).stream() // remove duplicates
+                            .collect(ImmutableCollectors.toList());
 
                     List<IQTree> children = joinTree.getChildren();
                     int currentIndex = 0;
                     while (currentIndex < children.size()) {
                         ImmutableList.Builder<IQTree> builder = ImmutableList.builder();
-                        for (int j = 0; j < children.size(); j++)
-                            if (currentIndex != j)
-                                builder.add(children.get(j));
+                        for (int i = 0; i < children.size(); i++)
+                            if (i != currentIndex)
+                                builder.add(children.get(i));
                         ImmutableList<IQTree> subChildren = builder.build();
 
-                        if (!subChildren.stream()
+                        if (subChildren.stream()
                                 .flatMap(a -> a.getVariables().stream())
                                 .collect(ImmutableCollectors.toSet())
                                 .containsAll(answerVariables)) {
-                            currentIndex++;
-                            continue;
-                        }
 
-                        System.out.println("CHECK H: " + children + " TO " + subChildren);
-
-                        ImmutableList<DataAtom<AtomPredicate>> atoms = children.stream()
-                                .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
-                                .collect(ImmutableCollectors.toList());
-                        ImmutableList<DataAtom<AtomPredicate>> subAtoms = subChildren.stream()
-                                .map(n -> ((DataNode<AtomPredicate>)n.getRootNode()).getProjectionAtom())
-                                .collect(ImmutableCollectors.toList());
-                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(avList, subAtoms), new ImmutableCQ<>(avList, atoms))) {
-                            System.out.println("POSITIVE");
-                            children = subChildren;
-                            if (children.size() < 2)
-                                break;
-                            currentIndex = 0; // reset
+                            ImmutableList<DataAtom<AtomPredicate>> atoms = children.stream()
+                                    .map(n -> ((DataNode<AtomPredicate>) n.getRootNode()).getProjectionAtom())
+                                    .collect(ImmutableCollectors.toList());
+                            ImmutableList<DataAtom<AtomPredicate>> subAtoms = subChildren.stream()
+                                    .map(n -> ((DataNode<AtomPredicate>) n.getRootNode()).getProjectionAtom())
+                                    .collect(ImmutableCollectors.toList());
+                            if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables, subAtoms), new ImmutableCQ<>(answerVariables, atoms))) {
+                                children = subChildren;
+                                if (children.size() < 2)
+                                    break;
+                                currentIndex = 0; // reset
+                            }
+                            else
+                                currentIndex++;
                         }
-                        else {
-                            System.out.println("NEGATIVE");
+                        else
                             currentIndex++;
-                        }
                     }
 
                     return iqFactory.createIQ(
                             query.getProjectionAtom(),
                             iqFactory.createUnaryIQTree(
-                                (ConstructionNode)tree.getRootNode(),
+                                    (ConstructionNode)tree.getRootNode(),
                                     (children.size() < 2)
-                                        ? (joinNode.getOptionalFilterCondition().isPresent()
-                                            ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get()), children.get(0))
-                                            : children.get(0))
-                                        : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
+                                            ? (joinNode.getOptionalFilterCondition().isPresent()
+                                                    ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get()), children.get(0))
+                                                    : children.get(0))
+                                            : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
                 }
             }
 
