@@ -5,17 +5,10 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
 
-/**
- * Abstraction for LeftJoinRelation and explicit InnerJoinRelation
- */
-public interface BinaryJoinExpression extends SQLExpression {
+public interface SQLNaryJoinExpression extends SQLExpression {
 
-    SQLExpression getLeft();
-    SQLExpression getRight();
+    ImmutableList <SQLExpression> getJoinedExpressions();
 
     Optional<ImmutableExpression> getFilterCondition();
-
-    ImmutableList<? extends SQLExpression> getSubExpressions();
-
 
 }

@@ -179,8 +179,8 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
         QueryModifierSplit queryModifierSplit = splitQueryModifiers(normalizedSubTree);
 
-        NativeNode subNativeNode = legacyIQTree2NativeNodeGenerator.generate(
-                queryModifierSplit.treeToConvertUsingLegacyConverter, metadata);
+        NativeNode subNativeNode = defaultIQTree2NativeNodeGenerator.generate(
+                queryModifierSplit.treeToConvertUsingLegacyConverter, metadata.getDBParameters());
 
         if (queryModifierSplit.ancestors.isEmpty())
             return subNativeNode;
