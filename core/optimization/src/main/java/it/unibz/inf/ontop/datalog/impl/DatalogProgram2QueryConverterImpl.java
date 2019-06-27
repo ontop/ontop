@@ -175,7 +175,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                                   Optional<ImmutableQueryModifiers> optionalModifiers) throws InvalidDatalogProgramException {
 
         ImmutableList<IQ> convertedDefinitions = atomDefinitions.stream()
-                .map(d -> datalogRuleConverter.convertDatalogRule(d, tablePredicates, Optional.empty(), iqFactory))
+                .map(d -> datalogRuleConverter.convertDatalogRule(d, tablePredicates, iqFactory))
                 .collect(ImmutableCollectors.toList());
 
         return optionalModifiers.isPresent()

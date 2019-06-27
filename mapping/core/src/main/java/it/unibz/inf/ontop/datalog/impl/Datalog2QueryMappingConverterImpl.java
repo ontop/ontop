@@ -121,10 +121,7 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
     private IQ convertDatalogRule(CQIE datalogRule, ImmutableSet<Predicate> extensionalPredicates) {
         IQ directlyConvertedIQ = datalogRule2QueryConverter.convertDatalogRule(
-                datalogRule,
-                extensionalPredicates,
-                Optional.empty(),
-                iqFactory);
+                datalogRule, extensionalPredicates, iqFactory);
 
         return noNullValueEnforcer.transform(directlyConvertedIQ)
                 .liftBinding();

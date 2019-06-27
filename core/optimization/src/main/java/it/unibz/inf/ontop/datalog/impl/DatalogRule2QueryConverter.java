@@ -90,7 +90,7 @@ public class DatalogRule2QueryConverter {
      * TODO: describe
      */
     public IQ convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates,
-                                 Optional<ImmutableQueryModifiers> optionalModifiers, IntermediateQueryFactory iqFactory)
+                                 IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
@@ -102,26 +102,22 @@ public class DatalogRule2QueryConverter {
 
         List<Function> bodyAtoms = List.iterableList(datalogRule.getBody());
         if (bodyAtoms.isEmpty()) {
-            return createFact(topConstructionNode, optionalModifiers, projectionAtom, iqFactory);
+            return createFact(topConstructionNode, projectionAtom, iqFactory);
         }
         else {
-            return createDefinition(topConstructionNode, optionalModifiers, projectionAtom, tablePredicates,
+            return createDefinition(topConstructionNode, projectionAtom, tablePredicates,
                     bodyAtoms, iqFactory);
         }
     }
 
     private static IQ createFact(ConstructionNode topConstructionNode,
-                                 Optional<ImmutableQueryModifiers> optionalModifiers,
                                  DistinctVariableOnlyDataAtom projectionAtom, IntermediateQueryFactory iqFactory) {
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
-        IQTree tree = optionalModifiers
-                .map(m -> m.insertAbove(constructionTree, iqFactory))
-                .orElse(constructionTree);
-        return iqFactory.createIQ(projectionAtom, tree);
+        return iqFactory.createIQ(projectionAtom, constructionTree);
     }
 
 
-    private IQ createDefinition(ConstructionNode topConstructionNode, Optional<ImmutableQueryModifiers> optionalModifiers,
+    private IQ createDefinition(ConstructionNode topConstructionNode,
                                 DistinctVariableOnlyDataAtom projectionAtom,
                                 Collection<Predicate> tablePredicates,
                                 List<Function> bodyAtoms,
@@ -132,11 +128,7 @@ public class DatalogRule2QueryConverter {
             IQTree bodyTree = convertAtoms(bodyAtoms, tablePredicates, iqFactory);
             IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, bodyTree);
 
-            IQTree tree = optionalModifiers
-                    .map(m -> m.insertAbove(constructionTree, iqFactory))
-                    .orElse(constructionTree);
-
-            return iqFactory.createIQ(projectionAtom, tree);
+            return iqFactory.createIQ(projectionAtom, constructionTree);
         }
         catch (IntermediateQueryBuilderException e) {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException(e.getMessage());
