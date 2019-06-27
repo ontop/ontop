@@ -2,34 +2,36 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
 import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
 
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
@@ -43,56 +45,59 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final ImmutabilityTools immutabilityTools;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final DatalogConversionTools datalogConversionTools;
+    private final CoreUtilsFactory coreUtilsFactory;
+    private final SubstitutionFactory substitutionFactory;
 
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(SpecificationFactory mappingFactory, AtomFactory atomFactory,
                                               TermFactory termFactory,
                                               ImmutabilityTools immutabilityTools, IntermediateQueryFactory iqFactory,
-                                              UnionBasedQueryMerger queryMerger, DatalogConversionTools datalogConversionTools) {
+                                              UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
-        this.datalogConversionTools = datalogConversionTools;
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
     public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
                            UriTemplateMatcher uriTemplateMatcher) {
 
-        ImmutableMultimap<Term, IQ> classes = ontology.getClassAssertions().stream()
-                .map(ca -> atomFactory.getMutableTripleHeadAtom(
+        ImmutableList<IQ> classes = ontology.getClassAssertions().stream()
+                .map(ca -> convertFact(
                         getTerm(ca.getIndividual(), uriTemplateMatcher),
-                        ca.getConcept().getIRI()))
-                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(2), a -> convertFact(a)));
+                        getIRI(RDF.TYPE),
+                        getIRI(ca.getConcept().getIRI())))
+                .collect(ImmutableCollectors.toList());
 
-        ImmutableMultimap<Term, IQ> properties = Stream.concat(Stream.concat(
+        ImmutableList<IQ> properties = Stream.concat(Stream.concat(
                 ontology.getObjectPropertyAssertions().stream()
-                    .map(pa -> atomFactory.getMutableTripleHeadAtom(
-                            getTerm(pa.getSubject(), uriTemplateMatcher),
-                            pa.getProperty().getIRI(),
-                            getTerm(pa.getObject(), uriTemplateMatcher))),
+                        .map(pa -> convertFact(
+                                getTerm(pa.getSubject(), uriTemplateMatcher),
+                                getIRI(pa.getProperty().getIRI()),
+                                getTerm(pa.getObject(), uriTemplateMatcher))),
 
                 ontology.getDataPropertyAssertions().stream()
-                    .map(da -> atomFactory.getMutableTripleHeadAtom(
-                            getTerm(da.getSubject(), uriTemplateMatcher),
-                            da.getProperty().getIRI(),
-                            getValueConstant(da.getValue())))),
+                        .map(da -> convertFact(
+                                getTerm(da.getSubject(), uriTemplateMatcher),
+                                getIRI(da.getProperty().getIRI()),
+                                getValueConstant(da.getValue())))),
 
                 isOntologyAnnotationQueryingEnabled
-                    ? ontology.getAnnotationAssertions().stream()
-                        .map(aa -> atomFactory.getMutableTripleHeadAtom(
-                            getTerm(aa.getSubject(), uriTemplateMatcher),
-                            aa.getProperty().getIRI(),
-                            (aa.getValue() instanceof ValueConstant)
-                                    ? getValueConstant((ValueConstant) aa.getValue())
-                                    : getTerm((ObjectConstant) aa.getValue(), uriTemplateMatcher)))
-                    : Stream.of())
-                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(1), a -> convertFact(a)));
+                        ? ontology.getAnnotationAssertions().stream()
+                        .map(aa -> convertFact(
+                                getTerm(aa.getSubject(), uriTemplateMatcher),
+                                getIRI(aa.getProperty().getIRI()),
+                                (aa.getValue() instanceof ValueConstant)
+                                        ? getValueConstant((ValueConstant) aa.getValue())
+                                        : getTerm((ObjectConstant) aa.getValue(), uriTemplateMatcher)))
+                        : Stream.of())
+                .collect(ImmutableCollectors.toList());
 
         LOGGER.debug("Appended {} object property assertions as fact rules", ontology.getObjectPropertyAssertions().size());
         LOGGER.debug("Appended {} data property assertions as fact rules", ontology.getDataPropertyAssertions().size());
@@ -116,10 +121,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         return a;
     }
 
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableMultimap<Term, IQ> heads) {
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableList<IQ> iqs) {
 
-        return heads.keySet().stream()
-                .map(iri -> queryMerger.mergeDefinitions(heads.get(iri)).get()
+        ImmutableMultimap<IRI, IQ> heads = iqs.stream()
+                .collect(ImmutableCollectors.toMultimap(iq -> MappingTools.extractRDFPredicate(iq).getIri(), iq -> iq));
+
+        return heads.asMap().entrySet().stream()
+                .map(e -> queryMerger.mergeDefinitions(e.getValue()).get()
                         .liftBinding())
                 .map(iq -> Tables.immutableCell(
                         (RDFAtomPredicate) iq.getProjectionAtom().getPredicate(),
@@ -129,26 +137,73 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
 
-    public IQ convertFact(Function head)
+    public IQ convertFact(Term subject, Term property, Term object)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(head);
+        Function head = atomFactory.getMutableTripleAtom(subject, property, object);
 
-        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+        Predicate datalogAtomPredicate = head.getFunctionSymbol();
+        AtomPredicate atomPredicate = (AtomPredicate) datalogAtomPredicate;
+
+        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();
+
+        VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
+        for (Term term : head.getTerms()) {
+            Variable newArgument;
+
+            /*
+             * If a projected variable occurs multiple times as an head argument,
+             * rename it and keep track of the equivalence.
+             *
+             */
+            if (term instanceof Variable) {
+                Variable originalVariable = (Variable) term;
+                newArgument = projectedVariableGenerator.generateNewVariableIfConflicting(originalVariable);
+                if (!newArgument.equals(originalVariable)) {
+                    bindingBuilder.put(newArgument, originalVariable);
+                }
+            }
+            /*
+             * Ground-term: replace by a variable and add a binding.
+             * (easier to merge than putting the ground term in the data atom).
+             */
+            else if (isGroundTerm(term)) {
+                Variable newVariable = projectedVariableGenerator.generateNewVariable();
+                newArgument = newVariable;
+                bindingBuilder.put(newVariable, castIntoGroundTerm(term));
+            }
+            /*
+             * Non-ground functional term
+             */
+            else {
+                ImmutableTerm nonVariableTerm = immutabilityTools.convertIntoImmutableTerm(term);
+                Variable newVariable = projectedVariableGenerator.generateNewVariable();
+                newArgument = newVariable;
+                bindingBuilder.put(newVariable, nonVariableTerm);
+            }
+            argListBuilder.add(newArgument);
+        }
+
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                targetAtom.getSubstitution());
+                substitution);
 
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
         return iqFactory.createIQ(projectionAtom, constructionTree);
     }
 
 
-
     // BNODES are not supported here
     private Term getTerm(ObjectConstant o, UriTemplateMatcher uriTemplateMatcher) {
-        IRIConstant iri = (IRIConstant)o;
+        IRIConstant iri = (IRIConstant) o;
         return immutabilityTools.convertToMutableFunction(uriTemplateMatcher.generateURIFunction(iri.getIRI().getIRIString()));
+    }
+
+    private Term getIRI(IRI iri) {
+        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 
     private Term getValueConstant(ValueConstant o) {
