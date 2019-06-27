@@ -10,7 +10,5 @@ import java.util.stream.Stream;
 
 public interface Mapping2DatalogConverter {
 
-    Stream<CQIE> convert(Mapping mapping);
-
     ImmutableMap<CQIE,PPMappingAssertionProvenance> convert(MappingWithProvenance mappingWithProvenance);
 }
