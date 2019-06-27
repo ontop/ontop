@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
-import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
 
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
@@ -41,7 +39,6 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final SpecificationFactory mappingFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreUtilsFactory coreUtilsFactory;
@@ -51,12 +48,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     @Inject
     public LegacyABoxFactIntoMappingConverter(SpecificationFactory mappingFactory, AtomFactory atomFactory,
                                               TermFactory termFactory,
-                                              ImmutabilityTools immutabilityTools, IntermediateQueryFactory iqFactory,
-                                              UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+                                              IntermediateQueryFactory iqFactory,
+                                              UnionBasedQueryMerger queryMerger,
+                                              CoreUtilsFactory coreUtilsFactory,
+                                              SubstitutionFactory substitutionFactory) {
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.coreUtilsFactory = coreUtilsFactory;
@@ -103,21 +101,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         LOGGER.debug("Appended {} annotation assertions as fact rules", ontology.getAnnotationAssertions().size());
         LOGGER.debug("Appended {} class assertions from ontology as fact rules", ontology.getClassAssertions().size());
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = table(classes);
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = table(properties);
-
-        if (!classTable.isEmpty())
-            System.out.println("CLASS TABLE " + classTable);
-        if (!propertyTable.isEmpty())
-            System.out.println("PROPERTY TABLE " + propertyTable);
-
         Mapping a = mappingFactory.createMapping(
                 mappingFactory.createMetadata(
                         //TODO: parse the ontology prefixes ??
                         mappingFactory.createPrefixManager(ImmutableMap.of()),
                         uriTemplateMatcher),
-                propertyTable,
-                classTable);
+                table(properties),
+                table(classes));
 
         return a;
     }
@@ -136,28 +126,21 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
 
-    public IQ convertFact(Term subject, Term property, Term object) {
-
-        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
-        ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();
+    private IQ convertFact(ImmutableTerm subject, ImmutableTerm property, ImmutableTerm object) {
 
         VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-        for (Term term : ImmutableList.of(subject, property, object)) {
-            if (!isGroundTerm(term))
-                System.out.println("ABOX PANIC");
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctTripleAtom(
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable());
 
-            Variable newVariable = projectedVariableGenerator.generateNewVariable();
-            bindingBuilder.put(newVariable, castIntoGroundTerm(term));
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+                projectionAtom.getTerm(0), subject,
+                projectionAtom.getTerm(1), property,
+                projectionAtom.getTerm(2), object);
 
-            argListBuilder.add(newVariable);
-        }
-
-        ImmutableList<Variable> vars = argListBuilder.build();
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctTripleAtom(vars.get(0), vars.get(1), vars.get(2));
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
-
-        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
-                substitution);
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
+                projectionAtom.getVariables(), substitution);
 
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
         return iqFactory.createIQ(projectionAtom, constructionTree);
@@ -165,21 +148,21 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
 
     // BNODES are not supported here
-    private Term getTerm(ObjectConstant o, UriTemplateMatcher uriTemplateMatcher) {
+    private ImmutableTerm getTerm(ObjectConstant o, UriTemplateMatcher uriTemplateMatcher) {
         IRIConstant iri = (IRIConstant) o;
-        return immutabilityTools.convertToMutableFunction(uriTemplateMatcher.generateURIFunction(iri.getIRI().getIRIString()));
+        return uriTemplateMatcher.generateURIFunction(iri.getIRI().getIRIString());
     }
 
-    private Term getIRI(IRI iri) {
-        return termFactory.getUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+    private ImmutableTerm getIRI(IRI iri) {
+        return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
     }
 
-    private Term getValueConstant(ValueConstant o) {
-        return o.getType().getLanguageTag()
+    private ImmutableTerm getValueConstant(ValueConstant o) {
+        return castIntoGroundTerm(o.getType().getLanguageTag()
                 .map(lang ->
                         termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString()))
                 .orElseGet(() ->
-                        termFactory.getTypedTerm(o, o.getType()));
+                        termFactory.getTypedTerm(o, o.getType())));
     }
 
 
