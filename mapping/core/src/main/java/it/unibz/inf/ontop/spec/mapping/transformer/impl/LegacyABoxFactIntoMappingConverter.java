@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -123,33 +122,25 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableList<IQ> iqs) {
 
-        ImmutableMultimap<IRI, IQ> heads = iqs.stream()
-                .collect(ImmutableCollectors.toMultimap(iq -> MappingTools.extractRDFPredicate(iq).getIri(), iq -> iq));
-
-        return heads.asMap().entrySet().stream()
-                .map(e -> queryMerger.mergeDefinitions(e.getValue()).get()
-                        .liftBinding())
-                .map(iq -> Tables.immutableCell(
-                        (RDFAtomPredicate) iq.getProjectionAtom().getPredicate(),
-                        MappingTools.extractRDFPredicate(iq).getIri(),
-                        iq))
+        return iqs.stream()
+                // group by IRI
+                .collect(ImmutableCollectors.toMultimap(iq -> MappingTools.extractRDFPredicate(iq).getIri(), iq -> iq))
+                .asMap().entrySet().stream()
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate) e.getValue().iterator().next().getProjectionAtom().getPredicate(),
+                        e.getKey(),
+                        queryMerger.mergeDefinitions(e.getValue()).get().liftBinding()))
                 .collect(ImmutableCollectors.toTable());
     }
 
 
-    public IQ convertFact(Term subject, Term property, Term object)
-            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-
-        Function head = atomFactory.getMutableTripleAtom(subject, property, object);
-
-        Predicate datalogAtomPredicate = head.getFunctionSymbol();
-        AtomPredicate atomPredicate = (AtomPredicate) datalogAtomPredicate;
+    public IQ convertFact(Term subject, Term property, Term object) {
 
         ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
         ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();
 
         VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-        for (Term term : head.getTerms()) {
+        for (Term term : ImmutableList.of(subject, property, object)) {
             Variable newArgument;
 
             /*
@@ -185,7 +176,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
             argListBuilder.add(newArgument);
         }
 
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
+        ImmutableList<Variable> vars = argListBuilder.build();
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctTripleAtom(vars.get(0), vars.get(1), vars.get(2));
         ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
