@@ -2,16 +2,20 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
+import it.unibz.inf.ontop.datalog.impl.DatalogProgram2QueryConverterImpl;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -30,43 +34,43 @@ import java.util.stream.Stream;
 
 public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingConverter {
 
-    private final SpecificationFactory mappingFactory;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyABoxFactIntoMappingConverter.class);
+
+    private final SpecificationFactory mappingFactory;
     private final AtomFactory atomFactory;
     private final TermFactory termFactory;
-    private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
     private final IntermediateQueryFactory iqFactory;
-    private final DatalogRule2QueryConverter datalogRuleConverter;
     private final UnionBasedQueryMerger queryMerger;
+    private final DatalogConversionTools datalogConversionTools;
 
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(SpecificationFactory mappingFactory, AtomFactory atomFactory,
-                                              TermFactory termFactory, DatalogFactory datalogFactory,
-                                              ImmutabilityTools immutabilityTools, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter, UnionBasedQueryMerger queryMerger) {
+                                              TermFactory termFactory,
+                                              ImmutabilityTools immutabilityTools, IntermediateQueryFactory iqFactory,
+                                              UnionBasedQueryMerger queryMerger, DatalogConversionTools datalogConversionTools) {
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
-        this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
-        this.datalogRuleConverter = datalogRuleConverter;
         this.queryMerger = queryMerger;
+        this.datalogConversionTools = datalogConversionTools;
     }
 
     @Override
     public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled,
                            UriTemplateMatcher uriTemplateMatcher) {
 
-        ImmutableMultimap<Term, Function> classes = ontology.getClassAssertions().stream()
+        ImmutableMultimap<Term, IQ> classes = ontology.getClassAssertions().stream()
                 .map(ca -> atomFactory.getMutableTripleHeadAtom(
                         getTerm(ca.getIndividual(), uriTemplateMatcher),
                         ca.getConcept().getIRI()))
-                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(2), a -> a));
+                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(2), a -> convertFact(a)));
 
-        ImmutableMultimap<Term, Function> properties = Stream.concat(Stream.concat(
+        ImmutableMultimap<Term, IQ> properties = Stream.concat(Stream.concat(
                 ontology.getObjectPropertyAssertions().stream()
                     .map(pa -> atomFactory.getMutableTripleHeadAtom(
                             getTerm(pa.getSubject(), uriTemplateMatcher),
@@ -88,7 +92,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                                     ? getValueConstant((ValueConstant) aa.getValue())
                                     : getTerm((ObjectConstant) aa.getValue(), uriTemplateMatcher)))
                     : Stream.of())
-                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(1), a -> a));
+                .collect(ImmutableCollectors.toMultimap(a -> a.getTerm(1), a -> convertFact(a)));
 
         LOGGER.debug("Appended {} object property assertions as fact rules", ontology.getObjectPropertyAssertions().size());
         LOGGER.debug("Appended {} data property assertions as fact rules", ontology.getDataPropertyAssertions().size());
@@ -112,19 +116,31 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         return a;
     }
 
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableMultimap<Term, Function> heads) {
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableMultimap<Term, IQ> heads) {
 
         return heads.keySet().stream()
-                .map(iri -> queryMerger.mergeDefinitions(
-                        heads.get(iri).stream()
-                                .map(h -> datalogRuleConverter.convertDatalogRule(datalogFactory.getCQIE(h, Collections.emptyList()), ImmutableSet.of(), Optional.empty(), iqFactory))
-                                .collect(ImmutableCollectors.toList())).get())
-                .map(IQ::liftBinding)
+                .map(iri -> queryMerger.mergeDefinitions(heads.get(iri)).get()
+                        .liftBinding())
                 .map(iq -> Tables.immutableCell(
                         (RDFAtomPredicate) iq.getProjectionAtom().getPredicate(),
                         MappingTools.extractRDFPredicate(iq).getIri(),
                         iq))
                 .collect(ImmutableCollectors.toTable());
+    }
+
+
+    public IQ convertFact(Function head)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+
+        TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(head);
+
+        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution());
+
+        IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
+        return iqFactory.createIQ(projectionAtom, constructionTree);
     }
 
 
