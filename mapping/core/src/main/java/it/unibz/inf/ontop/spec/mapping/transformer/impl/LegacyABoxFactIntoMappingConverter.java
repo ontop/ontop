@@ -108,6 +108,8 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
         if (!classTable.isEmpty())
             System.out.println("CLASS TABLE " + classTable);
+        if (!propertyTable.isEmpty())
+            System.out.println("PROPERTY TABLE " + propertyTable);
 
         Mapping a = mappingFactory.createMapping(
                 mappingFactory.createMetadata(
@@ -141,39 +143,13 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
         VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
         for (Term term : ImmutableList.of(subject, property, object)) {
-            Variable newArgument;
+            if (!isGroundTerm(term))
+                System.out.println("ABOX PANIC");
 
-            /*
-             * If a projected variable occurs multiple times as an head argument,
-             * rename it and keep track of the equivalence.
-             *
-             */
-            if (term instanceof Variable) {
-                Variable originalVariable = (Variable) term;
-                newArgument = projectedVariableGenerator.generateNewVariableIfConflicting(originalVariable);
-                if (!newArgument.equals(originalVariable)) {
-                    bindingBuilder.put(newArgument, originalVariable);
-                }
-            }
-            /*
-             * Ground-term: replace by a variable and add a binding.
-             * (easier to merge than putting the ground term in the data atom).
-             */
-            else if (isGroundTerm(term)) {
-                Variable newVariable = projectedVariableGenerator.generateNewVariable();
-                newArgument = newVariable;
-                bindingBuilder.put(newVariable, castIntoGroundTerm(term));
-            }
-            /*
-             * Non-ground functional term
-             */
-            else {
-                ImmutableTerm nonVariableTerm = immutabilityTools.convertIntoImmutableTerm(term);
-                Variable newVariable = projectedVariableGenerator.generateNewVariable();
-                newArgument = newVariable;
-                bindingBuilder.put(newVariable, nonVariableTerm);
-            }
-            argListBuilder.add(newArgument);
+            Variable newVariable = projectedVariableGenerator.generateNewVariable();
+            bindingBuilder.put(newVariable, castIntoGroundTerm(term));
+
+            argListBuilder.add(newVariable);
         }
 
         ImmutableList<Variable> vars = argListBuilder.build();
