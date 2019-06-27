@@ -174,26 +174,13 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                                   Collection<Predicate> tablePredicates,
                                                   Optional<ImmutableQueryModifiers> optionalModifiers) throws InvalidDatalogProgramException {
 
-        // ROMAN (27 JUNE 2019): queryMerger does the same job, so the switch below is redundant
-        switch(atomDefinitions.size()) {
-            case 0:
-                return Optional.empty();
-            case 1:
-                CQIE definition = atomDefinitions.iterator().next();
-                return Optional.of(datalogRuleConverter.convertDatalogRule(definition, tablePredicates, optionalModifiers,
-                        iqFactory));
-            default:
-                List<IQ> convertedDefinitions = new ArrayList<>();
-                for (CQIE datalogAtomDefinition : atomDefinitions) {
+        ImmutableList<IQ> convertedDefinitions = atomDefinitions.stream()
+                .map(d -> datalogRuleConverter.convertDatalogRule(d, tablePredicates, Optional.empty(), iqFactory))
+                .collect(ImmutableCollectors.toList());
 
-                    convertedDefinitions.add(
-                            datalogRuleConverter.convertDatalogRule(datalogAtomDefinition, tablePredicates,
-                                    Optional.empty(), iqFactory));
-                }
-                return optionalModifiers.isPresent()
-                        ? queryMerger.mergeDefinitions(convertedDefinitions, optionalModifiers.get())
-                        : queryMerger.mergeDefinitions(convertedDefinitions);
-        }
+        return optionalModifiers.isPresent()
+                ? queryMerger.mergeDefinitions(convertedDefinitions, optionalModifiers.get())
+                : queryMerger.mergeDefinitions(convertedDefinitions);
     }
 
     /**
