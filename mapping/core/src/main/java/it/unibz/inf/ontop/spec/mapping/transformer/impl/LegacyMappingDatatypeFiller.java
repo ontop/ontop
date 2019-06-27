@@ -2,13 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
-import it.unibz.inf.ontop.datalog.Mapping2DatalogConverter;
+import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -16,6 +15,10 @@ import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.AbstractMap;
+import java.util.stream.Stream;
 
 /**
  * Legacy code to infer datatypes not declared in the targets of mapping assertions.
@@ -26,28 +29,31 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
     private final Datalog2QueryMappingConverter datalog2MappingConverter;
-    private final Mapping2DatalogConverter mapping2DatalogConverter;
     private final OntopMappingSettings settings;
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
+    private final QueryUnionSplitter unionSplitter;
+    private final IQ2DatalogTranslator iq2DatalogTranslator;
+    private final UnionFlattener unionNormalizer;
 
     @Inject
     private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
-                                        Mapping2DatalogConverter mapping2DatalogConverter,
                                         OntopMappingSettings settings, Relation2Predicate relation2Predicate,
                                         TermFactory termFactory, TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools) {
+                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer) {
         this.datalog2MappingConverter = datalog2MappingConverter;
-        this.mapping2DatalogConverter = mapping2DatalogConverter;
         this.settings = settings;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.immutabilityTools = immutabilityTools;
+        this.unionSplitter = unionSplitter;
+        this.iq2DatalogTranslator = iq2DatalogTranslator;
+        this.unionNormalizer = unionNormalizer;
     }
 
     /***
@@ -75,7 +81,11 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,
                 settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping2DatalogConverter.convert(mapping);
+
+        ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping.getProvenanceMap().entrySet().stream()
+                .flatMap(e -> convertMappingQuery(e.getKey())
+                        .map(r -> new AbstractMap.SimpleEntry<>(r, e.getValue())))
+                .collect(ImmutableCollectors.toMap());;
 
         //CQIEs are mutable
         for(CQIE rule : ruleMap.keySet()){
@@ -83,4 +93,12 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         }
         return datalog2MappingConverter.convertMappingRules(ruleMap, mapping.getMetadata());
     }
+
+    private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
+        return unionSplitter.splitUnion(unionNormalizer.optimize(mappingQuery))
+                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                .collect(ImmutableCollectors.toSet())
+                .stream();
+    }
+
 }
