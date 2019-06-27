@@ -2,11 +2,14 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
+import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -21,8 +24,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -35,19 +37,23 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final TermFactory termFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
-    private final DatalogProgram2QueryConverter converter;
+    private final IntermediateQueryFactory iqFactory;
+    private final DatalogRule2QueryConverter datalogRuleConverter;
+    private final UnionBasedQueryMerger queryMerger;
 
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(SpecificationFactory mappingFactory, AtomFactory atomFactory,
                                               TermFactory termFactory, DatalogFactory datalogFactory,
-                                              ImmutabilityTools immutabilityTools, DatalogProgram2QueryConverter converter) {
+                                              ImmutabilityTools immutabilityTools, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter, UnionBasedQueryMerger queryMerger) {
         this.mappingFactory = mappingFactory;
         this.atomFactory = atomFactory;
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
-        this.converter = converter;
+        this.iqFactory = iqFactory;
+        this.datalogRuleConverter = datalogRuleConverter;
+        this.queryMerger = queryMerger;
     }
 
     @Override
@@ -109,15 +115,10 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> table(ImmutableMultimap<Term, Function> heads) {
 
         return heads.keySet().stream()
-                .map(iri -> converter.convertDatalogDefinitions(
+                .map(iri -> queryMerger.mergeDefinitions(
                         heads.get(iri).stream()
-                                .map(h -> datalogFactory.getCQIE(h, Collections.emptyList()))
-                                .collect(ImmutableCollectors.toList()),
-                        ImmutableSet.of(),
-                        Optional.empty()
-                ))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                                .map(h -> datalogRuleConverter.convertDatalogRule(datalogFactory.getCQIE(h, Collections.emptyList()), ImmutableSet.of(), Optional.empty(), iqFactory))
+                                .collect(ImmutableCollectors.toList())).get())
                 .map(IQ::liftBinding)
                 .map(iq -> Tables.immutableCell(
                         (RDFAtomPredicate) iq.getProjectionAtom().getPredicate(),
@@ -125,6 +126,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                         iq))
                 .collect(ImmutableCollectors.toTable());
     }
+
 
 
     // BNODES are not supported here
@@ -140,8 +142,6 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 .orElseGet(() ->
                         termFactory.getTypedTerm(o, o.getType()));
     }
-
-
 
 
 }

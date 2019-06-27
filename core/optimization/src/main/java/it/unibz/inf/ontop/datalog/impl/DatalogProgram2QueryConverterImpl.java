@@ -174,6 +174,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                                   Collection<Predicate> tablePredicates,
                                                   Optional<ImmutableQueryModifiers> optionalModifiers) throws InvalidDatalogProgramException {
 
+        // ROMAN (27 JUNE 2019): queryMerger does the same job, so the switch below is redundant
         switch(atomDefinitions.size()) {
             case 0:
                 return Optional.empty();
