@@ -126,7 +126,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
                 .collect(ImmutableCollectors.toMultimap(iq -> MappingTools.extractRDFPredicate(iq).getIri(), iq -> iq))
                 .asMap().entrySet().stream()
                 .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate) e.getValue().iterator().next().getProjectionAtom().getPredicate(),
+                        (RDFAtomPredicate) projectionAtom.getPredicate(),
                         e.getKey(),
                         queryMerger.mergeDefinitions(e.getValue()).get().liftBinding()))
                 .collect(ImmutableCollectors.toTable());
