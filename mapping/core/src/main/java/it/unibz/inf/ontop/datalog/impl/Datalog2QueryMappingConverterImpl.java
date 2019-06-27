@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +57,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
     @Override
     public Mapping convertMappingRules(ImmutableList<CQIE> mappingRules, MappingMetadata mappingMetadata) {
 
-
         ImmutableMultimap<Term, CQIE> ruleIndex = mappingRules.stream()
                 .collect(ImmutableCollectors.toMultimap(
                         r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))
@@ -65,13 +65,13 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                         r -> r
                 ));
 
-        ImmutableSet<Predicate> extensionalPredicates = ruleIndex.values().stream()
+        ImmutableSet<Predicate> extensionalPredicates = mappingRules.stream()
                 .flatMap(r -> r.getBody().stream())
                 .flatMap(Datalog2QueryTools::extractPredicates)
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQ> intermediateQueryList = ruleIndex.keySet().stream()
+        ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
                         ruleIndex.get(predicate),
                         extensionalPredicates,
@@ -82,28 +82,23 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 // In case some legacy implementations do not preserve IS_NOT_NULL conditions
                 .map(noNullValueEnforcer::transform)
                 .map(IQ::liftBinding)
+                .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = intermediateQueryList.stream()
-                .collect(ImmutableCollectors.toMap(
-                        iq -> iq,
-                        MappingTools::extractRDFPredicate
-                ));
-
         return specificationFactory.createMapping(mappingMetadata,
-                extractTable(iqClassificationMap, false),
-                extractTable(iqClassificationMap, true));
+                extractTable(intermediateQueryList, false),
+                extractTable(intermediateQueryList, true));
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
-            ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap, boolean isClass) {
+            ImmutableList<Map.Entry<MappingTools.RDFPredicateInfo, IQ>> iqClassificationMap, boolean isClass) {
 
-        return iqClassificationMap.entrySet().stream()
-                .filter(e -> e.getValue().isClass() == isClass)
+        return iqClassificationMap.stream()
+                .filter(e -> e.getKey().isClass() == isClass)
                 .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate) e.getKey().getProjectionAtom().getPredicate(),
-                        e.getValue().getIri(),
-                        e.getKey()))
+                        (RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
                 .collect(ImmutableCollectors.toTable());
     }
 
@@ -115,7 +110,6 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
                 .flatMap(r -> r.getBody().stream())
                 .flatMap(Datalog2QueryTools::extractPredicates)
                 .collect(ImmutableCollectors.toSet());
-
 
         ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
@@ -135,6 +129,5 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
         return noNullValueEnforcer.transform(directlyConvertedIQ)
                 .liftBinding();
     }
-
 
 }
