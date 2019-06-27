@@ -44,6 +44,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     private final CoreUtilsFactory coreUtilsFactory;
     private final SubstitutionFactory substitutionFactory;
 
+    private final DistinctVariableOnlyDataAtom projectionAtom;
 
     @Inject
     public LegacyABoxFactIntoMappingConverter(SpecificationFactory mappingFactory, AtomFactory atomFactory,
@@ -59,6 +60,12 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         this.queryMerger = queryMerger;
         this.coreUtilsFactory = coreUtilsFactory;
         this.substitutionFactory = substitutionFactory;
+
+        VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
+        projectionAtom = atomFactory.getDistinctTripleAtom(
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable(),
+                projectedVariableGenerator.generateNewVariable());
     }
 
     @Override
@@ -87,7 +94,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
                 isOntologyAnnotationQueryingEnabled
                         ? ontology.getAnnotationAssertions().stream()
-                        .map(aa -> convertFact(
+                            .map(aa -> convertFact(
                                 getTerm(aa.getSubject(), uriTemplateMatcher),
                                 getIRI(aa.getProperty().getIRI()),
                                 (aa.getValue() instanceof ValueConstant)
@@ -128,19 +135,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
 
     private IQ convertFact(ImmutableTerm subject, ImmutableTerm property, ImmutableTerm object) {
 
-        VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctTripleAtom(
-                projectedVariableGenerator.generateNewVariable(),
-                projectedVariableGenerator.generateNewVariable(),
-                projectedVariableGenerator.generateNewVariable());
-
-        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-                projectionAtom.getTerm(0), subject,
-                projectionAtom.getTerm(1), property,
-                projectionAtom.getTerm(2), object);
-
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
-                projectionAtom.getVariables(), substitution);
+                projectionAtom.getVariables(), substitutionFactory.getSubstitution(
+                        projectionAtom.getTerm(0), subject,
+                        projectionAtom.getTerm(1), property,
+                        projectionAtom.getTerm(2), object));
 
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());
         return iqFactory.createIQ(projectionAtom, constructionTree);
@@ -158,11 +157,11 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     private ImmutableTerm getValueConstant(ValueConstant o) {
-        return castIntoGroundTerm(o.getType().getLanguageTag()
+        return o.getType().getLanguageTag()
                 .map(lang ->
-                        termFactory.getTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString()))
+                        termFactory.getImmutableTypedTerm(termFactory.getConstantLiteral(o.getValue()), lang.getFullString()))
                 .orElseGet(() ->
-                        termFactory.getTypedTerm(o, o.getType())));
+                        termFactory.getImmutableTypedTerm(o, o.getType()));
     }
 
 
