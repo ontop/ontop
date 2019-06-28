@@ -144,22 +144,21 @@ public class TMappingProcessor {
                         s -> dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
-                                        .map(replaceHead(getNewHeadGen.apply(d), getIRI.apply(s.getRepresentative()))))
+                                        .map(replaceHead(getNewHeadGen, d, getIRI, s.getRepresentative())))
                                 .collect(getCollectorCQC(cqc))));
 
 	    return dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
                     .filter(populationFilter)
-                    .map(getIRI)
-                    .flatMap(i -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
-                            .map(replaceHead(getNewHeadGen.apply(s.getRepresentative()), i))
-                            .collect(ImmutableCollectors.toMultimap(m -> i, m -> m)).entries().stream()));
+                    .flatMap(d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
+                            .map(replaceHead(getNewHeadGen, s.getRepresentative(), getIRI, d))
+                            .collect(ImmutableCollectors.toMultimap(m -> getIRI.apply(d), m -> m)).entries().stream()));
     }
 
 
-    private java.util.function.Function<TMappingRule, TMappingRule> replaceHead(java.util.function.BiFunction<Function, IRI, Function> getNewHead, IRI iri) {
-	    return m -> new TMappingRule(getNewHead.apply(m.getHead(), iri), m);
+    private <T> java.util.function.Function<TMappingRule, TMappingRule> replaceHead(java.util.function.Function<T, BiFunction<Function, IRI, Function>> getNewHeadGen, T s, java.util.function.Function<T, IRI> getIRI, T d) {
+	    return m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHead(), getIRI.apply(d)), m);
     }
 
 	private IRI getIRI(ClassExpression child) {
