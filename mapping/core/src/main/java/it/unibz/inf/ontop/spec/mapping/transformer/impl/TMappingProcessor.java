@@ -99,7 +99,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
                         m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory, atomFactory, immutabilityTools)));
 
-        ImmutableMultimap<IRI, TMappingRule> index = Stream.concat(Stream.concat(
+        ImmutableMap<IRI, ImmutableList<TMappingRule>> index = Stream.concat(Stream.concat(
 
         saturate(reasoner.objectPropertiesDAG(),
                 p -> !p.isInverse() && !excludeFromTMappings.contains(p), originalMappingIndex,
@@ -113,15 +113,15 @@ public class TMappingProcessor {
                 s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), originalMappingIndex,
                 this::getIRI, this::getNewHeadC, cqc, c -> c instanceof OClass))
 
-                .collect(ImmutableCollectors.toMultimap());
+                .collect(ImmutableCollectors.toMap());
 
 		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
-                index.values().stream(),
+                index.values().stream().flatMap(l -> l.stream()),
                 originalMappingIndex.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
                         .filter(e -> !index.containsKey(e.getKey()))
-                        .flatMap(e -> e.getValue().stream().collect(getCollectorCQC(cqc)).stream()))
+                        .flatMap(e -> e.getValue().stream().collect(toListWithCQC(cqc)).stream()))
                 .map(m -> m.asCQIE())
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
@@ -129,7 +129,7 @@ public class TMappingProcessor {
 		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
 
-    private <T> Stream<Map.Entry<IRI, TMappingRule>> saturate(EquivalencesDAG<T> dag,
+    private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
                                                               Predicate<T> repFilter,
                                                               ImmutableMultimap<IRI, TMappingRule> originalMappingIndex,
                                                               java.util.function.Function<T, IRI> getIRI,
@@ -145,15 +145,18 @@ public class TMappingProcessor {
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
                                         .map(replaceHead(getNewHeadGen, d, getIRI, s.getRepresentative())))
-                                .collect(getCollectorCQC(cqc))));
+                                .collect(toListWithCQC(cqc))));
 
 	    return dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
                     .filter(populationFilter)
-                    .flatMap(d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
-                            .map(replaceHead(getNewHeadGen, s.getRepresentative(), getIRI, d))
-                            .collect(ImmutableCollectors.toMultimap(m -> getIRI.apply(d), m -> m)).entries().stream()));
+                    .collect(ImmutableCollectors.toMap(
+                            d -> getIRI.apply(d),
+                            d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
+                                    .map(replaceHead(getNewHeadGen, s.getRepresentative(), getIRI, d))
+                                    .collect(ImmutableCollectors.toList())))
+                    .entrySet().stream());
     }
 
 
@@ -216,7 +219,7 @@ public class TMappingProcessor {
 
 
 
-    private Collector<TMappingRule, BuilderWithCQC, ImmutableList<TMappingRule>> getCollectorCQC(CQContainmentCheckUnderLIDs cqc) {
+    private Collector<TMappingRule, BuilderWithCQC, ImmutableList<TMappingRule>> toListWithCQC(CQContainmentCheckUnderLIDs cqc) {
         return Collector.of(
                 () -> new BuilderWithCQC(cqc), // Supplier
                 BuilderWithCQC::add, // Accumulator
