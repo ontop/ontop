@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public class AggregationNodeImpl extends ConstructionOrAggregationNodeImpl implements AggregationNode {
+public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
 
 
     private static final String AGGREGATE_NODE_STR = "AGGREGATE";
@@ -64,16 +64,6 @@ public class AggregationNodeImpl extends ConstructionOrAggregationNodeImpl imple
                 currentIQProperties);
     }
 
-    @Override
-    public VariableNullability getVariableNullability(IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public boolean isConstructed(Variable variable, IQTree child) {
-        return substitution.isDefining(variable)
-                || (groupingVariables.contains(variable) && child.isConstructed(variable));
-    }
 
     @Override
     public boolean isDistinct(IQTree child) {
@@ -165,7 +155,24 @@ public class AggregationNodeImpl extends ConstructionOrAggregationNodeImpl imple
 
     @Override
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
-        throw new RuntimeException("TODO: implement");
+
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> groupingVariableDefs = child.getPossibleVariableDefinitions().stream()
+                .map(s -> s.reduceDomainToIntersectionWith(groupingVariables))
+                .collect(ImmutableCollectors.toSet());
+
+        if (groupingVariableDefs.isEmpty()) {
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            return def.isEmpty()
+                    ? ImmutableSet.of()
+                    : ImmutableSet.of(def);
+        }
+
+        // For Aggregation functional terms, we don't look further on for child definitions
+        return groupingVariableDefs.stream()
+                .map(childDef -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) childDef)
+                .map(childDef -> childDef.union((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution).get())
+                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .collect(ImmutableCollectors.toSet());
     }
 
     /**

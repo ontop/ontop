@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public abstract class ConstructionOrAggregationNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
+public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl implements ExtendedProjectionNode {
 
     private final ImmutableUnificationTools unificationTools;
     private final ConstructionNodeTools constructionNodeTools;
@@ -28,11 +28,11 @@ public abstract class ConstructionOrAggregationNodeImpl extends CompositeQueryNo
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
-    public ConstructionOrAggregationNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
-                                             ImmutableUnificationTools unificationTools,
-                                             ConstructionNodeTools constructionNodeTools,
-                                             ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                             CoreUtilsFactory coreUtilsFactory) {
+    public ExtendedProjectionNodeImpl(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
+                                      ImmutableUnificationTools unificationTools,
+                                      ConstructionNodeTools constructionNodeTools,
+                                      ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
+                                      CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory);
         this.unificationTools = unificationTools;
         this.constructionNodeTools = constructionNodeTools;
@@ -291,6 +291,17 @@ public abstract class ConstructionOrAggregationNodeImpl extends CompositeQueryNo
                                 Map.Entry::getKey,
                                 e -> valueTransformationFct.apply(e.getValue())
                         )));
+    }
+
+    @Override
+    public VariableNullability getVariableNullability(IQTree child) {
+        return child.getVariableNullability().update(getSubstitution(), getVariables());
+    }
+
+    @Override
+    public boolean isConstructed(Variable variable, IQTree child) {
+        return getSubstitution().isDefining(variable)
+                || (getChildVariables().contains(variable) && child.isConstructed(variable));
     }
 
     @FunctionalInterface

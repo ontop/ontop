@@ -31,13 +31,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "BindingAnnotationWithoutInject"})
-public class ConstructionNodeImpl extends ConstructionOrAggregationNodeImpl implements ConstructionNode {
+public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements ConstructionNode {
 
     private static Logger LOGGER = LoggerFactory.getLogger(ConstructionNodeImpl.class);
     @SuppressWarnings("FieldCanBeLocal")
@@ -202,17 +201,6 @@ public class ConstructionNodeImpl extends ConstructionOrAggregationNodeImpl impl
         return Optional.ofNullable(substitution.get(variable))
                 .map(t -> isTermNullable(query, t))
                 .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
-    }
-
-    @Override
-    public VariableNullability getVariableNullability(IQTree child) {
-        return child.getVariableNullability().update(substitution, projectedVariables);
-    }
-
-    @Override
-    public boolean isConstructed(Variable variable, IQTree child) {
-        return substitution.isDefining(variable)
-                || (getChildVariables().contains(variable) && child.isConstructed(variable));
     }
 
     /**
