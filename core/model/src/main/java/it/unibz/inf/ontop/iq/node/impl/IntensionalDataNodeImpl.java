@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -102,11 +101,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof IntensionalDataNode)
                 && getProjectionAtom().equals(((IntensionalDataNode) queryNode).getProjectionAtom());
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        return transformer.transform(this);
     }
 
     @Override
