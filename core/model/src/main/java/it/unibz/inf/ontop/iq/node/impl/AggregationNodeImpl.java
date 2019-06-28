@@ -81,27 +81,27 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+        return transformer.transformAggregation(tree, this, child);
     }
 
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+        return visitor.visitAggregation(this, child);
     }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
-        throw new RuntimeException("TODO: implement");
+        visitor.visit(this);
     }
 
     @Override
     public AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new RuntimeException("TODO: implement");
+        return transformer.transform(this);
     }
 
     @Override
     public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        throw new RuntimeException("TODO: implement");
+        return transformer.transform(this);
     }
 
     @Override

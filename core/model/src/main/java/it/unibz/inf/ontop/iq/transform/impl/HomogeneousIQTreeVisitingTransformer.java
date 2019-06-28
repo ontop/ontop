@@ -51,6 +51,11 @@ public class HomogeneousIQTreeVisitingTransformer extends DefaultRecursiveIQTree
     }
 
     @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        return transformUnaryNode(rootNode.acceptNodeTransformer(nodeTransformer), child);
+    }
+
+    @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         return transformUnaryNode(rootNode.acceptNodeTransformer(nodeTransformer), child);
     }

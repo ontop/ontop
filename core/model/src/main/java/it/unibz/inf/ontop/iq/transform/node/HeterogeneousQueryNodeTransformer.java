@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transform.node;
 
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.impl.AggregationNodeImpl;
 
 /**
  * TODO: explain
@@ -20,6 +21,8 @@ public interface HeterogeneousQueryNodeTransformer<P extends NodeTransformationP
     P transform(InnerJoinNode innerJoinNode);
 
     P transform(ConstructionNode constructionNode);
+
+    P transform(AggregationNode aggregationNode);
 
     P transform(EmptyNode emptyNode);
 
