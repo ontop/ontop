@@ -100,26 +100,20 @@ public class TMappingProcessor {
 
         ImmutableMultimap.Builder<IRI, TMappingRule> builder = ImmutableMultimap.builder();
 
-        for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
-            saturate(reasoner.objectPropertiesDAG(), propertySet,
-                    p -> !p.isInverse() && !excludeFromTMappings.contains(p),
-                    originalMappingIndex, ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc,
-                    p -> !p.isInverse(), builder);
-        } // object properties loop ended
+        saturate(reasoner.objectPropertiesDAG(),
+                p -> !p.isInverse() && !excludeFromTMappings.contains(p),
+                originalMappingIndex, ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc,
+                p -> !p.isInverse(), builder);
 
-        for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
-            saturate(reasoner.dataPropertiesDAG(), propertySet,
-                    p -> !excludeFromTMappings.contains(p),
-                    originalMappingIndex, DataPropertyExpression::getIRI, p -> getNewHeadP(false), cqc,
-                    p -> true, builder);
-        } // data properties loop ended
+        saturate(reasoner.dataPropertiesDAG(),
+                p -> !excludeFromTMappings.contains(p),
+                originalMappingIndex, DataPropertyExpression::getIRI, p -> getNewHeadP(false), cqc,
+                p -> true, builder);
 
-		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
-            saturate(reasoner.classesDAG(), classSet,
-                    s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s),
-                    originalMappingIndex, this::getIRI, this::getNewHeadC, cqc,
-                    c -> c instanceof OClass, builder);
-		} // class loop end
+        saturate(reasoner.classesDAG(),
+                s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s),
+                originalMappingIndex, this::getIRI, this::getNewHeadC, cqc,
+                c -> c instanceof OClass, builder);
 
         ImmutableMultimap<IRI, TMappingRule> index = builder.build();
 
@@ -138,38 +132,36 @@ public class TMappingProcessor {
 	}
 
     private <T> void saturate(EquivalencesDAG<T> dag,
-                              Equivalences<T> set,
                               Predicate<T> repFilter,
                               ImmutableMultimap<IRI, TMappingRule> originalMappingIndex,
                               java.util.function.Function<T, IRI> getIRI,
                               java.util.function.Function<T, java.util.function.BiFunction<Function, IRI, Function>> getNewHeadGen,
                               CQContainmentCheckUnderLIDs cqc,
-                              java.util.function.Predicate<T> poulationFilter,
+                              java.util.function.Predicate<T> populationFilter,
                               ImmutableMultimap.Builder<IRI, TMappingRule> builder) {
 
+        for (Equivalences<T> set : dag) {
+            T rep = set.getRepresentative();
+            if (!repFilter.test(rep))
+                continue;
 
-	    T rep = set.getRepresentative();
-	    if (!repFilter.test(rep))
-	        return;
+            IRI repIri = getIRI.apply(rep);
+            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
+                    dag.getSub(set).stream()
+                            .flatMap(descendants -> descendants.getMembers().stream())
+                            .flatMap(child -> originalMappingIndex.get(getIRI.apply(child)).stream()
+                                    .map(m -> new TMappingRule(getNewHeadGen.apply(child).apply(m.getHead(), repIri), m))), cqc);
 
-        IRI repIri = getIRI.apply(rep);
-
-        ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
-                dag.getSub(set).stream()
-                        .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> originalMappingIndex.get(getIRI.apply(child)).stream()
-                                .map(m -> new TMappingRule(getNewHeadGen.apply(child).apply(m.getHead(), repIri), m))), cqc);
-
-        // this assumes co-ordination with the poulationFilter
-        java.util.function.BiFunction<Function, IRI, Function> getNewHead = getNewHeadGen.apply(rep);
-
-        set.getMembers().stream()
-                .filter(poulationFilter)
-                .map(getIRI)
-                .forEach(i -> builder.putAll(i,
-                        currentNodeMappings.stream()
-                                .map(rule -> new TMappingRule(getNewHead.apply(rule.getHead(), i), rule))
-                                .collect(ImmutableCollectors.toList())));
+            // this assumes co-ordination with the populationFilter
+            java.util.function.BiFunction<Function, IRI, Function> getNewHead = getNewHeadGen.apply(rep);
+            set.getMembers().stream()
+                    .filter(populationFilter)
+                    .map(getIRI)
+                    .forEach(i -> builder.putAll(i,
+                            currentNodeMappings.stream()
+                                    .map(rule -> new TMappingRule(getNewHead.apply(rule.getHead(), i), rule))
+                                    .collect(ImmutableCollectors.toList())));
+        }
     }
 
 
