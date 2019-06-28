@@ -59,7 +59,15 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return ImmutableTable.of();
     }
 
-        @Override
+    @Override
+    protected DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct) {
+        DBTermType integerType = dbTypeFactory.getDBLargeIntegerType();
+        return isUnary
+                ? new DBCountFunctionSymbolImpl(abstractRootDBType, integerType, isDistinct)
+                : new DBCountFunctionSymbolImpl(integerType, isDistinct);
+    }
+
+    @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:
