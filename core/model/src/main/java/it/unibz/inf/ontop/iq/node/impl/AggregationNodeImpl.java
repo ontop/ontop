@@ -19,12 +19,15 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public class AggregationNodeImpl extends CompositeQueryNodeImpl implements AggregationNode {
+public class AggregationNodeImpl extends ConstructionOrAggregationNodeImpl implements AggregationNode {
 
 
     private static final String AGGREGATE_NODE_STR = "AGGREGATE";
@@ -39,8 +42,12 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
                                   SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
-                                  AggregationNormalizer aggregationNormalizer) {
-        super(substitutionFactory, iqFactory);
+                                  AggregationNormalizer aggregationNormalizer,
+                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                  ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
+                                  CoreUtilsFactory coreUtilsFactory) {
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools,
+                termFactory, coreUtilsFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
@@ -55,18 +62,6 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return aggregationNormalizer.normalizeForOptimization(this, child, variableGenerator,
                 currentIQProperties);
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child) {
-        throw new RuntimeException("TODO: implement");
     }
 
     @Override
@@ -92,11 +87,6 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
         return iqFactory.createUnaryIQTree(this, child);
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement");
     }
 
     @Override
