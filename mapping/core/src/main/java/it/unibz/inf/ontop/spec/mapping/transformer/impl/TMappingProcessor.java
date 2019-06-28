@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
+import org.mapdb.Fun;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -137,6 +138,9 @@ public class TMappingProcessor {
                                                               CQContainmentCheckUnderLIDs cqc,
                                                               Predicate<T> populationFilter) {
 
+	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHead(), getIRI.apply(d)), m));
+
 	    ImmutableMap<IRI, ImmutableList<TMappingRule>> representatives = dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
@@ -144,7 +148,7 @@ public class TMappingProcessor {
                         s -> dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
-                                        .map(replaceHead(getNewHeadGen, d, getIRI, s.getRepresentative())))
+                                        .map(headReplacer.apply(d, s.getRepresentative())))
                                 .collect(toListWithCQC(cqc))));
 
 	    return dag.stream()
@@ -154,15 +158,11 @@ public class TMappingProcessor {
                     .collect(ImmutableCollectors.toMap(
                             d -> getIRI.apply(d),
                             d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
-                                    .map(replaceHead(getNewHeadGen, s.getRepresentative(), getIRI, d))
+                                    .map(headReplacer.apply(s.getRepresentative(), d))
                                     .collect(ImmutableCollectors.toList())))
                     .entrySet().stream());
     }
 
-
-    private <T> java.util.function.Function<TMappingRule, TMappingRule> replaceHead(java.util.function.Function<T, BiFunction<Function, IRI, Function>> getNewHeadGen, T s, java.util.function.Function<T, IRI> getIRI, T d) {
-	    return m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHead(), getIRI.apply(d)), m);
-    }
 
 	private IRI getIRI(ClassExpression child) {
         if (child instanceof OClass) {
