@@ -40,6 +40,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
+import org.mapdb.Fun;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -102,22 +103,22 @@ public class TMappingProcessor {
         for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
             saturate(reasoner.objectPropertiesDAG(), propertySet,
                     p -> !p.isInverse() && !excludeFromTMappings.contains(p),
-                    originalMappingIndex, this::getIRI, p -> getNewHeadP(p.isInverse()), cqc,
-                    p -> !p.isInverse(), getNewHeadP(false), builder);
+                    originalMappingIndex, ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc,
+                    p -> !p.isInverse(), builder);
         } // object properties loop ended
 
         for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
             saturate(reasoner.dataPropertiesDAG(), propertySet,
                     p -> !excludeFromTMappings.contains(p),
-                    originalMappingIndex, this::getIRI, p -> getNewHeadP(false), cqc,
-                    p -> true, getNewHeadP(false), builder);
+                    originalMappingIndex, DataPropertyExpression::getIRI, p -> getNewHeadP(false), cqc,
+                    p -> true, builder);
         } // data properties loop ended
 
 		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
             saturate(reasoner.classesDAG(), classSet,
                     s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s),
-                    originalMappingIndex, this::getIRI, c -> getNewHeadC(getPosition(c)), cqc,
-                    c -> c instanceof OClass, getNewHeadC(0), builder);
+                    originalMappingIndex, this::getIRI, this::getNewHeadC, cqc,
+                    c -> c instanceof OClass, builder);
 		} // class loop end
 
         ImmutableMultimap<IRI, TMappingRule> index = builder.build();
@@ -138,17 +139,17 @@ public class TMappingProcessor {
 
     private <T> void saturate(EquivalencesDAG<T> dag,
                               Equivalences<T> set,
-                              Predicate<T> nodeFilter,
+                              Predicate<T> repFilter,
                               ImmutableMultimap<IRI, TMappingRule> originalMappingIndex,
                               java.util.function.Function<T, IRI> getIRI,
                               java.util.function.Function<T, java.util.function.BiFunction<Function, IRI, Function>> getNewHeadGen,
                               CQContainmentCheckUnderLIDs cqc,
-                              java.util.function.Predicate<T> filter,
-                              java.util.function.BiFunction<Function, IRI, Function> getNewHead,
+                              java.util.function.Predicate<T> poulationFilter,
                               ImmutableMultimap.Builder<IRI, TMappingRule> builder) {
 
+
 	    T rep = set.getRepresentative();
-	    if (!nodeFilter.test(rep))
+	    if (!repFilter.test(rep))
 	        return;
 
         IRI repIri = getIRI.apply(rep);
@@ -159,8 +160,11 @@ public class TMappingProcessor {
                         .flatMap(child -> originalMappingIndex.get(getIRI.apply(child)).stream()
                                 .map(m -> new TMappingRule(getNewHeadGen.apply(child).apply(m.getHead(), repIri), m))), cqc);
 
+        // this assumes co-ordination with the poulationFilter
+        java.util.function.BiFunction<Function, IRI, Function> getNewHead = getNewHeadGen.apply(rep);
+
         set.getMembers().stream()
-                .filter(filter)
+                .filter(poulationFilter)
                 .map(getIRI)
                 .forEach(i -> builder.putAll(i,
                         currentNodeMappings.stream()
@@ -183,30 +187,21 @@ public class TMappingProcessor {
         }
     }
 
-    private IRI getIRI(ObjectPropertyExpression child) {
-	    return child.getIRI();
-    }
-
-    private IRI getIRI(DataPropertyExpression child) {
-	    return child.getIRI();
-    }
-
-    private int getPosition(ClassExpression child) {
+	private java.util.function.BiFunction<Function, IRI, Function> getNewHeadC(ClassExpression child) {
         if (child instanceof OClass) {
-            return 0;
+            return (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(0), newIri);
         }
         else if (child instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
-            return some.isInverse() ? 2 : 0;
+            return some.isInverse()
+                ? (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(2), newIri)
+                : (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(0), newIri);
         }
         else {
             DataPropertyExpression some = ((DataSomeValuesFrom) child).getProperty();
-            return 0; // can never be an inverse
+            // can never be an inverse
+            return (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(0), newIri);
         }
-    }
-
-	private java.util.function.BiFunction<Function, IRI, Function> getNewHeadC(int position) {
-        return (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(position), newIri);
     }
 
     private java.util.function.BiFunction<Function, IRI, Function> getNewHeadP(boolean isInverse) {
