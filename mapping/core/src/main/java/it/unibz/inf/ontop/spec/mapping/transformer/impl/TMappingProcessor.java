@@ -40,10 +40,10 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.mapdb.Fun;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public class TMappingProcessor {
@@ -123,7 +123,7 @@ public class TMappingProcessor {
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
                         .filter(e -> !index.containsKey(e.getKey()))
-                        .flatMap(e -> getTMappingIndexEntry(e.getValue().stream(), cqc).stream()))
+                        .flatMap(e -> e.getValue().stream().collect(getCollectorCQC(cqc)).stream()))
                 .map(m -> m.asCQIE())
 				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
@@ -140,30 +140,30 @@ public class TMappingProcessor {
                               java.util.function.Predicate<T> populationFilter,
                               ImmutableMultimap.Builder<IRI, TMappingRule> builder) {
 
-        for (Equivalences<T> set : dag) {
-            T rep = set.getRepresentative();
-            if (!repFilter.test(rep))
-                continue;
+	    ImmutableMap<IRI, ImmutableList<TMappingRule>> representatives = dag.stream()
+                .filter(s -> repFilter.test(s.getRepresentative()))
+                .collect(ImmutableCollectors.toMap(
+                        s -> getIRI.apply(s.getRepresentative()),
+                        s -> dag.getSub(s).stream()
+                                .flatMap(descendants -> descendants.getMembers().stream())
+                                .flatMap(child -> originalMappingIndex.get(getIRI.apply(child)).stream()
+                                        .map(replaceHead(getNewHeadGen.apply(child), getIRI.apply(s.getRepresentative()))))
+                                .collect(getCollectorCQC(cqc))));
 
-            IRI repIri = getIRI.apply(rep);
-            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
-                    dag.getSub(set).stream()
-                            .flatMap(descendants -> descendants.getMembers().stream())
-                            .flatMap(child -> originalMappingIndex.get(getIRI.apply(child)).stream()
-                                    .map(m -> new TMappingRule(getNewHeadGen.apply(child).apply(m.getHead(), repIri), m))), cqc);
-
-            // this assumes co-ordination with the populationFilter
-            java.util.function.BiFunction<Function, IRI, Function> getNewHead = getNewHeadGen.apply(rep);
-            set.getMembers().stream()
+	    dag.stream()
+                .filter(s -> repFilter.test(s.getRepresentative()))
+                .forEach(s -> s.getMembers().stream()
                     .filter(populationFilter)
                     .map(getIRI)
                     .forEach(i -> builder.putAll(i,
-                            currentNodeMappings.stream()
-                                    .map(rule -> new TMappingRule(getNewHead.apply(rule.getHead(), i), rule))
-                                    .collect(ImmutableCollectors.toList())));
-        }
+                            representatives.get(getIRI.apply(s.getRepresentative())).stream()
+                                    .map(replaceHead(getNewHeadGen.apply(s.getRepresentative()), i))
+                                    .collect(ImmutableCollectors.toList()))));
     }
 
+    private java.util.function.Function<TMappingRule, TMappingRule> replaceHead(java.util.function.BiFunction<Function, IRI, Function> getNewHead, IRI iri) {
+	    return m -> new TMappingRule(getNewHead.apply(m.getHead(), iri), m);
+    }
 
 	private IRI getIRI(ClassExpression child) {
         if (child instanceof OClass) {
@@ -220,13 +220,39 @@ public class TMappingProcessor {
 
 
 
-    private ImmutableList<TMappingRule> getTMappingIndexEntry(Stream<TMappingRule> stream, CQContainmentCheckUnderLIDs cqc) {
-        ImmutableList<TMappingRule> rs = stream.collect(ImmutableCollectors.toList());
-        List<TMappingRule> rules = new ArrayList<>(rs.size());
-        for (TMappingRule newRule : rs)
-            mergeMappingsWithCQC(rules, newRule, cqc);
-        return ImmutableList.copyOf(rules);
+    private Collector<TMappingRule, BuilderWithCQC, ImmutableList<TMappingRule>> getCollectorCQC(CQContainmentCheckUnderLIDs cqc) {
+        return Collector.of(
+                () -> new BuilderWithCQC(cqc), // Supplier
+                BuilderWithCQC::add, // Accumulator
+                (b1, b2) -> b1.addAll(b2.build().iterator()), // Merger
+                BuilderWithCQC::build, // Finisher
+                Collector.Characteristics.UNORDERED);
     }
+
+    private final class BuilderWithCQC {
+        private final List<TMappingRule> rules = new ArrayList<>();
+        private final CQContainmentCheckUnderLIDs cqc;
+
+        BuilderWithCQC(CQContainmentCheckUnderLIDs cqc) {
+            this.cqc = cqc;
+        }
+
+        public BuilderWithCQC add(TMappingRule rule) {
+            mergeMappingsWithCQC(rules, rule, cqc);
+            return this;
+        }
+
+        public BuilderWithCQC addAll(Iterator<TMappingRule> rs) {
+            while (rs.hasNext())
+                mergeMappingsWithCQC(rules, rs.next(), cqc);
+            return this;
+        }
+
+        public ImmutableList<TMappingRule> build() {
+            return ImmutableList.copyOf(rules);
+        }
+    }
+
 
     /***
      *
