@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
@@ -96,9 +97,9 @@ public class TMappingProcessor {
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
-                        m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory, atomFactory, immutabilityTools)));
+//                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                .collect(ImmutableCollectors.toMultimap(q -> MappingTools.extractRDFPredicate(q).getIri(),
+                        q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator)));
 
         ImmutableMap<IRI, ImmutableList<TMappingRule>> index = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),

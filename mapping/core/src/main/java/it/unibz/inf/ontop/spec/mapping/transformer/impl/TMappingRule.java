@@ -3,7 +3,9 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -55,11 +57,18 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(Function head, List<Function> body, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+	public TMappingRule(IQ q, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator) {
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
+
+		List<CQIE> translation = iq2DatalogTranslator.translate(q).getRules();
+		if (translation.size() != 1)
+			System.out.println("TMAP PANIC");
+
+		Function head = translation.get(0).getHead();
+		List<Function> body = translation.get(0).getBody();
 
 		ImmutableList.Builder<Function> filters = ImmutableList.builder();
 		ImmutableList.Builder<DataAtom<AtomPredicate>> dbs = ImmutableList.builder();
