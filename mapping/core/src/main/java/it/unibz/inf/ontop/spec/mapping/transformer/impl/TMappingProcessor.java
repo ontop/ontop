@@ -101,18 +101,17 @@ public class TMappingProcessor {
                         m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory, atomFactory, immutabilityTools)));
 
         ImmutableMap<IRI, ImmutableList<TMappingRule>> index = Stream.concat(Stream.concat(
+                saturate(reasoner.objectPropertiesDAG(),
+                        p -> !p.isInverse() && !excludeFromTMappings.contains(p), originalMappingIndex,
+                        ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
 
-        saturate(reasoner.objectPropertiesDAG(),
-                p -> !p.isInverse() && !excludeFromTMappings.contains(p), originalMappingIndex,
-                ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
+                saturate(reasoner.dataPropertiesDAG(),
+                        p -> !excludeFromTMappings.contains(p), originalMappingIndex,
+                        DataPropertyExpression::getIRI, p -> getNewHeadP(false), cqc, p -> true)),
 
-        saturate(reasoner.dataPropertiesDAG(),
-                p -> !excludeFromTMappings.contains(p), originalMappingIndex,
-                DataPropertyExpression::getIRI, p -> getNewHeadP(false), cqc, p -> true)),
-
-        saturate(reasoner.classesDAG(),
-                s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), originalMappingIndex,
-                this::getIRI, this::getNewHeadC, cqc, c -> c instanceof OClass))
+                saturate(reasoner.classesDAG(),
+                        s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), originalMappingIndex,
+                        this::getIRI, this::getNewHeadC, cqc, c -> c instanceof OClass))
 
                 .collect(ImmutableCollectors.toMap());
 
@@ -124,28 +123,7 @@ public class TMappingProcessor {
                         .filter(e -> !index.containsKey(e.getKey()))
                         .flatMap(e -> e.getValue().stream().collect(toListWithCQC(cqc)).stream()))
                 .map(m -> m.asCQIE())
-				//.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
-
-		ImmutableList<CQIE> duplicates =
-                tmappingsProgram.stream()
-                        .collect(ImmutableCollectors.toMultimap(m -> m, m -> m))
-                        .asMap()
-                        .entrySet().stream()
-                        .filter(e -> e.getValue().size() > 1)
-                        .map(e -> e.getKey())
-                        .collect(ImmutableCollectors.toList());
-
-		if (!duplicates.isEmpty()) {
-            System.out.println("TMAP NON-FACTS: " + duplicates.stream()
-                    .filter(q -> q.getBody().size() > 0)
-                    .collect(ImmutableCollectors.toList()));
-            System.out.println("TMAP DUP: " + duplicates);
-        }
-
-		tmappingsProgram = tmappingsProgram.stream()
-                .collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
-                .collect(ImmutableCollectors.toList());
 
         return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
