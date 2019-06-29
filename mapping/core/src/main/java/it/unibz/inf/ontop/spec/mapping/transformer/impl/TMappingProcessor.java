@@ -127,13 +127,21 @@ public class TMappingProcessor {
 				//.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
 
-		System.out.println("TMAP DUP: " + tmappingsProgram.stream()
-                .collect(ImmutableCollectors.toMultimap(m -> m, m -> m))
-                .asMap()
-                .entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(e -> e.getKey())
-                .collect(ImmutableCollectors.toList()));
+		ImmutableList<CQIE> duplicates =
+                tmappingsProgram.stream()
+                        .collect(ImmutableCollectors.toMultimap(m -> m, m -> m))
+                        .asMap()
+                        .entrySet().stream()
+                        .filter(e -> e.getValue().size() > 1)
+                        .map(e -> e.getKey())
+                        .collect(ImmutableCollectors.toList());
+
+		if (!duplicates.isEmpty()) {
+            System.out.println("TMAP NON-FACTS: " + duplicates.stream()
+                    .filter(q -> q.getBody().size() > 0)
+                    .collect(ImmutableCollectors.toList()));
+            System.out.println("TMAP DUP: " + duplicates);
+        }
 
 		tmappingsProgram = tmappingsProgram.stream()
                 .collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
