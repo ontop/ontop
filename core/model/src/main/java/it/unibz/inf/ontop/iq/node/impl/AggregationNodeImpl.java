@@ -13,18 +13,20 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public class AggregationNodeImpl extends CompositeQueryNodeImpl implements AggregationNode {
+public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
 
 
     private static final String AGGREGATE_NODE_STR = "AGGREGATE";
@@ -39,8 +41,12 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted ImmutableSubstitution<ImmutableFunctionalTerm> substitution,
                                   SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
-                                  AggregationNormalizer aggregationNormalizer) {
-        super(substitutionFactory, iqFactory);
+                                  AggregationNormalizer aggregationNormalizer,
+                                  ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
+                                  ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
+                                  CoreUtilsFactory coreUtilsFactory) {
+        super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools,
+                termFactory, coreUtilsFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
@@ -57,28 +63,6 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
                 currentIQProperties);
     }
 
-    @Override
-    public IQTree applyDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public VariableNullability getVariableNullability(IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public boolean isConstructed(Variable variable, IQTree child) {
-        return substitution.isDefining(variable)
-                || (groupingVariables.contains(variable) && child.isConstructed(variable));
-    }
 
     @Override
     public boolean isDistinct(IQTree child) {
@@ -95,33 +79,23 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
     }
 
     @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
     public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+        return transformer.transformAggregation(tree, this, child);
     }
 
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        throw new RuntimeException("TODO: implement");
+        return visitor.visitAggregation(this, child);
     }
 
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
-        throw new RuntimeException("TODO: implement");
+        visitor.visit(this);
     }
 
     @Override
     public AggregationNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        throw new RuntimeException("TODO: implement");
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        throw new RuntimeException("TODO: implement");
+        return transformer.transform(this);
     }
 
     @Override
@@ -175,7 +149,24 @@ public class AggregationNodeImpl extends CompositeQueryNodeImpl implements Aggre
 
     @Override
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
-        throw new RuntimeException("TODO: implement");
+
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> groupingVariableDefs = child.getPossibleVariableDefinitions().stream()
+                .map(s -> s.reduceDomainToIntersectionWith(groupingVariables))
+                .collect(ImmutableCollectors.toSet());
+
+        if (groupingVariableDefs.isEmpty()) {
+            ImmutableSubstitution<NonVariableTerm> def = substitution.getNonVariableTermFragment();
+            return def.isEmpty()
+                    ? ImmutableSet.of()
+                    : ImmutableSet.of(def);
+        }
+
+        // For Aggregation functional terms, we don't look further on for child definitions
+        return groupingVariableDefs.stream()
+                .map(childDef -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) childDef)
+                .map(childDef -> childDef.union((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>) substitution).get())
+                .map(ImmutableSubstitution::getNonVariableTermFragment)
+                .collect(ImmutableCollectors.toSet());
     }
 
     /**

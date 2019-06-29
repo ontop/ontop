@@ -14,10 +14,7 @@ import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -90,6 +87,14 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                         iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
                         // "Recursive"
                         optimizerFactory.createDefinitionPushDownTransformer(newRequest).transform(child)));
+    }
+
+    /**
+     * TODO: understand when the definition does not have to be blocked
+     */
+    @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        return blockDefinition(tree);
     }
 
     /**
