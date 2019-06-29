@@ -323,6 +323,9 @@ public class TMappingProcessor {
 
     private void mergeMappingsWithCQC(List<TMappingRule> rules, TMappingRule newRule, CQContainmentCheckUnderLIDs cqc) {
 
+        if (rules.contains(newRule))
+            return;
+
         // Facts are just added
         if (newRule.isFact()) {
             rules.add(newRule);
@@ -333,9 +336,6 @@ public class TMappingProcessor {
         while (mappingIterator.hasNext()) {
 
             TMappingRule currentRule = mappingIterator.next();
-            // ROMAN (14 Oct 2015): quick fix, but one has to be more careful with variables in filters
-            if (currentRule.equals(newRule))
-                return;
 
             boolean couldIgnore = false;
 
