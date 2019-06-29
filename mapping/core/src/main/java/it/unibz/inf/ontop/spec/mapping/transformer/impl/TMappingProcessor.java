@@ -25,14 +25,18 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.datalog.impl.Datalog2QueryTools;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -41,7 +45,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.mapdb.Fun;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -64,11 +67,14 @@ public class TMappingProcessor {
     private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
+    private final NoNullValueEnforcer noNullValueEnforcer;
+    private final DatalogProgram2QueryConverter converter;
+    private final SpecificationFactory specificationFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                               SubstitutionUtilities substitutionUtilities,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer) {
+                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer, NoNullValueEnforcer noNullValueEnforcer, DatalogProgram2QueryConverter converter, SpecificationFactory specificationFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -79,6 +85,9 @@ public class TMappingProcessor {
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
+        this.noNullValueEnforcer = noNullValueEnforcer;
+        this.converter = converter;
+        this.specificationFactory = specificationFactory;
     }
 
 
@@ -126,8 +135,53 @@ public class TMappingProcessor {
                 .map(m -> m.asCQIE())
 		        .collect(ImmutableCollectors.toList());
 
-        return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
-	}
+
+        ImmutableMultimap<Term, CQIE> ruleIndex = tmappingsProgram.stream()
+                .collect(ImmutableCollectors.toMultimap(
+                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))
+                                ? r.getHead().getTerm(2)
+                                : r.getHead().getTerm(1),
+                        r -> r
+                ));
+
+        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> extensionalPredicates = tmappingsProgram.stream()
+                .flatMap(r -> r.getBody().stream())
+                .flatMap(Datalog2QueryTools::extractPredicates)
+                .filter(p -> !ruleIndex.containsKey(p))
+                .collect(ImmutableCollectors.toSet());
+
+        ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.keySet().stream()
+                .map(predicate -> converter.convertDatalogDefinitions(
+                        ruleIndex.get(predicate),
+                        extensionalPredicates,
+                        Optional.empty()
+                ))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                .map(noNullValueEnforcer::transform)
+                .map(IQ::liftBinding)
+                .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
+                .collect(ImmutableCollectors.toList());
+
+        return specificationFactory.createMapping(mapping.getMetadata(),
+                extractTable(intermediateQueryList, false),
+                extractTable(intermediateQueryList, true));
+    }
+
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
+            ImmutableList<Map.Entry<MappingTools.RDFPredicateInfo, IQ>> iqClassificationMap, boolean isClass) {
+
+        return iqClassificationMap.stream()
+                .filter(e -> e.getKey().isClass() == isClass)
+                .map(e -> Tables.immutableCell(
+                        (RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+    }
+
+
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
                                                               Predicate<T> repFilter,
@@ -199,22 +253,6 @@ public class TMappingProcessor {
                 ? (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(2), newIri, head.getTerm(0))
                 : (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(0), newIri, head.getTerm(2));
     }
-
-    private IRI extractRDFPredicate(Function headAtom) {
-		if (!(headAtom.getFunctionSymbol() instanceof RDFAtomPredicate))
-			throw new MinorOntopInternalBugException("Mapping assertion without an RDFAtomPredicate found");
-
-		RDFAtomPredicate predicate = (RDFAtomPredicate) headAtom.getFunctionSymbol();
-
-		ImmutableList<ImmutableTerm> arguments = headAtom.getTerms().stream()
-				.map(immutabilityTools::convertIntoImmutableTerm)
-				.collect(ImmutableCollectors.toList());
-
-		return predicate.getClassIRI(arguments)
-				.orElseGet(() -> predicate.getPropertyIRI(arguments)
-						.orElseThrow(() -> new MinorOntopInternalBugException("Could not extract a predicate IRI from " + headAtom)));
-	}
-
 
 
 
