@@ -124,10 +124,22 @@ public class TMappingProcessor {
                         .filter(e -> !index.containsKey(e.getKey()))
                         .flatMap(e -> e.getValue().stream().collect(toListWithCQC(cqc)).stream()))
                 .map(m -> m.asCQIE())
-				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
+				//.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
 		        .collect(ImmutableCollectors.toList());
 
-		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
+		System.out.println("TMAP DUP: " + tmappingsProgram.stream()
+                .collect(ImmutableCollectors.toMultimap(m -> m, m -> m))
+                .asMap()
+                .entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(e -> e.getKey())
+                .collect(ImmutableCollectors.toList()));
+
+		tmappingsProgram = tmappingsProgram.stream()
+                .collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
+                .collect(ImmutableCollectors.toList());
+
+        return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
 	}
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
