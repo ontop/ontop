@@ -125,7 +125,7 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-		ImmutableMap<IRI, ImmutableList<CQIE>> ruleIndex = Stream.concat(
+		ImmutableMap<IRI, ImmutableList<TMappingRule>> ruleIndex = Stream.concat(
                 index.entrySet().stream(),
                 originalMappingIndex.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
@@ -136,23 +136,18 @@ public class TMappingProcessor {
                                 e -> e.getValue().stream()
                                         .collect(toListWithCQC(cqc))))
                         .entrySet().stream())
-                .collect(ImmutableCollectors.toMap(
-                        e -> e.getKey(),
-                        e -> e.getValue().stream()
-                                .map(m -> m.asCQIE())
-                                .collect(ImmutableCollectors.toList())));
+                .collect(ImmutableCollectors.toMap());
 
-
-        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> extensionalPredicates = ruleIndex.values().stream()
-                .flatMap(l -> l.stream())
-                .flatMap(r -> r.getBody().stream())
-                .flatMap(Datalog2QueryTools::extractPredicates)
-                .collect(ImmutableCollectors.toSet());
-
-        ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.keySet().stream()
-                .map(predicate -> converter.convertDatalogDefinitions(
-                        ruleIndex.get(predicate),
-                        extensionalPredicates,
+        ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.entrySet().stream()
+                .map(e -> e.getValue().stream()
+                        .map(m -> m.asCQIE())
+                        .collect(ImmutableCollectors.toList()))
+                .map(cqs -> converter.convertDatalogDefinitions(
+                        cqs,
+                        cqs.stream()
+                                .flatMap(r -> r.getBody().stream())
+                                .flatMap(Datalog2QueryTools::extractPredicates)
+                                .collect(ImmutableCollectors.toSet()),
                         Optional.empty()
                 ))
                 .filter(Optional::isPresent)
