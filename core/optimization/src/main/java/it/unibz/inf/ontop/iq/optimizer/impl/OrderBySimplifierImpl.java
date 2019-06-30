@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer.DefPushDownRequest;
+import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
@@ -51,21 +52,19 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     }
 
 
-    protected static class OrderBySimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected static class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         protected final VariableGenerator variableGenerator;
         protected final TermFactory termFactory;
-        protected final OptimizerFactory optimizerFactory;
         protected final TypeFactory typeFactory;
         protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
         protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator,
                                                 OptimizationSingletons optimizationSingletons) {
-            super(optimizationSingletons.getCoreSingletons());
+            super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             this.termFactory = coreSingletons.getTermFactory();
-            this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
             this.typeFactory = coreSingletons.getTypeFactory();
             this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
                     typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
@@ -158,42 +157,6 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
         protected NonGroundTerm computeDBTerm(ImmutableTerm lexicalTerm, RDFTermType rdfType, IQTree childTree) {
             return (NonGroundTerm) termFactory.getConversionFromRDFLexical2DB(lexicalTerm, rdfType)
                     .simplify(childTree.getVariableNullability());
-        }
-
-        private ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
-            return Optional.of(term)
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t)
-                    .filter(t -> t.getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
-                    .map(t -> t.getTerm(1))
-                    .orElse(term);
-        }
-
-
-        /**
-         * Pushes down definitions emerging from the simplification of the order comparators
-         */
-        private IQTree pushDownDefinitions(IQTree initialChild, Stream<DefPushDownRequest> definitionsToPushDown) {
-            return definitionsToPushDown
-                    .reduce(initialChild,
-                            (c, r) -> optimizerFactory.createDefinitionPushDownTransformer(r).transform(c),
-                            (c1, c2) -> { throw new MinorOntopInternalBugException("Merging must not happen") ; });
-        }
-
-        private Optional<ImmutableSet<RDFTermType>> extractPossibleTypes(ImmutableTerm rdfTypeTerm, IQTree childTree) {
-            ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
-                    .map(s -> s.apply(rdfTypeTerm))
-                    .map(t -> t.simplify(childTree.getVariableNullability()))
-                    .map(this::unwrapIfElseNull)
-                    .filter(t -> !t.isNull())
-                    .collect(ImmutableCollectors.toSet());
-
-            return Optional.of(possibleValues)
-                    .filter(vs -> vs.stream().allMatch(t -> t instanceof RDFTermTypeConstant))
-                    .map(vs -> vs.stream()
-                            .map(t -> (RDFTermTypeConstant) t)
-                            .map(RDFTermTypeConstant::getRDFTermType)
-                            .collect(ImmutableCollectors.toSet()));
         }
 
         /**
