@@ -165,15 +165,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
-        return convertDatalogDefinitions(atomDefinitions,tablePredicates,optionalModifiers);
-
-    }
-
-    @Override
-    public Optional<IQ> convertDatalogDefinitions(Collection<CQIE> atomDefinitions,
-                                                  Collection<Predicate> tablePredicates,
-                                                  Optional<ImmutableQueryModifiers> optionalModifiers) throws InvalidDatalogProgramException {
-
         ImmutableList<IQ> convertedDefinitions = atomDefinitions.stream()
                 .map(d -> datalogRuleConverter.convertDatalogRule(d, tablePredicates, iqFactory))
                 .collect(ImmutableCollectors.toList());

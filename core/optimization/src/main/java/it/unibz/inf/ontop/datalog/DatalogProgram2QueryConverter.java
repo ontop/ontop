@@ -15,10 +15,4 @@ public interface DatalogProgram2QueryConverter {
 
     IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
                              ImmutableList<Variable> signature) throws EmptyQueryException;
-
-
-    Optional<IQ> convertDatalogDefinitions(Collection<CQIE> atomDefinitions,
-                                           Collection<Predicate> tablePredicates,
-                                           Optional<ImmutableQueryModifiers> optionalModifiers)
-            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException;
 }

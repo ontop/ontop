@@ -147,6 +147,8 @@ public class TMappingProcessor {
 
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.entrySet().stream()
                 .map(e -> convert(e.getValue()))                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                .map(queryMerger::mergeDefinitions)
+                .map(Optional::get)
                 .map(noNullValueEnforcer::transform)
                 .map(IQ::liftBinding)
                 .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
@@ -170,23 +172,17 @@ public class TMappingProcessor {
     }
 
 
-    private IQ convert(ImmutableList<TMappingRule> rules) {
+    private ImmutableList<IQ> convert(ImmutableList<TMappingRule> rules) {
 
-	    ImmutableList<CQIE> cqs = rules.stream()
-                .map(m -> m.asCQIE())
+        return rules.stream()
+                .map(r -> r.asCQIE())
+                .map(d -> datalogRuleConverter.convertDatalogRule(
+                        d,
+                        d.getBody().stream()
+                            .flatMap(Datalog2QueryTools::extractPredicates)
+                            .collect(ImmutableCollectors.toSet()),
+                        iqFactory))
                 .collect(ImmutableCollectors.toList());
-
-	    ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> dataPredicates =
-                cqs.stream()
-                        .flatMap(r -> r.getBody().stream())
-                        .flatMap(Datalog2QueryTools::extractPredicates)
-                        .collect(ImmutableCollectors.toSet());
-
-        ImmutableList<IQ> convertedDefinitions = cqs.stream()
-                .map(d -> datalogRuleConverter.convertDatalogRule(d, dataPredicates, iqFactory))
-                .collect(ImmutableCollectors.toList());
-
-        return queryMerger.mergeDefinitions(convertedDefinitions).get();
     }
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
