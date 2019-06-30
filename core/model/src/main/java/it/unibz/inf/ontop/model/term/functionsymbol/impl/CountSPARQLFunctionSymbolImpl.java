@@ -3,9 +3,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -13,7 +12,7 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.Optional;
 
-public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl{
+public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     private final RDFDatatype xsdIntegerType;
     private final boolean isDistinct;
@@ -58,13 +57,37 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl{
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
+        if (getArity() == 0)
+            return termFactory.getRDFLiteralFunctionalTerm(
+                    termFactory.getConversion2RDFLexical(
+                            termFactory.getDBCount(isDistinct),
+                            xsdIntegerType),
+                    xsdIntegerType);
 
-        ImmutableFunctionalTerm dbCountTerm = (getArity() == 0)
-                ? termFactory.getDBCount(isDistinct)
-                : termFactory.getDBCount(newTerms.get(0), isDistinct);
+        ImmutableTerm newTerm = newTerms.get(0);
+        if (isRDFFunctionalTerm(newTerm) || (newTerm instanceof RDFConstant)) {
+            ImmutableTerm lexicalTerm = extractLexicalTerm(newTerm, termFactory);
+            ImmutableFunctionalTerm dbCountTerm = termFactory.getDBCount(lexicalTerm, isDistinct);
 
-        return termFactory.getRDFLiteralFunctionalTerm(termFactory.getConversion2RDFLexical(dbCountTerm, xsdIntegerType),
-                xsdIntegerType);
+            return termFactory.getRDFLiteralFunctionalTerm(
+                    termFactory.getConversion2RDFLexical(dbCountTerm, xsdIntegerType), xsdIntegerType)
+                    .simplify(variableNullability);
+        }
+
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
+    @Override
+    public boolean isAggregation() {
+        return true;
+    }
+
+    /**
+     * Simplifies itself without needing the call of this method.
+     */
+    @Override
+    public Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> decomposeIntoDBAggregation(
+            ImmutableList<? extends ImmutableTerm> subTerms) {
+        return Optional.empty();
+    }
 }
