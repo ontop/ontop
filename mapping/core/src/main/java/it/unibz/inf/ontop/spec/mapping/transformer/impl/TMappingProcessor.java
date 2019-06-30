@@ -139,20 +139,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.entrySet().stream()
-                .map(e -> e.getValue().stream()
-                        .map(m -> m.asCQIE())
-                        .collect(ImmutableCollectors.toList()))
-                .map(cqs -> converter.convertDatalogDefinitions(
-                        cqs,
-                        cqs.stream()
-                                .flatMap(r -> r.getBody().stream())
-                                .flatMap(Datalog2QueryTools::extractPredicates)
-                                .collect(ImmutableCollectors.toSet()),
-                        Optional.empty()
-                ))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                .map(e -> convert(e.getValue()))                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
                 .map(noNullValueEnforcer::transform)
                 .map(IQ::liftBinding)
                 .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
@@ -176,6 +163,20 @@ public class TMappingProcessor {
     }
 
 
+    private IQ convert(ImmutableList<TMappingRule> rules) {
+
+	    ImmutableList<CQIE> cqs = rules.stream()
+                .map(m -> m.asCQIE())
+                .collect(ImmutableCollectors.toList());
+
+	    ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> dataPredicates =
+                cqs.stream()
+                        .flatMap(r -> r.getBody().stream())
+                        .flatMap(Datalog2QueryTools::extractPredicates)
+                        .collect(ImmutableCollectors.toSet());
+
+        return converter.convertDatalogDefinitions(cqs, dataPredicates, Optional.empty()).get();
+    }
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
                                                               Predicate<T> repFilter,
@@ -207,7 +208,8 @@ public class TMappingProcessor {
                             d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
                                     .map(headReplacer.apply(s.getRepresentative(), d))
                                     .collect(ImmutableCollectors.toList())))
-                    .entrySet().stream());
+                    .entrySet().stream())
+                .filter(e -> !e.getValue().isEmpty());
     }
 
 
