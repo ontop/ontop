@@ -125,39 +125,29 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
-                index.values().stream().flatMap(l -> l.stream()),
+		ImmutableMap<IRI, ImmutableList<CQIE>> ruleIndex = Stream.concat(
+                index.entrySet().stream(),
                 originalMappingIndex.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
                         .filter(e -> !index.containsKey(e.getKey()))
-                        .flatMap(e -> e.getValue().stream().collect(toListWithCQC(cqc)).stream()))
-                .map(m -> m.asCQIE())
-		        .collect(ImmutableCollectors.toList());
+                        .collect(ImmutableCollectors.toMap(
+                                e -> e.getKey(),
+                                e -> e.getValue().stream()
+                                        .collect(toListWithCQC(cqc))))
+                        .entrySet().stream())
+                .collect(ImmutableCollectors.toMap(
+                        e -> e.getKey(),
+                        e -> e.getValue().stream()
+                                .map(m -> m.asCQIE())
+                                .collect(ImmutableCollectors.toList())));
 
 
-        ImmutableMultimap<Term, CQIE> ruleIndex = tmappingsProgram.stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        r -> Datalog2QueryTools.isURIRDFType(r.getHead().getTerm(1))
-                                ? r.getHead().getTerm(2)
-                                : r.getHead().getTerm(1),
-                        r -> r
-                ));
-
-        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> extensionalPredicates = tmappingsProgram.stream()
+        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> extensionalPredicates = ruleIndex.values().stream()
+                .flatMap(l -> l.stream())
                 .flatMap(r -> r.getBody().stream())
                 .flatMap(Datalog2QueryTools::extractPredicates)
-                .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
-
-        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> intPredicates = tmappingsProgram.stream()
-                .flatMap(r -> r.getBody().stream())
-                .flatMap(Datalog2QueryTools::extractPredicates)
-                .filter(p -> ruleIndex.containsKey(p))
-                .collect(ImmutableCollectors.toSet());
-
-        if (intPredicates.size() > 0)
-            System.out.println("INT PANIC" + intPredicates);
 
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
