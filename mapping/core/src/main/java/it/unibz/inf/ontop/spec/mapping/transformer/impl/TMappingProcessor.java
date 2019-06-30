@@ -150,6 +150,15 @@ public class TMappingProcessor {
                 .filter(p -> !ruleIndex.containsKey(p))
                 .collect(ImmutableCollectors.toSet());
 
+        ImmutableSet<it.unibz.inf.ontop.model.term.functionsymbol.Predicate> intPredicates = tmappingsProgram.stream()
+                .flatMap(r -> r.getBody().stream())
+                .flatMap(Datalog2QueryTools::extractPredicates)
+                .filter(p -> ruleIndex.containsKey(p))
+                .collect(ImmutableCollectors.toSet());
+
+        if (intPredicates.size() > 0)
+            System.out.println("INT PANIC" + intPredicates);
+
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.keySet().stream()
                 .map(predicate -> converter.convertDatalogDefinitions(
                         ruleIndex.get(predicate),
