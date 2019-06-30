@@ -26,17 +26,18 @@ import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.impl.Datalog2QueryTools;
+import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -70,11 +71,14 @@ public class TMappingProcessor {
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final DatalogProgram2QueryConverter converter;
     private final SpecificationFactory specificationFactory;
+    private final IntermediateQueryFactory iqFactory;
+    private final UnionBasedQueryMerger queryMerger;
+    private final DatalogRule2QueryConverter datalogRuleConverter;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                               SubstitutionUtilities substitutionUtilities,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer, NoNullValueEnforcer noNullValueEnforcer, DatalogProgram2QueryConverter converter, SpecificationFactory specificationFactory) {
+                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer, NoNullValueEnforcer noNullValueEnforcer, DatalogProgram2QueryConverter converter, SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory, UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -88,6 +92,9 @@ public class TMappingProcessor {
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.converter = converter;
         this.specificationFactory = specificationFactory;
+        this.iqFactory = iqFactory;
+        this.queryMerger = queryMerger;
+        this.datalogRuleConverter = datalogRuleConverter;
     }
 
 
@@ -175,7 +182,11 @@ public class TMappingProcessor {
                         .flatMap(Datalog2QueryTools::extractPredicates)
                         .collect(ImmutableCollectors.toSet());
 
-        return converter.convertDatalogDefinitions(cqs, dataPredicates, Optional.empty()).get();
+        ImmutableList<IQ> convertedDefinitions = cqs.stream()
+                .map(d -> datalogRuleConverter.convertDatalogRule(d, dataPredicates, iqFactory))
+                .collect(ImmutableCollectors.toList());
+
+        return queryMerger.mergeDefinitions(convertedDefinitions).get();
     }
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
