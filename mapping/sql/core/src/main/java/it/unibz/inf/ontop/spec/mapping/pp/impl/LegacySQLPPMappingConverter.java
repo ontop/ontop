@@ -241,7 +241,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         String iq1s = directlyConvertedIQ.toString()
                                 .replace("v0", "s")
                                 .replace("v1", "p")
-                                .replace("v2", "o");
+                                .replace("v2", "o")
+                                .replace("npd-o", "npd-v2");
                         if (!iq0s.equals(iq1s))
                             System.out.println("IQ0: " + iq0 + " VS " + iq1s);
 
@@ -283,33 +284,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                                                          QuotedIDFactory idfac) throws AttributeNotFoundException {
 
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-
-        for (ImmutableTerm term : terms) {
-            if (term instanceof Variable) {
-                Variable var = (Variable) term;
-                QuotedID attribute = idfac.createAttributeID(var.getName());
-                ImmutableTerm newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
-
-                if (newTerm == null) {
-                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
-
-                    if (newTerm == null)
-                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
-                                + " (variable " + var.getName() + ") required by the target atom.");
-                }
-                builder.add(newTerm);
-            }
-            else if (term instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)term;
-                builder.add(termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), renameVariables(f.getTerms(), attributes, idfac)));
-            }
-            else if (term instanceof Constant)
-                builder.add(term);
-            else
-                throw new RuntimeException("Unknown term type: " + term);
-        }
-
+        for (ImmutableTerm term : terms)
+            builder.add(renameVariables(term, attributes, idfac));
         return builder.build();
     }
 
