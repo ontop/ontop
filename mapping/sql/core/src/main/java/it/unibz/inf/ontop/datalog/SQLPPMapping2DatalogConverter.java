@@ -115,12 +115,9 @@ public class SQLPPMapping2DatalogConverter {
                 for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
+                        ImmutableList<ImmutableTerm> headTerms = renameVariables(atom.getSubstitutedTerms(), lookupTable, idfac);
+                        Function head = immutabilityTools.convertToMutableFunction(atom.getProjectionAtom().getPredicate(), headTerms);
 
-                        Function mergedAtom = immutabilityTools.convertToMutableFunction(
-                                atom.getProjectionAtom().getPredicate(),
-                                atom.getSubstitutedTerms());
-
-                        Function head = renameVariables(mergedAtom, lookupTable, idfac);
                         CQIE rule = datalogFactory.getCQIE(head, body);
 
                         PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
@@ -152,39 +149,39 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                                            QuotedIDFactory idfac) throws AttributeNotFoundException {
-        List<Term> terms = function.getTerms();
-        List<Term> newTerms = new ArrayList<>(terms.size());
+    private ImmutableList<ImmutableTerm> renameVariables(ImmutableList<? extends ImmutableTerm> terms,
+                                                         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+                                                         QuotedIDFactory idfac) throws AttributeNotFoundException {
 
-        for (Term term : terms) {
-            Term newTerm;
+        ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+
+        for (ImmutableTerm term : terms) {
             if (term instanceof Variable) {
                 Variable var = (Variable) term;
                 QuotedID attribute = idfac.createAttributeID(var.getName());
-                ImmutableTerm newT = attributes.get(new QualifiedAttributeID(null, attribute));
+                ImmutableTerm newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                if (newT == null) {
+                if (newTerm == null) {
                     QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                    newT = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
 
-                    if (newT == null)
+                    if (newTerm == null)
                         throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
                                 + " (variable " + var.getName() + ") required by the target atom.");
                 }
-                newTerm = immutabilityTools.convertToMutableTerm(newT);
+                builder.add(newTerm);
             }
-            else if (term instanceof Function)
-                newTerm = renameVariables((Function) term, attributes, idfac);
+            else if (term instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)term;
+                builder.add(termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), renameVariables(f.getTerms(), attributes, idfac)));
+            }
             else if (term instanceof Constant)
-                newTerm = term.clone();
+                builder.add(term);
             else
                 throw new RuntimeException("Unknown term type: " + term);
-
-            newTerms.add(newTerm);
         }
 
-        return termFactory.getFunction(function.getFunctionSymbol(), newTerms);
+        return builder.build();
     }
 
 

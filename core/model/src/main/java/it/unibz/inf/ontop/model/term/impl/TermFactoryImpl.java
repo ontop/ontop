@@ -295,26 +295,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Expression getFunctionGTE(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.GTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionGT(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.GT, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionLTE(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.LTE, firstTerm, secondTerm);
-	}
-
-	@Override
-	public Expression getFunctionLT(Term firstTerm, Term secondTerm) {
-		return getExpression(ExpressionOperation.LT, firstTerm, secondTerm);
-	}
-
-	@Override
 	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(ExpressionOperation.NEQ, firstTerm, secondTerm);
 	}
@@ -349,11 +329,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public Expression getLANGMATCHESFunction(Term term1, Term term2) {
 		return getExpression(ExpressionOperation.LANGMATCHES, term1, term2);
-	}
-
-	@Override
-	public Expression getSQLFunctionLike(Term term1, Term term2) {
-		return getExpression(ExpressionOperation.SQL_LIKE, term1, term2);
 	}
 
 	@Override
