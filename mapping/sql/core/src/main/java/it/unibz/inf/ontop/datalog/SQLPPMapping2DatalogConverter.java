@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -43,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class SQLPPMapping2DatalogConverter {
@@ -53,14 +53,16 @@ public class SQLPPMapping2DatalogConverter {
     private final TypeFactory typeFactory;
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
+    private final AtomFactory atomFactory;
 
     @Inject
     private SQLPPMapping2DatalogConverter(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory,
-                                          ImmutabilityTools immutabilityTools) {
+                                          ImmutabilityTools immutabilityTools, AtomFactory atomFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
+        this.atomFactory = atomFactory;
     }
 
     /**
@@ -82,12 +84,14 @@ public class SQLPPMapping2DatalogConverter {
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
+                    SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory, atomFactory);
                     RAExpression re = sqp.parse(sourceQuery.toString());
                     lookupTable = re.getAttributes();
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
-                    body.addAll(re.getDataAtoms());
+                    body.addAll(re.getDataAtoms().stream()
+                            .map(t -> immutabilityTools.convertToMutableFunction(t))
+                            .collect(ImmutableCollectors.toList()));
                     body.addAll(re.getFilterAtoms().stream()
                             .map(t -> immutabilityTools.convertToMutableFunction(t))
                             .collect(ImmutableCollectors.toList()));
@@ -98,7 +102,7 @@ public class SQLPPMapping2DatalogConverter {
                     ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
 
                     // this is required to preserve the order of the variables
-                    ImmutableList<Map.Entry<QualifiedAttributeID,Variable>> list = view.getAttributes().stream()
+                    ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
                             .map(att -> new AbstractMap.SimpleEntry<>(
                                     new QualifiedAttributeID(null, att.getID()), // strip off the ParserViewDefinitionName
                                     termFactory.getVariable(att.getID().getName())))

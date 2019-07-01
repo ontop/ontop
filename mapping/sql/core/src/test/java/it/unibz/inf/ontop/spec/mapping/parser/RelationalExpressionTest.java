@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
@@ -26,10 +28,10 @@ import static org.junit.Assert.assertTrue;
  */
 public class RelationalExpressionTest {
 
-    private static DBMetadata METADATA = EMPTY_METADATA;
-    private static QuotedIDFactory MDFAC = METADATA.getQuotedIDFactory();
+    private static RDBMetadata METADATA;
+    private static QuotedIDFactory MDFAC;
 
-    private Function f1, f2;
+    private DataAtom<RelationPredicate> f1, f2;
     private ImmutableFunctionalTerm eq;
     private Variable x, y, u, v;
     private QualifiedAttributeID qaTx, qaTy, qaNx, qaNy, qaTu, qaTv, qaNu, qaNv;
@@ -40,16 +42,23 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
+        METADATA = createDummyMetadata();
+        MDFAC = METADATA.getQuotedIDFactory();
+
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
-
-        f1 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("P", 2, TYPE_FACTORY),
-                ImmutableList.of(x, y));
 
         table1 = MDFAC.createRelationID(null, "P");
         attX = MDFAC.createAttributeID("A");
         attY = MDFAC.createAttributeID("B");
+
+        DatabaseRelationDefinition P = METADATA.createDatabaseRelation(table1);
+        P.addAttribute(attX, 0, "", true);
+        P.addAttribute(attY, 0, "", true);
+
+        f1 = ATOM_FACTORY.getDataAtom(
+                new FakeRelationPredicate(P),
+                ImmutableList.of(x, y));
 
         qaTx = new QualifiedAttributeID(table1, attX);
         qaTy = new QualifiedAttributeID(table1, attY);
@@ -65,13 +74,17 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        f2 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("Q", 2, TYPE_FACTORY),
-                ImmutableList.of(u, v));
-
         RelationID table2 = MDFAC.createRelationID(null, "Q");
         QuotedID attu = MDFAC.createAttributeID("A");
         QuotedID attv = MDFAC.createAttributeID("C");
+
+        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(table2);
+        Q.addAttribute(attu, 0, "", true);
+        Q.addAttribute(attv, 0, "", true);
+        
+        f2 = ATOM_FACTORY.getDataAtom(
+                new FakeRelationPredicate(Q),
+                ImmutableList.of(u, v));
 
         qaTu = new QualifiedAttributeID(table2, attu);
         qaTv = new QualifiedAttributeID(table2, attv);
@@ -88,8 +101,8 @@ public class RelationalExpressionTest {
         Variable w = TERM_FACTORY.getVariable("u");
         Variable z = TERM_FACTORY.getVariable("v");
 
-        Function f3 = TERM_FACTORY.getFunction(
-                new FakeRelationPredicate("Q", 2, TYPE_FACTORY),
+        DataAtom<RelationPredicate> f3 = ATOM_FACTORY.getDataAtom(
+                new FakeRelationPredicate(Q),
                 ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");

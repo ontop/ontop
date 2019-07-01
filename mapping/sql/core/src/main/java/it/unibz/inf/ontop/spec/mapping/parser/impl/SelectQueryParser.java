@@ -5,6 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
@@ -35,12 +39,14 @@ public class SelectQueryParser {
     private int relationIndex = 0;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
+    private final AtomFactory atomFactory;
 
-    public SelectQueryParser(DBMetadata metadata, TermFactory termFactory, TypeFactory typeFactory) {
+    public SelectQueryParser(DBMetadata metadata, TermFactory termFactory, TypeFactory typeFactory, AtomFactory atomFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
+        this.atomFactory = atomFactory;
     }
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -248,8 +254,8 @@ public class SelectQueryParser {
                     ? idfac.createRelationID(null, tableName.getAlias().getName())
                     : relation.getID();
 
-            List<Term> terms = new ArrayList<>(relation.getAttributes().size());
-            ImmutableMap.Builder attributes = ImmutableMap.<QuotedID, Variable>builder();
+            ImmutableList.Builder<Variable> terms = ImmutableList.builder();
+            ImmutableMap.Builder<QuotedID, ImmutableTerm> attributes = ImmutableMap.builder();
             // the order in the loop is important
             relation.getAttributes().forEach(attribute -> {
                 QuotedID attributeId = attribute.getID();
@@ -258,7 +264,7 @@ public class SelectQueryParser {
                 attributes.put(attributeId, var);
             });
             // create an atom for a particular table
-            Function atom = termFactory.getFunction(relation.getAtomPredicate(), terms);
+            DataAtom<RelationPredicate> atom = atomFactory.getDataAtom(relation.getAtomPredicate(), terms.build());
 
             // DEFAULT SCHEMA
             // TODO: to be improved

@@ -5,13 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * Common abstraction for all sorts of Database (relational, etc.)
  */
-public interface DBMetadata extends Serializable {
+public interface DBMetadata {
 
     String getDbmsProductName();
 

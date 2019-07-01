@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -17,7 +19,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  */
 public class RAExpression {
 
-    private ImmutableList<Function> dataAtoms;
+    private ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
     private ImmutableList<ImmutableFunctionalTerm> filterAtoms;
     private RAExpressionAttributes attributes;
 
@@ -27,7 +29,7 @@ public class RAExpression {
      * @param filterAtoms          an {@link ImmutableList}<{@link Function}>
      * @param attributes           an {@link RAExpressionAttributes}
      */
-    public RAExpression(ImmutableList<Function> dataAtoms,
+    public RAExpression(ImmutableList<DataAtom<RelationPredicate>> dataAtoms,
                         ImmutableList<ImmutableFunctionalTerm> filterAtoms,
                         RAExpressionAttributes attributes) {
         this.dataAtoms = dataAtoms;
@@ -36,7 +38,7 @@ public class RAExpression {
     }
 
 
-    public ImmutableList<Function> getDataAtoms() {
+    public ImmutableList<DataAtom<RelationPredicate>> getDataAtoms() {
         return dataAtoms;
     }
 
