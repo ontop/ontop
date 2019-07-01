@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -416,8 +417,8 @@ public class SelectQueryParserTest {
 
     // END SUB SELECT TESTS
 
-    private ImmutableFunctionalTerm eqOf(String var1, String var2) {
-        return TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.EQ,
+    private ImmutableExpression eqOf(String var1, String var2) {
+        return TERM_FACTORY.getImmutableExpression(ExpressionOperation.EQ,
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 

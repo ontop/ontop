@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
@@ -13,16 +14,23 @@ import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.FilterNode;
+import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
@@ -32,11 +40,16 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -56,10 +69,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     private final DatalogFactory datalogFactory;
     private final ImmutabilityTools immutabilityTools;
     private final AtomFactory atomFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private LegacySQLPPMappingConverter(TermFactory termFactory,
-                                        EQNormalizer eqNormalizer, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter, IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools, AtomFactory atomFactory) {
+                                        EQNormalizer eqNormalizer, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter, IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogFactory datalogFactory, ImmutabilityTools immutabilityTools, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
         this.eqNormalizer = eqNormalizer;
         this.provMappingFactory = provMappingFactory;
@@ -70,6 +84,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         this.datalogFactory = datalogFactory;
         this.immutabilityTools = immutabilityTools;
         this.atomFactory = atomFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -121,28 +136,24 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         for (SQLPPTriplesMap mappingAxiom : triplesMaps) {
             try {
-                OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
+                String sourceQuery = mappingAxiom.getSourceQuery().getSQLQuery();
 
-                List<Function> body;
+                ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
+                ImmutableList<ImmutableExpression> filters;
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory, atomFactory);
-                    RAExpression re = sqp.parse(sourceQuery.toString());
+                    RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
 
-                    body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
-                    body.addAll(re.getDataAtoms().stream()
-                            .map(t -> immutabilityTools.convertToMutableFunction(t))
-                            .collect(ImmutableCollectors.toList()));
-                    body.addAll(re.getFilterAtoms().stream()
-                            .map(t -> immutabilityTools.convertToMutableFunction(t))
-                            .collect(ImmutableCollectors.toList()));
+                    dataAtoms = re.getDataAtoms();
+                    filters = re.getFilterAtoms();
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
-                            .extract(sourceQuery.toString());
-                    ParserViewDefinition view = metadata.createParserView(sourceQuery.toString(), attributes);
+                            .extract(sourceQuery);
+                    ParserViewDefinition view = metadata.createParserView(sourceQuery, attributes);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
@@ -153,10 +164,10 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                    List<Term> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
+                    ImmutableList<Variable> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
-                    body = new ArrayList<>(1);
-                    body.add(termFactory.getFunction(view.getAtomPredicate(), arguments));
+                    dataAtoms = ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments));
+                    filters = ImmutableList.of();
                 }
 
                 for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
@@ -166,12 +177,69 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         Function head = immutabilityTools.convertToMutableFunction(atom.getProjectionAtom().getPredicate(), headTerms);
                         normalizeMapping(head); // Normalizing language tags (SIDE-EFFECT!)
 
+                        List<Function> body = Stream.concat(
+                                dataAtoms.stream().map(t -> immutabilityTools.convertToMutableFunction(t)),
+                                filters.stream().map(t -> immutabilityTools.convertToMutableFunction(t)))
+                                .collect(Collectors.toList());
+
                         CQIE rule = datalogFactory.getCQIE(head, body);
                         eqNormalizer.enforceEqualities(rule); // Normalizing equalities (SIDE-EFFECT!)
 
                         IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(rule, iqFactory);
 
-                        IQ iq = noNullValueEnforcer.transform(directlyConvertedIQ).liftBinding();
+                        IQTree child;
+                        if (dataAtoms.size() == 1) {
+                                child = iqFactory.createExtensionalDataNode(dataAtoms.get(0));
+                        }
+                        else {
+                            child = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(),
+                                    dataAtoms.stream()
+                                            .map(a -> iqFactory.createExtensionalDataNode(a))
+                                            .collect(ImmutableCollectors.toList()));
+                        }
+                        IQTree qn;
+                        if (!filters.isEmpty()) {
+                            FilterNode filterNode = iqFactory.createFilterNode(
+                                    filters.stream().reduce(null,
+                                                    (a, b) -> (a == null)
+                                                            ? b
+                                                            : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
+                            qn = iqFactory.createUnaryIQTree(filterNode, child);
+                        }
+                        else
+                            qn = child;
+
+                        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
+                        ImmutableList.Builder<Variable> varBuilder2 = ImmutableList.builder();
+                        System.out.println(atom.getSubstitution() + " AT "  + atom.getProjectionAtom());
+                        for (Variable v : atom.getProjectionAtom().getArguments()) {
+                            ImmutableTerm t = atom.getSubstitution().get(v);
+                            if (t != null) {
+                                builder.put(v, renameVariables(t, lookupTable, idfac));
+                                varBuilder2.add(v);
+                            }
+                            else {
+                                ImmutableTerm tt = renameVariables(v, lookupTable, idfac);
+                                if (tt instanceof Variable) {
+                                    Variable v2 = (Variable) tt;
+                                    varBuilder2.add(v2);
+                                }
+                                else {
+                                    builder.put(v, tt);
+                                    varBuilder2.add(v);
+                                }
+                            }
+                        }
+                        ImmutableList<Variable> varList = varBuilder2.build();
+                        ImmutableSubstitution substitution = substitutionFactory.getSubstitution(builder.build());
+                        ConstructionNode cn = iqFactory.createConstructionNode(ImmutableSet.copyOf(varList), substitution);
+
+                        IQ iq0 = iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),
+                                iqFactory.createUnaryIQTree(cn, qn));
+
+                        System.out.println("IQ0: " + iq0 + " VS " + directlyConvertedIQ);
+
+                        IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
                         PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
                         if (previous != null)
@@ -237,6 +305,43 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
         }
 
         return builder.build();
+    }
+
+
+    /**
+     * Returns a new function by renaming variables occurring in the {@code function}
+     *  according to the {@code attributes} lookup table
+     */
+    private ImmutableTerm renameVariables(ImmutableTerm term,
+                                          ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+                                          QuotedIDFactory idfac) throws AttributeNotFoundException {
+
+            if (term instanceof Variable) {
+                Variable var = (Variable) term;
+                QuotedID attribute = idfac.createAttributeID(var.getName());
+                ImmutableTerm newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
+
+                if (newTerm == null) {
+                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+
+                    if (newTerm == null)
+                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
+                                + " (variable " + var.getName() + ") required by the target atom.");
+                }
+                return newTerm;
+            }
+            else if (term instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)term;
+                ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+                for (ImmutableTerm t : f.getTerms())
+                    builder.add(renameVariables(t, attributes, idfac));
+                return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), builder.build());
+            }
+            else if (term instanceof Constant)
+                return term;
+            else
+                throw new RuntimeException("Unknown term type: " + term);
     }
 
 

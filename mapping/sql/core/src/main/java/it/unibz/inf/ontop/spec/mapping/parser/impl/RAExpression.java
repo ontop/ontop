@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public class RAExpression {
 
     private ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
-    private ImmutableList<ImmutableFunctionalTerm> filterAtoms;
+    private ImmutableList<ImmutableExpression> filterAtoms;
     private RAExpressionAttributes attributes;
 
     /**
@@ -30,7 +30,7 @@ public class RAExpression {
      * @param attributes           an {@link RAExpressionAttributes}
      */
     public RAExpression(ImmutableList<DataAtom<RelationPredicate>> dataAtoms,
-                        ImmutableList<ImmutableFunctionalTerm> filterAtoms,
+                        ImmutableList<ImmutableExpression> filterAtoms,
                         RAExpressionAttributes attributes) {
         this.dataAtoms = dataAtoms;
         this.filterAtoms = filterAtoms;
@@ -42,7 +42,7 @@ public class RAExpression {
         return dataAtoms;
     }
 
-    public ImmutableList<ImmutableFunctionalTerm> getFilterAtoms() {
+    public ImmutableList<ImmutableExpression> getFilterAtoms() {
         return filterAtoms;
     }
 
@@ -78,7 +78,7 @@ public class RAExpression {
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RAExpression joinOn(RAExpression re1, RAExpression re2,
-                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableFunctionalTerm>> getAtomOnExpression) throws IllegalJoinException {
+                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
@@ -143,7 +143,7 @@ public class RAExpression {
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@Link ImmutableList}<{@link Function}>
      */
-    private static ImmutableList<ImmutableFunctionalTerm> getJoinOnFilter(RAExpressionAttributes re1,
+    private static ImmutableList<ImmutableExpression> getJoinOnFilter(RAExpressionAttributes re1,
                                                                                RAExpressionAttributes re2,
                                                                                ImmutableSet<QuotedID> using,
                                                                                TermFactory termFactory) {
@@ -158,7 +158,7 @@ public class RAExpression {
                     ImmutableTerm v2 = re2.getAttributes().get(id);
                     if (v2 == null)
                         throw new IllegalArgumentException("Term " + id + " not found in " + re2);
-                    return termFactory.getImmutableFunctionalTerm(ExpressionOperation.EQ, v1, v2);
+                    return termFactory.getImmutableExpression(ExpressionOperation.EQ, v1, v2);
                 })
                 .collect(ImmutableCollectors.toList());
     }

@@ -136,9 +136,9 @@ public class SelectQueryParser {
                 }
         }
 
-        ImmutableList<ImmutableFunctionalTerm> filterAtoms = (plainSelect.getWhere() == null)
+        ImmutableList<ImmutableExpression> filterAtoms = (plainSelect.getWhere() == null)
                 ? current.getFilterAtoms()
-                : ImmutableList.<ImmutableFunctionalTerm>builder()
+                : ImmutableList.<ImmutableExpression>builder()
                 .addAll(current.getFilterAtoms())
                 .addAll(new ExpressionParser(idfac, current.getAttributes(), termFactory, typeFactory)
                         .parseBooleanExpression(plainSelect.getWhere()))
@@ -175,7 +175,7 @@ public class SelectQueryParser {
         }
 
         return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<ImmutableFunctionalTerm>builder().addAll(filterAtoms).build(),
+                ImmutableList.<ImmutableExpression>builder().addAll(filterAtoms).build(),
                 new RAExpressionAttributes(attributes, null));
     }
 
