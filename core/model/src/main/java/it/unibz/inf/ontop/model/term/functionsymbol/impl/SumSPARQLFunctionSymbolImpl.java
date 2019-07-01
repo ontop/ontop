@@ -51,8 +51,8 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
     }
 
     @Override
-    public Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> decomposeIntoDBAggregation(
-            ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory, VariableNullability variableNullability) {
+    public Optional<AggregationSimplification> decomposeIntoDBAggregation(
+            ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes, VariableNullability variableNullability, TermFactory termFactory) {
         // TODO: implement it seriously
         return Optional.empty();
     }

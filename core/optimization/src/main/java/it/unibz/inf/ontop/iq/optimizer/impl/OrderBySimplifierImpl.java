@@ -3,23 +3,19 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer.DefPushDownRequest;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -82,7 +78,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                     .map(s -> s.newComparator)
                     .collect(ImmutableCollectors.toList());
 
-            Stream<DefPushDownRequest> definitionsToPushDown = simplifications.stream()
+            Stream<DefinitionPushDownRequest> definitionsToPushDown = simplifications.stream()
                     .map(s -> s.request)
                     .filter(Optional::isPresent)
                     .map(Optional::get);
@@ -212,7 +208,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                                                                               ImmutableExpression condition) {
             Variable v = variableGenerator.generateNewVariable();
 
-            DefPushDownRequest request = DefPushDownRequest.create(v,
+            DefinitionPushDownRequest request = DefinitionPushDownRequest.create(v,
                     computeDBTerm(lexicalTerm, referenceCastType, childTree),
                     condition);
 
@@ -248,9 +244,9 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static class ComparatorSimplification {
         protected final OrderByNode.OrderComparator newComparator;
-        protected final Optional<DefPushDownRequest> request;
+        protected final Optional<DefinitionPushDownRequest> request;
 
-        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefPushDownRequest request) {
+        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefinitionPushDownRequest request) {
             this.newComparator = newComparator;
             this.request = Optional.of(request);
         }

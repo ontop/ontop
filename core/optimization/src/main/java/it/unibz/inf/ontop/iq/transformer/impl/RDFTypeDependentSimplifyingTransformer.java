@@ -5,8 +5,8 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
@@ -57,7 +57,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
     /**
      * Pushes down definitions emerging from the simplification of the order comparators
      */
-    protected IQTree pushDownDefinitions(IQTree initialChild, Stream<DefinitionPushDownTransformer.DefPushDownRequest> definitionsToPushDown) {
+    protected IQTree pushDownDefinitions(IQTree initialChild, Stream<DefinitionPushDownRequest> definitionsToPushDown) {
         return definitionsToPushDown
                 .reduce(initialChild,
                         (c, r) -> optimizerFactory.createDefinitionPushDownTransformer(r).transform(c),

@@ -66,6 +66,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final AtomFactory atomFactory;
 	private final IntermediateQueryFactory iqFactory;
 	private final OrderBySimplifier orderBySimplifier;
+	private final AggregationSimplifier aggregationSimplifier;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -83,7 +84,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								InputQueryTranslator inputQueryTranslator,
 								IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter,
 								AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
-								OrderBySimplifier orderBySimplifier) {
+								OrderBySimplifier orderBySimplifier, AggregationSimplifier aggregationSimplifier) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
 		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
@@ -98,6 +99,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.atomFactory = atomFactory;
 		this.iqFactory = iqFactory;
 		this.orderBySimplifier = orderBySimplifier;
+		this.aggregationSimplifier = aggregationSimplifier;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 
@@ -205,7 +207,8 @@ public class QuestQueryProcessor implements QueryReformulator {
                 intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
                 log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
-				IQ optimizedQuery = orderBySimplifier.optimize(iqConverter.convert(intermediateQuery));
+                IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(iqConverter.convert(intermediateQuery));
+				IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
 
 				IQ executableQuery = generateExecutableQuery(optimizedQuery);
 				queryCache.put(inputQuery, executableQuery);

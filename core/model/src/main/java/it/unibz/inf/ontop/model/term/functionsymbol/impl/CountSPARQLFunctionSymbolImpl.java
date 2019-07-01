@@ -86,8 +86,9 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
      * Simplifies itself without needing the call of this method.
      */
     @Override
-    public Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> decomposeIntoDBAggregation(
-            ImmutableList<? extends ImmutableTerm> subTerms, TermFactory termFactory, VariableNullability variableNullability) {
+    public Optional<AggregationSimplification> decomposeIntoDBAggregation(
+            ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
+            VariableNullability variableNullability, TermFactory termFactory) {
         return Optional.empty();
     }
 }

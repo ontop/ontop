@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.model.term.*;
@@ -26,13 +27,13 @@ import java.util.stream.Stream;
 public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer
         implements DefinitionPushDownTransformer {
 
-    private final DefPushDownRequest request;
+    private final DefinitionPushDownRequest request;
     private final OptimizerFactory optimizerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @AssistedInject
-    protected DefinitionPushDownTransformerImpl(@Assisted DefPushDownRequest request,
+    protected DefinitionPushDownTransformerImpl(@Assisted DefinitionPushDownRequest request,
                                                 IntermediateQueryFactory iqFactory,
                                                 OptimizerFactory optimizerFactory,
                                                 SubstitutionFactory substitutionFactory,
@@ -52,7 +53,7 @@ public class DefinitionPushDownTransformerImpl extends DefaultRecursiveIQTreeVis
                 tree.getVariables(),
                 ImmutableSet.of(request.getNewVariable())).immutableCopy();
 
-        DefPushDownRequest newRequest = request.newRequest(rootNode.getSubstitution());
+        DefinitionPushDownRequest newRequest = request.newRequest(rootNode.getSubstitution());
         if (newRequest.equals(request))
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
