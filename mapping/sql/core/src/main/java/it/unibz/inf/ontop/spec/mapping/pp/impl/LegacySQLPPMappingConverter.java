@@ -265,16 +265,16 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         IQ iq0 = iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),
                                 iqFactory.createUnaryIQTree(cn, qn));
 
-                        String iq0s = iq0.toString();
-                        String iq1s = directlyConvertedIQ.toString()
-                                .replace("v0", "s")
-                                .replace("v1", "p")
-                                .replace("v2", "o")
-                                .replace("npd-o", "npd-v2");
-                        if (!iq0s.equals(iq1s))
-                            System.out.println("IQ0: " + iq0 + " VS " + iq1s);
+                        //String iq0s = iq0.toString();
+                        //String iq1s = directlyConvertedIQ.toString()
+                        //        .replace("v0", "s")
+                        //        .replace("v1", "p")
+                        //        .replace("v2", "o")
+                        //        .replace("npd-o", "npd-v2");
+                        //if (!iq0s.equals(iq1s))
+                        //    System.out.println("IQ0: " + iq0 + " VS " + iq1s);
 
-                        IQ iq = noNullValueEnforcer.transform(directlyConvertedIQ).liftBinding();
+                        IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
                         PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
                         if (previous != null)
