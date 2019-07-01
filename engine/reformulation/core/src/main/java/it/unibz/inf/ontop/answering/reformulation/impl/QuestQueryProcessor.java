@@ -11,14 +11,10 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -47,22 +43,17 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
-	private final SameAsRewriter sameAsRewriter;
 	private final BindingLiftOptimizer bindingLiftOptimizer;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
-	private final OntopReformulationSettings settings;
 	private final DBMetadata dbMetadata;
 	private final JoinLikeOptimizer joinLikeOptimizer;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
-	private final DatalogFactory datalogFactory;
 	private final FlattenUnionOptimizer flattenUnionOptimizer;
-	private final EQNormalizer eqNormalizer;
 	private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
 	private final IQConverter iqConverter;
-    private final DatalogProgram2QueryConverter datalogConverter;
 	private final AtomFactory atomFactory;
 	private final IntermediateQueryFactory iqFactory;
 	private final OrderBySimplifier orderBySimplifier;
@@ -72,30 +63,24 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
-								BindingLiftOptimizer bindingLiftOptimizer, OntopReformulationSettings settings,
+								BindingLiftOptimizer bindingLiftOptimizer,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
 								InputQueryFactory inputQueryFactory,
-								DatalogFactory datalogFactory,
 								FlattenUnionOptimizer flattenUnionOptimizer,
-								EQNormalizer eqNormalizer,
 								PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
 								InputQueryTranslator inputQueryTranslator,
-								IQConverter iqConverter, DatalogProgram2QueryConverter datalogConverter,
+								IQConverter iqConverter,
 								AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
 								OrderBySimplifier orderBySimplifier, AggregationSimplifier aggregationSimplifier) {
 		this.bindingLiftOptimizer = bindingLiftOptimizer;
-		this.settings = settings;
 		this.joinLikeOptimizer = joinLikeOptimizer;
 		this.inputQueryFactory = inputQueryFactory;
-		this.datalogFactory = datalogFactory;
 		this.flattenUnionOptimizer = flattenUnionOptimizer;
-		this.eqNormalizer = eqNormalizer;
 		this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
 		this.iqConverter = iqConverter;
 		this.rewriter = queryRewriter;
-        this.datalogConverter = datalogConverter;
 		this.atomFactory = atomFactory;
 		this.iqFactory = iqFactory;
 		this.orderBySimplifier = orderBySimplifier;
@@ -117,41 +102,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.dbMetadata = obdaSpecification.getDBMetadata();
 		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.inputQueryTranslator = inputQueryTranslator;
-		this.sameAsRewriter = translationFactory.createSameAsRewriter(saturatedMapping);
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;
 
 		log.info("Ontop has completed the setup and it is ready for query answering!");
 	}
-
-	private IQ preProcess(InternalSparqlQuery translation) throws OntopInvalidInputQueryException, EmptyQueryException {
-		DatalogProgram program = translation.getProgram();
-		log.debug("Datalog program translated from the SPARQL query: \n{}", program);
-
-		if(settings.isSameAsInMappingsEnabled()){
-			program = sameAsRewriter.getSameAsRewriting(program);
-			log.debug("Datalog program after SameAs rewriting \n{}", program);
-		}
-
-		log.debug("Replacing equivalences...");
-		DatalogProgram newprogramEq = datalogFactory.getDatalogProgram(program.getQueryModifiers());
-		for (CQIE query : program.getRules()) {
-			CQIE rule = query.clone();
-			// EQNormalizer cannot be removed because it is used in NULL propagation in OPTIONAL
-			eqNormalizer.enforceEqualities(rule);
-			newprogramEq.appendRule(rule);
-		}
-
-		if (newprogramEq.getRules().isEmpty())
-			throw new OntopInvalidInputQueryException("Error, the translation of the query generated 0 rules. " +
-					"This is not possible for any SELECT query (other queries are not supported by the translator).");
-
-
-
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of(), translation.getSignature());
-    }
-	
-
 
 	@Override
 	public IQ reformulateIntoNativeQuery(InputQuery inputQuery)
