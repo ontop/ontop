@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.LegacySQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import junit.framework.TestCase;
 
@@ -52,7 +53,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private RDBMetadata md;
 	private PrefixManager pm;
-	private final SQLPPMapping2DatalogConverter ppMapping2DatalogConverter;
+	private final LegacySQLPPMappingConverter ppMapping2DatalogConverter;
 
 	public SQLPPMapping2DatalogConverterTest() {
 		OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -61,7 +62,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 		Injector injector = defaultConfiguration.getInjector();
 		specificationFactory = injector.getInstance(SpecificationFactory.class);
-		ppMapping2DatalogConverter = injector.getInstance(SQLPPMapping2DatalogConverter.class);
+		ppMapping2DatalogConverter = injector.getInstance(LegacySQLPPMappingConverter.class);
 		defaultDummyMetadata = injector.getInstance(DummyRDBMetadata.class);
     }
 	

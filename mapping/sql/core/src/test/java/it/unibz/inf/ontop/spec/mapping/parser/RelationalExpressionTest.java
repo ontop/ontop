@@ -26,6 +26,9 @@ import static org.junit.Assert.assertTrue;
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
+
+// TODO: REFACTOR
+
 public class RelationalExpressionTest {
 
     private static RDBMetadata METADATA;
@@ -81,7 +84,7 @@ public class RelationalExpressionTest {
         DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(table2);
         Q.addAttribute(attu, 0, "", true);
         Q.addAttribute(attv, 0, "", true);
-        
+
         f2 = ATOM_FACTORY.getDataAtom(
                 new FakeRelationPredicate(Q),
                 ImmutableList.of(u, v));
