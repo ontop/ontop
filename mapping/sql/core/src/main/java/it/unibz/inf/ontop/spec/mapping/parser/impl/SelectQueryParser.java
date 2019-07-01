@@ -173,7 +173,7 @@ public class SelectQueryParser {
 
         return new RAExpression(current.getDataAtoms(),
                 ImmutableList.<Function>builder().addAll(filterAtoms).build(),
-                new RAExpressionAttributes(attributes, null), termFactory);
+                new RAExpressionAttributes(attributes, null));
     }
 
     private RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
@@ -183,7 +183,7 @@ public class SelectQueryParser {
 
         RAExpression right = getRelationalExpression(join.getRightItem());
         if (join.isSimple()) {
-            return RAExpression.crossJoin(left, right, termFactory);
+            return RAExpression.crossJoin(left, right);
         }
         else if (join.isCross()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -192,7 +192,7 @@ public class SelectQueryParser {
             if (join.isInner())
                 throw new InvalidSelectQueryRuntimeException("CROSS INNER JOIN is not allowed", join);
 
-            return RAExpression.crossJoin(left, right, termFactory);
+            return RAExpression.crossJoin(left, right);
         }
         else if (join.isNatural()) {
             if (join.getOnExpression() != null || join.getUsingColumns() != null)
@@ -210,7 +210,7 @@ public class SelectQueryParser {
 
                 return RAExpression.joinOn(left, right,
                         (attributes ->  new ExpressionParser(idfac, attributes, termFactory, typeFactory)
-                                .parseBooleanExpression(join.getOnExpression())), termFactory);
+                                .parseBooleanExpression(join.getOnExpression())));
             }
             else if (join.getUsingColumns() != null) {
                 return RAExpression.joinUsing(left, right,
@@ -273,7 +273,7 @@ public class SelectQueryParser {
             else
                 attrs = RAExpressionAttributes.create(attributes.build(), alias);
 
-            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs, termFactory);
+            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
         }
 
 
@@ -285,7 +285,7 @@ public class SelectQueryParser {
             RAExpression current = select(subSelect.getSelectBody());
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = RAExpression.alias(current, aliasId, termFactory);
+            result = RAExpression.alias(current, aliasId);
         }
 
         @Override
@@ -303,7 +303,7 @@ public class SelectQueryParser {
             }
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-            result = RAExpression.alias(join, aliasId, termFactory);
+            result = RAExpression.alias(join, aliasId);
         }
 
         @Override
