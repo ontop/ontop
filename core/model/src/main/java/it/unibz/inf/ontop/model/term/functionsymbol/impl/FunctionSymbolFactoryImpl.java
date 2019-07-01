@@ -166,7 +166,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new NowSPARQLFunctionSymbolImpl(xsdDatetime),
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
-                new SumSPARQLFunctionSymbolImpl(abstractRDFType),
+                new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
                 new DummyMinSPARQLFunctionSymbol(abstractRDFType),
                 new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
                 new DummyAvgSPARQLFunctionSymbol(abstractRDFType),

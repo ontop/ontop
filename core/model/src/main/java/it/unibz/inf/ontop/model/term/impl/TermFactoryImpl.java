@@ -598,7 +598,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(1, isDistinct));
 	}
 
-    @Override
+	@Override
+	public ImmutableFunctionalTerm getNonNullRejectingDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNonNullRejectingDBSum(dbType, isDistinct), subTerm);
+	}
+
+	@Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

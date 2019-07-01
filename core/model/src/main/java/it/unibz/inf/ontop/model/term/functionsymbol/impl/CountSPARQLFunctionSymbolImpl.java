@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -18,13 +19,13 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
     private final boolean isDistinct;
 
     protected CountSPARQLFunctionSymbolImpl(RDFTermType rootRdfTermType, RDFDatatype xsdIntegerType, boolean isDistinct) {
-        super("SP_COUNT_1", SPARQL.COUNT, ImmutableList.of(rootRdfTermType));
+        super("SP_COUNT_1" + (isDistinct ? "_DISTINCT" : ""), SPARQL.COUNT, ImmutableList.of(rootRdfTermType));
         this.xsdIntegerType = xsdIntegerType;
         this.isDistinct = isDistinct;
     }
 
     protected CountSPARQLFunctionSymbolImpl(RDFDatatype xsdIntegerType, boolean isDistinct) {
-        super("SP_COUNT_0", SPARQL.COUNT, ImmutableList.of());
+        super("SP_COUNT_0" + (isDistinct ? "_DISTINCT" : ""), SPARQL.COUNT, ImmutableList.of());
         this.xsdIntegerType = xsdIntegerType;
         this.isDistinct = isDistinct;
     }
@@ -88,7 +89,7 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
     @Override
     public Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            VariableNullability variableNullability, TermFactory termFactory) {
+            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
         return Optional.empty();
     }
 }

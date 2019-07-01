@@ -233,4 +233,6 @@ public interface DBFunctionSymbolFactory {
      * arity <= 1
      */
     DBFunctionSymbol getDBCount(int arity, boolean isDistinct);
+
+    DBFunctionSymbol getNonNullRejectingDBSum(DBTermType dbType, boolean isDistinct);
 }

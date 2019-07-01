@@ -768,6 +768,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return countTable.get(arity, isDistinct);
     }
 
+    @Override
+    public DBFunctionSymbol getNonNullRejectingDBSum(DBTermType dbType, boolean isDistinct) {
+        throw new RuntimeException("TODO: implement getNonNullRejectingDBSum()");
+    }
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);

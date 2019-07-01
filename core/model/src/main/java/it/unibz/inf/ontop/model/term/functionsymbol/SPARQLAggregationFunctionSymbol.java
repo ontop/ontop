@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.AggregationSimplificationImpl;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ public interface SPARQLAggregationFunctionSymbol extends SPARQLFunctionSymbol {
 
     Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            VariableNullability variableNullability, TermFactory termFactory);
+            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory);
 
 
     interface AggregationSimplification {

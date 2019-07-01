@@ -160,7 +160,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                      * Delegates the simplification to the function symbol
                      */
                     return aggregationFunctionSymbol.decomposeIntoDBAggregation(subTerms, possibleRDFTypes,
-                            child.getVariableNullability(), termFactory);
+                            child.getVariableNullability(), variableGenerator, termFactory);
                 }
             }
             /*

@@ -576,5 +576,7 @@ public interface TermFactory {
 	//-------------
 
 	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
-    ImmutableFunctionalTerm getDBCount(ImmutableTerm immutableTerm, boolean isDistinct);
+    ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
+
+	ImmutableFunctionalTerm getNonNullRejectingDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
 }
