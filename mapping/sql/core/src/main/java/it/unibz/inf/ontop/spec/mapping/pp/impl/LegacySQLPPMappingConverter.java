@@ -158,9 +158,16 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         else
                             builder.add(e);
 
+                    ImmutableList<ImmutableExpression> ff = builder.build();
+                    if (ff.size() == 1 && ff.get(0).getFunctionSymbol() == ExpressionOperation.EQ &&
+                    ff.get(0).getTerm(0) instanceof Variable && ff.get(0).getTerm(1) instanceof Variable) {
+                        s.put((Variable)ff.get(0).getTerm(0), (Variable) ff.get(0).getTerm(1));
+                        ff = ImmutableList.of();
+                    }
+
                     ImmutableSubstitution<VariableOrGroundTerm> sub = substitutionFactory.getSubstitution(s.build());
 
-                    filters = builder.build().stream()
+                    filters = ff.stream()
                             .map(e -> sub.applyToBooleanExpression(e))
                             .collect(ImmutableCollectors.toList());
 
