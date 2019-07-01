@@ -85,7 +85,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping.getProvenanceMap().entrySet().stream()
                 .flatMap(e -> convertMappingQuery(e.getKey())
                         .map(r -> new AbstractMap.SimpleEntry<>(r, e.getValue())))
-                .collect(ImmutableCollectors.toMap());;
+                .collect(ImmutableCollectors.toMap());
 
         //CQIEs are mutable
         for(CQIE rule : ruleMap.keySet()){

@@ -63,13 +63,11 @@ public class TMappingProcessor {
 	private final DatalogFactory datalogFactory;
 	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
-    private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final QueryUnionSplitter unionSplitter;
     private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final NoNullValueEnforcer noNullValueEnforcer;
-    private final DatalogProgram2QueryConverter converter;
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
@@ -78,19 +76,22 @@ public class TMappingProcessor {
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
                               SubstitutionUtilities substitutionUtilities,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer, NoNullValueEnforcer noNullValueEnforcer, DatalogProgram2QueryConverter converter, SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory, UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
+                              ImmutabilityTools immutabilityTools,
+                              QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator,
+                              UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
+                              NoNullValueEnforcer noNullValueEnforcer,
+                              SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
+                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
 		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
-        this.datalog2MappingConverter = datalog2MappingConverter;
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.converter = converter;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
@@ -113,7 +114,6 @@ public class TMappingProcessor {
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-//                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toMultimap(q -> MappingTools.extractRDFPredicate(q).getIri(),
                         q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator)));
 
