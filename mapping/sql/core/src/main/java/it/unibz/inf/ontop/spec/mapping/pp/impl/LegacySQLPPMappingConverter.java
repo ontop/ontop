@@ -20,10 +20,7 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -145,10 +142,31 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory, atomFactory);
                     RAExpression re = sqp.parse(sourceQuery);
-                    lookupTable = re.getAttributes();
+                    //lookupTable = re.getAttributes();
 
-                    dataAtoms = re.getDataAtoms();
-                    filters = re.getFilterAtoms();
+                    //dataAtoms = re.getDataAtoms();
+                    //filters = re.getFilterAtoms();
+
+                    ImmutableMap.Builder<Variable, VariableOrGroundTerm> s = ImmutableMap.builder();
+                    ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
+
+                    for (ImmutableExpression e : re.getFilterAtoms())
+                        if (e.getFunctionSymbol() == ExpressionOperation.EQ && e.getTerm(0 ) instanceof Variable && e.getTerm(1) instanceof Constant)
+                            s.put((Variable)e.getTerm(0), (Constant)e.getTerm(1));
+                        else if (e.getFunctionSymbol() == ExpressionOperation.EQ && e.getTerm(1 ) instanceof Variable && e.getTerm(0) instanceof Constant)
+                            s.put((Variable)e.getTerm(1), (Constant)e.getTerm(0));
+                        else
+                            builder.add(e);
+
+                    filters = builder.build();
+                    ImmutableSubstitution<VariableOrGroundTerm> sub = substitutionFactory.getSubstitution(s.build());
+
+                    dataAtoms = re.getDataAtoms().stream()
+                            .map(a -> (DataAtom<RelationPredicate>)sub.applyToDataAtom(a))
+                            .collect(ImmutableCollectors.toList());
+
+                    lookupTable = re.getAttributes().entrySet().stream()
+                            .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> sub.apply(e.getValue())));
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -200,7 +218,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         IQTree qn;
                         if (!filters.isEmpty()) {
                             FilterNode filterNode = iqFactory.createFilterNode(
-                                    filters.stream().reduce(null,
+                                    filters.reverse().stream().reduce(null,
                                                     (a, b) -> (a == null)
                                                             ? b
                                                             : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
