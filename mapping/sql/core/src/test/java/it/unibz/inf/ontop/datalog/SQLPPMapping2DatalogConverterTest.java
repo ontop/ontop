@@ -26,6 +26,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -104,7 +105,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
-		Set<CQIE> dp = ppMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
+		Set<IQ> dp = ppMapping2DatalogConverter.convert(ImmutableList.of(mappingAxiom), md).keySet();
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

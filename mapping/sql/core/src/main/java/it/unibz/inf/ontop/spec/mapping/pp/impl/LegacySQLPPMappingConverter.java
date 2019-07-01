@@ -76,41 +76,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     public MappingWithProvenance convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
-        /**
-         * Assumption: one CQIE per mapping axiom (no nested union)
-         */
-        /*
-         * May also add views in the DBMetadata!
-         */
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> datalogMap = convert(
-                ppMapping.getTripleMaps(), dbMetadata);
-
-        LOGGER.debug("Original mapping size: {}", datalogMap.size());
-
-        // Normalizing language tags (SIDE-EFFECT!)
-        for (CQIE cq: datalogMap.keySet())
-            normalizeMapping(cq);
-
-        // Normalizing equalities (SIDE-EFFECT!)
-        for (CQIE cq: datalogMap.keySet())
-            eqNormalizer.enforceEqualities(cq);
-
-
-        ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = datalogMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(e.getKey()),
-                        Map.Entry::getValue));
-
-        return provMappingFactory.create(iqMap, ppMapping.getMetadata());
-    }
-
-    private IQ convertDatalogRule(CQIE datalogRule) {
-
-        IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
-                datalogRule, iqFactory);
-
-        return noNullValueEnforcer.transform(directlyConvertedIQ)
-                .liftBinding();
+        return provMappingFactory.create(convert(ppMapping.getTripleMaps(), dbMetadata), ppMapping.getMetadata());
     }
 
 
@@ -118,8 +84,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
      * Normalize language tags (make them lower-case)
      */
 
-    private void normalizeMapping(CQIE mapping) {
-        Function head = mapping.getHead();
+    private void normalizeMapping(Function head) {
         for (Term term : head.getTerms()) {
             if (!(term instanceof Function))
                 continue;
@@ -140,10 +105,15 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
     /**
      * returns a Datalog representation of the mappings
+     *
+     * Assumption: one CQIE per mapping axiom (no nested union)
+     *
+     * May also add views in the DBMetadata!
      */
-    public ImmutableMap<CQIE, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
+
+    public ImmutableMap<IQ, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
                                                                     RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
-        Map<CQIE, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
+        Map<IQ, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
 
         List<String> errorMessages = new ArrayList<>();
 
@@ -194,10 +164,16 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     try {
                         ImmutableList<ImmutableTerm> headTerms = renameVariables(atom.getSubstitutedTerms(), lookupTable, idfac);
                         Function head = immutabilityTools.convertToMutableFunction(atom.getProjectionAtom().getPredicate(), headTerms);
+                        normalizeMapping(head); // Normalizing language tags (SIDE-EFFECT!)
 
                         CQIE rule = datalogFactory.getCQIE(head, body);
+                        eqNormalizer.enforceEqualities(rule); // Normalizing equalities (SIDE-EFFECT!)
 
-                        PPMappingAssertionProvenance previous = mutableMap.put(rule, provenance);
+                        IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(rule, iqFactory);
+
+                        IQ iq = noNullValueEnforcer.transform(directlyConvertedIQ).liftBinding();
+
+                        PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
                         if (previous != null)
                             LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
@@ -217,6 +193,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         if (!errorMessages.isEmpty())
             throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
+
+        LOGGER.debug("Original mapping size: {}", mutableMap.size());
 
         return ImmutableMap.copyOf(mutableMap);
     }
