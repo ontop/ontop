@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.*;
@@ -53,7 +52,6 @@ public class MappingTestingTools {
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
-    public static final Datalog2QueryMappingConverter DATALOG_2_QUERY_MAPPING_CONVERTER;
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingMerger MAPPING_MERGER;
@@ -94,7 +92,6 @@ public class MappingTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
-        DATALOG_2_QUERY_MAPPING_CONVERTER = injector.getInstance(Datalog2QueryMappingConverter.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);

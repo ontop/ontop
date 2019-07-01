@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.datalog.QueryUnionSplitter;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 
@@ -31,7 +30,6 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingVariableNameNormalizer.class);
         bindFromSettings(MappingSaturator.class);
         bindFromSettings(MappingCanonicalTransformer.class);
-        bindFromSettings(Datalog2QueryMappingConverter.class);
         bindFromSettings(ABoxFactIntoMappingConverter.class);
         bindFromSettings(MappingDatatypeFiller.class);
         bindFromSettings(MappingMerger.class);

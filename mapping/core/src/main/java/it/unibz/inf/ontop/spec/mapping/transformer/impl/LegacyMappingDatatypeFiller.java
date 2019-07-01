@@ -3,11 +3,15 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
+import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -18,6 +22,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -28,7 +33,6 @@ import java.util.stream.Stream;
 public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
-    private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final OntopMappingSettings settings;
     private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
@@ -38,13 +42,15 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final QueryUnionSplitter unionSplitter;
     private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
+    private final IntermediateQueryFactory iqFactory;
+    private final ProvenanceMappingFactory provMappingFactory;
+    private final NoNullValueEnforcer noNullValueEnforcer;
+    private final DatalogRule2QueryConverter datalogRule2QueryConverter;
 
     @Inject
-    private LegacyMappingDatatypeFiller(Datalog2QueryMappingConverter datalog2MappingConverter,
-                                        OntopMappingSettings settings, Relation2Predicate relation2Predicate,
+    private LegacyMappingDatatypeFiller(OntopMappingSettings settings, Relation2Predicate relation2Predicate,
                                         TermFactory termFactory, TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer) {
-        this.datalog2MappingConverter = datalog2MappingConverter;
+                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, IntermediateQueryFactory iqFactory, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter) {
         this.settings = settings;
         this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
@@ -54,6 +60,10 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
+        this.iqFactory = iqFactory;
+        this.provMappingFactory = provMappingFactory;
+        this.noNullValueEnforcer = noNullValueEnforcer;
+        this.datalogRule2QueryConverter = datalogRule2QueryConverter;
     }
 
     /***
@@ -88,10 +98,16 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                 .collect(ImmutableCollectors.toMap());
 
         //CQIEs are mutable
-        for(CQIE rule : ruleMap.keySet()){
+        for(CQIE rule : ruleMap.keySet()) {
             typeCompletion.insertDataTyping(rule);
         }
-        return datalog2MappingConverter.convertMappingRules(ruleMap, mapping.getMetadata());
+
+        ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = ruleMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> convertDatalogRule(e.getKey()),
+                        Map.Entry::getValue));
+
+        return provMappingFactory.create(iqMap, mapping.getMetadata());
     }
 
     private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
@@ -99,6 +115,15 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toSet())
                 .stream();
+    }
+
+    private IQ convertDatalogRule(CQIE datalogRule) {
+
+        IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
+                datalogRule, iqFactory);
+
+        return noNullValueEnforcer.transform(directlyConvertedIQ)
+                .liftBinding();
     }
 
 }
