@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class SQLPPMapping2DatalogConverter {
@@ -78,7 +79,7 @@ public class SQLPPMapping2DatalogConverter {
                 OBDASQLQuery sourceQuery = mappingAxiom.getSourceQuery();
 
                 List<Function> body;
-                ImmutableMap<QualifiedAttributeID, Term> lookupTable;
+                ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory);
@@ -87,7 +88,9 @@ public class SQLPPMapping2DatalogConverter {
 
                     body = new ArrayList<>(re.getDataAtoms().size() + re.getFilterAtoms().size());
                     body.addAll(re.getDataAtoms());
-                    body.addAll(re.getFilterAtoms());
+                    body.addAll(re.getFilterAtoms().stream()
+                            .map(t -> immutabilityTools.convertToMutableFunction(t))
+                            .collect(ImmutableCollectors.toList()));
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -149,7 +152,7 @@ public class SQLPPMapping2DatalogConverter {
      * Returns a new function by renaming variables occurring in the {@code function}
      *  according to the {@code attributes} lookup table
      */
-    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, Term> attributes,
+    private Function renameVariables(Function function, ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
                                             QuotedIDFactory idfac) throws AttributeNotFoundException {
         List<Term> terms = function.getTerms();
         List<Term> newTerms = new ArrayList<>(terms.size());
@@ -159,16 +162,17 @@ public class SQLPPMapping2DatalogConverter {
             if (term instanceof Variable) {
                 Variable var = (Variable) term;
                 QuotedID attribute = idfac.createAttributeID(var.getName());
-                newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
+                ImmutableTerm newT = attributes.get(new QualifiedAttributeID(null, attribute));
 
-                if (newTerm == null) {
+                if (newT == null) {
                     QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+                    newT = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
 
-                    if (newTerm == null)
+                    if (newT == null)
                         throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
                                 + " (variable " + var.getName() + ") required by the target atom.");
                 }
+                newTerm = immutabilityTools.convertToMutableTerm(newT);
             }
             else if (term instanceof Function)
                 newTerm = renameVariables((Function) term, attributes, idfac);

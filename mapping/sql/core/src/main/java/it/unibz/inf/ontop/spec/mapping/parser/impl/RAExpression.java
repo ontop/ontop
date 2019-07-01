@@ -3,12 +3,11 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -19,7 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 public class RAExpression {
 
     private ImmutableList<Function> dataAtoms;
-    private ImmutableList<Function> filterAtoms;
+    private ImmutableList<ImmutableFunctionalTerm> filterAtoms;
     private RAExpressionAttributes attributes;
 
     /**
@@ -29,7 +28,7 @@ public class RAExpression {
      * @param attributes           an {@link RAExpressionAttributes}
      */
     public RAExpression(ImmutableList<Function> dataAtoms,
-                        ImmutableList<Function> filterAtoms,
+                        ImmutableList<ImmutableFunctionalTerm> filterAtoms,
                         RAExpressionAttributes attributes) {
         this.dataAtoms = dataAtoms;
         this.filterAtoms = filterAtoms;
@@ -41,11 +40,11 @@ public class RAExpression {
         return dataAtoms;
     }
 
-    public ImmutableList<Function> getFilterAtoms() {
+    public ImmutableList<ImmutableFunctionalTerm> getFilterAtoms() {
         return filterAtoms;
     }
 
-    public ImmutableMap<QualifiedAttributeID, Term> getAttributes() {
+    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes() {
         return attributes.getAttributes();
     }
 
@@ -77,7 +76,7 @@ public class RAExpression {
      * @throws IllegalJoinException if the same alias occurs in both arguments
      */
     public static RAExpression joinOn(RAExpression re1, RAExpression re2,
-                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, Term>, ImmutableList<Function>> getAtomOnExpression) throws IllegalJoinException {
+                                      java.util.function.Function<ImmutableMap<QualifiedAttributeID, ImmutableTerm>, ImmutableList<ImmutableFunctionalTerm>> getAtomOnExpression) throws IllegalJoinException {
 
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
@@ -142,22 +141,22 @@ public class RAExpression {
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
      * @return a {@Link ImmutableList}<{@link Function}>
      */
-    private static ImmutableList<Function> getJoinOnFilter(RAExpressionAttributes re1,
-                                                           RAExpressionAttributes re2,
-                                                           ImmutableSet<QuotedID> using,
-                                                           TermFactory termFactory) {
+    private static ImmutableList<ImmutableFunctionalTerm> getJoinOnFilter(RAExpressionAttributes re1,
+                                                                               RAExpressionAttributes re2,
+                                                                               ImmutableSet<QuotedID> using,
+                                                                               TermFactory termFactory) {
 
         return using.stream()
                 .map(id -> new QualifiedAttributeID(null, id))
                 .map(id -> {
                     // TODO: this will be removed later, when OBDA factory will start checking non-nulls
-                    Term v1 = re1.getAttributes().get(id);
+                    ImmutableTerm v1 = re1.getAttributes().get(id);
                     if (v1 == null)
                         throw new IllegalArgumentException("Term " + id + " not found in " + re1);
-                    Term v2 = re2.getAttributes().get(id);
+                    ImmutableTerm v2 = re2.getAttributes().get(id);
                     if (v2 == null)
                         throw new IllegalArgumentException("Term " + id + " not found in " + re2);
-                    return termFactory.getFunctionEQ(v1, v2);
+                    return termFactory.getImmutableFunctionalTerm(ExpressionOperation.EQ, v1, v2);
                 })
                 .collect(ImmutableCollectors.toList());
     }
@@ -178,12 +177,12 @@ public class RAExpression {
 
 
 
-    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2) {
-        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).build();
+    private static <T> ImmutableList<T> union(ImmutableList<T> atoms1, ImmutableList<T> atoms2) {
+        return ImmutableList.<T>builder().addAll(atoms1).addAll(atoms2).build();
     }
 
-    private static ImmutableList<Function> union(ImmutableList<Function> atoms1, ImmutableList<Function> atoms2, ImmutableList<Function> atoms3) {
-        return ImmutableList.<Function>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
+    private static <T> ImmutableList<T> union(ImmutableList<T> atoms1, ImmutableList<T> atoms2, ImmutableList<T> atoms3) {
+        return ImmutableList.<T>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
     }
 
 

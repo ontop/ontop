@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -396,8 +398,8 @@ public class SelectQueryParserTest {
 
     // END SUB SELECT TESTS
 
-    private Function eqOf(String var1, String var2) {
-        return TERM_FACTORY.getFunction(ExpressionOperation.EQ,
+    private ImmutableFunctionalTerm eqOf(String var1, String var2) {
+        return TERM_FACTORY.getImmutableFunctionalTerm(ExpressionOperation.EQ,
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
@@ -411,7 +413,7 @@ public class SelectQueryParserTest {
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
-    private void assertMatches(ImmutableList<Function> list0, List<Function> list) {
+    private <T> void assertMatches(ImmutableList<T> list0, List<T> list) {
         assertEquals(list0.size(), list.size());
         list0.forEach(a -> { assertTrue(list.contains(a)); });
     }

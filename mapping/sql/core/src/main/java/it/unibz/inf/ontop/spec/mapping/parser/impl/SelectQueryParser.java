@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -133,25 +130,25 @@ public class SelectQueryParser {
                 }
         }
 
-        ImmutableList<Function> filterAtoms = (plainSelect.getWhere() == null)
+        ImmutableList<ImmutableFunctionalTerm> filterAtoms = (plainSelect.getWhere() == null)
                 ? current.getFilterAtoms()
-                : ImmutableList.<Function>builder()
+                : ImmutableList.<ImmutableFunctionalTerm>builder()
                 .addAll(current.getFilterAtoms())
                 .addAll(new ExpressionParser(idfac, current.getAttributes(), termFactory, typeFactory)
                         .parseBooleanExpression(plainSelect.getWhere()))
                 .build();
 
-        ImmutableMap.Builder<QualifiedAttributeID, Term> attributesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<QualifiedAttributeID, ImmutableTerm> attributesBuilder = ImmutableMap.builder();
         SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
 
         plainSelect.getSelectItems().forEach(si -> {
-            ImmutableMap<QualifiedAttributeID, Term> attrs = sip.getAttributes(si);
+            ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip.getAttributes(si);
 
             // attributesBuilder.build() below checks that the keys in attrs do not intersect
             attributesBuilder.putAll(attrs);
         });
 
-        ImmutableMap<QualifiedAttributeID, Term> attributes;
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
         try {
             attributes = attributesBuilder.build();
         }
@@ -159,8 +156,8 @@ public class SelectQueryParser {
             SelectItemProcessor sip2 = new SelectItemProcessor(current.getAttributes());
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, Term> attrs = sip2.getAttributes(si);
-                for (Map.Entry<QualifiedAttributeID, Term> a : attrs.entrySet())
+                ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip2.getAttributes(si);
+                for (Map.Entry<QualifiedAttributeID, ImmutableTerm> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
             throw new InvalidSelectQueryRuntimeException(
@@ -172,7 +169,7 @@ public class SelectQueryParser {
         }
 
         return new RAExpression(current.getDataAtoms(),
-                ImmutableList.<Function>builder().addAll(filterAtoms).build(),
+                ImmutableList.<ImmutableFunctionalTerm>builder().addAll(filterAtoms).build(),
                 new RAExpressionAttributes(attributes, null));
     }
 
@@ -323,15 +320,15 @@ public class SelectQueryParser {
     }
 
     private class SelectItemProcessor implements SelectItemVisitor {
-        final ImmutableMap<QualifiedAttributeID, Term> attributes;
+        final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
 
-        ImmutableMap<QualifiedAttributeID, Term> map;
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> map;
 
-        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
+        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
             this.attributes = attributes;
         }
 
-        ImmutableMap<QualifiedAttributeID, Term> getAttributes(SelectItem si) {
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes(SelectItem si) {
             si.accept(this);
             return map;
         }
@@ -366,7 +363,7 @@ public class SelectQueryParser {
                         ? new QualifiedAttributeID(null, id)
                         : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
 
-                Term var = attributes.get(attr);
+                ImmutableTerm var = attributes.get(attr);
                 if (var != null) {
                     Alias columnAlias = selectExpressionItem.getAlias();
                     QuotedID name = (columnAlias == null || columnAlias.getName() == null)
@@ -386,7 +383,7 @@ public class SelectQueryParser {
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
                 //Variable var = termFactory.getVariable(name.getName() + relationIndex);
 
-                Term term =  new ExpressionParser(idfac, attributes, termFactory, typeFactory).parseTerm(expr);
+                ImmutableTerm term =  new ExpressionParser(idfac, attributes, termFactory, typeFactory).parseTerm(expr);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
             }
         }

@@ -260,7 +260,7 @@ public class MetaMappingExpander {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
-		ImmutableMap<QualifiedAttributeID, Term> attributes = sqae.getQueryBodyAttributes(plainSelect);
+		ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = sqae.getQueryBodyAttributes(plainSelect);
 
 		ImmutableMap.Builder<QuotedID, SelectExpressionItem> builder = ImmutableMap.builder();
 		for (SelectItem si : plainSelect.getSelectItems()) {
