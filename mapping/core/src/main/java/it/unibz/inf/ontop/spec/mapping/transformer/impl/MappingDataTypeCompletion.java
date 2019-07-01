@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  */
 
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.impl.Datalog2QueryTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
@@ -36,6 +35,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ public class MappingDataTypeCompletion {
         Function atom = rule.getHead();
 
         //case of data and object property
-        if(!Datalog2QueryTools.isURIRDFType(atom.getTerm(1))){
+        if(!isURIRDFType(atom.getTerm(1))){
             Term object = atom.getTerm(2); // the object, third argument only
             Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
@@ -93,6 +93,25 @@ public class MappingDataTypeCompletion {
             // Infer operation datatypes from variable datatypes
             insertOperationDatatyping(object, atom, 2);
         }
+    }
+
+    /**
+     * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
+     */
+
+    private static boolean isURIRDFType(Term term) {
+        if (term instanceof Function) {
+            Function func = (Function) term;
+            if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
+                Term t0 = func.getTerm(0);
+                if (t0 instanceof IRIConstant)
+                    return ((IRIConstant) t0).getIRI().equals(RDF.TYPE);
+                    // UGLY!! TODO: remove it
+                else if (t0 instanceof ValueConstant)
+                    return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
+            }
+        }
+        return false;
     }
 
 

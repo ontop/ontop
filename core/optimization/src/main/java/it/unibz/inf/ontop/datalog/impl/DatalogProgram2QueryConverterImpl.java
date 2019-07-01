@@ -78,7 +78,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     }
 
     @Override
-    public IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+    public IQ convertDatalogProgram(DatalogProgram queryProgram,
                                     ImmutableList<Variable> signature) throws EmptyQueryException {
 
         List<CQIE> rules = queryProgram.getRules();
@@ -91,8 +91,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
 
         Predicate rootPredicate = topDownPredicates.get(0);
-        if (tablePredicates.contains(rootPredicate))
-            throw new InvalidDatalogProgramException("The root predicate must not be a table predicate");
 
         Multimap<Predicate, CQIE> ruleIndex = dependencyGraph.getRuleIndex();
 
@@ -102,8 +100,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
          * TODO: explain
          */
         // Non-final
-        IQ iq = convertDatalogDefinitions(rootPredicate, ruleIndex, tablePredicates,
-                topQueryModifiers).get();
+        IQ iq = convertDatalogDefinitions(rootPredicate, ruleIndex, topQueryModifiers).get();
 
         /*
          * Rules (sub-queries)
@@ -111,7 +108,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         for (int j = 1; j < topDownPredicates.size() ; j++) {
             Predicate datalogAtomPredicate  = topDownPredicates.get(j);
             Optional<IQ> optionalSubQuery = convertDatalogDefinitions(datalogAtomPredicate,
-                    ruleIndex, tablePredicates, NO_QUERY_MODIFIER);
+                    ruleIndex, NO_QUERY_MODIFIER);
             if (optionalSubQuery.isPresent()) {
 
                 IntensionalQueryMerger intensionalQueryMerger = new IntensionalQueryMerger(
@@ -158,14 +155,13 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
      */
     private Optional<IQ> convertDatalogDefinitions(Predicate datalogAtomPredicate,
                                                   Multimap<Predicate, CQIE> datalogRuleIndex,
-                                                  Collection<Predicate> tablePredicates,
                                                   Optional<ImmutableQueryModifiers> optionalModifiers)
             throws InvalidDatalogProgramException {
 
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
         ImmutableList<IQ> convertedDefinitions = atomDefinitions.stream()
-                .map(d -> datalogRuleConverter.convertDatalogRule(d, tablePredicates, iqFactory))
+                .map(d -> datalogRuleConverter.convertDatalogRule(d, iqFactory))
                 .collect(ImmutableCollectors.toList());
 
         return optionalModifiers.isPresent()

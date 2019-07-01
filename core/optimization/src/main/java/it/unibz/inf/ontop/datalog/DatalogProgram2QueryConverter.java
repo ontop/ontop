@@ -13,6 +13,6 @@ import java.util.Optional;
 
 public interface DatalogProgram2QueryConverter {
 
-    IQ convertDatalogProgram(DatalogProgram queryProgram, ImmutableList<Predicate> tablePredicates,
+    IQ convertDatalogProgram(DatalogProgram queryProgram,
                              ImmutableList<Variable> signature) throws EmptyQueryException;
 }

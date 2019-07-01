@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -22,6 +23,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
 /**
  * Converts a Datalog rule into an intermediate query.
@@ -89,7 +91,36 @@ public class DatalogRule2QueryConverter {
     /**
      * TODO: describe
      */
-    public IQ convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates,
+
+    public IQ extractPredicatesAndConvertDatalogRule(CQIE datalogRule, IntermediateQueryFactory iqFactory)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+
+        return convertDatalogRule(datalogRule, datalogRule.getBody().stream()
+                .flatMap(DatalogRule2QueryConverter::extractPredicates)
+                .collect(ImmutableCollectors.toSet()), iqFactory);
+
+    }
+
+    private static Stream<Predicate> extractPredicates(Function atom) {
+        Predicate currentpred = atom.getFunctionSymbol();
+        if (currentpred instanceof OperationPredicate)
+            return Stream.of();
+        else if (currentpred instanceof AlgebraOperatorPredicate) {
+            return atom.getTerms().stream()
+                    .filter(t -> t instanceof Function)
+                    // Recursive
+                    .flatMap(t -> extractPredicates((Function) t));
+        } else {
+            return Stream.of(currentpred);
+        }
+    }
+
+    public IQ convertDatalogRule(CQIE datalogRule, IntermediateQueryFactory iqFactory)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+        return convertDatalogRule(datalogRule, ImmutableSet.of(), iqFactory);
+    }
+
+    private IQ convertDatalogRule(CQIE datalogRule, Collection<Predicate> tablePredicates,
                                  IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 

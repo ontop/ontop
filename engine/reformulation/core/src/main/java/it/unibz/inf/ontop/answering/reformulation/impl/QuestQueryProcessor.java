@@ -134,7 +134,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 
 
-        return  datalogConverter.convertDatalogProgram(newprogramEq, ImmutableList.of(), translation.getSignature());
+        return  datalogConverter.convertDatalogProgram(newprogramEq, translation.getSignature());
     }
 	
 

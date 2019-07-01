@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -54,12 +53,8 @@ public class Datalog2QueryMappingConverterImpl implements Datalog2QueryMappingCo
 
     private IQ convertDatalogRule(CQIE datalogRule) {
 
-        ImmutableSet<Predicate> extensionalPredicates = datalogRule.getBody().stream()
-                .flatMap(Datalog2QueryTools::extractPredicates)
-                .collect(ImmutableCollectors.toSet());
-
-        IQ directlyConvertedIQ = datalogRule2QueryConverter.convertDatalogRule(
-                datalogRule, extensionalPredicates, iqFactory);
+        IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
+                datalogRule, iqFactory);
 
         return noNullValueEnforcer.transform(directlyConvertedIQ)
                 .liftBinding();

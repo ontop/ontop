@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.impl.Datalog2QueryTools;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -176,12 +175,7 @@ public class TMappingProcessor {
 
         return rules.stream()
                 .map(r -> r.asCQIE())
-                .map(d -> datalogRuleConverter.convertDatalogRule(
-                        d,
-                        d.getBody().stream()
-                            .flatMap(Datalog2QueryTools::extractPredicates)
-                            .collect(ImmutableCollectors.toSet()),
-                        iqFactory))
+                .map(d -> datalogRuleConverter.extractPredicatesAndConvertDatalogRule(d, iqFactory))
                 .collect(ImmutableCollectors.toList());
     }
 
