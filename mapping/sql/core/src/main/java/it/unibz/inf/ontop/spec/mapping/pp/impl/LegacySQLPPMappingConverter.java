@@ -158,8 +158,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         else
                             builder.add(e);
 
-                    filters = builder.build();
                     ImmutableSubstitution<VariableOrGroundTerm> sub = substitutionFactory.getSubstitution(s.build());
+
+                    filters = builder.build().stream()
+                            .map(e -> sub.applyToBooleanExpression(e))
+                            .collect(ImmutableCollectors.toList());
 
                     dataAtoms = re.getDataAtoms().stream()
                             .map(a -> (DataAtom<RelationPredicate>)sub.applyToDataAtom(a))
