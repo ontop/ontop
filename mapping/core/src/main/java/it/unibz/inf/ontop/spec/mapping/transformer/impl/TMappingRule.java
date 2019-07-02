@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -37,6 +39,8 @@ public class TMappingRule {
 	private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
 	private final ImmutabilityTools immutabilityTools;
+	private final IntermediateQueryFactory iqFactory;
+	private final DatalogRule2QueryConverter datalogRuleConverter;
 
 	/***
 	 * Given a mappings in currentMapping, this method will
@@ -57,11 +61,13 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(IQ q, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator) {
+	public TMappingRule(IQ q, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter) {
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
+        this.iqFactory = iqFactory;
+        this.datalogRuleConverter = datalogRuleConverter;
 
 		List<CQIE> translation = iq2DatalogTranslator.translate(q).getRules();
 		if (translation.size() != 1)
@@ -146,6 +152,8 @@ public class TMappingRule {
         this.termFactory = baseRule.termFactory;
         this.atomFactory = baseRule.atomFactory;
         this.immutabilityTools = baseRule.immutabilityTools;
+        this.iqFactory = baseRule.iqFactory;
+        this.datalogRuleConverter = baseRule.datalogRuleConverter;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
 		this.head = (Function)baseRule.head.clone();
@@ -159,6 +167,8 @@ public class TMappingRule {
         this.termFactory = baseRule.termFactory;
 		this.atomFactory = baseRule.atomFactory;
 		this.immutabilityTools = baseRule.immutabilityTools;
+		this.iqFactory = baseRule.iqFactory;
+		this.datalogRuleConverter = baseRule.datalogRuleConverter;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
 		this.head = (Function)head.clone();
@@ -178,7 +188,7 @@ public class TMappingRule {
 		return cqc.computeHomomorphsim(head, databaseAtoms, other.head, other.databaseAtoms);
 	}
 	
-	public CQIE asCQIE() {
+	public IQ asIQ() {
 		List<Function> combinedBody;
 		if (!filterAtoms.isEmpty()) {
 			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
@@ -197,8 +207,9 @@ public class TMappingRule {
 		}
 		else
 			combinedBody = getDatabaseAtoms();
-		
-		return datalogFactory.getCQIE(head, combinedBody);
+
+		return datalogRuleConverter.extractPredicatesAndConvertDatalogRule(
+				datalogFactory.getCQIE(head, combinedBody), iqFactory);
 	}
 	
 	/***

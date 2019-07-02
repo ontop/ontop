@@ -114,7 +114,7 @@ public class TMappingProcessor {
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .collect(ImmutableCollectors.toMultimap(q -> MappingTools.extractRDFPredicate(q).getIri(),
-                        q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator)));
+                        q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter)));
 
         ImmutableMap<IRI, ImmutableList<TMappingRule>> index = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
@@ -145,9 +145,12 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.entrySet().stream()
-                .map(e -> convert(e.getValue()))                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                .map(e -> e.getValue().stream()
+                        .map(r -> r.asIQ())
+                        .collect(ImmutableCollectors.toList()) )
                 .map(queryMerger::mergeDefinitions)
                 .map(Optional::get)
+                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
                 .map(noNullValueEnforcer::transform)
                 .map(IQ::liftBinding)
                 .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
@@ -170,14 +173,6 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toTable());
     }
 
-
-    private ImmutableList<IQ> convert(ImmutableList<TMappingRule> rules) {
-
-        return rules.stream()
-                .map(r -> r.asCQIE())
-                .map(d -> datalogRuleConverter.extractPredicatesAndConvertDatalogRule(d, iqFactory))
-                .collect(ImmutableCollectors.toList());
-    }
 
     private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
                                                               Predicate<T> repFilter,
