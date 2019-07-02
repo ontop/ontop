@@ -558,12 +558,35 @@ public class LeftJoinProfTest {
                 "SELECT ?p (SUM(?nb) AS ?v)\n" +
                 "WHERE {\n" +
                 "   ?p :teaches ?c .\n" +
-                "   ?c a :Course ; \n" +
-                "        :nbStudents ?nb .\n" +
+                "   ?c :nbStudents ?nb .\n" +
                 "}\n" +
-                "GROUP BY ?p";
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("46");
+        List<String> expectedValues = ImmutableList.of("12", "13", "21");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testSumStudents3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :teaches ?c .\n" +
+                "      ?c :nbStudents ?nb .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "21");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);

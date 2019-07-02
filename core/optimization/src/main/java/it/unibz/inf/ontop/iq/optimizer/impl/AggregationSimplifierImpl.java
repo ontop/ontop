@@ -145,6 +145,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                         || (t instanceof RDFConstant))) {
                     ImmutableList<Optional<ImmutableSet<RDFTermType>>> extractedRDFTypes = aggregationFunctionalTerm.getTerms().stream()
                             .map(this::extractRDFTermTypeTerm)
+                            .map(this::unwrapIfElseNull)
                             .map(t -> extractPossibleTypes(t, child))
                             .collect(ImmutableCollectors.toList());
 

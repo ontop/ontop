@@ -595,7 +595,7 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getDBCount(ImmutableTerm term, boolean isDistinct) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(1, isDistinct));
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(1, isDistinct), term);
 	}
 
 	@Override
