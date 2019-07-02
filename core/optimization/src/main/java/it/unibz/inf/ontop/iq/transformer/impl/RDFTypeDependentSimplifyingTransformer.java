@@ -39,6 +39,12 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
     }
 
     protected Optional<ImmutableSet<RDFTermType>> extractPossibleTypes(ImmutableTerm rdfTypeTerm, IQTree childTree) {
+        if (rdfTypeTerm.isNull())
+            return Optional.empty();
+        else if (rdfTypeTerm instanceof RDFTermTypeConstant) {
+            return Optional.of(ImmutableSet.of(((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType()));
+        }
+
         ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
                 .map(s -> s.apply(rdfTypeTerm))
                 .map(t -> t.simplify(childTree.getVariableNullability()))
