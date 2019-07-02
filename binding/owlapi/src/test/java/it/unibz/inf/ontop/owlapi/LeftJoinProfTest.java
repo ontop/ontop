@@ -15,7 +15,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -532,7 +531,7 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
-    @Inject
+    @Ignore
     @Test
     public void testSumStudents1() throws Exception {
 
