@@ -549,6 +549,26 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    @Ignore
+    @Test
+    public void testSumStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p";
+
+        List<String> expectedValues = ImmutableList.of("46");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
