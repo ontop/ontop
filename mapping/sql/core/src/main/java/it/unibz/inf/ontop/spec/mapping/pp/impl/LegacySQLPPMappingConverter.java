@@ -105,11 +105,12 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(metadata, termFactory, typeFactory, atomFactory);
                     RAExpression re = sqp.parse(sourceQuery);
-                    //lookupTable = re.getAttributes();
-                    //dataAtoms = re.getDataAtoms();
-                    //filters = re.getFilterAtoms();
+                    lookupTable = re.getAttributes();
+                    dataAtoms = re.getDataAtoms();
+                    filters = re.getFilterAtoms();
 
-                    // replacemnt of EQNormalizer
+                    /*
+                    // replacement of EQNormalizer
 
                     ImmutableMap.Builder<Variable, VariableOrGroundTerm> s = ImmutableMap.builder();
                     ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
@@ -141,6 +142,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                     lookupTable = re.getAttributes().entrySet().stream()
                             .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> sub.apply(e.getValue())));
+
+                     */
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -216,7 +219,10 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
-                        PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
+                        if (filters.size() > 1)
+                            System.out.println("IQ: " + iq);
+
+                            PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
                         if (previous != null)
                             LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
