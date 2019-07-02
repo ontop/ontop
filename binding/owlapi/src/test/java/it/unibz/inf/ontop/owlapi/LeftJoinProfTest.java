@@ -15,6 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
+import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -529,6 +530,24 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
 
         assertFalse(sql.toUpperCase().contains("LEFT"));
+    }
+
+    @Inject
+    @Test
+    public void testSumStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("46");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
     }
 
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
