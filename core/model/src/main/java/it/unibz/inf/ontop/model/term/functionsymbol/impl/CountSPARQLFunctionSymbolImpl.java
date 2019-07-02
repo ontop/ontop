@@ -89,7 +89,7 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
     @Override
     public Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
+            boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
         return Optional.empty();
     }
 }

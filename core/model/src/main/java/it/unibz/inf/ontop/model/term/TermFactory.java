@@ -419,6 +419,8 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
+
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
@@ -578,5 +580,5 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
     ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
 
-	ImmutableFunctionalTerm getNonNullRejectingDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
 }

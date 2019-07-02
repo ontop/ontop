@@ -57,7 +57,7 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
     @Override
     public Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
+            boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
         if (possibleRDFTypes.size() != getArity()) {
             throw new IllegalArgumentException("The size of possibleRDFTypes is expected to match the arity of " +
                     "the function symbol");
@@ -69,17 +69,17 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
             case 0:
                 throw new MinorOntopInternalBugException("At least one RDF type was expected to be inferred for the first sub-term");
             case 1:
-                return decomposeUniTyped(subTerm, subTermPossibleTypes.iterator().next(), variableNullability,
+                return decomposeUniTyped(subTerm, subTermPossibleTypes.iterator().next(), hasGroupBy, variableNullability,
                         variableGenerator, termFactory);
             default:
-                return decomposeMultiTyped(subTerm, subTermPossibleTypes, termFactory);
+                return decomposeMultiTyped(subTerm, subTermPossibleTypes, hasGroupBy, termFactory);
         }
 
 
     }
 
     private Optional<AggregationSimplification> decomposeUniTyped(ImmutableTerm subTerm, RDFTermType subTermType,
-                                                                  VariableNullability variableNullability,
+                                                                  boolean hasGroupBy, VariableNullability variableNullability,
                                                                   VariableGenerator variableGenerator, TermFactory termFactory) {
         if (!(subTermType instanceof ConcreteNumericRDFDatatype))
             // TODO: return a NULL
@@ -91,7 +91,7 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
         TypeFactory typeFactory = termFactory.getTypeFactory();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
-        ImmutableFunctionalTerm dbSumTerm = termFactory.getNonNullRejectingDBSum(
+        ImmutableFunctionalTerm dbSumTerm = termFactory.getDBSum(
                 termFactory.getConversionFromRDFLexical2DB(subTermLexicalTerm, numericDatatype),
                 numericDatatype.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()),
                 isDistinct);
@@ -99,20 +99,29 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
         RDFTermTypeConstant inferredTypeTermWhenNonEmpty = termFactory.getRDFTermTypeConstant(
                 numericDatatype.getCommonPropagatedOrSubstitutedType(numericDatatype));
 
+        boolean isSubTermNullable = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables());
+        DBConstant zero = termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType());
+
         // TODO: consider the possibility to disable through the settings
-        ImmutableTerm inferredType = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables())
+        ImmutableTerm inferredType = isSubTermNullable
                 ? termFactory.getIfThenElse(
                         termFactory.getStrictEquality(
                                 termFactory.getDBCount(subTermLexicalTerm, false),
-                                termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType())),
+                                zero),
                         termFactory.getRDFTermTypeConstant(typeFactory.getXsdIntegerDatatype()),
                         inferredTypeTermWhenNonEmpty)
                 : inferredTypeTermWhenNonEmpty;
 
         Variable dbAggregationVariable = variableGenerator.generateNewVariable();
 
+        // If DB sum returns a NULL, replaces it by 0
+        boolean dbSumMayReturnNull = !(hasGroupBy && (!isSubTermNullable));
+        ImmutableTerm nonNullDBAggregate = dbSumMayReturnNull
+                ? termFactory.getDBCoalesce(dbAggregationVariable, zero)
+                : dbAggregationVariable;
+
         ImmutableFunctionalTerm liftedTerm = termFactory.getRDFFunctionalTerm(
-                termFactory.getConversion2RDFLexical(dbAggregationVariable, numericDatatype),
+                termFactory.getConversion2RDFLexical(nonNullDBAggregate, numericDatatype),
                 inferredType);
 
         FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(liftedTerm,
@@ -126,7 +135,7 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
      */
     private Optional<AggregationSimplification> decomposeMultiTyped(ImmutableTerm subTerm,
                                                                     ImmutableSet<RDFTermType> subTermPossibleTypes,
-                                                                    TermFactory termFactory) {
+                                                                    boolean hasGroupBy, TermFactory termFactory) {
         throw new RuntimeException("TODO: the multityped case for SUM is not yet supported");
     }
 

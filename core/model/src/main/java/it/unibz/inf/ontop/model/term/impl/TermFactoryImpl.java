@@ -599,8 +599,8 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getNonNullRejectingDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNonNullRejectingDBSum(dbType, isDistinct), subTerm);
+	public ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBSum(dbType, isDistinct), subTerm);
 	}
 
 	@Override
@@ -896,6 +896,15 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs) {
 		return getDBCase(whenPairs, valueNull);
 	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms) {
+		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+		builder.add(term1);
+		builder.add(term2);
+		builder.addAll(ImmutableList.copyOf(terms));
+        return getDBCoalesce(builder.build());
+    }
 
     @Override
     public ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms) {

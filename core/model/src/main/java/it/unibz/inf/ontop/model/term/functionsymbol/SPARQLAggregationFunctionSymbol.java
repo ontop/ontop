@@ -17,7 +17,7 @@ public interface SPARQLAggregationFunctionSymbol extends SPARQLFunctionSymbol {
 
     Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory);
+            boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory);
 
 
     interface AggregationSimplification {

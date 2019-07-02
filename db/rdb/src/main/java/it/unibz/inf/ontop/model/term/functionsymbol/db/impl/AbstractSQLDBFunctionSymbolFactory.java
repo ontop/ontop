@@ -98,6 +98,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 : new DBCountFunctionSymbolImpl(integerType, isDistinct);
     }
 
+    @Override
+    protected DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct) {
+        return new NullIgnoringDBSumFunctionSymbol(termType, isDistinct);
+    }
+
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();

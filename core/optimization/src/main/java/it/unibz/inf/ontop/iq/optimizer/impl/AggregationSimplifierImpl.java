@@ -81,11 +81,14 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
 
             ImmutableSubstitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
 
+            // With the GROUP BY clause, groups are never empty
+            boolean hasGroupBy = !rootNode.getGroupingVariables().isEmpty();
+
             ImmutableMap<Variable, Optional<AggregationSimplification>> simplificationMap =
                     initialSubstitution.getImmutableMap().entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
-                                    e -> simplifyAggregationFunctionalTerm(e.getValue(), normalizedChild)));
+                                    e -> simplifyAggregationFunctionalTerm(e.getValue(), normalizedChild, hasGroupBy)));
 
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     substitutionFactory.getSubstitution(simplificationMap.entrySet().stream()
@@ -125,7 +128,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
         }
 
         protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
-                                                                                        IQTree child) {
+                                                                                        IQTree child, boolean hasGroupBy) {
             FunctionSymbol functionSymbol = aggregationFunctionalTerm.getFunctionSymbol();
 
             /*
@@ -160,7 +163,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                      * Delegates the simplification to the function symbol
                      */
                     return aggregationFunctionSymbol.decomposeIntoDBAggregation(subTerms, possibleRDFTypes,
-                            child.getVariableNullability(), variableGenerator, termFactory);
+                            hasGroupBy, child.getVariableNullability(), variableGenerator, termFactory);
                 }
             }
             /*
