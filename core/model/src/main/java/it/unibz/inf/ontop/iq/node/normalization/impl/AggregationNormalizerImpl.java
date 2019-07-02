@@ -134,9 +134,12 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ImmutableSubstitution<ImmutableTerm> nonGroupingSubstitution = childConstructionNode.getSubstitution()
                     .reduceDomainToIntersectionWith(nonGroupingVariables);
 
+            ImmutableSubstitution<ImmutableFunctionalTerm> aggregationSubstitution = aggregationNode.getSubstitution();
+
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution =
                     (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)
-                    nonGroupingSubstitution.composeWith(aggregationNode.getSubstitution());
+                            nonGroupingSubstitution.composeWith(aggregationSubstitution)
+                                    .reduceDomainToIntersectionWith(aggregationSubstitution.getDomain());
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(
                     aggregationNode.getGroupingVariables(),
