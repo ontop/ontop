@@ -219,10 +219,10 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
-                        if (filters.size() > 1)
+                        if (iq.toString().contains("EMPTY"))
                             System.out.println("IQ: " + iq);
 
-                            PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
+                        PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
                         if (previous != null)
                             LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
