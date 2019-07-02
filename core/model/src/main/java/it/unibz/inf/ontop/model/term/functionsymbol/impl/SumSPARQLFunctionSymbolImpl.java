@@ -102,17 +102,19 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
         boolean isSubTermNullable = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables());
         DBConstant zero = termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType());
 
+        Variable newCountVariable = variableGenerator.generateNewVariable("count");
+
         // TODO: consider the possibility to disable through the settings
         ImmutableTerm inferredType = isSubTermNullable
                 ? termFactory.getIfThenElse(
                         termFactory.getStrictEquality(
-                                termFactory.getDBCount(subTermLexicalTerm, false),
+                                newCountVariable,
                                 zero),
                         termFactory.getRDFTermTypeConstant(typeFactory.getXsdIntegerDatatype()),
                         inferredTypeTermWhenNonEmpty)
                 : inferredTypeTermWhenNonEmpty;
 
-        Variable dbAggregationVariable = variableGenerator.generateNewVariable();
+        Variable dbAggregationVariable = variableGenerator.generateNewVariable("sum");
 
         // If DB sum returns a NULL, replaces it by 0
         boolean dbSumMayReturnNull = !(hasGroupBy && (!isSubTermNullable));
@@ -124,8 +126,15 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
                 termFactory.getConversion2RDFLexical(nonNullDBAggregate, numericDatatype),
                 inferredType);
 
-        FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbSumTerm));
+        ImmutableMap<Variable, ImmutableFunctionalTerm> newSubstitutionMap = isSubTermNullable
+                ? ImmutableMap.of(
+                        dbAggregationVariable, dbSumTerm,
+                        newCountVariable, termFactory.getDBCount(subTermLexicalTerm, false))
+                : ImmutableMap.of(dbAggregationVariable, dbSumTerm);
+
+        FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
+                liftedTerm,
+                newSubstitutionMap);
 
         return Optional.of(AggregationSimplification.create(decomposition, ImmutableSet.of()));
     }
