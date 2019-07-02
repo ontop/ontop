@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 
@@ -79,10 +80,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
 
     /**
-     * returns a Datalog representation of the mappings
-     *
-     * Assumption: one CQIE per mapping axiom (no nested union)
-     *
      * May also add views in the DBMetadata!
      */
 
@@ -97,7 +94,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQLQuery();
 
                 ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
-                ImmutableList<ImmutableExpression> filters;
+                Optional<ImmutableExpression> filter;
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
@@ -105,7 +102,14 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
-                    filters = re.getFilterAtoms();
+
+                    filter = re.getFilterAtoms().isEmpty()
+                            ? Optional.empty()
+                            : Optional.of(re.getFilterAtoms().reverse().stream()
+                                        .reduce(null, (a, b) -> (a == null)
+                                            ? b
+                                            : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
+
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -124,34 +128,26 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     ImmutableList<Variable> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
 
                     dataAtoms = ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments));
-                    filters = ImmutableList.of();
+                    filter = Optional.empty();
+                }
+
+                final IQTree tree;
+                if (dataAtoms.size() == 1) {
+                    IQTree child = iqFactory.createExtensionalDataNode(dataAtoms.get(0));
+                    tree = (filter.isPresent())
+                            ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filter.get()), child)
+                            : child;
+                }
+                else {
+                    tree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter),
+                            dataAtoms.stream()
+                                    .map(a -> iqFactory.createExtensionalDataNode(a))
+                                    .collect(ImmutableCollectors.toList()));
                 }
 
                 for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
-                        IQTree child;
-                        if (dataAtoms.size() == 1) {
-                                child = iqFactory.createExtensionalDataNode(dataAtoms.get(0));
-                        }
-                        else {
-                            child = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(),
-                                    dataAtoms.stream()
-                                            .map(a -> iqFactory.createExtensionalDataNode(a))
-                                            .collect(ImmutableCollectors.toList()));
-                        }
-                        IQTree qn;
-                        if (!filters.isEmpty()) {
-                            FilterNode filterNode = iqFactory.createFilterNode(
-                                    filters.reverse().stream().reduce(null,
-                                                    (a, b) -> (a == null)
-                                                            ? b
-                                                            : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
-                            qn = iqFactory.createUnaryIQTree(filterNode, child);
-                        }
-                        else
-                            qn = child;
-
                         ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
                         ImmutableList.Builder<Variable> varBuilder2 = ImmutableList.builder();
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
@@ -174,10 +170,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         }
                         ImmutableList<Variable> varList = varBuilder2.build();
                         ImmutableSubstitution substitution = substitutionFactory.getSubstitution(builder.build());
-                        ConstructionNode cn = iqFactory.createConstructionNode(ImmutableSet.copyOf(varList), substitution);
 
-                        IQ iq0 = iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),
-                                iqFactory.createUnaryIQTree(cn, qn));
+                        IQ iq0 = iqFactory.createIQ(
+                                    atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),
+                                    iqFactory.createUnaryIQTree(
+                                            iqFactory.createConstructionNode(ImmutableSet.copyOf(varList), substitution), tree));
 
                         IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
@@ -206,6 +203,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         return ImmutableMap.copyOf(mutableMap);
     }
+
 
 
     /**
