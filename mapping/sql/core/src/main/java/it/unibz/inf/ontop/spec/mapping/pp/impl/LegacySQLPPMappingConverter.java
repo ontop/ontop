@@ -92,8 +92,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         List<String> errorMessages = new ArrayList<>();
 
-        QuotedIDFactory idfac = metadata.getQuotedIDFactory();
-
         for (SQLPPTriplesMap mappingAxiom : triplesMaps) {
             try {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQLQuery();
@@ -108,42 +106,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
                     filters = re.getFilterAtoms();
-
-                    /*
-                    // replacement of EQNormalizer
-
-                    ImmutableMap.Builder<Variable, VariableOrGroundTerm> s = ImmutableMap.builder();
-                    ImmutableList.Builder<ImmutableExpression> builder = ImmutableList.builder();
-
-                    for (ImmutableExpression e : re.getFilterAtoms())
-                        if (e.getFunctionSymbol() == ExpressionOperation.EQ && e.getTerm(0 ) instanceof Variable && e.getTerm(1) instanceof Constant)
-                            s.put((Variable)e.getTerm(0), (Constant)e.getTerm(1));
-                        else if (e.getFunctionSymbol() == ExpressionOperation.EQ && e.getTerm(1 ) instanceof Variable && e.getTerm(0) instanceof Constant)
-                            s.put((Variable)e.getTerm(1), (Constant)e.getTerm(0));
-                        else
-                            builder.add(e);
-
-                    ImmutableList<ImmutableExpression> ff = builder.build();
-                    if (ff.size() == 1 && ff.get(0).getFunctionSymbol() == ExpressionOperation.EQ &&
-                    ff.get(0).getTerm(0) instanceof Variable && ff.get(0).getTerm(1) instanceof Variable) {
-                        s.put((Variable)ff.get(0).getTerm(0), (Variable) ff.get(0).getTerm(1));
-                        ff = ImmutableList.of();
-                    }
-
-                    ImmutableSubstitution<VariableOrGroundTerm> sub = substitutionFactory.getSubstitution(s.build());
-
-                    filters = ff.stream()
-                            .map(e -> sub.applyToBooleanExpression(e))
-                            .collect(ImmutableCollectors.toList());
-
-                    dataAtoms = re.getDataAtoms().stream()
-                            .map(a -> (DataAtom<RelationPredicate>)sub.applyToDataAtom(a))
-                            .collect(ImmutableCollectors.toList());
-
-                    lookupTable = re.getAttributes().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> sub.apply(e.getValue())));
-
-                     */
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -195,11 +157,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
                             ImmutableTerm t = atom.getSubstitution().get(v);
                             if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, idfac));
+                                builder.put(v, renameVariables(t, lookupTable, metadata.getQuotedIDFactory()));
                                 varBuilder2.add(v);
                             }
                             else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, idfac);
+                                ImmutableTerm tt = renameVariables(v, lookupTable, metadata.getQuotedIDFactory());
                                 if (tt instanceof Variable) { // avoids Var -> Var
                                     Variable v2 = (Variable) tt;
                                     varBuilder2.add(v2);
@@ -219,11 +181,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0).liftBinding();
 
-                        if (!iq.getTree().isDeclaredAsEmpty()) {
-                            PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
-                            if (previous != null)
-                                LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
-                        }
+                        PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
+                        if (previous != null)
+                            LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
                     catch (AttributeNotFoundException e) {
                         errorMessages.add("Error: " + e.getMessage()

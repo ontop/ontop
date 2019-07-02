@@ -112,6 +112,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
     private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
         return unionSplitter.splitUnion(unionNormalizer.optimize(mappingQuery))
+                .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .collect(ImmutableCollectors.toSet())
                 .stream();
