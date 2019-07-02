@@ -11,8 +11,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -35,7 +33,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 
@@ -102,14 +99,12 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
-
                     filter = re.getFilterAtoms().isEmpty()
                             ? Optional.empty()
                             : Optional.of(re.getFilterAtoms().reverse().stream()
                                         .reduce(null, (a, b) -> (a == null)
                                             ? b
                                             : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
-
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -232,7 +227,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
             else if (term instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)term;
                 ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-                for (ImmutableTerm t : f.getTerms())
+                for (ImmutableTerm t : f.getTerms()) // for exception handling
                     builder.add(renameVariables(t, attributes, idfac));
                 return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), builder.build());
             }
@@ -242,11 +237,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 throw new RuntimeException("Unknown term type: " + term);
     }
 
-
     private static class AttributeNotFoundException extends Exception {
         AttributeNotFoundException(String message) {
             super(message);
         }
     }
-
 }
