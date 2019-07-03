@@ -116,7 +116,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMultimap(q -> MappingTools.extractRDFPredicate(q).getIri(),
                         q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter)));
 
-        ImmutableMap<IRI, ImmutableList<TMappingRule>> index = Stream.concat(Stream.concat(
+        ImmutableMap<IRI, TMappingEntry> index = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), originalMappingIndex,
                         ObjectPropertyExpression::getIRI, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
@@ -131,7 +131,7 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-		ImmutableMap<IRI, ImmutableList<TMappingRule>> ruleIndex = Stream.concat(
+		ImmutableMap<IRI, TMappingEntry> ruleIndex = Stream.concat(
                 index.entrySet().stream(),
                 originalMappingIndex.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
@@ -139,20 +139,13 @@ public class TMappingProcessor {
                         .filter(e -> !index.containsKey(e.getKey()))
                         .collect(ImmutableCollectors.toMap(
                                 e -> e.getKey(),
-                                e -> e.getValue().stream()
-                                        .collect(toListWithCQC(cqc))))
+                                e -> new TMappingEntry(e.getValue().stream()
+                                        .collect(toListWithCQC(cqc)), noNullValueEnforcer, queryMerger)))
                         .entrySet().stream())
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableList<AbstractMap.Entry<MappingTools.RDFPredicateInfo, IQ>> intermediateQueryList = ruleIndex.entrySet().stream()
-                .map(e -> e.getValue().stream()
-                        .map(r -> r.asIQ())
-                        .collect(ImmutableCollectors.toList()) )
-                .map(queryMerger::mergeDefinitions)
-                .map(Optional::get)
-                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                .map(noNullValueEnforcer::transform)
-                .map(IQ::liftBinding)
+                .map(e ->  e.getValue().asIQ())
                 .map(iq -> new AbstractMap.SimpleImmutableEntry<>(MappingTools.extractRDFPredicate(iq), iq))
                 .collect(ImmutableCollectors.toList());
 
@@ -174,7 +167,7 @@ public class TMappingProcessor {
     }
 
 
-    private <T> Stream<Map.Entry<IRI, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
+    private <T> Stream<Map.Entry<IRI, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                               Predicate<T> repFilter,
                                                               ImmutableMultimap<IRI, TMappingRule> originalMappingIndex,
                                                               java.util.function.Function<T, IRI> getIRI,
@@ -185,15 +178,15 @@ public class TMappingProcessor {
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHead(), getIRI.apply(d)), m));
 
-	    ImmutableMap<IRI, ImmutableList<TMappingRule>> representatives = dag.stream()
+	    ImmutableMap<IRI, TMappingEntry> representatives = dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
                         s -> getIRI.apply(s.getRepresentative()),
-                        s -> dag.getSub(s).stream()
+                        s -> new TMappingEntry(dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(toListWithCQC(cqc))));
+                                .collect(toListWithCQC(cqc)), noNullValueEnforcer, queryMerger)));
 
 	    return dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
@@ -201,9 +194,8 @@ public class TMappingProcessor {
                     .filter(populationFilter)
                     .collect(ImmutableCollectors.toMap(
                             d -> getIRI.apply(d),
-                            d -> representatives.get(getIRI.apply(s.getRepresentative())).stream()
-                                    .map(headReplacer.apply(s.getRepresentative(), d))
-                                    .collect(ImmutableCollectors.toList())))
+                            d -> representatives.get(getIRI.apply(s.getRepresentative()))
+                                    .createCopy(headReplacer.apply(s.getRepresentative(), d))))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
