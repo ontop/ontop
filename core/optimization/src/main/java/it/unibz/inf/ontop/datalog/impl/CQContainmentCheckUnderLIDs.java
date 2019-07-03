@@ -54,7 +54,7 @@ public class CQContainmentCheckUnderLIDs {
 		return factMap;
 	}
 
-	public Substitution computeHomomorphsim(Function h1, ImmutableList<DataAtom<AtomPredicate>> b1, Function h2, ImmutableList<DataAtom<AtomPredicate>> b2) {
+	public Substitution computeHomomorphsim(ImmutableList<Term> h1, ImmutableList<DataAtom<AtomPredicate>> b1, ImmutableList<Term> h2, ImmutableList<DataAtom<AtomPredicate>> b2) {
 
 		SubstitutionBuilder sb = new SubstitutionBuilder(termFactory);
 
@@ -80,17 +80,12 @@ public class CQContainmentCheckUnderLIDs {
 		return "(empty)";
 	}
 
+	private static boolean extendHomomorphism(SubstitutionBuilder sb, List<Term> from, List<Term> to) {
 
-
-	private static boolean extendHomomorphism(SubstitutionBuilder sb, Function from, Function to) {
-
-		if ((from.getArity() != to.getArity()) || !(from.getFunctionSymbol().equals(to.getFunctionSymbol())))
-			return false;
-
-		int arity = from.getArity();
+		int arity = from.size();
 		for (int i = 0; i < arity; i++) {
-			Term fromTerm = from.getTerm(i);
-			Term toTerm = to.getTerm(i);
+			Term fromTerm = from.get(i);
+			Term toTerm = to.get(i);
 			if (fromTerm instanceof Variable) {
 				boolean result = sb.extend((Variable)fromTerm, toTerm);
 				// if we cannot find a match, terminate the process and return false
@@ -113,8 +108,15 @@ public class CQContainmentCheckUnderLIDs {
 					return false;
 			}
 		}
-
 		return true;
+	}
+
+	private static boolean extendHomomorphism(SubstitutionBuilder sb, Function from, Function to) {
+
+		if ((from.getArity() != to.getArity()) || !(from.getFunctionSymbol().equals(to.getFunctionSymbol())))
+			return false;
+
+		return extendHomomorphism(sb, from.getTerms(), to.getTerms());
 	}
 
 	/**
