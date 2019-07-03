@@ -211,13 +211,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                     aggregateVariables).immutableCopy(), a.getSubstitution())))
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableSet<Variable> groupingVariables = aggregationNode.getGroupingVariables();
-
-            // The closest parent informs us about the new grouping variables
-            ImmutableSet<Variable> newGroupingVariables = subStateAncestors.isEmpty()
-                    ? groupingVariables
-                    : subStateAncestors.get(subStateAncestors.size() - 1).getChildVariables();
-
             // Applies all the substitutions of the ancestors to the substitution of the aggregation node
             // Needed when some grouping variables are also used in the aggregates
             ImmutableSubstitution<ImmutableFunctionalTerm> newAggregationSubstitution = subStateAncestors.stream()
@@ -227,6 +220,16 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             (s1, s2) -> {
                                 throw new MinorOntopInternalBugException("Substitution merging was not expected");
                             });
+
+            ImmutableSet<Variable> groupingVariables = aggregationNode.getGroupingVariables();
+
+            // The closest parent informs us about the new grouping variables
+            ImmutableSet<Variable> newGroupingVariables = subStateAncestors.isEmpty()
+                    ? groupingVariables
+                    : Sets.difference(
+                            subStateAncestors.get(subStateAncestors.size() - 1).getChildVariables(),
+                            newAggregationSubstitution.getDomain())
+                    .immutableCopy();
 
             AggregationNode newAggregationNode = iqFactory.createAggregationNode(newGroupingVariables, newAggregationSubstitution);
 
@@ -308,8 +311,10 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
             ConstructionNode liftedConstructionNode = iqFactory.createConstructionNode(
                     aggregationNode.getVariables(), substitutionFactory.getSubstitution(liftedSubstitutionMap));
 
-            AggregationNode newAggregationNode = iqFactory.createAggregationNode(liftedConstructionNode.getChildVariables(),
-                    newAggregationSubstitution);
+            ImmutableSet<Variable> newGroupingVariables = Sets.difference(liftedConstructionNode.getChildVariables(),
+                    newAggregationSubstitution.getDomain()).immutableCopy();
+
+            AggregationNode newAggregationNode = iqFactory.createAggregationNode(newGroupingVariables, newAggregationSubstitution);
 
             ImmutableList<ConstructionNode> newAncestors = Stream.concat(ancestors.stream(), Stream.of(liftedConstructionNode))
                             .collect(ImmutableCollectors.toList());
