@@ -139,8 +139,8 @@ public class TMappingProcessor {
                         .filter(e -> !index.containsKey(e.getKey()))
                         .collect(ImmutableCollectors.toMap(
                                 e -> e.getKey(),
-                                e -> new TMappingEntry(e.getValue().stream()
-                                        .collect(toListWithCQC(cqc)), noNullValueEnforcer, queryMerger)))
+                                e -> e.getValue().stream()
+                                        .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))))
                         .entrySet().stream())
                 .collect(ImmutableCollectors.toMap());
 
@@ -182,11 +182,11 @@ public class TMappingProcessor {
                 .filter(s -> repFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
                         s -> getIRI.apply(s.getRepresentative()),
-                        s -> new TMappingEntry(dag.getSub(s).stream()
+                        s -> dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(toListWithCQC(cqc)), noNullValueEnforcer, queryMerger)));
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))));
 
 	    return dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
@@ -236,176 +236,5 @@ public class TMappingProcessor {
         return isInverse
                 ? (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(2), newIri, head.getTerm(0))
                 : (head, newIri) -> atomFactory.getMutableTripleHeadAtom(head.getTerm(0), newIri, head.getTerm(2));
-    }
-
-
-
-    private Collector<TMappingRule, BuilderWithCQC, ImmutableList<TMappingRule>> toListWithCQC(CQContainmentCheckUnderLIDs cqc) {
-        return Collector.of(
-                () -> new BuilderWithCQC(cqc), // Supplier
-                BuilderWithCQC::add, // Accumulator
-                (b1, b2) -> b1.addAll(b2.build().iterator()), // Merger
-                BuilderWithCQC::build, // Finisher
-                Collector.Characteristics.UNORDERED);
-    }
-
-    private final class BuilderWithCQC {
-        private final List<TMappingRule> rules = new ArrayList<>();
-        private final CQContainmentCheckUnderLIDs cqc;
-
-        BuilderWithCQC(CQContainmentCheckUnderLIDs cqc) {
-            this.cqc = cqc;
-        }
-
-        public BuilderWithCQC add(TMappingRule rule) {
-            mergeMappingsWithCQC(rules, rule, cqc);
-            return this;
-        }
-
-        public BuilderWithCQC addAll(Iterator<TMappingRule> rs) {
-            while (rs.hasNext())
-                mergeMappingsWithCQC(rules, rs.next(), cqc);
-            return this;
-        }
-
-        public ImmutableList<TMappingRule> build() {
-            return ImmutableList.copyOf(rules);
-        }
-    }
-
-
-    /***
-     *
-     * This is an optimization mechanism that allows T-mappings to produce a
-     * smaller number of mappings, and hence, the unfolding will be able to
-     * produce fewer queries.
-     *
-     * Given a set of mappings for a class/property A in currentMappings
-     * , this method tries to add a the data coming from a new mapping for A in
-     * an optimal way, that is, this method will attempt to include the content
-     * of coming from newmapping by modifying an existing mapping
-     * instead of adding a new mapping.
-     *
-     * <p/>
-     *
-     * To do this, this method will strip newmapping from any
-     * (in)equality conditions that hold over the variables of the query,
-     * leaving only the raw body. Then it will look for another "stripped"
-     * mapping <bold>m</bold> in currentMappings such that m is
-     * equivalent to stripped(newmapping). If such a m is found, this method
-     * will add the extra semantics of newmapping to "m" by appending
-     * newmapping's conditions into an OR atom, together with the existing
-     * conditions of m.
-     *
-     * </p>
-     * If no such m is found, then this method simply adds newmapping to
-     * currentMappings.
-     *
-     *
-     * <p/>
-     * For example. If new mapping is equal to
-     * <p/>
-     *
-     * S(x,z) :- R(x,y,z), y = 2
-     *
-     * <p/>
-     * and there exists a mapping m
-     * <p/>
-     * S(x,z) :- R(x,y,z), y > 7
-     *
-     * This method would modify 'm' as follows:
-     *
-     * <p/>
-     * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
-     *
-     * <p/>
-     *
-     */
-
-    private void mergeMappingsWithCQC(List<TMappingRule> rules, TMappingRule newRule, CQContainmentCheckUnderLIDs cqc) {
-
-        if (rules.contains(newRule))
-            return;
-
-        // Facts are just added
-        if (newRule.isFact()) {
-            rules.add(newRule);
-            return;
-        }
-
-        Iterator<TMappingRule> mappingIterator = rules.iterator();
-        while (mappingIterator.hasNext()) {
-
-            TMappingRule currentRule = mappingIterator.next();
-
-            boolean couldIgnore = false;
-
-            Substitution toNewRule = newRule.computeHomomorphsim(currentRule, cqc);
-            if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
-                if (newRule.getDatabaseAtoms().size() < currentRule.getDatabaseAtoms().size()) {
-                    couldIgnore = true;
-                }
-                else {
-                    // if the new mapping is redundant and there are no conditions then do not add anything
-                    return;
-                }
-            }
-
-            Substitution fromNewRule = currentRule.computeHomomorphsim(newRule, cqc);
-            if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {
-                // The existing query is more specific than the new query, so we
-                // need to add the new query and remove the old
-                mappingIterator.remove();
-                continue;
-            }
-
-            if (couldIgnore) {
-                // if the new mapping is redundant and there are no conditions then do not add anything
-                return;
-            }
-
-            if ((toNewRule != null) && (fromNewRule != null)) {
-                // We found an equivalence, we will try to merge the conditions of
-                // newRule into the currentRule
-                // Here we can merge conditions of the new query with the one we have just found
-                // new map always has just one set of filters  !!
-                ImmutableList<Function> newf = newRule.getConditions().get(0).stream()
-                        .map(atom -> applySubstitution(atom, fromNewRule))
-                        .collect(ImmutableCollectors.toList());
-
-                // if each of the existing conditions in one of the filter groups
-                // is found in the new filter then the new filter is redundant
-                if (currentRule.getConditions().stream().anyMatch(f -> newf.containsAll(f)))
-                    return;
-
-                // REPLACE THE CURRENT RULE
-                mappingIterator.remove();
-                rules.add(new TMappingRule(currentRule,
-                        Stream.concat(currentRule.getConditions().stream()
-                                // if each of the new conditions is found among econd then the old condition is redundant
-                                .filter(f -> !f.containsAll(newf)), // no need to clone
-                        Stream.of(newf))
-                        .collect(ImmutableCollectors.toList())));
-                return;
-            }
-        }
-        rules.add(newRule);
-    }
-
-    private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, Substitution toRule1) {
-        if (rule2.getConditions().size() == 0)
-            return true;
-        if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)
-            return false;
-
-        return rule2.getConditions().get(0).stream()
-                .map(atom -> applySubstitution(atom, toRule1))
-                .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
-    }
-
-    private Function applySubstitution(Function atom, Substitution sub) {
-        Function clone = (Function)atom.clone();
-        substitutionUtilities.applySubstitution(clone, sub);
-        return clone;
     }
 }
