@@ -99,22 +99,10 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
         RDFTermTypeConstant inferredTypeTermWhenNonEmpty = termFactory.getRDFTermTypeConstant(
                 numericDatatype.getCommonPropagatedOrSubstitutedType(numericDatatype));
 
+        Variable dbAggregationVariable = variableGenerator.generateNewVariable("sum");
+
         boolean isSubTermNullable = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables());
         DBConstant zero = termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType());
-
-        Variable newCountVariable = variableGenerator.generateNewVariable("count");
-
-        // TODO: consider the possibility to disable through the settings
-        ImmutableTerm inferredType = isSubTermNullable
-                ? termFactory.getIfThenElse(
-                        termFactory.getStrictEquality(
-                                newCountVariable,
-                                zero),
-                        termFactory.getRDFTermTypeConstant(typeFactory.getXsdIntegerDatatype()),
-                        inferredTypeTermWhenNonEmpty)
-                : inferredTypeTermWhenNonEmpty;
-
-        Variable dbAggregationVariable = variableGenerator.generateNewVariable("sum");
 
         // If DB sum returns a NULL, replaces it by 0
         boolean dbSumMayReturnNull = !(hasGroupBy && (!isSubTermNullable));
@@ -122,19 +110,21 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
                 ? termFactory.getDBCoalesce(dbAggregationVariable, zero)
                 : dbAggregationVariable;
 
+        // TODO: consider the possibility to disable it through the settings
+        ImmutableTerm inferredType = isSubTermNullable
+                ? termFactory.getIfThenElse(
+                    termFactory.getDBIsNotNull(dbAggregationVariable),
+                    inferredTypeTermWhenNonEmpty,
+                    termFactory.getRDFTermTypeConstant(typeFactory.getXsdIntegerDatatype()))
+                : inferredTypeTermWhenNonEmpty;
+
         ImmutableFunctionalTerm liftedTerm = termFactory.getRDFFunctionalTerm(
                 termFactory.getConversion2RDFLexical(nonNullDBAggregate, numericDatatype),
                 inferredType);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> newSubstitutionMap = isSubTermNullable
-                ? ImmutableMap.of(
-                        dbAggregationVariable, dbSumTerm,
-                        newCountVariable, termFactory.getDBCount(subTermLexicalTerm, false))
-                : ImmutableMap.of(dbAggregationVariable, dbSumTerm);
-
         FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
                 liftedTerm,
-                newSubstitutionMap);
+                ImmutableMap.of(dbAggregationVariable, dbSumTerm));
 
         return Optional.of(AggregationSimplification.create(decomposition, ImmutableSet.of()));
     }
