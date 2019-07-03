@@ -117,7 +117,7 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                     .filter(e -> e.getValue().isPresent())
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> (ImmutableTerm) e.getValue().get().getDecomposition().getLiftableTerm()));
+                            e -> e.getValue().get().getDecomposition().getLiftableTerm()));
 
             return parentSubstitutionMap.isEmpty()
                     ? newAggregationTree

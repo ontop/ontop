@@ -81,9 +81,10 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
     private Optional<AggregationSimplification> decomposeUniTyped(ImmutableTerm subTerm, RDFTermType subTermType,
                                                                   boolean hasGroupBy, VariableNullability variableNullability,
                                                                   VariableGenerator variableGenerator, TermFactory termFactory) {
-        if (!(subTermType instanceof ConcreteNumericRDFDatatype))
-            // TODO: return a NULL
-            throw new RuntimeException("TODO: return a null");
+        if (!(subTermType instanceof ConcreteNumericRDFDatatype)) {
+            FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(termFactory.getNullConstant());
+            return Optional.of(AggregationSimplification.create(decomposition));
+        }
 
         ConcreteNumericRDFDatatype numericDatatype = (ConcreteNumericRDFDatatype) subTermType;
         ImmutableTerm subTermLexicalTerm = extractLexicalTerm(subTerm, termFactory);
@@ -126,7 +127,7 @@ public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implem
                 liftedTerm,
                 ImmutableMap.of(dbAggregationVariable, dbSumTerm));
 
-        return Optional.of(AggregationSimplification.create(decomposition, ImmutableSet.of()));
+        return Optional.of(AggregationSimplification.create(decomposition));
     }
 
     /**

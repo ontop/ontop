@@ -28,5 +28,9 @@ public interface SPARQLAggregationFunctionSymbol extends SPARQLFunctionSymbol {
                                                 ImmutableSet<DefinitionPushDownRequest> pushDownRequests) {
             return new AggregationSimplificationImpl(decomposition, pushDownRequests);
         }
+
+        static AggregationSimplification create(FunctionalTermDecomposition decomposition) {
+            return create(decomposition, ImmutableSet.of());
+        }
     }
 }

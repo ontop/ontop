@@ -281,7 +281,7 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                     decompositionMap.entrySet().stream()
                             .filter(e -> e.getValue().isPresent())
                             .map(e -> Maps.immutableEntry(e.getKey(),
-                                    (ImmutableTerm) e.getValue().get().getLiftableTerm())))
+                                    e.getValue().get().getLiftableTerm())))
                     .collect(ImmutableCollectors.toMap());
 
             ImmutableMap<Variable, ImmutableFunctionalTerm> newAggregationSubstitutionMap =
@@ -354,7 +354,6 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                             .map(optionalDecomposition -> optionalDecomposition
                                     // Injective functional sub-term
                                     .map(ImmutableFunctionalTerm.FunctionalTermDecomposition::getLiftableTerm)
-                                    .map(t -> (ImmutableTerm) t)
                                     // Otherwise a fresh variable
                                     .orElseGet(variableGenerator::generateNewVariable))
                             // Previous argument when non-functional

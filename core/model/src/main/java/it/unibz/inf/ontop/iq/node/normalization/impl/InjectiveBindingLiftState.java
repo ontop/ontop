@@ -120,7 +120,7 @@ public class InjectiveBindingLiftState {
                 injectivityDecompositionMap.entrySet().stream()
                         .filter(e -> e.getValue().isPresent())
                         .map(e -> Maps.immutableEntry(e.getKey(),
-                                (ImmutableTerm) e.getValue().get().getLiftableTerm())))
+                                e.getValue().get().getLiftableTerm())))
                 .collect(ImmutableCollectors.toMap());
 
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
