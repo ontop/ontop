@@ -100,7 +100,8 @@ public class RedundantJoinFKProfTest {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
                 "SELECT * {\n" +
                 "?p a :Professor ; :teaches ?c .\n" +
-                "}";
+                "}\n" +
+                "ORDER BY ?p";
 
 
         List<String> expectedValues = new ArrayList<>();

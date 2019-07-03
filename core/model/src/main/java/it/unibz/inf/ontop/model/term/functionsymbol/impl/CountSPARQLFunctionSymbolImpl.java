@@ -3,29 +3,29 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl{
+public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     private final RDFDatatype xsdIntegerType;
     private final boolean isDistinct;
 
     protected CountSPARQLFunctionSymbolImpl(RDFTermType rootRdfTermType, RDFDatatype xsdIntegerType, boolean isDistinct) {
-        super("SP_COUNT_1", SPARQL.COUNT, ImmutableList.of(rootRdfTermType));
+        super("SP_COUNT_1" + (isDistinct ? "_DISTINCT" : ""), SPARQL.COUNT, ImmutableList.of(rootRdfTermType));
         this.xsdIntegerType = xsdIntegerType;
         this.isDistinct = isDistinct;
     }
 
     protected CountSPARQLFunctionSymbolImpl(RDFDatatype xsdIntegerType, boolean isDistinct) {
-        super("SP_COUNT_0", SPARQL.COUNT, ImmutableList.of());
+        super("SP_COUNT_0" + (isDistinct ? "_DISTINCT" : ""), SPARQL.COUNT, ImmutableList.of());
         this.xsdIntegerType = xsdIntegerType;
         this.isDistinct = isDistinct;
     }
@@ -58,13 +58,38 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl{
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
+        if (getArity() == 0)
+            return termFactory.getRDFLiteralFunctionalTerm(
+                    termFactory.getConversion2RDFLexical(
+                            termFactory.getDBCount(isDistinct),
+                            xsdIntegerType),
+                    xsdIntegerType);
 
-        ImmutableFunctionalTerm dbCountTerm = (getArity() == 0)
-                ? termFactory.getDBCount(isDistinct)
-                : termFactory.getDBCount(newTerms.get(0), isDistinct);
+        ImmutableTerm newTerm = newTerms.get(0);
+        if (isRDFFunctionalTerm(newTerm) || (newTerm instanceof RDFConstant)) {
+            ImmutableTerm lexicalTerm = extractLexicalTerm(newTerm, termFactory);
+            ImmutableFunctionalTerm dbCountTerm = termFactory.getDBCount(lexicalTerm, isDistinct);
 
-        return termFactory.getRDFLiteralFunctionalTerm(termFactory.getConversion2RDFLexical(dbCountTerm, xsdIntegerType),
-                xsdIntegerType);
+            return termFactory.getRDFLiteralFunctionalTerm(
+                    termFactory.getConversion2RDFLexical(dbCountTerm, xsdIntegerType), xsdIntegerType)
+                    .simplify(variableNullability);
+        }
+
+        return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
 
+    @Override
+    public boolean isAggregation() {
+        return true;
+    }
+
+    /**
+     * Simplifies itself without needing the call of this method.
+     */
+    @Override
+    public Optional<AggregationSimplification> decomposeIntoDBAggregation(
+            ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
+            boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
+        return Optional.empty();
+    }
 }

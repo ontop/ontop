@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Optional;
@@ -200,6 +199,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
 
+    private final Map<DBTermType, DBFunctionSymbol> distinctSumMap;
+    private final Map<DBTermType, DBFunctionSymbol> regularSumMap;
+
+
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
@@ -247,6 +250,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.ceilMap = new ConcurrentHashMap<>();
         this.floorMap = new ConcurrentHashMap<>();
         this.roundMap = new ConcurrentHashMap<>();
+
+        this.distinctSumMap = new ConcurrentHashMap<>();
+        this.regularSumMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
     }
@@ -768,7 +774,26 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return countTable.get(arity, isDistinct);
     }
 
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBSum(DBTermType dbType, boolean isDistinct) {
+        Function<DBTermType, DBFunctionSymbol> creationFct = t -> createDBSum(dbType, isDistinct);
+
+        return isDistinct
+                ? distinctSumMap.computeIfAbsent(dbType, creationFct)
+                : regularSumMap.computeIfAbsent(dbType, creationFct);
+    }
+
+    /**
+     * By default, we assume that the DB sum complies to the semantics of a null-ignoring sum.
+     */
+    @Override
+    public DBFunctionSymbol getDBSum(DBTermType dbType, boolean isDistinct) {
+        return getNullIgnoringDBSum(dbType, isDistinct);
+    }
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
+
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);

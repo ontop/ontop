@@ -364,7 +364,6 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         .map(optionalDecomposition -> optionalDecomposition
                                 // Injective functional sub-term
                                 .map(FunctionalTermDecomposition::getLiftableTerm)
-                                .map(t -> (ImmutableTerm) t)
                                 // Otherwise a fresh variable
                                 .orElseGet(variableGenerator::generateNewVariable))
                         // Previous argument when non-functional

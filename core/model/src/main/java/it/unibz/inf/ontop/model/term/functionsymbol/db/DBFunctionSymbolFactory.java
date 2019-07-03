@@ -233,4 +233,15 @@ public interface DBFunctionSymbolFactory {
      * arity <= 1
      */
     DBFunctionSymbol getDBCount(int arity, boolean isDistinct);
+
+    /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBSum(DBTermType dbType, boolean isDistinct);
+
+    /**
+     * Semantics not guaranteed (may depend on the dialect)!
+     */
+    DBFunctionSymbol getDBSum(DBTermType dbType, boolean isDistinct);
 }

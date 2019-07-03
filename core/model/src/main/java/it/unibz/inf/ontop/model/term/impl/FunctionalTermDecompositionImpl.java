@@ -11,24 +11,24 @@ import java.util.Optional;
 
 public class FunctionalTermDecompositionImpl implements ImmutableFunctionalTerm.FunctionalTermDecomposition {
 
-    private final ImmutableFunctionalTerm injectiveFunctionalTerm;
+    private final ImmutableTerm liftableTerm;
     @Nullable
     private final ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap;
 
-    protected FunctionalTermDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm,
+    protected FunctionalTermDecompositionImpl(ImmutableTerm injectiveTerm,
                                               @Nonnull ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
-        this.injectiveFunctionalTerm = injectiveFunctionalTerm;
+        this.liftableTerm = injectiveTerm;
         this.subTermSubstitutionMap = subTermSubstitutionMap;
     }
 
-    protected FunctionalTermDecompositionImpl(ImmutableFunctionalTerm injectiveFunctionalTerm) {
-        this.injectiveFunctionalTerm = injectiveFunctionalTerm;
+    protected FunctionalTermDecompositionImpl(ImmutableTerm liftableTerm) {
+        this.liftableTerm = liftableTerm;
         this.subTermSubstitutionMap = null;
     }
 
     @Override
-    public ImmutableFunctionalTerm getLiftableTerm() {
-        return injectiveFunctionalTerm;
+    public ImmutableTerm getLiftableTerm() {
+        return liftableTerm;
     }
 
     @Override
