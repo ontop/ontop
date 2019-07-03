@@ -35,7 +35,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -47,7 +46,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -164,13 +163,13 @@ public class TMappingProcessor {
                                                               Predicate<T> repFilter,
                                                               ImmutableMultimap<IRI, TMappingRule> originalMappingIndex,
                                                               java.util.function.Function<T, IRI> getIRI,
-                                                              java.util.function.Function<T, BiFunction<ImmutableList<Term>, IRI, ImmutableList<Term>>> getNewHeadGen,
+                                                              java.util.function.Function<T, Function<ImmutableList<Term>, ImmutableList<Term>>> getNewHeadGen,
                                                               java.util.function.Function<IRI, MappingTools.RDFPredicateInfo> getPredicateInfo,
                                                               CQContainmentCheckUnderLIDs cqc,
                                                               Predicate<T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms(), getIRI.apply(d)), getPredicateInfo.apply(getIRI.apply(d)), m));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), getPredicateInfo.apply(getIRI.apply(d)), m));
 
 	    ImmutableMap<IRI, TMappingEntry> representatives = dag.stream()
                 .filter(s -> repFilter.test(s.getRepresentative()))
@@ -209,26 +208,26 @@ public class TMappingProcessor {
         }
     }
 
-	private java.util.function.BiFunction<ImmutableList<Term>, IRI, ImmutableList<Term>> getNewHeadC(ClassExpression child) {
+	private java.util.function.Function<ImmutableList<Term>, ImmutableList<Term>> getNewHeadC(ClassExpression child) {
         if (child instanceof OClass) {
-            return (head, newIri) -> ImmutableList.of(head.get(0));
+            return Function.identity();
         }
         else if (child instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
             return some.isInverse()
-                ? (head, newIri) -> ImmutableList.of(head.get(1))
-                : (head, newIri) -> ImmutableList.of(head.get(0));
+                ? head -> ImmutableList.of(head.get(1))
+                : head -> ImmutableList.of(head.get(0));
         }
         else {
             DataPropertyExpression some = ((DataSomeValuesFrom) child).getProperty();
             // can never be an inverse
-            return (head, newIri) -> ImmutableList.of(head.get(0));
+            return head -> ImmutableList.of(head.get(0));
         }
     }
 
-    private java.util.function.BiFunction<ImmutableList<Term>, IRI, ImmutableList<Term>> getNewHeadP(boolean isInverse) {
+    private java.util.function.Function<ImmutableList<Term>, ImmutableList<Term>> getNewHeadP(boolean isInverse) {
         return isInverse
-                ? (head, newIri) -> ImmutableList.of(head.get(1), head.get(0))
-                : (head, newIri) -> ImmutableList.of(head.get(0), head.get(1));
+                ? head -> ImmutableList.of(head.get(1), head.get(0))
+                : Function.identity();
     }
 }
