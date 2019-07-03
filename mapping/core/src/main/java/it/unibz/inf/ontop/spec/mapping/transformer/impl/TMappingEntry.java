@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -51,6 +52,9 @@ public class TMappingEntry {
     public boolean isEmpty() {
         return rules.isEmpty();
     }
+
+    // ASSUMES NON-EMPTINESS
+    public MappingTools.RDFPredicateInfo getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
 
     public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities) {
         return Collector.of(

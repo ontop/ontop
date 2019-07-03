@@ -13,8 +13,10 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +31,8 @@ import java.util.Map;
  */
 
 public class TMappingRule {
-	
+
+	private final MappingTools.RDFPredicateInfo predicateInfo;
 	private final Function head;
 	private final ImmutableList<DataAtom<AtomPredicate>> databaseAtoms;
 	// an OR-connected list of AND-connected atomic filters
@@ -62,12 +65,15 @@ public class TMappingRule {
 	 */
 	
 	public TMappingRule(IQ q, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter) {
+
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
         this.datalogRuleConverter = datalogRuleConverter;
+
+		predicateInfo = MappingTools.extractRDFPredicate(q);
 
 		List<CQIE> translation = iq2DatalogTranslator.translate(q).getRules();
 		if (translation.size() != 1)
@@ -155,6 +161,8 @@ public class TMappingRule {
         this.iqFactory = baseRule.iqFactory;
         this.datalogRuleConverter = baseRule.datalogRuleConverter;
 
+        this.predicateInfo = baseRule.predicateInfo;
+
 		this.databaseAtoms = baseRule.databaseAtoms;
 		this.head = (Function)baseRule.head.clone();
 
@@ -162,13 +170,15 @@ public class TMappingRule {
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule) {
+	TMappingRule(Function head, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule) {
         this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
 		this.atomFactory = baseRule.atomFactory;
 		this.immutabilityTools = baseRule.immutabilityTools;
 		this.iqFactory = baseRule.iqFactory;
 		this.datalogRuleConverter = baseRule.datalogRuleConverter;
+
+		this.predicateInfo = predicateInfo;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
 		this.head = (Function)head.clone();
@@ -180,7 +190,10 @@ public class TMappingRule {
                 .collect(ImmutableCollectors.toList());
 	}
 	
-	
+	public IRI getIri() { return predicateInfo.getIri(); }
+
+	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
+
 	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
 
 		//System.out.println("CH: " + head + " v " + other.head);
