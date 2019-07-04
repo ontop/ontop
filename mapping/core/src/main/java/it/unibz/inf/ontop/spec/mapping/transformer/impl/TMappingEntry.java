@@ -12,8 +12,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -27,17 +25,13 @@ public class TMappingEntry {
 
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final UnionBasedQueryMerger queryMerger;
-    private final SubstitutionUtilities substitutionUtilities;
-    private final ImmutableSubstitutionTools immutableSubstitutionTools;
     private final SubstitutionFactory substitutionFactory;
 
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
         this.rules = rules;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.queryMerger = queryMerger;
-        this.substitutionUtilities = substitutionUtilities;
-        this.immutableSubstitutionTools = immutableSubstitutionTools;
         this.substitutionFactory = substitutionFactory;
     }
 
@@ -46,7 +40,7 @@ public class TMappingEntry {
                 rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
                 noNullValueEnforcer,
                 queryMerger,
-                substitutionUtilities, immutableSubstitutionTools, substitutionFactory);
+                substitutionFactory);
     }
 
     public IQ asIQ() {
@@ -68,9 +62,9 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
         return Collector.of(
-                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory), // Supplier
+                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
@@ -82,16 +76,12 @@ public class TMappingEntry {
         private final ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc;
         private final NoNullValueEnforcer noNullValueEnforcer;
         private final UnionBasedQueryMerger queryMerger;
-        private final SubstitutionUtilities substitutionUtilities;
-        private final ImmutableSubstitutionTools immutableSubstitutionTools;
         private final SubstitutionFactory substitutionFactory;
 
-        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
+        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
             this.cqc = cqc;
             this.noNullValueEnforcer = noNullValueEnforcer;
             this.queryMerger = queryMerger;
-            this.substitutionUtilities = substitutionUtilities;
-            this.immutableSubstitutionTools = immutableSubstitutionTools;
             this.substitutionFactory = substitutionFactory;
         }
 
@@ -107,7 +97,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory);
+            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionFactory);
         }
 
 

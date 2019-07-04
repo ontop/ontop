@@ -149,7 +149,7 @@ public class TMappingProcessor {
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory))))
+                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, noNullValueEnforcer, queryMerger, substitutionFactory))))
                 .collect(ImmutableCollectors.toList());
 
         return specificationFactory.createMapping(mapping.getMetadata(),
@@ -187,7 +187,7 @@ public class TMappingProcessor {
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory))));
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionFactory))));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
