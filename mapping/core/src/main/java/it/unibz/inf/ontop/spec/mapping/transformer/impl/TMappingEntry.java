@@ -275,7 +275,7 @@ public class TMappingEntry {
 
                     ImmutableFunctionalTerm fromIFT = (ImmutableFunctionalTerm)fromTerm;
                     ImmutableFunctionalTerm toIFT = (ImmutableFunctionalTerm)toTerm;
-                    if (fromIFT.getFunctionSymbol() != toIFT.getFunctionSymbol())
+                    if (!fromIFT.getFunctionSymbol().equals(toIFT.getFunctionSymbol()))
                         return false;
 
                     boolean result = extendHomomorphism(builder, fromIFT.getTerms(), toIFT.getTerms());
