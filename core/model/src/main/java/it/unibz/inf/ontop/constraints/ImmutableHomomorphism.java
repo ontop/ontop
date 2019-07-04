@@ -32,6 +32,8 @@ public class ImmutableHomomorphism {
         return (term instanceof Variable) ? map.get(term) : term;
     }
 
+    public ImmutableMap<Variable, VariableOrGroundTerm> asMap() { return map; }
+
     @Override
     public boolean equals(Object other) {
         if (other != null && other instanceof ImmutableHomomorphism) {

@@ -1,16 +1,18 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
+import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -28,14 +30,16 @@ public class TMappingEntry {
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionUtilities substitutionUtilities;
     private final ImmutableSubstitutionTools immutableSubstitutionTools;
+    private final SubstitutionFactory substitutionFactory;
 
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
         this.rules = rules;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.queryMerger = queryMerger;
         this.substitutionUtilities = substitutionUtilities;
         this.immutableSubstitutionTools = immutableSubstitutionTools;
+        this.substitutionFactory = substitutionFactory;
     }
 
     public TMappingEntry createCopy(java.util.function.Function<TMappingRule, TMappingRule> headReplacer) {
@@ -43,7 +47,7 @@ public class TMappingEntry {
                 rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
                 noNullValueEnforcer,
                 queryMerger,
-                substitutionUtilities, immutableSubstitutionTools);
+                substitutionUtilities, immutableSubstitutionTools, substitutionFactory);
     }
 
     public IQ asIQ() {
@@ -65,9 +69,9 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
         return Collector.of(
-                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools), // Supplier
+                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
@@ -76,18 +80,20 @@ public class TMappingEntry {
 
     private static final class BuilderWithCQC {
         private final List<TMappingRule> rules = new ArrayList<>();
-        private final CQContainmentCheckUnderLIDs cqc;
+        private final ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc;
         private final NoNullValueEnforcer noNullValueEnforcer;
         private final UnionBasedQueryMerger queryMerger;
         private final SubstitutionUtilities substitutionUtilities;
         private final ImmutableSubstitutionTools immutableSubstitutionTools;
+        private final SubstitutionFactory substitutionFactory;
 
-        BuilderWithCQC(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
+        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
             this.cqc = cqc;
             this.noNullValueEnforcer = noNullValueEnforcer;
             this.queryMerger = queryMerger;
             this.substitutionUtilities = substitutionUtilities;
             this.immutableSubstitutionTools = immutableSubstitutionTools;
+            this.substitutionFactory = substitutionFactory;
         }
 
         public BuilderWithCQC add(TMappingRule rule) {
@@ -102,7 +108,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools);
+            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory);
         }
 
 
@@ -173,7 +179,7 @@ public class TMappingEntry {
 
                 boolean couldIgnore = false;
 
-                ImmutableSubstitution<ImmutableTerm> toNewRule = computeHomomorphsim(newRule, currentRule, cqc);
+                ImmutableSubstitution<VariableOrGroundTerm> toNewRule = computeHomomorphsim(newRule, currentRule, cqc);
                 if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
                     if (newRule.getDatabaseAtoms().size() < currentRule.getDatabaseAtoms().size()) {
                         couldIgnore = true;
@@ -184,7 +190,7 @@ public class TMappingEntry {
                     }
                 }
 
-                ImmutableSubstitution<ImmutableTerm> fromNewRule = computeHomomorphsim(currentRule, newRule, cqc);
+                ImmutableSubstitution<VariableOrGroundTerm> fromNewRule = computeHomomorphsim(currentRule, newRule, cqc);
                 if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {
                     // The existing query is more specific than the new query, so we
                     // need to add the new query and remove the old
@@ -225,16 +231,65 @@ public class TMappingEntry {
             rules.add(newRule);
         }
 
-        private ImmutableSubstitution<ImmutableTerm> computeHomomorphsim(TMappingRule to, TMappingRule from, CQContainmentCheckUnderLIDs cqc) {
-            Substitution s = cqc.computeHomomorphsim(to.getHeadTerms(), to.getDatabaseAtoms(), from.getHeadTerms(), from.getDatabaseAtoms());
-            if (s == null)
+        private ImmutableSubstitution<VariableOrGroundTerm> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc) {
+            ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
+            boolean headMatch = extendHomomorphism(builder, from.getHeadTerms(), to.getHeadTerms());
+            if (!headMatch)
                 return null;
-            
-            return immutableSubstitutionTools.convertMutableSubstitution(s);
+
+            ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(), from.getDatabaseAtoms(), to.getDatabaseAtoms());
+            if (!h.hasNext())
+                return null;
+
+            ImmutableHomomorphism hom = h.next();
+            return substitutionFactory.getSubstitution(
+                    hom.asMap().entrySet().stream()
+                            .filter(e -> !e.getKey().equals(e.getValue()))
+                            .collect(ImmutableCollectors.toMap()));
+        }
+
+        private static boolean extendHomomorphism(ImmutableHomomorphism.Builder builder, ImmutableList<? extends ImmutableTerm> from, ImmutableList<? extends ImmutableTerm> to) {
+
+            int arity = from.size();
+            for (int i = 0; i < arity; i++) {
+                ImmutableTerm fromTerm = from.get(i);
+                ImmutableTerm toTerm = to.get(i);
+                if (fromTerm instanceof Variable) {
+                    if (!(toTerm instanceof VariableOrGroundTerm))
+                        return false;
+
+                    builder.extend((Variable)fromTerm, (VariableOrGroundTerm)toTerm);
+                    // if we cannot find a match, terminate the process and return false
+                    if (!builder.isValid())
+                        return false;
+                }
+                else if (fromTerm instanceof Constant) {
+                    // constants must match
+                    if (!fromTerm.equals(toTerm))
+                        return false;
+                }
+                else /*if (fromTerm instanceof ImmutableFunctionalTerm)*/ {
+                    // the to term must also be a function
+                    if (!(toTerm instanceof ImmutableFunctionalTerm))
+                        return false;
+
+                    ImmutableFunctionalTerm fromIFT = (ImmutableFunctionalTerm)fromTerm;
+                    ImmutableFunctionalTerm toIFT = (ImmutableFunctionalTerm)toTerm;
+                    if (fromIFT.getFunctionSymbol() != toIFT.getFunctionSymbol())
+                        return false;
+
+                    boolean result = extendHomomorphism(builder, fromIFT.getTerms(), toIFT.getTerms());
+                    // if we cannot find a match, terminate the process and return false
+                    if (!result)
+                        return false;
+                }
+            }
+            return true;
         }
 
 
-        private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, ImmutableSubstitution<ImmutableTerm> toRule1) {
+
+        private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, ImmutableSubstitution<VariableOrGroundTerm> toRule1) {
             if (rule2.getConditions().size() == 0)
                 return true;
             if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)

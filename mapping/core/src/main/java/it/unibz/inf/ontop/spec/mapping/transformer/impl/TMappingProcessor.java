@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
@@ -32,8 +33,9 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
@@ -41,6 +43,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -71,6 +74,7 @@ public class TMappingProcessor {
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
     private final ImmutableSubstitutionTools immutableSubstitutionTools;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
@@ -80,7 +84,7 @@ public class TMappingProcessor {
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, ImmutableSubstitutionTools immutableSubstitutionTools) {
+                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -96,6 +100,7 @@ public class TMappingProcessor {
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
         this.immutableSubstitutionTools = immutableSubstitutionTools;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -106,7 +111,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheck cqContainmentCheck) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck) {
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -125,15 +130,15 @@ public class TMappingProcessor {
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
-                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
+                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, p -> !p.isInverse()),
 
                 saturate(reasoner.dataPropertiesDAG(),
                         p -> !excludeFromTMappings.contains(p), source,
-                        this::indexOf, p -> getNewHeadP(false), cqc, p -> true)),
+                        this::indexOf, p -> getNewHeadP(false), cqContainmentCheck, p -> true)),
 
                 saturate(reasoner.classesDAG(),
                         s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), source,
-                        this::indexOf, this::getNewHeadC, cqc, c -> c instanceof OClass))
+                        this::indexOf, this::getNewHeadC, cqContainmentCheck, c -> c instanceof OClass))
 
                 .collect(ImmutableCollectors.toMap());
 
@@ -146,7 +151,7 @@ public class TMappingProcessor {
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools))))
+                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory))))
                 .collect(ImmutableCollectors.toList());
 
         return specificationFactory.createMapping(mapping.getMetadata(),
@@ -169,8 +174,8 @@ public class TMappingProcessor {
                                                                                          Predicate<T> representativeFilter,
                                                                                          ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
                                                                                          java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
-                                                                                         java.util.function.Function<T, Function<ImmutableList<Term>, ImmutableList<Term>>> getNewHeadGen,
-                                                                                         CQContainmentCheckUnderLIDs cqc,
+                                                                                         java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
+                                                                                         ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc,
                                                                                          Predicate<T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
@@ -184,7 +189,7 @@ public class TMappingProcessor {
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools))));
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools, substitutionFactory))));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
@@ -215,7 +220,7 @@ public class TMappingProcessor {
         return new MappingTools.RDFPredicateInfo(false, child.getIRI());
     }
 
-    private java.util.function.Function<ImmutableList<Term>, ImmutableList<Term>> getNewHeadC(ClassExpression child) {
+    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {
         if (child instanceof OClass) {
             return Function.identity();
         }
@@ -232,7 +237,7 @@ public class TMappingProcessor {
         }
     }
 
-    private java.util.function.Function<ImmutableList<Term>, ImmutableList<Term>> getNewHeadP(boolean isInverse) {
+    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadP(boolean isInverse) {
         return isInverse
                 ? head -> ImmutableList.of(head.get(1), head.get(0))
                 : Function.identity();

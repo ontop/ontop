@@ -66,7 +66,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(lids, termFactory, immutabilityTools);
 
-        ImmutableCQContainmentCheck cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
+        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig, cqContainmentCheck);
     }

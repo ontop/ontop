@@ -32,7 +32,7 @@ import java.util.Map;
 public class TMappingRule {
 
 	private final MappingTools.RDFPredicateInfo predicateInfo;
-	private final ImmutableList<Term> headTerms;
+	private final ImmutableList<ImmutableTerm> headTerms;
 	private final ImmutableList<DataAtom<AtomPredicate>> databaseAtoms;
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
@@ -102,8 +102,8 @@ public class TMappingRule {
         this.databaseAtoms = dbs.build();
 
 		this.headTerms = predicateInfo.isClass()
-				? ImmutableList.of(head.getTerms().get(0))
-				: ImmutableList.of(head.getTerms().get(0), head.getTerms().get(2));
+				? ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)))
+				: ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)), immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(2)));
 
 		ImmutableList<ImmutableExpression> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
@@ -145,13 +145,13 @@ public class TMappingRule {
         this.predicateInfo = baseRule.predicateInfo;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
-		this.headTerms = baseRule.headTerms.stream().map(t -> t.clone()).collect(ImmutableCollectors.toList());
+		this.headTerms = baseRule.headTerms;
 
 		this.filterAtoms = filterAtoms;
 	}
 	
 	
-	TMappingRule(ImmutableList<Term> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule) {
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule) {
         this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
 		this.atomFactory = baseRule.atomFactory;
@@ -162,7 +162,7 @@ public class TMappingRule {
 		this.predicateInfo = predicateInfo;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
-		this.headTerms = headTerms.stream().map(t -> t.clone()).collect(ImmutableCollectors.toList());
+		this.headTerms = headTerms;
 
         this.filterAtoms = baseRule.filterAtoms;
 	}
@@ -197,8 +197,8 @@ public class TMappingRule {
 					.collect(ImmutableCollectors.toList());
 
 		Function head = predicateInfo.isClass()
-				? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), predicateInfo.getIri())
-				: atomFactory.getMutableTripleHeadAtom(headTerms.get(0), predicateInfo.getIri(), headTerms.get(1));
+				? atomFactory.getMutableTripleHeadAtom(immutabilityTools.convertToMutableTerm(headTerms.get(0)), predicateInfo.getIri())
+				: atomFactory.getMutableTripleHeadAtom(immutabilityTools.convertToMutableTerm(headTerms.get(0)), predicateInfo.getIri(), immutabilityTools.convertToMutableTerm(headTerms.get(1)));
 
 		return datalogRuleConverter.extractPredicatesAndConvertDatalogRule(
 				datalogFactory.getCQIE(head, combinedBody), iqFactory);
@@ -231,7 +231,7 @@ public class TMappingRule {
 		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
 	}
 	
-    public ImmutableList<Term> getHeadTerms() {
+    public ImmutableList<ImmutableTerm> getHeadTerms() {
         return headTerms;
     }
 
