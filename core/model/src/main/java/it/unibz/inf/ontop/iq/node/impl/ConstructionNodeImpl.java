@@ -14,9 +14,9 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -48,7 +48,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final Constant nullValue;
-    private final AscendingSubstitutionNormalizer substitutionNormalizer;
+    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -57,7 +57,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
-                                 AscendingSubstitutionNormalizer substitutionNormalizer,
+                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
@@ -111,7 +111,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  ConstructionNodeTools constructionNodeTools,
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                                 AscendingSubstitutionNormalizer substitutionNormalizer,
+                                 ConstructionSubstitutionNormalizer substitutionNormalizer,
                                  CoreUtilsFactory coreUtilsFactory) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
@@ -373,12 +373,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         else if (liftedChild.getVariables().equals(projectedVariables))
             return liftedChild;
         else {
-            ImmutableSubstitution<ImmutableTerm> newSubstitution = substitution.simplifyValues(liftedChild.getVariableNullability());
-            ConstructionNode newConstructionNode = newSubstitution.equals(substitution)
-                    ? this
-                    : iqFactory.createConstructionNode(projectedVariables, newSubstitution);
+            ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
+                    substitution.simplifyValues(liftedChild.getVariableNullability()), projectedVariables);
 
-            return iqFactory.createUnaryIQTree(newConstructionNode, liftedChild, currentIQProperties.declareNormalizedForOptimization());
+            IQTree newChild = normalization.updateChild(liftedChild);
+            return normalization.generateTopConstructionNode()
+                    .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
+                            currentIQProperties.declareNormalizedForOptimization()))
+                    .orElse(newChild);
         }
     }
 
@@ -387,14 +389,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
         IQTree grandChild = childIQ.getChild();
 
-        AscendingSubstitutionNormalization ascendingNormalization = substitutionNormalizer.normalizeAscendingSubstitution(
+        ConstructionSubstitutionNormalization substitutionNormalization = substitutionNormalizer.normalizeSubstitution(
                 childConstructionNode.getSubstitution().composeWith(substitution).simplifyValues(grandChild.getVariableNullability()),
                 projectedVariables
         );
 
-        IQTree newGrandChild = ascendingNormalization.updateChild(grandChild);
+        IQTree newGrandChild = substitutionNormalization.updateChild(grandChild);
 
-        ImmutableSubstitution<ImmutableTerm> newSubstitution = ascendingNormalization.getAscendingSubstitution();
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionNormalization.getNormalizedSubstitution();
 
         ConstructionNode newConstructionNode = iqFactory.createConstructionNode(projectedVariables,
                 newSubstitution);
