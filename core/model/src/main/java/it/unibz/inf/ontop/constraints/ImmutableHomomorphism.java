@@ -71,13 +71,13 @@ public class ImmutableHomomorphism {
                     VariableOrGroundTerm t = map.put((Variable) from, (VariableOrGroundTerm)to);
                     // t is the previous value
                     if (t == null || t.equals(to))
-                        return this;
+                        return this; // success
                 }
             }
             else if (from instanceof Constant) {
                 // constants must match
                 if (from.equals(to))
-                    return this;
+                    return this; // success
             }
             else {
                 // the from term can now only be a ImmutableFunctionalTerm
@@ -87,15 +87,16 @@ public class ImmutableHomomorphism {
                     ImmutableFunctionalTerm toIFT = (ImmutableFunctionalTerm)to;
                     if (fromIFT.getFunctionSymbol().equals(toIFT.getFunctionSymbol())) {
                         for (int i = 0; i < fromIFT.getArity(); i++) {
-                            if (extend(fromIFT.getTerm(i), toIFT.getTerm(i)).isValid())
-                                return this;
+                            if (!extend(fromIFT.getTerm(i), toIFT.getTerm(i)).isValid())
+                                return this; // fail - early exit
                         }
+                        return this; // success
                     }
                 }
             }
 
             valid = false;
-            return this;
+            return this;  // fail
         }
 
         public Builder extend(ImmutableList<? extends VariableOrGroundTerm> from, ImmutableList<? extends VariableOrGroundTerm> to) {
