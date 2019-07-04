@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -172,7 +173,7 @@ public class TMappingEntry {
 
                 boolean couldIgnore = false;
 
-                Substitution toNewRule = newRule.computeHomomorphsim(currentRule, cqc);
+                ImmutableSubstitution<ImmutableTerm> toNewRule = computeHomomorphsim(newRule, currentRule, cqc);
                 if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
                     if (newRule.getDatabaseAtoms().size() < currentRule.getDatabaseAtoms().size()) {
                         couldIgnore = true;
@@ -183,7 +184,7 @@ public class TMappingEntry {
                     }
                 }
 
-                Substitution fromNewRule = currentRule.computeHomomorphsim(newRule, cqc);
+                ImmutableSubstitution<ImmutableTerm> fromNewRule = computeHomomorphsim(currentRule, newRule, cqc);
                 if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {
                     // The existing query is more specific than the new query, so we
                     // need to add the new query and remove the old
@@ -202,7 +203,7 @@ public class TMappingEntry {
                     // Here we can merge conditions of the new query with the one we have just found
                     // new map always has just one set of filters  !!
                     ImmutableList<ImmutableExpression> newf = newRule.getConditions().get(0).stream()
-                            .map(atom -> applySubstitution(atom, fromNewRule))
+                            .map(atom -> fromNewRule.applyToBooleanExpression(atom))
                             .collect(ImmutableCollectors.toList());
 
                     // if each of the existing conditions in one of the filter groups
@@ -224,20 +225,24 @@ public class TMappingEntry {
             rules.add(newRule);
         }
 
-        private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, Substitution toRule1) {
+        private ImmutableSubstitution<ImmutableTerm> computeHomomorphsim(TMappingRule to, TMappingRule from, CQContainmentCheckUnderLIDs cqc) {
+            Substitution s = cqc.computeHomomorphsim(to.getHeadTerms(), to.getDatabaseAtoms(), from.getHeadTerms(), from.getDatabaseAtoms());
+            if (s == null)
+                return null;
+            
+            return immutableSubstitutionTools.convertMutableSubstitution(s);
+        }
+
+
+        private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, ImmutableSubstitution<ImmutableTerm> toRule1) {
             if (rule2.getConditions().size() == 0)
                 return true;
             if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)
                 return false;
 
             return rule2.getConditions().get(0).stream()
-                    .map(atom -> applySubstitution(atom, toRule1))
+                    .map(atom -> toRule1.applyToBooleanExpression(atom))
                     .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
-        }
-
-        private ImmutableExpression applySubstitution(ImmutableExpression atom, Substitution sub) {
-            ImmutableSubstitution<ImmutableTerm> is = immutableSubstitutionTools.convertMutableSubstitution(sub);
-            return is.applyToBooleanExpression(atom);
         }
 
     }

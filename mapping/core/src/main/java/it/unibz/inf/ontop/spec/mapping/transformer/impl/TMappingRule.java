@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -15,10 +14,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.mapdb.Fun;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,7 +88,6 @@ public class TMappingRule {
 
 		for (Function atom : body) {
 			if (atom.getFunctionSymbol() instanceof ExpressionOperation) {
-				Function clone = (Function)atom.clone();
 				filters.add(termFactory.getImmutableExpression(
 						(ExpressionOperation)atom.getFunctionSymbol(),
 						atom.getTerms().stream()
@@ -175,18 +171,14 @@ public class TMappingRule {
 
 	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
 
-	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
 
-		//System.out.println("CH: " + head + " v " + other.head);
-
-		return cqc.computeHomomorphsim(headTerms, databaseAtoms, other.headTerms, other.databaseAtoms);
-	}
-	
 	public IQ asIQ() {
 		List<Function> combinedBody;
 		if (!filterAtoms.isEmpty()) {
 			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
-			combinedBody.addAll(getDatabaseAtoms());
+			combinedBody.addAll(databaseAtoms.stream()
+					.map(immutabilityTools::convertToMutableFunction)
+					.collect(ImmutableCollectors.toList()));
 			
 			Iterator<ImmutableList<ImmutableExpression>> iterOR = filterAtoms.iterator();
 			List<ImmutableExpression> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
@@ -200,7 +192,9 @@ public class TMappingRule {
 			combinedBody.add(immutabilityTools.convertToMutableBooleanExpression(mergedConditions));
 		}
 		else
-			combinedBody = getDatabaseAtoms();
+			combinedBody = databaseAtoms.stream()
+					.map(immutabilityTools::convertToMutableFunction)
+					.collect(ImmutableCollectors.toList());
 
 		Function head = predicateInfo.isClass()
 				? atomFactory.getMutableTripleHeadAtom(headTerms.get(0), predicateInfo.getIri())
@@ -241,12 +235,10 @@ public class TMappingRule {
         return headTerms;
     }
 
-    public ImmutableList<Function> getDatabaseAtoms() {
-		return databaseAtoms.stream()
-				.map(immutabilityTools::convertToMutableFunction)
-				.collect(ImmutableCollectors.toList());
+	public ImmutableList<DataAtom<AtomPredicate>> getDatabaseAtoms() {
+		return databaseAtoms;
 	}
-	
+
 	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filterAtoms; }
 	
 	@Override

@@ -120,7 +120,7 @@ public class TMappingProcessor {
                 .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
-        System.out.println("TMAP SOURCE: " + source + reasoner);
+        //System.out.println("TMAP SOURCE: " + source + reasoner);
 
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
@@ -137,8 +137,7 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-        System.out.println("TMAP SATURATED: " + saturated);
-
+        //System.out.println("TMAP SATURATED: " + saturated);
 
         ImmutableList<TMappingEntry> entries = Stream.concat(
                 saturated.values().stream(),
