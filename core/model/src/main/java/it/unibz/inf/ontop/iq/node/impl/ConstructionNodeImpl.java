@@ -380,7 +380,11 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             return normalization.generateTopConstructionNode()
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
                             currentIQProperties.declareNormalizedForOptimization()))
-                    .orElse(newChild);
+                    .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
+                            ? child
+                            : iqFactory.createUnaryIQTree(
+                                    iqFactory.createConstructionNode(projectedVariables),
+                                    newChild));
         }
     }
 
