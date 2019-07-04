@@ -100,6 +100,7 @@ public class TMappingRule {
 		}
         this.databaseAtoms = dbs.build();
 
+		System.out.println("TMP: " + q);
         ImmutableList<Term> h = replaceConstants(head.getTerms(), filters, valueMap);
 
 		this.headTerms = predicateInfo.isClass() ? ImmutableList.of(h.get(0)) : ImmutableList.of(h.get(0), h.get(2));
@@ -116,6 +117,7 @@ public class TMappingRule {
 		ImmutableList.Builder<Term> builder = ImmutableList.builder();
 		for (Term term : terms) {
 			if (term instanceof Constant) {
+				System.out.println("TMP: CONSTANT " + terms);
 				// Found a constant, replacing with a fresh variable and adding the new equality atom
 				Constant c = (Constant)term;
 				Variable var = valueMap.get(c);
