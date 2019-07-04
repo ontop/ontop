@@ -56,6 +56,9 @@ public class TMappingEntry {
     // ASSUMES NON-EMPTINESS
     public MappingTools.RDFPredicateInfo getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
 
+    @Override
+    public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
+
     public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities) {
         return Collector.of(
                 () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities), // Supplier

@@ -85,6 +85,21 @@ public class MappingTools {
         public IRI getIri() {
             return iri;
         }
+
+        @Override
+        public int hashCode() { return iri.hashCode(); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof RDFPredicateInfo) {
+                RDFPredicateInfo other = (RDFPredicateInfo)o;
+                return iri.equals(other.iri) && isClass == other.isClass;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() { return (isClass ? "C/" : "P/") + iri; }
     }
 
 
