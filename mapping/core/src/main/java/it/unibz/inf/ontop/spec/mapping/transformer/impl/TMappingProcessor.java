@@ -110,34 +110,34 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex = mapping.getRDFAtomPredicates().stream()
+        ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> source = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
-        ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> index = Stream.concat(Stream.concat(
+        ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
-                        p -> !p.isInverse() && !excludeFromTMappings.contains(p), originalMappingIndex,
-                        this::getRDFPredicateInfo, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
+                        p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
+                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqc, p -> !p.isInverse()),
 
                 saturate(reasoner.dataPropertiesDAG(),
-                        p -> !excludeFromTMappings.contains(p), originalMappingIndex,
-                        this::getRDFPredicateInfo, p -> getNewHeadP(false), cqc, p -> true)),
+                        p -> !excludeFromTMappings.contains(p), source,
+                        this::indexOf, p -> getNewHeadP(false), cqc, p -> true)),
 
                 saturate(reasoner.classesDAG(),
-                        s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), originalMappingIndex,
-                        this::getRDFPredicateInfo, this::getNewHeadC, cqc, c -> c instanceof OClass))
+                        s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), source,
+                        this::indexOf, this::getNewHeadC, cqc, c -> c instanceof OClass))
 
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableList<TMappingEntry> entries = Stream.concat(
-                index.values().stream(),
-                originalMappingIndex.asMap().entrySet().stream()
+                saturated.values().stream(),
+                source.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
-                        .filter(e -> !index.containsKey(e.getKey()))
+                        .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
                                 .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))))
                 .collect(ImmutableCollectors.toList());
@@ -159,53 +159,53 @@ public class TMappingProcessor {
     }
 
     private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
-                                                                                         Predicate<T> repFilter,
+                                                                                         Predicate<T> representativeFilter,
                                                                                          ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
-                                                                                         java.util.function.Function<T, MappingTools.RDFPredicateInfo> getIRI,
+                                                                                         java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
                                                                                          java.util.function.Function<T, Function<ImmutableList<Term>, ImmutableList<Term>>> getNewHeadGen,
                                                                                          CQContainmentCheckUnderLIDs cqc,
                                                                                          Predicate<T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), getIRI.apply(d), m));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m));
 
 	    ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> representatives = dag.stream()
-                .filter(s -> repFilter.test(s.getRepresentative()))
+                .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
-                        s -> getIRI.apply(s.getRepresentative()),
+                        s -> indexOf.apply(s.getRepresentative()),
                         s -> dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
-                                .flatMap(d -> originalMappingIndex.get(getIRI.apply(d)).stream()
+                                .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
                                 .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))));
 
 	    return dag.stream()
-                .filter(s -> repFilter.test(s.getRepresentative()))
+                .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
                     .filter(populationFilter)
                     .collect(ImmutableCollectors.toMap(
-                            d -> getIRI.apply(d),
-                            d -> representatives.get(getIRI.apply(s.getRepresentative()))
+                            d -> indexOf.apply(d),
+                            d -> representatives.get(indexOf.apply(s.getRepresentative()))
                                     .createCopy(headReplacer.apply(s.getRepresentative(), d))))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
 
 
-	private MappingTools.RDFPredicateInfo getRDFPredicateInfo(ClassExpression child) {
+	private MappingTools.RDFPredicateInfo indexOf(ClassExpression child) {
         if (child instanceof OClass)
             return new MappingTools.RDFPredicateInfo(true, ((OClass) child).getIRI());
         else if (child instanceof ObjectSomeValuesFrom)
-            return getRDFPredicateInfo(((ObjectSomeValuesFrom) child).getProperty());
+            return indexOf(((ObjectSomeValuesFrom) child).getProperty());
         else
-            return getRDFPredicateInfo(((DataSomeValuesFrom) child).getProperty());
+            return indexOf(((DataSomeValuesFrom) child).getProperty());
     }
 
-    private MappingTools.RDFPredicateInfo getRDFPredicateInfo(ObjectPropertyExpression child) {
+    private MappingTools.RDFPredicateInfo indexOf(ObjectPropertyExpression child) {
         return new MappingTools.RDFPredicateInfo(false, child.getIRI());
     }
 
-    private MappingTools.RDFPredicateInfo getRDFPredicateInfo(DataPropertyExpression child) {
+    private MappingTools.RDFPredicateInfo indexOf(DataPropertyExpression child) {
         return new MappingTools.RDFPredicateInfo(false, child.getIRI());
     }
 
