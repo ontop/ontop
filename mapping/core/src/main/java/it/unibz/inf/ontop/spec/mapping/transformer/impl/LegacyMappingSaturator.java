@@ -3,10 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
@@ -34,7 +32,6 @@ public class LegacyMappingSaturator implements MappingSaturator {
     private final TermFactory termFactory;
     private final TMappingProcessor tMappingProcessor;
     private final AtomFactory atomFactory;
-    private final ImmutabilityTools immutabilityTools;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
@@ -42,13 +39,11 @@ public class LegacyMappingSaturator implements MappingSaturator {
                                    TermFactory termFactory,
                                    TMappingProcessor tMappingProcessor,
                                    AtomFactory atomFactory,
-                                   ImmutabilityTools immutabilityTools,
                                    CoreUtilsFactory coreUtilsFactory) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
         this.termFactory = termFactory;
         this.tMappingProcessor = tMappingProcessor;
         this.atomFactory = atomFactory;
-        this.immutabilityTools = immutabilityTools;
         this.coreUtilsFactory = coreUtilsFactory;
     }
 
@@ -64,11 +59,9 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         LinearInclusionDependencies<AtomPredicate> lids = b.build();
 
-        CQContainmentCheckUnderLIDs foreignKeyCQC = new CQContainmentCheckUnderLIDs(lids, termFactory, immutabilityTools);
-
         ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
 
-        return tMappingProcessor.getTMappings(mapping, saturatedTBox, foreignKeyCQC, tMappingExclusionConfig, cqContainmentCheck);
+        return tMappingProcessor.getTMappings(mapping, saturatedTBox, tMappingExclusionConfig, cqContainmentCheck);
     }
 
 

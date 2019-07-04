@@ -4,21 +4,15 @@ import com.google.common.collect.*;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Constant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingEntry;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingProcessor;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -120,10 +114,6 @@ public class PunningTest {
 
         Mapping result = tmap.getTMappings(mapping,
                 tbox,
-                new CQContainmentCheckUnderLIDs(
-                        lids,
-                        TERM_FACTORY,
-                        IMMUTABILITY_TOOLS),
                 new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
                 new ImmutableCQContainmentCheckUnderLIDs(lids));
     }

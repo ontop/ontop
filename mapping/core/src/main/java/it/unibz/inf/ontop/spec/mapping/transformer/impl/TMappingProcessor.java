@@ -22,10 +22,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -111,7 +109,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck) {
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
