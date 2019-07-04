@@ -65,12 +65,14 @@ public class ImmutableHomomorphism {
             return new ImmutableHomomorphism(ImmutableMap.copyOf(map));
         }
 
-        public Builder extend(VariableOrGroundTerm from, VariableOrGroundTerm to) {
+        public Builder extend(ImmutableTerm from, ImmutableTerm to) {
             if (from instanceof Variable) {
-                VariableOrGroundTerm t = map.put((Variable) from, to);
-                // t is the previous value
-                if (t == null || t.equals(to))
-                    return this;
+                if (to instanceof VariableOrGroundTerm) {
+                    VariableOrGroundTerm t = map.put((Variable) from, (VariableOrGroundTerm)to);
+                    // t is the previous value
+                    if (t == null || t.equals(to))
+                        return this;
+                }
             }
             else if (from instanceof Constant) {
                 // constants must match
@@ -78,13 +80,17 @@ public class ImmutableHomomorphism {
                     return this;
             }
             else {
-                // the from term can now only be a GroundFunctionalTerm
-                GroundFunctionalTerm fromF = (GroundFunctionalTerm)from;
-                if (to instanceof GroundFunctionalTerm) {
-                    // then the to term must be a GroundFunctionalTerm - no match otherwise
-                    GroundFunctionalTerm toF = (GroundFunctionalTerm) to;
-                    if (fromF.getFunctionSymbol().equals(toF.getFunctionSymbol()))
-                        return extend(fromF.getTerms(), toF.getTerms());
+                // the from term can now only be a ImmutableFunctionalTerm
+                ImmutableFunctionalTerm fromIFT = (ImmutableFunctionalTerm)from;
+                // then the to term must be a ImmutableFunctionalTerm - no match otherwise
+                if (to instanceof ImmutableFunctionalTerm) {
+                    ImmutableFunctionalTerm toIFT = (ImmutableFunctionalTerm)to;
+                    if (fromIFT.getFunctionSymbol().equals(toIFT.getFunctionSymbol())) {
+                        for (int i = 0; i < fromIFT.getArity(); i++) {
+                            if (extend(fromIFT.getTerm(i), toIFT.getTerm(i)).isValid())
+                                return this;
+                        }
+                    }
                 }
             }
 

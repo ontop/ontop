@@ -222,9 +222,9 @@ public class TMappingEntry {
 
         private ImmutableSubstitution<VariableOrGroundTerm> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc) {
             ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
-            boolean headMatch = extendHomomorphism(builder, from.getHeadTerms(), to.getHeadTerms());
-            if (!headMatch)
-                return null;
+            for(int i = 0; i < from.getHeadTerms().size(); i++)
+                if (!builder.extend(from.getHeadTerms().get(i), to.getHeadTerms().get(i)).isValid())
+                    return null;
 
             ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(), from.getDatabaseAtoms(), to.getDatabaseAtoms());
             if (!h.hasNext())
@@ -237,44 +237,6 @@ public class TMappingEntry {
                             .collect(ImmutableCollectors.toMap()));
         }
 
-        private static boolean extendHomomorphism(ImmutableHomomorphism.Builder builder, ImmutableList<? extends ImmutableTerm> from, ImmutableList<? extends ImmutableTerm> to) {
-
-            int arity = from.size();
-            for (int i = 0; i < arity; i++) {
-                ImmutableTerm fromTerm = from.get(i);
-                ImmutableTerm toTerm = to.get(i);
-                if (fromTerm instanceof Variable) {
-                    if (!(toTerm instanceof VariableOrGroundTerm))
-                        return false;
-
-                    builder.extend((Variable)fromTerm, (VariableOrGroundTerm)toTerm);
-                    // if we cannot find a match, terminate the process and return false
-                    if (!builder.isValid())
-                        return false;
-                }
-                else if (fromTerm instanceof Constant) {
-                    // constants must match
-                    if (!fromTerm.equals(toTerm))
-                        return false;
-                }
-                else /*if (fromTerm instanceof ImmutableFunctionalTerm)*/ {
-                    // the to term must also be a function
-                    if (!(toTerm instanceof ImmutableFunctionalTerm))
-                        return false;
-
-                    ImmutableFunctionalTerm fromIFT = (ImmutableFunctionalTerm)fromTerm;
-                    ImmutableFunctionalTerm toIFT = (ImmutableFunctionalTerm)toTerm;
-                    if (!fromIFT.getFunctionSymbol().equals(toIFT.getFunctionSymbol()))
-                        return false;
-
-                    boolean result = extendHomomorphism(builder, fromIFT.getTerms(), toIFT.getTerms());
-                    // if we cannot find a match, terminate the process and return false
-                    if (!result)
-                        return false;
-                }
-            }
-            return true;
-        }
 
 
 
