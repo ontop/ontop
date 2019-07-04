@@ -637,6 +637,41 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    /**
+     * Checks that the type error is detected
+     */
+    @Ignore
+    @Test
+    public void testMinusMultitypedSum() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "        :lastName ?v .\n" +
+                "   MINUS {\n " +
+                "     SELECT ?p (SUM(?n) AS ?v){\n" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?c :duration ?n " +
+                "       } \n" +
+                "       UNION" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?p :lastName ?n " +
+                "       }\n" +
+                "     } GROUP BY ?p\n" +
+                "  }\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
