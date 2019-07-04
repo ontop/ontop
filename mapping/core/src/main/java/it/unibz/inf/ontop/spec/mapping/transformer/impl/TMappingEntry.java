@@ -6,10 +6,16 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import sun.tools.tree.BooleanExpression;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,13 +29,15 @@ public class TMappingEntry {
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionUtilities substitutionUtilities;
+    private final ImmutableSubstitutionTools immutableSubstitutionTools;
 
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
         this.rules = rules;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.queryMerger = queryMerger;
         this.substitutionUtilities = substitutionUtilities;
+        this.immutableSubstitutionTools = immutableSubstitutionTools;
     }
 
     public TMappingEntry createCopy(java.util.function.Function<TMappingRule, TMappingRule> headReplacer) {
@@ -37,7 +45,7 @@ public class TMappingEntry {
                 rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
                 noNullValueEnforcer,
                 queryMerger,
-                substitutionUtilities);
+                substitutionUtilities, immutableSubstitutionTools);
     }
 
     public IQ asIQ() {
@@ -59,9 +67,9 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
         return Collector.of(
-                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities), // Supplier
+                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools), // Supplier
                 BuilderWithCQC::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
@@ -74,12 +82,14 @@ public class TMappingEntry {
         private final NoNullValueEnforcer noNullValueEnforcer;
         private final UnionBasedQueryMerger queryMerger;
         private final SubstitutionUtilities substitutionUtilities;
+        private final ImmutableSubstitutionTools immutableSubstitutionTools;
 
-        BuilderWithCQC(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities) {
+        BuilderWithCQC(CQContainmentCheckUnderLIDs cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionUtilities substitutionUtilities, ImmutableSubstitutionTools immutableSubstitutionTools) {
             this.cqc = cqc;
             this.noNullValueEnforcer = noNullValueEnforcer;
             this.queryMerger = queryMerger;
             this.substitutionUtilities = substitutionUtilities;
+            this.immutableSubstitutionTools = immutableSubstitutionTools;
         }
 
         public BuilderWithCQC add(TMappingRule rule) {
@@ -94,7 +104,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionUtilities);
+            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools);
         }
 
 
@@ -194,7 +204,7 @@ public class TMappingEntry {
                     // newRule into the currentRule
                     // Here we can merge conditions of the new query with the one we have just found
                     // new map always has just one set of filters  !!
-                    ImmutableList<Function> newf = newRule.getConditions().get(0).stream()
+                    ImmutableList<ImmutableExpression> newf = newRule.getConditions().get(0).stream()
                             .map(atom -> applySubstitution(atom, fromNewRule))
                             .collect(ImmutableCollectors.toList());
 
@@ -228,10 +238,9 @@ public class TMappingEntry {
                     .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
         }
 
-        private Function applySubstitution(Function atom, Substitution sub) {
-            Function clone = (Function)atom.clone();
-            substitutionUtilities.applySubstitution(clone, sub);
-            return clone;
+        private ImmutableExpression applySubstitution(ImmutableExpression atom, Substitution sub) {
+            ImmutableSubstitution<ImmutableTerm> is = immutableSubstitutionTools.convertMutableSubstitution(sub);
+            return is.applyToBooleanExpression(atom);
         }
 
     }

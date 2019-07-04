@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -37,7 +38,7 @@ public class TMappingRule {
 	private final ImmutableList<Term> headTerms;
 	private final ImmutableList<DataAtom<AtomPredicate>> databaseAtoms;
 	// an OR-connected list of AND-connected atomic filters
-	private final ImmutableList<ImmutableList<Function>> filterAtoms;
+	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
 
 	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
@@ -83,15 +84,19 @@ public class TMappingRule {
 		Function head = translation.get(0).getHead();
 		List<Function> body = translation.get(0).getBody();
 
-		ImmutableList.Builder<Function> filters = ImmutableList.builder();
+		ImmutableList.Builder<ImmutableExpression> filters = ImmutableList.builder();
 		ImmutableList.Builder<DataAtom<AtomPredicate>> dbs = ImmutableList.builder();
 
         Map<Term, Variable> valueMap = new HashMap<>();
 
 		for (Function atom : body) {
-			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
+			if (atom.getFunctionSymbol() instanceof ExpressionOperation) {
 				Function clone = (Function)atom.clone();
-				filters.add(clone);
+				filters.add(termFactory.getImmutableExpression(
+						(ExpressionOperation)atom.getFunctionSymbol(),
+						atom.getTerms().stream()
+								.map(t -> immutabilityTools.convertIntoImmutableTerm(t))
+								.collect(ImmutableCollectors.toList())));
 			}
 			else {
 				// database atom, we need to replace all constants by filters
@@ -104,13 +109,13 @@ public class TMappingRule {
 				? ImmutableList.of(head.getTerms().get(0))
 				: ImmutableList.of(head.getTerms().get(0), head.getTerms().get(2));
 
-		ImmutableList<Function> f = filters.build();
+		ImmutableList<ImmutableExpression> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
 	}
 
 	
 
-	private DataAtom<AtomPredicate> replaceConstants2(Function atom, ImmutableList.Builder<Function> filters, Map<Term, Variable> valueMap) {
+	private DataAtom<AtomPredicate> replaceConstants2(Function atom, ImmutableList.Builder<ImmutableExpression> filters, Map<Term, Variable> valueMap) {
 		ImmutableList.Builder<VariableOrGroundTerm> builder = ImmutableList.builder();
 
 		for (Term term : atom.getTerms()) {
@@ -124,7 +129,7 @@ public class TMappingRule {
 				if (var == null) {
 					var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
 					valueMap.put(term, var);
-					filters.add(termFactory.getFunctionEQ(var, term));
+					filters.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, var, immutabilityTools.convertIntoImmutableTerm(term)));
 				}
 				builder.add(var);
 			}
@@ -133,7 +138,7 @@ public class TMappingRule {
 		return atomFactory.getDataAtom((AtomPredicate)atom.getFunctionSymbol(), builder.build());
 	}
 
-	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<Function>> filterAtoms) {
+	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms) {
         this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
         this.atomFactory = baseRule.atomFactory;
@@ -163,11 +168,7 @@ public class TMappingRule {
 		this.databaseAtoms = baseRule.databaseAtoms;
 		this.headTerms = headTerms.stream().map(t -> t.clone()).collect(ImmutableCollectors.toList());
 
-        this.filterAtoms = baseRule.filterAtoms.stream()
-                .map(list -> list.stream()
-                        .map(atom -> (Function)atom.clone())
-                        .collect(ImmutableCollectors.toList()))
-                .collect(ImmutableCollectors.toList());
+        this.filterAtoms = baseRule.filterAtoms;
 	}
 	
 	public IRI getIri() { return predicateInfo.getIri(); }
@@ -187,16 +188,16 @@ public class TMappingRule {
 			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
 			combinedBody.addAll(getDatabaseAtoms());
 			
-			Iterator<ImmutableList<Function>> iterOR = filterAtoms.iterator();
-			List<Function> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
-			Function mergedConditions = getMergedByAND(list);
+			Iterator<ImmutableList<ImmutableExpression>> iterOR = filterAtoms.iterator();
+			List<ImmutableExpression> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
+			ImmutableExpression mergedConditions = getMergedByAND(list);
 			while (iterOR.hasNext()) {
 				list = iterOR.next();
-				Function e = getMergedByAND(list);
-				mergedConditions = termFactory.getFunctionOR(e, mergedConditions);
+				ImmutableExpression e = getMergedByAND(list);
+				mergedConditions = termFactory.getImmutableExpression(ExpressionOperation.OR, e, mergedConditions);
 			}
 			
-			combinedBody.add(mergedConditions);
+			combinedBody.add(immutabilityTools.convertToMutableBooleanExpression(mergedConditions));
 		}
 		else
 			combinedBody = getDatabaseAtoms();
@@ -221,12 +222,12 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	private Function getMergedByAND(List<Function> list) {
-		Iterator<Function> iterAND = list.iterator();
-		Function mergedConditions = iterAND.next();
+	private ImmutableExpression getMergedByAND(List<ImmutableExpression> list) {
+		Iterator<ImmutableExpression> iterAND = list.iterator();
+		ImmutableExpression mergedConditions = iterAND.next();
 		while (iterAND.hasNext()) {
-			Function e = iterAND.next();
-			mergedConditions = termFactory.getFunctionAND(e, mergedConditions);
+			ImmutableExpression e = iterAND.next();
+			mergedConditions = termFactory.getImmutableExpression(ExpressionOperation.AND, e, mergedConditions);
 		}		
 		return mergedConditions;
 	}
@@ -246,7 +247,7 @@ public class TMappingRule {
 				.collect(ImmutableCollectors.toList());
 	}
 	
-	public ImmutableList<ImmutableList<Function>> getConditions() { return filterAtoms; }
+	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filterAtoms; }
 	
 	@Override
 	public int hashCode() {

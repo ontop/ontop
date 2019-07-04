@@ -140,15 +140,6 @@ public class ImmutableUnificationTools {
      * TODO: explain
      *
      */
-    public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGU(ImmutableFunctionalTerm term1, ImmutableFunctionalTerm term2) {
-        Substitution mutableSubstitution = unifierUtilities.getMGU(immutabilityTools.convertToMutableFunction(term1),
-                immutabilityTools.convertToMutableFunction(term2));
-
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
-        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution));
-    }
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {

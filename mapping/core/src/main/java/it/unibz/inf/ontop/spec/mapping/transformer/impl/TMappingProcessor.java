@@ -41,6 +41,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -69,6 +70,7 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
+    private final ImmutableSubstitutionTools immutableSubstitutionTools;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
@@ -78,7 +80,7 @@ public class TMappingProcessor {
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
+                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, ImmutableSubstitutionTools immutableSubstitutionTools) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -93,6 +95,7 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
+        this.immutableSubstitutionTools = immutableSubstitutionTools;
     }
 
 
@@ -117,6 +120,8 @@ public class TMappingProcessor {
                 .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
+        System.out.println("TMAP SOURCE: " + source + reasoner);
+
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
@@ -132,6 +137,9 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
+        System.out.println("TMAP SATURATED: " + saturated);
+
+
         ImmutableList<TMappingEntry> entries = Stream.concat(
                 saturated.values().stream(),
                 source.asMap().entrySet().stream()
@@ -139,7 +147,7 @@ public class TMappingProcessor {
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))))
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools))))
                 .collect(ImmutableCollectors.toList());
 
         return specificationFactory.createMapping(mapping.getMetadata(),
@@ -177,7 +185,7 @@ public class TMappingProcessor {
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities))));
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionUtilities, immutableSubstitutionTools))));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
@@ -190,7 +198,6 @@ public class TMappingProcessor {
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
-
 
 	private MappingTools.RDFPredicateInfo indexOf(ClassExpression child) {
         if (child instanceof OClass)
