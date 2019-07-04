@@ -74,7 +74,7 @@ public class TMappingRule {
         this.iqFactory = iqFactory;
         this.datalogRuleConverter = datalogRuleConverter;
 
-		predicateInfo = MappingTools.extractRDFPredicate(q);
+		this.predicateInfo = MappingTools.extractRDFPredicate(q);
 
 		List<CQIE> translation = iq2DatalogTranslator.translate(q).getRules();
 		if (translation.size() != 1)
@@ -100,39 +100,15 @@ public class TMappingRule {
 		}
         this.databaseAtoms = dbs.build();
 
-		System.out.println("TMP: " + q);
-        ImmutableList<Term> h = replaceConstants(head.getTerms(), filters, valueMap);
-
-		this.headTerms = predicateInfo.isClass() ? ImmutableList.of(h.get(0)) : ImmutableList.of(h.get(0), h.get(2));
-
-        // System.out.println("M" + head + " := " + databaseAtoms);
+		this.headTerms = predicateInfo.isClass()
+				? ImmutableList.of(head.getTerms().get(0))
+				: ImmutableList.of(head.getTerms().get(0), head.getTerms().get(2));
 
 		ImmutableList<Function> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
 	}
 
 	
-	private ImmutableList<Term> replaceConstants(List<Term> terms, ImmutableList.Builder<Function> filters, Map<Term, Variable> valueMap) {
-
-		ImmutableList.Builder<Term> builder = ImmutableList.builder();
-		for (Term term : terms) {
-			if (term instanceof Constant) {
-				System.out.println("TMP: CONSTANT " + terms);
-				// Found a constant, replacing with a fresh variable and adding the new equality atom
-				Constant c = (Constant)term;
-				Variable var = valueMap.get(c);
-				if (var == null) {
-					var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
-					valueMap.put(c, var);
-					filters.add(termFactory.getFunctionEQ(var, c));
-				}
-				builder.add(var);
-			}
-			else
-				builder.add(term.clone());
-		}
-		return builder.build();
-	}
 
 	private DataAtom<AtomPredicate> replaceConstants2(Function atom, ImmutableList.Builder<Function> filters, Map<Term, Variable> valueMap) {
 		ImmutableList.Builder<VariableOrGroundTerm> builder = ImmutableList.builder();
