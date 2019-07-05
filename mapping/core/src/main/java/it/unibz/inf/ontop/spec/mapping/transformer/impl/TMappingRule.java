@@ -18,7 +18,9 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
@@ -176,27 +178,13 @@ public class TMappingRule {
 	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
 
 
-	public IQ asIQ() {
+	public IQ asIQ(CoreUtilsFactory coreUtilsFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
 		Optional<ImmutableExpression> mergedConditions = filterAtoms.stream()
 				.map(list -> list.stream()
 						.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.AND, e, r)).get())
 				.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.OR, e, r));
-
-		Variable s = termFactory.getVariable("s");
-		Variable p = termFactory.getVariable("p");
-		Variable o = termFactory.getVariable("o");
-
-		ImmutableSubstitution sub = predicateInfo.isClass()
-			? substitutionFactory.getSubstitution(
-				s, headTerms.get(0),
-				p, getConstantIRI(RDF.TYPE),
-				o, getConstantIRI(predicateInfo.getIri()))
-			: substitutionFactory.getSubstitution(
-				s, headTerms.get(0),
-				p, getConstantIRI(predicateInfo.getIri()),
-				o, headTerms.get(1));
 
 		IQTree tree;
 		switch (databaseAtoms.size()) {
@@ -210,6 +198,33 @@ public class TMappingRule {
 				break;
 			default:
 				tree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(mergedConditions), databaseAtoms.stream().map(a -> iqFactory.createExtensionalDataNode(a)).collect(ImmutableCollectors.toList()));
+		}
+
+		VariableGenerator generator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
+
+		Variable s = generator.generateNewVariable();
+		Variable p = generator.generateNewVariable();
+		Variable o = generator.generateNewVariable();
+
+		ImmutableSubstitution sub;
+		if (predicateInfo.isClass()) {
+			sub = substitutionFactory.getSubstitution(
+					s, headTerms.get(0),
+					p, getConstantIRI(RDF.TYPE),
+					o, getConstantIRI(predicateInfo.getIri()));
+		}
+		else {
+			if (headTerms.get(1) instanceof Variable) {
+				o = (Variable)headTerms.get(1);
+				sub = substitutionFactory.getSubstitution(
+						s, headTerms.get(0),
+						p, getConstantIRI(predicateInfo.getIri()));
+			}
+			else
+				sub = substitutionFactory.getSubstitution(
+					s, headTerms.get(0),
+					p, getConstantIRI(predicateInfo.getIri()),
+					o, headTerms.get(1));
 		}
 
 		return iqFactory.createIQ(

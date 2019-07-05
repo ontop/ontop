@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -42,11 +43,11 @@ public class TMappingEntry {
                 termFactory);
     }
 
-    public IQ asIQ() {
+    public IQ asIQ(CoreUtilsFactory coreUtilsFactory) {
         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
         return noNullValueEnforcer.transform(
                     queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ())
+                        .map(r -> r.asIQ(coreUtilsFactory))
                         .collect(ImmutableCollectors.toList())).get())
                .liftBinding();
     }
