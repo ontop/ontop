@@ -7,11 +7,10 @@ import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -38,13 +37,10 @@ public class TMappingEntry {
                 termFactory);
     }
 
-    public IQ asIQ(IntermediateQueryFactory iqFactory, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger) {
-        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-        return noNullValueEnforcer.transform(
-                    queryMerger.mergeDefinitions(rules.stream()
+    public IQ asIQ(IntermediateQueryFactory iqFactory, UnionBasedQueryMerger queryMerger) {
+        return queryMerger.mergeDefinitions(rules.stream()
                         .map(r -> r.asIQ(iqFactory))
-                        .collect(ImmutableCollectors.toList())).get())
-               .liftBinding();
+                        .collect(ImmutableCollectors.toList())).get();
     }
 
     public boolean isEmpty() {
@@ -53,6 +49,8 @@ public class TMappingEntry {
 
     // ASSUMES NON-EMPTINESS
     public MappingTools.RDFPredicateInfo getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
+
+    public RDFAtomPredicate getRDFAtomPredicate() { return rules.iterator().next().getRDFAtomPredicate(); }
 
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
@@ -129,18 +127,24 @@ public class TMappingEntry {
             while (mappingIterator.hasNext()) {
 
                 TMappingRule current = mappingIterator.next();
+                // to and from refer to "to assertion" and "from assertion"
 
                 boolean couldIgnore = false;
 
-                Optional<ImmutableHomomorphism> toNewRule = computeHomomorphsim(assertion, current, cqc);
-                if (toNewRule.isPresent()) {
+                Optional<ImmutableHomomorphism> to =
+                        fixHeadTermMapping(current.getHeadTerms(), assertion.getHeadTerms())
+                        .map(h -> cqc.homomorphismIterator(h, IQ2CQ.toDataAtoms(current.getDatabaseAtoms()), IQ2CQ.toDataAtoms(assertion.getDatabaseAtoms())))
+                        .filter(ImmutableHomomorphismIterator::hasNext)
+                        .map(ImmutableHomomorphismIterator::next);
+
+                if (to.isPresent()) {
                     if (current.getConditions().isEmpty() ||
                             (current.getConditions().size() == 1 &&
-                             assertion.getConditions().size() == 1 &&
-                             // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
-                             current.getConditions().get(0).stream()
-                                    .map(atom -> toNewRule.get().applyToBooleanExpression(atom, termFactory))
-                                    .allMatch(atom -> assertion.getConditions().get(0).contains(atom)))) {
+                                    assertion.getConditions().size() == 1 &&
+                                    // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
+                                    current.getConditions().get(0).stream()
+                                            .map(atom -> to.get().applyToBooleanExpression(atom, termFactory))
+                                            .allMatch(atom -> assertion.getConditions().get(0).contains(atom)))) {
 
                         if (assertion.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
                             couldIgnore = true;
@@ -152,15 +156,20 @@ public class TMappingEntry {
                     }
                 }
 
-                Optional<ImmutableHomomorphism> fromNewRule = computeHomomorphsim(current, assertion, cqc);
-                if (fromNewRule.isPresent()) {
+                Optional<ImmutableHomomorphism> from =
+                        fixHeadTermMapping(assertion.getHeadTerms(), current.getHeadTerms())
+                        .map(h -> cqc.homomorphismIterator(h, IQ2CQ.toDataAtoms(assertion.getDatabaseAtoms()), IQ2CQ.toDataAtoms(current.getDatabaseAtoms())))
+                        .filter(ImmutableHomomorphismIterator::hasNext)
+                        .map(ImmutableHomomorphismIterator::next);
+
+                if (from.isPresent()) {
                     if (assertion.getConditions().isEmpty() ||
                             (assertion.getConditions().size() == 1 &&
-                             current.getConditions().size() == 1 &&
-                             // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
+                                    current.getConditions().size() == 1 &&
+                                    // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
                                     assertion.getConditions().get(0).stream()
-                                    .map(atom -> fromNewRule.get().applyToBooleanExpression(atom, termFactory))
-                                    .allMatch(atom -> current.getConditions().get(0).contains(atom)))) {
+                                            .map(atom -> from.get().applyToBooleanExpression(atom, termFactory))
+                                            .allMatch(atom -> current.getConditions().get(0).contains(atom)))) {
 
                         // The existing query is more specific than the new query, so we
                         // need to add the new query and remove the old
@@ -174,13 +183,13 @@ public class TMappingEntry {
                     return;
                 }
 
-                if (toNewRule.isPresent() && fromNewRule.isPresent()) {
+                if (to.isPresent() && from.isPresent()) {
                     // We found an equivalence, we will try to merge the conditions of
                     // newRule into the current
                     // Here we can merge conditions of the new query with the one we have just found
                     // new map always has just one set of filters  !!
                     ImmutableList<ImmutableExpression> newf = assertion.getConditions().get(0).stream()
-                            .map(atom -> fromNewRule.get().applyToBooleanExpression(atom, termFactory))
+                            .map(atom -> from.get().applyToBooleanExpression(atom, termFactory))
                             .collect(ImmutableCollectors.toList());
 
                     // if each of the existing conditions in one of the filter groups
@@ -190,8 +199,8 @@ public class TMappingEntry {
 
                     // REPLACE THE CURRENT RULE
                     mappingIterator.remove();
-                    rules.add(new TMappingRule(current,
-                            Stream.concat(current.getConditions().stream()
+                    rules.add(new TMappingRule(current, Stream.concat(
+                                    current.getConditions().stream()
                                             // if each of the new conditions is found among econd then the old condition is redundant
                                             .filter(f -> !f.containsAll(newf)),
                                     Stream.of(newf))
@@ -202,16 +211,12 @@ public class TMappingEntry {
             rules.add(assertion);
         }
 
-        private Optional<ImmutableHomomorphism> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
+        private Optional<ImmutableHomomorphism> fixHeadTermMapping(ImmutableList<ImmutableTerm> fromHead, ImmutableList<ImmutableTerm> toHead) {
             ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
-            for (int i = 0; i < from.getHeadTerms().size(); i++)
-                if (!builder.extend(from.getHeadTerms().get(i), to.getHeadTerms().get(i)).isValid())
+            for (int i = 0; i < fromHead.size(); i++)
+                if (!builder.extend(fromHead.get(i), toHead.get(i)).isValid())
                     return Optional.empty();
-
-            ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(),
-                    IQ2CQ.toDataAtoms(from.getDatabaseAtoms()),
-                    IQ2CQ.toDataAtoms(to.getDatabaseAtoms()));
-            return h.hasNext() ? Optional.of(h.next()) : Optional.empty();
+            return Optional.of(builder.build());
         }
     }
 }

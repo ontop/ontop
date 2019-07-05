@@ -136,19 +136,22 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toList());
 
         return specificationFactory.createMapping(mapping.getMetadata(),
-                        extractTable(entries.stream().filter(e -> !e.getPredicateInfo().isClass())),
-                        extractTable(entries.stream().filter(e -> e.getPredicateInfo().isClass())));
+                        entries.stream()
+                                .filter(e -> !e.getPredicateInfo().isClass())
+                                .map(this::toCell)
+                                .collect(ImmutableCollectors.toTable()),
+                        entries.stream()
+                                .filter(e -> e.getPredicateInfo().isClass())
+                                .map(this::toCell)
+                                .collect(ImmutableCollectors.toTable()));
     }
 
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(Stream<TMappingEntry> stream) {
-
-        return stream
-                .map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getPredicateInfo(), e.asIQ(iqFactory, noNullValueEnforcer, queryMerger)))
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey().getIri(),
-                        e.getValue()))
-                .collect(ImmutableCollectors.toTable());
+    private Table.Cell<RDFAtomPredicate, IRI, IQ> toCell(TMappingEntry e) {
+	    return Tables.immutableCell(
+	            e.getRDFAtomPredicate(),
+                e.getPredicateInfo().getIri(),
+                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                noNullValueEnforcer.transform(e.asIQ(iqFactory, queryMerger)).liftBinding());
     }
 
     private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,

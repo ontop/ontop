@@ -36,18 +36,13 @@ public class TMappingRule {
 	private final TermFactory termFactory;
 
 	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
-
-        this.termFactory = termFactory;
+		this.termFactory = termFactory;
 
 		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
-
 		this.projectionAtom = iq.getProjectionAtom();
-		ConstructionNode cn = (ConstructionNode)iq.getTree().getRootNode();
-		this.substitution = cn.getSubstitution();
+		this.substitution = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution();
 
 		IQTree tree = iq.getTree().getChildren().get(0);
-		if (!IQ2CQ.getExtensionalDataNodes(tree).isPresent())
-			System.out.println(tree);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
 		ImmutableSet<ImmutableExpression> joinConditions = IQ2CQ.getFilterExpressions(tree);
 
@@ -89,10 +84,9 @@ public class TMappingRule {
 
         this.predicateInfo = baseRule.predicateInfo;
         this.projectionAtom = baseRule.projectionAtom;
-
-		this.extensionalNodes = baseRule.extensionalNodes;
 		this.substitution = baseRule.substitution;
 
+		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = filter;
 	}
 	
@@ -102,8 +96,6 @@ public class TMappingRule {
 
 		this.predicateInfo = predicateInfo;
 		this.projectionAtom = baseRule.projectionAtom;
-
-		this.extensionalNodes = baseRule.extensionalNodes;
 		if (predicateInfo.isClass()) {
 			substitution = substitutionFactory.getSubstitution(
 					projectionAtom.getTerm(0), headTerms.get(0),
@@ -125,6 +117,7 @@ public class TMappingRule {
 					projectionAtom.getTerm(2), headTerms.get(1));
 		}
 
+		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = baseRule.filter;
 	}
 
@@ -134,8 +127,6 @@ public class TMappingRule {
 	}
 
 
-
-	public IRI getIri() { return predicateInfo.getIri(); }
 
 	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
 
@@ -160,11 +151,11 @@ public class TMappingRule {
 				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
     }
 
-	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() {
-		return extensionalNodes;
-	}
+	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }
 
 	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filter; }
+
+	public RDFAtomPredicate getRDFAtomPredicate() { return (RDFAtomPredicate) projectionAtom.getPredicate(); }
 
 	@Override
 	public int hashCode() {
