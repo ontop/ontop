@@ -388,6 +388,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
     }
 
+    @Override
+    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
+                                                                        ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild) {
+        return Optional.of(theta)
+                .filter(t -> !(t.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
+                .map(t -> iqFactory.createConstructionNode(newProjectedVariables, t));
+    }
 
     private IQTree mergeWithChild(ConstructionNode childConstructionNode, UnaryIQTree childIQ, IQProperties currentIQProperties) {
 

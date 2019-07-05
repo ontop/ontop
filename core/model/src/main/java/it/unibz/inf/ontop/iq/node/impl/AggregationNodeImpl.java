@@ -58,6 +58,13 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     }
 
     @Override
+    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
+                                                                        ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild) {
+        return Optional.of(iqFactory.createAggregationNode(newProjectedVariables,
+                (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)theta));
+    }
+
+    @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return aggregationNormalizer.normalizeForOptimization(this, child, variableGenerator,
                 currentIQProperties);
