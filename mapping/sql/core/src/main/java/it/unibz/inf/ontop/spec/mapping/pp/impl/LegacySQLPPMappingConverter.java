@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -99,12 +100,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
-                    filter = re.getFilterAtoms().isEmpty()
-                            ? Optional.empty()
-                            : Optional.of(re.getFilterAtoms().reverse().stream()
-                                        .reduce(null, (a, b) -> (a == null)
-                                            ? b
-                                            : termFactory.getImmutableExpression(ExpressionOperation.AND, b, a)));
+                    filter = re.getFilterAtoms().reverse().stream()
+                                        .reduce((a, b) -> termFactory.getImmutableExpression(ExpressionOperation.AND, b, a));
                 }
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
@@ -126,19 +123,10 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                     filter = Optional.empty();
                 }
 
-                final IQTree tree;
-                if (dataAtoms.size() == 1) {
-                    IQTree child = iqFactory.createExtensionalDataNode(dataAtoms.get(0));
-                    tree = (filter.isPresent())
-                            ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filter.get()), child)
-                            : child;
-                }
-                else {
-                    tree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter),
-                            dataAtoms.stream()
-                                    .map(a -> iqFactory.createExtensionalDataNode(a))
-                                    .collect(ImmutableCollectors.toList()));
-                }
+                final IQTree tree = IQ2CQ.toIQTree(dataAtoms.stream()
+                                .map(a -> iqFactory.createExtensionalDataNode(a))
+                                .collect(ImmutableCollectors.toList()),
+                        filter, iqFactory);
 
                 for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
