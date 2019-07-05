@@ -104,60 +104,32 @@ public class TMappingEntry {
 
         /***
          *
-         * This is an optimization mechanism that allows T-mappings to produce a
-         * smaller number of mappings, and hence, the unfolding will be able to
-         * produce fewer queries.
+         * This is an optimization mechanism that allows T-mappings to reduce
+         * the number of mapping assertions. The unfolding will then produce fewer queries.
          *
-         * Given a set of mappings for a class/property A in currentMappings
-         * , this method tries to add a the data coming from a new mapping for A in
-         * an optimal way, that is, this method will attempt to include the content
-         * of coming from newmapping by modifying an existing mapping
-         * instead of adding a new mapping.
+         * The method
+         *    (1) removes a mapping assertion from rules if it is subsumed by the given assertion
          *
-         * <p/>
+         *    (2) does not add the assertion if it is subsumed by one of the rules
          *
-         * To do this, this method will strip newmapping from any
-         * (in)equality conditions that hold over the variables of the query,
-         * leaving only the raw body. Then it will look for another "stripped"
-         * mapping <bold>m</bold> in currentMappings such that m is
-         * equivalent to stripped(newmapping). If such a m is found, this method
-         * will add the extra semantics of newmapping to "m" by appending
-         * newmapping's conditions into an OR atom, together with the existing
-         * conditions of m.
+         *    (3) merges the given assertion into an existing assertion if their database atoms
+         *        are homomorphically equivalent
          *
-         * </p>
-         * If no such m is found, then this method simply adds newmapping to
-         * currentMappings.
-         *
-         *
-         * <p/>
-         * For example. If new mapping is equal to
-         * <p/>
-         *
-         * S(x,z) :- R(x,y,z), y = 2
-         *
-         * <p/>
-         * and there exists a mapping m
-         * <p/>
-         * S(x,z) :- R(x,y,z), y > 7
-         *
-         * This method would modify 'm' as follows:
-         *
-         * <p/>
-         * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
-         *
-         * <p/>
-         *
+         * For example, if we are given
+         *     S(x,z) :- R(x,y,z), y = 2
+         * and rules contains
+         *     S(x,z) :- R(x,y,z), y > 7
+         * then this method will modify the existing assertion into
+         *     S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
          */
 
-        private void mergeMappingsWithCQC(TMappingRule newRule) {
+        private void mergeMappingsWithCQC(TMappingRule assertion) {
 
-            if (rules.contains(newRule))
+            if (rules.contains(assertion))
                 return;
 
-            // Facts are just added
-            if (newRule.isFact()) {
-                rules.add(newRule);
+            if (assertion.getDatabaseAtoms().isEmpty() && assertion.getConditions().isEmpty()) {
+                rules.add(assertion); // facts are just added
                 return;
             }
 
@@ -168,17 +140,17 @@ public class TMappingEntry {
 
                 boolean couldIgnore = false;
 
-                Optional<ImmutableHomomorphism> toNewRule = computeHomomorphsim(newRule, current, cqc);
+                Optional<ImmutableHomomorphism> toNewRule = computeHomomorphsim(assertion, current, cqc);
                 if (toNewRule.isPresent()) {
                     if (current.getConditions().isEmpty() ||
                             (current.getConditions().size() == 1 &&
-                             newRule.getConditions().size() == 1 &&
+                             assertion.getConditions().size() == 1 &&
                              // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
                              current.getConditions().get(0).stream()
                                     .map(atom -> toNewRule.get().applyToBooleanExpression(atom, termFactory))
-                                    .allMatch(atom -> newRule.getConditions().get(0).contains(atom)))) {
+                                    .allMatch(atom -> assertion.getConditions().get(0).contains(atom)))) {
 
-                        if (newRule.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
+                        if (assertion.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
                             couldIgnore = true;
                         }
                         else {
@@ -188,13 +160,13 @@ public class TMappingEntry {
                     }
                 }
 
-                Optional<ImmutableHomomorphism> fromNewRule = computeHomomorphsim(current, newRule, cqc);
+                Optional<ImmutableHomomorphism> fromNewRule = computeHomomorphsim(current, assertion, cqc);
                 if (fromNewRule.isPresent()) {
-                    if (newRule.getConditions().isEmpty() ||
-                            (newRule.getConditions().size() == 1 &&
+                    if (assertion.getConditions().isEmpty() ||
+                            (assertion.getConditions().size() == 1 &&
                              current.getConditions().size() == 1 &&
                              // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
-                             newRule.getConditions().get(0).stream()
+                                    assertion.getConditions().get(0).stream()
                                     .map(atom -> fromNewRule.get().applyToBooleanExpression(atom, termFactory))
                                     .allMatch(atom -> current.getConditions().get(0).contains(atom)))) {
 
@@ -215,7 +187,7 @@ public class TMappingEntry {
                     // newRule into the current
                     // Here we can merge conditions of the new query with the one we have just found
                     // new map always has just one set of filters  !!
-                    ImmutableList<ImmutableExpression> newf = newRule.getConditions().get(0).stream()
+                    ImmutableList<ImmutableExpression> newf = assertion.getConditions().get(0).stream()
                             .map(atom -> fromNewRule.get().applyToBooleanExpression(atom, termFactory))
                             .collect(ImmutableCollectors.toList());
 
@@ -235,7 +207,7 @@ public class TMappingEntry {
                     return;
                 }
             }
-            rules.add(newRule);
+            rules.add(assertion);
         }
 
         private Optional<ImmutableHomomorphism> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc) {

@@ -227,10 +227,6 @@ public class TMappingRule {
 	}
 	
 	
-	public boolean isFact() {
-		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
-	}
-	
     public ImmutableList<ImmutableTerm> getHeadTerms() {
         return headTerms;
     }
