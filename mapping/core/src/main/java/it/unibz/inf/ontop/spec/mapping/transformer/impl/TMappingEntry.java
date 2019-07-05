@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -37,11 +38,11 @@ public class TMappingEntry {
                 termFactory);
     }
 
-    public IQ asIQ(CoreUtilsFactory coreUtilsFactory, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger) {
+    public IQ asIQ(IntermediateQueryFactory iqFactory, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger) {
         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
         return noNullValueEnforcer.transform(
                     queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ(coreUtilsFactory))
+                        .map(r -> r.asIQ(iqFactory))
                         .collect(ImmutableCollectors.toList())).get())
                .liftBinding();
     }

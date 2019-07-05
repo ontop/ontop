@@ -14,7 +14,6 @@ import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
@@ -22,59 +21,28 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.*;
 import java.util.stream.Stream;
 
-/***
- * Splits a given mapping into builtin predicates (conditions)
- * and all other atoms (stripped), which are checked for containment
- * by the TMapping construction algorithm.
- */
 
 public class TMappingRule {
 
 	private final MappingTools.RDFPredicateInfo predicateInfo;
 
-	private final ImmutableList<ImmutableTerm> headTerms;
+	private final DistinctVariableOnlyDataAtom projectionAtom;
+	private final ImmutableSubstitution substitution;
+
 	private final ImmutableList<ExtensionalDataNode> databaseAtoms;
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
 
 	private final TermFactory termFactory;
-	private final AtomFactory atomFactory;
-	private final IntermediateQueryFactory iqFactory;
-	private final SubstitutionFactory substitutionFactory;
 
-	/***
-	 * Given a mappings in currentMapping, this method will
-	 * return a new mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurrence
-	 * with a fresh variable, and adding a new equality condition to the body of
-	 * the mapping.
-	 * <p/>
-	 * 
-	 * For example, let the mapping m be
-	 * <p/>
-	 * A(x) :- T(x,y,22)
-	 * 
-	 * <p>
-	 * Then this method will replace m by the mapping m'
-	 * <p>
-	 * A(x) :- T(x,y,z), EQ(z,22)
-	 * 
-	 */
-	
-	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
 
         this.termFactory = termFactory;
-        this.atomFactory = atomFactory;
-        this.iqFactory = iqFactory;
 
 		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
-		this.substitutionFactory = substitutionFactory;
 
-		VariableGenerator variableGenerator = iq.getVariableGenerator();
-
-		DistinctVariableOnlyDataAtom projectionAtom = iq.getProjectionAtom();
+		this.projectionAtom = iq.getProjectionAtom();
 		ConstructionNode cn = (ConstructionNode)iq.getTree().getRootNode();
-		ImmutableSubstitution sub = cn.getSubstitution();
 
 		ImmutableSet<ImmutableExpression> joinConditions;
 		ImmutableList<ExtensionalDataNode> dataAtoms;
@@ -98,6 +66,13 @@ public class TMappingRule {
 		}
 
 		// maps all non-constants to fresh variables
+		//    this is required for more extensive use of OR
+		//    for example R(x,y) :- T(x,y,22) and R(x,y) :- T(x,y,23) will be replaced by
+		//    R(x,y) :- T(x,y,z) AND ((z = 22) OR (z = 23))
+		// without the replacement below, the database parts of the two assertion bodies
+		// will not be homomorphically equivalent
+
+		VariableGenerator variableGenerator = iq.getVariableGenerator();
 		ImmutableMap<ImmutableTerm, VariableOrGroundTerm> valueMap = dataAtoms.stream()
 				.flatMap(n -> n.getProjectionAtom().getArguments().stream())
 				.filter(t -> !(t instanceof Variable))
@@ -120,48 +95,68 @@ public class TMappingRule {
 
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
 
-		this.headTerms = sub.apply(predicateInfo.isClass()
-				? ImmutableList.of(projectionAtom.getTerm(0))
-				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
+		this.substitution = cn.getSubstitution();
 	}
 
 
 
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms) {
         this.termFactory = baseRule.termFactory;
-        this.atomFactory = baseRule.atomFactory;
-        this.iqFactory = baseRule.iqFactory;
-        this.substitutionFactory = baseRule.substitutionFactory;
 
         this.predicateInfo = baseRule.predicateInfo;
+        this.projectionAtom = baseRule.projectionAtom;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
-		this.headTerms = baseRule.headTerms;
+		this.substitution = baseRule.substitution;
 
 		this.filterAtoms = filterAtoms;
 	}
 	
 	
-	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule) {
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule, SubstitutionFactory substitutionFactory) {
         this.termFactory = baseRule.termFactory;
-		this.atomFactory = baseRule.atomFactory;
-		this.iqFactory = baseRule.iqFactory;
-		this.substitutionFactory = baseRule.substitutionFactory;
 
 		this.predicateInfo = predicateInfo;
+		this.projectionAtom = baseRule.projectionAtom;
 
 		this.databaseAtoms = baseRule.databaseAtoms;
-		this.headTerms = headTerms;
+		if (predicateInfo.isClass()) {
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(RDF.TYPE),
+					projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()));
+		}
+		else if (headTerms.get(1) instanceof Variable) {
+			if (!headTerms.get(1).equals(projectionAtom.getTerm(1)))
+				throw new IllegalStateException("The last argument does not match");
 
-        this.filterAtoms = baseRule.filterAtoms;
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()));
+		}
+		else {
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()),
+					projectionAtom.getTerm(2), headTerms.get(1));
+		}
+
+		this.filterAtoms = baseRule.filterAtoms;
 	}
-	
+
+	private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
+		return termFactory.getImmutableUriTemplate(
+				termFactory.getConstantLiteral(iri.getIRIString()));
+	}
+
+
+
 	public IRI getIri() { return predicateInfo.getIri(); }
 
 	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
 
 
-	public IQ asIQ(CoreUtilsFactory coreUtilsFactory) {
+	public IQ asIQ(IntermediateQueryFactory iqFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
 		Optional<ImmutableExpression> mergedConditions = filterAtoms.stream()
@@ -187,46 +182,15 @@ public class TMappingRule {
 						databaseAtoms.stream().collect(ImmutableCollectors.toList()));
 		}
 
-		VariableGenerator generator = coreUtilsFactory.createVariableGenerator(tree.getKnownVariables());
-
-		Variable s = generator.generateNewVariable();
-		Variable p = generator.generateNewVariable();
-		Variable o = generator.generateNewVariable();
-
-		ImmutableSubstitution sub;
-		if (predicateInfo.isClass()) {
-			sub = substitutionFactory.getSubstitution(
-					s, headTerms.get(0),
-					p, getConstantIRI(RDF.TYPE),
-					o, getConstantIRI(predicateInfo.getIri()));
-		}
-		else {
-			if (headTerms.get(1) instanceof Variable) {
-				o = (Variable)headTerms.get(1);
-				sub = substitutionFactory.getSubstitution(
-						s, headTerms.get(0),
-						p, getConstantIRI(predicateInfo.getIri()));
-			}
-			else
-				sub = substitutionFactory.getSubstitution(
-					s, headTerms.get(0),
-					p, getConstantIRI(predicateInfo.getIri()),
-					o, headTerms.get(1));
-		}
-
-		return iqFactory.createIQ(
-				atomFactory.getDistinctTripleAtom(s, p, o),
+		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
-						iqFactory.createConstructionNode(ImmutableSet.of(s, p, o), sub),
-						tree));
-	}
-
-	private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
-		return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution), tree));
 	}
 
 	public ImmutableList<ImmutableTerm> getHeadTerms() {
-        return headTerms;
+        return substitution.apply(predicateInfo.isClass()
+				? ImmutableList.of(projectionAtom.getTerm(0))
+				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
     }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() {
@@ -234,17 +198,18 @@ public class TMappingRule {
 	}
 
 	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filterAtoms; }
-	
+
 	@Override
 	public int hashCode() {
-		return predicateInfo.getIri().hashCode() ^ headTerms.hashCode() ^ databaseAtoms.hashCode() ^ filterAtoms.hashCode();
+		return predicateInfo.getIri().hashCode() ^ substitution.hashCode() ^ databaseAtoms.hashCode() ^ filterAtoms.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
-			return (headTerms.equals(otherRule.headTerms) &&
+			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
+					substitution.equals(otherRule.substitution) &&
 					databaseAtoms.equals(otherRule.databaseAtoms) && 
 					filterAtoms.equals(otherRule.filterAtoms));
 		}
@@ -253,6 +218,6 @@ public class TMappingRule {
 
 	@Override 
 	public String toString() {
-		return predicateInfo.getIri() + "(" + headTerms + ") <- " + databaseAtoms + " AND " + filterAtoms;
+		return predicateInfo.getIri() + "(" + substitution.apply(projectionAtom.getArguments()) + ") <- " + databaseAtoms + " AND " + filterAtoms;
 	}
 }

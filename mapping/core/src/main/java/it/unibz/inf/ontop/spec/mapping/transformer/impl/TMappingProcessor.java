@@ -64,7 +64,6 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory,
@@ -72,7 +71,7 @@ public class TMappingProcessor {
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
+                              UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
         this.unionSplitter = unionSplitter;
@@ -83,7 +82,6 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
     }
 
 
@@ -105,7 +103,7 @@ public class TMappingProcessor {
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                .map(q -> new TMappingRule(q, termFactory, atomFactory, iqFactory, substitutionFactory))
+                .map(q -> new TMappingRule(q, termFactory, atomFactory))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
         // System.out.println("TMAP SOURCE: " + source + reasoner);
@@ -145,7 +143,7 @@ public class TMappingProcessor {
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(Stream<TMappingEntry> stream) {
 
         return stream
-                .map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getPredicateInfo(), e.asIQ(coreUtilsFactory, noNullValueEnforcer, queryMerger)))
+                .map(e -> new AbstractMap.SimpleImmutableEntry<>(e.getPredicateInfo(), e.asIQ(iqFactory, noNullValueEnforcer, queryMerger)))
                 .map(e -> Tables.immutableCell(
                         (RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(),
                         e.getKey().getIri(),
@@ -162,7 +160,7 @@ public class TMappingProcessor {
                                                                                          Predicate<T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
 
 	    ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
