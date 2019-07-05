@@ -3,22 +3,19 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer.DefPushDownRequest;
+import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -51,21 +48,19 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     }
 
 
-    protected static class OrderBySimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+    protected static class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         protected final VariableGenerator variableGenerator;
         protected final TermFactory termFactory;
-        protected final OptimizerFactory optimizerFactory;
         protected final TypeFactory typeFactory;
         protected final ImmutableSet<RDFDatatype> nonLexicallyOrderedDatatypes;
 
         protected OrderBySimplifyingTransformer(VariableGenerator variableGenerator,
                                                 OptimizationSingletons optimizationSingletons) {
-            super(optimizationSingletons.getCoreSingletons());
+            super(optimizationSingletons);
             this.variableGenerator = variableGenerator;
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             this.termFactory = coreSingletons.getTermFactory();
-            this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
             this.typeFactory = coreSingletons.getTypeFactory();
             this.nonLexicallyOrderedDatatypes = ImmutableSet.of(typeFactory.getAbstractOntopNumericDatatype(),
                     typeFactory.getXsdBooleanDatatype(), typeFactory.getXsdDatetimeDatatype());
@@ -83,7 +78,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                     .map(s -> s.newComparator)
                     .collect(ImmutableCollectors.toList());
 
-            Stream<DefPushDownRequest> definitionsToPushDown = simplifications.stream()
+            Stream<DefinitionPushDownRequest> definitionsToPushDown = simplifications.stream()
                     .map(s -> s.request)
                     .filter(Optional::isPresent)
                     .map(Optional::get);
@@ -160,42 +155,6 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                     .simplify(childTree.getVariableNullability());
         }
 
-        private ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
-            return Optional.of(term)
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t)
-                    .filter(t -> t.getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
-                    .map(t -> t.getTerm(1))
-                    .orElse(term);
-        }
-
-
-        /**
-         * Pushes down definitions emerging from the simplification of the order comparators
-         */
-        private IQTree pushDownDefinitions(IQTree initialChild, Stream<DefPushDownRequest> definitionsToPushDown) {
-            return definitionsToPushDown
-                    .reduce(initialChild,
-                            (c, r) -> optimizerFactory.createDefinitionPushDownTransformer(r).transform(c),
-                            (c1, c2) -> { throw new MinorOntopInternalBugException("Merging must not happen") ; });
-        }
-
-        private Optional<ImmutableSet<RDFTermType>> extractPossibleTypes(ImmutableTerm rdfTypeTerm, IQTree childTree) {
-            ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
-                    .map(s -> s.apply(rdfTypeTerm))
-                    .map(t -> t.simplify(childTree.getVariableNullability()))
-                    .map(this::unwrapIfElseNull)
-                    .filter(t -> !t.isNull())
-                    .collect(ImmutableCollectors.toSet());
-
-            return Optional.of(possibleValues)
-                    .filter(vs -> vs.stream().allMatch(t -> t instanceof RDFTermTypeConstant))
-                    .map(vs -> vs.stream()
-                            .map(t -> (RDFTermTypeConstant) t)
-                            .map(RDFTermTypeConstant::getRDFTermType)
-                            .collect(ImmutableCollectors.toSet()));
-        }
-
         /**
          * SPARQL ascending order: UNBOUND (NULL), Bnode, IRI and literals.
          *
@@ -249,7 +208,7 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
                                                                               ImmutableExpression condition) {
             Variable v = variableGenerator.generateNewVariable();
 
-            DefPushDownRequest request = DefPushDownRequest.create(v,
+            DefinitionPushDownRequest request = DefinitionPushDownRequest.create(v,
                     computeDBTerm(lexicalTerm, referenceCastType, childTree),
                     condition);
 
@@ -285,9 +244,9 @@ public class OrderBySimplifierImpl implements OrderBySimplifier {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static class ComparatorSimplification {
         protected final OrderByNode.OrderComparator newComparator;
-        protected final Optional<DefPushDownRequest> request;
+        protected final Optional<DefinitionPushDownRequest> request;
 
-        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefPushDownRequest request) {
+        protected ComparatorSimplification(OrderByNode.OrderComparator newComparator, DefinitionPushDownRequest request) {
             this.newComparator = newComparator;
             this.request = Optional.of(request);
         }

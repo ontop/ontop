@@ -61,9 +61,11 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
     interface FunctionalTermDecomposition {
 
         /**
-         * Part of the functional that is liftable (e.g. injective)
+         * Part of the functional that is liftable (e.g. injective).
+         *
+         * Is usually an ImmutableFunctionalTerm itself, but in some cases it might be for instance a NULL constant
          */
-        ImmutableFunctionalTerm getLiftableTerm();
+        ImmutableTerm getLiftableTerm();
 
         /**
          * Contains the sub-terms that are not liftable.

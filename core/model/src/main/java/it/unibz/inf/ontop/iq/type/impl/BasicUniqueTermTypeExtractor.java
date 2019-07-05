@@ -106,6 +106,15 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitConstruction(ConstructionNode rootNode, IQTree child) {
+            return visitExtendedProjection(rootNode, child);
+        }
+
+        @Override
+        public Optional<TermType> visitAggregation(AggregationNode rootNode, IQTree child) {
+            return visitExtendedProjection(rootNode, child);
+        }
+
+        protected Optional<TermType> visitExtendedProjection(ExtendedProjectionNode rootNode, IQTree child) {
             return typeExtractor.extractUniqueTermType(rootNode.getSubstitution().apply(variable), child);
         }
 
@@ -116,15 +125,18 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitDistinct(DistinctNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);        }
+            return child.acceptVisitor(this);
+        }
 
         @Override
         public Optional<TermType> visitSlice(SliceNode sliceNode, IQTree child) {
-            return child.acceptVisitor(this);        }
+            return child.acceptVisitor(this);
+        }
 
         @Override
         public Optional<TermType> visitOrderBy(OrderByNode rootNode, IQTree child) {
-            return child.acceptVisitor(this);        }
+            return child.acceptVisitor(this);
+        }
 
         @Override
         public Optional<TermType> visitNonStandardUnaryNode(UnaryOperatorNode rootNode, IQTree child) {

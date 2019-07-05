@@ -1,7 +1,7 @@
-package it.unibz.inf.ontop.iq.transformer.impl;
+package it.unibz.inf.ontop.iq.request.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class DefPushDownRequestImpl implements DefinitionPushDownTransformer.DefPushDownRequest {
+public class DefPushDownRequestImpl implements DefinitionPushDownRequest {
 
     private final Variable newVariable;
     private final ImmutableTerm definition;
@@ -47,7 +47,7 @@ public class DefPushDownRequestImpl implements DefinitionPushDownTransformer.Def
     }
 
     @Override
-    public DefinitionPushDownTransformer.DefPushDownRequest newRequest(
+    public DefinitionPushDownRequest newRequest(
             ImmutableSubstitution<? extends ImmutableTerm> substitution) {
         return new DefPushDownRequestImpl(newVariable,
                 substitution.apply(definition),
@@ -57,8 +57,8 @@ public class DefPushDownRequestImpl implements DefinitionPushDownTransformer.Def
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof DefinitionPushDownTransformer.DefPushDownRequest)) return false;
-        DefinitionPushDownTransformer.DefPushDownRequest that = (DefinitionPushDownTransformer.DefPushDownRequest) o;
+        if (o == null || !(o instanceof DefinitionPushDownRequest)) return false;
+        DefinitionPushDownRequest that = (DefinitionPushDownRequest) o;
         return Objects.equals(newVariable, that.getNewVariable()) &&
                 Objects.equals(definition, that.getDefinitionWhenConditionSatisfied()) &&
                 Objects.equals(condition, that.getCondition());

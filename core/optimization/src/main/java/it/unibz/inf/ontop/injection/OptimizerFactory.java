@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
-import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer.DefPushDownRequest;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -15,6 +15,6 @@ public interface OptimizerFactory {
 
     TermTypeTermLiftTransformer createRDFTermTypeConstantTransformer(VariableGenerator variableGenerator);
 
-    DefinitionPushDownTransformer createDefinitionPushDownTransformer(DefPushDownRequest request);
+    DefinitionPushDownTransformer createDefinitionPushDownTransformer(DefinitionPushDownRequest request);
 
 }

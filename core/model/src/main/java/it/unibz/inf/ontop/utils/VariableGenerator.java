@@ -38,6 +38,12 @@ public interface VariableGenerator {
      */
     Variable generateNewVariable();
 
+    /**
+     * Creates a variable with the suggested string if no conflict is detected.
+     * However, generates a variable with a close but different name.
+     */
+    Variable generateNewVariable(String suggestedString);
+
     ImmutableSet<Variable> getKnownVariables();
 
     /**

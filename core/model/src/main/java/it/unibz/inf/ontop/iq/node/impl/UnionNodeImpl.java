@@ -15,7 +15,6 @@ import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -241,11 +240,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return projectedVariables.equals(((UnionNode)node).getVariables());
         }
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        return transformer.transform(this);
     }
 
     @Override

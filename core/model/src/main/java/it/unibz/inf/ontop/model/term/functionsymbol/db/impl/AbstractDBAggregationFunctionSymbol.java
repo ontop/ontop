@@ -14,39 +14,23 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class AbstractDBAggregationFunctionSymbol extends FunctionSymbolImpl implements DBFunctionSymbol {
+public abstract class AbstractDBAggregationFunctionSymbol extends AbstractAggregationFunctionSymbol implements DBFunctionSymbol {
 
-    private final DBTermType targetType;
     private final DBFunctionSymbolSerializer serializer;
 
     protected AbstractDBAggregationFunctionSymbol(@Nonnull String name,
                                                   @Nonnull ImmutableList<TermType> expectedBaseTypes,
                                                   @Nonnull DBTermType targetType,
+                                                  boolean isDistinct,
                                                   @Nonnull DBFunctionSymbolSerializer serializer) {
-        super(name, expectedBaseTypes);
-        this.targetType = targetType;
+        super(name, expectedBaseTypes, targetType, isDistinct);
         this.serializer = serializer;
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.of(TermTypeInference.declareTermType(targetType));
-    }
-
-    @Override
-    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
     }
 
     @Override
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializer.getNativeDBString(terms, termConverter, termFactory);
-    }
-
-    @Override
-    public boolean isAggregation() {
-        return true;
     }
 
     @Override

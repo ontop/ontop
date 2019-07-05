@@ -138,9 +138,9 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
-	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm liftableFunctionalTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
-			ImmutableFunctionalTerm liftableFunctionalTerm,
+			ImmutableTerm liftableTerm,
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
@@ -419,6 +419,8 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
+
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
 
 	ImmutableFunctionalTerm getDBReplace(ImmutableTerm arg, ImmutableTerm pattern, ImmutableTerm replacement);
@@ -576,5 +578,7 @@ public interface TermFactory {
 	//-------------
 
 	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
-    ImmutableFunctionalTerm getDBCount(ImmutableTerm immutableTerm, boolean isDistinct);
+    ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
 }

@@ -8,21 +8,17 @@ import javax.annotation.Nonnull;
 
 public class DBCountFunctionSymbolImpl extends AbstractDBAggregationFunctionSymbol {
 
-    private final boolean isDistinct;
-
     protected DBCountFunctionSymbolImpl(@Nonnull DBTermType inputType,
                                         @Nonnull DBTermType targetType,
                                         boolean isDistinct,
                                         @Nonnull DBFunctionSymbolSerializer serializer) {
-        super(isDistinct ? "COUNT_DISTINCT_1" : "COUNT_1", ImmutableList.of(inputType), targetType, serializer);
-        this.isDistinct = isDistinct;
+        super(isDistinct ? "COUNT_DISTINCT_1" : "COUNT_1", ImmutableList.of(inputType), targetType, isDistinct, serializer);
     }
 
     protected DBCountFunctionSymbolImpl(@Nonnull DBTermType targetType,
                                         boolean isDistinct,
                                         @Nonnull DBFunctionSymbolSerializer serializer) {
-        super(isDistinct ? "COUNT_DISTINCT_0" : "COUNT_0", ImmutableList.of(), targetType, serializer);
-        this.isDistinct = isDistinct;
+        super(isDistinct ? "COUNT_DISTINCT_0" : "COUNT_0", ImmutableList.of(), targetType, isDistinct, serializer);
     }
 
     protected DBCountFunctionSymbolImpl(@Nonnull DBTermType inputType,

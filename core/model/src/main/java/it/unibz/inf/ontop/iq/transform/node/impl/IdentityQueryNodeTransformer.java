@@ -43,6 +43,11 @@ public class IdentityQueryNodeTransformer implements HomogeneousQueryNodeTransfo
     }
 
     @Override
+    public AggregationNode transform(AggregationNode aggregationNode) {
+        return aggregationNode;
+    }
+
+    @Override
     public EmptyNode transform(EmptyNode emptyNode) { return emptyNode; }
 
     @Override

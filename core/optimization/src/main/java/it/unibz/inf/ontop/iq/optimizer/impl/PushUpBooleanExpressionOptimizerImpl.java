@@ -166,6 +166,9 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
             if (currentParentNode == query.getRootNode()) {
                 break;
             }
+            if (currentParentNode instanceof AggregationNode) {
+                break;
+            }
             if (currentParentNode instanceof ConstructionNode) {
                 /* keep track of Construction nodes on the path between provider and recipient */
                 inbetweenProjectorsBuilder.add((ConstructionNode) currentParentNode);
