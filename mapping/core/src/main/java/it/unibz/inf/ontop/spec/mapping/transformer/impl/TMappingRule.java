@@ -2,14 +2,12 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
@@ -24,7 +22,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 /***
  * Splits a given mapping into builtin predicates (conditions)
@@ -41,10 +38,8 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
 
-	private final DatalogFactory datalogFactory;
 	private final TermFactory termFactory;
 	private final AtomFactory atomFactory;
-	private final ImmutabilityTools immutabilityTools;
 	private final IntermediateQueryFactory iqFactory;
 	private final SubstitutionFactory substitutionFactory;
 
@@ -69,78 +64,77 @@ public class TMappingRule {
 	
 	public TMappingRule(IQ iq, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
 
-        this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
-        this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
 
 		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
 		this.substitutionFactory = substitutionFactory;
 
-		List<CQIE> translation = iq2DatalogTranslator.translate(iq).getRules();
-		if (translation.size() != 1)
-			System.out.println("TMAP PANIC");
-
-		List<Function> body = translation.get(0).getBody();
-
-		ImmutableList.Builder<ImmutableExpression> filters = ImmutableList.builder();
-		ImmutableList.Builder<DataAtom<RelationPredicate>> dbs = ImmutableList.builder();
-
-        Map<Term, Variable> valueMap = new HashMap<>();
-
-		for (Function atom : body) {
-			if (atom.getFunctionSymbol() instanceof ExpressionOperation) {
-				filters.add(termFactory.getImmutableExpression(
-						(ExpressionOperation)atom.getFunctionSymbol(),
-						atom.getTerms().stream()
-								.map(t -> immutabilityTools.convertIntoImmutableTerm(t))
-								.collect(ImmutableCollectors.toList())));
-			}
-			else {
-				// database atom, we need to replace all constants by filters
-				ImmutableList.Builder<VariableOrGroundTerm> builder = ImmutableList.builder();
-				for (Term term : atom.getTerms()) {
-					if (term instanceof Variable) {
-						builder.add((Variable)term);
-					}
-					else {
-						// Found a constant, replacing with a fresh variable
-						// and adding the new equality atom
-						Variable var = valueMap.get(term);
-						if (var == null) {
-							var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
-							valueMap.put(term, var);
-							filters.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, var, immutabilityTools.convertIntoImmutableTerm(term)));
-						}
-						builder.add(var);
-					}
-				}
-				dbs.add(atomFactory.getDataAtom((RelationPredicate)atom.getFunctionSymbol(), builder.build()));
-			}
-		}
-        this.databaseAtoms = dbs.build();
-
 		DistinctVariableOnlyDataAtom projectionAtom = iq.getProjectionAtom();
 		ConstructionNode cn = (ConstructionNode)iq.getTree().getRootNode();
 		ImmutableSubstitution sub = cn.getSubstitution();
 
+		Optional<ImmutableExpression> joinConditions;
+		ImmutableList<IQTree> dataAtoms;
+
+		IQTree tree = iq.getTree().getChildren().get(0);
+		if (tree.getRootNode() instanceof FilterNode) {
+			joinConditions = ((FilterNode)tree.getRootNode()).getOptionalFilterCondition();
+			dataAtoms = tree.getChildren();
+		}
+		else if (tree.getRootNode() instanceof ExtensionalDataNode) {
+			joinConditions = Optional.empty();
+			dataAtoms = ImmutableList.of(tree);
+		}
+		else if (tree.getRootNode() instanceof TrueNode) {
+			joinConditions = Optional.empty();
+			dataAtoms = ImmutableList.of();
+		}
+		else {
+			joinConditions = ((InnerJoinNode)tree.getRootNode()).getOptionalFilterCondition();
+			dataAtoms = tree.getChildren();
+		}
+
+		ImmutableList.Builder<ImmutableExpression> filters = ImmutableList.builder();
+		Map<ImmutableTerm, Variable> valueMap = new HashMap<>();
+
+		this.databaseAtoms = dataAtoms.stream()
+					.map(n -> (ExtensionalDataNode)n.getRootNode())
+					.map(n -> n.getProjectionAtom())
+					.map(a -> atomFactory.getDataAtom(a.getPredicate(), a.getArguments().stream().map(term -> replaceConstants(term, filters, valueMap)).collect(ImmutableCollectors.toList())))
+					.collect(ImmutableCollectors.toList());
+
+		joinConditions.ifPresent(e -> filters.addAll(e.flattenAND()));
+		ImmutableList<ImmutableExpression> f = filters.build();
+		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
+
 		this.headTerms = sub.apply(predicateInfo.isClass()
 				? ImmutableList.of(projectionAtom.getTerm(0))
 				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
-
-		ImmutableList<ImmutableExpression> f = filters.build();
-		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
 	}
 
-	
+
+	private Variable replaceConstants(ImmutableTerm term, ImmutableList.Builder<ImmutableExpression> filters, Map<ImmutableTerm, Variable> valueMap) {
+		if (term instanceof Variable) {
+			return ((Variable)term);
+		}
+		else {
+			// found a constant, replacing with a fresh variable and adding the new equality atom
+			Variable var = valueMap.get(term);
+			if (var == null) {
+				var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
+				valueMap.put(term, var);
+				filters.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, var, term));
+			}
+			return var;
+		}
+	}
 
 
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms) {
-        this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
         this.atomFactory = baseRule.atomFactory;
-        this.immutabilityTools = baseRule.immutabilityTools;
         this.iqFactory = baseRule.iqFactory;
         this.substitutionFactory = baseRule.substitutionFactory;
 
@@ -154,10 +148,8 @@ public class TMappingRule {
 	
 	
 	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule) {
-        this.datalogFactory = baseRule.datalogFactory;
         this.termFactory = baseRule.termFactory;
 		this.atomFactory = baseRule.atomFactory;
-		this.immutabilityTools = baseRule.immutabilityTools;
 		this.iqFactory = baseRule.iqFactory;
 		this.substitutionFactory = baseRule.substitutionFactory;
 
