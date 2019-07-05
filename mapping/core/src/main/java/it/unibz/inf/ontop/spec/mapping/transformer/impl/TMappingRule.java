@@ -46,7 +46,6 @@ public class TMappingRule {
 	private final AtomFactory atomFactory;
 	private final ImmutabilityTools immutabilityTools;
 	private final IntermediateQueryFactory iqFactory;
-	private final DatalogRule2QueryConverter datalogRuleConverter;
 	private final SubstitutionFactory substitutionFactory;
 
 	/***
@@ -68,14 +67,13 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(IQ iq, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter, SubstitutionFactory substitutionFactory) {
+	public TMappingRule(IQ iq, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
 
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
         this.immutabilityTools = immutabilityTools;
         this.iqFactory = iqFactory;
-        this.datalogRuleConverter = datalogRuleConverter;
 
 		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
 		this.substitutionFactory = substitutionFactory;
@@ -144,7 +142,6 @@ public class TMappingRule {
         this.atomFactory = baseRule.atomFactory;
         this.immutabilityTools = baseRule.immutabilityTools;
         this.iqFactory = baseRule.iqFactory;
-        this.datalogRuleConverter = baseRule.datalogRuleConverter;
         this.substitutionFactory = baseRule.substitutionFactory;
 
         this.predicateInfo = baseRule.predicateInfo;
@@ -162,7 +159,6 @@ public class TMappingRule {
 		this.atomFactory = baseRule.atomFactory;
 		this.immutabilityTools = baseRule.immutabilityTools;
 		this.iqFactory = baseRule.iqFactory;
-		this.datalogRuleConverter = baseRule.datalogRuleConverter;
 		this.substitutionFactory = baseRule.substitutionFactory;
 
 		this.predicateInfo = predicateInfo;

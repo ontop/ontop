@@ -23,27 +23,21 @@ import java.util.stream.Stream;
 public class TMappingEntry {
     private ImmutableList<TMappingRule> rules;
 
-    private final NoNullValueEnforcer noNullValueEnforcer;
-    private final UnionBasedQueryMerger queryMerger;
     private final TermFactory termFactory;
 
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules, TermFactory termFactory) {
         this.rules = rules;
-        this.noNullValueEnforcer = noNullValueEnforcer;
-        this.queryMerger = queryMerger;
         this.termFactory = termFactory;
     }
 
     public TMappingEntry createCopy(java.util.function.Function<TMappingRule, TMappingRule> headReplacer) {
         return new TMappingEntry(
                 rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
-                noNullValueEnforcer,
-                queryMerger,
                 termFactory);
     }
 
-    public IQ asIQ(CoreUtilsFactory coreUtilsFactory) {
+    public IQ asIQ(CoreUtilsFactory coreUtilsFactory, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger) {
         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
         return noNullValueEnforcer.transform(
                     queryMerger.mergeDefinitions(rules.stream()
@@ -62,9 +56,9 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
         return Collector.of(
-                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, termFactory), // Supplier
+                () -> new BuilderWithCQC(cqc, termFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
@@ -75,14 +69,10 @@ public class TMappingEntry {
         private final List<TMappingRule> rules = new ArrayList<>();
         private final ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc;
 
-        private final NoNullValueEnforcer noNullValueEnforcer;
-        private final UnionBasedQueryMerger queryMerger;
         private final TermFactory termFactory;
 
-        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
+        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
             this.cqc = cqc;
-            this.noNullValueEnforcer = noNullValueEnforcer;
-            this.queryMerger = queryMerger;
             this.termFactory = termFactory;
         }
 
@@ -98,7 +88,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, termFactory);
+            return new TMappingEntry(ImmutableList.copyOf(rules), termFactory);
         }
 
 
