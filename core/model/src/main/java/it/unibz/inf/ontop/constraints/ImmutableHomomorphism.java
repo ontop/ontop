@@ -3,9 +3,13 @@ package it.unibz.inf.ontop.constraints;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ImmutableHomomorphism {
     private final ImmutableMap<Variable, VariableOrGroundTerm> map;
@@ -33,6 +37,42 @@ public class ImmutableHomomorphism {
     }
 
     public ImmutableMap<Variable, VariableOrGroundTerm> asMap() { return map; }
+
+
+    public ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression, TermFactory termFactory) {
+        return (ImmutableExpression) applyToImmutableTerm(booleanExpression, termFactory);
+    }
+
+    private ImmutableTerm applyToImmutableTerm(ImmutableTerm term, TermFactory termFactory) {
+        if (term instanceof Constant) {
+            return term;
+        }
+        else if (term instanceof Variable) {
+            return map.get(term);
+        }
+        else if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+            ImmutableList<ImmutableTerm> terms = functionalTerm.getTerms().stream()
+                    .map(t -> applyToImmutableTerm(t, termFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            // Distinguishes the BooleanExpression from the other functional terms.
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+            if (functionSymbol instanceof OperationPredicate) {
+                return termFactory.getImmutableExpression((OperationPredicate) functionSymbol, terms);
+            }
+            else {
+                return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
+            }
+        }
+        else {
+            throw new IllegalArgumentException("Unexpected kind of term: " + term.getClass());
+        }
+    }
+
+
+
 
     @Override
     public boolean equals(Object other) {
