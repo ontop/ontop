@@ -17,11 +17,8 @@ import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 /***
  * Splits a given mapping into builtin predicates (conditions)
@@ -96,7 +93,24 @@ public class TMappingRule {
 			}
 			else {
 				// database atom, we need to replace all constants by filters
-				dbs.add(replaceConstants2(atom, filters, valueMap));
+				ImmutableList.Builder<VariableOrGroundTerm> builder = ImmutableList.builder();
+				for (Term term : atom.getTerms()) {
+					if (term instanceof Variable) {
+						builder.add((Variable)term);
+					}
+					else {
+						// Found a constant, replacing with a fresh variable
+						// and adding the new equality atom
+						Variable var = valueMap.get(term);
+						if (var == null) {
+							var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
+							valueMap.put(term, var);
+							filters.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, var, immutabilityTools.convertIntoImmutableTerm(term)));
+						}
+						builder.add(var);
+					}
+				}
+				dbs.add(atomFactory.getDataAtom((AtomPredicate)atom.getFunctionSymbol(), builder.build()));
 			}
 		}
         this.databaseAtoms = dbs.build();
@@ -111,28 +125,6 @@ public class TMappingRule {
 
 	
 
-	private DataAtom<AtomPredicate> replaceConstants2(Function atom, ImmutableList.Builder<ImmutableExpression> filters, Map<Term, Variable> valueMap) {
-		ImmutableList.Builder<VariableOrGroundTerm> builder = ImmutableList.builder();
-
-		for (Term term : atom.getTerms()) {
-			if (term instanceof Variable) {
-				builder.add((Variable)term);
-			}
-			else {
-				// Found a constant, replacing with a fresh variable
-				// and adding the new equality atom
-				Variable var = valueMap.get(term);
-				if (var == null) {
-					var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
-					valueMap.put(term, var);
-					filters.add(termFactory.getImmutableExpression(ExpressionOperation.EQ, var, immutabilityTools.convertIntoImmutableTerm(term)));
-				}
-				builder.add(var);
-			}
-		}
-
-		return atomFactory.getDataAtom((AtomPredicate)atom.getFunctionSymbol(), builder.build());
-	}
 
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms) {
         this.datalogFactory = baseRule.datalogFactory;
@@ -173,28 +165,20 @@ public class TMappingRule {
 
 
 	public IQ asIQ() {
-		List<Function> combinedBody;
-		if (!filterAtoms.isEmpty()) {
-			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
-			combinedBody.addAll(databaseAtoms.stream()
-					.map(immutabilityTools::convertToMutableFunction)
-					.collect(ImmutableCollectors.toList()));
-			
-			Iterator<ImmutableList<ImmutableExpression>> iterOR = filterAtoms.iterator();
-			List<ImmutableExpression> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
-			ImmutableExpression mergedConditions = getMergedByAND(list);
-			while (iterOR.hasNext()) {
-				list = iterOR.next();
-				ImmutableExpression e = getMergedByAND(list);
-				mergedConditions = termFactory.getImmutableExpression(ExpressionOperation.OR, e, mergedConditions);
-			}
-			
-			combinedBody.add(immutabilityTools.convertToMutableBooleanExpression(mergedConditions));
-		}
-		else
-			combinedBody = databaseAtoms.stream()
-					.map(immutabilityTools::convertToMutableFunction)
-					.collect(ImmutableCollectors.toList());
+
+		// assumes that filterAtoms is a possibly empty list of non-empty lists
+		Optional<ImmutableExpression> mergedConditions = filterAtoms.stream()
+				.map(list -> list.stream()
+						.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.AND, e, r)).get())
+				.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.OR, e, r));
+
+		ImmutableList<Function> combinedBody = Stream.concat(
+				databaseAtoms.stream()
+					.map(immutabilityTools::convertToMutableFunction),
+				mergedConditions.isPresent()
+						? Stream.of(immutabilityTools.convertToMutableBooleanExpression(mergedConditions.get()))
+						: Stream.empty())
+				.collect(ImmutableCollectors.toList());
 
 		Function head = predicateInfo.isClass()
 				? atomFactory.getMutableTripleHeadAtom(immutabilityTools.convertToMutableTerm(headTerms.get(0)), predicateInfo.getIri())
@@ -203,29 +187,7 @@ public class TMappingRule {
 		return datalogRuleConverter.extractPredicatesAndConvertDatalogRule(
 				datalogFactory.getCQIE(head, combinedBody), iqFactory);
 	}
-	
-	/***
-	 * Takes a list of boolean atoms and returns one single atom
-	 * representing the conjunction 
-	 * 
-	 * ASSUMPTION: the list is non-empty
-	 * 
-	 * Example: A -> A
-	 *          A, B -> AND(B,A)
-	 *          A, B, C -> AND(C,AND(B,A))
-	 * 
-	 */
-	
-	private ImmutableExpression getMergedByAND(List<ImmutableExpression> list) {
-		Iterator<ImmutableExpression> iterAND = list.iterator();
-		ImmutableExpression mergedConditions = iterAND.next();
-		while (iterAND.hasNext()) {
-			ImmutableExpression e = iterAND.next();
-			mergedConditions = termFactory.getImmutableExpression(ExpressionOperation.AND, e, mergedConditions);
-		}		
-		return mergedConditions;
-	}
-	
+
 	
     public ImmutableList<ImmutableTerm> getHeadTerms() {
         return headTerms;
