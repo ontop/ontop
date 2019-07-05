@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -143,9 +144,8 @@ public class MappingDataTypeCompletion {
         } else if (term instanceof Variable) {
 
             Variable variable = (Variable) term;
-            Term newTerm;
-            RDFDatatype type = getDataType(termOccurenceIndex, variable);
-            newTerm = termFactory.getTypedTerm(variable, type);
+            RDFDatatype type = getDataType(termOccurenceIndex.get(variable.getName()), variable);
+            Term newTerm = termFactory.getTypedTerm(variable, type);
             log.info("Datatype "+type+" for the value " + variable + " of the property " + atom + " has been " +
                     "inferred " +
                     "from the database");
@@ -221,40 +221,26 @@ public class MappingDataTypeCompletion {
     /**
      * returns COL_TYPE for one of the datatype ids
      *
-     * @param termOccurenceIndex
      * @param variable
      * @return
      */
-    private RDFDatatype getDataType(Map<String, List<IndexedPosition>> termOccurenceIndex, Variable variable) throws UnknownDatatypeException {
+    private RDFDatatype getDataType(Collection<IndexedPosition> list, Variable variable) throws UnknownDatatypeException {
 
-
-        List<IndexedPosition> list = termOccurenceIndex.get(variable.getName());
         if (list == null)
             throw new UnboundTargetVariableException(variable);
 
-        // ROMAN (10 Oct 2015): this assumes the first occurrence is a database relation!
-        //                      AND THAT THERE ARE NO CONSTANTS IN ARGUMENTS!
-        IndexedPosition ip = list.get(0);
-
-        RelationID tableId = relation2Predicate.createRelationFromPredicateName(metadata.getQuotedIDFactory(), ip.atom
-                .getFunctionSymbol());
-        RelationDefinition td = metadata.getRelation(tableId);
-        
-        
-        Attribute attribute = td.getAttribute(ip.pos);
-        Optional<RDFDatatype>  type;
-        //we want to assign the default value or throw an exception when the type of the attribute is missing (case of view)
-        if (attribute.getType() == 0){
-
-            type = Optional.empty();
+        Optional<RDFDatatype> type = Optional.empty();
+        for (IndexedPosition ip : list) {
+            if (ip.atom.getFunctionSymbol() instanceof RelationPredicate) {
+                RelationDefinition td = ((RelationPredicate) ip.atom.getFunctionSymbol()).getRelationDefinition();
+                Attribute attribute = td.getAttribute(ip.pos);
+                if (attribute.getType() != 0 && !type.isPresent())
+                    // TODO: refactor this (unsafe)!!!
+                    type = Optional.of((RDFDatatype) attribute.getTermType());
+            }
         }
-        else{
-            // TODO: refactor this (unsafe)!!!
-            type = Optional.of((RDFDatatype) attribute.getTermType());
-        }
-
-        if(defaultDatatypeInferred)
-            return type.orElseGet(typeFactory::getXsdStringDatatype) ;
+        if (defaultDatatypeInferred)
+            return type.orElseGet(typeFactory::getXsdStringDatatype);
         else {
             return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +
@@ -263,7 +249,6 @@ public class MappingDataTypeCompletion {
                     " and we will infer the default datatype (xsd:string)"));
 
         }
-
     }
 
 	private static class IndexedPosition {
