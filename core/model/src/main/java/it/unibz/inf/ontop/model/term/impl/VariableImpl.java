@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 
 public class VariableImpl implements Variable, Comparable<Variable> {
 
-	private static final long serialVersionUID = 5723075311798541659L;
-
 	private final String name;
 
 	protected VariableImpl(String name) {

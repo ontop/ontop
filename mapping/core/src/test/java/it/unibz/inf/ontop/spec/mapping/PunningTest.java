@@ -24,7 +24,6 @@ import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
 
 import java.sql.Types;
-import java.util.AbstractMap;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
@@ -35,11 +34,6 @@ public class PunningTest {
 
 
     private final static RelationPredicate company;
-    private final static AtomPredicate ANS1_VAR2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(2);
-    private final static Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
-    private final static Variable fldNpdidField1 = TERM_FACTORY.getVariable("fldNpdidField1");
-    private final static Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
-    private final static Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
 
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
@@ -128,7 +122,7 @@ public class PunningTest {
      * TODO: stop this practise
      */
     private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
-        return TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantIRI(iri));
+        return TERM_FACTORY.getImmutableUriTemplate(TERM_FACTORY.getConstantLiteral(iri.getIRIString()));
     }
 
     private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {

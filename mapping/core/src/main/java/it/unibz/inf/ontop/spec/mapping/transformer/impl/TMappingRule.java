@@ -127,7 +127,7 @@ public class TMappingRule {
 					projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()));
 		}
 		else if (headTerms.get(1) instanceof Variable) {
-			if (!headTerms.get(1).equals(projectionAtom.getTerm(1)))
+			if (!headTerms.get(1).equals(projectionAtom.getTerm(2)))
 				throw new IllegalStateException("The last argument does not match");
 
 			substitution = substitutionFactory.getSubstitution(
