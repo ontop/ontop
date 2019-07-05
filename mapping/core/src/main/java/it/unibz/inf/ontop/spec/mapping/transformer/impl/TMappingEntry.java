@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -25,15 +24,13 @@ public class TMappingEntry {
 
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final UnionBasedQueryMerger queryMerger;
-    private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
         this.rules = rules;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.queryMerger = queryMerger;
-        this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;
     }
 
@@ -42,7 +39,7 @@ public class TMappingEntry {
                 rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
                 noNullValueEnforcer,
                 queryMerger,
-                substitutionFactory, termFactory);
+                termFactory);
     }
 
     public IQ asIQ() {
@@ -64,9 +61,9 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
         return Collector.of(
-                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, substitutionFactory, termFactory), // Supplier
+                () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, termFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
@@ -79,14 +76,12 @@ public class TMappingEntry {
 
         private final NoNullValueEnforcer noNullValueEnforcer;
         private final UnionBasedQueryMerger queryMerger;
-        private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
 
-        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
             this.cqc = cqc;
             this.noNullValueEnforcer = noNullValueEnforcer;
             this.queryMerger = queryMerger;
-            this.substitutionFactory = substitutionFactory;
             this.termFactory = termFactory;
         }
 
@@ -102,7 +97,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, substitutionFactory, termFactory);
+            return new TMappingEntry(ImmutableList.copyOf(rules), noNullValueEnforcer, queryMerger, termFactory);
         }
 
 
@@ -174,22 +169,40 @@ public class TMappingEntry {
                 boolean couldIgnore = false;
 
                 Optional<ImmutableHomomorphism> toNewRule = computeHomomorphsim(newRule, current, cqc);
-                if (toNewRule.isPresent() && checkConditions(newRule, current, toNewRule.get())) {
-                    if (newRule.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
-                        couldIgnore = true;
-                    }
-                    else {
-                        // if the new mapping is redundant and there are no conditions then do not add anything
-                        return;
+                if (toNewRule.isPresent()) {
+                    if (current.getConditions().isEmpty() ||
+                            (current.getConditions().size() == 1 &&
+                             newRule.getConditions().size() == 1 &&
+                             // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
+                             current.getConditions().get(0).stream()
+                                    .map(atom -> toNewRule.get().applyToBooleanExpression(atom, termFactory))
+                                    .allMatch(atom -> newRule.getConditions().get(0).contains(atom)))) {
+
+                        if (newRule.getDatabaseAtoms().size() < current.getDatabaseAtoms().size()) {
+                            couldIgnore = true;
+                        }
+                        else {
+                            // if the new mapping is redundant and there are no conditions then do not add anything
+                            return;
+                        }
                     }
                 }
 
                 Optional<ImmutableHomomorphism> fromNewRule = computeHomomorphsim(current, newRule, cqc);
-                if (fromNewRule.isPresent() && checkConditions(current, newRule, fromNewRule.get())) {
-                    // The existing query is more specific than the new query, so we
-                    // need to add the new query and remove the old
-                    mappingIterator.remove();
-                    continue;
+                if (fromNewRule.isPresent()) {
+                    if (newRule.getConditions().isEmpty() ||
+                            (newRule.getConditions().size() == 1 &&
+                             current.getConditions().size() == 1 &&
+                             // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
+                             newRule.getConditions().get(0).stream()
+                                    .map(atom -> fromNewRule.get().applyToBooleanExpression(atom, termFactory))
+                                    .allMatch(atom -> current.getConditions().get(0).contains(atom)))) {
+
+                        // The existing query is more specific than the new query, so we
+                        // need to add the new query and remove the old
+                        mappingIterator.remove();
+                        continue;
+                    }
                 }
 
                 if (couldIgnore) {
@@ -199,7 +212,7 @@ public class TMappingEntry {
 
                 if (toNewRule.isPresent() && fromNewRule.isPresent()) {
                     // We found an equivalence, we will try to merge the conditions of
-                    // newRule into the currentRule
+                    // newRule into the current
                     // Here we can merge conditions of the new query with the one we have just found
                     // new map always has just one set of filters  !!
                     ImmutableList<ImmutableExpression> newf = newRule.getConditions().get(0).stream()
@@ -234,23 +247,5 @@ public class TMappingEntry {
             ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(), from.getDatabaseAtoms(), to.getDatabaseAtoms());
             return h.hasNext() ? Optional.of(h.next()) : Optional.empty();
         }
-
-
-
-
-        private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, ImmutableHomomorphism toRule1) {
-            if (rule2.getConditions().isEmpty())
-                return true;
-
-            return  rule2.getConditions().size() == 1 &&
-                    rule1.getConditions().size() == 1 &&
-                    // rule1.getConditions().get(0) contains all images of rule2.getConditions.get(0)
-                    rule2.getConditions().get(0).stream()
-                        .map(atom -> toRule1.applyToBooleanExpression(atom, termFactory))
-                        .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
-        }
-
-
-
     }
 }

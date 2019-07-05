@@ -41,8 +41,6 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -60,7 +58,6 @@ public class TMappingProcessor {
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
 	private final DatalogFactory datalogFactory;
-	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final QueryUnionSplitter unionSplitter;
     private final IQ2DatalogTranslator iq2DatalogTranslator;
@@ -71,22 +68,18 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
-    private final ImmutableSubstitutionTools immutableSubstitutionTools;
-    private final SubstitutionFactory substitutionFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-                              SubstitutionUtilities substitutionUtilities,
                               ImmutabilityTools immutabilityTools,
                               QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator,
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, ImmutableSubstitutionTools immutableSubstitutionTools, SubstitutionFactory substitutionFactory) {
+                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
-		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.unionSplitter = unionSplitter;
         this.iq2DatalogTranslator = iq2DatalogTranslator;
@@ -97,8 +90,6 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
-        this.immutableSubstitutionTools = immutableSubstitutionTools;
-        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -149,7 +140,7 @@ public class TMappingProcessor {
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, noNullValueEnforcer, queryMerger, substitutionFactory, termFactory))))
+                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, noNullValueEnforcer, queryMerger, termFactory))))
                 .collect(ImmutableCollectors.toList());
 
         return specificationFactory.createMapping(mapping.getMetadata(),
@@ -187,7 +178,7 @@ public class TMappingProcessor {
                                 .flatMap(ss -> ss.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
-                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, substitutionFactory, termFactory))));
+                                .collect(TMappingEntry.toTMappingEntry(cqc, noNullValueEnforcer, queryMerger, termFactory))));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
