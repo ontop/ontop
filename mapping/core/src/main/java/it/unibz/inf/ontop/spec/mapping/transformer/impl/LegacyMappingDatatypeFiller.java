@@ -34,7 +34,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
 
     private final OntopMappingSettings settings;
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
@@ -52,7 +51,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                                         TermFactory termFactory, TypeFactory typeFactory,
                                         TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, IntermediateQueryFactory iqFactory, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter) {
         this.settings = settings;
-        this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
@@ -88,9 +86,9 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
     @Override
-    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata) throws UnknownDatatypeException {
-        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(dbMetadata,
-                settings.isDefaultDatatypeInferred(), relation2Predicate, termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
+    public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping) throws UnknownDatatypeException {
+        MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(
+                settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
 
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping.getProvenanceMap().entrySet().stream()
                 .flatMap(e -> convertMappingQuery(e.getKey())

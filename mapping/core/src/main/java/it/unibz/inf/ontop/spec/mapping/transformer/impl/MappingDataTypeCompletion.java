@@ -46,11 +46,9 @@ import java.util.stream.IntStream;
 
 public class MappingDataTypeCompletion {
 
-    private final DBMetadata metadata;
     private final boolean defaultDatatypeInferred;
 
     private static final Logger log = LoggerFactory.getLogger(MappingDataTypeCompletion.class);
-    private final Relation2Predicate relation2Predicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
@@ -61,21 +59,16 @@ public class MappingDataTypeCompletion {
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
      * //TODO: rewrite in a Datalog-free fashion
-     * @param metadata The database metadata.
-     * @param relation2Predicate
      * @param termFactory
      * @param typeFactory
      * @param termTypeInferenceTools
      * @param immutabilityTools
      */
-    public MappingDataTypeCompletion(DBMetadata metadata,
-                                     boolean defaultDatatypeInferred, Relation2Predicate relation2Predicate,
+    public MappingDataTypeCompletion(boolean defaultDatatypeInferred,
                                      TermFactory termFactory, TypeFactory typeFactory,
                                      TermTypeInferenceTools termTypeInferenceTools,
                                      ImmutabilityTools immutabilityTools) {
-        this.metadata = metadata;
         this.defaultDatatypeInferred = defaultDatatypeInferred;
-        this.relation2Predicate = relation2Predicate;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
