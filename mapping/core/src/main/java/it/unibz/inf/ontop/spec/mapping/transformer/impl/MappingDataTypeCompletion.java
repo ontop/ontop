@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -81,7 +83,7 @@ public class MappingDataTypeCompletion {
         //case of data and object property
         if(!isURIRDFType(atom.getTerm(1))){
             Term object = atom.getTerm(2); // the object, third argument only
-            Map<String, List<IndexedPosition>> termOccurenceIndex = createIndex(rule.getBody());
+            ImmutableMultimap<String, IndexedPosition> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
             insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
             // Infer operation datatypes from variable datatypes
@@ -115,7 +117,7 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
-                                          Map<String, List<IndexedPosition>> termOccurenceIndex) throws UnknownDatatypeException {
+                                          ImmutableMultimap<String, IndexedPosition> termOccurenceIndex) throws UnknownDatatypeException {
 
 
         if (term instanceof Function) {
@@ -254,20 +256,15 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    private static Map<String, List<IndexedPosition>> createIndex(List<Function> body) {
-        Map<String, List<IndexedPosition>> termOccurenceIndex = new HashMap<>();
+    private static ImmutableMultimap<String, IndexedPosition> createIndex(List<Function> body) {
+        ImmutableMultimap.Builder<String, IndexedPosition> termOccurenceIndex = ImmutableMultimap.builder();
         for (Function a : body) {
             List<Term> terms = a.getTerms();
             int i = 1; // position index
             for (Term t : terms) {
                 if (t instanceof Variable) {
                     Variable var = (Variable) t;
-                    List<IndexedPosition> aux = termOccurenceIndex.get(var.getName());
-                    if (aux == null)
-                        aux = new LinkedList<>();
-                    aux.add(new IndexedPosition(a, i));
-                    termOccurenceIndex.put(var.getName(), aux);
-                    
+                    termOccurenceIndex.put(var.getName(), new IndexedPosition(a, i));
                 } else if (t instanceof FunctionalTermImpl) {
                     // NO-OP
                 } else if (t instanceof ValueConstant) {
@@ -282,7 +279,7 @@ public class MappingDataTypeCompletion {
                 i++; // increase the position index for the next variable
             }
         }
-        return termOccurenceIndex;
+        return termOccurenceIndex.build();
     }
 
     /**

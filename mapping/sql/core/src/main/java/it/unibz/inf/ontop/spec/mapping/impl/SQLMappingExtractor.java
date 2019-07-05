@@ -89,7 +89,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         MappingWithProvenance provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
         dbMetadata.freeze();
 
-        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping, dbMetadata);
+        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.inferMissingDatatypes(provMapping);
 
         MappingWithProvenance canonizedMapping = canonicalTransformer.transform(filledProvMapping);
 
