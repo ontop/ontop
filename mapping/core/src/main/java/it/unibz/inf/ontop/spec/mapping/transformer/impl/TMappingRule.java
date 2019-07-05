@@ -7,17 +7,21 @@ import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /***
@@ -75,7 +79,6 @@ public class TMappingRule {
 		if (translation.size() != 1)
 			System.out.println("TMAP PANIC");
 
-		Function head = translation.get(0).getHead();
 		List<Function> body = translation.get(0).getBody();
 
 		ImmutableList.Builder<ImmutableExpression> filters = ImmutableList.builder();
@@ -115,9 +118,19 @@ public class TMappingRule {
 		}
         this.databaseAtoms = dbs.build();
 
+
+		DistinctVariableOnlyDataAtom h = q.getProjectionAtom();
+		ConstructionNode cn = (ConstructionNode)q.getTree().getRootNode();
+		ImmutableSubstitution sub = cn.getSubstitution();
+		ImmutableList<ImmutableTerm> headT = sub.apply(h.getArguments());
+
+		//Function head = translation.get(0).getHead();
+		//this.headTerms = predicateInfo.isClass()
+		//		? ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)))
+		//		: ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)), immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(2)));
 		this.headTerms = predicateInfo.isClass()
-				? ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)))
-				: ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)), immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(2)));
+				? ImmutableList.of(headT.get(0))
+				: ImmutableList.of(headT.get(0), headT.get(2));
 
 		ImmutableList<ImmutableExpression> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
