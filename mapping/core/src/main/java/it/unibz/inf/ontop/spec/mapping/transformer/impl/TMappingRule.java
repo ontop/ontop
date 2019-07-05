@@ -29,9 +29,9 @@ public class TMappingRule {
 	private final DistinctVariableOnlyDataAtom projectionAtom;
 	private final ImmutableSubstitution substitution;
 
-	private final ImmutableList<ExtensionalDataNode> databaseAtoms;
+	private final ImmutableList<ExtensionalDataNode> extensionalNodes;
 	// an OR-connected list of AND-connected atomic filters
-	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
+	private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
 
 	private final TermFactory termFactory;
 
@@ -43,27 +43,13 @@ public class TMappingRule {
 
 		this.projectionAtom = iq.getProjectionAtom();
 		ConstructionNode cn = (ConstructionNode)iq.getTree().getRootNode();
-
-		ImmutableSet<ImmutableExpression> joinConditions;
-		ImmutableList<ExtensionalDataNode> dataAtoms;
+		this.substitution = cn.getSubstitution();
 
 		IQTree tree = iq.getTree().getChildren().get(0);
-		if (tree.getRootNode() instanceof FilterNode) {
-			joinConditions = ((FilterNode)tree.getRootNode()).getOptionalFilterCondition().get().flattenAND();
-			dataAtoms = ImmutableList.of((ExtensionalDataNode)tree.getChildren().get(0));
-		}
-		else if (tree.getRootNode() instanceof ExtensionalDataNode) {
-			joinConditions = ImmutableSet.of();
-			dataAtoms = ImmutableList.of((ExtensionalDataNode)tree);
-		}
-		else if (tree.getRootNode() instanceof TrueNode) {
-			joinConditions = ImmutableSet.of();
-			dataAtoms = ImmutableList.of();
-		}
-		else {
-			joinConditions = ((InnerJoinNode)tree.getRootNode()).getOptionalFilterCondition().map(e -> e.flattenAND()).orElseGet(ImmutableSet::of);
-			dataAtoms = tree.getChildren().stream().map(n -> (ExtensionalDataNode)n).collect(ImmutableCollectors.toList());
-		}
+		if (!IQ2CQ.getExtensionalDataNodes(tree).isPresent())
+			System.out.println(tree);
+		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
+		ImmutableSet<ImmutableExpression> joinConditions = IQ2CQ.getFilterExpressions(tree);
 
 		// maps all non-constants to fresh variables
 		//    this is required for more extensive use of OR
@@ -79,7 +65,7 @@ public class TMappingRule {
 				.collect(ImmutableCollectors.toSet()).stream()
 				.collect(ImmutableCollectors.toMap(t -> t, t -> variableGenerator.generateNewVariable()));
 
-		this.databaseAtoms = dataAtoms.stream()
+		this.extensionalNodes = dataAtoms.stream()
 					.map(n -> n.newAtom(atomFactory.getDataAtom(
 							n.getProjectionAtom().getPredicate(),
 							n.getProjectionAtom().getArguments().stream()
@@ -87,29 +73,27 @@ public class TMappingRule {
 									.collect(ImmutableCollectors.toList()))))
 					.collect(ImmutableCollectors.toList());
 
-		ImmutableList<ImmutableExpression> f = Stream.concat(
+		ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
 				joinConditions.stream(),
 				valueMap.entrySet().stream()
 					.map(e -> termFactory.getImmutableExpression(ExpressionOperation.EQ, e.getKey(), e.getValue())))
 				.collect(ImmutableCollectors.toList());
 
-		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
-
-		this.substitution = cn.getSubstitution();
+		this.filter = filterAtoms.isEmpty() ? ImmutableList.of() : ImmutableList.of(filterAtoms);
 	}
 
 
 
-	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms) {
+	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
         this.termFactory = baseRule.termFactory;
 
         this.predicateInfo = baseRule.predicateInfo;
         this.projectionAtom = baseRule.projectionAtom;
 
-		this.databaseAtoms = baseRule.databaseAtoms;
+		this.extensionalNodes = baseRule.extensionalNodes;
 		this.substitution = baseRule.substitution;
 
-		this.filterAtoms = filterAtoms;
+		this.filter = filter;
 	}
 	
 	
@@ -119,7 +103,7 @@ public class TMappingRule {
 		this.predicateInfo = predicateInfo;
 		this.projectionAtom = baseRule.projectionAtom;
 
-		this.databaseAtoms = baseRule.databaseAtoms;
+		this.extensionalNodes = baseRule.extensionalNodes;
 		if (predicateInfo.isClass()) {
 			substitution = substitutionFactory.getSubstitution(
 					projectionAtom.getTerm(0), headTerms.get(0),
@@ -141,7 +125,7 @@ public class TMappingRule {
 					projectionAtom.getTerm(2), headTerms.get(1));
 		}
 
-		this.filterAtoms = baseRule.filterAtoms;
+		this.filter = baseRule.filter;
 	}
 
 	private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
@@ -159,32 +143,15 @@ public class TMappingRule {
 	public IQ asIQ(IntermediateQueryFactory iqFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
-		Optional<ImmutableExpression> mergedConditions = filterAtoms.stream()
+		Optional<ImmutableExpression> mergedConditions = filter.stream()
 				.map(list -> list.stream()
 						.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.AND, e, r)).get())
 				.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.OR, e, r));
 
-		IQTree tree;
-		switch (databaseAtoms.size()) {
-			case 0:
-				tree = iqFactory.createTrueNode();
-				break;
-			case 1:
-				tree = (mergedConditions.isPresent()
-						? iqFactory.createUnaryIQTree(
-								iqFactory.createFilterNode(mergedConditions.get()),
-								databaseAtoms.get(0))
-						: databaseAtoms.get(0));
-				break;
-			default:
-				tree = iqFactory.createNaryIQTree(
-						iqFactory.createInnerJoinNode(mergedConditions),
-						databaseAtoms.stream().collect(ImmutableCollectors.toList()));
-		}
-
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
-						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution), tree));
+						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
+						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, iqFactory)));
 	}
 
 	public ImmutableList<ImmutableTerm> getHeadTerms() {
@@ -194,14 +161,14 @@ public class TMappingRule {
     }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() {
-		return databaseAtoms;
+		return extensionalNodes;
 	}
 
-	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filterAtoms; }
+	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filter; }
 
 	@Override
 	public int hashCode() {
-		return predicateInfo.getIri().hashCode() ^ substitution.hashCode() ^ databaseAtoms.hashCode() ^ filterAtoms.hashCode();
+		return predicateInfo.getIri().hashCode() ^ substitution.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
 	}
 	
 	@Override
@@ -210,14 +177,14 @@ public class TMappingRule {
 			TMappingRule otherRule = (TMappingRule)other;
 			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
 					substitution.equals(otherRule.substitution) &&
-					databaseAtoms.equals(otherRule.databaseAtoms) && 
-					filterAtoms.equals(otherRule.filterAtoms));
+					extensionalNodes.equals(otherRule.extensionalNodes) &&
+					filter.equals(otherRule.filter));
 		}
 		return false;
 	}
 
 	@Override 
 	public String toString() {
-		return predicateInfo.getIri() + "(" + substitution.apply(projectionAtom.getArguments()) + ") <- " + databaseAtoms + " AND " + filterAtoms;
+		return predicateInfo.getIri() + "(" + substitution.apply(projectionAtom.getArguments()) + ") <- " + extensionalNodes + " FILTER " + filter;
 	}
 }

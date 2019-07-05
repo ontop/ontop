@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -39,7 +40,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     }
 
     @Override
-    public IQ optimize(ImmutableCQContainmentCheck cqContainmentCheck, IQ query) {
+    public IQ optimize(ImmutableCQContainmentCheck<RelationPredicate> cqContainmentCheck, IQ query) {
 
         IQTree tree0 = query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
@@ -66,75 +67,55 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
         IQTree tree = tree0.acceptTransformer(new FilterChildNormalizer());
 
-        if (tree.getRootNode() instanceof ConstructionNode) {
+        if (tree.getRootNode() instanceof ConstructionNode && tree.getChildren().size() == 1) {
             ConstructionNode constructionNode = (ConstructionNode)tree.getRootNode();
-            if (tree.getChildren().size() == 1 && tree.getChildren().get(0).getRootNode() instanceof InnerJoinNode) {
-                IQTree joinTree = tree.getChildren().get(0);
-                if (joinTree.getChildren().size() < 2) {
-                    System.out.println("CQC: NOTHING TO OPTIMIZE");
-                    return query;
-                }
-                if (joinTree.getChildren().stream().anyMatch(c -> !(c.getRootNode() instanceof DataNode))) {
-                    System.out.println("CQC PANIC - NOT A JOIN OF DATA ATOMS");
-                }
-                else {
-                    InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
-                    ImmutableList<Variable> answerVariables = Stream.concat(
-                            constructionNode.getSubstitution().getImmutableMap().values().stream()
-                                    .flatMap(ImmutableTerm::getVariableStream),
-                            joinNode.getOptionalFilterCondition()
-                                    .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
-                            .collect(ImmutableCollectors.toSet()).stream() // remove duplicates
-                            .collect(ImmutableCollectors.toList());
+            IQTree joinTree = tree.getChildren().get(0);
+            Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(joinTree);
+            if (c.isPresent() && c.get().size() > 1) {
+                InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
+                ImmutableList<Variable> answerVariables = Stream.concat(
+                        constructionNode.getSubstitution().getImmutableMap().values().stream()
+                                .flatMap(ImmutableTerm::getVariableStream),
+                        joinNode.getOptionalFilterCondition()
+                                .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
+                        .collect(ImmutableCollectors.toSet()).stream() // remove duplicates
+                        .collect(ImmutableCollectors.toList());
 
-                    List<IQTree> children = joinTree.getChildren();
-                    int currentIndex = 0;
-                    while (currentIndex < children.size()) {
-                        ImmutableList.Builder<IQTree> builder = ImmutableList.builder();
-                        for (int i = 0; i < children.size(); i++)
-                            if (i != currentIndex)
-                                builder.add(children.get(i));
-                        ImmutableList<IQTree> subChildren = builder.build();
+                ImmutableList<ExtensionalDataNode> children = c.get();
+                int currentIndex = 0;
+                while (currentIndex < children.size()) {
+                    ImmutableList.Builder<ExtensionalDataNode> builder = ImmutableList.builder();
+                    for (int i = 0; i < children.size(); i++)
+                        if (i != currentIndex)
+                            builder.add(children.get(i));
+                    ImmutableList<ExtensionalDataNode> subChildren = builder.build();
 
-                        if (subChildren.stream()
-                                .flatMap(a -> a.getVariables().stream())
-                                .collect(ImmutableCollectors.toSet())
-                                .containsAll(answerVariables)) {
+                    if (subChildren.stream()
+                            .flatMap(a -> a.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet())
+                            .containsAll(answerVariables)) {
 
-                            ImmutableList<DataAtom<AtomPredicate>> atoms = children.stream()
-                                    .map(n -> ((DataNode<AtomPredicate>) n.getRootNode()).getProjectionAtom())
-                                    .collect(ImmutableCollectors.toList());
-                            ImmutableList<DataAtom<AtomPredicate>> subAtoms = subChildren.stream()
-                                    .map(n -> ((DataNode<AtomPredicate>) n.getRootNode()).getProjectionAtom())
-                                    .collect(ImmutableCollectors.toList());
-                            if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables, subAtoms), new ImmutableCQ<>(answerVariables, atoms))) {
-                                children = subChildren;
-                                if (children.size() < 2)
-                                    break;
-                                currentIndex = 0; // reset
-                            }
-                            else
-                                currentIndex++;
+                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(subChildren)), new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children)))) {
+                            children = subChildren;
+                            if (children.size() < 2)
+                                break;
+                            currentIndex = 0; // reset
                         }
                         else
                             currentIndex++;
                     }
-
-                    return iqFactory.createIQ(
-                            query.getProjectionAtom(),
-                            iqFactory.createUnaryIQTree(
-                                    (ConstructionNode)tree.getRootNode(),
-                                    (children.size() < 2)
-                                            ? (joinNode.getOptionalFilterCondition().isPresent()
-                                                    ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(joinNode.getOptionalFilterCondition().get()), children.get(0))
-                                                    : children.get(0))
-                                            : iqFactory.createNaryIQTree(joinNode, ImmutableList.copyOf(children))));
+                    else
+                        currentIndex++;
                 }
+
+                return iqFactory.createIQ(
+                        query.getProjectionAtom(),
+                        iqFactory.createUnaryIQTree(
+                                (ConstructionNode)tree.getRootNode(),
+                                IQ2CQ.toIQTree(children, joinNode.getOptionalFilterCondition(), iqFactory)));
             }
-
         }
-
-        return query;
+        return iqFactory.createIQ(query.getProjectionAtom(), tree);
     }
 
     // PINCHED FROM ExplicitEqualityTransformerImpl
