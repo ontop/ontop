@@ -24,7 +24,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -35,7 +34,6 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
@@ -58,41 +56,32 @@ public class TMappingProcessor {
 
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
-	private final DatalogFactory datalogFactory;
-	private final ImmutabilityTools immutabilityTools;
     private final QueryUnionSplitter unionSplitter;
-    private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final DatalogRule2QueryConverter datalogRuleConverter;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-                              ImmutabilityTools immutabilityTools,
-                              QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator,
+	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory,
+                              QueryUnionSplitter unionSplitter,
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
+                              UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
-		this.datalogFactory = datalogFactory;
-		this.immutabilityTools = immutabilityTools;
         this.unionSplitter = unionSplitter;
-        this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
-        this.datalogRuleConverter = datalogRuleConverter;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
     }
@@ -116,7 +105,7 @@ public class TMappingProcessor {
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, substitutionFactory))
+                .map(q -> new TMappingRule(q, termFactory, atomFactory, iqFactory, substitutionFactory))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
         // System.out.println("TMAP SOURCE: " + source + reasoner);

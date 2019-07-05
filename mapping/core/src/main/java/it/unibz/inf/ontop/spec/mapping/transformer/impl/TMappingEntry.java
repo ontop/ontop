@@ -207,7 +207,9 @@ public class TMappingEntry {
                 if (!builder.extend(from.getHeadTerms().get(i), to.getHeadTerms().get(i)).isValid())
                     return Optional.empty();
 
-            ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(), from.getDatabaseAtoms(), to.getDatabaseAtoms());
+            ImmutableHomomorphismIterator h = cqc.homomorphismIterator(builder.build(),
+                    from.getDatabaseAtoms().stream().map(n -> n.getProjectionAtom()).collect(ImmutableCollectors.toList()),
+                    to.getDatabaseAtoms().stream().map(n -> n.getProjectionAtom()).collect(ImmutableCollectors.toList()));
             return h.hasNext() ? Optional.of(h.next()) : Optional.empty();
         }
     }
