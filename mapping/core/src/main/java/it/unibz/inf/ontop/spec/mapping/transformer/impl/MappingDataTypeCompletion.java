@@ -83,7 +83,7 @@ public class MappingDataTypeCompletion {
         //case of data and object property
         if(!isURIRDFType(atom.getTerm(1))){
             Term object = atom.getTerm(2); // the object, third argument only
-            ImmutableMultimap<String, IndexedPosition> termOccurenceIndex = createIndex(rule.getBody());
+            ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(rule.getBody());
             // Infer variable datatypes
             insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
             // Infer operation datatypes from variable datatypes
@@ -117,11 +117,9 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     private void insertVariableDataTyping(Term term, Function atom, int position,
-                                          ImmutableMultimap<String, IndexedPosition> termOccurenceIndex) throws UnknownDatatypeException {
-
+                                          ImmutableMultimap<Variable, Attribute> termOccurenceIndex) throws UnknownDatatypeException {
 
         if (term instanceof Function) {
-
             Function function = (Function) term;
             Predicate functionSymbol = function.getFunctionSymbol();
             if (function.isDataTypeFunction() ||
@@ -133,22 +131,25 @@ public class MappingDataTypeCompletion {
                 for (int i = 0; i < function.getArity(); i++) {
                     insertVariableDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
                 }
-            } else {
+            }
+            else {
                 throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
             }
-        } else if (term instanceof Variable) {
-
+        }
+        else if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            RDFDatatype type = getDataType(termOccurenceIndex.get(variable.getName()), variable);
+            RDFDatatype type = getDataType(termOccurenceIndex.get(variable), variable);
             Term newTerm = termFactory.getTypedTerm(variable, type);
-            log.info("Datatype "+type+" for the value " + variable + " of the property " + atom + " has been " +
+            log.info("Datatype " + type + " for the value " + variable + " of the property " + atom + " has been " +
                     "inferred " +
                     "from the database");
             atom.setTerm(position, newTerm);
-        } else if (term instanceof ValueConstant) {
+        }
+        else if (term instanceof ValueConstant) {
             Term newTerm = termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
             atom.setTerm(position, newTerm);
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
         }
     }
@@ -181,11 +182,10 @@ public class MappingDataTypeCompletion {
                 else
                     {
 
-
                     if (defaultDatatypeInferred) {
-
                         atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
-                    } else {
+                    }
+                    else {
                         throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +
                                 "- Add an explicit datatype in the mapping \n" +
@@ -199,16 +199,16 @@ public class MappingDataTypeCompletion {
     }
 
     private void deleteExplicitTypes(Term term, Function atom, int position) {
-        if(term instanceof Function){
-            Function castTerm = (Function) term;
-            IntStream.range(0, castTerm.getArity())
+        if (term instanceof Function) {
+            Function function = (Function) term;
+            IntStream.range(0, function.getArity())
                     .forEach(i -> deleteExplicitTypes(
-                            castTerm.getTerm(i),
-                            castTerm,
+                            function.getTerm(i),
+                            function,
                             i
                     ));
-            if(castTerm.isDataTypeFunction()){
-                atom.setTerm(position, castTerm.getTerm(0));
+            if (function.isDataTypeFunction()) {
+                atom.setTerm(position, function.getTerm(0));
             }
         }
     }
@@ -219,20 +219,16 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private RDFDatatype getDataType(Collection<IndexedPosition> list, Variable variable) throws UnknownDatatypeException {
+    private RDFDatatype getDataType(Collection<Attribute> list, Variable variable) throws UnknownDatatypeException {
 
         if (list == null)
             throw new UnboundTargetVariableException(variable);
 
         Optional<RDFDatatype> type = Optional.empty();
-        for (IndexedPosition ip : list) {
-            if (ip.atom.getFunctionSymbol() instanceof RelationPredicate) {
-                RelationDefinition td = ((RelationPredicate) ip.atom.getFunctionSymbol()).getRelationDefinition();
-                Attribute attribute = td.getAttribute(ip.pos);
-                if (attribute.getType() != 0 && !type.isPresent())
-                    // TODO: refactor this (unsafe)!!!
-                    type = Optional.of((RDFDatatype) attribute.getTermType());
-            }
+        for (Attribute attribute : list) {
+            if (attribute.getType() != 0 && !type.isPresent())
+                // TODO: refactor this (unsafe)!!!
+                type = Optional.of((RDFDatatype) attribute.getTermType());
         }
         if (defaultDatatypeInferred)
             return type.orElseGet(typeFactory::getXsdStringDatatype);
@@ -246,37 +242,19 @@ public class MappingDataTypeCompletion {
         }
     }
 
-	private static class IndexedPosition {
-        final Function atom;
-        final int pos;
-
-        IndexedPosition(Function atom, int pos) {
-            this.atom = atom;
-            this.pos = pos;
-        }
-    }
-
-    private static ImmutableMultimap<String, IndexedPosition> createIndex(List<Function> body) {
-        ImmutableMultimap.Builder<String, IndexedPosition> termOccurenceIndex = ImmutableMultimap.builder();
+    private static ImmutableMultimap<Variable, Attribute> createIndex(List<Function> body) {
+        ImmutableMultimap.Builder<Variable, Attribute> termOccurenceIndex = ImmutableMultimap.builder();
         for (Function a : body) {
-            List<Term> terms = a.getTerms();
-            int i = 1; // position index
-            for (Term t : terms) {
-                if (t instanceof Variable) {
-                    Variable var = (Variable) t;
-                    termOccurenceIndex.put(var.getName(), new IndexedPosition(a, i));
-                } else if (t instanceof FunctionalTermImpl) {
-                    // NO-OP
-                } else if (t instanceof ValueConstant) {
-                    // NO-OP
-                } else if (t instanceof IRIConstant) {
-                    // NO-OP
+            if (a.getFunctionSymbol() instanceof RelationPredicate) {
+                RelationDefinition td = ((RelationPredicate) a.getFunctionSymbol()).getRelationDefinition();
+                List<Term> terms = a.getTerms();
+                int i = 1; // position index
+                for (Term t : terms) {
+                    if (t instanceof Variable) {
+                        termOccurenceIndex.put((Variable) t, td.getAttribute(i));
+                    }
+                    i++; // increase the position index for the next variable
                 }
-                // fabad (4 Oct 2017) Quick fix if there are constants in arguments.
-                // Increase i in all cases. If there are terms that are not variables
-                // and i is not incremented then indexedPosition.pos contains a wrong
-                // index that may points to terms that are not variables.
-                i++; // increase the position index for the next variable
             }
         }
         return termOccurenceIndex.build();
