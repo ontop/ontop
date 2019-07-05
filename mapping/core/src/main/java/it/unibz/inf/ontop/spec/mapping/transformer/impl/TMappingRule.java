@@ -1,27 +1,27 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /***
@@ -33,8 +33,9 @@ import java.util.stream.Stream;
 public class TMappingRule {
 
 	private final MappingTools.RDFPredicateInfo predicateInfo;
+
 	private final ImmutableList<ImmutableTerm> headTerms;
-	private final ImmutableList<DataAtom<AtomPredicate>> databaseAtoms;
+	private final ImmutableList<DataAtom<RelationPredicate>> databaseAtoms;
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filterAtoms;
 
@@ -44,6 +45,7 @@ public class TMappingRule {
 	private final ImmutabilityTools immutabilityTools;
 	private final IntermediateQueryFactory iqFactory;
 	private final DatalogRule2QueryConverter datalogRuleConverter;
+	private final SubstitutionFactory substitutionFactory;
 
 	/***
 	 * Given a mappings in currentMapping, this method will
@@ -64,7 +66,7 @@ public class TMappingRule {
 	 * 
 	 */
 	
-	public TMappingRule(IQ q, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter) {
+	public TMappingRule(IQ iq, DatalogFactory datalogFactory, TermFactory termFactory, AtomFactory atomFactory, ImmutabilityTools immutabilityTools, IQ2DatalogTranslator iq2DatalogTranslator, IntermediateQueryFactory iqFactory, DatalogRule2QueryConverter datalogRuleConverter, SubstitutionFactory substitutionFactory) {
 
         this.datalogFactory = datalogFactory;
         this.termFactory = termFactory;
@@ -73,16 +75,17 @@ public class TMappingRule {
         this.iqFactory = iqFactory;
         this.datalogRuleConverter = datalogRuleConverter;
 
-		this.predicateInfo = MappingTools.extractRDFPredicate(q);
+		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
+		this.substitutionFactory = substitutionFactory;
 
-		List<CQIE> translation = iq2DatalogTranslator.translate(q).getRules();
+		List<CQIE> translation = iq2DatalogTranslator.translate(iq).getRules();
 		if (translation.size() != 1)
 			System.out.println("TMAP PANIC");
 
 		List<Function> body = translation.get(0).getBody();
 
 		ImmutableList.Builder<ImmutableExpression> filters = ImmutableList.builder();
-		ImmutableList.Builder<DataAtom<AtomPredicate>> dbs = ImmutableList.builder();
+		ImmutableList.Builder<DataAtom<RelationPredicate>> dbs = ImmutableList.builder();
 
         Map<Term, Variable> valueMap = new HashMap<>();
 
@@ -113,24 +116,18 @@ public class TMappingRule {
 						builder.add(var);
 					}
 				}
-				dbs.add(atomFactory.getDataAtom((AtomPredicate)atom.getFunctionSymbol(), builder.build()));
+				dbs.add(atomFactory.getDataAtom((RelationPredicate)atom.getFunctionSymbol(), builder.build()));
 			}
 		}
         this.databaseAtoms = dbs.build();
 
-
-		DistinctVariableOnlyDataAtom h = q.getProjectionAtom();
-		ConstructionNode cn = (ConstructionNode)q.getTree().getRootNode();
+		DistinctVariableOnlyDataAtom projectionAtom = iq.getProjectionAtom();
+		ConstructionNode cn = (ConstructionNode)iq.getTree().getRootNode();
 		ImmutableSubstitution sub = cn.getSubstitution();
-		ImmutableList<ImmutableTerm> headT = sub.apply(h.getArguments());
 
-		//Function head = translation.get(0).getHead();
-		//this.headTerms = predicateInfo.isClass()
-		//		? ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)))
-		//		: ImmutableList.of(immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(0)), immutabilityTools.convertIntoImmutableTerm(head.getTerms().get(2)));
-		this.headTerms = predicateInfo.isClass()
-				? ImmutableList.of(headT.get(0))
-				: ImmutableList.of(headT.get(0), headT.get(2));
+		this.headTerms = sub.apply(predicateInfo.isClass()
+				? ImmutableList.of(projectionAtom.getTerm(0))
+				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
 
 		ImmutableList<ImmutableExpression> f = filters.build();
 		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
@@ -146,6 +143,7 @@ public class TMappingRule {
         this.immutabilityTools = baseRule.immutabilityTools;
         this.iqFactory = baseRule.iqFactory;
         this.datalogRuleConverter = baseRule.datalogRuleConverter;
+        this.substitutionFactory = baseRule.substitutionFactory;
 
         this.predicateInfo = baseRule.predicateInfo;
 
@@ -163,6 +161,7 @@ public class TMappingRule {
 		this.immutabilityTools = baseRule.immutabilityTools;
 		this.iqFactory = baseRule.iqFactory;
 		this.datalogRuleConverter = baseRule.datalogRuleConverter;
+		this.substitutionFactory = baseRule.substitutionFactory;
 
 		this.predicateInfo = predicateInfo;
 
@@ -185,28 +184,50 @@ public class TMappingRule {
 						.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.AND, e, r)).get())
 				.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.OR, e, r));
 
-		ImmutableList<Function> combinedBody = Stream.concat(
-				databaseAtoms.stream()
-					.map(immutabilityTools::convertToMutableFunction),
-				mergedConditions.isPresent()
-						? Stream.of(immutabilityTools.convertToMutableBooleanExpression(mergedConditions.get()))
-						: Stream.empty())
-				.collect(ImmutableCollectors.toList());
+		Variable s = termFactory.getVariable("s");
+		Variable p = termFactory.getVariable("p");
+		Variable o = termFactory.getVariable("o");
 
-		Function head = predicateInfo.isClass()
-				? atomFactory.getMutableTripleHeadAtom(immutabilityTools.convertToMutableTerm(headTerms.get(0)), predicateInfo.getIri())
-				: atomFactory.getMutableTripleHeadAtom(immutabilityTools.convertToMutableTerm(headTerms.get(0)), predicateInfo.getIri(), immutabilityTools.convertToMutableTerm(headTerms.get(1)));
+		ImmutableSubstitution sub = predicateInfo.isClass()
+			? substitutionFactory.getSubstitution(
+				s, headTerms.get(0),
+				p, getConstantIRI(RDF.TYPE),
+				o, getConstantIRI(predicateInfo.getIri()))
+			: substitutionFactory.getSubstitution(
+				s, headTerms.get(0),
+				p, getConstantIRI(predicateInfo.getIri()),
+				o, headTerms.get(1));
 
-		return datalogRuleConverter.extractPredicatesAndConvertDatalogRule(
-				datalogFactory.getCQIE(head, combinedBody), iqFactory);
+		IQTree tree;
+		switch (databaseAtoms.size()) {
+			case 0:
+				tree = iqFactory.createTrueNode();
+				break;
+			case 1:
+				tree = (mergedConditions.isPresent()
+						? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(mergedConditions.get()), iqFactory.createExtensionalDataNode(databaseAtoms.get(0)))
+						: iqFactory.createExtensionalDataNode(databaseAtoms.get(0)));
+				break;
+			default:
+				tree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(mergedConditions), databaseAtoms.stream().map(a -> iqFactory.createExtensionalDataNode(a)).collect(ImmutableCollectors.toList()));
+		}
+
+		return iqFactory.createIQ(
+				atomFactory.getDistinctTripleAtom(s, p, o),
+				iqFactory.createUnaryIQTree(
+						iqFactory.createConstructionNode(ImmutableSet.of(s, p, o), sub),
+						tree));
 	}
 
-	
-    public ImmutableList<ImmutableTerm> getHeadTerms() {
+	private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
+		return termFactory.getImmutableUriTemplate(termFactory.getConstantLiteral(iri.getIRIString()));
+	}
+
+	public ImmutableList<ImmutableTerm> getHeadTerms() {
         return headTerms;
     }
 
-	public ImmutableList<DataAtom<AtomPredicate>> getDatabaseAtoms() {
+	public ImmutableList<DataAtom<RelationPredicate>> getDatabaseAtoms() {
 		return databaseAtoms;
 	}
 

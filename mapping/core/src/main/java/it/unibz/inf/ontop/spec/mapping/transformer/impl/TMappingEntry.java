@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -61,7 +61,7 @@ public class TMappingEntry {
     @Override
     public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
 
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
+    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
         return Collector.of(
                 () -> new BuilderWithCQC(cqc, noNullValueEnforcer, queryMerger, termFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
@@ -72,13 +72,13 @@ public class TMappingEntry {
 
     private static final class BuilderWithCQC {
         private final List<TMappingRule> rules = new ArrayList<>();
-        private final ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc;
+        private final ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc;
 
         private final NoNullValueEnforcer noNullValueEnforcer;
         private final UnionBasedQueryMerger queryMerger;
         private final TermFactory termFactory;
 
-        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
+        BuilderWithCQC(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, NoNullValueEnforcer noNullValueEnforcer, UnionBasedQueryMerger queryMerger, TermFactory termFactory) {
             this.cqc = cqc;
             this.noNullValueEnforcer = noNullValueEnforcer;
             this.queryMerger = queryMerger;
@@ -210,7 +210,7 @@ public class TMappingEntry {
             rules.add(assertion);
         }
 
-        private Optional<ImmutableHomomorphism> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc) {
+        private Optional<ImmutableHomomorphism> computeHomomorphsim(TMappingRule to, TMappingRule from, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
             ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder();
             for (int i = 0; i < from.getHeadTerms().size(); i++)
                 if (!builder.extend(from.getHeadTerms().get(i), to.getHeadTerms().get(i)).isValid())

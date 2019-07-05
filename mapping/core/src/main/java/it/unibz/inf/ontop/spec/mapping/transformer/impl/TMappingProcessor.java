@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -41,7 +42,7 @@ import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -68,6 +69,7 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final DatalogRule2QueryConverter datalogRuleConverter;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
@@ -76,7 +78,7 @@ public class TMappingProcessor {
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter) {
+                              UnionBasedQueryMerger queryMerger, DatalogRule2QueryConverter datalogRuleConverter, SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
 		this.datalogFactory = datalogFactory;
@@ -90,6 +92,7 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.datalogRuleConverter = datalogRuleConverter;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -100,7 +103,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -111,10 +114,10 @@ public class TMappingProcessor {
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter))
+                .map(q -> new TMappingRule(q, datalogFactory, termFactory, atomFactory, immutabilityTools, iq2DatalogTranslator, iqFactory, datalogRuleConverter, substitutionFactory))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
-        //System.out.println("TMAP SOURCE: " + source + reasoner);
+        System.out.println("TMAP SOURCE: " + source + reasoner);
 
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
@@ -131,7 +134,7 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-        //System.out.println("TMAP SATURATED: " + saturated);
+        System.out.println("TMAP SATURATED: " + saturated);
 
         ImmutableList<TMappingEntry> entries = Stream.concat(
                 saturated.values().stream(),
@@ -164,7 +167,7 @@ public class TMappingProcessor {
                                                                                          ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
                                                                                          java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
                                                                                          java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
-                                                                                         ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqc,
+                                                                                         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
                                                                                          Predicate<T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =

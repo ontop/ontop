@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -50,22 +51,22 @@ public class LegacyMappingSaturator implements MappingSaturator {
     @Override
     public Mapping saturate(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        LinearInclusionDependencies.Builder<AtomPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
         dbMetadata.getDatabaseRelations().stream()
                 .map(DatabaseRelationDefinition::getForeignKeys)
                 .flatMap(List::stream)
                 .forEach(fk -> getLinearInclusionDependency(b, fk));
 
-        LinearInclusionDependencies<AtomPredicate> lids = b.build();
+        LinearInclusionDependencies<RelationPredicate> lids = b.build();
 
-        ImmutableCQContainmentCheckUnderLIDs<AtomPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
+        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, tMappingExclusionConfig, cqContainmentCheck);
     }
 
 
-    private void getLinearInclusionDependency(LinearInclusionDependencies.Builder<AtomPredicate> b, ForeignKeyConstraint fk) {
+    private void getLinearInclusionDependency(LinearInclusionDependencies.Builder<RelationPredicate> b, ForeignKeyConstraint fk) {
 
         DatabaseRelationDefinition def1 = fk.getRelation();
         VariableOrGroundTerm[] terms1 = new VariableOrGroundTerm[def1.getAttributes().size()];
@@ -80,8 +81,8 @@ public class LegacyMappingSaturator implements MappingSaturator {
         for (ForeignKeyConstraint.Component comp : fk.getComponents())
             terms1[comp.getAttribute().getIndex() - 1] = terms2[comp.getReference().getIndex() - 1]; // indexes start at 1
 
-        DataAtom<AtomPredicate> head = atomFactory.getDataAtom(def2.getAtomPredicate(), ImmutableList.copyOf(terms2));
-        DataAtom<AtomPredicate> body = atomFactory.getDataAtom(def1.getAtomPredicate(), ImmutableList.copyOf(terms1));
+        DataAtom<RelationPredicate> head = atomFactory.getDataAtom(def2.getAtomPredicate(), ImmutableList.copyOf(terms2));
+        DataAtom<RelationPredicate> body = atomFactory.getDataAtom(def1.getAtomPredicate(), ImmutableList.copyOf(terms1));
 
         b.add(head, body);
     }
