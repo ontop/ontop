@@ -53,13 +53,18 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = Sets.union(groupingVariables,
-                substitution.getImmutableMap().values().stream()
-                .flatMap(ImmutableTerm::getVariableStream)
-                        .collect(ImmutableCollectors.toSet())).immutableCopy();
+        this.childVariables = extractChildVariables(groupingVariables, substitution);
 
         if (settings.isTestModeEnabled())
             validateNode();
+    }
+
+    public static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
+                                                               ImmutableSubstitution<ImmutableFunctionalTerm> substitution) {
+        return Sets.union(groupingVariables,
+                substitution.getImmutableMap().values().stream()
+                        .flatMap(ImmutableTerm::getVariableStream)
+                        .collect(ImmutableCollectors.toSet())).immutableCopy();
     }
 
     @Override
