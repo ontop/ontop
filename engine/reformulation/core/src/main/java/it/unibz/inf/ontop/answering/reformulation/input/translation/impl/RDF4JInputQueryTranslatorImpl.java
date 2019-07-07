@@ -1075,7 +1075,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 Count count = (Count) expr;
                 if (count.isDistinct())
                     return termFactory.getImmutableFunctionalTerm(
-                            functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(SPARQL.COUNT),
+                            functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(SPARQL.COUNT,1),
                             term
                     );
                 return termFactory.getImmutableFunctionalTerm(
