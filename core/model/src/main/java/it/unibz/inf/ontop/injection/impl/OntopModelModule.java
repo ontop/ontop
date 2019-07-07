@@ -59,7 +59,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
         bindFromSettings(ConditionSimplifier.class);
-        bindFromSettings(AscendingSubstitutionNormalizer.class);
+        bindFromSettings(ConstructionSubstitutionNormalizer.class);
         bindFromSettings(FilterNormalizer.class);
         bindFromSettings(InnerJoinNormalizer.class);
         bindFromSettings(LeftJoinNormalizer.class);

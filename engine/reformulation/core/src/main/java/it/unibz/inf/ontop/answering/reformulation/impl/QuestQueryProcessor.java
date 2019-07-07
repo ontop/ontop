@@ -163,7 +163,9 @@ public class QuestQueryProcessor implements QueryReformulator {
                 log.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
                 IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(iqConverter.convert(intermediateQuery));
+ 				log.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
 				IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
+				log.debug("New query after simplifying the order by node: \n" + optimizedQuery);
 
 				IQ executableQuery = generateExecutableQuery(optimizedQuery);
 				queryCache.put(inputQuery, executableQuery);
