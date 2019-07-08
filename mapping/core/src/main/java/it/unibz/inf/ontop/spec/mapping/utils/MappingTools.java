@@ -34,7 +34,7 @@ public class MappingTools {
                 .map(s -> s.apply(projectionAtom.getArguments()))
                 .collect(ImmutableCollectors.toSet());
 
-        if (mappingAssertion.toString().contains("http://sws.ifi.uio.no/data/npd-v2/quadrant/{}/block/{}/award/{}/area/{}"))
+        if (mappingAssertion.toString().contains("mapping-person"))
             System.out.println(mappingAssertion + ": " + possibleSubstitutedArguments + " A " + mappingAssertion.getTree().getPossibleVariableDefinitions());
 
         IRI propertyIRI;
