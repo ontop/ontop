@@ -55,6 +55,9 @@ public class MappingTools {
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
         if (possibleIris.size() != 1) {
+            for (ImmutableList<? extends ImmutableTerm> list : possibleSubstitutedArguments)
+            for (int i = 0; i < list.size(); i++)
+                System.out.println("LIST ELEMENT " + i + ": " + list.get(i) + " OF TYPE " + list.get(i).getClass());
             System.out.println("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
         }
