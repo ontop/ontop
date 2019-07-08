@@ -318,14 +318,11 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
         protected ImmutableFunctionalTerm mergeDefinitions(Variable idVariable,
                                                            ImmutableList<ChildDefinitionLift> childDefinitionLifts) {
-            return termFactory.getDBCase(
-                    IntStream.range(0, childDefinitionLifts.size() - 1)
-                            .boxed()
-                            .map(i -> Maps.immutableEntry(
-                                    termFactory.getStrictEquality(idVariable, termFactory.getDBIntegerConstant(i)),
-                                    childDefinitionLifts.get(i).getLiftedDefinition())),
-                    // Last child -> "default" value
-                    childDefinitionLifts.get(childDefinitionLifts.size() - 1).getLiftedDefinition());
+            ImmutableList<ImmutableTerm> values = childDefinitionLifts.stream()
+                    .map(ChildDefinitionLift::getLiftedDefinition)
+                    .collect(ImmutableCollectors.toList());
+
+            return termFactory.getDBIntIndex(idVariable, values);
         }
 
         protected Optional<DBTermType> extractType(Variable variable, ImmutableList<ChildDefinitionLift> childDefinitionLifts) {

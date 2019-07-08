@@ -817,6 +817,28 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(ImmutableList.copyOf(possibleValues));
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.length),
+				argumentBuilder.build());
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(possibleValues);
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.size()),
+				argumentBuilder.build());
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getConversion2RDFLexicalFunctionSymbol(inputType, rdfTermType), term);
 	}

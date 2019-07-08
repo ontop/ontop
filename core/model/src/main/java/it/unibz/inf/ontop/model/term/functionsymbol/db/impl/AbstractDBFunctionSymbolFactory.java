@@ -791,6 +791,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return getNullIgnoringDBSum(dbType, isDistinct);
     }
 
+    @Override
+    public DBFunctionSymbol getDBIntIndex(int nbValues) {
+        // TODO: cache it
+        return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
+    }
+
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
 
