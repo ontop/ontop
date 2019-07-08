@@ -57,7 +57,7 @@ public class TMappingRule {
 		ImmutableMap<ImmutableTerm, VariableOrGroundTerm> valueMap = dataAtoms.stream()
 				.flatMap(n -> n.getProjectionAtom().getArguments().stream())
 				.filter(t -> !(t instanceof Variable))
-				.collect(ImmutableCollectors.toSet()).stream()
+				.distinct()
 				.collect(ImmutableCollectors.toMap(t -> t, t -> variableGenerator.generateNewVariable()));
 
 		this.extensionalNodes = dataAtoms.stream()

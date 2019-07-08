@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -98,7 +99,9 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
-                    .flatMap(e -> inferMissingDatatypes(e.getKey(), typeCompletion)
+                    .flatMap(e -> MappingTools.extractRDFPredicate(e.getKey()).isClass()
+                            ? Stream.of(e)
+                            : inferMissingDatatypes(e.getKey(), typeCompletion)
                                 .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
                     .collect(ImmutableCollectors.toMap());
 
@@ -117,20 +120,19 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     //CQIEs are mutable
                     Function atom = rule.getHead();
                     //case of data and object property
-                    if (!typeCompletion.isURIRDFType(atom.getTerm(1))) {
+                    //if (!typeCompletion.isURIRDFType(atom.getTerm(1))) {
                         Term object = atom.getTerm(2); // the object, third argument only
                         ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
                         // Infer variable datatypes
                         typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
                         // Infer operation datatypes from variable datatypes
                         typeCompletion.insertOperationDatatyping(object, atom, 2);
-                    }
+                    //}
                     return rule;
                 })
                 .map(rule -> noNullValueEnforcer.transform(
                         datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
-                                rule, iqFactory).liftBinding()))
-                .collect(ImmutableCollectors.toSet()).stream();
+                                rule, iqFactory).liftBinding())).distinct();
 
     }
 
