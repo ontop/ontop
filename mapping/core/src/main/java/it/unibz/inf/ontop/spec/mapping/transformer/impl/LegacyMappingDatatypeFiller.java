@@ -95,39 +95,44 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(
                 settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
 
-        ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping.getProvenanceMap().entrySet().stream()
-                .flatMap(e -> unionSplitter.splitUnion(unionNormalizer.optimize(e.getKey()))
-                        .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
-                        .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                        .collect(ImmutableCollectors.toSet()).stream()
-                        .map(r -> new AbstractMap.SimpleEntry<>(r, e.getValue())))
-                .collect(ImmutableCollectors.toMap());
 
-        //CQIEs are mutable
-        for(CQIE rule : ruleMap.keySet()) {
-            Function atom = rule.getHead();
+        try {
+            ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
+                    .flatMap(e -> inferMissingDatatypes(e.getKey(), typeCompletion)
+                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
+                    .collect(ImmutableCollectors.toMap());
 
-            //case of data and object property
-            if(!typeCompletion.isURIRDFType(atom.getTerm(1))){
-                Term object = atom.getTerm(2); // the object, third argument only
-                ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
-                // Infer variable datatypes
-                typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
-                // Infer operation datatypes from variable datatypes
-                typeCompletion.insertOperationDatatyping(object, atom, 2);
-            }
+            return provMappingFactory.create(iqMap, mapping.getMetadata());
         }
-
-        ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = ruleMap.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e ->  noNullValueEnforcer.transform(
-                                datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
-                                e.getKey(), iqFactory).liftBinding()),
-                        Map.Entry::getValue));
-
-        return provMappingFactory.create(iqMap, mapping.getMetadata());
+        catch (MappingDataTypeCompletion.UnknownDatatypeRuntimeException e) {
+            throw new UnknownDatatypeException(e.getMessage());
+        }
     }
 
+    private Stream<IQ> inferMissingDatatypes(IQ iq0, MappingDataTypeCompletion typeCompletion) {
+        return unionSplitter.splitUnion(unionNormalizer.optimize(iq0))
+                .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
+                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                .map(rule -> {
+                    //CQIEs are mutable
+                    Function atom = rule.getHead();
+                    //case of data and object property
+                    if (!typeCompletion.isURIRDFType(atom.getTerm(1))) {
+                        Term object = atom.getTerm(2); // the object, third argument only
+                        ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
+                        // Infer variable datatypes
+                        typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
+                        // Infer operation datatypes from variable datatypes
+                        typeCompletion.insertOperationDatatyping(object, atom, 2);
+                    }
+                    return rule;
+                })
+                .map(rule -> noNullValueEnforcer.transform(
+                        datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
+                                rule, iqFactory).liftBinding()))
+                .collect(ImmutableCollectors.toSet()).stream();
+
+    }
 
 
 }

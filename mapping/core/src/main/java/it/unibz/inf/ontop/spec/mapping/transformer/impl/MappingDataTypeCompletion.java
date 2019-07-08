@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
@@ -32,7 +30,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
-import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -103,7 +100,7 @@ public class MappingDataTypeCompletion {
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
     public void insertVariableDataTyping(Term term, Function atom, int position,
-                                          ImmutableMultimap<Variable, Attribute> termOccurenceIndex) throws UnknownDatatypeException {
+                                          ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
 
         if (term instanceof Function) {
             Function function = (Function) term;
@@ -143,7 +140,7 @@ public class MappingDataTypeCompletion {
    /**
     * Following r2rml standard we do not infer the datatype for operation but we return the default value string
     */
-    public void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
+    public void insertOperationDatatyping(Term term, Function atom, int position) {
 
         ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
 
@@ -172,7 +169,7 @@ public class MappingDataTypeCompletion {
                         atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
                     }
                     else {
-                        throw new UnknownDatatypeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
+                        throw new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                                 "Possible solutions: \n" +
                                 "- Add an explicit datatype in the mapping \n" +
                                 "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
@@ -205,7 +202,7 @@ public class MappingDataTypeCompletion {
      * @param variable
      * @return
      */
-    private RDFDatatype getDataType(Collection<Attribute> list, Variable variable) throws UnknownDatatypeException {
+    private RDFDatatype getDataType(Collection<Attribute> list, Variable variable) {
 
         if (list == null)
             throw new UnboundTargetVariableException(variable);
@@ -219,7 +216,7 @@ public class MappingDataTypeCompletion {
         if (defaultDatatypeInferred)
             return type.orElseGet(typeFactory::getXsdStringDatatype);
         else {
-            return type.orElseThrow(() -> new UnknownDatatypeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+            return type.orElseThrow(() -> new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
                     "Possible solutions: \n" +
                     "- Add an explicit datatype in the mapping \n" +
                     "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
@@ -253,6 +250,12 @@ public class MappingDataTypeCompletion {
 
         protected UnboundTargetVariableException(Variable variable) {
             super("Unknown variable in the head of a mapping:" + variable + ". Should have been detected earlier !");
+        }
+    }
+
+    public static class UnknownDatatypeRuntimeException extends RuntimeException { // workaround for lambdas
+        private UnknownDatatypeRuntimeException(String message) {
+            super(message);
         }
     }
 
