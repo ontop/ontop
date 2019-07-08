@@ -34,17 +34,7 @@ public class MappingTools {
                 .map(s -> s.apply(projectionAtom.getArguments()))
                 .collect(ImmutableCollectors.toSet());
 
-        if (mappingAssertion.toString().contains("mapping-person"))
-            System.out.println(mappingAssertion + ": " + possibleSubstitutedArguments + " A " + mappingAssertion.getTree().getPossibleVariableDefinitions());
-
-        IRI propertyIRI;
-        try {
-            propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
-        }
-        catch (Exception e) {
-            System.out.println("MAP EXCEPTION22: " + e + " ON " + mappingAssertion + " WITH " + possibleSubstitutedArguments);
-            throw e;
-        }
+        IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
 
         return propertyIRI.equals(RDF.TYPE)
                 ? new RDFPredicateInfo(true, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
@@ -61,14 +51,8 @@ public class MappingTools {
         if (!possibleIris.stream().allMatch(Optional::isPresent))
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
-        if (possibleIris.size() != 1) {
-            System.out.println("The definition of the predicate is not unique: " + possibleSubstitutedArguments);
-            for (ImmutableList<? extends ImmutableTerm> list : possibleSubstitutedArguments)
-            for (int i = 0; i < list.size(); i++)
-                System.out.println("LIST ELEMENT " + i + ": " + list.get(i) + " OF TYPE " + list.get(i).getClass());
-            System.out.println("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
+        if (possibleIris.size() != 1)
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
-        }
 
         return possibleIris.stream()
                 .map(Optional::get)
