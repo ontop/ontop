@@ -77,25 +77,11 @@ public class MappingDataTypeCompletion {
         this.immutabilityTools = immutabilityTools;
     }
 
-    public void insertDataTyping(CQIE rule) throws UnknownDatatypeException {
-        Function atom = rule.getHead();
-
-        //case of data and object property
-        if(!isURIRDFType(atom.getTerm(1))){
-            Term object = atom.getTerm(2); // the object, third argument only
-            ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(rule.getBody());
-            // Infer variable datatypes
-            insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
-            // Infer operation datatypes from variable datatypes
-            insertOperationDatatyping(object, atom, 2);
-        }
-    }
-
     /**
      * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
      */
 
-    private static boolean isURIRDFType(Term term) {
+    public static boolean isURIRDFType(Term term) {
         if (term instanceof Function) {
             Function func = (Function) term;
             if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
@@ -116,7 +102,7 @@ public class MappingDataTypeCompletion {
      * It will replace the variable with a new function symbol and update the rule atom.
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
-    private void insertVariableDataTyping(Term term, Function atom, int position,
+    public void insertVariableDataTyping(Term term, Function atom, int position,
                                           ImmutableMultimap<Variable, Attribute> termOccurenceIndex) throws UnknownDatatypeException {
 
         if (term instanceof Function) {
@@ -157,7 +143,7 @@ public class MappingDataTypeCompletion {
    /**
     * Following r2rml standard we do not infer the datatype for operation but we return the default value string
     */
-    private void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
+    public void insertOperationDatatyping(Term term, Function atom, int position) throws UnknownDatatypeException {
 
         ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
 
@@ -198,7 +184,7 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    private void deleteExplicitTypes(Term term, Function atom, int position) {
+    public void deleteExplicitTypes(Term term, Function atom, int position) {
         if (term instanceof Function) {
             Function function = (Function) term;
             IntStream.range(0, function.getArity())
@@ -242,7 +228,7 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    private static ImmutableMultimap<Variable, Attribute> createIndex(List<Function> body) {
+    public static ImmutableMultimap<Variable, Attribute> createIndex(List<Function> body) {
         ImmutableMultimap.Builder<Variable, Attribute> termOccurenceIndex = ImmutableMultimap.builder();
         for (Function a : body) {
             if (a.getFunctionSymbol() instanceof RelationPredicate) {

@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
+import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
@@ -12,7 +14,10 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
@@ -91,38 +96,38 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                 settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
 
         ImmutableMap<CQIE, PPMappingAssertionProvenance> ruleMap = mapping.getProvenanceMap().entrySet().stream()
-                .flatMap(e -> convertMappingQuery(e.getKey())
+                .flatMap(e -> unionSplitter.splitUnion(unionNormalizer.optimize(e.getKey()))
+                        .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
+                        .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
+                        .collect(ImmutableCollectors.toSet()).stream()
                         .map(r -> new AbstractMap.SimpleEntry<>(r, e.getValue())))
                 .collect(ImmutableCollectors.toMap());
 
         //CQIEs are mutable
         for(CQIE rule : ruleMap.keySet()) {
-            typeCompletion.insertDataTyping(rule);
+            Function atom = rule.getHead();
+
+            //case of data and object property
+            if(!typeCompletion.isURIRDFType(atom.getTerm(1))){
+                Term object = atom.getTerm(2); // the object, third argument only
+                ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
+                // Infer variable datatypes
+                typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
+                // Infer operation datatypes from variable datatypes
+                typeCompletion.insertOperationDatatyping(object, atom, 2);
+            }
         }
 
         ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = ruleMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
-                        e -> convertDatalogRule(e.getKey()),
+                        e ->  noNullValueEnforcer.transform(
+                                datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
+                                e.getKey(), iqFactory).liftBinding()),
                         Map.Entry::getValue));
 
         return provMappingFactory.create(iqMap, mapping.getMetadata());
     }
 
-    private Stream<CQIE> convertMappingQuery(IQ mappingQuery) {
-        return unionSplitter.splitUnion(unionNormalizer.optimize(mappingQuery))
-                .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .collect(ImmutableCollectors.toSet())
-                .stream();
-    }
 
-    private IQ convertDatalogRule(CQIE datalogRule) {
-
-        IQ directlyConvertedIQ = datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
-                datalogRule, iqFactory);
-
-        return noNullValueEnforcer.transform(directlyConvertedIQ)
-                .liftBinding();
-    }
 
 }
