@@ -99,6 +99,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
+                    .filter(e -> !e.getKey().getTree().isDeclaredAsEmpty())
                     .flatMap(e -> { try { return MappingTools.extractRDFPredicate(e.getKey()).isClass()
                             ? Stream.of(e)
                             : inferMissingDatatypes(e.getKey(), typeCompletion)
