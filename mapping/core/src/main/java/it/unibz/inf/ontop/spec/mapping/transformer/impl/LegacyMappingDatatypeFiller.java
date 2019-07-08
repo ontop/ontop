@@ -91,11 +91,16 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .rule body atoms are extensional
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
+
+    public static boolean PRINT_OUT = false;
+
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(
                 settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
 
+        if (PRINT_OUT)
+            System.out.println("MAPPP: " + mapping.getProvenanceMap());
 
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
@@ -105,6 +110,9 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                             : inferMissingDatatypes(e.getKey(), typeCompletion))
                                 .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())) )
                     .collect(ImmutableCollectors.toMap());
+
+            if (PRINT_OUT)
+                System.out.println("IQMAP: " + iqMap);
 
             return provMappingFactory.create(iqMap, mapping.getMetadata());
         }

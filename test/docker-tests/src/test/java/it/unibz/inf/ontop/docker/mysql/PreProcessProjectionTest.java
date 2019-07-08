@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.LegacyMappingDatatypeFiller;
 import org.junit.Test;
 
 public class PreProcessProjectionTest extends AbstractVirtualModeTest {
@@ -12,6 +13,7 @@ public class PreProcessProjectionTest extends AbstractVirtualModeTest {
 
     public PreProcessProjectionTest() {
         super(owlfile, obdafile, propertiesfile);
+        LegacyMappingDatatypeFiller.PRINT_OUT = true;
     }
     @Test
     public void testSimpleQuery() throws Exception {
