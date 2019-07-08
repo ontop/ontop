@@ -29,6 +29,8 @@ public class MappingTools {
                 .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
                         "is not having a RDFAtomPredicate: " + mappingAssertion));
 
+        if (mappingAssertion.toString().contains("http://sws.ifi.uio.no/data/npd-v2/quadrant/{}/block/{}/award/{}/area/{}"))
+            System.out.println(mappingAssertion);
 
         ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
                 = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
