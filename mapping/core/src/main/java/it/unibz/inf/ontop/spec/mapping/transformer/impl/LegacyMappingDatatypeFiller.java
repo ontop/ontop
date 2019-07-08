@@ -101,9 +101,9 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
                     .filter(e -> !e.getKey().getTree().isDeclaredAsEmpty())
                     .flatMap(e -> (MappingTools.extractRDFPredicate(e.getKey()).isClass()
-                            ? unionSplitter.splitUnion(unionNormalizer.optimize(e.getKey()))
+                            ? Stream.of(e.getKey().liftBinding())
                             : inferMissingDatatypes(e.getKey(), typeCompletion))
-                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
+                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())) )
                     .collect(ImmutableCollectors.toMap());
 
             return provMappingFactory.create(iqMap, mapping.getMetadata());
