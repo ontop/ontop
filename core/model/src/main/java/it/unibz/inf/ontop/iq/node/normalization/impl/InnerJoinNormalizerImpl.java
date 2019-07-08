@@ -11,8 +11,8 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.model.term.*;
@@ -32,14 +32,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
     private final JoinLikeChildBindingLifter bindingLift;
     private final IntermediateQueryFactory iqFactory;
-    private final AscendingSubstitutionNormalizer substitutionNormalizer;
+    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
     private final ConditionSimplifier conditionSimplifier;
     private final TermFactory termFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLift, IntermediateQueryFactory iqFactory,
-                                    AscendingSubstitutionNormalizer substitutionNormalizer,
+                                    ConstructionSubstitutionNormalizer substitutionNormalizer,
                                     ConditionSimplifier conditionSimplifier, TermFactory termFactory,
                                     JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
         this.bindingLift = bindingLift;
@@ -224,8 +224,8 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 Optional<ImmutableExpression> notNormalizedCondition, ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
                 ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
 
-            AscendingSubstitutionNormalization normalization = substitutionNormalizer
-                    .normalizeAscendingSubstitution(ascendingSubstitution, extractProjectedVariables(liftedChildren));
+            ConstructionSubstitutionNormalization normalization = substitutionNormalizer
+                    .normalizeSubstitution(ascendingSubstitution, extractProjectedVariables(liftedChildren));
 
             Optional<ImmutableExpression> newCondition = notNormalizedCondition
                     .map(normalization::updateExpression);

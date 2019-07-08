@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -22,13 +21,13 @@ import java.util.Optional;
 /**
  * TODO: find a better name
  */
-public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutionNormalizer {
+public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubstitutionNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    private AscendingSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+    private ConstructionSubstitutionNormalizerImpl(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
     }
@@ -40,7 +39,7 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
      *
      */
     @Override
-    public AscendingSubstitutionNormalization normalizeAscendingSubstitution(
+    public ConstructionSubstitutionNormalization normalizeSubstitution(
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
         ImmutableSubstitution<ImmutableTerm> reducedAscendingSubstitution = ascendingSubstitution.reduceDomainToIntersectionWith(projectedVariables);
@@ -61,28 +60,28 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
                 .reduceDomainToIntersectionWith(projectedVariables)
                 .simplifyValues();
 
-        return new AscendingSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
+        return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, downRenamingSubstitution,
                 projectedVariables);
     }
 
 
-    public class AscendingSubstitutionNormalizationImpl implements AscendingSubstitutionNormalization {
+    public class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 
-        private final ImmutableSubstitution<ImmutableTerm> ascendingSubstitution;
+        private final ImmutableSubstitution<ImmutableTerm> normalizedSubstitution;
         private final Var2VarSubstitution downRenamingSubstitution;
         private final ImmutableSet<Variable> projectedVariables;
 
-        private AscendingSubstitutionNormalizationImpl(ImmutableSubstitution<ImmutableTerm> ascendingSubstitution,
-                                                   Var2VarSubstitution downRenamingSubstitution,
-                                                   ImmutableSet<Variable> projectedVariables) {
-            this.ascendingSubstitution = ascendingSubstitution;
+        private ConstructionSubstitutionNormalizationImpl(ImmutableSubstitution<ImmutableTerm> normalizedSubstitution,
+                                                          Var2VarSubstitution downRenamingSubstitution,
+                                                          ImmutableSet<Variable> projectedVariables) {
+            this.normalizedSubstitution = normalizedSubstitution;
             this.downRenamingSubstitution = downRenamingSubstitution;
             this.projectedVariables = projectedVariables;
         }
 
         @Override
         public Optional<ConstructionNode> generateTopConstructionNode() {
-            return Optional.of(ascendingSubstitution)
+            return Optional.of(normalizedSubstitution)
                     .filter(s -> !s.isEmpty())
                     .map(s -> iqFactory.createConstructionNode(projectedVariables, s));
 
@@ -103,8 +102,8 @@ public class AscendingSubstitutionNormalizerImpl implements AscendingSubstitutio
         }
 
         @Override
-        public ImmutableSubstitution<ImmutableTerm> getAscendingSubstitution() {
-            return ascendingSubstitution;
+        public ImmutableSubstitution<ImmutableTerm> getNormalizedSubstitution() {
+            return normalizedSubstitution;
         }
     }
 }

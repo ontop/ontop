@@ -99,15 +99,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
             IQTree newChild = updateChildFct.apply(child, tauFPropagationResults);
 
-            Optional<ConstructionNode> constructionNode = Optional.of(tauFPropagationResults.theta)
-                    .filter(theta -> !(theta.isEmpty() && newProjectedVariables.equals(newChild.getVariables())))
-                    .map(theta -> iqFactory.createConstructionNode(newProjectedVariables, theta));
+            Optional<ExtendedProjectionNode> projectionNode = computeNewProjectionNode(newProjectedVariables,
+                    tauFPropagationResults.theta, newChild);
 
             IQTree filterTree = filterNode
                     .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
                     .orElse(newChild);
 
-            return constructionNode
+            return projectionNode
                     .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, filterTree))
                     .orElse(filterTree);
 
@@ -115,6 +114,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             return iqFactory.createEmptyNode(newProjectedVariables);
         }
     }
+
+    protected abstract Optional<ExtendedProjectionNode> computeNewProjectionNode(
+            ImmutableSet<Variable> newProjectedVariables, ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild);
 
     private ConstructionNodeImpl.PropagationResults<NonFunctionalTerm> propagateTauC(ImmutableSubstitution<NonFunctionalTerm> tauC, IQTree child)
             throws EmptyTreeException {
