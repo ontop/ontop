@@ -70,9 +70,6 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
         ImmutableTerm idTerm = terms.get(0)
                 .simplify(variableNullability);
 
-        if (idTerm.isNull()) {
-            throw new MinorOntopInternalBugException("The DBMap was not expecting any NULL");
-        }
         if (idTerm instanceof NonNullConstant) {
             NonNullConstant constant = (NonNullConstant) idTerm;
             if (!constant.getType().equals(termFactory.getTypeFactory().getDBTypeFactory().getDBLargeIntegerType()))
