@@ -37,7 +37,14 @@ public class MappingTools {
         if (mappingAssertion.toString().contains("http://sws.ifi.uio.no/data/npd-v2/quadrant/{}/block/{}/award/{}/area/{}"))
             System.out.println(mappingAssertion + ": " + possibleSubstitutedArguments + " A " + mappingAssertion.getTree().getPossibleVariableDefinitions());
 
-        IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
+        IRI propertyIRI;
+        try {
+            propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
+        }
+        catch (Exception e) {
+            System.out.println("MAP EXCEPTION22: " + e + " ON " + mappingAssertion + " WITH " + possibleSubstitutedArguments);
+            throw e;
+        }
 
         return propertyIRI.equals(RDF.TYPE)
                 ? new RDFPredicateInfo(true, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
@@ -55,6 +62,7 @@ public class MappingTools {
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
         if (possibleIris.size() != 1) {
+            System.out.println("The definition of the predicate is not unique: " + possibleSubstitutedArguments);
             for (ImmutableList<? extends ImmutableTerm> list : possibleSubstitutedArguments)
             for (int i = 0; i < list.size(); i++)
                 System.out.println("LIST ELEMENT " + i + ": " + list.get(i) + " OF TYPE " + list.get(i).getClass());
