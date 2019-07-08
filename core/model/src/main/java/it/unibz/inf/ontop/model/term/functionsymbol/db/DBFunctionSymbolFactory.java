@@ -1,5 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonNullConstant;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -243,4 +247,15 @@ public interface DBFunctionSymbolFactory {
      * Semantics not guaranteed (may depend on the dialect)!
      */
     DBFunctionSymbol getDBSum(DBTermType dbType, boolean isDistinct);
+
+    /**
+     * The first sub-term encodes the index of the term to return.
+     * Such values correspond to the following sub-terms
+     *
+     * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
+     *
+     * TODO: find a better name
+     *
+     */
+    DBFunctionSymbol getDBIntIndex(int nbValues);
 }
