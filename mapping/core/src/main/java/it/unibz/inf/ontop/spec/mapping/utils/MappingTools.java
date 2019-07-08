@@ -55,7 +55,7 @@ public class MappingTools {
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
         if (possibleIris.size() != 1)
-            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris);
+            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
 
         return possibleIris.stream()
                 .map(Optional::get)
