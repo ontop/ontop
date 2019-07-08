@@ -99,10 +99,10 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
-                    .flatMap(e -> MappingTools.extractRDFPredicate(e.getKey()).isClass()
+                    .flatMap(e -> { try { return MappingTools.extractRDFPredicate(e.getKey()).isClass()
                             ? Stream.of(e)
                             : inferMissingDatatypes(e.getKey(), typeCompletion)
-                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
+                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())); }catch(Exception ex) {System.out.println("MAP-EXCEPTION" + ex + " ON " + e); throw ex; } })
                     .collect(ImmutableCollectors.toMap());
 
             return provMappingFactory.create(iqMap, mapping.getMetadata());
