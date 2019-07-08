@@ -38,6 +38,9 @@ public class IQ2CQ {
     public static Optional<ImmutableList<ExtensionalDataNode>> getExtensionalDataNodes(IQTree tree) {
         QueryNode node = tree.getRootNode();
         if (node instanceof FilterNode) {
+            // CAREFUL WITH TYPE CAST - ASSUMES FilterChildNormalizer has been applied
+            if (!(tree.getChildren().get(0) instanceof ExtensionalDataNode))
+                System.out.println("PANICCC: " + tree);
             return Optional.of(ImmutableList.of((ExtensionalDataNode)tree.getChildren().get(0)));
         }
         else if (node instanceof ExtensionalDataNode) {
