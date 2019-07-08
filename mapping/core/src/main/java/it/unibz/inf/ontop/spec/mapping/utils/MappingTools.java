@@ -29,13 +29,13 @@ public class MappingTools {
                 .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
                         "is not having a RDFAtomPredicate: " + mappingAssertion));
 
-        if (mappingAssertion.toString().contains("http://sws.ifi.uio.no/data/npd-v2/quadrant/{}/block/{}/award/{}/area/{}"))
-            System.out.println(mappingAssertion);
-
         ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
                 = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
                 .map(s -> s.apply(projectionAtom.getArguments()))
                 .collect(ImmutableCollectors.toSet());
+
+        if (mappingAssertion.toString().contains("http://sws.ifi.uio.no/data/npd-v2/quadrant/{}/block/{}/award/{}/area/{}"))
+            System.out.println(mappingAssertion + ": " + possibleSubstitutedArguments + " A " + mappingAssertion.getTree().getPossibleVariableDefinitions());
 
         IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
 
@@ -54,8 +54,10 @@ public class MappingTools {
         if (!possibleIris.stream().allMatch(Optional::isPresent))
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
-        if (possibleIris.size() != 1)
+        if (possibleIris.size() != 1) {
+            System.out.println("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
+        }
 
         return possibleIris.stream()
                 .map(Optional::get)
