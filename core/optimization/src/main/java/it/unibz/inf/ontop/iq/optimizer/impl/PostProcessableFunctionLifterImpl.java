@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -36,13 +36,13 @@ import java.util.stream.Stream;
 @Singleton
 public class PostProcessableFunctionLifterImpl implements PostProcessableFunctionLifter {
 
-    protected final CoreSingletons coreSingletons;
+    protected final OptimizationSingletons optimizationSingletons;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected PostProcessableFunctionLifterImpl(CoreSingletons coreSingletons,
+    protected PostProcessableFunctionLifterImpl(OptimizationSingletons optimizationSingletons,
                                                 IntermediateQueryFactory iqFactory) {
-        this.coreSingletons = coreSingletons;
+        this.optimizationSingletons = optimizationSingletons;
         this.iqFactory = iqFactory;
     }
 
@@ -56,7 +56,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
      * TODO: refactor IQTreeVisitingTransformer so as avoid to create fresh transformers
      */
     protected IQTreeVisitingTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new FunctionLifterTransformer(variableGenerator, coreSingletons);
+        return new FunctionLifterTransformer(variableGenerator, optimizationSingletons);
     }
 
 
@@ -64,14 +64,15 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
 
         protected static final int LOOPING_BOUND = 1000000;
         protected final VariableGenerator variableGenerator;
-        protected final CoreSingletons coreSingletons;
-        // TODO: use the preferences
-        private static final int maxNbChildrenForLiftingDBFunctionSymbol = 10;
+        protected final OptimizationSingletons optimizationSingletons;
+        private final int maxNbChildrenForLiftingDBFunctionSymbol;
 
-        protected FunctionLifterTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
-            super(coreSingletons.getIQFactory());
+        protected FunctionLifterTransformer(VariableGenerator variableGenerator, OptimizationSingletons optimizationSingletons) {
+            super(optimizationSingletons.getCoreSingletons().getIQFactory());
             this.variableGenerator = variableGenerator;
-            this.coreSingletons = coreSingletons;
+            this.optimizationSingletons = optimizationSingletons;
+            this.maxNbChildrenForLiftingDBFunctionSymbol = optimizationSingletons.getSettings()
+                    .getMaxNbChildrenForLiftingDBFunctionSymbol();
         }
 
         @Override
@@ -102,7 +103,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                 return normalizedTree.acceptTransformer(this);
             }
 
-            return lift(new LiftState(children, rootNode.getVariables(), variableGenerator, coreSingletons))
+            return lift(new LiftState(children, rootNode.getVariables(), variableGenerator,
+                        optimizationSingletons.getCoreSingletons()))
                     .generateTree(iqFactory)
                     .normalizeForOptimization(variableGenerator);
         }
@@ -157,7 +159,7 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
             return functionalTerm.getTerms().stream()
                     .filter(t -> t instanceof ImmutableFunctionalTerm)
                     .map(t -> (ImmutableFunctionalTerm) t)
-                    .anyMatch(this::shouldBeLifted);
+                    .anyMatch(t -> shouldBeLifted(t, nbChildren));
         }
 
     }
