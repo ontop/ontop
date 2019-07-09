@@ -60,37 +60,6 @@ public class VariableNullabilityImpl implements VariableNullability {
     }
 
     /**
-     * "Dummy"
-     */
-    @AssistedInject
-    private VariableNullabilityImpl(@Assisted ImmutableFunctionalTerm functionalTerm,
-                                     CoreUtilsFactory coreUtilsFactory, TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory) {
-        this(functionalTerm.getVariableStream(), coreUtilsFactory, termFactory, substitutionFactory);
-    }
-
-    /**
-     * Dummy
-     */
-    @AssistedInject
-    private VariableNullabilityImpl(@Assisted Stream<Variable> variables,
-                                    CoreUtilsFactory coreUtilsFactory, TermFactory termFactory,
-                                    SubstitutionFactory substitutionFactory) {
-        this(coreUtilsFactory, termFactory, substitutionFactory, variables
-                .collect(ImmutableCollectors.toSet()));
-    }
-
-    /**
-     * Dummy (low-level)
-     */
-    private VariableNullabilityImpl(CoreUtilsFactory coreUtilsFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                    ImmutableSet<Variable> scope) {
-        this(scope.stream()
-                .map(ImmutableSet::of)
-                .collect(ImmutableCollectors.toSet()), scope, coreUtilsFactory, termFactory, substitutionFactory);
-    }
-
-    /**
      * Non-projected variables ("external") are considered as nullable.
      *
      * Relevant when propagating down constraints
