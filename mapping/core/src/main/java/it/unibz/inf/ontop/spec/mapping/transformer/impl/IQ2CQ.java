@@ -8,9 +8,14 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
 
 public class IQ2CQ {
 
@@ -75,6 +80,18 @@ public class IQ2CQ {
             return ((InnerJoinNode)tree.getRootNode()).getOptionalFilterCondition().map(e -> e.flattenAND()).orElseGet(ImmutableSet::of);
         }
         throw new IllegalStateException("Use getExtensionalDataNodes first to check whether it's a CQ");
+    }
+
+    public static Optional<ImmutableExpression> getConjunction(Optional<ImmutableExpression> optExpression, List<ImmutableExpression> expressions, TermFactory termFactory) {
+        if (expressions.isEmpty())
+            throw new IllegalArgumentException("Nonempty list of filters expected");
+
+        ImmutableExpression result = (optExpression.isPresent()
+                ? Stream.concat(Stream.of(optExpression.get()), expressions.stream())
+                : expressions.stream())
+                .reduce(null,
+                        (a, b) -> (a == null) ? b : termFactory.getImmutableExpression(AND, a, b));
+        return Optional.of(result);
     }
 
 }
