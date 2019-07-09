@@ -40,12 +40,11 @@ public class IQ2CQ {
         }
     }
 
+    //  assumes FilterAbsorber has been applied
     public static Optional<ImmutableList<ExtensionalDataNode>> getExtensionalDataNodes(IQTree tree) {
         QueryNode node = tree.getRootNode();
         if (node instanceof FilterNode) {
-            // CAREFUL WITH TYPE CAST - ASSUMES FilterChildNormalizer has been applied
-            if (!(tree.getChildren().get(0) instanceof ExtensionalDataNode))
-                System.out.println("PANICCC: " + tree);
+            // unguarded type cast - see FilterAbsorber
             return Optional.of(ImmutableList.of((ExtensionalDataNode)tree.getChildren().get(0)));
         }
         else if (node instanceof ExtensionalDataNode) {

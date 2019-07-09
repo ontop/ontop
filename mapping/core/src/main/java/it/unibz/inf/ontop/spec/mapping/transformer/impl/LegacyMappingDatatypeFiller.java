@@ -99,27 +99,19 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
      *  .the corresponding column types are compatible (e.g the types for column 1 of A and column 1 of B)
      */
 
-    public static boolean PRINT_OUT = false;
-
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(
                 settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
 
-        if (PRINT_OUT)
-            System.out.println("MAPPP: " + mapping.getProvenanceMap());
-
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
                     .filter(e -> !e.getKey().getTree().isDeclaredAsEmpty())
                     .flatMap(e -> (MappingTools.extractRDFPredicate(e.getKey()).isClass()
-                            ? Stream.of(iqFactory.createIQ(e.getKey().getProjectionAtom(), e.getKey().getTree().acceptTransformer(new FilterChildNormalizer())))
+                            ? Stream.of(e.getKey())
                             : inferMissingDatatypes(e.getKey(), typeCompletion))
                                 .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
                     .collect(ImmutableCollectors.toMap());
-
-            if (PRINT_OUT)
-                System.out.println("IQMAP: " + iqMap);
 
             return provMappingFactory.create(iqMap, mapping.getMetadata());
         }
@@ -129,22 +121,19 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     }
 
     private Stream<IQ> inferMissingDatatypes(IQ iq0, MappingDataTypeCompletion typeCompletion) {
+        //case of data and object property
         return unionSplitter.splitUnion(unionNormalizer.optimize(iq0))
                 .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
                 .map(rule -> {
-                    //CQIEs are mutable
                     Function atom = rule.getHead();
-                    //case of data and object property
-                    //if (!typeCompletion.isURIRDFType(atom.getTerm(1))) {
-                        Term object = atom.getTerm(2); // the object, third argument only
-                        ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
-                        // Infer variable datatypes
-                        typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
-                        // Infer operation datatypes from variable datatypes
-                        typeCompletion.insertOperationDatatyping(object, atom, 2);
-                    //}
-                    return rule;
+                    Term object = atom.getTerm(2); // the object, third argument only
+                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
+                    // Infer variable datatypes
+                    typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
+                    // Infer operation datatypes from variable datatypes
+                    typeCompletion.insertOperationDatatyping(object, atom, 2);
+                    return rule; //CQIEs are mutable
                 })
                 .map(rule -> noNullValueEnforcer.transform(
                         datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(

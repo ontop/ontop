@@ -83,7 +83,6 @@ public abstract class AbstractVirtualModeTest {
             retval = ind1.toString();
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         } finally {
             conn.close();
