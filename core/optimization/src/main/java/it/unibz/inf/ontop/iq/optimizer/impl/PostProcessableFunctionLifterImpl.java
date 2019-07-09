@@ -65,6 +65,8 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         protected static final int LOOPING_BOUND = 1000000;
         protected final VariableGenerator variableGenerator;
         protected final CoreSingletons coreSingletons;
+        // TODO: use the preferences
+        private static final int maxNbChildrenForLiftingDBFunctionSymbol = 10;
 
         protected FunctionLifterTransformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory());
@@ -139,16 +141,17 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
                     .map(n -> n.getSubstitution().get(variable))
                     .filter(d -> d instanceof ImmutableFunctionalTerm)
                     .map(d -> (ImmutableFunctionalTerm) d)
-                    .anyMatch(this::shouldBeLifted);
+                    .anyMatch(t -> shouldBeLifted(t, children.size()));
         }
 
         /**
          * Recursive
          */
-        protected boolean shouldBeLifted(ImmutableFunctionalTerm functionalTerm) {
+        protected boolean shouldBeLifted(ImmutableFunctionalTerm functionalTerm, int nbChildren) {
             FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
             if (!(functionSymbol instanceof DBFunctionSymbol)
-                || ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked())
+                || ((nbChildren < maxNbChildrenForLiftingDBFunctionSymbol)
+                    && ((DBFunctionSymbol) functionSymbol).isPreferringToBePostProcessedOverBeingBlocked()))
                 return true;
 
             return functionalTerm.getTerms().stream()
