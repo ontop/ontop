@@ -51,31 +51,35 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final TermTypeInferenceTools termTypeInferenceTools;
     private final ImmutabilityTools immutabilityTools;
     private final QueryUnionSplitter unionSplitter;
-    private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
     private final IntermediateQueryFactory iqFactory;
     private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
-    private final DatalogRule2QueryConverter datalogRule2QueryConverter;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
 
     @Inject
-    private LegacyMappingDatatypeFiller(OntopMappingSettings settings, Relation2Predicate relation2Predicate,
+    private LegacyMappingDatatypeFiller(OntopMappingSettings settings,
                                         TermFactory termFactory, TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, IntermediateQueryFactory iqFactory, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter, SubstitutionFactory substitutionFactory, AtomFactory atomFactory) {
+                                        TermTypeInferenceTools termTypeInferenceTools,
+                                        ImmutabilityTools immutabilityTools,
+                                        QueryUnionSplitter unionSplitter,
+                                        UnionFlattener unionNormalizer,
+                                        IntermediateQueryFactory iqFactory,
+                                        ProvenanceMappingFactory provMappingFactory,
+                                        NoNullValueEnforcer noNullValueEnforcer,
+                                        SubstitutionFactory substitutionFactory,
+                                        AtomFactory atomFactory) {
         this.settings = settings;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.immutabilityTools = immutabilityTools;
         this.unionSplitter = unionSplitter;
-        this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
         this.iqFactory = iqFactory;
         this.provMappingFactory = provMappingFactory;
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.datalogRule2QueryConverter = datalogRule2QueryConverter;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
     }
@@ -127,34 +131,26 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         //case of data and object property
         return unionSplitter.splitUnion(unionNormalizer.optimize(iq0))
                 .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream()
-                        .map(cq -> new AbstractMap.SimpleImmutableEntry<>(q, cq)))
-                .map(e -> {
-                    IQ iq = e.getKey();
-                    //Term object = atom.getTerm(2); // the object, third argument only
-                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(iq.getTree());
-                    // Infer variable datatypes
-                    Variable objectVar = iq.getProjectionAtom().getTerm(2);
+                .map(iq -> {
+                    DistinctVariableOnlyDataAtom pa = iq.getProjectionAtom();
                     ConstructionNode constructionNode = ((ConstructionNode)iq.getTree().getRootNode());
-                    ImmutableSubstitution<ImmutableTerm> originalSubstitution = constructionNode.getSubstitution();
-                    ImmutableTerm immutableObject = originalSubstitution.applyToVariable(objectVar); //immutabilityTools.convertIntoImmutableTerm(object);
-                    ImmutableTerm newObject = typeCompletion.insertVariableDataTyping(immutableObject, termOccurenceIndex);
+                    ImmutableSubstitution<ImmutableTerm> sub = constructionNode.getSubstitution();
+                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(iq.getTree());
+                    ImmutableTerm object = sub.applyToVariable(pa.getTerm(2)); // third argument only
+                    // Infer variable datatypes
+                    ImmutableTerm object2p = typeCompletion.insertVariableDataTyping(object, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
-                    ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(newObject);
-                    Variable newObjectVar = iq.getVariableGenerator().generateNewVariable();
-                    ImmutableMap<Variable, ImmutableTerm> map =  Stream.concat(
-                            originalSubstitution.getImmutableMap().entrySet().stream()
-                                .filter(me -> !me.getKey().equals(objectVar)),
-                            Stream.of(new AbstractMap.SimpleImmutableEntry(newObjectVar, newObject2)))
-                            .collect(ImmutableCollectors.toMap());
-                    DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(iq.getProjectionAtom().getPredicate(), iq.getProjectionAtom().getTerm(0), iq.getProjectionAtom().getTerm(1), newObjectVar);
-                    ImmutableSubstitution<ImmutableTerm> ns = substitutionFactory.getSubstitution(map);
-                    IQ iq2 =  iqFactory.createIQ(newProjectionAtom, iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(newProjectionAtom.getVariables(), ns), ((UnaryIQTree)iq.getTree()).getChild()));
-                    //Function atom = e.getValue().getHead();
-                    //atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
-                    //return e.getValue(); //CQIEs are mutable
-                    System.out.println("IQ:: " + iq + " TO " + iq2);
-                    return iq2;
+                    ImmutableTerm object2 = typeCompletion.insertOperationDatatyping(object2p);
+                    Variable var2 = iq.getVariableGenerator().generateNewVariable();
+                    DistinctVariableOnlyDataAtom pa2 = atomFactory.getDistinctVariableOnlyDataAtom(
+                            pa.getPredicate(), pa.getTerm(0), pa.getTerm(1), var2);
+                    ImmutableSubstitution<ImmutableTerm> sub2 = substitutionFactory.getSubstitution(
+                            pa.getTerm(0), sub.applyToVariable(pa.getTerm(0)),
+                            pa.getTerm(1), sub.applyToVariable(pa.getTerm(1)),
+                            var2, object2);
+                    return  iqFactory.createIQ(pa2, iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(pa2.getVariables(), sub2),
+                            ((UnaryIQTree)iq.getTree()).getChild()));
                 })
                 .map(rule -> noNullValueEnforcer.transform(rule).liftBinding()).distinct();
 
