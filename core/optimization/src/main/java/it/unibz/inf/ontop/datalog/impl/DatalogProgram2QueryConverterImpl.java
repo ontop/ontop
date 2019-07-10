@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import fj.P2;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -9,11 +10,16 @@ import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -21,6 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -32,27 +39,37 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final DatalogRule2QueryConverter datalogRuleConverter;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
     private final QueryTransformerFactory transformerFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
+
+    private final TermFactory termFactory;
+    private final DatalogFactory datalogFactory;
+    private final DatalogConversionTools datalogConversionTools;
+    private final DatalogTools datalogTools;
+    private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
                                               UnionBasedQueryMerger queryMerger,
-                                              DatalogRule2QueryConverter datalogRuleConverter,
                                               SubstitutionFactory substitutionFactory,
                                               CoreUtilsFactory coreUtilsFactory,
                                               QueryTransformerFactory transformerFactory,
-                                              QueryTransformerFactory queryTransformerFactory) {
+                                              TermFactory termFactory,
+                                              DatalogFactory datalogFactory,
+                                              DatalogConversionTools datalogConversionTools,
+                                              DatalogTools datalogTools,
+                                              PullOutEqualityNormalizer pullOutEqualityNormalizer) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
-        this.datalogRuleConverter = datalogRuleConverter;
+        this.termFactory = termFactory;
+        this.datalogFactory = datalogFactory;
+        this.datalogConversionTools = datalogConversionTools;
+        this.datalogTools = datalogTools;
+        this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
-        this.queryTransformerFactory = queryTransformerFactory;
     }
 
 
@@ -145,7 +162,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
 
-        return queryTransformerFactory.createRenamer(renamingSubstitution)
+        return transformerFactory.createRenamer(renamingSubstitution)
                 .transform(iq);
     }
 
@@ -161,7 +178,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         Collection<CQIE> atomDefinitions = datalogRuleIndex.get(datalogAtomPredicate);
 
         ImmutableList<IQ> convertedDefinitions = atomDefinitions.stream()
-                .map(d -> datalogRuleConverter.convertDatalogRule(d, iqFactory))
+                .map(d -> convertDatalogRule(d, iqFactory))
                 .collect(ImmutableCollectors.toList());
 
         return optionalModifiers.isPresent()
@@ -215,4 +232,167 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     }
 
 
+
+
+
+
+/**
+ * Converts a Datalog rule into an intermediate query.
+ *
+ * Note here List are from Functional Java, not java.util.List.
+ */
+
+    /**
+     * TODO: explain
+     */
+    private static class AtomClassification {
+        private final fj.data.List<Function> dataAndCompositeAtoms;
+        private final fj.data.List<Function> booleanAtoms;
+
+        protected AtomClassification(fj.data.List<Function> atoms, DatalogTools datalogTools)
+                throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+            dataAndCompositeAtoms = datalogTools.filterDataAndCompositeAtoms(atoms);
+            fj.data.List<Function> otherAtoms = datalogTools.filterNonDataAndCompositeAtoms(atoms);
+            booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
+
+            if (booleanAtoms.length() < otherAtoms.length()) {
+                HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
+                unsupportedAtoms.removeAll(booleanAtoms.toCollection());
+
+                throw new DatalogProgram2QueryConverterImpl.NotSupportedConversionException(
+                        "Conversion of the following atoms to the intermediate query is not (yet) supported: "
+                                + unsupportedAtoms);
+            }
+        }
+    }
+
+
+    /**
+     * TODO: describe
+     */
+
+    public IQ convertDatalogRule(CQIE datalogRule, IntermediateQueryFactory iqFactory)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+
+        TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+
+        DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
+
+        ConstructionNode topConstructionNode = iqFactory.createConstructionNode(projectionAtom.getVariables(),
+                targetAtom.getSubstitution());
+
+        fj.data.List<Function> bodyAtoms = fj.data.List.iterableList(datalogRule.getBody());
+        try {
+            IQTree bodyTree = bodyAtoms.isEmpty() ? iqFactory.createTrueNode() : convertAtoms(bodyAtoms, iqFactory);
+            IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, bodyTree);
+            return iqFactory.createIQ(projectionAtom, constructionTree);
+        }
+        catch (IntermediateQueryBuilderException e) {
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException(e.getMessage());
+        }
+    }
+
+    private Optional<ImmutableExpression> createFilterExpression(fj.data.List<Function> booleanAtoms) {
+        if (booleanAtoms.isEmpty())
+            return Optional.empty();
+        return Optional.of(termFactory.getImmutableExpression(datalogTools.foldBooleanConditions(booleanAtoms)));
+    }
+
+    /**
+     * TODO: describe
+     */
+    private IQTree convertDataOrCompositeAtom(final Function atom,
+                                              IntermediateQueryFactory iqFactory)
+            throws IntermediateQueryBuilderException, DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+
+        // If the atom is composite, extracts sub atoms
+        if (atom.isAlgebraFunction()) {
+            fj.data.List<Function> subAtoms = fj.data.List.iterableList(
+                    (java.util.List<Function>)(java.util.List<?>)atom.getTerms());
+
+            Predicate atomPredicate = atom.getFunctionSymbol();
+            if (atomPredicate.equals(datalogFactory.getSparqlJoinPredicate())) {
+                return convertAtoms(subAtoms, iqFactory);
+            }
+            else if (atomPredicate.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
+                return convertLeftJoinAtom(subAtoms, iqFactory);
+            }
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
+        }
+        // Data atom: creates a DataNode and adds it to the tree
+        else if (atom.isDataFunction()) {
+            TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(atom);
+            ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
+            DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
+            return iqFactory.createIntensionalDataNode(dataAtom);
+        }
+        throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
+    }
+
+    private IQTree convertLeftJoinAtom(fj.data.List<Function> subAtomsOfTheLJ,
+                                       IntermediateQueryFactory iqFactory)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
+
+        P2<fj.data.List<Function>, fj.data.List<Function>> decomposition = pullOutEqualityNormalizer.splitLeftJoinSubAtoms(subAtomsOfTheLJ);
+        final fj.data.List<Function> leftAtoms = decomposition._1();
+        final fj.data.List<Function> rightAtoms = decomposition._2();
+
+        /*
+         * TODO: explain why we just care about the right
+         */
+        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms, datalogTools);
+
+        Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
+                rightSubAtomClassification.booleanAtoms);
+
+        LeftJoinNode ljNode = iqFactory.createLeftJoinNode(optionalFilterCondition);
+
+        IQTree leftTree = convertAtoms(leftAtoms, iqFactory);
+        IQTree rightTree = convertAtoms(rightSubAtomClassification.dataAndCompositeAtoms, iqFactory);
+        return iqFactory.createBinaryNonCommutativeIQTree(ljNode, leftTree, rightTree);
+    }
+
+    /**
+     * TODO: explain
+     */
+    private IQTree convertAtoms(fj.data.List<Function> atoms, IntermediateQueryFactory iqFactory)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
+
+        AtomClassification classification = new AtomClassification(atoms, datalogTools);
+
+        Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
+                classification.booleanAtoms);
+
+        if (classification.dataAndCompositeAtoms.isEmpty()) {
+            return optionalFilterCondition
+                    .map(ImmutableFunctionalTerm::getVariables)
+                    .map(iqFactory::createEmptyNode)
+                    .orElseGet(() -> iqFactory.createEmptyNode(ImmutableSet.of()));
+        }
+        // May happen because this method can also be called after the LJ conversion
+        else if (classification.dataAndCompositeAtoms.length() == 1) {
+            if (optionalFilterCondition.isPresent()) {
+                FilterNode filterNode = iqFactory.createFilterNode(optionalFilterCondition.get());
+                IQTree childTree = convertDataOrCompositeAtom(classification.dataAndCompositeAtoms.index(0),
+                        iqFactory);
+
+                return iqFactory.createUnaryIQTree(filterNode, childTree);
+            }
+            else {
+                // no need for intermediate query node.
+                return convertDataOrCompositeAtom(classification.dataAndCompositeAtoms.index(0), iqFactory);
+            }
+        }
+        else {
+            // Normal case
+            InnerJoinNode joinNode = iqFactory.createInnerJoinNode(optionalFilterCondition);
+
+            // Indirect recursive call for composite atoms
+            ImmutableList<IQTree> children = classification.dataAndCompositeAtoms.toJavaList().stream()
+                    .map(a -> convertDataOrCompositeAtom(a, iqFactory))
+                    .collect(ImmutableCollectors.toList());
+
+            return iqFactory.createNaryIQTree(joinNode, children);
+        }
+    }
 }
