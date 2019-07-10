@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.datalog.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import fj.F;
+import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -48,7 +49,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
     private final TermFactory termFactory;
     private final DatalogTools datalogTools;
-    private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
 
     private final AtomFactory atomFactory;
     private final ImmutabilityTools immutabilityTools;
@@ -67,7 +67,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                               QueryTransformerFactory transformerFactory,
                                               TermFactory termFactory,
                                               DatalogTools datalogTools,
-                                              PullOutEqualityNormalizer pullOutEqualityNormalizer,
                                               AtomFactory atomFactory,
                                               ImmutabilityTools immutabilityTools,
                                               TargetAtomFactory targetAtomFactory, DatalogFactory datalogFactory) {
@@ -78,7 +77,6 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         this.immutabilityTools = immutabilityTools;
         this.targetAtomFactory = targetAtomFactory;
         this.datalogTools = datalogTools;
-        this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
@@ -365,7 +363,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                        IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        P2<fj.data.List<Function>, fj.data.List<Function>> decomposition = pullOutEqualityNormalizer.splitLeftJoinSubAtoms(subAtomsOfTheLJ);
+        P2<fj.data.List<Function>, fj.data.List<Function>> decomposition = splitLeftJoinSubAtoms(subAtomsOfTheLJ);
         final fj.data.List<Function> leftAtoms = decomposition._1();
         final fj.data.List<Function> rightAtoms = decomposition._2();
 
@@ -493,6 +491,51 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
 
 
         return targetAtomFactory.getTargetAtom(dataAtom, substitution);
+    }
+
+
+    /**
+     * Default implementation of PullOutEqualityNormalizer. Is Left-Join aware.
+     *
+     * Immutable class (instances have no attribute).
+     *
+     * Main challenge: putting the equalities at the "right" (good) place.
+     * Rules for accepting/rejecting to move up boolean conditions:
+     *   - Left of the LJ: ACCEPT. Why? If they appeared as ON conditions of the LJ, they would "filter" ONLY the right part,
+     *                             NOT THE LEFT.
+     *   - Right of the LJ: REJECT. Boolean conditions have to be used as ON conditions of the LOCAL LJ.
+     *   - "Real" JOIN (joins between two tables): REJECT. Local ON conditions are (roughly) equivalent to the "global" WHERE
+     *     conditions.
+     *   - "Fake" JOIN (one data atoms and filter conditions). ACCEPT. Need a JOIN/LJ for being used as ON conditions.
+     *                  If not blocked later, they will finish as WHERE conditions (atoms not embedded in a META-one).
+     *
+     */
+
+    private P2<fj.data.List<Function>, fj.data.List<Function>> splitLeftJoinSubAtoms(fj.data.List<Function> ljSubAtoms) {
+
+        // TODO: make it static (performance improvement).
+        F<Function, Boolean> isNotDataOrCompositeAtomFct = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
+
+        /**
+         * Left: left of the first data/composite atom (usually empty).
+         *
+         * The first data/composite atom is thus the first element of the right list.
+         */
+        P2<fj.data.List<Function>, fj.data.List<Function>> firstDataAtomSplit = ljSubAtoms.span(isNotDataOrCompositeAtomFct);
+        Function firstDataAtom = firstDataAtomSplit._2().head();
+
+        /**
+         * Left: left of the second data/composite atom starting just after the first data/composite atom.
+         *
+         * Right: right part of the left join (includes the joining conditions, no problem).
+         */
+        P2<fj.data.List<Function>, fj.data.List<Function>> secondDataAtomSplit = firstDataAtomSplit._2().tail().span(
+                isNotDataOrCompositeAtomFct);
+
+        fj.data.List<Function> leftAtoms = firstDataAtomSplit._1().snoc(firstDataAtom).append(secondDataAtomSplit._1());
+        fj.data.List<Function> rightAtoms = secondDataAtomSplit._2();
+
+        return P.p(leftAtoms, rightAtoms);
     }
 
 }
