@@ -15,10 +15,12 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultIdentityIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -122,14 +124,16 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                 .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream()
                         .map(cq -> new AbstractMap.SimpleImmutableEntry<>(q, cq)))
                 .map(e -> {
-                    Function atom = e.getValue().getHead();
-                    Term object = atom.getTerm(2); // the object, third argument only
-                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(e.getKey().getTree());
+                    IQ iq = e.getKey();
+                    //Term object = atom.getTerm(2); // the object, third argument only
+                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(iq.getTree());
                     // Infer variable datatypes
-                    ImmutableTerm immutableObject = immutabilityTools.convertIntoImmutableTerm(object);
+                    Variable objectVar = iq.getProjectionAtom().getTerm(2);
+                    ImmutableTerm immutableObject = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().applyToVariable(objectVar); //immutabilityTools.convertIntoImmutableTerm(object);
                     ImmutableTerm newObject = typeCompletion.insertVariableDataTyping(immutableObject, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
                     ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(newObject);
+                    Function atom = e.getValue().getHead();
                     atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
                     return e.getValue(); //CQIEs are mutable
                 })
