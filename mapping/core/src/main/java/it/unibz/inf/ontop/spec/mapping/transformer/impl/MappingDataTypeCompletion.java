@@ -113,9 +113,9 @@ public class MappingDataTypeCompletion {
     }
 
    /**
-    * Following r2rml standard we do not infer the datatype for operation but we return the default value string
+    * Following R2RML standard we do not infer the datatype for operation but we return the default value string
     */
-    public void insertOperationDatatyping(Term term, Function atom, int position) {
+    public Term insertOperationDatatyping(Term term) {
 
         ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
 
@@ -123,52 +123,43 @@ public class MappingDataTypeCompletion {
             ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
             Predicate functionSymbol = castTerm.getFunctionSymbol();
             if (functionSymbol instanceof OperationPredicate) {
-
                 Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
-                if(inferredType.isPresent()){
+                if (inferredType.isPresent()) {
                     // delete explicit datatypes of the operands
-                    deleteExplicitTypes(term, atom, position);
+                    Term newTerm = deleteExplicitTypes(term);
                     // insert the datatype of the evaluated operation
-                    atom.setTerm(
-                            position,
-                            termFactory.getTypedTerm(
-                                    term,
-                                    // TODO: refactor this cast
-                                    (RDFDatatype) inferredType.get()
-                            ));
+                    return termFactory.getTypedTerm(newTerm, (RDFDatatype) inferredType.get()); // TODO: refactor this cast
                 }
-                else
-                    {
-
+                else {
                     if (defaultDatatypeInferred) {
-                        atom.setTerm(position, termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype()));
+                        return termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype());
                     }
-                    else {
-                        throw new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
-                                "Possible solutions: \n" +
-                                "- Add an explicit datatype in the mapping \n" +
-                                "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
-                                " and we will infer the default datatype (xsd:string)"
-                        );
-                    }
+                    throw new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
+                            "Possible solutions: \n" +
+                            "- Add an explicit datatype in the mapping \n" +
+                            "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                            " and we will infer the default datatype (xsd:string)"
+                    );
                 }
             }
         }
+        return term;
     }
 
-    public void deleteExplicitTypes(Term term, Function atom, int position) {
+    public Term deleteExplicitTypes(Term term) {
         if (term instanceof Function) {
             Function function = (Function) term;
+            ImmutableList.Builder<Term> termBuilder = ImmutableList.builder();
             IntStream.range(0, function.getArity())
-                    .forEach(i -> deleteExplicitTypes(
-                            function.getTerm(i),
-                            function,
-                            i
-                    ));
-            if (function.isDataTypeFunction()) {
-                atom.setTerm(position, function.getTerm(0));
-            }
+                    .forEach(i -> termBuilder.add(deleteExplicitTypes(function.getTerm(i))));
+            ImmutableList<Term> terms = termBuilder.build();
+
+            if (function.isDataTypeFunction())
+                return terms.get(0);
+            else
+                return termFactory.getFunction(function.getFunctionSymbol(), terms);
         }
+        return term;
     }
 
     /**
