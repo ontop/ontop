@@ -26,16 +26,15 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 
 public class MappingDataTypeCompletion {
@@ -46,27 +45,22 @@ public class MappingDataTypeCompletion {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
-    private final ImmutabilityTools immutabilityTools;
 
     /**
      * Constructs a new mapping data type resolution.
      * If no datatype is defined, then we use database metadata for obtaining the table column definition as the
      * default data-type.
-     * //TODO: rewrite in a Datalog-free fashion
      * @param termFactory
      * @param typeFactory
      * @param termTypeInferenceTools
-     * @param immutabilityTools
      */
     public MappingDataTypeCompletion(boolean defaultDatatypeInferred,
                                      TermFactory termFactory, TypeFactory typeFactory,
-                                     TermTypeInferenceTools termTypeInferenceTools,
-                                     ImmutabilityTools immutabilityTools) {
+                                     TermTypeInferenceTools termTypeInferenceTools) {
         this.defaultDatatypeInferred = defaultDatatypeInferred;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
-        this.immutabilityTools = immutabilityTools;
     }
 
 
@@ -87,17 +81,27 @@ public class MappingDataTypeCompletion {
                 return term;
             }
             else if (functionSymbol instanceof OperationPredicate) {
-                ImmutableList.Builder<ImmutableTerm> termBuilder = ImmutableList.builder();
-                for (int i = 0; i < function.getArity(); i++) {
-                    termBuilder.add(insertVariableDataTyping(function.getTerm(i), termOccurenceIndex));
-                }
-                return termFactory.getImmutableFunctionalTerm((OperationPredicate)functionSymbol, termBuilder.build());
+                ImmutableList<ImmutableTerm> terms = function.getTerms().stream()
+                        .map(t -> insertVariableDataTyping(t, termOccurenceIndex))
+                        .collect(ImmutableCollectors.toList());
+                return termFactory.getImmutableFunctionalTerm((OperationPredicate)functionSymbol, terms);
             }
             throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
         }
         else if (term instanceof Variable) {
             Variable variable = (Variable) term;
-            RDFDatatype type = getDataType(termOccurenceIndex.get(variable), variable);
+            Collection<Attribute> list = termOccurenceIndex.get(variable);
+            if (list == null)
+                throw new UnboundTargetVariableException(variable);
+
+            Optional<RDFDatatype> ot = list.stream()
+                    .filter(a -> a.getType() != 0)
+                    // TODO: refactor this (unsafe)!!!
+                    .map(a -> (RDFDatatype) a.getTermType())
+                    .findFirst();
+                    Optional.empty();
+
+            RDFDatatype type = getDatatype(ot, variable);
             ImmutableTerm newTerm = termFactory.getImmutableTypedTerm(variable, type);
             log.info("Datatype " + type + " for the value " + variable + " has been inferred from the database");
             return newTerm;
@@ -115,39 +119,31 @@ public class MappingDataTypeCompletion {
     public ImmutableTerm insertOperationDatatyping(ImmutableTerm immutableTerm) {
 
         if (immutableTerm instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
-            Predicate functionSymbol = castTerm.getFunctionSymbol();
-            if (functionSymbol instanceof OperationPredicate) {
-                Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) immutableTerm;
+            if (functionalTerm.getFunctionSymbol() instanceof OperationPredicate) {
+                Optional<TermType> inferredType = termTypeInferenceTools.inferType(functionalTerm);
                 if (inferredType.isPresent()) {
-                    // delete explicit datatypes of the operands
-                    ImmutableTerm newTerm = deleteExplicitTypes(castTerm);
-                    // insert the datatype of the evaluated operation
-                    return termFactory.getImmutableTypedTerm(newTerm, (RDFDatatype) inferredType.get()); // TODO: refactor this cast
+                    return termFactory.getImmutableTypedTerm(
+                            deleteExplicitTypes(functionalTerm),
+                            // TODO: refactor the cast
+                            (RDFDatatype) inferredType.get());
                 }
                 else {
-                    if (defaultDatatypeInferred) {
-                        return termFactory.getImmutableTypedTerm(castTerm, typeFactory.getXsdStringDatatype());
-                    }
-                    throw new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
-                            "Possible solutions: \n" +
-                            "- Add an explicit datatype in the mapping \n" +
-                            "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
-                            " and we will infer the default datatype (xsd:string)"
-                    );
+                    return termFactory.getImmutableTypedTerm(
+                            functionalTerm,
+                            getDatatype(Optional.empty(), immutableTerm));
                 }
             }
         }
         return immutableTerm;
     }
 
-    public ImmutableTerm deleteExplicitTypes(ImmutableTerm term) {
+    private ImmutableTerm deleteExplicitTypes(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
-            ImmutableList.Builder<ImmutableTerm> termBuilder = ImmutableList.builder();
-            IntStream.range(0, function.getArity())
-                    .forEach(i -> termBuilder.add(deleteExplicitTypes(function.getTerm(i))));
-            ImmutableList<ImmutableTerm> terms = termBuilder.build();
+            ImmutableList<ImmutableTerm> terms = function.getTerms().stream()
+                    .map(t -> deleteExplicitTypes(t))
+                    .collect(ImmutableCollectors.toList());
 
             if (function.getFunctionSymbol() instanceof DatatypePredicate)
                 return terms.get(0);
@@ -157,27 +153,12 @@ public class MappingDataTypeCompletion {
         return term;
     }
 
-    /**
-     * returns COL_TYPE for one of the datatype ids
-     *
-     * @param variable
-     * @return
-     */
-    private RDFDatatype getDataType(Collection<Attribute> list, Variable variable) {
 
-        if (list == null)
-            throw new UnboundTargetVariableException(variable);
-
-        Optional<RDFDatatype> type = Optional.empty();
-        for (Attribute attribute : list) {
-            if (attribute.getType() != 0 && !type.isPresent())
-                // TODO: refactor this (unsafe)!!!
-                type = Optional.of((RDFDatatype) attribute.getTermType());
-        }
+    private RDFDatatype getDatatype(Optional<RDFDatatype> type, ImmutableTerm term) {
         if (defaultDatatypeInferred)
             return type.orElseGet(typeFactory::getXsdStringDatatype);
         else {
-            return type.orElseThrow(() -> new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the column "+ variable+"\n" +
+            return type.orElseThrow(() -> new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for "+ term +"\n" +
                     "Possible solutions: \n" +
                     "- Add an explicit datatype in the mapping \n" +
                     "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
@@ -186,9 +167,6 @@ public class MappingDataTypeCompletion {
         }
     }
 
-    /**
-     * Should have been detected earlier!
-     */
     private static class UnboundTargetVariableException extends OntopInternalBugException {
 
         protected UnboundTargetVariableException(Variable variable) {

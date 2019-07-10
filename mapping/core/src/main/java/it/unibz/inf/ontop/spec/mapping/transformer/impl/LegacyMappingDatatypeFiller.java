@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -49,7 +47,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
-    private final ImmutabilityTools immutabilityTools;
     private final QueryUnionSplitter unionSplitter;
     private final UnionFlattener unionNormalizer;
     private final IntermediateQueryFactory iqFactory;
@@ -62,7 +59,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private LegacyMappingDatatypeFiller(OntopMappingSettings settings,
                                         TermFactory termFactory, TypeFactory typeFactory,
                                         TermTypeInferenceTools termTypeInferenceTools,
-                                        ImmutabilityTools immutabilityTools,
                                         QueryUnionSplitter unionSplitter,
                                         UnionFlattener unionNormalizer,
                                         IntermediateQueryFactory iqFactory,
@@ -74,7 +70,6 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
-        this.immutabilityTools = immutabilityTools;
         this.unionSplitter = unionSplitter;
         this.unionNormalizer = unionNormalizer;
         this.iqFactory = iqFactory;
@@ -109,7 +104,7 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     @Override
     public MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping) throws UnknownDatatypeException {
         MappingDataTypeCompletion typeCompletion = new MappingDataTypeCompletion(
-                settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools, immutabilityTools);
+                settings.isDefaultDatatypeInferred(), termFactory, typeFactory, termTypeInferenceTools);
 
         try {
             ImmutableMap<IQ, PPMappingAssertionProvenance> iqMap = mapping.getProvenanceMap().entrySet().stream()
