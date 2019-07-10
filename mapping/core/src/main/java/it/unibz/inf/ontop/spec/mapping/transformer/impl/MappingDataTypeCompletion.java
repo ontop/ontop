@@ -74,25 +74,6 @@ public class MappingDataTypeCompletion {
         this.immutabilityTools = immutabilityTools;
     }
 
-    /**
-     * check if the term is {@code URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")}
-     */
-
-    public static boolean isURIRDFType(Term term) {
-        if (term instanceof Function) {
-            Function func = (Function) term;
-            if (func.getArity() == 1 && (func.getFunctionSymbol() instanceof URITemplatePredicate)) {
-                Term t0 = func.getTerm(0);
-                if (t0 instanceof IRIConstant)
-                    return ((IRIConstant) t0).getIRI().equals(RDF.TYPE);
-                    // UGLY!! TODO: remove it
-                else if (t0 instanceof ValueConstant)
-                    return ((ValueConstant) t0).getValue().equals(RDF.TYPE.getIRIString());
-            }
-        }
-        return false;
-    }
-
 
     /**
      * This method wraps the variable that holds data property values with a data type predicate.
@@ -223,24 +204,6 @@ public class MappingDataTypeCompletion {
                     " and we will infer the default datatype (xsd:string)"));
 
         }
-    }
-
-    public static ImmutableMultimap<Variable, Attribute> createIndex(List<Function> body) {
-        ImmutableMultimap.Builder<Variable, Attribute> termOccurenceIndex = ImmutableMultimap.builder();
-        for (Function a : body) {
-            if (a.getFunctionSymbol() instanceof RelationPredicate) {
-                RelationDefinition td = ((RelationPredicate) a.getFunctionSymbol()).getRelationDefinition();
-                List<Term> terms = a.getTerms();
-                int i = 1; // position index
-                for (Term t : terms) {
-                    if (t instanceof Variable) {
-                        termOccurenceIndex.put((Variable) t, td.getAttribute(i));
-                    }
-                    i++; // increase the position index for the next variable
-                }
-            }
-        }
-        return termOccurenceIndex.build();
     }
 
     /**

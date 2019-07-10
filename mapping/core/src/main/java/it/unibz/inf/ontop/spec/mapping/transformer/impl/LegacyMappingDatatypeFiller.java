@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
@@ -7,12 +8,18 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.datalog.impl.DatalogRule2QueryConverter;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.Relation2Predicate;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultIdentityIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -25,8 +32,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation.AND;
 
 /**
  * Legacy code to infer datatypes not declared in the targets of mapping assertions.
@@ -114,21 +119,45 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         //case of data and object property
         return unionSplitter.splitUnion(unionNormalizer.optimize(iq0))
                 .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .map(rule -> {
-                    Function atom = rule.getHead();
+                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream()
+                        .map(cq -> new AbstractMap.SimpleImmutableEntry<>(q, cq)))
+                .map(e -> {
+                    Function atom = e.getValue().getHead();
                     Term object = atom.getTerm(2); // the object, third argument only
-                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = typeCompletion.createIndex(rule.getBody());
+                    ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(e.getKey().getTree());
                     // Infer variable datatypes
                     typeCompletion.insertVariableDataTyping(object, atom, 2, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
                     typeCompletion.insertOperationDatatyping(object, atom, 2);
-                    return rule; //CQIEs are mutable
+                    return e.getValue(); //CQIEs are mutable
                 })
                 .map(rule -> noNullValueEnforcer.transform(
                         datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
                                 rule, iqFactory).liftBinding())).distinct();
 
+    }
+
+
+    private ImmutableMultimap<Variable, Attribute> createIndex(IQTree tree) {
+        ImmutableMultimap.Builder<Variable, Attribute> termOccurenceIndex = ImmutableMultimap.builder();
+        // ASSUMPTION: there are no CONSTRUCT nodes apart from the top level
+        // TODO: a more light-weight version is needed (that does not change the tree)
+        tree.acceptTransformer(new LazyRecursiveIQTreeVisitingTransformer(iqFactory) {
+           @Override
+           public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
+               RelationDefinition td = dataNode.getProjectionAtom().getPredicate().getRelationDefinition();
+               ImmutableList<? extends VariableOrGroundTerm> terms = dataNode.getProjectionAtom().getArguments();
+               int i = 1; // position index
+               for (VariableOrGroundTerm t : terms) {
+                   if (t instanceof Variable) {
+                       termOccurenceIndex.put((Variable) t, td.getAttribute(i));
+                   }
+                   i++; // increase the position index for the next variable
+               }
+               return dataNode;
+           }
+        });
+        return termOccurenceIndex.build();
     }
 
 
