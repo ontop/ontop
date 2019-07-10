@@ -25,10 +25,7 @@ import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -115,9 +112,7 @@ public class MappingDataTypeCompletion {
    /**
     * Following R2RML standard we do not infer the datatype for operation but we return the default value string
     */
-    public Term insertOperationDatatyping(Term term) {
-
-        ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(term);
+    public ImmutableTerm insertOperationDatatyping(ImmutableTerm immutableTerm) {
 
         if (immutableTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm castTerm = (ImmutableFunctionalTerm) immutableTerm;
@@ -126,13 +121,13 @@ public class MappingDataTypeCompletion {
                 Optional<TermType> inferredType = termTypeInferenceTools.inferType(castTerm);
                 if (inferredType.isPresent()) {
                     // delete explicit datatypes of the operands
-                    Term newTerm = deleteExplicitTypes(term);
+                    ImmutableTerm newTerm = deleteExplicitTypes(castTerm);
                     // insert the datatype of the evaluated operation
-                    return termFactory.getTypedTerm(newTerm, (RDFDatatype) inferredType.get()); // TODO: refactor this cast
+                    return termFactory.getImmutableTypedTerm(newTerm, (RDFDatatype) inferredType.get()); // TODO: refactor this cast
                 }
                 else {
                     if (defaultDatatypeInferred) {
-                        return termFactory.getTypedTerm(term, typeFactory.getXsdStringDatatype());
+                        return termFactory.getImmutableTypedTerm(castTerm, typeFactory.getXsdStringDatatype());
                     }
                     throw new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for the operation " + castTerm + "\n" +
                             "Possible solutions: \n" +
@@ -143,21 +138,21 @@ public class MappingDataTypeCompletion {
                 }
             }
         }
-        return term;
+        return immutableTerm;
     }
 
-    public Term deleteExplicitTypes(Term term) {
-        if (term instanceof Function) {
-            Function function = (Function) term;
-            ImmutableList.Builder<Term> termBuilder = ImmutableList.builder();
+    public ImmutableTerm deleteExplicitTypes(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
+            ImmutableList.Builder<ImmutableTerm> termBuilder = ImmutableList.builder();
             IntStream.range(0, function.getArity())
                     .forEach(i -> termBuilder.add(deleteExplicitTypes(function.getTerm(i))));
-            ImmutableList<Term> terms = termBuilder.build();
+            ImmutableList<ImmutableTerm> terms = termBuilder.build();
 
-            if (function.isDataTypeFunction())
+            if (function.getFunctionSymbol() instanceof DatatypePredicate)
                 return terms.get(0);
             else
-                return termFactory.getFunction(function.getFunctionSymbol(), terms);
+                return termFactory.getImmutableFunctionalTerm(function.getFunctionSymbol(), terms);
         }
         return term;
     }

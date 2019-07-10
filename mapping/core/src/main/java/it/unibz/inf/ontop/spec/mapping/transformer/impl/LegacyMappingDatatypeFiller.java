@@ -128,8 +128,9 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     // Infer variable datatypes
                     Term newObject = typeCompletion.insertVariableDataTyping(object, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
-                    Term newObject2 = typeCompletion.insertOperationDatatyping(newObject);
-                    atom.setTerm(2, newObject2);
+                    ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(newObject);
+                    ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(immutableTerm);
+                    atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
                     return e.getValue(); //CQIEs are mutable
                 })
                 .map(rule -> noNullValueEnforcer.transform(
