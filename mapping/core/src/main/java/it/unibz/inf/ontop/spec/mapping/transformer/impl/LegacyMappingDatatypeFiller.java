@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 /**
@@ -49,31 +50,29 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
 
     private static final Logger log = LoggerFactory.getLogger(LegacyMappingDatatypeFiller.class);
 
-    private final OntopMappingSettings settings;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
+    private final AtomFactory atomFactory;
     private final TermTypeInferenceTools termTypeInferenceTools;
     private final QueryUnionSplitter unionSplitter;
     private final UnionFlattener unionNormalizer;
     private final IntermediateQueryFactory iqFactory;
-    private final ProvenanceMappingFactory provMappingFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final AtomFactory atomFactory;
+    private final ProvenanceMappingFactory provMappingFactory;
+
+    private final BiFunction<Optional<RDFDatatype>, ImmutableTerm, RDFDatatype> getDatatype;
 
     @Inject
     private LegacyMappingDatatypeFiller(OntopMappingSettings settings,
-                                        TermFactory termFactory,
-                                        TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools,
-                                        QueryUnionSplitter unionSplitter,
-                                        UnionFlattener unionNormalizer,
-                                        IntermediateQueryFactory iqFactory,
-                                        ProvenanceMappingFactory provMappingFactory,
-                                        SubstitutionFactory substitutionFactory,
-                                        AtomFactory atomFactory) {
-        this.settings = settings;
+                                         TermFactory termFactory,
+                                         TypeFactory typeFactory,
+                                         TermTypeInferenceTools termTypeInferenceTools,
+                                         QueryUnionSplitter unionSplitter,
+                                         UnionFlattener unionNormalizer,
+                                         IntermediateQueryFactory iqFactory,
+                                         ProvenanceMappingFactory provMappingFactory,
+                                         SubstitutionFactory substitutionFactory,
+                                         AtomFactory atomFactory) {
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.termTypeInferenceTools = termTypeInferenceTools;
         this.unionSplitter = unionSplitter;
         this.unionNormalizer = unionNormalizer;
@@ -81,6 +80,16 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         this.provMappingFactory = provMappingFactory;
         this.substitutionFactory = substitutionFactory;
         this.atomFactory = atomFactory;
+
+        this.getDatatype = settings.isDefaultDatatypeInferred()
+            ? (type, term) -> type.orElseGet(typeFactory::getXsdStringDatatype)
+            : (type, term) -> type.orElseThrow(() ->
+                new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for "+ term +"\n" +
+                    "Possible solutions: \n" +
+                    "- Add an explicit datatype in the mapping \n" +
+                    "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
+                    " and we will infer the default datatype (xsd:string)"));
+
     }
 
     /***
@@ -113,8 +122,11 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     .filter(e -> !e.getKey().getTree().isDeclaredAsEmpty())
                     .flatMap(e -> (MappingTools.extractRDFPredicate(e.getKey()).isClass()
                             ? Stream.of(e.getKey())
-                            : inferMissingDatatypes(e.getKey()))
-                                .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
+                            : unionSplitter.splitUnion(unionNormalizer.optimize(e.getKey()))
+                                .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
+                                .map(this::inferMissingDatatypes)
+                                .distinct())
+                            .map(iq -> new AbstractMap.SimpleEntry<>(iq, e.getValue())))
                     .collect(ImmutableCollectors.toMap());
 
             return provMappingFactory.create(iqMap, mapping.getMetadata());
@@ -124,30 +136,26 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         }
     }
 
-    private Stream<IQ> inferMissingDatatypes(IQ iq0) {
-        //case of data and object property
-        return unionSplitter.splitUnion(unionNormalizer.optimize(iq0))
-                .filter(iq -> !iq.getTree().isDeclaredAsEmpty())
-                .map(iq -> {
-                    DistinctVariableOnlyDataAtom pa = iq.getProjectionAtom();
-                    ConstructionNode constructionNode = ((ConstructionNode)iq.getTree().getRootNode());
-                    ImmutableSubstitution<ImmutableTerm> sub = constructionNode.getSubstitution();
-                    ImmutableTerm object = sub.applyToVariable(pa.getTerm(2)); // third argument only
-                    ImmutableTerm object2 = insertOperationDatatyping(
-                            insertVariableDataTyping(object, createIndex(iq.getTree())));
-                    Variable var2 = iq.getVariableGenerator().generateNewVariable();
-                    DistinctVariableOnlyDataAtom pa2 = atomFactory.getDistinctVariableOnlyDataAtom(
-                            pa.getPredicate(), pa.getTerm(0), pa.getTerm(1), var2);
-                    ImmutableSubstitution<ImmutableTerm> sub2 = substitutionFactory.getSubstitution(
-                            pa.getTerm(0), sub.applyToVariable(pa.getTerm(0)),
-                            pa.getTerm(1), sub.applyToVariable(pa.getTerm(1)),
-                            var2, object2);
-                    return  iqFactory.createIQ(pa2, iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(pa2.getVariables(), sub2),
-                            ((UnaryIQTree)iq.getTree()).getChild()));
-                })
-                .distinct();
 
+    private IQ inferMissingDatatypes(IQ iq) {
+        //case of data and object property
+        DistinctVariableOnlyDataAtom pa = iq.getProjectionAtom();
+        ConstructionNode constructionNode = ((ConstructionNode)iq.getTree().getRootNode());
+        ImmutableSubstitution<ImmutableTerm> sub = constructionNode.getSubstitution();
+        ImmutableTerm object = sub.applyToVariable(pa.getTerm(2)); // third argument only
+        ImmutableTerm object2 = insertOperationDatatyping(
+                insertVariableDatatyping(object, createIndex(iq.getTree())));
+        Variable var2 = iq.getVariableGenerator().generateNewVariable();
+        DistinctVariableOnlyDataAtom pa2 = atomFactory.getDistinctVariableOnlyDataAtom(
+                pa.getPredicate(), pa.getTerm(0), pa.getTerm(1), var2);
+        ImmutableSubstitution<ImmutableTerm> sub2 = substitutionFactory.getSubstitution(
+                pa.getTerm(0), sub.applyToVariable(pa.getTerm(0)),
+                pa.getTerm(1), sub.applyToVariable(pa.getTerm(1)),
+                var2, object2);
+        return  iqFactory.createIQ(pa2,
+                    iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(pa2.getVariables(), sub2),
+                            ((UnaryIQTree)iq.getTree()).getChild()));
     }
 
 
@@ -162,9 +170,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                ImmutableList<? extends VariableOrGroundTerm> terms = dataNode.getProjectionAtom().getArguments();
                int i = 1; // position index
                for (VariableOrGroundTerm t : terms) {
-                   if (t instanceof Variable) {
+                   if (t instanceof Variable)
                        termOccurenceIndex.put((Variable) t, td.getAttribute(i));
-                   }
                    i++; // increase the position index for the next variable
                }
                return dataNode;
@@ -173,16 +180,14 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         return termOccurenceIndex.build();
     }
 
-
-
-
+    
 
     /**
-     * This method wraps the variable that holds data property values with a data type predicate.
-     * It will replace the variable with a new function symbol and update the rule atom.
-     * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
+     * This RECURSIVE method wraps variables that hold data property values in datatype predicates.
+     * However, if the user's already defined the datatype in the mapping,
+     * this method simply keeps the function symbol.
      */
-    private ImmutableTerm insertVariableDataTyping(ImmutableTerm term, ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
+    private ImmutableTerm insertVariableDatatyping(ImmutableTerm term, ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
 
         if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
@@ -195,11 +200,11 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
             }
             else if (functionSymbol instanceof OperationPredicate) {
                 ImmutableList<ImmutableTerm> terms = function.getTerms().stream()
-                        .map(t -> insertVariableDataTyping(t, termOccurenceIndex))
+                        .map(t -> insertVariableDatatyping(t, termOccurenceIndex))
                         .collect(ImmutableCollectors.toList());
                 return termFactory.getImmutableFunctionalTerm((OperationPredicate)functionSymbol, terms);
             }
-            throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
+            throw new IllegalArgumentException("Unsupported subtype " + function.getClass().getSimpleName() + " of " + ImmutableFunctionalTerm.class.getSimpleName());
         }
         else if (term instanceof Variable) {
             Variable variable = (Variable) term;
@@ -212,9 +217,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     // TODO: refactor this (unsafe)!!!
                     .map(a -> (RDFDatatype) a.getTermType())
                     .findFirst();
-            Optional.empty();
 
-            RDFDatatype type = getDatatype(ot, variable);
+            RDFDatatype type = getDatatype.apply(ot, variable);
             ImmutableTerm newTerm = termFactory.getImmutableTypedTerm(variable, type);
             log.info("Datatype " + type + " for the value " + variable + " has been inferred from the database");
             return newTerm;
@@ -223,11 +227,12 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
             return termFactory.getImmutableTypedTerm(term, ((ValueConstant) term).getType());
         }
 
-        throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
+        throw new IllegalArgumentException("Unsupported subtype " + term.getClass().getSimpleName() + " of " + Term.class.getSimpleName());
     }
 
     /**
-     * Following R2RML standard we do not infer the datatype for operation but we return the default value string
+     * This NON-RECURSIVE method assigns datatypes to Functional Terms
+     * If the datatype for the operation cannot be inferred, we use the default datatype (xsd:string)
      */
     private ImmutableTerm insertOperationDatatyping(ImmutableTerm immutableTerm) {
 
@@ -244,15 +249,15 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                 else {
                     return termFactory.getImmutableTypedTerm(
                             functionalTerm,
-                            getDatatype(Optional.empty(), immutableTerm));
+                            getDatatype.apply(Optional.empty(), immutableTerm));
                 }
             }
         }
         return immutableTerm;
     }
 
-    /*
-        remove all datatype annotations RECURSIVELY
+    /**
+        RECURSIVELY removes all datatype annotations
      */
     private ImmutableTerm deleteExplicitTypes(ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm) {
@@ -270,30 +275,19 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     }
 
 
-    private RDFDatatype getDatatype(Optional<RDFDatatype> type, ImmutableTerm term) {
-        if (settings.isDefaultDatatypeInferred())
-            return type.orElseGet(typeFactory::getXsdStringDatatype);
-        else {
-            return type.orElseThrow(() -> new UnknownDatatypeRuntimeException("Impossible to determine the expected datatype for "+ term +"\n" +
-                    "Possible solutions: \n" +
-                    "- Add an explicit datatype in the mapping \n" +
-                    "- Add in the .properties file the setting: ontop.inferDefaultDatatype = true\n" +
-                    " and we will infer the default datatype (xsd:string)"));
-
-        }
-    }
-
     private static class UnboundTargetVariableException extends OntopInternalBugException {
         protected UnboundTargetVariableException(Variable variable) {
             super("Unknown variable in the head of a mapping:" + variable + ". Should have been detected earlier !");
         }
     }
 
-    private static class UnknownDatatypeRuntimeException extends RuntimeException { // workaround for lambdas
+    /**
+     * workaround for lambdas
+     */
+    private static class UnknownDatatypeRuntimeException extends RuntimeException {
         private UnknownDatatypeRuntimeException(String message) {
             super(message);
         }
     }
-
 
 }
