@@ -181,7 +181,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
                 new DummyMinSPARQLFunctionSymbol(abstractRDFType),
                 new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
-                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new DummySampleSPARQLFunctionSymbol(abstractRDFType),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
@@ -210,8 +210,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
                 // Distinct can be safely ignored
                 new DummySampleSPARQLFunctionSymbol(abstractRDFType),
-                // TODO: update
-                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
                 // TODO: update
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 // TODO: update

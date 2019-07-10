@@ -202,6 +202,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<DBTermType, DBFunctionSymbol> distinctSumMap;
     private final Map<DBTermType, DBFunctionSymbol> regularSumMap;
 
+    private final Map<DBTermType, DBFunctionSymbol> distinctAvgMap;
+    private final Map<DBTermType, DBFunctionSymbol> regularAvgMap;
 
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
@@ -253,6 +255,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.distinctSumMap = new ConcurrentHashMap<>();
         this.regularSumMap = new ConcurrentHashMap<>();
+
+        this.distinctAvgMap = new ConcurrentHashMap<>();
+        this.regularAvgMap = new ConcurrentHashMap<>();
 
         this.typeNullMap = new ConcurrentHashMap<>();
     }
@@ -792,6 +797,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getNullIgnoringDBAvg(DBTermType dbType, boolean isDistinct) {
+        Function<DBTermType, DBFunctionSymbol> creationFct = t -> createDBAvg(dbType, isDistinct);
+
+        return isDistinct
+                ? distinctAvgMap.computeIfAbsent(dbType, creationFct)
+                : regularAvgMap.computeIfAbsent(dbType, creationFct);
+    }
+
+    @Override
     public DBFunctionSymbol getDBIntIndex(int nbValues) {
         // TODO: cache it
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
@@ -799,6 +813,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);

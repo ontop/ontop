@@ -50,6 +50,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected final DBTermType dbStringType;
     protected final DBTermType dbBooleanType;
     protected final DBTermType dbDoubleType;
+    protected final DBTermType dbIntegerType;
+    protected final DBTermType dbDecimalType;
     protected final DBTermType abstractRootDBType;
     protected final TermType abstractRootType;
     private final Map<Integer, DBConcatFunctionSymbol> nullRejectingConcatMap;
@@ -73,6 +75,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         this.dbStringType = dbTypeFactory.getDBStringType();
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.dbDoubleType = dbTypeFactory.getDBDoubleType();
+        this.dbIntegerType = dbTypeFactory.getDBLargeIntegerType();
+        this.dbDecimalType = dbTypeFactory.getDBDecimalType();
         this.abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
         this.abstractRootType = typeFactory.getAbstractAtomicTermType();
         this.nullRejectingConcatMap = Maps.newConcurrentMap();
@@ -101,6 +105,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct) {
         return new NullIgnoringDBSumFunctionSymbol(termType, isDistinct);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
+        DBTermType targetType = inputType.equals(dbIntegerType) ? dbDecimalType : inputType;
+        return new NullIgnoringDBAvgFunctionSymbol(inputType, targetType, isDistinct);
     }
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {

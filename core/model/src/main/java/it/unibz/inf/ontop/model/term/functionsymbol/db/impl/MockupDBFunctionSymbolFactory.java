@@ -73,6 +73,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:

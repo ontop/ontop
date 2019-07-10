@@ -18,10 +18,13 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
         implements SPARQLAggregationFunctionSymbol {
 
     private final boolean isDistinct;
+    private final String defaultAggVariableName;
 
-    public UnaryNumericSPARQLAggregationFunctionSymbolImpl(String name, String officialName, boolean isDistinct, RDFTermType rootRdfTermType) {
+    public UnaryNumericSPARQLAggregationFunctionSymbolImpl(String name, String officialName, boolean isDistinct,
+                                                           RDFTermType rootRdfTermType, String defaultAggVariableName) {
         super(name, officialName, ImmutableList.of(rootRdfTermType));
         this.isDistinct = isDistinct;
+        this.defaultAggVariableName = defaultAggVariableName;
     }
 
     public boolean isDistinct() {
@@ -96,21 +99,21 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
             return AggregationSimplification.create(decomposition);
         }
 
-        ConcreteNumericRDFDatatype numericDatatype = (ConcreteNumericRDFDatatype) subTermType;
+        ConcreteNumericRDFDatatype inputNumericDatatype = (ConcreteNumericRDFDatatype) subTermType;
         ImmutableTerm subTermLexicalTerm = extractLexicalTerm(subTerm, termFactory);
 
         TypeFactory typeFactory = termFactory.getTypeFactory();
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 
-        ImmutableFunctionalTerm dbSumTerm = createAggregate(
-                numericDatatype,
-                termFactory.getConversionFromRDFLexical2DB(subTermLexicalTerm, numericDatatype),
+        ImmutableFunctionalTerm dbAggTerm = createAggregate(
+                inputNumericDatatype,
+                termFactory.getConversionFromRDFLexical2DB(subTermLexicalTerm, inputNumericDatatype),
                 termFactory);
 
-        RDFTermTypeConstant inferredTypeTermWhenNonEmpty = termFactory.getRDFTermTypeConstant(
-                numericDatatype.getCommonPropagatedOrSubstitutedType(numericDatatype));
+        ConcreteNumericRDFDatatype inferredTypeWhenNonEmpty = inferTypeWhenNonEmpty(inputNumericDatatype, typeFactory);
+        RDFTermTypeConstant inferredTypeTermWhenNonEmpty = termFactory.getRDFTermTypeConstant(inferredTypeWhenNonEmpty);
 
-        Variable dbAggregationVariable = variableGenerator.generateNewVariable("sum");
+        Variable dbAggregationVariable = variableGenerator.generateNewVariable(defaultAggVariableName);
 
         boolean isSubTermNullable = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables());
         DBConstant zero = termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType());
@@ -130,15 +133,17 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
                 : inferredTypeTermWhenNonEmpty;
 
         ImmutableFunctionalTerm liftedTerm = termFactory.getRDFFunctionalTerm(
-                termFactory.getConversion2RDFLexical(nonNullDBAggregate, numericDatatype),
+                termFactory.getConversion2RDFLexical(nonNullDBAggregate, inferredTypeWhenNonEmpty),
                 inferredType);
 
         ImmutableFunctionalTerm.FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
                 liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbSumTerm));
+                ImmutableMap.of(dbAggregationVariable, dbAggTerm));
 
         return AggregationSimplification.create(decomposition);
     }
+
+    protected abstract ConcreteNumericRDFDatatype inferTypeWhenNonEmpty(ConcreteNumericRDFDatatype inputNumericDatatype, TypeFactory typeFactory);
 
     protected abstract AggregationSimplification decomposeMultityped(ImmutableTerm subTerm,
                                                                      ImmutableSet<RDFTermType> subTermPossibleTypes,
