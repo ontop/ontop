@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 /*
  * #%L
@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 

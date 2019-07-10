@@ -1,7 +1,9 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 
 @Deprecated
