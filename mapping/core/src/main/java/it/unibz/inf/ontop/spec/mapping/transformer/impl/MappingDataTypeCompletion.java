@@ -20,11 +20,10 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.exception.UnknownDatatypeException;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BNodePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
@@ -35,7 +34,6 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.TermTypeInferenceTools;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +78,7 @@ public class MappingDataTypeCompletion {
      * It will replace the variable with a new function symbol and update the rule atom.
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
-    public void insertVariableDataTyping(Term term, Function atom, int position,
-                                          ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
+    public Term insertVariableDataTyping(Term term, ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
 
         if (term instanceof Function) {
             Function function = (Function) term;
@@ -90,32 +87,29 @@ public class MappingDataTypeCompletion {
                     (functionSymbol instanceof URITemplatePredicate)
                     || (functionSymbol instanceof BNodePredicate)) {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
+                return term;
             }
             else if (function.isOperation()) {
+                ImmutableList.Builder<Term> termBuilder = ImmutableList.builder();
                 for (int i = 0; i < function.getArity(); i++) {
-                    insertVariableDataTyping(function.getTerm(i), function, i, termOccurenceIndex);
+                    termBuilder.add(insertVariableDataTyping(function.getTerm(i), termOccurenceIndex));
                 }
+                return termFactory.getFunction(functionSymbol, termBuilder.build());
             }
-            else {
-                throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
-            }
+            throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
         }
         else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             RDFDatatype type = getDataType(termOccurenceIndex.get(variable), variable);
             Term newTerm = termFactory.getTypedTerm(variable, type);
-            log.info("Datatype " + type + " for the value " + variable + " of the property " + atom + " has been " +
-                    "inferred " +
-                    "from the database");
-            atom.setTerm(position, newTerm);
+            log.info("Datatype " + type + " for the value " + variable + " has been inferred from the database");
+            return newTerm;
         }
         else if (term instanceof ValueConstant) {
-            Term newTerm = termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
-            atom.setTerm(position, newTerm);
+            return termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
         }
-        else {
-            throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
-        }
+
+        throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
     }
 
    /**
