@@ -7,12 +7,8 @@ import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.transform.impl.ChildTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultNonRecursiveIQTreeTransformer;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -51,7 +47,7 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                                 .flatMap(ImmutableTerm::getVariableStream),
                         joinNode.getOptionalFilterCondition()
                                 .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
-                        .collect(ImmutableCollectors.toSet()).stream() // remove duplicates
+                        .distinct()
                         .collect(ImmutableCollectors.toList());
 
                 ImmutableList<ExtensionalDataNode> children = c.get();

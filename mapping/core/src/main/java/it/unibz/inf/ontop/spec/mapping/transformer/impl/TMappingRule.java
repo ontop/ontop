@@ -27,7 +27,7 @@ public class TMappingRule {
 	private final MappingTools.RDFPredicateInfo predicateInfo;
 
 	private final DistinctVariableOnlyDataAtom projectionAtom;
-	private final ImmutableSubstitution substitution;
+	private final ImmutableSubstitution<ImmutableTerm> substitution;
 
 	private final ImmutableList<ExtensionalDataNode> extensionalNodes;
 	// an OR-connected list of AND-connected atomic filters
@@ -146,9 +146,10 @@ public class TMappingRule {
 	}
 
 	public ImmutableList<ImmutableTerm> getHeadTerms() {
-        return substitution.apply(predicateInfo.isClass()
-				? ImmutableList.of(projectionAtom.getTerm(0))
-				: ImmutableList.of(projectionAtom.getTerm(0), projectionAtom.getTerm(2)));
+        return predicateInfo.isClass()
+				? ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)))
+				: ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)),
+									substitution.applyToVariable(projectionAtom.getTerm(2)));
     }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }

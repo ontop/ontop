@@ -40,7 +40,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -52,7 +51,6 @@ import java.util.stream.Stream;
 public class TMappingProcessor {
 
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
-
 
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
@@ -106,8 +104,6 @@ public class TMappingProcessor {
                 .map(q -> new TMappingRule(q, termFactory, atomFactory))
                 .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
-        // System.out.println("TMAP SOURCE: " + source + reasoner);
-
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
@@ -122,8 +118,6 @@ public class TMappingProcessor {
                         this::indexOf, this::getNewHeadC, cqContainmentCheck, c -> c instanceof OClass))
 
                 .collect(ImmutableCollectors.toMap());
-
-        // System.out.println("TMAP SATURATED: " + saturated);
 
         ImmutableList<TMappingEntry> entries = Stream.concat(
                 saturated.values().stream(),
