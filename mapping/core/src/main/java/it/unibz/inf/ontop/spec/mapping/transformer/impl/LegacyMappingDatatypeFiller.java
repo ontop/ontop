@@ -126,10 +126,10 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     Term object = atom.getTerm(2); // the object, third argument only
                     ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(e.getKey().getTree());
                     // Infer variable datatypes
-                    Term newObject = typeCompletion.insertVariableDataTyping(object, termOccurenceIndex);
+                    ImmutableTerm immutableObject = immutabilityTools.convertIntoImmutableTerm(object);
+                    ImmutableTerm newObject = typeCompletion.insertVariableDataTyping(immutableObject, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
-                    ImmutableTerm immutableTerm = immutabilityTools.convertIntoImmutableTerm(newObject);
-                    ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(immutableTerm);
+                    ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(newObject);
                     atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
                     return e.getValue(); //CQIEs are mutable
                 })

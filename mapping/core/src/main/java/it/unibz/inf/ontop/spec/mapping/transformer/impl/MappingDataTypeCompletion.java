@@ -75,35 +75,35 @@ public class MappingDataTypeCompletion {
      * It will replace the variable with a new function symbol and update the rule atom.
      * However, if the users already defined the data-type in the mapping, this method simply accepts the function symbol.
      */
-    public Term insertVariableDataTyping(Term term, ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
+    public ImmutableTerm insertVariableDataTyping(ImmutableTerm term, ImmutableMultimap<Variable, Attribute> termOccurenceIndex) {
 
-        if (term instanceof Function) {
-            Function function = (Function) term;
+        if (term instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
             Predicate functionSymbol = function.getFunctionSymbol();
-            if (function.isDataTypeFunction() ||
+            if (functionSymbol instanceof DatatypePredicate ||
                     (functionSymbol instanceof URITemplatePredicate)
                     || (functionSymbol instanceof BNodePredicate)) {
                 // NO-OP for already assigned datatypes, or object properties, or bnodes
                 return term;
             }
-            else if (function.isOperation()) {
-                ImmutableList.Builder<Term> termBuilder = ImmutableList.builder();
+            else if (functionSymbol instanceof OperationPredicate) {
+                ImmutableList.Builder<ImmutableTerm> termBuilder = ImmutableList.builder();
                 for (int i = 0; i < function.getArity(); i++) {
                     termBuilder.add(insertVariableDataTyping(function.getTerm(i), termOccurenceIndex));
                 }
-                return termFactory.getFunction(functionSymbol, termBuilder.build());
+                return termFactory.getImmutableFunctionalTerm((OperationPredicate)functionSymbol, termBuilder.build());
             }
             throw new IllegalArgumentException("Unsupported subtype of: " + Function.class.getSimpleName());
         }
         else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             RDFDatatype type = getDataType(termOccurenceIndex.get(variable), variable);
-            Term newTerm = termFactory.getTypedTerm(variable, type);
+            ImmutableTerm newTerm = termFactory.getImmutableTypedTerm(variable, type);
             log.info("Datatype " + type + " for the value " + variable + " has been inferred from the database");
             return newTerm;
         }
         else if (term instanceof ValueConstant) {
-            return termFactory.getTypedTerm(term, ((ValueConstant) term).getType());
+            return termFactory.getImmutableTypedTerm(term, ((ValueConstant) term).getType());
         }
 
         throw new IllegalArgumentException("Unsupported subtype of: " + Term.class.getSimpleName());
