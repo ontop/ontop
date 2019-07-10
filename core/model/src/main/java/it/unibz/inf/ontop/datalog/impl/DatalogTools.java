@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.inject.Inject;
-import fj.F;
-import fj.F2;
 import fj.data.List;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -10,7 +8,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
 import it.unibz.inf.ontop.model.term.functionsymbol.OperationPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
@@ -26,41 +23,18 @@ public class DatalogTools {
 
     private final Expression TRUE_EQ;
 
-    private final  F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT;
-    private final  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT;
-    private final  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT;
-
     @Inject
     private DatalogTools(TermFactory termFactory, DatalogFactory datalogFactory) {
         this.termFactory = termFactory;
         this.datalogFactory = datalogFactory;
         ValueConstant valueTrue = termFactory.getBooleanConstant(true);
         TRUE_EQ = termFactory.getFunctionEQ(valueTrue, valueTrue);
-        IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
-        IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
-        IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || isXsdBoolean(atom.getFunctionSymbol());
     }
 
     public Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
-        return atom.isDataFunction() || isLeftJoinOrJoinAtom(atom);
-    }
-
-    public Boolean isLeftJoinOrJoinAtom(Function atom) {
-        Predicate predicate = atom.getFunctionSymbol();
-        return predicate.equals(datalogFactory.getSparqlLeftJoinPredicate()) ||
-                predicate.equals(datalogFactory.getSparqlJoinPredicate());
-    }
-
-    public List<Function> filterDataAndCompositeAtoms(List<Function> atoms) {
-        return atoms.filter(IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT);
-    }
-
-    public List<Function> filterNonDataAndCompositeAtoms(List<Function> atoms) {
-        return atoms.filter(IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT);
-    }
-
-    public List<Function> filterBooleanAtoms(List<Function> atoms) {
-        return atoms.filter(IS_BOOLEAN_ATOM_FCT);
+        return atom.isDataFunction() ||
+                atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()) ||
+                atom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate());
     }
 
     /**
@@ -70,14 +44,8 @@ public class DatalogTools {
         if (booleanAtoms.length() == 0)
             return TRUE_EQ;
 
-        Expression firstBooleanAtom = convertOrCastIntoBooleanAtom( booleanAtoms.head());
-
-        return booleanAtoms.tail().foldLeft(new F2<Expression, Function, Expression>() {
-            @Override
-            public Expression f(Expression previousAtom, Function currentAtom) {
-                return termFactory.getFunctionAND(previousAtom, currentAtom);
-            }
-        }, firstBooleanAtom);
+        Expression firstBooleanAtom = convertOrCastIntoBooleanAtom(booleanAtoms.head());
+        return booleanAtoms.tail().foldLeft(termFactory::getFunctionAND, firstBooleanAtom);
     }
 
     private Expression convertOrCastIntoBooleanAtom(Function atom) {
@@ -101,7 +69,7 @@ public class DatalogTools {
         return foldBooleanConditions(List.iterableList(booleanAtoms));
     }
 
-    private static boolean isXsdBoolean(Predicate predicate) {
+    public static boolean isXsdBoolean(Predicate predicate) {
         return (predicate instanceof DatatypePredicate)
                 && ((DatatypePredicate) predicate).getReturnedType().isA(XSD.BOOLEAN);
     }

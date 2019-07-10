@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.datalog.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import fj.F;
 import fj.P2;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
@@ -14,11 +15,10 @@ import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.castIntoGroundTerm;
+import static it.unibz.inf.ontop.model.term.impl.GroundTermTools.isGroundTerm;
+
 /**
  * Converts a datalog program into an intermediate query
  */
@@ -44,10 +47,17 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private final QueryTransformerFactory transformerFactory;
 
     private final TermFactory termFactory;
-    private final DatalogFactory datalogFactory;
-    private final DatalogConversionTools datalogConversionTools;
     private final DatalogTools datalogTools;
     private final PullOutEqualityNormalizer pullOutEqualityNormalizer;
+
+    private final AtomFactory atomFactory;
+    private final ImmutabilityTools immutabilityTools;
+    private final TargetAtomFactory targetAtomFactory;
+
+    private final DatalogFactory datalogFactory;
+    private final F<Function, Boolean> IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT;
+    private final  F<Function, Boolean> IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT;
+    private final  F<Function, Boolean> IS_BOOLEAN_ATOM_FCT;
 
     @Inject
     private DatalogProgram2QueryConverterImpl(IntermediateQueryFactory iqFactory,
@@ -56,20 +66,28 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
                                               CoreUtilsFactory coreUtilsFactory,
                                               QueryTransformerFactory transformerFactory,
                                               TermFactory termFactory,
-                                              DatalogFactory datalogFactory,
-                                              DatalogConversionTools datalogConversionTools,
                                               DatalogTools datalogTools,
-                                              PullOutEqualityNormalizer pullOutEqualityNormalizer) {
+                                              PullOutEqualityNormalizer pullOutEqualityNormalizer,
+                                              AtomFactory atomFactory,
+                                              ImmutabilityTools immutabilityTools,
+                                              TargetAtomFactory targetAtomFactory, DatalogFactory datalogFactory) {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.termFactory = termFactory;
-        this.datalogFactory = datalogFactory;
-        this.datalogConversionTools = datalogConversionTools;
+        this.atomFactory = atomFactory;
+        this.immutabilityTools = immutabilityTools;
+        this.targetAtomFactory = targetAtomFactory;
         this.datalogTools = datalogTools;
         this.pullOutEqualityNormalizer = pullOutEqualityNormalizer;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
         this.transformerFactory = transformerFactory;
+        this.datalogFactory = datalogFactory;
+
+        IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT = this::isDataOrLeftJoinOrJoinAtom;
+        IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT = atom -> !isDataOrLeftJoinOrJoinAtom(atom);
+        IS_BOOLEAN_ATOM_FCT = atom -> atom.isOperation() || DatalogTools.isXsdBoolean(atom.getFunctionSymbol());
+
     }
 
 
@@ -242,18 +260,19 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
  * Note here List are from Functional Java, not java.util.List.
  */
 
+
     /**
      * TODO: explain
      */
-    private static class AtomClassification {
+    private class AtomClassification {
         private final fj.data.List<Function> dataAndCompositeAtoms;
         private final fj.data.List<Function> booleanAtoms;
 
-        protected AtomClassification(fj.data.List<Function> atoms, DatalogTools datalogTools)
+        protected AtomClassification(fj.data.List<Function> atoms)
                 throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
-            dataAndCompositeAtoms = datalogTools.filterDataAndCompositeAtoms(atoms);
-            fj.data.List<Function> otherAtoms = datalogTools.filterNonDataAndCompositeAtoms(atoms);
-            booleanAtoms = datalogTools.filterBooleanAtoms(otherAtoms);
+            dataAndCompositeAtoms = atoms.filter(IS_DATA_OR_LJ_OR_JOIN_ATOM_FCT);
+            fj.data.List<Function> otherAtoms = atoms.filter(IS_NOT_DATA_OR_COMPOSITE_ATOM_FCT);
+            booleanAtoms = otherAtoms.filter(IS_BOOLEAN_ATOM_FCT);
 
             if (booleanAtoms.length() < otherAtoms.length()) {
                 HashSet<Function> unsupportedAtoms = new HashSet<>(otherAtoms.toCollection());
@@ -266,15 +285,29 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         }
     }
 
+    private Boolean isDataOrLeftJoinOrJoinAtom(Function atom) {
+        return atom.isDataFunction() || isLeftJoinAtom(atom) || isJoinAtom(atom);
+    }
+
+    private Boolean isLeftJoinAtom(Function atom) {
+        return atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate());
+    }
+
+    private Boolean isJoinAtom(Function atom) {
+        return atom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate());
+    }
+
+
+
 
     /**
      * TODO: describe
      */
 
-    public IQ convertDatalogRule(CQIE datalogRule, IntermediateQueryFactory iqFactory)
+    private IQ convertDatalogRule(CQIE datalogRule, IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
-        TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(datalogRule.getHead());
+        TargetAtom targetAtom = convertFromDatalogDataAtom(datalogRule.getHead());
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
 
@@ -310,18 +343,17 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
             fj.data.List<Function> subAtoms = fj.data.List.iterableList(
                     (java.util.List<Function>)(java.util.List<?>)atom.getTerms());
 
-            Predicate atomPredicate = atom.getFunctionSymbol();
-            if (atomPredicate.equals(datalogFactory.getSparqlJoinPredicate())) {
+            if (isJoinAtom(atom)) {
                 return convertAtoms(subAtoms, iqFactory);
             }
-            else if (atomPredicate.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
+            else if (isLeftJoinAtom(atom)) {
                 return convertLeftJoinAtom(subAtoms, iqFactory);
             }
-            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atom.getFunctionSymbol());
         }
         // Data atom: creates a DataNode and adds it to the tree
         else if (atom.isDataFunction()) {
-            TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(atom);
+            TargetAtom targetAtom = convertFromDatalogDataAtom(atom);
             ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
             DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
             return iqFactory.createIntensionalDataNode(dataAtom);
@@ -340,7 +372,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
         /*
          * TODO: explain why we just care about the right
          */
-        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms, datalogTools);
+        AtomClassification rightSubAtomClassification = new AtomClassification(rightAtoms);
 
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 rightSubAtomClassification.booleanAtoms);
@@ -358,7 +390,7 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
     private IQTree convertAtoms(fj.data.List<Function> atoms, IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
-        AtomClassification classification = new AtomClassification(atoms, datalogTools);
+        AtomClassification classification = new AtomClassification(atoms);
 
         Optional<ImmutableExpression> optionalFilterCondition = createFilterExpression(
                 classification.booleanAtoms);
@@ -395,4 +427,72 @@ public class DatalogProgram2QueryConverterImpl implements DatalogProgram2QueryCo
             return iqFactory.createNaryIQTree(joinNode, children);
         }
     }
+
+
+    /**
+     * TODO: explain
+     */
+    public TargetAtom convertFromDatalogDataAtom(Function datalogDataAtom)
+            throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
+
+        Predicate datalogAtomPredicate = datalogDataAtom.getFunctionSymbol();
+        if (!(datalogAtomPredicate instanceof AtomPredicate))
+            throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("The datalog predicate "
+                    + datalogAtomPredicate + " is not an AtomPredicate!");
+
+        AtomPredicate atomPredicate = (AtomPredicate) datalogAtomPredicate;
+
+        ImmutableList.Builder<Variable> argListBuilder = ImmutableList.builder();
+        ImmutableMap.Builder<Variable, ImmutableTerm> bindingBuilder = ImmutableMap.builder();
+
+        /*
+         * Replaces all the arguments by variables.
+         * Makes sure the projected variables are unique.
+         *
+         * Creates allBindings entries if needed (in case of constant of a functional term)
+         */
+        VariableGenerator projectedVariableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
+        for (Term term : datalogDataAtom.getTerms()) {
+            Variable newArgument;
+
+            /*
+             * If a projected variable occurs multiple times as an head argument,
+             * rename it and keep track of the equivalence.
+             *
+             */
+            if (term instanceof Variable) {
+                Variable originalVariable = (Variable) term;
+                newArgument = projectedVariableGenerator.generateNewVariableIfConflicting(originalVariable);
+                if (!newArgument.equals(originalVariable)) {
+                    bindingBuilder.put(newArgument, originalVariable);
+                }
+            }
+            /*
+             * Ground-term: replace by a variable and add a binding.
+             * (easier to merge than putting the ground term in the data atom).
+             */
+            else if (isGroundTerm(term)) {
+                Variable newVariable = projectedVariableGenerator.generateNewVariable();
+                newArgument = newVariable;
+                bindingBuilder.put(newVariable, castIntoGroundTerm(term));
+            }
+            /*
+             * Non-ground functional term
+             */
+            else {
+                ImmutableTerm nonVariableTerm = immutabilityTools.convertIntoImmutableTerm(term);
+                Variable newVariable = projectedVariableGenerator.generateNewVariable();
+                newArgument = newVariable;
+                bindingBuilder.put(newVariable, nonVariableTerm);
+            }
+            argListBuilder.add(newArgument);
+        }
+
+        DistinctVariableOnlyDataAtom dataAtom = atomFactory.getDistinctVariableOnlyDataAtom(atomPredicate, argListBuilder.build());
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(bindingBuilder.build());
+
+
+        return targetAtomFactory.getTargetAtom(dataAtom, substitution);
+    }
+
 }
