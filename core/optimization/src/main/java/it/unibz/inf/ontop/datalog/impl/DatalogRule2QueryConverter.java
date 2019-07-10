@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
 import java.util.HashSet;
 
 /**
@@ -123,7 +122,7 @@ public class DatalogRule2QueryConverter {
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
 
         try {
-            IQTree bodyTree = convertAtoms(bodyAtoms, ImmutableSet.of(), iqFactory);
+            IQTree bodyTree = convertAtoms(bodyAtoms, iqFactory);
             IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, bodyTree);
 
             return iqFactory.createIQ(projectionAtom, constructionTree);
@@ -143,7 +142,6 @@ public class DatalogRule2QueryConverter {
      * TODO: describe
      */
     private IQTree convertDataOrCompositeAtom(final Function atom,
-                                              Collection<Predicate> tablePredicates,
                                               IntermediateQueryFactory iqFactory)
             throws IntermediateQueryBuilderException, DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException {
         /*
@@ -155,10 +153,10 @@ public class DatalogRule2QueryConverter {
 
             Predicate atomPredicate = atom.getFunctionSymbol();
             if (atomPredicate.equals(datalogFactory.getSparqlJoinPredicate())) {
-                return convertAtoms(subAtoms, tablePredicates, iqFactory);
+                return convertAtoms(subAtoms, iqFactory);
             }
             else if(atomPredicate.equals(datalogFactory.getSparqlLeftJoinPredicate())) {
-                return convertLeftJoinAtom(subAtoms, tablePredicates, iqFactory);
+                return convertLeftJoinAtom(subAtoms, iqFactory);
             }
             else {
                 throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported predicate: " + atomPredicate);
@@ -175,7 +173,7 @@ public class DatalogRule2QueryConverter {
             TargetAtom targetAtom = datalogConversionTools.convertFromDatalogDataAtom(atom);
             ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();
             DataAtom dataAtom = bindings.applyToDataAtom(targetAtom.getProjectionAtom());
-            return datalogConversionTools.createDataNode(iqFactory, dataAtom, tablePredicates);
+            return iqFactory.createIntensionalDataNode(dataAtom);
         }
         else {
             throw new DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException("Unsupported non-data atom: " + atom);
@@ -183,7 +181,6 @@ public class DatalogRule2QueryConverter {
     }
 
     private IQTree convertLeftJoinAtom(List<Function> subAtomsOfTheLJ,
-                                       Collection<Predicate> tablePredicates,
                                        IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -201,8 +198,8 @@ public class DatalogRule2QueryConverter {
 
         LeftJoinNode ljNode = iqFactory.createLeftJoinNode(optionalFilterCondition);
 
-        IQTree leftTree = convertAtoms(leftAtoms, tablePredicates, iqFactory);
-        IQTree rightTree = convertAtoms(rightSubAtomClassification.dataAndCompositeAtoms, tablePredicates,
+        IQTree leftTree = convertAtoms(leftAtoms, iqFactory);
+        IQTree rightTree = convertAtoms(rightSubAtomClassification.dataAndCompositeAtoms,
                 iqFactory);
         return iqFactory.createBinaryNonCommutativeIQTree(ljNode, leftTree, rightTree);
     }
@@ -211,7 +208,7 @@ public class DatalogRule2QueryConverter {
      * TODO: explain
      *
      */
-    private IQTree convertAtoms(List<Function> atoms, Collection<Predicate> tablePredicates,
+    private IQTree convertAtoms(List<Function> atoms,
                                 IntermediateQueryFactory iqFactory)
             throws DatalogProgram2QueryConverterImpl.InvalidDatalogProgramException, IntermediateQueryBuilderException {
 
@@ -233,7 +230,7 @@ public class DatalogRule2QueryConverter {
             if (optionalFilterCondition.isPresent()) {
                 FilterNode filterNode = iqFactory.createFilterNode(optionalFilterCondition.get());
                 IQTree childTree = convertDataOrCompositeAtom(classification.dataAndCompositeAtoms.index(0),
-                        tablePredicates, iqFactory);
+                        iqFactory);
 
                 return iqFactory.createUnaryIQTree(filterNode, childTree);
             }
@@ -241,7 +238,7 @@ public class DatalogRule2QueryConverter {
              * Otherwise, no need for intermediate query node.
              */
             else {
-                return convertDataOrCompositeAtom(classification.dataAndCompositeAtoms.index(0), tablePredicates, iqFactory);
+                return convertDataOrCompositeAtom(classification.dataAndCompositeAtoms.index(0), iqFactory);
             }
         }
         /*
@@ -254,7 +251,7 @@ public class DatalogRule2QueryConverter {
              * Indirect recursive call for composite atoms
              */
             ImmutableList<IQTree> children = classification.dataAndCompositeAtoms.toJavaList().stream()
-                    .map(a -> convertDataOrCompositeAtom(a, tablePredicates, iqFactory))
+                    .map(a -> convertDataOrCompositeAtom(a, iqFactory))
                     .collect(ImmutableCollectors.toList());
 
             return iqFactory.createNaryIQTree(joinNode, children);
