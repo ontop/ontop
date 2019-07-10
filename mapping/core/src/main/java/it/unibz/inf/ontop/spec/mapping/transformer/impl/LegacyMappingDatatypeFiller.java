@@ -15,13 +15,13 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultIdentityIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -30,6 +30,8 @@ import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.AbstractMap;
@@ -55,11 +57,13 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
     private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final DatalogRule2QueryConverter datalogRule2QueryConverter;
+    private final SubstitutionFactory substitutionFactory;
+    private final AtomFactory atomFactory;
 
     @Inject
     private LegacyMappingDatatypeFiller(OntopMappingSettings settings, Relation2Predicate relation2Predicate,
                                         TermFactory termFactory, TypeFactory typeFactory,
-                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, IntermediateQueryFactory iqFactory, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter) {
+                                        TermTypeInferenceTools termTypeInferenceTools, ImmutabilityTools immutabilityTools, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, IntermediateQueryFactory iqFactory, ProvenanceMappingFactory provMappingFactory, NoNullValueEnforcer noNullValueEnforcer, DatalogRule2QueryConverter datalogRule2QueryConverter, SubstitutionFactory substitutionFactory, AtomFactory atomFactory) {
         this.settings = settings;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
@@ -72,6 +76,8 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
         this.provMappingFactory = provMappingFactory;
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.datalogRule2QueryConverter = datalogRule2QueryConverter;
+        this.substitutionFactory = substitutionFactory;
+        this.atomFactory = atomFactory;
     }
 
     /***
@@ -129,17 +135,28 @@ public class LegacyMappingDatatypeFiller implements MappingDatatypeFiller {
                     ImmutableMultimap<Variable, Attribute> termOccurenceIndex = createIndex(iq.getTree());
                     // Infer variable datatypes
                     Variable objectVar = iq.getProjectionAtom().getTerm(2);
-                    ImmutableTerm immutableObject = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().applyToVariable(objectVar); //immutabilityTools.convertIntoImmutableTerm(object);
+                    ConstructionNode constructionNode = ((ConstructionNode)iq.getTree().getRootNode());
+                    ImmutableSubstitution<ImmutableTerm> originalSubstitution = constructionNode.getSubstitution();
+                    ImmutableTerm immutableObject = originalSubstitution.applyToVariable(objectVar); //immutabilityTools.convertIntoImmutableTerm(object);
                     ImmutableTerm newObject = typeCompletion.insertVariableDataTyping(immutableObject, termOccurenceIndex);
                     // Infer operation datatypes from variable datatypes
                     ImmutableTerm newObject2 = typeCompletion.insertOperationDatatyping(newObject);
-                    Function atom = e.getValue().getHead();
-                    atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
-                    return e.getValue(); //CQIEs are mutable
+                    Variable newObjectVar = iq.getVariableGenerator().generateNewVariable();
+                    ImmutableMap<Variable, ImmutableTerm> map =  Stream.concat(
+                            originalSubstitution.getImmutableMap().entrySet().stream()
+                                .filter(me -> !me.getKey().equals(objectVar)),
+                            Stream.of(new AbstractMap.SimpleImmutableEntry(newObjectVar, newObject2)))
+                            .collect(ImmutableCollectors.toMap());
+                    DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(iq.getProjectionAtom().getPredicate(), iq.getProjectionAtom().getTerm(0), iq.getProjectionAtom().getTerm(1), newObjectVar);
+                    ImmutableSubstitution<ImmutableTerm> ns = substitutionFactory.getSubstitution(map);
+                    IQ iq2 =  iqFactory.createIQ(newProjectionAtom, iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(newProjectionAtom.getVariables(), ns), ((UnaryIQTree)iq.getTree()).getChild()));
+                    //Function atom = e.getValue().getHead();
+                    //atom.setTerm(2, immutabilityTools.convertToMutableTerm(newObject2));
+                    //return e.getValue(); //CQIEs are mutable
+                    System.out.println("IQ:: " + iq + " TO " + iq2);
+                    return iq2;
                 })
-                .map(rule -> noNullValueEnforcer.transform(
-                        datalogRule2QueryConverter.extractPredicatesAndConvertDatalogRule(
-                                rule, iqFactory).liftBinding())).distinct();
+                .map(rule -> noNullValueEnforcer.transform(rule).liftBinding()).distinct();
 
     }
 
