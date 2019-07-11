@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 /*
  * #%L
@@ -21,73 +21,20 @@ package it.unibz.inf.ontop.datalog;
  */
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class DatalogNormalizer {
 
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
-	private final DatalogFactory datalogFactory;
 
 	@Inject
-	private DatalogNormalizer(TermFactory termFactory, TypeFactory typeFactory, DatalogFactory datalogFactory) {
+	private DatalogNormalizer(TermFactory termFactory, TypeFactory typeFactory) {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
-		this.datalogFactory = datalogFactory;
 	}
-
-	public void foldJoinTrees(CQIE query) {
-	    foldJoinTrees(query.getBody(), false);
-	}
-
-	private void foldJoinTrees(List atoms, boolean isJoin) {
-		List<Function> dataAtoms = new LinkedList<>();
-		List<Function> booleanAtoms = new LinkedList<>();
-
-		/*
-		 * Collecting all data and boolean atoms for later processing. Calling
-		 * recursively fold Join trees on any algebra function.
-		 */
-		for (Object o : atoms) {
-			Function atom = (Function) o;
-			if (atom.isOperation()) {
-				booleanAtoms.add(atom);
-			} else {
-				dataAtoms.add(atom);
-				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlLeftJoinPredicate()))
-					foldJoinTrees(atom.getTerms(), false);
-				if (atom.getFunctionSymbol().equals(datalogFactory.getSparqlJoinPredicate()))
-					foldJoinTrees(atom.getTerms(), true);
-			}
-
-		}
-
-		if (!isJoin || dataAtoms.size() <= 2)
-			return;
-
-		/*
-		 * We process all atoms in dataAtoms to make only BINARY joins. Taking
-		 * two at a time and replacing them for JOINs, until only two are left.
-		 * All boolean conditions of the original join go into the first join
-		 * generated. It always merges from the left to the right.
-		 */
-		while (dataAtoms.size() > 2) {
-			Function joinAtom = datalogFactory.getSPARQLJoin(dataAtoms.remove(0), dataAtoms.remove(0));
-			joinAtom.getTerms().addAll(booleanAtoms);
-			booleanAtoms.clear();
-
-			dataAtoms.add(0, joinAtom);
-		}
-		atoms.clear();
-		atoms.addAll(dataAtoms);
-
-	}
-
-
 
 
 	/***
@@ -104,6 +51,8 @@ public class DatalogNormalizer {
         }
     }
 
+    // recursive method: algebraFunctionalTerm is checked to be isAlgebraFunction() before every call
+
     private void addMinimalEqualityToLeftOrNestedInnerJoin(Function algebraFunctionalTerm) {
 		int booleanAtoms = 0;
 		for (Term term : algebraFunctionalTerm.getTerms()) {
@@ -114,8 +63,7 @@ public class DatalogNormalizer {
 			if (f.isOperation())
 				booleanAtoms++;
 		}
-		if (algebraFunctionalTerm.isAlgebraFunction()
-				&& booleanAtoms == 0) {
+		if (booleanAtoms == 0) {
 			Function trivialEquality = termFactory.getFunctionEQ(
 			        termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBLargeIntegerType()),
 					termFactory.getDBConstant("1", typeFactory.getDBTypeFactory().getDBLargeIntegerType()));

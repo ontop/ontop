@@ -381,7 +381,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		}
 
         DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
-        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of(),
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting,
 				query.getProjectionAtom().getArguments());
 
         IQTree optimisedTree = convertedIQ.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {

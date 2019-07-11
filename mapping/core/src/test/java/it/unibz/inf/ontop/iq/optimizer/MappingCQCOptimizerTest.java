@@ -1,71 +1,26 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
+import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.iq.tools.IQConverter;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
-import org.apache.commons.rdf.api.RDF;
 import org.junit.Test;
+
+import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
+import static org.junit.Assert.assertEquals;
 
 
 public class MappingCQCOptimizerTest {
 
 
-    private static final DBMetadata DB_METADATA;
-
-    public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final ExecutorRegistry EXECUTOR_REGISTRY;
-    public static final TermFactory TERM_FACTORY;
-    public static final AtomFactory ATOM_FACTORY;
-    public static final DatalogFactory DATALOG_FACTORY;
-    public static final TypeFactory TYPE_FACTORY;
-    public static final UnifierUtilities UNIFIER_UTILITIES;
-    public static final NoNullValueEnforcer NO_NULL_VALUE_ENFORCER;
-    public static final IQConverter IQ_CONVERTER;
-    public static final RDF RDF_FACTORY;
-
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
-    }
-
-    static {
-        OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
-                .enableTestMode()
-                .build();
-        Injector injector = defaultConfiguration.getInjector();
-
-        IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
-        ATOM_FACTORY = injector.getInstance(AtomFactory.class);
-        DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        TERM_FACTORY = injector.getInstance(TermFactory.class);
-        TYPE_FACTORY = injector.getInstance(TypeFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
-        UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
-        IQ_CONVERTER = injector.getInstance(IQConverter.class);
-        RDF_FACTORY = injector.getInstance(RDF.class);
-
-        EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
-
-        NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
-    }
 
     private final static RelationPredicate company;
     private final static RelationPredicate companyReserves;
@@ -74,6 +29,11 @@ public class MappingCQCOptimizerTest {
     private final static Variable fldNpdidField1 = TERM_FACTORY.getVariable("fldNpdidField1");
     private final static Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
     private final static Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
+
+    private final static Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
+    private final static Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
+    private final static Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
+    private final static Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
 
     static {
@@ -94,8 +54,12 @@ public class MappingCQCOptimizerTest {
         table3Def.addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType.getName(), integerType, false);
         companyReserves = table3Def.getAtomPredicate();
 
+        table3Def.addForeignKeyConstraint(
+                ForeignKeyConstraint.builder(table3Def, table24Def)
+                    .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
+                    .build("FK"));
+
         dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
     }
 
     @Test
@@ -113,7 +77,17 @@ public class MappingCQCOptimizerTest {
 
         IQ q = IQ_FACTORY.createIQ(root, rootTree);
 
-        System.out.println(q);
+        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+
+        b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
+                ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+
+        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
+
+        IQ r = MAPPING_CQC_OPTIMIZER.optimize(foreignKeyCQC, q);
+
+        assertEquals(1, r.getTree().getChildren().size());
+        assertEquals(companyReservesNode, r.getTree().getChildren().get(0));
     }
 
 }
