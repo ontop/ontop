@@ -53,8 +53,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
             Mapping factsAsMapping = factConverter.convert(ontology.get().abox(),
                     settings.isOntologyAnnotationQueryingEnabled());
             Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-            Mapping mappingWithDistinct = mappingDistinctTransformer.addDistinct(mappingWithFacts);
-            return createSpecification(mappingWithDistinct, dbMetadata, ontology.get().tbox());
+            return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory).build().tbox();
@@ -66,7 +65,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
         Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         Mapping saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+        Mapping mappingWithDistinct = mappingDistinctTransformer.addDistinct(normalizedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tbox);
+        return specificationFactory.createSpecification(mappingWithDistinct, dbMetadata, tbox);
     }
 }

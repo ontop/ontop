@@ -25,9 +25,9 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
 
     public Mapping addDistinct(Mapping mapping){
         return specificationFactory.createMapping(
-          mapping.getMetadata(),
-          updateQueries(mapping.getRDFClassQueries()),
-          updateQueries(mapping.getRDFClassQueries())
+                mapping.getMetadata(),
+                updateQueries(mapping.getRDFPropertyQueries()),
+                updateQueries(mapping.getRDFClassQueries())
         );
     }
 
