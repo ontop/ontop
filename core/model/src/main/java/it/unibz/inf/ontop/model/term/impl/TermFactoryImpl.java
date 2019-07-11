@@ -790,7 +790,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate, 
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
@@ -814,6 +814,28 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCastFunctionSymbol(inputType, targetType), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(ImmutableList.copyOf(possibleValues));
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.length),
+				argumentBuilder.build());
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(possibleValues);
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.size()),
+				argumentBuilder.build());
 	}
 
 	@Override

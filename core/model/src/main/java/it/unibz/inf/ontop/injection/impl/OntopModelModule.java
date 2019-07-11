@@ -77,6 +77,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 ImmutableList.of(
                         VariableGenerator.class,
                         VariableNullability.class,
+                        DummyVariableNullability.class,
                         ProjectionDecomposer.class
                 ),
                 CoreUtilsFactory.class);

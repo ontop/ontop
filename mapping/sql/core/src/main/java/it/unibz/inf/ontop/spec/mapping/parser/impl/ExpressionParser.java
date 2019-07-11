@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -48,27 +49,26 @@ import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 public class ExpressionParser {
 
     private final QuotedIDFactory idfac;
-    private final ImmutableMap<QualifiedAttributeID, Term> attributes;
+    private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
     private final TermFactory termFactory;
     private final DBTypeFactory dbTypeFactory;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
-    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, Term> attributes,
-                            TermFactory termFactory, TypeFactory typeFactory,
-                            DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+    public ExpressionParser(QuotedIDFactory idfac, ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+                            CoreSingletons coreSingletons) {
         this.idfac = idfac;
         this.attributes = attributes;
-        this.termFactory = termFactory;
-        this.dbTypeFactory = typeFactory.getDBTypeFactory();
-        this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
+        this.dbFunctionSymbolFactory = coreSingletons.getDBFunctionsymbolFactory();
     }
 
-    public Term parseTerm(Expression expression) {
+    public ImmutableTerm parseTerm(Expression expression) {
         TermVisitor visitor = new TermVisitor(attributes);
         return visitor.getTerm(expression);
     }
 
-    public ImmutableList<Function> parseBooleanExpression(Expression expression) {
+    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression) {
         BooleanExpressionVisitor parser = new BooleanExpressionVisitor(attributes);
         return parser.translate(expression);
     }
@@ -95,38 +95,38 @@ public class ExpressionParser {
 
         // CAREFUL: this variable gets reset in each visit method implementation
         // concurrent evaluation is not possible
-        private ImmutableList<Function> result;
+        private ImmutableList<ImmutableExpression> result;
 
-        BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
+        BooleanExpressionVisitor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
             termVisitor = new TermVisitor(attributes);
         }
 
-        private ImmutableList<Function> translate(Expression expression) {
+        private ImmutableList<ImmutableExpression> translate(Expression expression) {
             expression.accept(this);
             return this.result;
         }
 
         // cancel double negation
-        private Function negation(Function arg) {
+        private ImmutableExpression negation(ImmutableExpression arg) {
             return (arg.getFunctionSymbol() instanceof DBNotFunctionSymbol)
-                    ? (Function) arg.getTerm(0)
-                    : termFactory.getFunctionNOT(arg);
+                    ? (ImmutableExpression)arg.getTerm(0)
+                    : termFactory.getDBNot(arg);
         }
 
-        private java.util.function.Function<Function, ImmutableList<Function>> notOperation(boolean isNot) {
+        private java.util.function.Function<ImmutableExpression, ImmutableList<ImmutableExpression>> notOperation(boolean isNot) {
             return isNot
                     ? arg -> ImmutableList.of(negation(arg))
                     : arg -> ImmutableList.of(arg);
         }
 
-        private void process(BinaryExpression expression, BiFunction<Term, Term, Function> op) {
-            Term leftTerm = termVisitor.getTerm(expression.getLeftExpression());
-            Term rightTerm = termVisitor.getTerm(expression.getRightExpression());
-            Function f = op.apply(leftTerm, rightTerm);
+        private void process(BinaryExpression expression, BiFunction<ImmutableTerm, ImmutableTerm, ImmutableExpression> op) {
+            ImmutableTerm leftTerm = termVisitor.getTerm(expression.getLeftExpression());
+            ImmutableTerm rightTerm = termVisitor.getTerm(expression.getRightExpression());
+            ImmutableExpression f = op.apply(leftTerm, rightTerm);
             result = notOperation(expression.isNot()).apply(f);
         }
 
-        private void processOJ(OldOracleJoinBinaryExpression expression, BiFunction<Term, Term, Function> op) {
+        private void processOJ(OldOracleJoinBinaryExpression expression, BiFunction<ImmutableTerm, ImmutableTerm, ImmutableExpression> op) {
             if (expression.getOraclePriorPosition() != SupportsOldOracleJoinSyntax.NO_ORACLE_PRIOR)
                 throw new UnsupportedSelectQueryRuntimeException("Oracle PRIOR is not supported", expression);
 
@@ -136,14 +136,14 @@ public class ExpressionParser {
             process(expression, op);
         }
 
-        private Function getOR(ImmutableList<Function> list) {
+        private ImmutableExpression getOR(ImmutableList<ImmutableExpression> list) {
             return list.reverse().stream()
-                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getFunctionOR(b, a));
+                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getDisjunction(b, a));
         }
 
-        private Function getAND(ImmutableList<Function> list) {
+        private ImmutableExpression getAND(ImmutableList<ImmutableExpression> list) {
             return list.reverse().stream()
-                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getFunctionAND(b, a));
+                    .reduce(null, (a, b) -> (a == null) ? b : termFactory.getConjunction(b, a));
         }
 
         // ------------------------------------------------------------
@@ -152,9 +152,9 @@ public class ExpressionParser {
 
         @Override
         public void visit(AndExpression expression) {
-            ImmutableList<Function> left = translate(expression.getLeftExpression());
-            ImmutableList<Function> right = translate(expression.getRightExpression());
-            ImmutableList<Function> and = Stream.of(left, right).flatMap(Collection::stream)
+            ImmutableList<ImmutableExpression> left = translate(expression.getLeftExpression());
+            ImmutableList<ImmutableExpression> right = translate(expression.getRightExpression());
+            ImmutableList<ImmutableExpression> and = Stream.of(left, right).flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toList());
 
             result = (expression.isNot())
@@ -164,16 +164,16 @@ public class ExpressionParser {
 
         @Override
         public void visit(OrExpression expression) {
-            Function left = getAND(translate(expression.getLeftExpression()));
-            Function right = getAND(translate(expression.getRightExpression()));
+            ImmutableExpression left = getAND(translate(expression.getLeftExpression()));
+            ImmutableExpression right = getAND(translate(expression.getRightExpression()));
             result = (expression.isNot())
                     ? ImmutableList.of(negation(left), negation(right))
-                    : ImmutableList.of(termFactory.getFunctionOR(left, right));
+                    : ImmutableList.of(termFactory.getDisjunction(left, right));
         }
 
         @Override
         public void visit(Parenthesis expression) {
-            ImmutableList<Function> arg = translate(expression.getExpression());
+            ImmutableList<ImmutableExpression> arg = translate(expression.getExpression());
             result = (expression.isNot()) ? ImmutableList.of(negation(getAND(arg))) : arg;
         }
 
@@ -184,44 +184,39 @@ public class ExpressionParser {
 
         @Override
         public void visit(IsNullExpression expression) {
-            Term term = termVisitor.getTerm(expression.getLeftExpression());
-            result = notOperation(expression.isNot()).apply(termFactory.getFunction(
-                    dbFunctionSymbolFactory.getDBIsNull(),
-                    term));
+            ImmutableTerm term = termVisitor.getTerm(expression.getLeftExpression());
+            result = notOperation(expression.isNot()).apply(termFactory.getDBIsNull(term));
         }
 
         @Override
         public void visit(EqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBStrictEquality(2), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getStrictEquality(t1, t2));
         }
 
         @Override
         public void visit(GreaterThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(
-                    dbFunctionSymbolFactory.getDBDefaultInequality(GT), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getDBDefaultInequality(GT, t1, t2));
         }
 
         @Override
         public void visit(GreaterThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(
-                    dbFunctionSymbolFactory.getDBDefaultInequality(GTE), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getDBDefaultInequality(GTE, t1, t2));
         }
 
         @Override
         public void visit(MinorThan expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(
-                    dbFunctionSymbolFactory.getDBDefaultInequality(LT), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getDBDefaultInequality(LT, t1, t2));
         }
 
         @Override
         public void visit(MinorThanEquals expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(
-                    dbFunctionSymbolFactory.getDBDefaultInequality(LTE), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getDBDefaultInequality(LTE, t1, t2));
         }
 
         @Override
         public void visit(NotEqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBStrictNEquality(2), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getImmutableExpression(
+                    dbFunctionSymbolFactory.getDBStrictNEquality(2), t1, t2));
         }
 
 
@@ -231,7 +226,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(LikeExpression expression) {
-            process(expression, (t1, t2) -> termFactory.getExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2));
+            process(expression, (t1, t2) -> termFactory.getImmutableExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2));
         }
 
         @Override
@@ -248,8 +243,8 @@ public class ExpressionParser {
                     throw new UnsupportedOperationException();
             }
             process(expression, (t1, t2) -> flags.getValue().isEmpty()
-                    ? termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches2(), t1, t2)
-                    : termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags));
+                    ? termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2))
+                    : termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2, flags)));
         }
 
         // POSIX Regular Expressions
@@ -258,7 +253,7 @@ public class ExpressionParser {
         @Override
         public void visit(RegExpMatchOperator expression) {
             DBConstant flags;
-            java.util.function.UnaryOperator<Function> not;
+            java.util.function.UnaryOperator<ImmutableExpression> not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
                     flags = termFactory.getDBStringConstant("");
@@ -270,11 +265,11 @@ public class ExpressionParser {
                     break;
                 case NOT_MATCH_CASESENSITIVE:
                     flags = termFactory.getDBStringConstant("");
-                    not = arg -> termFactory.getFunctionNOT(arg);
+                    not = termFactory::getDBNot;
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
                     flags = termFactory.getDBStringConstant("i");
-                    not = arg -> termFactory.getFunctionNOT(arg);
+                    not = termFactory::getDBNot;
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -282,8 +277,8 @@ public class ExpressionParser {
             process(expression, (t1, t2) ->
                     not.apply(
                             flags.getValue().isEmpty()
-                                    ? termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches2(), t1, t2)
-                                    : termFactory.getFunction(dbFunctionSymbolFactory.getDBRegexpMatches3(), t1, t2, flags)));
+                                    ? termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2))
+                                    : termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2, flags))));
         }
 
 
@@ -292,23 +287,23 @@ public class ExpressionParser {
 
         @Override
         public void visit(Between expression) {
-            Term t1 = termVisitor.getTerm(expression.getLeftExpression());
-            Term t2 = termVisitor.getTerm(expression.getBetweenExpressionStart());
+            ImmutableTerm t1 = termVisitor.getTerm(expression.getLeftExpression());
+            ImmutableTerm t2 = termVisitor.getTerm(expression.getBetweenExpressionStart());
 
-            Term t3 = termVisitor.getTerm(expression.getLeftExpression());
-            Term t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
+            ImmutableTerm t3 = termVisitor.getTerm(expression.getLeftExpression());
+            ImmutableTerm t4 = termVisitor.getTerm(expression.getBetweenExpressionEnd());
 
             if (expression.isNot()) {
-                Function atom1 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(LT), t1, t2);
-                Function atom2 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(GT), t3, t4);
+                ImmutableExpression e1 = termFactory.getDBDefaultInequality(LT, t1, t2);
+                ImmutableExpression e2 = termFactory.getDBDefaultInequality(GT, t3, t4);
 
-                result = ImmutableList.of(termFactory.getFunctionOR(atom1, atom2));
+                result = ImmutableList.of(termFactory.getDisjunction(e1, e2));
             }
             else {
-                Function atom1 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(GTE), t1, t2);
-                Function atom2 = termFactory.getFunction(dbFunctionSymbolFactory.getDBDefaultInequality(LTE), t3, t4);
+                ImmutableExpression e1 = termFactory.getDBDefaultInequality(GTE, t1, t2);
+                ImmutableExpression e2 = termFactory.getDBDefaultInequality(LTE, t3, t4);
 
-                result = ImmutableList.of(atom1, atom2);
+                result = ImmutableList.of(e1, e2);
             }
         }
 
@@ -319,7 +314,7 @@ public class ExpressionParser {
             if (expression.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN)
                 throw new UnsupportedSelectQueryRuntimeException("Oracle OUTER JOIN syntax is not supported", expression);
 
-            Stream<Function> stream;
+            Stream<ImmutableExpression> stream;
             Expression left = expression.getLeftExpression();
             if (left != null) {
                 ItemsList right = expression.getRightItemsList();
@@ -333,9 +328,9 @@ public class ExpressionParser {
                 // cannot be done in parallel
                 stream = ((ExpressionList)right).getExpressions().stream()
                         .map(item -> {
-                            Term t1 = termVisitor.getTerm(expression.getLeftExpression());
-                            Term t2 = termVisitor.getTerm(item);
-                            return termFactory.getFunctionEQ(t1, t2);
+                            ImmutableTerm t1 = termVisitor.getTerm(expression.getLeftExpression());
+                            ImmutableTerm t2 = termVisitor.getTerm(item);
+                            return termFactory.getStrictEquality(t1, t2);
                         });
             }
             else {
@@ -367,10 +362,10 @@ public class ExpressionParser {
             }
 
             // do not use ImmutableCollectors.toList because this cannot be done concurrently
-            ImmutableList<Function> equalities =
-                    ImmutableList.<Function>builder().addAll(stream.iterator()).build();
+            ImmutableList<ImmutableExpression> equalities =
+                    ImmutableList.<ImmutableExpression>builder().addAll(stream.iterator()).build();
 
-            Function atom;
+            ImmutableExpression atom;
             switch (equalities.size()) {
                 case 0:
                     throw new InvalidSelectQueryRuntimeException("IN must contain at least one expression", expression);
@@ -408,8 +403,8 @@ public class ExpressionParser {
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
             // do not use ImmutableCollectors.toList because this cannot be done concurrently
-            ImmutableList<Term> terms = (expression.getParameters() != null)
-                    ? ImmutableList.<Term>builder()
+            ImmutableList<ImmutableTerm> terms = (expression.getParameters() != null)
+                    ? ImmutableList.<ImmutableTerm>builder()
                     .addAll(expression.getParameters().getExpressions().stream()
                             .map(t -> termVisitor.getTerm(t)).iterator())
                     .build()
@@ -419,7 +414,7 @@ public class ExpressionParser {
                     expression.getName(),
                     terms.size());
 
-            result = ImmutableList.of(termFactory.getExpression(functionSymbol, terms));
+            result = ImmutableList.of(termFactory.getImmutableExpression(functionSymbol, terms));
         }
 
 
@@ -564,9 +559,11 @@ public class ExpressionParser {
 
         @Override
         public void visit(NotExpression expression) {
-            result = ImmutableList.of(termFactory.getFunctionNOT(termVisitor.getTerm(expression.getExpression())));
-//            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+            ImmutableTerm subTerm = termVisitor.getTerm(expression.getExpression());
+            if (!(subTerm instanceof ImmutableExpression))
+                throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression.getExpression());
 
+            result = ImmutableList.of(termFactory.getDBNot((ImmutableExpression) subTerm));
         }
 
 
@@ -699,17 +696,17 @@ public class ExpressionParser {
      */
     private class TermVisitor implements ExpressionVisitor {
 
-        private final ImmutableMap<QualifiedAttributeID, Term> attributes;
+        private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
 
         // CAREFUL: this variable gets reset in each visit method implementation
         // concurrent evaluation is not possible
-        private Term result;
+        private ImmutableTerm result;
 
-        TermVisitor(ImmutableMap<QualifiedAttributeID, Term> attributes) {
+        TermVisitor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
             this.attributes = attributes;
         }
 
-        Term getTerm(Expression expression) {
+        ImmutableTerm getTerm(Expression expression) {
             expression.accept(this);
             return this.result;
         }
@@ -719,15 +716,15 @@ public class ExpressionParser {
         @Override
         public void visit(net.sf.jsqlparser.expression.Function expression) {
             // do not use ImmutableCollectors.toList because this cannot be done concurrently
-            ImmutableList<Term> terms = (expression.getParameters() != null)
-                    ? ImmutableList.<Term>builder()
+            ImmutableList<ImmutableTerm> terms = (expression.getParameters() != null)
+                    ? ImmutableList.<ImmutableTerm>builder()
                     .addAll(expression.getParameters().getExpressions().stream()
                             .map(t -> getTerm(t)).iterator())
                     .build()
                     : ImmutableList.of();
 
             // Old approach
-            BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function> function
+            BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm> function
                     = FUNCTIONS.get(expression.getName().toUpperCase());
 
             result = (function == null)
@@ -736,10 +733,10 @@ public class ExpressionParser {
                     : function.apply(terms, expression);
         }
 
-        private Term convertFunction(net.sf.jsqlparser.expression.Function expression, ImmutableList<Term> terms) {
+        private ImmutableTerm convertFunction(net.sf.jsqlparser.expression.Function expression, ImmutableList<ImmutableTerm> terms) {
             DBFunctionSymbol functionSymbol = dbFunctionSymbolFactory.getRegularDBFunctionSymbol(expression.getName(),
                     terms.size());
-            return termFactory.getFunction(functionSymbol, terms);
+            return termFactory.getImmutableFunctionalTerm(functionSymbol, terms);
         }
 
 
@@ -805,25 +802,25 @@ public class ExpressionParser {
 
         @Override
         public void visit(Addition expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(
+            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
                     dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_ADD), t1, t2));
         }
 
         @Override
         public void visit(Subtraction expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(
+            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
                     dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_SUBSTRACT), t1, t2));
         }
 
         @Override
         public void visit(Multiplication expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(
+            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
                     dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY), t1, t2));
         }
 
         @Override
         public void visit(Division expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(
+            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
                     dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_DIVIDE), t1, t2));
         }
 
@@ -835,15 +832,16 @@ public class ExpressionParser {
 
         @Override
         public void visit(Concat expression) {
-            process(expression, (t1, t2) -> termFactory.getFunction(dbFunctionSymbolFactory.getDBConcatOperator(2), t1, t2));
+            process(expression, (t1, t2) -> termFactory.getImmutableFunctionalTerm(
+                    dbFunctionSymbolFactory.getDBConcatOperator(2), t1, t2));
         }
 
-        private void process(BinaryExpression expression, BinaryOperator<Term> op) {
+        private void process(BinaryExpression expression, BinaryOperator<ImmutableTerm> op) {
             if (expression.isNot())
                 throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
 
-            Term leftTerm = getTerm(expression.getLeftExpression());
-            Term rightTerm = getTerm(expression.getRightExpression());
+            ImmutableTerm leftTerm = getTerm(expression.getLeftExpression());
+            ImmutableTerm rightTerm = getTerm(expression.getRightExpression());
             result = op.apply(leftTerm, rightTerm);
         }
 
@@ -870,10 +868,10 @@ public class ExpressionParser {
         @Override
         public void visit(SignedExpression expression) {
 
-            Term arg = getTerm(expression.getExpression());
+            ImmutableTerm arg = getTerm(expression.getExpression());
             switch (expression.getSign()) {
                 case '-' :
-                    result = termFactory.getFunction(
+                    result = termFactory.getImmutableFunctionalTerm(
                             dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
                             termFactory.getDBConstant("-1", dbTypeFactory.getDBLargeIntegerType()),
                             arg);
@@ -903,7 +901,7 @@ public class ExpressionParser {
                     ? idfac.createRelationID(table.getSchemaName(), table.getName())
                     : null;
             QualifiedAttributeID qa = new QualifiedAttributeID(relation, column);
-            Term var = attributes.get(qa);
+            ImmutableTerm var = attributes.get(qa);
 
             if (var == null) {
                 // can be
@@ -1072,7 +1070,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(CastExpression expression) {
-            Term term = getTerm(expression.getLeftExpression());
+            ImmutableTerm term = getTerm(expression.getLeftExpression());
             ColDataType type = expression.getType();
             String datatype = type.getDataType();
             // TODO: proper datatype conversion is required at this stage
@@ -1171,8 +1169,8 @@ public class ExpressionParser {
     // (WARNING: not all combinations of the parameters are supported)
     // ---------------------------------------------------------------
 
-    private final ImmutableMap<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>
-            FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<Term>, net.sf.jsqlparser.expression.Function, Function>>builder()
+    private final ImmutableMap<String, BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm>>
+            FUNCTIONS = ImmutableMap.<String, BiFunction<ImmutableList<ImmutableTerm>, net.sf.jsqlparser.expression.Function, ImmutableFunctionalTerm>>builder()
             .put("RAND", this::get_RAND)
             // due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
             .put("CONVERT", this::reject)
@@ -1188,15 +1186,15 @@ public class ExpressionParser {
             .put("JSON_ARRAY_ELEMENTS", this::reject)
             .build();
 
-    private Function get_RAND(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private ImmutableFunctionalTerm get_RAND(ImmutableList<ImmutableTerm> terms, net.sf.jsqlparser.expression.Function expression) {
         switch (terms.size()) {
             case 0:
-                return termFactory.getFunction(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
+                return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(UUID.randomUUID()));
         }
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 
-    private Function reject(ImmutableList<Term> terms, net.sf.jsqlparser.expression.Function expression) {
+    private ImmutableFunctionalTerm reject(ImmutableList<ImmutableTerm> terms, net.sf.jsqlparser.expression.Function expression) {
         throw new UnsupportedSelectQueryRuntimeException("Unsupported SQL function", expression);
     }
 

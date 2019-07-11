@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -133,83 +132,6 @@ public class DatalogFactoryImpl implements DatalogFactory {
     }
 
 
-    /***
-     * Replaces each variable 'v' in the query for a new variable constructed
-     * using the name of the original variable plus the counter. For example
-     *
-     * <pre>
-     * q(x) :- C(x)
-     *
-     * results in
-     *
-     * q(x_1) :- C(x_1)
-     *
-     * if counter = 1.
-     * </pre>
-     *
-     * <p>
-     * This method can be used to generate "fresh" rules from a datalog program
-     * so that it can be used during a resolution step.
-     * suffix
-     *            The integer that will be apended to every variable name
-     * @param rule
-     * @return
-     */
-    @Override
-    public CQIE getFreshCQIECopy(CQIE rule) {
-
-        int suff = ++suffix;
-
-        // This method doesn't support nested functional terms
-        CQIE freshRule = rule.clone();
-        Function head = freshRule.getHead();
-        List<Term> headTerms = head.getTerms();
-        for (int i = 0; i < headTerms.size(); i++) {
-            Term term = headTerms.get(i);
-            Term newTerm = getFreshTerm(term, suff);
-            headTerms.set(i, newTerm);
-        }
-
-        List<Function> body = freshRule.getBody();
-        for (Function atom : body) {
-            List<Term> atomTerms = atom.getTerms();
-            for (int i = 0; i < atomTerms.size(); i++) {
-                Term term = atomTerms.get(i);
-                Term newTerm = getFreshTerm(term, suff);
-                atomTerms.set(i, newTerm);
-            }
-        }
-        return freshRule;
-    }
-
-    private int suffix = 0;
-
-    private Term getFreshTerm(Term term, int suff) {
-        Term newTerm;
-        if (term instanceof Variable) {
-            Variable variable = (Variable) term;
-            newTerm = termFactory.getVariable(variable.getName() + "_" + suff);
-        }
-        else if (term instanceof Function) {
-            Function functionalTerm = (Function) term;
-            List<Term> innerTerms = functionalTerm.getTerms();
-            List<Term> newInnerTerms = new LinkedList<>();
-            for (int j = 0; j < innerTerms.size(); j++) {
-                Term innerTerm = innerTerms.get(j);
-                newInnerTerms.add(getFreshTerm(innerTerm, suff));
-            }
-            Predicate newFunctionSymbol = functionalTerm.getFunctionSymbol();
-            Function newFunctionalTerm = termFactory.getFunction(newFunctionSymbol, newInnerTerms);
-            newTerm = newFunctionalTerm;
-        }
-        else if (term instanceof Constant) {
-            newTerm = term.clone();
-        }
-        else {
-            throw new RuntimeException("Unsupported term: " + term);
-        }
-        return newTerm;
-    }
 
     /**
      * Used for intermediate datalog rules

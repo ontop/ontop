@@ -19,5 +19,7 @@ public interface OptimizationSingletons {
 
     UnionBasedQueryMerger getUnionBasedQueryMerger();
 
+    OntopOptimizationSettings getSettings();
+
     // TODO: complete
 }

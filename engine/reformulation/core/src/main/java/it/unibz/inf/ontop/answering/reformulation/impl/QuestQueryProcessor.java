@@ -43,7 +43,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryCache queryCache;
 
 	private final QueryUnfolder queryUnfolder;
-	private final BindingLiftOptimizer bindingLiftOptimizer;
+	private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
@@ -63,7 +63,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
 								@Assisted ExecutorRegistry executorRegistry,
 								QueryCache queryCache,
-								BindingLiftOptimizer bindingLiftOptimizer,
+								UnionAndBindingLiftOptimizer bindingLiftOptimizer,
 								TranslationFactory translationFactory,
 								QueryRewriter queryRewriter,
 								JoinLikeOptimizer joinLikeOptimizer,
@@ -139,16 +139,12 @@ public class QuestQueryProcessor implements QueryReformulator {
                     throw new EmptyQueryException();
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
-                // Non-final
-                IntermediateQuery intermediateQuery = iqConverter.convert(unfoldedIQ, executorRegistry);
-
                 //lift bindings and union when it is possible
-                intermediateQuery = bindingLiftOptimizer.optimize(intermediateQuery);
-                log.debug("New query after substitution lift optimization: \n" + intermediateQuery.toString());
+				IQ liftedQuery = bindingLiftOptimizer.optimize(unfoldedIQ);
+                log.debug("New lifted query: \n" + liftedQuery.toString());
 
-                log.debug("New lifted query: \n" + intermediateQuery.toString());
-
-                intermediateQuery = pullUpExpressionOptimizer.optimize(intermediateQuery);
+				// Non-final
+				IntermediateQuery intermediateQuery = pullUpExpressionOptimizer.optimize(iqConverter.convert(liftedQuery, executorRegistry));
                 log.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
                 intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
