@@ -41,19 +41,16 @@ import java.util.*;
 public class SubstitutionImpl implements Substitution {
 
     private final Map<Variable, Term> map;
-    private final SubstitutionUtilities substitutionUtilities;
     private final TermFactory termFactory;
 
     public SubstitutionImpl(TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
-        this.substitutionUtilities = new SubstitutionUtilities();
     }
 
     public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = substitutionMap;
-        this.substitutionUtilities = new SubstitutionUtilities();
     }
 
     @Override
@@ -205,8 +202,8 @@ public class SubstitutionImpl implements Substitution {
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            substitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
-            substitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
         }
 
         return true;

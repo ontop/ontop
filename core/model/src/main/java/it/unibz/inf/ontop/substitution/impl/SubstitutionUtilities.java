@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.substitution.impl;
  */
 
 
-import it.unibz.inf.ontop.datalog.CQIE;
-
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 
@@ -36,36 +34,6 @@ import java.util.List;
 public class SubstitutionUtilities {
 
     /**
-     * This method will return a new query, resulting from the application of
-     * the substitution function to the original query q. To do this, we will call the clone()
-     * method of the original query and then will call applySubstitution to each atom
-     * of the cloned query.
-     *
-     * @param q
-     * @param substitution
-     * @return
-     */
-    public CQIE applySubstitution(CQIE q, Substitution substitution, boolean clone) {
-
-        CQIE newq;
-        if (clone)
-            newq = q.clone();
-        else
-            newq = q;
-
-        Function head = newq.getHead();
-        applySubstitution(head, substitution);
-        for (Function bodyatom : newq.getBody())
-            applySubstitution(bodyatom, substitution);
-
-        return newq;
-    }
-
-    public CQIE applySubstitution(CQIE q, Substitution substitution) {
-        return applySubstitution(q, substitution, true);
-    }
-
-    /**
      * Applies the substitution to all the terms in the list. Note that this
      * will not clone the list or the terms inside the list.
      *
@@ -73,11 +41,11 @@ public class SubstitutionUtilities {
      * @param unifier
      */
 
-    public void applySubstitution(Function atom, Substitution unifier) {
+    public static void applySubstitution(Function atom, Substitution unifier) {
         applySubstitution(atom, unifier, 0);
     }
 
-    public void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
+    public static void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
 
         List<Term> terms = atom.getTerms();
 
