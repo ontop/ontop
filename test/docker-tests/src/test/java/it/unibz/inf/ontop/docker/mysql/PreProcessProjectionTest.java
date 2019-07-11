@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.docker.mysql;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.LegacyMappingDatatypeFiller;
 import org.junit.Test;
 
 public class PreProcessProjectionTest extends AbstractVirtualModeTest {
