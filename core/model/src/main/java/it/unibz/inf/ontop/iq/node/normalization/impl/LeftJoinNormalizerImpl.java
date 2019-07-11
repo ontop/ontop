@@ -142,8 +142,6 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         private LJNormalizationState updateLeftChild(IQTree newLeftChild) {
-            if (newLeftChild.equals(leftChild))
-                return this;
             return new LJNormalizationState(projectedVariables, newLeftChild, rightChild, ljCondition,
                     ancestors, variableGenerator);
         }

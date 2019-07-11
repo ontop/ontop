@@ -3,7 +3,7 @@ package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -47,7 +47,6 @@ public class OptimizationTestingTools {
     public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final PushDownBooleanExpressionOptimizer PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER;
-    public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final DatalogTools DATALOG_TOOLS;
     public static final IQConverter IQ_CONVERTER;
@@ -55,6 +54,7 @@ public class OptimizationTestingTools {
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final DatalogProgram2QueryConverter DATALOG_PROGRAM_2_QUERY_CONVERTER;
     public static final RDF RDF_FACTORY;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -123,12 +123,12 @@ public class OptimizationTestingTools {
         PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER = injector.getInstance(PushDownBooleanExpressionOptimizer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
+        DATALOG_PROGRAM_2_QUERY_CONVERTER = injector.getInstance(DatalogProgram2QueryConverter.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
-        
-        DATALOG_CONVERSION_TOOLS = injector.getInstance(DatalogConversionTools.class);
+
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
