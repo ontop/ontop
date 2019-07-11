@@ -50,7 +50,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
             Mapping factsAsMapping = factConverter.convert(ontology.get().abox(),
                     settings.isOntologyAnnotationQueryingEnabled());
             Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
-            return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
+            Mapping mappingWithDistinct = mappingDistinctTransformer.addDistinct(mappingWithFacts);
+            return createSpecification(mappingWithDistinct, dbMetadata, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory).build().tbox();
