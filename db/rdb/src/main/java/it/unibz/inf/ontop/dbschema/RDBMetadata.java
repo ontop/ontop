@@ -28,7 +28,6 @@ import java.util.*;
 
 public class RDBMetadata extends BasicDBMetadata {
 
-	private static final long serialVersionUID = -806363154890865756L;
 	private int parserViewCounter;
 	private final JdbcTypeMapper jdbcTypeMapper;
 	private final TypeFactory typeFactory;

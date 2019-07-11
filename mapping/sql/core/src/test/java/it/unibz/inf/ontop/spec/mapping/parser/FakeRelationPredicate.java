@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationPredicateImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -12,18 +14,10 @@ import java.util.stream.IntStream;
 /**
  * For low-level tests only!
  */
-public class FakeRelationPredicate extends PredicateImpl {
+public class FakeRelationPredicate extends RelationPredicateImpl {
 
-    protected FakeRelationPredicate(@Nonnull String name, int arity, TypeFactory typeFactory) {
-        super(name, createExpectedTermTypes(arity, typeFactory));
+    public FakeRelationPredicate(RelationDefinition relation) {
+        super(relation);
     }
 
-    private static ImmutableList<TermType> createExpectedTermTypes(int arity, TypeFactory typeFactory) {
-        TermType rootTermType = typeFactory.getAbstractAtomicTermType();
-
-        return IntStream.range(0, arity)
-                .boxed()
-                .map(i -> rootTermType)
-                .collect(ImmutableCollectors.toList());
-    }
 }

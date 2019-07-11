@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.Datalog2QueryMappingConverter;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.*;
@@ -46,13 +45,13 @@ public class MappingTestingTools {
     public static final DatalogFactory DATALOG_FACTORY;
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
+    public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
-    public static final Datalog2QueryMappingConverter DATALOG_2_QUERY_MAPPING_CONVERTER;
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingMerger MAPPING_MERGER;
@@ -66,6 +65,8 @@ public class MappingTestingTools {
     public static final UnionFlattener UNION_FLATTENER;
     public static final SpecificationFactory SPECIFICATION_FACTORY;
     public static final IQConverter IQ_CONVERTER;
+
+    public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
 
     public static final RelationPredicate TABLE1_AR2;
@@ -91,7 +92,6 @@ public class MappingTestingTools {
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
-        DATALOG_2_QUERY_MAPPING_CONVERTER = injector.getInstance(Datalog2QueryMappingConverter.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);
@@ -102,6 +102,7 @@ public class MappingTestingTools {
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
+        CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
 
         EMPTY_URI_TEMPLATE_MATCHER = UriTemplateMatcher.create(Stream.of(), TERM_FACTORY);
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
@@ -111,6 +112,8 @@ public class MappingTestingTools {
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
+
+        MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();

@@ -7,6 +7,6 @@ import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 
 public interface MappingDatatypeFiller {
 
-    MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping, DBMetadata dbMetadata)
+    MappingWithProvenance inferMissingDatatypes(MappingWithProvenance mapping)
             throws DBMetadataExtractionException, UnknownDatatypeException;
 }

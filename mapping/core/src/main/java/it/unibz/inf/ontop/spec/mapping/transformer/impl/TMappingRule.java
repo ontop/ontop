@@ -1,224 +1,182 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+import org.apache.commons.rdf.api.IRI;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
-/***
- * Splits a given mapping into builtin predicates (conditions)
- * and all other atoms (stripped), which are checked for containment
- * by the TMapping construction algorithm.
- */
 
 public class TMappingRule {
-	
-	private final Function head;
-	private final ImmutableList<Function> databaseAtoms;
-	private final CQIE stripped;
-	// an OR-connected list of AND-connected atomic filters
-	private final ImmutableList<ImmutableList<Function>> filterAtoms;
 
-	private final DatalogFactory datalogFactory;
+	private final MappingTools.RDFPredicateInfo predicateInfo;
+
+	private final DistinctVariableOnlyDataAtom projectionAtom;
+	private final ImmutableSubstitution<ImmutableTerm> substitution;
+
+	private final ImmutableList<ExtensionalDataNode> extensionalNodes;
+	// an OR-connected list of AND-connected atomic filters
+	private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
+
 	private final TermFactory termFactory;
 
-	/***
-	 * Given a mappings in currentMapping, this method will
-	 * return a new mappings in which no constants appear in the body of
-	 * database predicates. This is done by replacing the constant occurrence
-	 * with a fresh variable, and adding a new equality condition to the body of
-	 * the mapping.
-	 * <p/>
-	 * 
-	 * For example, let the mapping m be
-	 * <p/>
-	 * A(x) :- T(x,y,22)
-	 * 
-	 * <p>
-	 * Then this method will replace m by the mapping m'
-	 * <p>
-	 * A(x) :- T(x,y,z), EQ(z,22)
-	 * 
-	 */
-	
-	public TMappingRule(Function head, List<Function> body, DatalogFactory datalogFactory, TermFactory termFactory) {
-        this.datalogFactory = datalogFactory;
-        this.termFactory = termFactory;
+	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
+		this.termFactory = termFactory;
 
-		ImmutableList.Builder<Function> filters = ImmutableList.builder();
-		ImmutableList.Builder<Function> dbs = ImmutableList.builder();
+		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
+		this.projectionAtom = iq.getProjectionAtom();
+		this.substitution = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution();
 
-        Map<Constant, Variable> valueMap = new HashMap<>();
+		IQTree tree = iq.getTree().getChildren().get(0);
+		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
+		ImmutableSet<ImmutableExpression> joinConditions = IQ2CQ.getFilterExpressions(tree);
 
-		for (Function atom : body) {
-			if (!(atom.getFunctionSymbol() instanceof AtomPredicate)) {
-				Function clone = (Function)atom.clone();
-				filters.add(clone);
-			}
-			else {
-				// database atom, we need to replace all constants by filters
-				dbs.add(replaceConstants(atom, filters, valueMap));
-			}
-		}
-        this.databaseAtoms = dbs.build();
+		// maps all non-constants to fresh variables
+		//    this is required for more extensive use of OR
+		//    for example R(x,y) :- T(x,y,22) and R(x,y) :- T(x,y,23) will be replaced by
+		//    R(x,y) :- T(x,y,z) AND ((z = 22) OR (z = 23))
+		// without the replacement below, the database parts of the two assertion bodies
+		// will not be homomorphically equivalent
 
-        this.head = replaceConstants(head, filters, valueMap);
+		VariableGenerator variableGenerator = iq.getVariableGenerator();
+		ImmutableMap<ImmutableTerm, VariableOrGroundTerm> valueMap = dataAtoms.stream()
+				.flatMap(n -> n.getProjectionAtom().getArguments().stream())
+				.filter(t -> !(t instanceof Variable))
+				.distinct()
+				.collect(ImmutableCollectors.toMap(t -> t, t -> variableGenerator.generateNewVariable()));
 
-		ImmutableList<Function> f = filters.build();
-		this.filterAtoms = f.isEmpty() ? ImmutableList.of() : ImmutableList.of(f);
-		
-		this.stripped = this.datalogFactory.getCQIE(this.head, databaseAtoms);
+		this.extensionalNodes = dataAtoms.stream()
+					.map(n -> n.newAtom(atomFactory.getDataAtom(
+							n.getProjectionAtom().getPredicate(),
+							n.getProjectionAtom().getArguments().stream()
+									.map(term -> valueMap.getOrDefault(term, term))
+									.collect(ImmutableCollectors.toList()))))
+					.collect(ImmutableCollectors.toList());
+
+		ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(
+				joinConditions.stream(),
+				valueMap.entrySet().stream()
+					.map(e -> termFactory.getImmutableExpression(ExpressionOperation.EQ, e.getKey(), e.getValue())))
+				.collect(ImmutableCollectors.toList());
+
+		this.filter = filterAtoms.isEmpty() ? ImmutableList.of() : ImmutableList.of(filterAtoms);
 	}
 
-	
-	private Function replaceConstants(Function a, ImmutableList.Builder<Function> filters, Map<Constant, Variable> valueMap) {
-		Function atom = (Function)a.clone();
-		
-		for (int i = 0; i < atom.getTerms().size(); i++) {
-			Term term = atom.getTerm(i);
-			if (term instanceof Constant) {
-				// Found a constant, replacing with a fresh variable
-				// and adding the new equality atom
-				Constant c = (Constant)term;
-				Variable var = valueMap.get(c);
-				if (var == null) {
-					var = termFactory.getVariable("?FreshVar" + valueMap.keySet().size());
-					valueMap.put(c, var);
-					filters.add(termFactory.getFunctionEQ(var, c));
-				}
-				atom.setTerm(i, var);
-			}
-		}
-		
-		return atom;
-	}
-	
-	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<Function>> filterAtoms) {
-        this.datalogFactory = baseRule.datalogFactory;
+
+
+	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
         this.termFactory = baseRule.termFactory;
 
-		this.databaseAtoms = baseRule.databaseAtoms.stream()
-                .map(atom -> (Function)atom.clone())
-                .collect(ImmutableCollectors.toList());
-		this.head = (Function)baseRule.head.clone();
+        this.predicateInfo = baseRule.predicateInfo;
+        this.projectionAtom = baseRule.projectionAtom;
+		this.substitution = baseRule.substitution;
 
-		this.filterAtoms = filterAtoms;
-
-		this.stripped = datalogFactory.getCQIE(head, databaseAtoms);
+		this.extensionalNodes = baseRule.extensionalNodes;
+		this.filter = filter;
 	}
 	
 	
-	TMappingRule(Function head, TMappingRule baseRule) {
-        this.datalogFactory = baseRule.datalogFactory;
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule, SubstitutionFactory substitutionFactory) {
         this.termFactory = baseRule.termFactory;
 
-		this.databaseAtoms = baseRule.databaseAtoms.stream()
-                .map(atom -> (Function)atom.clone())
-                .collect(ImmutableCollectors.toList());
-		this.head = (Function)head.clone();
-
-        this.filterAtoms = baseRule.filterAtoms.stream()
-                .map(list -> list.stream()
-                        .map(atom -> (Function)atom.clone())
-                        .collect(ImmutableCollectors.toList()))
-                .collect(ImmutableCollectors.toList());
-
-        this.stripped = datalogFactory.getCQIE(this.head, databaseAtoms);
-	}
-	
-	
-	public Substitution computeHomomorphsim(TMappingRule other, CQContainmentCheckUnderLIDs cqc) {
-		return cqc.computeHomomorphsim(stripped, other.stripped);
-	}
-	
-	public CQIE asCQIE() {
-		List<Function> combinedBody;
-		if (!filterAtoms.isEmpty()) {
-			combinedBody = new ArrayList<>(databaseAtoms.size() + filterAtoms.size()); 
-			combinedBody.addAll(databaseAtoms);
-			
-			Iterator<ImmutableList<Function>> iterOR = filterAtoms.iterator();
-			List<Function> list = iterOR.next(); // IMPORTANT: assume that conditions is non-empty
-			Function mergedConditions = getMergedByAND(list);
-			while (iterOR.hasNext()) {
-				list = iterOR.next();
-				Function e = getMergedByAND(list);
-				mergedConditions = termFactory.getFunctionOR(e, mergedConditions);
-			}
-			
-			combinedBody.add(mergedConditions);
+		this.predicateInfo = predicateInfo;
+		this.projectionAtom = baseRule.projectionAtom;
+		if (predicateInfo.isClass()) {
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(RDF.TYPE),
+					projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()));
 		}
-		else
-			combinedBody = databaseAtoms;
-		
-		return datalogFactory.getCQIE(head, combinedBody);
+		else if (headTerms.get(1) instanceof Variable) {
+			if (!headTerms.get(1).equals(projectionAtom.getTerm(2)))
+				throw new IllegalStateException("The last argument does not match");
+
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()));
+		}
+		else {
+			substitution = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()),
+					projectionAtom.getTerm(2), headTerms.get(1));
+		}
+
+		this.extensionalNodes = baseRule.extensionalNodes;
+		this.filter = baseRule.filter;
 	}
-	
-	/***
-	 * Takes a list of boolean atoms and returns one single atom
-	 * representing the conjunction 
-	 * 
-	 * ASSUMPTION: the list is non-empty
-	 * 
-	 * Example: A -> A
-	 *          A, B -> AND(B,A)
-	 *          A, B, C -> AND(C,AND(B,A))
-	 * 
-	 */
-	
-	private Function getMergedByAND(List<Function> list) {
-		Iterator<Function> iterAND = list.iterator();
-		Function mergedConditions = iterAND.next();
-		while (iterAND.hasNext()) {
-			Function e = iterAND.next();
-			mergedConditions = termFactory.getFunctionAND(e, mergedConditions);
-		}		
-		return mergedConditions;
+
+	private ImmutableFunctionalTerm getConstantIRI(IRI iri) {
+		return termFactory.getImmutableUriTemplate(
+				termFactory.getConstantLiteral(iri.getIRIString()));
 	}
-	
-	
-	public boolean isFact() {
-		return databaseAtoms.isEmpty() && filterAtoms.isEmpty();
+
+
+
+	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
+
+
+	public IQ asIQ(IntermediateQueryFactory iqFactory) {
+
+		// assumes that filterAtoms is a possibly empty list of non-empty lists
+		Optional<ImmutableExpression> mergedConditions = filter.stream()
+				.map(list -> list.stream()
+						.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.AND, e, r)).get())
+				.reduce((r, e) -> termFactory.getImmutableExpression(ExpressionOperation.OR, e, r));
+
+		return iqFactory.createIQ(projectionAtom,
+				iqFactory.createUnaryIQTree(
+						iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution),
+						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, iqFactory)));
 	}
-	
-    public Function getHead() {
-        return head;
+
+	public ImmutableList<ImmutableTerm> getHeadTerms() {
+        return predicateInfo.isClass()
+				? ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)))
+				: ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)),
+									substitution.applyToVariable(projectionAtom.getTerm(2)));
     }
 
-    public ImmutableList<Function> getDatabaseAtoms() {
-		return databaseAtoms;
-	}
-	
-	public ImmutableList<ImmutableList<Function>> getConditions() { return filterAtoms; }
-	
+	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }
+
+	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filter; }
+
+	public RDFAtomPredicate getRDFAtomPredicate() { return (RDFAtomPredicate) projectionAtom.getPredicate(); }
+
 	@Override
 	public int hashCode() {
-		return head.hashCode() ^ databaseAtoms.hashCode() ^ filterAtoms.hashCode();
+		return predicateInfo.getIri().hashCode() ^ substitution.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
-			return (head.equals(otherRule.head) && 
-					databaseAtoms.equals(otherRule.databaseAtoms) && 
-					filterAtoms.equals(otherRule.filterAtoms));
+			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
+					substitution.equals(otherRule.substitution) &&
+					extensionalNodes.equals(otherRule.extensionalNodes) &&
+					filter.equals(otherRule.filter));
 		}
 		return false;
 	}
 
 	@Override 
 	public String toString() {
-		return head + " <- " + databaseAtoms + " AND " + filterAtoms;
+		return predicateInfo.getIri() + "(" + substitution.apply(projectionAtom.getArguments()) + ") <- " + extensionalNodes + " FILTER " + filter;
 	}
 }

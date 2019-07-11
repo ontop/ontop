@@ -36,7 +36,7 @@ public class Datalog2IQConversionTest {
 
         Function datalogHead = TERM_FACTORY.getFunction(predicate,X,X,TWO, Y, URI_TEMPLATE);
 
-        TargetAtom targetAtom = DATALOG_CONVERSION_TOOLS.convertFromDatalogDataAtom(datalogHead);
+        TargetAtom targetAtom = ((DatalogProgram2QueryConverterImpl)DATALOG_PROGRAM_2_QUERY_CONVERTER).convertFromDatalogDataAtom(datalogHead);
 
         DistinctVariableOnlyDataAtom projectionAtom = targetAtom.getProjectionAtom();
         ImmutableSubstitution<ImmutableTerm> bindings = targetAtom.getSubstitution();

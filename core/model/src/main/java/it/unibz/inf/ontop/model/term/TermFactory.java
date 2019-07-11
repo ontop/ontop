@@ -94,14 +94,6 @@ public interface TermFactory {
 
 	public Expression getFunctionEQ(Term firstTerm, Term secondTerm);
 
-	public Expression getFunctionGTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionGT(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLTE(Term firstTerm, Term secondTerm);
-
-	public Expression getFunctionLT(Term firstTerm, Term secondTerm);
-
 	public Expression getFunctionNEQ(Term firstTerm, Term secondTerm);
 
 	public Expression getFunctionNOT(Term term);
@@ -117,10 +109,6 @@ public interface TermFactory {
 	public Expression getFunctionIsNotNull(Term term);
 
 	public Expression getLANGMATCHESFunction(Term term1, Term term2);
-	
-	// ROMAN (23 Dec 2015): LIKE comes only from mappings
-	public Expression getSQLFunctionLike(Term term1, Term term2);
-
 
 	/*
 	 * Casting values cast(source-value AS destination-type)

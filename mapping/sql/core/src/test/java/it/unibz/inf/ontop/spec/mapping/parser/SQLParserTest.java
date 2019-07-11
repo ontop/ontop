@@ -175,7 +175,7 @@ public class SQLParserTest {
 		r20.addAttribute(idfac.createAttributeID("mac_code"), 1, "VARCHAR(8)", false);
 		r20.addAttribute(idfac.createAttributeID("pm_interval"), 0, "INT", false);
 
-		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY);
+		sqp = new SelectQueryParser(metadata, TERM_FACTORY, TYPE_FACTORY, ATOM_FACTORY);
 	}
 
 	@Test
