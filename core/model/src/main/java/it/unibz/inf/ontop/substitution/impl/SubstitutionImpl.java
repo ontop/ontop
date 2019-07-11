@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
-import it.unibz.inf.ontop.substitution.AppendableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
@@ -38,10 +37,8 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  *
- * TODO: rename it AppendableSubstitutionImpl
- *
  */
-public class SubstitutionImpl implements AppendableSubstitution {
+public class SubstitutionImpl implements Substitution {
 
     private final Map<Variable, Term> map;
     private final SubstitutionUtilities substitutionUtilities;
@@ -50,13 +47,13 @@ public class SubstitutionImpl implements AppendableSubstitution {
     public SubstitutionImpl(TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
+        this.substitutionUtilities = new SubstitutionUtilities();
     }
 
     public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = substitutionMap;
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
+        this.substitutionUtilities = new SubstitutionUtilities();
     }
 
     @Override
@@ -74,12 +71,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return map.isEmpty();
     }
 
-    @Override
-    @Deprecated
-    public void put(Variable var, Term term) {
-        map.put(var, term);
-    }
-
     @Deprecated
     public Set<Variable> keySet() {
         return map.keySet();
@@ -90,17 +81,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 
-    /**
-     * Composes the current substitution with another substitution function.
-     *
-     * Remind that composition is not commutative.
-     *
-     * TODO: implement it
-     */
-    @Override
-    public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Not implemented yet! But looks interesting.");
-    }
 
     /***
      * Creates a unifier (singleton substitution) out of term1 and term2.

@@ -22,15 +22,6 @@ public interface LocallyImmutableSubstitution extends Substitution {
     @Override
     ImmutableMap<Variable, Term> getMap();
 
-    /**
-     * Not supported (mutable operation)
-     *
-     * TODO: remove this operation from Substitution and from here
-     */
-    @Deprecated
-    @Override
-    boolean compose(Substitution s);
-
 
     /**
      * Not supported (mutable operation)

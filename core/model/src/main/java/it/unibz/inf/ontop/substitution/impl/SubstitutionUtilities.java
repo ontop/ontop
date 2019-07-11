@@ -21,16 +21,12 @@ package it.unibz.inf.ontop.substitution.impl;
  */
 
 
-import com.google.inject.Inject;
 import it.unibz.inf.ontop.datalog.CQIE;
 
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This utility class provides common operations
@@ -38,32 +34,6 @@ import java.util.Map;
  *
  */
 public class SubstitutionUtilities {
-
-    /**
-     * Exception occurring when computing a substitution.
-     */
-    public static class SubstitutionException extends Exception {
-
-		private static final long serialVersionUID = 2820771912046570562L;
-    }
-
-    /**
-     * Happens when union of two substitution functions is inconsistent
-     * (it does not produce a new substitution function).
-     *
-     */
-    public static class SubstitutionUnionException extends SubstitutionException {
-
-		private static final long serialVersionUID = 1587922941160561062L;
-    }
-
-    private final TermFactory termFactory;
-
-    @Inject
-    public SubstitutionUtilities(TermFactory termFactory) {
-        this.termFactory = termFactory;
-    }
-
 
     /**
      * This method will return a new query, resulting from the application of
@@ -128,58 +98,5 @@ public class SubstitutionUtilities {
     }
 
 
-    /**
-     * returns a substitution that assigns NULLs to all variables in the list
-     *
-     * @param vars the list of variables
-     * @return substitution
-     */
 
-    public Substitution getNullifier(Collection<Variable> vars) {
-        Map<Variable, Term> entries = new HashMap<>();
-
-        for (Variable var : vars) {
-            entries.put(var, termFactory.getNullConstant());
-        }
-        Substitution substitution = new SubstitutionImpl(entries, termFactory);
-        return substitution;
-    }
-
-    /**
-     * Computes the union of two substitution functions.
-     *
-     * This union is a little bit more than the simple union of their corresponding set: it
-     * fails if some singleton substitutions are conflicting. --> Throws a SubstitutionUnionException.
-     *
-     * Returns a new substitution function.
-     *
-     */
-    public Substitution union(Substitution substitution1, Substitution substitution2)
-            throws SubstitutionUnionException {
-        Map<Variable, Term> substitutionMap = new HashMap<>();
-        substitutionMap.putAll(substitution1.getMap());
-
-        for (Map.Entry<Variable, Term> newEntry : substitution2.getMap().entrySet()) {
-
-            /**
-             * Checks if the variable is part of the domain
-             * of the first substitution function.
-             *
-             * If not, adds the entry.
-             * Otherwise, throws a exception if the two entries
-             * are not equivalent (remind that a substitution must be a function).
-             */
-            Term substitutionTerm = substitution1.get(newEntry.getKey());
-            if (substitutionTerm == null) {
-                substitutionMap.put(newEntry.getKey(), newEntry.getValue());
-            }
-
-            else if (!substitutionTerm.equals(newEntry.getValue())) {
-                throw new SubstitutionUnionException();
-            }
-        }
-
-        Substitution newSubstitution = new SubstitutionImpl(substitutionMap, termFactory);
-        return newSubstitution;
-    }
 }

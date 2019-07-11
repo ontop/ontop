@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.LocallyImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 
 
 /**
@@ -12,11 +10,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
  */
 public abstract class LocallyImmutableSubstitutionImpl implements LocallyImmutableSubstitution {
 
-    @Deprecated
-    @Override
-    public boolean compose(Substitution s) {
-        throw new UnsupportedOperationException("Mutable operations are not supported.");
-    }
 
     @Deprecated
     @Override
@@ -27,12 +20,6 @@ public abstract class LocallyImmutableSubstitutionImpl implements LocallyImmutab
     @Deprecated
     @Override
     public boolean composeFunctions(Function term1, Function term2) {
-        throw new UnsupportedOperationException("Mutable operations are not supported.");
-    }
-
-    @Deprecated
-    @Override
-    public void put(Variable var, Term term) {
         throw new UnsupportedOperationException("Mutable operations are not supported.");
     }
 }

@@ -110,7 +110,7 @@ public class ThetaApplicationTest extends TestCase {
         Substitution mgu = new SubstitutionImpl(entries, TERM_FACTORY);
 
 
-		SubstitutionUtilities substitutionUtilities = new SubstitutionUtilities(TERM_FACTORY);
+		SubstitutionUtilities substitutionUtilities = new SubstitutionUtilities();
 		CQIE newquery = substitutionUtilities.applySubstitution(query, mgu);
 
 		List<Function> newbody = newquery.getBody();
