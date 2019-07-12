@@ -25,9 +25,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -44,21 +42,6 @@ import java.util.Map.Entry;
  * 
  * @author Roman Kontchakov
  * 
- * 
- * types of predicates (as of 1 October 2014)
- * 
- * Constant: NULL (string), TRUE, FALSE (boolean)
- * 
- * NumericalOperationPredicate: MINUS, ADD, SUBTRACT, MULTIPLY
- * BooleanOperationPredicate: AND, NOT, OR, EQ, NEQ, GTE, GT, LTE, LT, IS_NULL, IS_NOT_NULL, IS_TRUE, 
- *                            SPARQL_IS_LITERAL_URI, SPARQL_IS_URI, SPARQL_IS_IRI, SPARQL_IS_BLANK, SPARQL_LANGMATCHES, 
- *                            SPARQL_REGEX, SPARQL_LIKE
- * NonBooleanOperationPredicate: SPARQL_STR, SPARQL_DATATYPE, SPARQL_LANG                        
- * DataTypePredicate: RDFS_LITERAL, RDFS_LITERAL_LANG, XSD_STRING, XSD_INTEGER, XSD_DECIMAL, XSD_DOUBLE, XSD_DATETIME,
- *                    XSD_BOOLEAN, XSD_DATE, XSD_TIME, XSD_YEAR
- * Predicate: QUEST_TRIPLE_PRED, QUEST_CAST                    
- * AlgebraOperatorPredicate: SPARQL_JOIN, SPARQL_LEFTJOIN 
- *
  */
 
 public class QueryConnectedComponent {
@@ -68,7 +51,7 @@ public class QueryConnectedComponent {
 	private final ImmutableList<Variable> freeVariables;
 	
 	private final ImmutableList<Edge> edges;  // a connected component contains a list of edges
-	private final Loop loop;  //                                   or a loop if it is degenerate 
+	private final Loop loop;  //                   or a loop if it is degenerate
 	
 	private final ImmutableList<Function> nonDLAtoms;
 	
@@ -107,27 +90,23 @@ public class QueryConnectedComponent {
 
 	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<Function>>> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
 
-		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
-
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
 
+		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
 		ccTerms.add(seed);
 
 		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded;
 		do {
 			expanded = false;
-			Iterator<Entry<TermPair, Collection<Function>>> i = pairs.iterator();
-			while (i.hasNext()) {
+			for (Iterator<Entry<TermPair, Collection<Function>>> i = pairs.iterator(); i.hasNext();) {
 				Entry<TermPair, Collection<Function>> e = i.next();
 				TermPair pair = e.getKey();
-				if (ccTerms.contains(pair.t0)) {
+				if (ccTerms.contains(pair.t0))
 					ccTerms.add(pair.t1);   // the other term is already there
-				}
-				else if (ccTerms.contains(pair.t1)) {
+				else if (ccTerms.contains(pair.t1))
 					ccTerms.add(pair.t0);   // the other term is already there
-				}
 				else
 					continue;
 
@@ -138,9 +117,7 @@ public class QueryConnectedComponent {
 				i.remove();
 			}
 			
-			// non-DL atoms
-			Iterator<Function> ni = nonDLAtoms.iterator();
-			while (ni.hasNext()) {
+			for (Iterator<Function> ni = nonDLAtoms.iterator(); ni.hasNext(); ) {
 				Function atom = ni.next();
 				boolean intersects = false;
 				Set<Variable> atomVars = atom.getVariables();
@@ -153,8 +130,8 @@ public class QueryConnectedComponent {
 				if (!intersects)
 					continue;
 
-				ccNonDLAtoms.add(atom);
 				ccTerms.addAll(atomVars);
+				ccNonDLAtoms.add(atom);
 				expanded = true;
 				ni.remove();
 			}
@@ -178,7 +155,7 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static List<QueryConnectedComponent> getConnectedComponents(ClassifiedTBox reasoner, CQIE cqie,
+	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(ClassifiedTBox reasoner, CQIE cqie,
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
@@ -220,7 +197,7 @@ public class QueryConnectedComponent {
 
 		List<Entry<TermPair, Collection<Function>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
 
-		List<QueryConnectedComponent> ccs = new LinkedList<>();
+		ImmutableList.Builder<QueryConnectedComponent> ccs = ImmutableList.builder();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
@@ -240,7 +217,7 @@ public class QueryConnectedComponent {
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 				
-		return ccs;
+		return ccs.build();
 	}
 	
 	public Loop getLoop() {
@@ -397,16 +374,16 @@ public class QueryConnectedComponent {
 			return l1.term;
 		}
 		
-		public Collection<Function> getBAtoms() {
+		public ImmutableList<Function> getBAtoms() {
 			return bAtoms;
 		}
 		
-		public List<Function> getAtoms() {
-			List<Function> allAtoms = new ArrayList<>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
+		public ImmutableList<Function> getAtoms() {
+			ImmutableList.Builder<Function> allAtoms = ImmutableList.builder();
 			allAtoms.addAll(bAtoms);
 			allAtoms.addAll(l0.getAtoms());
 			allAtoms.addAll(l1.getAtoms());
-			return allAtoms;
+			return allAtoms.build();
 		}
 		
 		@Override
