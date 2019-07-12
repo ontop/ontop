@@ -117,9 +117,9 @@ public class QueryConnectedComponent {
 		Loop seedLoop = allLoops.get(seed);
 		if (seedLoop != null) {
 			ccLoops.add(seedLoop);
-			allLoops.remove(seed);
 		}
-		
+		allLoops.remove(seed);
+
 		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded;
 		do {
@@ -132,18 +132,18 @@ public class QueryConnectedComponent {
 				if (ccTerms.contains(t0)) {
 					if (ccTerms.add(t1))  { // the other term is already there
 						ccLoops.add(edge.getLoop1());
-						allLoops.remove(t1); // remove the loops that are covered by the edges in CC
 					}
 				}
 				else if (ccTerms.contains(t1)) {
 					if (ccTerms.add(t0))  { // the other term is already there
 						ccLoops.add(edge.getLoop0()); 
-						allLoops.remove(t0); // remove the loops that are covered by the edges in CC
 					}
 				}
 				else
 					continue;
-				
+
+				allLoops.remove(t1); // remove the loops that are covered by the edges in CC
+				allLoops.remove(t0); // remove the loops that are covered by the edges in CC
 				ccEdges.add(edge);
 				expanded = true;
 				i.remove();
