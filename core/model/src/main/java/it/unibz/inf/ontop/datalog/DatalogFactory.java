@@ -15,8 +15,6 @@ public interface DatalogFactory {
 
     CQIE getCQIE(Function head, List<Function> body);
 
-    CQIE getFreshCQIECopy(CQIE rule);
-
 
     DatalogProgram getDatalogProgram();
 

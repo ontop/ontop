@@ -10,9 +10,7 @@ public class PreProcessProjectionTest extends AbstractVirtualModeTest {
     static final String obdafile = "/mysql/northwind/mappingStars.obda";
     static final String propertiesfile = "/mysql/northwind/mapping-northwind.properties";
 
-    public PreProcessProjectionTest() {
-        super(owlfile, obdafile, propertiesfile);
-    }
+    public PreProcessProjectionTest() { super(owlfile, obdafile, propertiesfile); }
     @Test
     public void testSimpleQuery() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +

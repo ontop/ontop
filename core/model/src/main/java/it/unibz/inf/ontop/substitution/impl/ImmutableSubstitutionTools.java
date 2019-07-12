@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.substitution.impl;
 
+import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -32,8 +33,9 @@ public class ImmutableSubstitutionTools {
         this.immutabilityTools = immutabilityTools;
     }
 
-    ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
+    public ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
         ImmutableMap<Variable, ImmutableTerm> map = substitution.getMap().entrySet().stream()
+                .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> immutabilityTools.convertIntoImmutableTerm(e.getValue())));

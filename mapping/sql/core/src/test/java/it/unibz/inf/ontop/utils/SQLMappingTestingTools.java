@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.SQLPPMapping2DatalogConverter;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -14,6 +10,7 @@ import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.LegacySQLPPMappingConverter;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
@@ -31,8 +28,9 @@ public class SQLMappingTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final RDF RDF_FACTORY;
-    public static final SQLPPMapping2DatalogConverter PP_MAPPING_2_DATALOG_CONVERTER;
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
+    public static final CoreSingletons CORE_SINGLETONS;
+    public static final LegacySQLPPMappingConverter LEGACY_SQL_PP_MAPPING_CONVERTER;
 
     public static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -56,12 +54,13 @@ public class SQLMappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
-        PP_MAPPING_2_DATALOG_CONVERTER = injector.getInstance(SQLPPMapping2DatalogConverter.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
+        CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
+        LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(LegacySQLPPMappingConverter.class);
 
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
