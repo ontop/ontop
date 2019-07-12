@@ -73,7 +73,7 @@ public class QueryConnectedComponent {
 	
 	private final ImmutableList<Function> nonDLAtoms;
 	
-	private boolean noFreeTerms; // no free variables and no constants 
+	private final boolean noFreeTerms; // no free variables and no constants
 	                             // if true the component can be mapped onto the anonymous part of the canonical model
 
 	/**
@@ -90,30 +90,20 @@ public class QueryConnectedComponent {
 
 		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null;
 
-		ImmutableList.Builder<Loop> quantifiedVariables = ImmutableList.builder();
-		ImmutableList.Builder<Variable> variables = ImmutableList.builder();
-		ImmutableList.Builder<Variable> freeVariables = ImmutableList.builder();
-		noFreeTerms = true;
-		
-		for (Loop l: terms) {
-			Term t = l.getTerm(); 
-			if (t instanceof Variable) {
-				Variable v = (Variable)t;
-				variables.add(v);
-				if (l.isExistentialVariable())
-					quantifiedVariables.add(l);
-				else {
-					freeVariables.add(v);
-					noFreeTerms = false;
-				}
-			}
-			else
-				noFreeTerms = false; // not a variable -- better definition?
-		}
+		this.variables = terms.stream()
+				.map(Loop::getTerm)
+				.filter(t -> (t instanceof Variable))
+				.map(t -> (Variable)t)
+				.collect(ImmutableCollectors.toList());
+		this.freeVariables = terms.stream()
+				.filter(l -> !l.isExistentialVariable() && (l.getTerm() instanceof Variable))
+				.map(l -> (Variable)l.getTerm())
+				.collect(ImmutableCollectors.toList());
+		this.quantifiedVariables = terms.stream()
+				.filter(Loop::isExistentialVariable)
+				.collect(ImmutableCollectors.toList());
 
-		this.variables = variables.build();
-		this.freeVariables = freeVariables.build();
-		this.quantifiedVariables = quantifiedVariables.build();
+		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 	
 	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, ImmutableSet<Variable> headTerms) {
