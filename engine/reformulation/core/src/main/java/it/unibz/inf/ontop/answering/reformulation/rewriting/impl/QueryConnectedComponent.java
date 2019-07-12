@@ -209,14 +209,14 @@ public class QueryConnectedComponent {
 			// TODO: support quads
 			if (atom.isDataFunction() && (p instanceof TriplePredicate)) { // if DL predicates
 				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
-				Term t0 = a.getTerm(0);
 
 				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
 						.map(immutabilityTools::convertIntoImmutableTerm)
 						.collect(ImmutableCollectors.toList());
 				boolean isClass = ((TriplePredicate) p).getClassIRI(arguments).isPresent();
 
-				if ((!isClass) && !t0.equals(a.getTerm(2))) {
+				Term t0 = a.getTerm(0);
+				if (!isClass && !t0.equals(a.getTerm(2))) {
 					// proper DL edge between two distinct terms
 					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
