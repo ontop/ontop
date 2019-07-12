@@ -314,6 +314,7 @@ public class OBDAModel {
             else {
                 SQLPPTriplesMap newTriplesMap = new OntopNativeSQLPPTriplesMap(formerTriplesMap.getId(),
                         formerTriplesMap.getSourceQuery(),
+                        formerTriplesMap.getTargetString().get(), // we are sure at this point, it is present
                         newTargetAtoms);
 
                 return newTriplesMap;

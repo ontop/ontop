@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -153,7 +153,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         final List<Indicator> invalidMappingIndicators = new ArrayList<>();
 
         List<TargetQueryParser> parsers = null;
-		
+
 		String line;
 
         try (LineNumberReader lineNumberReader = new LineNumberReader(reader)) {
@@ -215,7 +215,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         MappingMetadata metadata = specificationFactory.createMetadata(prefixManager);
         return ppMappingFactory.createSQLPreProcessedMapping(mappingAxioms, metadata);
 	}
-    
+
     /*
      * Helper methods related to load file.
      */
@@ -247,13 +247,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
         String mappingId = "";
         String currentLabel = ""; // the reader is working on which label
         StringBuffer sourceQuery = null;
+        String targetString = null;
         ImmutableList<TargetAtom> targetQuery = null;
         int wsCount = 0;  // length of whitespace used as the separator
         boolean isMappingValid = true; // a flag to load the mapping to the model if valid
-        
+
         String line;
-        for(line = reader.readLine(); 
-        		line != null && !line.trim().equals(END_COLLECTION_SYMBOL); 
+        for(line = reader.readLine();
+        		line != null && !line.trim().equals(END_COLLECTION_SYMBOL);
         		line = reader.readLine()) {
             int lineNumber = reader.getLineNumber();
             if (line.isEmpty()) {
@@ -261,7 +262,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	            	// Save the mapping to the model (if valid) at this point
 	                if (isMappingValid) {
 	                    currentSourceMappings =
-                                addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
+                                addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
 	                    mappingId = "";
 	                    sourceQuery = null;
 	                    targetQuery = null;
@@ -281,7 +282,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
             if (!isMappingValid) {
             	continue; // skip if the mapping is invalid
             }
-            
+
             String[] tokens = line.split("[\t| ]+", 2);
 
             String label;
@@ -305,7 +306,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                     isMappingValid = false;
                 }
             } else if (currentLabel.equals(Label.target.name())) {
-                String targetString = value;
+                targetString = value;
                 if (targetString.isEmpty()) { // empty or not
                     invalidMappingIndicators.add(new Indicator(lineNumber, mappingId, TARGET_QUERY_IS_BLANK));
                     isMappingValid = false;
@@ -339,14 +340,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
                 throw new IOException(msg);
             }
         }
-        
+
         if (line == null) {
         	throw new IOException(String.format("End collection symbol %s is missing.", END_COLLECTION_SYMBOL));
         }
-        
+
         // Save the last mapping entry to the model
         if (!mappingId.isEmpty() && isMappingValid) {
-            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetQuery, currentSourceMappings);
+            currentSourceMappings = addNewMapping(mappingId, sourceQuery.toString(), targetString, targetQuery, currentSourceMappings);
         }
 
         return currentSourceMappings;
@@ -361,7 +362,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 				return parse;
             } catch (TargetQueryParserException e) {
             	exceptions.put(parser, e);
-            }     
+            }
     	}
 		throw new UnparsableTargetQueryException(exceptions);
     }
@@ -378,15 +379,16 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 	}
 
     private static List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
+                                                       String targetString,
                                                        ImmutableList<TargetAtom> targetQuery,
                                                        List<SQLPPTriplesMap> currentSourceMappings) {
         SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
-                mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+                mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetString, targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }
         else {
-            LOG.warn("Duplicate mapping %s", mappingId);
+            LOG.warn("Duplicate mapping {}", mappingId);
         }
         return currentSourceMappings;
     }

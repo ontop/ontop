@@ -160,7 +160,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 .filter(as -> !as.isEmpty())
                 // TODO: consider a R2RML-specific type of triples map
                 .map(as -> new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
-                        MAPPING_FACTORY.getSQLQuery(sourceQuery), as));
+                        MAPPING_FACTORY.getSQLQuery(sourceQuery),  as));
     }
 
     private ImmutableList<TargetAtom> extractMappingTargetAtoms(TriplesMap tm) throws InvalidR2RMLMappingException {
