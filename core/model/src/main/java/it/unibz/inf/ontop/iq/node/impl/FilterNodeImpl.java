@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -42,13 +41,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     @AssistedInject
     private FilterNodeImpl(@Assisted ImmutableExpression filterCondition, TermNullabilityEvaluator nullabilityEvaluator,
-                           TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
-                           SubstitutionFactory substitutionFactory,
+                           TermFactory termFactory, TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
                            ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                            IntermediateQueryFactory iqFactory,
                            ConstructionNodeTools constructionNodeTools, ConditionSimplifier conditionSimplifier,
                            CoreUtilsFactory coreUtilsFactory, FilterNormalizer normalizer, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
-        super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
+        super(Optional.of(filterCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.conditionSimplifier = conditionSimplifier;

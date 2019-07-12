@@ -86,7 +86,6 @@ public class OBDAModel {
     private final TargetAtomFactory targetAtomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TypeFactory typeFactory;
-    private final DatalogFactory datalogFactory;
     private final RDF rdfFactory;
     private final TargetQueryParserFactory targetQueryParserFactory;
 
@@ -94,7 +93,7 @@ public class OBDAModel {
                      SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
-                     TypeFactory typeFactory, DatalogFactory datalogFactory,
+                     TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
                      RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory) {
         this.specificationFactory = specificationFactory;
@@ -104,7 +103,6 @@ public class OBDAModel {
         this.owlPrefixManager = owlPrefixManager;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.datalogFactory = datalogFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
         this.rdfFactory = rdfFactory;
@@ -485,10 +483,6 @@ public class OBDAModel {
 
     public TypeFactory getTypeFactory() {
         return typeFactory;
-    }
-
-    public DatalogFactory getDatalogFactory() {
-        return datalogFactory;
     }
 
     public TargetAtomFactory getTargetAtomFactory() {
