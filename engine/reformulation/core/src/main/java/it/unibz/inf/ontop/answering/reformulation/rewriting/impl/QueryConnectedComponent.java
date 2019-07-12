@@ -105,7 +105,7 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
 
 		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
 
@@ -121,12 +121,12 @@ public class QueryConnectedComponent {
 		}
 		
 		// expand the current CC by adding all edges that are have at least one of the terms in them
-		boolean expanded = true;
-		while (expanded) {
+		boolean expanded;
+		do {
 			expanded = false;
-			Iterator<Entry<TermPair, Edge>> i = pairs.entrySet().iterator();
+			Iterator<Edge> i = pairs.iterator();
 			while (i.hasNext()) {
-				Edge edge = i.next().getValue();
+				Edge edge = i.next();
 				Term t0 = edge.getTerm0();
 				Term t1 = edge.getTerm1();
 				if (ccTerms.contains(t0)) {
@@ -154,9 +154,8 @@ public class QueryConnectedComponent {
 			while (ni.hasNext()) {
 				Function atom = ni.next();
 				boolean intersects = false;
-				Set<Variable> atomVars = new HashSet<>();
-				TermUtils.addReferencedVariablesTo(atomVars, atom);
-				for (Variable t : atomVars) 
+				Set<Variable> atomVars = atom.getVariables();
+				for (Variable t : atomVars)
 					if (ccTerms.contains(t)) {
 						intersects = true;
 						break;
@@ -172,7 +171,7 @@ public class QueryConnectedComponent {
 					ni.remove();
 				}
 			}
-		}
+		} while (expanded);
 		return new QueryConnectedComponent(ccEdges.build(), ccNonDLAtoms.build(), ccLoops.build());
 	}
 	
@@ -224,29 +223,26 @@ public class QueryConnectedComponent {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
-		Map<TermPair, Edge> pairs = new HashMap<>();
+		List<Edge> pairs = new ArrayList<>();
 		for (Entry<TermPair, Collection<Function>> e : pz.build().asMap().entrySet()) {
 			TermPair pair = e.getKey();
 			Loop l0 =  allLoops.computeIfAbsent(pair.t0, n -> new Loop(n, headVariables, ImmutableList.of()));
 			Loop l1 =  allLoops.computeIfAbsent(pair.t1, n -> new Loop(n, headVariables, ImmutableList.of()));
-			pairs.put(pair, new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
+			pairs.add(new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
 		}
 
 		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			Term seed = pairs.entrySet().iterator().next().getKey().t0;
+			Term seed = pairs.iterator().next().getTerm0();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 		
 		while (!nonDLAtoms.isEmpty()) {
-			//log.debug("NON-DL ATOMS ARE NOT EMPTY: {}", nonDLAtoms);
-			Function f = nonDLAtoms.iterator().next(); 
-			Set<Variable> vars = new HashSet<>();
-			TermUtils.addReferencedVariablesTo(vars, f);
-			Variable v = vars.iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v, headVariables));
+			Function atom = nonDLAtoms.iterator().next();
+			Variable seed = atom.getVariables().iterator().next();
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
