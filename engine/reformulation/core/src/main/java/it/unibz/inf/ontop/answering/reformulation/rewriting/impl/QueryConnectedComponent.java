@@ -104,12 +104,7 @@ public class QueryConnectedComponent {
 
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
-	
-	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, ImmutableList<Function> atoms, ImmutableSet<Variable> headTerms) {
-		return allLoops.computeIfAbsent(t,
-				n -> new Loop(n, ((n instanceof Variable) && !headTerms.contains(n)), atoms));
-	}
-	
+
 	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
 
 		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
@@ -213,16 +208,11 @@ public class QueryConnectedComponent {
 						.collect(ImmutableCollectors.toList());
 				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(arguments).isPresent();
 
-				Term t0 = a.getTerm(0);
-				if (!isClass && !t0.equals(a.getTerm(2))) {
-					// proper DL edge between two distinct terms
-					Term t1 = a.getTerm(2);
-					TermPair pair = new TermPair(t0, t1);
-					pz.put(pair, a);
-				}
-				else {
-					lz.put(t0, a);
-				}
+				// proper DL edge between two distinct terms
+				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
+					pz.put(new TermPair(a.getTerm(0), a.getTerm(2)), a);
+				else
+					lz.put(a.getTerm(0), a);
 			}
 			else {
 				nonDLAtoms.add(atom);
@@ -231,15 +221,14 @@ public class QueryConnectedComponent {
 
 		Map<Term, Loop> allLoops = new HashMap<>();
 		for (Entry<Term, Collection<Function>> e : lz.build().asMap().entrySet()) {
-			Loop l0 = getLoop(e.getKey(), allLoops, ImmutableList.copyOf(e.getValue()),  headVariables);
-			allLoops.put(e.getKey(), l0);
+			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
 		Map<TermPair, Edge> pairs = new HashMap<>();
 		for (Entry<TermPair, Collection<Function>> e : pz.build().asMap().entrySet()) {
 			TermPair pair = e.getKey();
-			Loop l0 = getLoop(pair.t0, allLoops, ImmutableList.of(), headVariables);
-			Loop l1 = getLoop(pair.t1, allLoops, ImmutableList.of(), headVariables);
+			Loop l0 =  allLoops.computeIfAbsent(pair.t0, n -> new Loop(n, headVariables, ImmutableList.of()));
+			Loop l1 =  allLoops.computeIfAbsent(pair.t1, n -> new Loop(n, headVariables, ImmutableList.of()));
 			pairs.put(pair, new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
 		}
 
@@ -351,9 +340,9 @@ public class QueryConnectedComponent {
 		private final ImmutableList<Function> atoms;
 		private final boolean isExistentialVariable;
 		
-		public Loop(Term term, boolean isExistentialVariable, ImmutableList<Function> atoms) {
+		public Loop(Term term, ImmutableSet<Variable> headVariables, ImmutableList<Function> atoms) {
 			this.term = term;
-			this.isExistentialVariable = isExistentialVariable;
+			this.isExistentialVariable = (term instanceof Variable) && !headVariables.contains(term);
 			this.atoms = atoms;
 		}
 		
@@ -361,7 +350,7 @@ public class QueryConnectedComponent {
 			return term;
 		}
 		
-		public Collection<Function> getAtoms() {
+		public ImmutableList<Function> getAtoms() {
 			return atoms;
 		}
 		
