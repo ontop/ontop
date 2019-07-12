@@ -111,14 +111,8 @@ public class QueryConnectedComponent {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
-		ImmutableList.Builder<Loop> ccLoops = ImmutableList.builder();
-		
+
 		ccTerms.add(seed);
-		Loop seedLoop = allLoops.get(seed);
-		if (seedLoop != null) {
-			ccLoops.add(seedLoop);
-		}
-		allLoops.remove(seed);
 
 		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded;
@@ -127,23 +121,15 @@ public class QueryConnectedComponent {
 			Iterator<Edge> i = pairs.iterator();
 			while (i.hasNext()) {
 				Edge edge = i.next();
-				Term t0 = edge.getTerm0();
-				Term t1 = edge.getTerm1();
-				if (ccTerms.contains(t0)) {
-					if (ccTerms.add(t1))  { // the other term is already there
-						ccLoops.add(edge.getLoop1());
-					}
+				if (ccTerms.contains(edge.getTerm0())) {
+					ccTerms.add(edge.getTerm1());   // the other term is already there
 				}
-				else if (ccTerms.contains(t1)) {
-					if (ccTerms.add(t0))  { // the other term is already there
-						ccLoops.add(edge.getLoop0()); 
-					}
+				else if (ccTerms.contains(edge.getTerm1())) {
+					ccTerms.add(edge.getTerm0());   // the other term is already there
 				}
 				else
 					continue;
 
-				allLoops.remove(t1); // remove the loops that are covered by the edges in CC
-				allLoops.remove(t0); // remove the loops that are covered by the edges in CC
 				ccEdges.add(edge);
 				expanded = true;
 				i.remove();
@@ -164,14 +150,19 @@ public class QueryConnectedComponent {
 				if (intersects) {
 					ccNonDLAtoms.add(atom);
 					ccTerms.addAll(atomVars);
-					for (Variable v : atomVars) {
-						allLoops.remove(v);
-					}
 					expanded = true;
 					ni.remove();
 				}
 			}
 		} while (expanded);
+
+		ImmutableList.Builder<Loop> ccLoops = ImmutableList.builder();
+		for (Term t : ccTerms) {
+			Loop l = allLoops.remove(t);
+			if (l != null)
+				ccLoops.add(l);
+		}
+
 		return new QueryConnectedComponent(ccEdges.build(), ccNonDLAtoms.build(), ccLoops.build());
 	}
 	
