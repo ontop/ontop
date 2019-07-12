@@ -122,9 +122,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private Function getHeadAtom(String base, String suffix, List<Term> arguments) {
+	private Function getHeadAtom(String base, String suffix, ImmutableList<Variable> arguments) {
 		Predicate predicate = datalogFactory.getSubqueryPredicate(base + suffix, arguments.size());
-		return termFactory.getFunction(predicate, arguments);
+		return termFactory.getFunction(predicate, new ArrayList(arguments));
 	}
 	
 	private int freshVarIndex = 0;

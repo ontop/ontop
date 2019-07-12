@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -63,14 +64,14 @@ import java.util.Map.Entry;
 
 public class QueryConnectedComponent {
 
-	private final List<Term> variables;
-	private final List<Loop> quantifiedVariables;
-	private final List<Term> freeVariables;
+	private final ImmutableList<Variable> variables;
+	private final ImmutableList<Loop> quantifiedVariables;
+	private final ImmutableList<Variable> freeVariables;
 	
-	private final List<Edge> edges;  // a connected component contains a list of edges
+	private final ImmutableList<Edge> edges;  // a connected component contains a list of edges
 	private final Loop loop;  //                                   or a loop if it is degenerate 
 	
-	private final List<Function> nonDLAtoms;
+	private final ImmutableList<Function> nonDLAtoms;
 	
 	private boolean noFreeTerms; // no free variables and no constants 
 	                             // if true the component can be mapped onto the anonymous part of the canonical model
@@ -83,50 +84,50 @@ public class QueryConnectedComponent {
 	 * @param terms: terms that are covered by the edges
 	 */
 	
-	private QueryConnectedComponent(List<Edge> edges, List<Function> nonDLAtoms, List<Loop> terms) {
+	private QueryConnectedComponent(ImmutableList<Edge> edges, ImmutableList<Function> nonDLAtoms, ImmutableList<Loop> terms) {
 		this.edges = edges;
 		this.nonDLAtoms = nonDLAtoms;
 
-		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null; 
-				
-		quantifiedVariables = new ArrayList<>(terms.size());
-		variables = new ArrayList<>(terms.size());
-		freeVariables = new ArrayList<>(terms.size());
+		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null;
+
+		ImmutableList.Builder<Loop> quantifiedVariables = ImmutableList.builder();
+		ImmutableList.Builder<Variable> variables = ImmutableList.builder();
+		ImmutableList.Builder<Variable> freeVariables = ImmutableList.builder();
 		noFreeTerms = true;
 		
 		for (Loop l: terms) {
 			Term t = l.getTerm(); 
 			if (t instanceof Variable) {
-				variables.add(t);
-				//if (headterms.contains(t))
+				Variable v = (Variable)t;
+				variables.add(v);
 				if (l.isExistentialVariable())
 					quantifiedVariables.add(l);
 				else {
-					freeVariables.add(t);
+					freeVariables.add(v);
 					noFreeTerms = false;
 				}
 			}
 			else
 				noFreeTerms = false; // not a variable -- better definition?
 		}
+
+		this.variables = variables.build();
+		this.freeVariables = freeVariables.build();
+		this.quantifiedVariables = quantifiedVariables.build();
 	}
 	
-	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, Set<Term> headTerms) {
-		Loop l = allLoops.get(t);
-		if (l == null) {
-			boolean isExistentialVariable =  ((t instanceof Variable) && !headTerms.contains(t));
-			l = new Loop(t, isExistentialVariable);
-			allLoops.put(t, l);
-		}
-		return l;
+	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, ImmutableSet<Variable> headTerms) {
+		return allLoops.computeIfAbsent(t,
+				n -> new Loop(n, ((n instanceof Variable) && !headTerms.contains(n))));
 	}
 	
-	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms,
-																Term seed) {
+	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed) {
+
 		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
-		List<Edge> ccEdges = new ArrayList<>(pairs.size());
-		List<Function> ccNonDLAtoms = new LinkedList<>();
-		List<Loop> ccLoops = new ArrayList<>(allLoops.size());
+
+		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
+		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
+		ImmutableList.Builder<Loop> ccLoops = ImmutableList.builder();
 		
 		ccTerms.add(seed);
 		Loop seedLoop = allLoops.get(seed);
@@ -188,7 +189,7 @@ public class QueryConnectedComponent {
 				}
 			}
 		}
-		return new QueryConnectedComponent(ccEdges, ccNonDLAtoms, ccLoops); 
+		return new QueryConnectedComponent(ccEdges.build(), ccNonDLAtoms.build(), ccLoops.build());
 	}
 	
 	/**
@@ -203,7 +204,7 @@ public class QueryConnectedComponent {
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
-		Set<Term> headTerms = new HashSet<>(cqie.getHead().getTerms());
+		ImmutableSet<Variable> headTerms = ImmutableSet.copyOf(cqie.getHead().getVariables());
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
@@ -212,7 +213,7 @@ public class QueryConnectedComponent {
 		Map<TermPair, Edge> pairs = new HashMap<>();
 		Map<Term, Loop> allLoops = new HashMap<>();
 		List<Function> nonDLAtoms = new LinkedList<>();
-		
+
 		for (Function atom : cqie.getBody()) {
 			Predicate p = atom.getFunctionSymbol();
 			// TODO: support quads
@@ -229,18 +230,16 @@ public class QueryConnectedComponent {
 					// proper DL edge between two distinct terms
 					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
-					Edge edge =  pairs.get(pair); 
-					if (edge == null) {
+					Edge edge =  pairs.computeIfAbsent(pair, pp -> {
 						Loop l0 = getLoop(t0, allLoops, headTerms);
 						Loop l1 = getLoop(t1, allLoops, headTerms);
-						edge = new Edge(l0, l1);
-						pairs.put(pair, edge);
-					}
-					edge.bAtoms.add(a);			
+						return new Edge(l0, l1);
+					});
+					edge.bAtoms.add(a);		 // MODIFIES THE EDGE
 				}
 				else {
 					Loop l0 = getLoop(t0, allLoops, headTerms);
-					l0.atoms.add(a);
+					l0.atoms.add(a); // MODIFIES THE LOOP
 				}
 			}
 			else { // non-DL precicate
@@ -249,7 +248,6 @@ public class QueryConnectedComponent {
 			}
 		}	
 
-		
 		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
 		// form the list of connected components from the list of edges
@@ -268,11 +266,9 @@ public class QueryConnectedComponent {
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		//for (Entry<term, Loop> loop : allLoops.entrySet()) {
 		while (!allLoops.isEmpty()) {
 			Term seed = allLoops.keySet().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
-			//ccs.add(new QueryConnectedComponent(Collections.EMPTY_LIST, loop.getValue(), Collections.EMPTY_LIST, Collections.singletonList(loop.getValue())));
 		}
 				
 		return ccs;
@@ -289,7 +285,7 @@ public class QueryConnectedComponent {
 	 */
 	
 	public boolean isDegenerate() {
-		return edges.isEmpty(); // && nonDLAtoms.isEmpty();
+		return edges.isEmpty();
 	}
 	
 	/**
@@ -308,7 +304,7 @@ public class QueryConnectedComponent {
 	 * @return the list of edges in the connected component
 	 */
 	
-	public List<Edge> getEdges() {
+	public ImmutableList<Edge> getEdges() {
 		return edges;
 	}
 	
@@ -318,7 +314,7 @@ public class QueryConnectedComponent {
 	 * @return the list of variables in the connected components
 	 */
 	
-	public List<Term> getVariables() {
+	public ImmutableList<Variable> getVariables() {
 		return variables;		
 	}
 
@@ -328,7 +324,7 @@ public class QueryConnectedComponent {
 	 * @return the collection of existentially quantified variables
 	 */
 	
-	public Collection<Loop> getQuantifiedVariables() {
+	public ImmutableList<Loop> getQuantifiedVariables() {
 		return quantifiedVariables;		
 	}
 	
@@ -338,11 +334,11 @@ public class QueryConnectedComponent {
 	 * @return the list of free variables in the connected component
 	 */
 	
-	public List<Term> getFreeVariables() {
+	public ImmutableList<Variable> getFreeVariables() {
 		return freeVariables;
 	}
 
-	public List<Function> getNonDLAtoms() {
+	public ImmutableList<Function> getNonDLAtoms() {
 		return nonDLAtoms;
 	}
 	
@@ -439,8 +435,8 @@ public class QueryConnectedComponent {
 		public List<Function> getAtoms() {
 			List<Function> allAtoms = new ArrayList<>(bAtoms.size() + l0.atoms.size() + l1.atoms.size());
 			allAtoms.addAll(bAtoms);
-			allAtoms.addAll(l0.atoms);
-			allAtoms.addAll(l1.atoms);
+			allAtoms.addAll(l0.getAtoms());
+			allAtoms.addAll(l1.getAtoms());
 			return allAtoms;
 		}
 		
@@ -490,43 +486,40 @@ public class QueryConnectedComponent {
 
 	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
 											 AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
-		Predicate p = bodyAtom.getFunctionSymbol();
-		if (p instanceof TriplePredicate) {
-			TriplePredicate triplePredicate = (TriplePredicate) p;
+		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
 
-			ImmutableList<ImmutableTerm> arguments = bodyAtom.getTerms().stream()
-					.map(immutabilityTools::convertIntoImmutableTerm)
-					.collect(ImmutableCollectors.toList());
+		ImmutableList<ImmutableTerm> arguments = bodyAtom.getTerms().stream()
+				.map(immutabilityTools::convertIntoImmutableTerm)
+				.collect(ImmutableCollectors.toList());
 
-			Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
-			Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
+		Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
+		Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
 
-			// the contains tests are inefficient, but tests fails without them
-			// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+		// the contains tests are inefficient, but tests fails without them
+		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
 
-			if (classIRI.isPresent() && reasoner.classes().contains(classIRI.get())) {
-				OClass c = reasoner.classes().get(classIRI.get());
-				OClass equivalent = (OClass)reasoner.classesDAG().getCanonicalForm(c);
-				if (equivalent != null && !equivalent.equals(c)) {
-					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI());
-				}
+		if (classIRI.isPresent() && reasoner.classes().contains(classIRI.get())) {
+			OClass c = reasoner.classes().get(classIRI.get());
+			OClass equivalent = (OClass)reasoner.classesDAG().getCanonicalForm(c);
+			if (equivalent != null && !equivalent.equals(c)) {
+				return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI());
 			}
-			else if (propertyIRI.isPresent() && reasoner.objectProperties().contains(propertyIRI.get())) {
-				ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
-				ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
-				if (equivalent != null && !equivalent.equals(ope)) {
-					if (!equivalent.isInverse())
-						return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
-					else
-						return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(2), equivalent.getIRI(), bodyAtom.getTerm(0));
-				}
-			}
-			else if (propertyIRI.isPresent()  && reasoner.dataProperties().contains(propertyIRI.get())) {
-				DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
-				DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
-				if (equivalent != null && !equivalent.equals(dpe)) {
+		}
+		else if (propertyIRI.isPresent() && reasoner.objectProperties().contains(propertyIRI.get())) {
+			ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
+			ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
+			if (equivalent != null && !equivalent.equals(ope)) {
+				if (!equivalent.isInverse())
 					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
-				}
+				else
+					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(2), equivalent.getIRI(), bodyAtom.getTerm(0));
+			}
+		}
+		else if (propertyIRI.isPresent()  && reasoner.dataProperties().contains(propertyIRI.get())) {
+			DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
+			DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
+			if (equivalent != null && !equivalent.equals(dpe)) {
+				return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
 			}
 		}
 		return bodyAtom;
