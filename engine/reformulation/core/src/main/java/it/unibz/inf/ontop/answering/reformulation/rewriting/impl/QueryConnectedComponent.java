@@ -111,7 +111,7 @@ public class QueryConnectedComponent {
 				n -> new Loop(n, ((n instanceof Variable) && !headTerms.contains(n))));
 	}
 	
-	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed) {
+	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
 
 		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
 
@@ -194,7 +194,7 @@ public class QueryConnectedComponent {
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
-		ImmutableSet<Variable> headTerms = ImmutableSet.copyOf(cqie.getHead().getVariables());
+		ImmutableSet<Variable> headVariables = ImmutableSet.copyOf(cqie.getHead().getVariables());
 
 		// collect all edges and loops 
 		//      an edge is a binary predicate P(t, t') with t \ne t'
@@ -221,14 +221,14 @@ public class QueryConnectedComponent {
 					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
 					Edge edge =  pairs.computeIfAbsent(pair, pp -> {
-						Loop l0 = getLoop(t0, allLoops, headTerms);
-						Loop l1 = getLoop(t1, allLoops, headTerms);
+						Loop l0 = getLoop(t0, allLoops, headVariables);
+						Loop l1 = getLoop(t1, allLoops, headVariables);
 						return new Edge(l0, l1);
 					});
 					edge.bAtoms.add(a);		 // MODIFIES THE EDGE
 				}
 				else {
-					Loop l0 = getLoop(t0, allLoops, headTerms);
+					Loop l0 = getLoop(t0, allLoops, headVariables);
 					l0.atoms.add(a); // MODIFIES THE LOOP
 				}
 			}
@@ -242,8 +242,8 @@ public class QueryConnectedComponent {
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			Edge edge = pairs.entrySet().iterator().next().getValue();			
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, edge.getTerm0()));			
+			Term seed = pairs.entrySet().iterator().next().getKey().t0;
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 		
 		while (!nonDLAtoms.isEmpty()) {
@@ -252,13 +252,13 @@ public class QueryConnectedComponent {
 			Set<Variable> vars = new HashSet<>();
 			TermUtils.addReferencedVariablesTo(vars, f);
 			Variable v = vars.iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v));			
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, v, headVariables));
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
 		while (!allLoops.isEmpty()) {
 			Term seed = allLoops.keySet().iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed));			
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 				
 		return ccs;
