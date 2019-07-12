@@ -20,8 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -106,9 +105,9 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 	
-	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, ImmutableSet<Variable> headTerms) {
+	public static Loop getLoop(Term t, Map<Term, Loop> allLoops, ImmutableList<Function> atoms, ImmutableSet<Variable> headTerms) {
 		return allLoops.computeIfAbsent(t,
-				n -> new Loop(n, ((n instanceof Variable) && !headTerms.contains(n))));
+				n -> new Loop(n, ((n instanceof Variable) && !headTerms.contains(n)), atoms));
 	}
 	
 	private static QueryConnectedComponent getConnectedComponent(Map<TermPair, Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
@@ -200,43 +199,49 @@ public class QueryConnectedComponent {
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
-		Map<TermPair, Edge> pairs = new HashMap<>();
-		Map<Term, Loop> allLoops = new HashMap<>();
+		ImmutableMultimap.Builder<TermPair, Function> pz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<Term, Function> lz = ImmutableMultimap.builder();
 		List<Function> nonDLAtoms = new LinkedList<>();
 
 		for (Function atom : cqie.getBody()) {
-			Predicate p = atom.getFunctionSymbol();
 			// TODO: support quads
-			if (atom.isDataFunction() && (p instanceof TriplePredicate)) { // if DL predicates
+			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
 				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
 
 				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
 						.map(immutabilityTools::convertIntoImmutableTerm)
 						.collect(ImmutableCollectors.toList());
-				boolean isClass = ((TriplePredicate) p).getClassIRI(arguments).isPresent();
+				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(arguments).isPresent();
 
 				Term t0 = a.getTerm(0);
 				if (!isClass && !t0.equals(a.getTerm(2))) {
 					// proper DL edge between two distinct terms
 					Term t1 = a.getTerm(2);
 					TermPair pair = new TermPair(t0, t1);
-					Edge edge =  pairs.computeIfAbsent(pair, pp -> {
-						Loop l0 = getLoop(t0, allLoops, headVariables);
-						Loop l1 = getLoop(t1, allLoops, headVariables);
-						return new Edge(l0, l1);
-					});
-					edge.bAtoms.add(a);		 // MODIFIES THE EDGE
+					pz.put(pair, a);
 				}
 				else {
-					Loop l0 = getLoop(t0, allLoops, headVariables);
-					l0.atoms.add(a); // MODIFIES THE LOOP
+					lz.put(t0, a);
 				}
 			}
-			else { // non-DL precicate
-				//log.debug("NON-DL ATOM {}",  a);
+			else {
 				nonDLAtoms.add(atom);
 			}
-		}	
+		}
+
+		Map<Term, Loop> allLoops = new HashMap<>();
+		for (Entry<Term, Collection<Function>> e : lz.build().asMap().entrySet()) {
+			Loop l0 = getLoop(e.getKey(), allLoops, ImmutableList.copyOf(e.getValue()),  headVariables);
+			allLoops.put(e.getKey(), l0);
+		}
+
+		Map<TermPair, Edge> pairs = new HashMap<>();
+		for (Entry<TermPair, Collection<Function>> e : pz.build().asMap().entrySet()) {
+			TermPair pair = e.getKey();
+			Loop l0 = getLoop(pair.t0, allLoops, ImmutableList.of(), headVariables);
+			Loop l1 = getLoop(pair.t1, allLoops, ImmutableList.of(), headVariables);
+			pairs.put(pair, new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
+		}
 
 		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
@@ -343,13 +348,13 @@ public class QueryConnectedComponent {
 	
 	static class Loop {
 		private final Term term;
-		private final List<Function> atoms;
+		private final ImmutableList<Function> atoms;
 		private final boolean isExistentialVariable;
 		
-		public Loop(Term term, boolean isExistentialVariable) {
+		public Loop(Term term, boolean isExistentialVariable, ImmutableList<Function> atoms) {
 			this.term = term;
 			this.isExistentialVariable = isExistentialVariable;
-			this.atoms = new ArrayList<>(10);
+			this.atoms = atoms;
 		}
 		
 		public Term getTerm() {
@@ -394,10 +399,10 @@ public class QueryConnectedComponent {
 	
 	static class Edge {
 		private final Loop l0, l1;
-		private final List<Function> bAtoms;
+		private final ImmutableList<Function> bAtoms;
 		
-		public Edge(Loop l0, Loop l1) {
-			this.bAtoms = new ArrayList<>(10);
+		public Edge(Loop l0, Loop l1, ImmutableList<Function> bAtoms) {
+			this.bAtoms = bAtoms;
 			this.l0 = l0;
 			this.l1 = l1;
 		}
