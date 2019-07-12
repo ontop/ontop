@@ -105,7 +105,7 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Edge> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<Function>>> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
 
 		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
 
@@ -118,19 +118,22 @@ public class QueryConnectedComponent {
 		boolean expanded;
 		do {
 			expanded = false;
-			Iterator<Edge> i = pairs.iterator();
+			Iterator<Entry<TermPair, Collection<Function>>> i = pairs.iterator();
 			while (i.hasNext()) {
-				Edge edge = i.next();
-				if (ccTerms.contains(edge.getTerm0())) {
-					ccTerms.add(edge.getTerm1());   // the other term is already there
+				Entry<TermPair, Collection<Function>> e = i.next();
+				TermPair pair = e.getKey();
+				if (ccTerms.contains(pair.t0)) {
+					ccTerms.add(pair.t1);   // the other term is already there
 				}
-				else if (ccTerms.contains(edge.getTerm1())) {
-					ccTerms.add(edge.getTerm0());   // the other term is already there
+				else if (ccTerms.contains(pair.t1)) {
+					ccTerms.add(pair.t0);   // the other term is already there
 				}
 				else
 					continue;
 
-				ccEdges.add(edge);
+				Loop l0 =  allLoops.computeIfAbsent(pair.t0, n -> new Loop(n, headVariables, ImmutableList.of()));
+				Loop l1 =  allLoops.computeIfAbsent(pair.t1, n -> new Loop(n, headVariables, ImmutableList.of()));
+				ccEdges.add(new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
 				expanded = true;
 				i.remove();
 			}
@@ -147,12 +150,13 @@ public class QueryConnectedComponent {
 						break;
 					}
 				
-				if (intersects) {
-					ccNonDLAtoms.add(atom);
-					ccTerms.addAll(atomVars);
-					expanded = true;
-					ni.remove();
-				}
+				if (!intersects)
+					continue;
+
+				ccNonDLAtoms.add(atom);
+				ccTerms.addAll(atomVars);
+				expanded = true;
+				ni.remove();
 			}
 		} while (expanded);
 
@@ -214,19 +218,13 @@ public class QueryConnectedComponent {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
-		List<Edge> pairs = new ArrayList<>();
-		for (Entry<TermPair, Collection<Function>> e : pz.build().asMap().entrySet()) {
-			TermPair pair = e.getKey();
-			Loop l0 =  allLoops.computeIfAbsent(pair.t0, n -> new Loop(n, headVariables, ImmutableList.of()));
-			Loop l1 =  allLoops.computeIfAbsent(pair.t1, n -> new Loop(n, headVariables, ImmutableList.of()));
-			pairs.add(new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
-		}
+		List<Entry<TermPair, Collection<Function>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
 
 		List<QueryConnectedComponent> ccs = new LinkedList<>();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			Term seed = pairs.iterator().next().getTerm0();
+			Term seed = pairs.iterator().next().getKey().t0;
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 		
