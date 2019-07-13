@@ -21,7 +21,10 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.CQIE;
@@ -172,7 +175,7 @@ public class QueryConnectedComponent {
 		for (Function atom : cqie.getBody()) {
 			// TODO: support quads
 			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-				Function a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
+				Function a = immutabilityTools.convertToMutableFunction(getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools));
 
 				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
 						.map(immutabilityTools::convertIntoImmutableTerm)
@@ -430,12 +433,12 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static Function getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
-											 AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+	private static DataAtom<AtomPredicate> getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
+															AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
 		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
 
-		ImmutableList<ImmutableTerm> arguments = bodyAtom.getTerms().stream()
-				.map(immutabilityTools::convertIntoImmutableTerm)
+		ImmutableList<VariableOrGroundTerm> arguments = bodyAtom.getTerms().stream()
+				.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
 				.collect(ImmutableCollectors.toList());
 
 		Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
@@ -444,31 +447,31 @@ public class QueryConnectedComponent {
 		// the contains tests are inefficient, but tests fails without them
 		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
 
-		if (classIRI.isPresent() && reasoner.classes().contains(classIRI.get())) {
-			OClass c = reasoner.classes().get(classIRI.get());
-			OClass equivalent = (OClass)reasoner.classesDAG().getCanonicalForm(c);
-			if (equivalent != null && !equivalent.equals(c)) {
-				return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI());
+		if (classIRI.isPresent()) {
+			if (reasoner.classes().contains(classIRI.get())) {
+				OClass c = reasoner.classes().get(classIRI.get());
+				OClass equivalent = (OClass) reasoner.classesDAG().getCanonicalForm(c);
+				return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI());
 			}
+			return atomFactory.getIntensionalTripleAtom(arguments.get(0), classIRI.get());
 		}
-		else if (propertyIRI.isPresent() && reasoner.objectProperties().contains(propertyIRI.get())) {
-			ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
-			ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
-			if (equivalent != null && !equivalent.equals(ope)) {
+		else if (propertyIRI.isPresent()) {
+			if (reasoner.objectProperties().contains(propertyIRI.get())) {
+				ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
+				ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
 				if (!equivalent.isInverse())
-					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
+					return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
 				else
-					return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(2), equivalent.getIRI(), bodyAtom.getTerm(0));
+					return atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0));
 			}
-		}
-		else if (propertyIRI.isPresent()  && reasoner.dataProperties().contains(propertyIRI.get())) {
-			DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
-			DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
-			if (equivalent != null && !equivalent.equals(dpe)) {
-				return atomFactory.getMutableTripleBodyAtom(bodyAtom.getTerm(0), equivalent.getIRI(), bodyAtom.getTerm(2));
+			else if (reasoner.dataProperties().contains(propertyIRI.get())) {
+				DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
+				DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
+				return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
 			}
+			return atomFactory.getIntensionalTripleAtom(arguments.get(0), propertyIRI.get(), arguments.get(2));
 		}
-		return bodyAtom;
+		throw new MinorOntopInternalBugException("Unknown type of triple atoms");
 	}
 
 }
