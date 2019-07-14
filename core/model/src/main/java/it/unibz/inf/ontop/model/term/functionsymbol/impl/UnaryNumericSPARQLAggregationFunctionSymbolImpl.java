@@ -125,7 +125,7 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
                 : dbAggregationVariable;
 
         // TODO: consider the possibility to disable it through the settings
-        ImmutableTerm inferredType = isSubTermNullable
+        ImmutableTerm inferredType = dbAggMayReturnNull
                 ? termFactory.getIfThenElse(
                 termFactory.getDBIsNotNull(dbAggregationVariable),
                 inferredTypeTermWhenNonEmpty,

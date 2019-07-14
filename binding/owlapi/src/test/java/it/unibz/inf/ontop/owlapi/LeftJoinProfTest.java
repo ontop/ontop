@@ -655,6 +655,82 @@ public class LeftJoinProfTest {
 
     @Ignore
     @Test
+    public void testMinStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (MIN(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("10");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMinStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MIN(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("10","12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMaxStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (MAX(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMaxStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MAX(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("11","12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
     public void testDuration1() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +

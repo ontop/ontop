@@ -113,6 +113,16 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return new NullIgnoringDBAvgFunctionSymbol(inputType, targetType, isDistinct);
     }
 
+    @Override
+    protected DBFunctionSymbol createDBMin(DBTermType termType) {
+        return new DBMinFunctionSymbolImpl(termType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBMax(DBTermType termType) {
+        return new DBMaxFunctionSymbolImpl(termType);
+    }
+
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDefaultRegularFunctionTable(TypeFactory typeFactory) {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType dbStringType = dbTypeFactory.getDBStringType();
