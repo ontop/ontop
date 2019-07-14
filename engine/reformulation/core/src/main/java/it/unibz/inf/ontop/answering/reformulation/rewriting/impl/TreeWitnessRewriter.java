@@ -37,6 +37,8 @@ import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
@@ -191,19 +193,16 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				twf.add(termFactory.getFunctionEQ(immutabilityTools.convertToMutableTerm(i.next()), immutabilityTools.convertToMutableTerm(r0)));
 			
 			// root atoms
-			for (Function a : tw.getRootAtoms()) {
-				if (!(a.getFunctionSymbol() instanceof TriplePredicate))
+			for (DataAtom<RDFAtomPredicate> a : tw.getRootAtoms()) {
+				if (!(a.getPredicate() instanceof TriplePredicate))
 					throw new MinorOntopInternalBugException("A triple atom was expected: " + a);
 
-				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(
-						a.getTerms().stream()
-								.map(immutabilityTools::convertIntoImmutableTerm)
-								.collect(ImmutableCollectors.toList()))
+				boolean isClass = ((TriplePredicate) a.getPredicate()).getClassIRI(a.getArguments())
 						.isPresent();
 
 				twf.add(isClass
-						? atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), a.getTerm(1), a.getTerm(2))
-						: atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), a.getTerm(1), immutabilityTools.convertToMutableTerm(r0)));
+						? atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), immutabilityTools.convertToMutableTerm(a.getTerm(1)), immutabilityTools.convertToMutableTerm(a.getTerm(2)))
+						: atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), immutabilityTools.convertToMutableTerm(a.getTerm(1)), immutabilityTools.convertToMutableTerm(r0)));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
@@ -250,7 +249,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 							}
 						if (!contained) {
 							log.debug("EDGE {} NOT COVERED BY ANY TW",  edge);
-							mainbody.addAll(edge.getAtoms());
+							mainbody.addAll(edge.getAtoms(immutabilityTools));
 						}
 					}
 					for (TreeWitness tw : compatibleTWs) {
@@ -280,7 +279,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 								mainbody.add(edgeAtom);				
 								
 								LinkedList<Function> edgeAtoms = new LinkedList<>();
-								edgeAtoms.addAll(edge.getAtoms());
+								edgeAtoms.addAll(edge.getAtoms(immutabilityTools));
 								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
@@ -289,7 +288,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
-						mainbody.addAll(edge.getAtoms());
+						mainbody.addAll(edge.getAtoms(immutabilityTools));
 				}
 				mainbody.addAll(cc.getNonDLAtoms());
 				outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
@@ -301,7 +300,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 			Loop loop = cc.getLoop();
 			log.debug("LOOP {}", loop);
 			if (loop != null)
-				loopbody.addAll(loop.getAtoms());
+				loopbody.addAll(loop.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList()));
 			loopbody.addAll(cc.getNonDLAtoms());
 			outputRules.add(datalogFactory.getCQIE(headAtom, loopbody));
 		}

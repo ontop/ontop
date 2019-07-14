@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -51,7 +53,7 @@ import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 public class TreeWitness {
 	private final TermCover terms;
 	
-	private final Set<Function> rootAtoms; // atoms of the query that contain only the roots of the tree witness
+	private final Set<DataAtom<RDFAtomPredicate>> rootAtoms; // atoms of the query that contain only the roots of the tree witness
 	                            // these atoms must hold true for this tree witness to be realised
 	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
 	                                          // in the canonical model of the TBox
@@ -60,7 +62,7 @@ public class TreeWitness {
 	
 	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, Intersection<ClassExpression> rootConcepts) {
+	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<DataAtom<RDFAtomPredicate>> rootAtoms, Intersection<ClassExpression> rootConcepts) {
 		this.gens = gens;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
@@ -146,7 +148,7 @@ public class TreeWitness {
 	 * @return query atoms with all terms among the roots of tree witness
 	 */
 	
-	public Set<Function> getRootAtoms() {
+	public Set<DataAtom<RDFAtomPredicate>> getRootAtoms() {
 		return rootAtoms;
 	}
 

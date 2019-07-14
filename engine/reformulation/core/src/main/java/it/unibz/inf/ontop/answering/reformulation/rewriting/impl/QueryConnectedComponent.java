@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.TriplePredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -91,7 +88,7 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<Function>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
@@ -103,8 +100,8 @@ public class QueryConnectedComponent {
 		boolean expanded;
 		do {
 			expanded = false;
-			for (Iterator<Entry<TermPair, Collection<Function>>> i = pairs.iterator(); i.hasNext();) {
-				Entry<TermPair, Collection<Function>> e = i.next();
+			for (Iterator<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext();) {
+				Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
 				TermPair pair = e.getKey();
 				if (ccTerms.contains(pair.t0))
 					ccTerms.add(pair.t1);   // the other term is already there
@@ -168,25 +165,22 @@ public class QueryConnectedComponent {
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
-		ImmutableMultimap.Builder<TermPair, Function> pz = ImmutableMultimap.builder();
-		ImmutableMultimap.Builder<VariableOrGroundTerm, Function> lz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<TermPair, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<VariableOrGroundTerm, DataAtom<RDFAtomPredicate>> lz = ImmutableMultimap.builder();
 		List<Function> nonDLAtoms = new LinkedList<>();
 
 		for (Function atom : cqie.getBody()) {
 			// TODO: support quads
 			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-				Function a = immutabilityTools.convertToMutableFunction(getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools));
+				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
 
-				ImmutableList<VariableOrGroundTerm> arguments = a.getTerms().stream()
-						.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
-						.collect(ImmutableCollectors.toList());
-				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(arguments).isPresent();
+				boolean isClass = ((TriplePredicate) a.getPredicate()).getClassIRI(a.getArguments()).isPresent();
 
 				// proper DL edge between two distinct terms
 				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
-					pz.put(new TermPair(arguments.get(0), arguments.get(2)), a);
+					pz.put(new TermPair(a.getTerm(0), a.getTerm(2)), a);
 				else
-					lz.put(arguments.get(0), a);
+					lz.put(a.getTerm(0), a);
 			}
 			else {
 				nonDLAtoms.add(atom);
@@ -194,11 +188,11 @@ public class QueryConnectedComponent {
 		}
 
 		Map<VariableOrGroundTerm, Loop> allLoops = new HashMap<>();
-		for (Entry<VariableOrGroundTerm, Collection<Function>> e : lz.build().asMap().entrySet()) {
+		for (Entry<VariableOrGroundTerm, Collection<DataAtom<RDFAtomPredicate>>> e : lz.build().asMap().entrySet()) {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
-		List<Entry<TermPair, Collection<Function>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
+		List<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
 
 		ImmutableList.Builder<QueryConnectedComponent> ccs = ImmutableList.builder();
 		
@@ -302,10 +296,10 @@ public class QueryConnectedComponent {
 	
 	static class Loop {
 		private final VariableOrGroundTerm term;
-		private final ImmutableList<Function> atoms;
+		private final ImmutableList<DataAtom<RDFAtomPredicate>> atoms;
 		private final boolean isExistentialVariable;
 		
-		public Loop(VariableOrGroundTerm term, ImmutableSet<Variable> headVariables, ImmutableList<Function> atoms) {
+		public Loop(VariableOrGroundTerm term, ImmutableSet<Variable> headVariables, ImmutableList<DataAtom<RDFAtomPredicate>> atoms) {
 			this.term = term;
 			this.isExistentialVariable = (term instanceof Variable) && !headVariables.contains(term);
 			this.atoms = atoms;
@@ -315,7 +309,7 @@ public class QueryConnectedComponent {
 			return term;
 		}
 		
-		public ImmutableList<Function> getAtoms() {
+		public ImmutableList<DataAtom<RDFAtomPredicate>> getAtoms() {
 			return atoms;
 		}
 		
@@ -353,9 +347,9 @@ public class QueryConnectedComponent {
 	
 	static class Edge {
 		private final Loop l0, l1;
-		private final ImmutableList<Function> bAtoms;
+		private final ImmutableList<DataAtom<RDFAtomPredicate>> bAtoms;
 		
-		public Edge(Loop l0, Loop l1, ImmutableList<Function> bAtoms) {
+		public Edge(Loop l0, Loop l1, ImmutableList<DataAtom<RDFAtomPredicate>> bAtoms) {
 			this.bAtoms = bAtoms;
 			this.l0 = l0;
 			this.l1 = l1;
@@ -377,16 +371,16 @@ public class QueryConnectedComponent {
 			return l1.term;
 		}
 		
-		public ImmutableList<Function> getBAtoms() {
+		public ImmutableList<DataAtom<RDFAtomPredicate>> getBAtoms() {
 			return bAtoms;
 		}
 		
-		public ImmutableList<Function> getAtoms() {
-			ImmutableList.Builder<Function> allAtoms = ImmutableList.builder();
+		public ImmutableList<Function> getAtoms(ImmutabilityTools immutabilityTools) {
+			ImmutableList.Builder<DataAtom<RDFAtomPredicate>> allAtoms = ImmutableList.builder();
 			allAtoms.addAll(bAtoms);
 			allAtoms.addAll(l0.getAtoms());
 			allAtoms.addAll(l1.getAtoms());
-			return allAtoms.build();
+			return allAtoms.build().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList());
 		}
 		
 		@Override
@@ -433,7 +427,7 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static DataAtom<AtomPredicate> getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
+	private static DataAtom<RDFAtomPredicate> getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
 															AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
 		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
 
@@ -451,25 +445,25 @@ public class QueryConnectedComponent {
 			if (reasoner.classes().contains(classIRI.get())) {
 				OClass c = reasoner.classes().get(classIRI.get());
 				OClass equivalent = (OClass) reasoner.classesDAG().getCanonicalForm(c);
-				return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI());
+				return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI());
 			}
-			return atomFactory.getIntensionalTripleAtom(arguments.get(0), classIRI.get());
+			return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), classIRI.get());
 		}
 		else if (propertyIRI.isPresent()) {
 			if (reasoner.objectProperties().contains(propertyIRI.get())) {
 				ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
 				ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
 				if (!equivalent.isInverse())
-					return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
+					return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
 				else
-					return atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0));
+					return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0));
 			}
 			else if (reasoner.dataProperties().contains(propertyIRI.get())) {
 				DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
 				DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
-				return atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
+				return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
 			}
-			return atomFactory.getIntensionalTripleAtom(arguments.get(0), propertyIRI.get(), arguments.get(2));
+			return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), propertyIRI.get(), arguments.get(2));
 		}
 		throw new MinorOntopInternalBugException("Unknown type of triple atoms");
 	}

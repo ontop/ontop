@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -180,7 +182,7 @@ public class QueryFolding {
 
 		Intersection<ClassExpression> rootType = cache.getTopClass();
 
-		Set<Function> rootAtoms = new HashSet<>();
+		Set<DataAtom<RDFAtomPredicate>> rootAtoms = new HashSet<>();
 		for (QueryConnectedComponent.Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable

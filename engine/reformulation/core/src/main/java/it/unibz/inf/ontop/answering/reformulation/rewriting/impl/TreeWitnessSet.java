@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
@@ -374,9 +375,9 @@ public class TreeWitnessSet {
 			return new Intersection<>();
 		}
 		
-		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
+		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
 			Intersection<ClassExpression> subc = new Intersection<>();
-			for (Function a : atoms) {
+			for (DataAtom<RDFAtomPredicate> a : atoms) {
 				Optional<IRI> optionalClassIRI = extractClassIRI(a);
 				if (!optionalClassIRI.isPresent()) {
 					subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
@@ -411,20 +412,21 @@ public class TreeWitnessSet {
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
 				properties = new Intersection<>();
-				for (Function a : edge.getBAtoms()) {
-					if (a.isOperation()) {
-						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
-						properties.setToBottom();
-						break;
-					}
-					else {
+				for (DataAtom<RDFAtomPredicate> a : edge.getBAtoms()) {
+//					if (a.isOperation()) {
+//						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
+//						properties.setToBottom();
+//						break;
+//					}
+//					else
+					{
 						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
 						Optional<IRI> optionalPropertyIRIString = extractPropertyIRI(a);
 						if (optionalPropertyIRIString
 								.filter(i -> reasoner.objectProperties().contains(i))
 								.isPresent()) {
 							ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
-							if (!root.equals(immutabilityTools.convertIntoImmutableTerm(a.getTerm(0))))
+							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
 							properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
 						}
@@ -440,30 +442,18 @@ public class TreeWitnessSet {
 			return properties;
 		}
 
-		private Optional<IRI> extractPropertyIRI(Function rdfDataAtom) {
-			if (rdfDataAtom.getFunctionSymbol() instanceof RDFAtomPredicate) {
-
-				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getFunctionSymbol();
-
-				ImmutableList<ImmutableTerm> arguments = rdfDataAtom.getTerms().stream()
-						.map(immutabilityTools::convertIntoImmutableTerm)
-						.collect(ImmutableCollectors.toList());
-
-				return rdfAtomPredicate.getPropertyIRI(arguments);
+		private Optional<IRI> extractPropertyIRI(DataAtom<RDFAtomPredicate> rdfDataAtom) {
+			if (rdfDataAtom.getPredicate() instanceof RDFAtomPredicate) {
+				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getPredicate();
+				return rdfAtomPredicate.getPropertyIRI(rdfDataAtom.getArguments());
 			}
 			return Optional.empty();
 		}
 
-		private Optional<IRI> extractClassIRI(Function rdfDataAtom) {
-			if (rdfDataAtom.getFunctionSymbol() instanceof RDFAtomPredicate) {
-
-				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getFunctionSymbol();
-
-				ImmutableList<ImmutableTerm> arguments = rdfDataAtom.getTerms().stream()
-						.map(immutabilityTools::convertIntoImmutableTerm)
-						.collect(ImmutableCollectors.toList());
-
-				return rdfAtomPredicate.getClassIRI(arguments);
+		private Optional<IRI> extractClassIRI(DataAtom<RDFAtomPredicate> rdfDataAtom) {
+			if (rdfDataAtom.getPredicate() instanceof RDFAtomPredicate) {
+				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getPredicate();
+				return rdfAtomPredicate.getClassIRI(rdfDataAtom.getArguments());
 			}
 			return Optional.empty();
 		}
