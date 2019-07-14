@@ -172,7 +172,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		
 		List<CQIE> outputRules = new LinkedList<>();	
 
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators, immutabilityTools);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
@@ -197,10 +197,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				if (!(a.getPredicate() instanceof TriplePredicate))
 					throw new MinorOntopInternalBugException("A triple atom was expected: " + a);
 
-				boolean isClass = ((TriplePredicate) a.getPredicate()).getClassIRI(a.getArguments())
-						.isPresent();
-
-				twf.add(isClass
+				twf.add(a.getPredicate().getClassIRI(a.getArguments()).isPresent()
 						? atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), immutabilityTools.convertToMutableTerm(a.getTerm(1)), immutabilityTools.convertToMutableTerm(a.getTerm(2)))
 						: atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), immutabilityTools.convertToMutableTerm(a.getTerm(1)), immutabilityTools.convertToMutableTerm(r0)));
 			}

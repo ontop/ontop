@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -67,7 +68,6 @@ public class TreeWitness {
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
 		this.rootConcepts = rootConcepts;
-		//this.domain = domain; // new HashSet<term>(roots); domain.addAll(nonroots);
 	}
 	
 	void setFormula(List<List<Function>> twfs) {
@@ -135,7 +135,7 @@ public class TreeWitness {
 		if (gens.size() == 1)
 			return gens.iterator().next().getSubConcepts();
 		
-		Set<ClassExpression> all = new HashSet<ClassExpression>();		
+		Set<ClassExpression> all = new HashSet<>();
 		for (TreeWitnessGenerator twg : gens) 
 			all.addAll(twg.getSubConcepts());
 		return all;
@@ -185,9 +185,9 @@ public class TreeWitness {
 	 *
 	 */
 	
-	public static class TermCover {
+	public static final class TermCover {
 		private final Set<VariableOrGroundTerm> domain; // terms that are covered by the tree witness
-		private final Set<VariableOrGroundTerm> roots;   // terms that are mapped onto the root of the tree witness
+		private final Set<VariableOrGroundTerm> roots;  // terms that are mapped onto the root of the tree witness
 		
 		public TermCover(Set<VariableOrGroundTerm> domain, Set<VariableOrGroundTerm> roots) {
 			this.domain = domain;
@@ -211,8 +211,7 @@ public class TreeWitness {
 		public boolean equals(Object obj) {
 			if (obj instanceof TermCover) {
 				TermCover other = (TermCover)obj;
-				return this.roots.equals(other.roots) && 
-					   this.domain.equals(other.domain);			
+				return this.roots.equals(other.roots) && this.domain.equals(other.domain);
 			}
 			return false;
 		}

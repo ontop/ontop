@@ -52,10 +52,9 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 
-	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators,
-						   ImmutabilityTools immutabilityTools) {
+	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner, immutabilityTools);
+		this.cache = new QueryConnectedComponentCache(reasoner);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -68,8 +67,8 @@ public class TreeWitnessSet {
 	}
 	
 	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner,
-												  Collection<TreeWitnessGenerator> generators, ImmutabilityTools immutabilityTools) {
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators, immutabilityTools);
+												  Collection<TreeWitnessGenerator> generators) {
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -360,11 +359,9 @@ public class TreeWitnessSet {
 		private final Map<VariableOrGroundTerm, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final ClassifiedTBox reasoner;
-		private final ImmutabilityTools immutabilityTools;
 
-		private QueryConnectedComponentCache(ClassifiedTBox reasoner, ImmutabilityTools immutabilityTools) {
+		private QueryConnectedComponentCache(ClassifiedTBox reasoner) {
 			this.reasoner = reasoner;
-			this.immutabilityTools = immutabilityTools;
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
@@ -378,7 +375,7 @@ public class TreeWitnessSet {
 		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
 			Intersection<ClassExpression> subc = new Intersection<>();
 			for (DataAtom<RDFAtomPredicate> a : atoms) {
-				Optional<IRI> optionalClassIRI = extractClassIRI(a);
+				Optional<IRI> optionalClassIRI = a.getPredicate().getClassIRI(a.getArguments());
 				if (!optionalClassIRI.isPresent()) {
 					subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
 					break;
@@ -413,49 +410,25 @@ public class TreeWitnessSet {
 			if (properties == null) {
 				properties = new Intersection<>();
 				for (DataAtom<RDFAtomPredicate> a : edge.getBAtoms()) {
-//					if (a.isOperation()) {
-//						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
-//						properties.setToBottom();
-//						break;
-//					}
-//					else
-					{
-						log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-						Optional<IRI> optionalPropertyIRIString = extractPropertyIRI(a);
-						if (optionalPropertyIRIString
-								.filter(i -> reasoner.objectProperties().contains(i))
-								.isPresent()) {
-							ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
-							if (!root.equals(a.getTerm(0)))
-									prop = prop.getInverse();
-							properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
-						}
-						else
-							properties.setToBottom();
-						
-						if (properties.isBottom())
-							break;						
+					log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
+					Optional<IRI> optionalPropertyIRIString = a.getPredicate().getPropertyIRI(a.getArguments());
+					if (optionalPropertyIRIString
+							.filter(i -> reasoner.objectProperties().contains(i))
+							.isPresent()) {
+						ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
+						if (!root.equals(a.getTerm(0)))
+							prop = prop.getInverse();
+						properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
 					}
+					else
+						properties.setToBottom();
+
+					if (properties.isBottom())
+						break;
 				}
 				propertiesCache.put(idx, properties); // edge.getTerms()
 			}
 			return properties;
-		}
-
-		private Optional<IRI> extractPropertyIRI(DataAtom<RDFAtomPredicate> rdfDataAtom) {
-			if (rdfDataAtom.getPredicate() instanceof RDFAtomPredicate) {
-				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getPredicate();
-				return rdfAtomPredicate.getPropertyIRI(rdfDataAtom.getArguments());
-			}
-			return Optional.empty();
-		}
-
-		private Optional<IRI> extractClassIRI(DataAtom<RDFAtomPredicate> rdfDataAtom) {
-			if (rdfDataAtom.getPredicate() instanceof RDFAtomPredicate) {
-				RDFAtomPredicate rdfAtomPredicate = (RDFAtomPredicate) rdfDataAtom.getPredicate();
-				return rdfAtomPredicate.getClassIRI(rdfDataAtom.getArguments());
-			}
-			return Optional.empty();
 		}
 	}
 	
