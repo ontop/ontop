@@ -20,10 +20,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
@@ -35,7 +34,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,11 +165,12 @@ public class QueryFolding {
 	
 	public TreeWitness.TermCover getTerms() {
 		if (terms == null) {
-			Set<VariableOrGroundTerm> domain = new HashSet<>(internalDomain);
-			Set<VariableOrGroundTerm> rootNewLiterals = new HashSet<>();
-			for (QueryConnectedComponent.Loop l : roots)
-				rootNewLiterals.add(l.getTerm());
-			domain.addAll(rootNewLiterals);
+			ImmutableSet<VariableOrGroundTerm> rootNewLiterals = roots.stream()
+					.map(QueryConnectedComponent.Loop::getTerm)
+					.collect(ImmutableCollectors.toSet());
+			ImmutableSet<VariableOrGroundTerm> domain = Stream.concat(
+						internalDomain.stream(), rootNewLiterals.stream())
+					.collect(ImmutableCollectors.toSet());
 			terms = new TreeWitness.TermCover(domain, rootNewLiterals);
 		}
 		return terms;
@@ -211,6 +213,6 @@ public class QueryFolding {
 				}
 			}
 		
-		return new TreeWitness(twg, getTerms(), rootAtoms, rootType); 	
+		return new TreeWitness(twg, getTerms(), ImmutableSet.copyOf(rootAtoms), rootType);
 	}
 }
