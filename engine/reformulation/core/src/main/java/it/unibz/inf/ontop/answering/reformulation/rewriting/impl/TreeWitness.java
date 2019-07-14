@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -32,6 +33,7 @@ import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * TreeWitness: universal tree witnesses as in the KR 2012 paper
@@ -56,14 +58,14 @@ public class TreeWitness {
 	
 	private final ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms; // atoms of the query that contain only the roots of the tree witness
 	                            // these atoms must hold true for this tree witness to be realised
-	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
+	private final ImmutableList<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness
 	                                          // in the canonical model of the TBox
 	
 	private final Intersection<ClassExpression> rootConcepts; // store concept for merging tree witnesses
 	
 	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
 
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms, Intersection<ClassExpression> rootConcepts) {
+	public TreeWitness(ImmutableList<TreeWitnessGenerator> gens, TermCover terms, ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms, Intersection<ClassExpression> rootConcepts) {
 		this.gens = gens;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
@@ -115,12 +117,12 @@ public class TreeWitness {
 	}
 	
 	/**
-	 * Set<TreeWitnessGenerator> getGenerator()
+	 * ImmutableList<TreeWitnessGenerator> getGenerator()
 	 * 
 	 * @return the tree witness generators \exists R.B
 	 */
 	
-	public Collection<TreeWitnessGenerator> getGenerators() {
+	public ImmutableList<TreeWitnessGenerator> getGenerators() {
 		return gens;
 	}
 
@@ -131,24 +133,20 @@ public class TreeWitness {
 	 */
 	
 	
-	public Set<ClassExpression> getGeneratorSubConcepts() {
-		if (gens.size() == 1)
-			return gens.iterator().next().getSubConcepts();
-		
-		Set<ClassExpression> all = new HashSet<>();
-		for (TreeWitnessGenerator twg : gens) 
-			all.addAll(twg.getSubConcepts());
-		return all;
+	public ImmutableSet<ClassExpression> getGeneratorSubConcepts() {
+		return gens.stream()
+				.flatMap(twg -> twg.getSubConcepts().stream())
+				.collect(ImmutableCollectors.toSet());
 	}
 	
 	
 	/**
-	 * Set<Function> getRootAtoms()
+	 * ImmutableSet<DataAtom<RDFAtomPredicate>> getRootAtoms()
 	 * 
 	 * @return query atoms with all terms among the roots of tree witness
 	 */
 	
-	public Set<DataAtom<RDFAtomPredicate>> getRootAtoms() {
+	public ImmutableSet<DataAtom<RDFAtomPredicate>> getRootAtoms() {
 		return rootAtoms;
 	}
 
@@ -158,7 +156,8 @@ public class TreeWitness {
 	 * tree witnesses are consistent iff their domains intersect on their **common** roots
 	 * 
 	 * @param tw1: a tree witness
-	 * @return true if tw1 is compatible with the given tree witness
+	 * @param tw2: a tree witness
+	 * @return true if tw1 is compatible with tw2
 	 */
 	
 	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {

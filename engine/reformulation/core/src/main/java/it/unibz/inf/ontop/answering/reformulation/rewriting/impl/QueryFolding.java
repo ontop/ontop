@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -176,7 +177,7 @@ public class QueryFolding {
 		return terms;
 	}
 	
-	public TreeWitness getTreeWitness(Collection<TreeWitnessGenerator> twg, Collection<QueryConnectedComponent.Edge> edges) {
+	public TreeWitness getTreeWitness(ImmutableList<TreeWitnessGenerator> twg, Collection<QueryConnectedComponent.Edge> edges) {
 		
 		log.debug("NEW TREE WITNESS");
 		log.debug("  PROPERTIES {}", properties);

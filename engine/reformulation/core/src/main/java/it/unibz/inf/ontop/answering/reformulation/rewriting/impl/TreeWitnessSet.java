@@ -97,7 +97,7 @@ public class TreeWitnessSet {
 			
 			if (qf.isValid()) {
 				// tws cannot contain duplicates by construction, so no caching (even negative)
-				Collection<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf); 
+				ImmutableList<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf);
 				if (twg != null) { 
 					// no need to copy the query folding: it creates all temporary objects anyway (including NewLiterals)
 					addTWS(qf.getTreeWitness(twg, cc.getEdges()));
@@ -198,7 +198,7 @@ public class TreeWitnessSet {
 
 		if (saturated && qf.hasRoot())  {
 			if (!twsCache.containsKey(qf.getTerms())) {
-				Collection<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf); 
+				ImmutableList<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf);
 				if (twg != null) {
 					TreeWitness tw = qf.getTreeWitness(twg, cc.getEdges()); 
 					delta.add(tw);
@@ -215,7 +215,7 @@ public class TreeWitnessSet {
 	
 	// can return null if there are no applicable generators!
 	
-	private Collection<TreeWitnessGenerator> getTreeWitnessGenerators(QueryFolding qf) {
+	private ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators(QueryFolding qf) {
 		Collection<TreeWitnessGenerator> twg = null;
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : allTWgenerators) {
@@ -253,7 +253,7 @@ public class TreeWitnessSet {
 			twg.add(g);
 			log.debug("        OK");
 		}
-		return twg;
+		return twg == null ? null : ImmutableList.copyOf(twg);
 	}
 	
 	public CompatibleTreeWitnessSetIterator getIterator() {
