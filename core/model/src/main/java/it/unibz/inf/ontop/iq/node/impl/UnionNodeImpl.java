@@ -8,14 +8,13 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.AscendingSubstitutionNormalizer.AscendingSubstitutionNormalization;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -39,14 +38,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final AscendingSubstitutionNormalizer substitutionNormalizer;
+    private final ConstructionSubstitutionNormalizer substitutionNormalizer;
 
     @AssistedInject
     private UnionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           ConstructionNodeTools constructionTools, IntermediateQueryFactory iqFactory,
                           SubstitutionFactory substitutionFactory, TermFactory termFactory,
                           CoreUtilsFactory coreUtilsFactory,
-                          AscendingSubstitutionNormalizer substitutionNormalizer) {
+                          ConstructionSubstitutionNormalizer substitutionNormalizer) {
         super(substitutionFactory, iqFactory);
         this.projectedVariables = projectedVariables;
         this.constructionTools = constructionTools;
@@ -241,11 +240,6 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             return projectedVariables.equals(((UnionNode)node).getVariables());
         }
         return false;
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        return transformer.transform(this);
     }
 
     @Override
@@ -567,7 +561,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
             IQTree grandChild = ((UnaryIQTree) child).getChild();
 
-            AscendingSubstitutionNormalization normalization = substitutionNormalizer.normalizeAscendingSubstitution(
+            ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
                     constructionNode.getSubstitution(), projectedVariables);
             Optional<ConstructionNode> proposedConstructionNode = normalization.generateTopConstructionNode();
 

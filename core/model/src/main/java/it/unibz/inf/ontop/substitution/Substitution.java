@@ -50,16 +50,6 @@ public interface Substitution {
 
     boolean isEmpty();
 
-    /**
-     * Composes the current substitution with another substitution function.
-     *
-     * Remind that composition is not commutative.
-     *
-     * CURRENTLY NOT IMPLEMENTED!
-     * TODO: provide implementations for this method.
-     */
-    boolean compose(Substitution s);
-
 
     /***
      * Creates a singleton substitution out of term1 and term2.
@@ -87,8 +77,5 @@ public interface Substitution {
      *
      */
     boolean composeFunctions(Function term1, Function term2);
-
-    @Deprecated
-    void put(Variable var, Term term);
 }
 

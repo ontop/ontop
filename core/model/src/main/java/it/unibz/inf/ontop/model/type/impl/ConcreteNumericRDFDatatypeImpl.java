@@ -33,8 +33,6 @@ public class ConcreteNumericRDFDatatypeImpl extends SimpleRDFDatatype implements
 
     @Override
     public ConcreteNumericRDFDatatype getCommonPropagatedOrSubstitutedType(ConcreteNumericRDFDatatype otherType){
-        if (equals(otherType))
-            return this;
         if (promotedHierarchy.contains(otherType))
             return otherType;
 

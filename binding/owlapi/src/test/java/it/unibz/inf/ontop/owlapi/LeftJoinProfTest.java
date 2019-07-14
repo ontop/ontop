@@ -531,6 +531,147 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
+    @Ignore
+    @Test
+    public void testSumStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("46");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testSumStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("12", "13", "21");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testSumStudents3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :teaches ?c .\n" +
+                "      ?c :nbStudents ?nb .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "12", "13", "21");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testDuration1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?d) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :teaches ?c .\n" +
+                "      ?c :duration ?d .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0.0", "0.0", "0.0", "0.0", "0.0", "18.0", "20.0", "54.5");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMultitypedSum1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   { ?c :duration ?n } \n" +
+                "   UNION" +
+                "   { ?c :nbStudents ?n }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("31.0", "32.0", "75.5");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    /**
+     * Checks that the type error is detected
+     */
+    @Ignore
+    @Test
+    public void testMinusMultitypedSum() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "        :lastName ?v .\n" +
+                "   MINUS {\n " +
+                "     SELECT ?p (SUM(?n) AS ?v){\n" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?c :duration ?n " +
+                "       } \n" +
+                "       UNION" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?p :lastName ?n " +
+                "       }\n" +
+                "     } GROUP BY ?p\n" +
+                "  }\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.datalog;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
@@ -84,8 +85,8 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
-		Set<CQIE> dp = PP_MAPPING_2_DATALOG_CONVERTER.convert(ImmutableList.of(mappingAxiom), md).keySet();
-
+		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(ImmutableList.of(mappingAxiom), md).keySet();
+		
 		assertNotNull(dp);
 		System.out.println(dp.toString());
 	}

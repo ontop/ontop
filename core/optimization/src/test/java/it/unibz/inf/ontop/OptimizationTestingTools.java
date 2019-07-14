@@ -3,8 +3,7 @@ package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.impl.DatalogConversionTools;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
+import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
@@ -21,7 +20,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -47,14 +45,13 @@ public class OptimizationTestingTools {
     public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final PushDownBooleanExpressionOptimizer PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER;
-    public static final DatalogConversionTools DATALOG_CONVERSION_TOOLS;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
-    public static final DatalogTools DATALOG_TOOLS;
     public static final IQConverter IQ_CONVERTER;
     public static final DBConstant TRUE, FALSE;
     public static final Constant NULL;
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
+    public static final DatalogProgram2QueryConverter DATALOG_PROGRAM_2_QUERY_CONVERTER;
     public static final RDF RDF_FACTORY;
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -115,7 +112,6 @@ public class OptimizationTestingTools {
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         FUNCTION_SYMBOL_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
         DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
-        DATALOG_TOOLS = injector.getInstance(DatalogTools.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
@@ -123,12 +119,12 @@ public class OptimizationTestingTools {
         PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER = injector.getInstance(PushDownBooleanExpressionOptimizer.class);
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
+        DATALOG_PROGRAM_2_QUERY_CONVERTER = injector.getInstance(DatalogProgram2QueryConverter.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
-        
-        DATALOG_CONVERSION_TOOLS = injector.getInstance(DatalogConversionTools.class);
+
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 

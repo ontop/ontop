@@ -138,9 +138,9 @@ public interface TermFactory {
 	ImmutableExpression.Evaluation getNegativeEvaluation();
 	ImmutableExpression.Evaluation getNullEvaluation();
 
-	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableFunctionalTerm liftableFunctionalTerm);
+	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(ImmutableTerm liftableTerm);
 	ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
-			ImmutableFunctionalTerm liftableFunctionalTerm,
+			ImmutableTerm liftableTerm,
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
@@ -373,6 +373,16 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
 
 	/**
+	 * The first sub-term encodes the index of the term to return.
+	 * Such values correspond to the following sub-terms
+	 *
+	 * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
+	 *
+	 */
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues);
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues);
+
+	/**
 	 * May "normalize"
 	 */
 	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
@@ -418,6 +428,8 @@ public interface TermFactory {
 	 * whenPairs must not be empty
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
+
+	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
 
@@ -570,4 +582,13 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBTz(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBNow();
+
+	//-------------
+	// Aggregation
+	//-------------
+
+	ImmutableFunctionalTerm getDBCount(boolean isDistinct);
+    ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
 }

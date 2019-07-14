@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 
 /**
- * Combines GROUP BY, HAVING and a projection
+ * Combines GROUP BY and a projection
  *
  * See IntermediateQueryFactory for creating a new instance.
  *

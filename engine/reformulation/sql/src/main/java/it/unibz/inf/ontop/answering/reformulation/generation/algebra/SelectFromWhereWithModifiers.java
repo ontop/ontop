@@ -22,10 +22,7 @@ public interface SelectFromWhereWithModifiers extends SQLExpression {
 
     ImmutableSubstitution<? extends ImmutableTerm> getSubstitution();
 
-    /**
-     * Implicit inner join between them
-     */
-    ImmutableList<? extends SQLExpression> getFromSQLExpressions();
+    SQLExpression getFromSQLExpression();
 
     Optional<ImmutableExpression> getWhereExpression();
 

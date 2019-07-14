@@ -59,7 +59,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(IQConverter.class);
         bindFromSettings(ConditionSimplifier.class);
-        bindFromSettings(AscendingSubstitutionNormalizer.class);
+        bindFromSettings(ConstructionSubstitutionNormalizer.class);
         bindFromSettings(FilterNormalizer.class);
         bindFromSettings(InnerJoinNormalizer.class);
         bindFromSettings(LeftJoinNormalizer.class);
@@ -77,6 +77,7 @@ public class OntopModelModule extends OntopAbstractModule {
                 ImmutableList.of(
                         VariableGenerator.class,
                         VariableNullability.class,
+                        DummyVariableNullability.class,
                         ProjectionDecomposer.class
                 ),
                 CoreUtilsFactory.class);
