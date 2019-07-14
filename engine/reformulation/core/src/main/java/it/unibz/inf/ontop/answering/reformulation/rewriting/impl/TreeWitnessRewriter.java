@@ -181,6 +181,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				}
 		}
 
+		Map<TreeWitness.TermCover, List<List<Function>>> treeWitnessFormulas = new HashMap<>();
+
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
 		for (TreeWitness tw : tws.getTWs()) {
 			log.debug("TREE WITNESS: {}", tw);		
@@ -222,7 +224,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 //			else
 //				twfs.add(twf.getAllAtoms());
 			
-			tw.setFormula(twfs);
+			treeWitnessFormulas.put(tw.getTerms(), twfs);
 		}
 
 		final String headURI = headAtom.getFunctionSymbol().getName();
@@ -252,7 +254,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					for (TreeWitness tw : compatibleTWs) {
 						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
-						for (List<Function> twfa : tw.getFormula())
+						for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
 							edgeDP.put(twAtom.getFunctionSymbol(), datalogFactory.getCQIE(twAtom, twfa));
 					}	
 					mainbody.addAll(cc.getNonDLAtoms());					
@@ -280,7 +282,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
-							for (List<Function> twfa : tw.getFormula())
+							for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
 								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, twfa));
 						}
 					
