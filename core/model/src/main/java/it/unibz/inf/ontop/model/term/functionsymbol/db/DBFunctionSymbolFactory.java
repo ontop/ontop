@@ -249,6 +249,15 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBSum(DBTermType dbType, boolean isDistinct);
 
     /**
+     * Ignores nulls.
+     * Returns NULL if the bag/set does not contain any non-null value.
+     */
+    DBFunctionSymbol getNullIgnoringDBAvg(DBTermType dbType, boolean isDistinct);
+
+    DBFunctionSymbol getDBMin(DBTermType dbType);
+    DBFunctionSymbol getDBMax(DBTermType dbType);
+
+    /**
      * The first sub-term encodes the index of the term to return.
      * Such values correspond to the following sub-terms
      *
@@ -258,4 +267,5 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
+
 }

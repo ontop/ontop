@@ -28,8 +28,8 @@ import java.util.stream.Stream;
 public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFunctionSymbolImpl {
 
     public SumLikeSPARQLAggregationFunctionSymbolImpl(String name, String officialName, boolean isDistinct,
-                                                      RDFTermType rootRdfTermType) {
-        super(name, officialName, isDistinct, rootRdfTermType);
+                                                      RDFTermType rootRdfTermType, String defaultAggVariableName) {
+        super(name, officialName, isDistinct, rootRdfTermType, defaultAggVariableName);
     }
 
     @Override

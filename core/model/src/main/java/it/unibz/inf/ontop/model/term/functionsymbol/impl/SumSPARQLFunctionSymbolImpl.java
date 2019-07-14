@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     protected SumSPARQLFunctionSymbolImpl(boolean isDistinct, RDFTermType rootRdfTermType) {
-        super("SP_SUM", SPARQL.SUM, isDistinct, rootRdfTermType);
+        super("SP_SUM", SPARQL.SUM, isDistinct, rootRdfTermType, "sum1");
     }
 
     @Override
@@ -25,6 +25,11 @@ public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctio
     protected ImmutableTerm combineAggregates(ImmutableTerm aggregate1, ImmutableTerm aggregate2, TermFactory termFactory) {
         DBTermType dbDecimalType = termFactory.getTypeFactory().getDBTypeFactory().getDBDecimalType();
         return termFactory.getDBBinaryNumericFunctionalTerm(SPARQL.NUMERIC_ADD, dbDecimalType, aggregate1, aggregate2);
+    }
+
+    @Override
+    protected ConcreteNumericRDFDatatype inferTypeWhenNonEmpty(ConcreteNumericRDFDatatype inputNumericDatatype, TypeFactory typeFactory) {
+        return inputNumericDatatype.getCommonPropagatedOrSubstitutedType(inputNumericDatatype);
     }
 
     @Override

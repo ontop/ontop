@@ -591,4 +591,8 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
 
 	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+    ImmutableFunctionalTerm getDBAvg(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
+    ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 }

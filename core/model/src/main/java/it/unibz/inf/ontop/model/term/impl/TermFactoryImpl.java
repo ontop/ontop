@@ -604,6 +604,21 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getDBAvg(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBAvg(dbType, isDistinct), subTerm);
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMin(dbType), subTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMax(dbType), subTerm);
+	}
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}

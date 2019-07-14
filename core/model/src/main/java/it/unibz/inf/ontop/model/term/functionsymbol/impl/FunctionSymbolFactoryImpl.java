@@ -179,9 +179,9 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
-                new DummyMinSPARQLFunctionSymbol(abstractRDFType),
-                new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
-                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new DummySampleSPARQLFunctionSymbol(abstractRDFType),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
@@ -205,13 +205,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, true),
                 new SumSPARQLFunctionSymbolImpl(true, abstractRDFType),
                 // Distinct can be safely ignored
-                new DummyMinSPARQLFunctionSymbol(abstractRDFType),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 // Distinct can be safely ignored
-                new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 // Distinct can be safely ignored
                 new DummySampleSPARQLFunctionSymbol(abstractRDFType),
-                // TODO: update
-                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
                 // TODO: update
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 // TODO: update
