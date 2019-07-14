@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.gui.action;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -157,6 +158,7 @@ public class R2RMLImportAction extends ProtegeAction {
 			 */
 			for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
 				if (mapping.getTargetAtoms().toString().contains("BNODE")) {
+					// FIXME: this is probably not valid any more
 					JOptionPane.showMessageDialog(getWorkspace(), "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
 				} else {
 					obdaModelController.addTriplesMap(mapping, false);

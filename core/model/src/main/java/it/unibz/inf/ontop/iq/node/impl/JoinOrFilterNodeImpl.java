@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -25,7 +24,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     private final TermNullabilityEvaluator nullabilityEvaluator;
     protected final TermFactory termFactory;
     protected final TypeFactory typeFactory;
-    protected final DatalogTools datalogTools;
     protected final SubstitutionFactory substitutionFactory;
     protected final ImmutableUnificationTools unificationTools;
     protected final ImmutableSubstitutionTools substitutionTools;
@@ -33,7 +31,7 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
 
     protected JoinOrFilterNodeImpl(Optional<ImmutableExpression> optionalFilterCondition,
                                    TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
-                                   IntermediateQueryFactory iqFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                                   IntermediateQueryFactory iqFactory, TypeFactory typeFactory,
                                    SubstitutionFactory substitutionFactory,
                                    ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
         super(substitutionFactory, iqFactory);
@@ -41,7 +39,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.datalogTools = datalogTools;
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
         this.substitutionTools = substitutionTools;

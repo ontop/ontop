@@ -33,7 +33,6 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.datalog.CQIE;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 

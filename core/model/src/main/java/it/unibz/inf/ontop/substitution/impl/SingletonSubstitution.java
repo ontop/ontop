@@ -21,14 +21,16 @@ package it.unibz.inf.ontop.substitution.impl;
  */
 
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.Substitution;
 
 
 /**
  * An atomic substitution accepts only one variable in its domain.
  */
-public class SingletonSubstitution extends LocallyImmutableSubstitutionImpl {
+public class SingletonSubstitution implements Substitution {
 
     private final Variable variable;
     private final Term term;
@@ -61,5 +63,18 @@ public class SingletonSubstitution extends LocallyImmutableSubstitutionImpl {
     @Override
     public boolean isEmpty() {
         return false;
+    }
+
+
+    @Deprecated
+    @Override
+    public boolean composeTerms(Term term1, Term term2) {
+        throw new UnsupportedOperationException("Mutable operations are not supported.");
+    }
+
+    @Deprecated
+    @Override
+    public boolean composeFunctions(Function term1, Function term2) {
+        throw new UnsupportedOperationException("Mutable operations are not supported.");
     }
 }
