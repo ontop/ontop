@@ -27,6 +27,7 @@ import java.util.Set;
 
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 
 /**
@@ -84,7 +85,7 @@ public class TreeWitness {
 	 * 
 	 * @return set of roots of the tree witness
 	 */
-	public Set<Term> getRoots() {
+	public Set<VariableOrGroundTerm> getRoots() {
 		return terms.roots;
 	}
 	
@@ -103,7 +104,7 @@ public class TreeWitness {
 	 * @return the domain (set of terms) of the tree witness
 	 */
 	
-	public Set<Term> getDomain() {
+	public Set<VariableOrGroundTerm> getDomain() {
 		return terms.domain;
 	}
 	
@@ -159,7 +160,7 @@ public class TreeWitness {
 	 */
 	
 	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
-		Set<Term> commonTerms = new HashSet<>(tw1.getDomain());
+		Set<VariableOrGroundTerm> commonTerms = new HashSet<>(tw1.getDomain());
 		commonTerms.retainAll(tw2.getDomain());
 		if (!commonTerms.isEmpty()) {
 			if (!tw1.getRoots().containsAll(commonTerms) || !tw2.getRoots().containsAll(commonTerms))
@@ -183,19 +184,19 @@ public class TreeWitness {
 	 */
 	
 	public static class TermCover {
-		private final Set<Term> domain; // terms that are covered by the tree witness
-		private final Set<Term> roots;   // terms that are mapped onto the root of the tree witness
+		private final Set<VariableOrGroundTerm> domain; // terms that are covered by the tree witness
+		private final Set<VariableOrGroundTerm> roots;   // terms that are mapped onto the root of the tree witness
 		
-		public TermCover(Set<Term> domain, Set<Term> roots) {
+		public TermCover(Set<VariableOrGroundTerm> domain, Set<VariableOrGroundTerm> roots) {
 			this.domain = domain;
 			this.roots = roots;
 		}
 		
-		public Set<Term> getDomain() {
+		public Set<VariableOrGroundTerm> getDomain() {
 			return domain;
 		}
 		
-		public Set<Term> getRoots() {
+		public Set<VariableOrGroundTerm> getRoots() {
 			return roots;
 		}
 		

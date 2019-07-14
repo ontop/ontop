@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.QueryConnectedComponentCache;
@@ -42,8 +43,8 @@ public class QueryFolding {
 	private Intersection<ObjectPropertyExpression> properties;
 	private Set<QueryConnectedComponent.Loop> roots;
 	private Intersection<ClassExpression> internalRootConcepts;
-	private Set<Term> internalRoots;
-	private Set<Term> internalDomain;
+	private Set<VariableOrGroundTerm> internalRoots;
+	private Set<VariableOrGroundTerm> internalDomain;
 	private List<TreeWitness> interior;
 	private TreeWitness.TermCover terms;
 	private boolean status;
@@ -109,7 +110,7 @@ public class QueryFolding {
 		return false;
 	}
 	
-	public void newOneStepFolding(Term t) {
+	public void newOneStepFolding(VariableOrGroundTerm t) {
 		properties.setToTop();
 		roots.clear();
 		internalRootConcepts.setToTop(); 
@@ -161,8 +162,8 @@ public class QueryFolding {
 	
 	public TreeWitness.TermCover getTerms() {
 		if (terms == null) {
-			Set<Term> domain = new HashSet<Term>(internalDomain);
-			Set<Term> rootNewLiterals = new HashSet<Term>();
+			Set<VariableOrGroundTerm> domain = new HashSet<>(internalDomain);
+			Set<VariableOrGroundTerm> rootNewLiterals = new HashSet<>();
 			for (QueryConnectedComponent.Loop l : roots)
 				rootNewLiterals.add(l.getTerm());
 			domain.addAll(rootNewLiterals);

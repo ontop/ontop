@@ -91,12 +91,12 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<Function>>> pairs, Map<Term, Loop> allLoops, List<Function> nonDLAtoms, Term seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<Function>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
 
-		Set<Term> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
+		Set<VariableOrGroundTerm> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
 		ccTerms.add(seed);
 
 		// expand the current CC by adding all edges that are have at least one of the terms in them
@@ -141,7 +141,7 @@ public class QueryConnectedComponent {
 		} while (expanded);
 
 		ImmutableList.Builder<Loop> ccLoops = ImmutableList.builder();
-		for (Term t : ccTerms) {
+		for (VariableOrGroundTerm t : ccTerms) {
 			Loop l = allLoops.remove(t);
 			if (l != null)
 				ccLoops.add(l);
@@ -169,7 +169,7 @@ public class QueryConnectedComponent {
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
 		ImmutableMultimap.Builder<TermPair, Function> pz = ImmutableMultimap.builder();
-		ImmutableMultimap.Builder<Term, Function> lz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<VariableOrGroundTerm, Function> lz = ImmutableMultimap.builder();
 		List<Function> nonDLAtoms = new LinkedList<>();
 
 		for (Function atom : cqie.getBody()) {
@@ -177,24 +177,24 @@ public class QueryConnectedComponent {
 			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
 				Function a = immutabilityTools.convertToMutableFunction(getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools));
 
-				ImmutableList<ImmutableTerm> arguments = a.getTerms().stream()
-						.map(immutabilityTools::convertIntoImmutableTerm)
+				ImmutableList<VariableOrGroundTerm> arguments = a.getTerms().stream()
+						.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
 						.collect(ImmutableCollectors.toList());
 				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(arguments).isPresent();
 
 				// proper DL edge between two distinct terms
 				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
-					pz.put(new TermPair(a.getTerm(0), a.getTerm(2)), a);
+					pz.put(new TermPair(arguments.get(0), arguments.get(2)), a);
 				else
-					lz.put(a.getTerm(0), a);
+					lz.put(arguments.get(0), a);
 			}
 			else {
 				nonDLAtoms.add(atom);
 			}
 		}
 
-		Map<Term, Loop> allLoops = new HashMap<>();
-		for (Entry<Term, Collection<Function>> e : lz.build().asMap().entrySet()) {
+		Map<VariableOrGroundTerm, Loop> allLoops = new HashMap<>();
+		for (Entry<VariableOrGroundTerm, Collection<Function>> e : lz.build().asMap().entrySet()) {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
@@ -204,7 +204,7 @@ public class QueryConnectedComponent {
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			Term seed = pairs.iterator().next().getKey().t0;
+			VariableOrGroundTerm seed = pairs.iterator().next().getKey().t0;
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 		
@@ -216,7 +216,7 @@ public class QueryConnectedComponent {
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
 		while (!allLoops.isEmpty()) {
-			Term seed = allLoops.keySet().iterator().next();
+			VariableOrGroundTerm seed = allLoops.keySet().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 				
@@ -301,17 +301,17 @@ public class QueryConnectedComponent {
 	 */
 	
 	static class Loop {
-		private final Term term;
+		private final VariableOrGroundTerm term;
 		private final ImmutableList<Function> atoms;
 		private final boolean isExistentialVariable;
 		
-		public Loop(Term term, ImmutableSet<Variable> headVariables, ImmutableList<Function> atoms) {
+		public Loop(VariableOrGroundTerm term, ImmutableSet<Variable> headVariables, ImmutableList<Function> atoms) {
 			this.term = term;
 			this.isExistentialVariable = (term instanceof Variable) && !headVariables.contains(term);
 			this.atoms = atoms;
 		}
 		
-		public Term getTerm() {
+		public VariableOrGroundTerm getTerm() {
 			return term;
 		}
 		
@@ -369,11 +369,11 @@ public class QueryConnectedComponent {
 			return l1;
 		}
 		
-		public Term getTerm0() {
+		public VariableOrGroundTerm getTerm0() {
 			return l0.term;
 		}
 		
-		public Term getTerm1() {
+		public VariableOrGroundTerm getTerm1() {
 			return l1.term;
 		}
 		
@@ -403,9 +403,9 @@ public class QueryConnectedComponent {
 	 */
 	
 	private static class TermPair {
-		private final Term t0, t1;
+		private final VariableOrGroundTerm t0, t1;
 
-		public TermPair(Term t0, Term t1) {
+		public TermPair(VariableOrGroundTerm t0, VariableOrGroundTerm t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 		}

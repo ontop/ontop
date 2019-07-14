@@ -139,22 +139,22 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
+	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
 		return TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner).stream()
 				.map(con -> {
 					log.debug("  BASIC CONCEPT: {}", con);
 					if (con instanceof OClass) {
-						return atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
+						return atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), ((OClass) con).getIRI());
 					}
 					else if (con instanceof ObjectSomeValuesFrom) {
 						ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
 						return (!ope.isInverse())
-								? atomFactory.getMutableTripleBodyAtom(r0, ope.getIRI(), getFreshVariable())
-								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), r0);
+								? atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), ope.getIRI(), getFreshVariable())
+								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), immutabilityTools.convertToMutableTerm(r0));
 					}
 					else {
 						DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
-						return atomFactory.getMutableTripleBodyAtom(r0, dpe.getIRI(), getFreshVariable());
+						return atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), dpe.getIRI(), getFreshVariable());
 					}
 				})
 				.collect(ImmutableCollectors.toList());
@@ -185,10 +185,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 			List<Function> twf = new LinkedList<>();
 			
 			// equality atoms
-			Iterator<Term> i = tw.getRoots().iterator();
-			Term r0 = i.next();
+			Iterator<VariableOrGroundTerm> i = tw.getRoots().iterator();
+			VariableOrGroundTerm r0 = i.next();
 			while (i.hasNext()) 
-				twf.add(termFactory.getFunctionEQ(i.next(), r0));
+				twf.add(termFactory.getFunctionEQ(immutabilityTools.convertToMutableTerm(i.next()), immutabilityTools.convertToMutableTerm(r0)));
 			
 			// root atoms
 			for (Function a : tw.getRootAtoms()) {
@@ -202,8 +202,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						.isPresent();
 
 				twf.add(isClass
-						? atomFactory.getMutableTripleAtom(r0, a.getTerm(1), a.getTerm(2))
-						: atomFactory.getMutableTripleAtom(r0, a.getTerm(1), r0));
+						? atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), a.getTerm(1), a.getTerm(2))
+						: atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), a.getTerm(1), immutabilityTools.convertToMutableTerm(r0)));
 			}
 			
 			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			

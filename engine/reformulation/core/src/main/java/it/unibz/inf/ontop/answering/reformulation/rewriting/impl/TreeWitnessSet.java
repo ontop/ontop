@@ -80,7 +80,7 @@ public class TreeWitnessSet {
 		QueryFolding qf = new QueryFolding(cache); // in-place query folding, so copying is required when creating a tree witness
 		
 		for (Loop loop : cc.getQuantifiedVariables()) {
-			Term v = loop.getTerm();
+			VariableOrGroundTerm v = loop.getTerm();
 			log.debug("QUANTIFIED VARIABLE {}", v); 
 			qf.newOneStepFolding(v);
 			
@@ -107,7 +107,7 @@ public class TreeWitnessSet {
 		
 		if (!tws.isEmpty()) {
 			mergeable = new ArrayList<>();
-			Queue<TreeWitness> working = new LinkedList<TreeWitness>();
+			Queue<TreeWitness> working = new LinkedList<>();
 
 			for (TreeWitness tw : tws) 
 				if (tw.isMergeable())  {
@@ -179,10 +179,10 @@ public class TreeWitnessSet {
 				}
 			}
 
-			saturated = false; 
+			saturated = false;
 
-			Term rootNewLiteral = rootLoop.getTerm();
-			Term internalNewLiteral = internalLoop.getTerm();
+			VariableOrGroundTerm rootNewLiteral = rootLoop.getTerm();
+			VariableOrGroundTerm internalNewLiteral = internalLoop.getTerm();
 			for (TreeWitness tw : mergeable)  
 				if (tw.getRoots().contains(rootNewLiteral) && tw.getDomain().contains(internalNewLiteral)) {
 					log.debug("    ATTACHING A TREE WITNESS {}", tw);
@@ -356,7 +356,7 @@ public class TreeWitnessSet {
 	
 	static class QueryConnectedComponentCache {
 		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
-		private final Map<Term, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
+		private final Map<VariableOrGroundTerm, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final ClassifiedTBox reasoner;
 		private final ImmutabilityTools immutabilityTools;
@@ -396,7 +396,7 @@ public class TreeWitnessSet {
 		
 		
 		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
-			Term t = loop.getTerm();
+			VariableOrGroundTerm t = loop.getTerm();
 			Intersection<ClassExpression> subconcepts = conceptsCache.get(t); 
 			if (subconcepts == null) {				
 				subconcepts = getSubConcepts(loop.getAtoms());
@@ -406,7 +406,7 @@ public class TreeWitnessSet {
 		}
 		
 		
-		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, Term root, Term nonroot) {
+		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
@@ -424,7 +424,7 @@ public class TreeWitnessSet {
 								.filter(i -> reasoner.objectProperties().contains(i))
 								.isPresent()) {
 							ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
-							if (!root.equals(a.getTerm(0)))
+							if (!root.equals(immutabilityTools.convertIntoImmutableTerm(a.getTerm(0))))
 									prop = prop.getInverse();
 							properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
 						}
@@ -470,10 +470,10 @@ public class TreeWitnessSet {
 	}
 	
 	private static class TermOrderedPair {
-		private final Term t0, t1;
+		private final VariableOrGroundTerm t0, t1;
 		private final int hashCode;
 
-		public TermOrderedPair(Term t0, Term t1) {
+		public TermOrderedPair(VariableOrGroundTerm t0, VariableOrGroundTerm t1) {
 			this.t0 = t0;
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);
