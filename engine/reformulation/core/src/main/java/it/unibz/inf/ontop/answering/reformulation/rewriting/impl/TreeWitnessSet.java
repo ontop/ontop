@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -367,35 +369,44 @@ public class TreeWitnessSet {
 		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
 			Intersection<ClassExpression> subc = Intersection.top();
 			for (DataAtom<RDFAtomPredicate> a : atoms) {
-				Optional<IRI> optionalClassIRI = a.getPredicate().getClassIRI(a.getArguments());
-				if (!optionalClassIRI.isPresent()) {
-					subc = Intersection.bottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
-					break;
-				}
-				IRI classIRI = optionalClassIRI.get();
-
-				 if (reasoner.classes().contains(classIRI))
-					 subc = subc.intersectionWith(reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(classIRI)));
-				 else
-					 subc = Intersection.bottom();
-				 if (subc.isBottom())
+				subc = subc.intersectionWith(getSubConcepts(a.getPredicate().getClassIRI(a.getArguments())));
+				if (subc.isBottom())
 					 break;
 			}
 			return subc;
 		}
-		
-		
-		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
-			VariableOrGroundTerm t = loop.getTerm();
-			Intersection<ClassExpression> subconcepts = conceptsCache.get(t); 
-			if (subconcepts == null) {				
-				subconcepts = getSubConcepts(loop.getAtoms());
-				conceptsCache.put(t, subconcepts);	
-			}
-			return subconcepts;
+
+		private ImmutableSet<ClassExpression> getSubConcepts(Optional<IRI> iri) {
+			return iri
+					.filter(i -> reasoner.classes().contains(i))
+					.map(i -> reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(i)))
+					.orElse(ImmutableSet.of());
 		}
 		
+		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
+			return conceptsCache.computeIfAbsent(loop.getTerm(), t -> getSubConcepts(loop.getAtoms()));
+		}
 		
+
+		private ImmutableSet<ObjectPropertyExpression> getSubProperties(Optional<IRI> iri, boolean inverse) {
+			return iri
+					.filter(i -> reasoner.objectProperties().contains(i))
+					.map(i -> reasoner.objectProperties().get(i))
+					.map(p -> inverse ? p.getInverse() : p)
+					.map(p -> reasoner.objectPropertiesDAG().getSubRepresentatives(p))
+					.orElse(ImmutableSet.of());
+		}
+
+		private boolean isInverse(DataAtom<RDFAtomPredicate> a, TermOrderedPair idx) {
+			VariableOrGroundTerm subject = a.getPredicate().getSubject(a.getArguments());
+			VariableOrGroundTerm object = a.getPredicate().getObject(a.getArguments());
+			if (subject.equals(idx.t0) && object.equals(idx.t1))
+				return false;
+			if (subject.equals(idx.t1) && object.equals(idx.t0))
+				return true;
+			throw new MinorOntopInternalBugException("non-matching arguments: " + a + " " + idx);
+		}
+
 		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
@@ -403,18 +414,7 @@ public class TreeWitnessSet {
 				properties = Intersection.top();
 				for (DataAtom<RDFAtomPredicate> a : edge.getBAtoms()) {
 					log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-					Optional<IRI> optionalPropertyIRIString = a.getPredicate().getPropertyIRI(a.getArguments());
-					if (optionalPropertyIRIString
-							.filter(i -> reasoner.objectProperties().contains(i))
-							.isPresent()) {
-						ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
-						if (!root.equals(a.getTerm(0)))
-							prop = prop.getInverse();
-						properties = properties.intersectionWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
-					}
-					else
-						properties = Intersection.bottom();
-
+					properties = properties.intersectionWith(getSubProperties(a.getPredicate().getPropertyIRI(a.getArguments()), isInverse(a, idx)));
 					if (properties.isBottom())
 						break;
 				}

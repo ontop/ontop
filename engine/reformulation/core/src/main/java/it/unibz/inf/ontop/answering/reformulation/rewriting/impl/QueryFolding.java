@@ -205,14 +205,13 @@ public class QueryFolding {
 		
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (!rootType.isBottom())
-			for (QueryConnectedComponent.Loop root : roots) {
-				rootType = rootType.intersectionWith(cache.getLoopConcepts(root));
-				if (rootType.isBottom()) {
-					log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
-					break;
-				}
-			}
+		if (!rootType.isBottom()) {
+			rootType = rootType.intersectionWith(roots.stream()
+					.map(root -> cache.getLoopConcepts(root))
+					.collect(Intersection.toIntersection()));
+			if (rootType.isBottom())
+				log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
+		}
 		
 		return new TreeWitness(twg, getTerms(), ImmutableSet.copyOf(rootAtoms), rootType);
 	}
