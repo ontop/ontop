@@ -22,24 +22,21 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
-import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
-import java.time.temporal.ValueRange;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -52,40 +49,20 @@ public class TargetQueryRenderer {
 	 * a prefix manager to shorten full IRI name.
 	 */
 	public static String encode(ImmutableList<TargetAtom> body, PrefixManager prefixManager) {
-
 		TurtleWriter turtleWriter = new TurtleWriter();
 		for (TargetAtom atom : body) {
-			String subject, predicate, object = "";
-			String originalString = atom.getProjectionAtom().getPredicate().toString();
-//			if (isUnary(atom.getProjectionAtom())) {
-//				ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
-//				subject = getDisplayName(subjectTerm, prefixManager);
-//				predicate = "a";
-//				object = getAbbreviatedName(originalString, prefixManager, false);
-//				if (originalString.equals(object)) {
-//					object = "<" + object + ">";
-//				}
-//			}
-//			else
-			//    if (originalString.equals("triple")) {
+			final AtomPredicate p = atom.getProjectionAtom().getPredicate();
+            if (p instanceof TriplePredicate) {
                 ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
-                subject = getDisplayName(subjectTerm, prefixManager);
+                String subject = getDisplayName(subjectTerm, prefixManager);
                 ImmutableTerm predicateTerm = atom.getSubstitutedTerm(1);
-                predicate = getDisplayName(predicateTerm, prefixManager);
+                String predicate = getDisplayName(predicateTerm, prefixManager);
                 ImmutableTerm objectTerm = atom.getSubstitutedTerm(2);
-                object = getDisplayName(objectTerm, prefixManager);
-			//}
-//			else {
-//                ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
-//				subject = getDisplayName(subjectTerm, prefixManager);
-//				predicate = getAbbreviatedName(originalString, prefixManager, false);
-//				if (originalString.equals(predicate)) {
-//					predicate = "<" + predicate + ">";
-//				}
-//                ImmutableTerm objectTerm = atom.getSubstitutedTerm(1);
-//				object = getDisplayName(objectTerm, prefixManager);
-//			}
-			turtleWriter.put(subject, predicate, object);
+                String object = getDisplayName(objectTerm, prefixManager);
+                turtleWriter.put(subject, predicate, object);
+            } else {
+                throw new UnsupportedOperationException("unsupported predicate! " + p);
+			}
 		}
 		return turtleWriter.print();
 	}
@@ -127,7 +104,7 @@ public class TargetQueryRenderer {
         if (term instanceof Variable)
             return displayVariable((Variable)term);
         if (term instanceof IRIConstant)
-            return displayURIConstant((Constant)term, prefixManager);
+            return displayIRIConstant((IRIConstant)term, prefixManager);
         if (term instanceof RDFLiteralConstant)
             return displayValueConstant((Constant)term);
         if (term instanceof BNode)
@@ -143,12 +120,16 @@ public class TargetQueryRenderer {
         return "\"" + ((RDFLiteralConstant) term).getValue() + "\"";
     }
 
-    private static String displayURIConstant(Term term, PrefixManager prefixManager) {
-        return getAbbreviatedName(term.toString(), prefixManager, false); // shorten the URI if possible
+    private static String displayIRIConstant(IRIConstant iri, PrefixManager prefixManager) {
+        if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString())) {
+            return "a";
+        } else {
+            return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
+        }
     }
 
     private static String displayVariable(Variable term) {
-        return "{" + ((Variable) term).getName() + "}";
+        return "{" + term.getName() + "}";
     }
 
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
@@ -221,12 +202,6 @@ public class TargetQueryRenderer {
 
         // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
         String templateFormat = template.replace("{}", "%s");
-//        List<String> varNames = new ArrayList<>();
-//        for (ImmutableTerm innerTerm : function.getTerms()) {
-//            if (innerTerm instanceof Variable) {
-//                varNames.add(getDisplayName(innerTerm, prefixManager));
-//            }
-//        }
 
         final Object[] varNames = function.getTerms().stream()
                 .filter(Variable.class::isInstance)
