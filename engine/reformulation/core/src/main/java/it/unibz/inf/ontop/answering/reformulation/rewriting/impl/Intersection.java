@@ -49,7 +49,7 @@ public class Intersection<T> {
 	/**
 	 * modifies the intersection by further intersecting it with a class / property
 	 * 
-	 * IMPORTANT: the class / property is given by the DOWNWRD-SATURATED SET
+	 * IMPORTANT: the class / property is given by the DOWNWARD-SATURATED SET
 	 *              (in other words, by the result of EquivalencesDAG.getSubRepresentatives
 	 * 
 	 * @param e a non-empty downward saturated set for class / property
@@ -96,23 +96,32 @@ public class Intersection<T> {
 
 	public boolean isBottom() { return elements != null && elements.isEmpty(); }
 
+	private final static class Accumulator<T> {
+		private Intersection<T> r = Intersection.top();
+
+		Accumulator<T> intersectWith(Intersection<T> i) { r = r.intersectionWith(i); return this; }
+		Accumulator<T> intersectWith(Collection<T> e) { r = r.intersectionWith(e); return this; }
+		Accumulator<T> intersectWith(Accumulator<T> a) { r = r.intersectionWith(a.r); return this; }
+
+		Intersection<T> result() { return r; }
+	}
 
 
-	public static <T> Collector<Intersection<T>, Intersection<T>, Intersection<T>> toIntersection() {
+	public static <T> Collector<Intersection<T>, Accumulator<T>, Intersection<T>> toIntersection() {
 		return Collector.of(
-				() -> Intersection.top(), // Supplier
-				(i, e) -> i.intersectionWith(e), // Accumulator
-				(b1, b2) -> b1.intersectionWith(b2), // Merger
-				i -> i, // Finisher
+				Accumulator::new, // Supplier
+				Accumulator::intersectWith, // Accumulator
+				Accumulator::intersectWith, // Merger
+				Accumulator::result, // Finisher
 				Collector.Characteristics.UNORDERED);
 	}
 
-	public static <T> Collector<ImmutableSet<T>, Intersection<T>, Intersection<T>> toIntersectionOfSets() {
+	public static <T> Collector<ImmutableSet<T>, Accumulator<T>, Intersection<T>> toIntersectionOfSets() {
 		return Collector.of(
-				() -> Intersection.top(), // Supplier
-				(i, e) -> i.intersectionWith(e), // Accumulator
-				(b1, b2) -> b1.intersectionWith(b2), // Merger
-				i -> i, // Finisher
+				Accumulator::new, // Supplier
+				Accumulator::intersectWith, // Accumulator
+				Accumulator::intersectWith, // Merger
+				Accumulator::result, // Finisher
 				Collector.Characteristics.UNORDERED);
 	}
 

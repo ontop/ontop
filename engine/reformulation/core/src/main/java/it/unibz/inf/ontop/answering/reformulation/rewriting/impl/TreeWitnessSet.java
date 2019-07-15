@@ -367,17 +367,11 @@ public class TreeWitnessSet {
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
-			Intersection<ClassExpression> subc = Intersection.top();
-			for (DataAtom<RDFAtomPredicate> a : atoms) {
-				subc = subc.intersectionWith(getSubConcepts(a.getPredicate().getClassIRI(a.getArguments())));
-				if (subc.isBottom())
-					 break;
-			}
-			return subc;
+			return atoms.stream().map(this::getSubConcepts).collect(Intersection.toIntersectionOfSets());
 		}
 
-		private ImmutableSet<ClassExpression> getSubConcepts(Optional<IRI> iri) {
-			return iri
+		private ImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
+			return atom.getPredicate().getClassIRI(atom.getArguments())
 					.filter(i -> reasoner.classes().contains(i))
 					.map(i -> reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(i)))
 					.orElse(ImmutableSet.of());
@@ -388,11 +382,11 @@ public class TreeWitnessSet {
 		}
 		
 
-		private ImmutableSet<ObjectPropertyExpression> getSubProperties(Optional<IRI> iri, boolean inverse) {
-			return iri
+		private ImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TermOrderedPair idx) {
+			return atom.getPredicate().getPropertyIRI(atom.getArguments())
 					.filter(i -> reasoner.objectProperties().contains(i))
 					.map(i -> reasoner.objectProperties().get(i))
-					.map(p -> inverse ? p.getInverse() : p)
+					.map(p -> isInverse(atom, idx) ? p.getInverse() : p)
 					.map(p -> reasoner.objectPropertiesDAG().getSubRepresentatives(p))
 					.orElse(ImmutableSet.of());
 		}
@@ -408,19 +402,8 @@ public class TreeWitnessSet {
 		}
 
 		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
-			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
-			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
-			if (properties == null) {
-				properties = Intersection.top();
-				for (DataAtom<RDFAtomPredicate> a : edge.getBAtoms()) {
-					log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
-					properties = properties.intersectionWith(getSubProperties(a.getPredicate().getPropertyIRI(a.getArguments()), isInverse(a, idx)));
-					if (properties.isBottom())
-						break;
-				}
-				propertiesCache.put(idx, properties); // edge.getTerms()
-			}
-			return properties;
+			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
+				idx -> edge.getBAtoms().stream().map(a -> getSubProperties(a, idx)).collect(Intersection.toIntersectionOfSets()));
 		}
 	}
 	
@@ -460,7 +443,7 @@ public class TreeWitnessSet {
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
 		
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
-			Intersection<ClassExpression> subc = cache.getSubConcepts(cc.getLoop().getAtoms());
+			Intersection<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : allTWgenerators) {
