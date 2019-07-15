@@ -20,18 +20,14 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.eclipse.rdf4j.query.algebra.In;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,52 +35,44 @@ public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
 //	private final OClass filler;
 
-	private final Set<ClassExpression> concepts = new HashSet<>();
-	private Set<ClassExpression> subconcepts;
+	private final Set<ClassExpression> concepts;
+	private ImmutableSet<ClassExpression> subconcepts;
 
 	private final ClassifiedTBox reasoner;
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
-//	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	
-	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
+
+	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/, Set<ClassExpression> concepts) {
 		this.reasoner = reasoner;
 		this.property = property;
 //		this.filler = filler;
+		this.concepts = concepts;
 	}
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
+	public static ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
 		
-		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<>();
+		ImmutableList.Builder<TreeWitnessGenerator> gens = ImmutableList.builder();
 
-		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
-		// TODO: improve the algorithm
+		// COLLECT GENERATING CONCEPTS (together with their subclasses)
 		for (Equivalences<ClassExpression> set : reasoner.classesDAG()) {
 			Set<Equivalences<ClassExpression>> subClasses = reasoner.classesDAG().getSub(set);
-			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
-			for (ClassExpression concept : set) {
-				if (concept instanceof ObjectSomeValuesFrom && couldBeGenerating) {
-					ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)concept;
-					TreeWitnessGenerator twg = gens.get(some);
-					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, some.getProperty());			
-						gens.put(concept, twg);
+			if (set.size() > 1 || subClasses.size() > 1) { // otherwise cannot give rise to any generator
+				for (ClassExpression concept : set) {
+					if (concept instanceof ObjectSomeValuesFrom) {
+						Set<ClassExpression> flatSubClasses = subClasses.stream().flatMap(s -> s.stream())
+								.filter(s -> !s.equals(concept))
+								.collect(ImmutableCollectors.toSet());
+
+						flatSubClasses.forEach(subConcept -> log.debug("GENERATING CI: {} <= {}", subConcept, concept));
+						gens.add(new TreeWitnessGenerator(reasoner, ((ObjectSomeValuesFrom) concept).getProperty(), flatSubClasses));
 					}
-					for (Equivalences<ClassExpression> subClassSet : subClasses) {
-						for (ClassExpression subConcept : subClassSet) {
-							if (!subConcept.equals(concept)) {
-								twg.concepts.add(subConcept);
-								log.debug("GENERATING CI: {} <= {}", subConcept, some);
-							}
-						}
-					}
-				}				
+				}
 			}
 		}
 
-		return gens.values();
+		return gens.build();
 		
 	}
 	
@@ -163,11 +151,11 @@ public class TreeWitnessGenerator {
 	}
 	
 	
-	public Set<ClassExpression> getSubConcepts() {
+	public ImmutableSet<ClassExpression> getSubConcepts() {
 		if (subconcepts == null) {
-			subconcepts = new HashSet<>();
-			for (ClassExpression con : concepts)
-				subconcepts.addAll(reasoner.classesDAG().getSubRepresentatives(con));
+			subconcepts = concepts.stream()
+					.flatMap(c -> reasoner.classesDAG().getSubRepresentatives(c).stream())
+					.collect(ImmutableCollectors.toSet());
 		}
 		return subconcepts;
 	}
