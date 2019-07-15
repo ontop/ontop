@@ -28,7 +28,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.QueryConnectedComponentCache;
+import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CachedClassifiedTBoxWrapper;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 import static it.unibz.inf.ontop.answering.reformulation.rewriting.impl.Intersection.intersectionOf;
 
 public class QueryFolding {
-	private final QueryConnectedComponentCache cache;
+	private final CachedClassifiedTBoxWrapper cache;
 	
 	private Intersection<ObjectPropertyExpression> properties;
 	private Set<QueryConnectedComponent.Loop> roots;
@@ -63,7 +63,7 @@ public class QueryFolding {
 		return "Query Folding: " + roots + ", internal roots " + internalRoots + " and domain: " + internalDomain + " with properties: " + properties; 
 	}
 	
-	public QueryFolding(QueryConnectedComponentCache cache) {
+	public QueryFolding(CachedClassifiedTBoxWrapper cache) {
 		this.cache = cache;
 		properties = Intersection.top();
 		roots = new HashSet<>();

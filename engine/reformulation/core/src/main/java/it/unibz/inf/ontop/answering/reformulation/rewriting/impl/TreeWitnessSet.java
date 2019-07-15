@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
@@ -36,7 +35,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedC
 import java.util.*;
 
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,7 @@ public class TreeWitnessSet {
 	private final List<TreeWitness> tws = new LinkedList<>();
 	private final QueryConnectedComponent cc;
 	private final Collection<TreeWitnessGenerator> allTWgenerators;
-	private final QueryConnectedComponentCache cache; 
+	private final CachedClassifiedTBoxWrapper cache;
 	private boolean hasConflicts = false;
 	
 	// working lists (may all be nulls)
@@ -56,7 +54,7 @@ public class TreeWitnessSet {
 
 	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new QueryConnectedComponentCache(reasoner);
+		this.cache = new CachedClassifiedTBoxWrapper(new ClassifiedTBoxWrapper(reasoner));
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -356,31 +354,37 @@ public class TreeWitnessSet {
 	}
 	
 	
-	static class QueryConnectedComponentCache {
+	static class CachedClassifiedTBoxWrapper {
 		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<VariableOrGroundTerm, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
 
+		private final ClassifiedTBoxWrapper classifiedTBoxWrapper;
+
+		private CachedClassifiedTBoxWrapper(ClassifiedTBoxWrapper classifiedTBoxWrapper) {
+			this.classifiedTBoxWrapper = classifiedTBoxWrapper;
+		}
+
+		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
+			return conceptsCache.computeIfAbsent(loop.getTerm(),
+					t -> classifiedTBoxWrapper.getSubConcepts(loop.getAtoms()));
+		}
+
+		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
+			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
+					idx -> classifiedTBoxWrapper.getSubProperties(edge.getBAtoms(), idx));
+		}
+	}
+
+	static class ClassifiedTBoxWrapper {
 		private final ClassifiedTBox reasoner;
 
-		private QueryConnectedComponentCache(ClassifiedTBox reasoner) {
+		private ClassifiedTBoxWrapper(ClassifiedTBox reasoner) {
 			this.reasoner = reasoner;
 		}
-		
-		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
-			return atoms.stream().map(this::getSubConcepts).collect(Intersection.toIntersectionOfSets());
-		}
 
-		private ImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
-			return atom.getPredicate().getClassIRI(atom.getArguments())
-					.filter(i -> reasoner.classes().contains(i))
-					.map(i -> reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(i)))
-					.orElse(ImmutableSet.of());
+		public Intersection<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, TermOrderedPair idx) {
+			return atoms.stream().map(a -> getSubProperties(a, idx)).collect(Intersection.toIntersectionOfSets());
 		}
-		
-		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
-			return conceptsCache.computeIfAbsent(loop.getTerm(), t -> getSubConcepts(loop.getAtoms()));
-		}
-		
 
 		private ImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TermOrderedPair idx) {
 			return atom.getPredicate().getPropertyIRI(atom.getArguments())
@@ -401,9 +405,16 @@ public class TreeWitnessSet {
 			throw new MinorOntopInternalBugException("non-matching arguments: " + a + " " + idx);
 		}
 
-		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
-			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
-				idx -> edge.getBAtoms().stream().map(a -> getSubProperties(a, idx)).collect(Intersection.toIntersectionOfSets()));
+
+		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
+			return atoms.stream().map(this::getSubConcepts).collect(Intersection.toIntersectionOfSets());
+		}
+
+		private ImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
+			return atom.getPredicate().getClassIRI(atom.getArguments())
+					.filter(i -> reasoner.classes().contains(i))
+					.map(i -> reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(i)))
+					.orElse(ImmutableSet.of());
 		}
 	}
 	
@@ -441,7 +452,7 @@ public class TreeWitnessSet {
 
 	public Set<TreeWitnessGenerator> getGeneratorsOfDetachedCC() {		
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
-		
+
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
 			Intersection<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
@@ -459,7 +470,7 @@ public class TreeWitnessSet {
 			for (TreeWitness tw : tws) 
 				if (tw.getDomain().containsAll(cc.getVariables())) {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
-					Intersection<ClassExpression> subc = cache.getSubConcepts(tw.getRootAtoms());
+					Intersection<ClassExpression> subc = cache.classifiedTBoxWrapper.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntailsAnyOf(subc)) {
@@ -480,10 +491,10 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				Set<ClassExpression> subc = new HashSet<>();
-				for (TreeWitnessGenerator twg : generators) 
-					subc.addAll(twg.getSubConcepts());
-				
+				ImmutableSet<ClassExpression> subc = generators.stream()
+						.flatMap(twg -> twg.getSubConcepts().stream())
+						.collect(ImmutableCollectors.toSet());
+
 				for (TreeWitnessGenerator g : allTWgenerators) 
 					if (g.endPointEntailsAnyOf(subc)) {
 						if (generators.add(g))

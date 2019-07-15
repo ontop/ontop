@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
@@ -38,9 +39,8 @@ public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
 //	private final OClass filler;
 
-	private final Set<ClassExpression> concepts = new HashSet<ClassExpression>();
+	private final Set<ClassExpression> concepts = new HashSet<>();
 	private Set<ClassExpression> subconcepts;
-	private ObjectSomeValuesFrom existsRinv;
 
 	private final ClassifiedTBox reasoner;
 
@@ -177,31 +177,12 @@ public class TreeWitnessGenerator {
 		return property;
 	}
 	
-	private void ensureExistsRinv() {
-		if (existsRinv == null) {
-			if (property instanceof ObjectPropertyExpression) {
-				ObjectPropertyExpression inv = ((ObjectPropertyExpression)property).getInverse();			
-				existsRinv = inv.getDomain();	
-			}
-//			else {
-//				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
-//				existsRinv = ontFactory.createPropertySomeRestriction(inv);					
-//			}
-		}		
-	}
-
-	public boolean endPointEntailsAnyOf(Set<ClassExpression> subc) {
-		ensureExistsRinv();
-		return subc.contains(existsRinv); // || subc.contains(filler);
+	public boolean endPointEntailsAnyOf(ImmutableSet<ClassExpression> subc) {
+		return subc.contains(property.getRange()); // || subc.contains(filler);
 	}
 	
 	public boolean endPointEntailsAnyOf(Intersection<ClassExpression> subc) {
-		if (subc == Intersection.<ClassExpression>top())
-			return true;
-		
-		ensureExistsRinv();
-		
-		return subc.subsumes(existsRinv); // || subc.subsumes(filler);
+		return subc.subsumes(property.getRange()); // || subc.subsumes(filler);
 	}
 	
 	@Override 
