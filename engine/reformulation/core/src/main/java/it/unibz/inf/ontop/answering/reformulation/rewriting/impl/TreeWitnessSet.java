@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -228,7 +227,7 @@ public class TreeWitnessSet {
 				log.debug("      POSITIVE PROPERTY CHECK {}", g.getProperty());
 
 			DownwardSaturatedImmutableSet<ClassExpression> subc = qf.getInternalRootConcepts();
-			if (!g.endPointEntailsAnyOf(subc)) {
+			if (!g.endPointEntails(subc)) {
 				 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, g);
 				 continue;			
 			}
@@ -238,7 +237,7 @@ public class TreeWitnessSet {
 			boolean failed = false;
 			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) {
 				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
-				if (!genreps.stream().anyMatch(s -> g.endPointEntailsAnyOf(s))) {
+				if (!g.endPointEntailsAny(genreps)) {
 					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
@@ -463,7 +462,7 @@ public class TreeWitnessSet {
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : allTWgenerators) {
-					if (twg.endPointEntailsAnyOf(subc)) {
+					if (twg.endPointEntails(subc)) {
 						log.debug("        ENDTYPE IS FINE: {} FOR {}", subc, twg);
 						generators.add(twg);					
 					}
@@ -479,9 +478,9 @@ public class TreeWitnessSet {
 					ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
-							if (twg.endPointEntailsAnyOf(subc)) {
+							if (twg.endPointEntails(subc)) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
-								if (genreps.stream().anyMatch(s -> twg.endPointEntailsAnyOf(s))) {
+								if (twg.endPointEntailsAny(genreps)) {
 									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
@@ -497,9 +496,9 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> subc = getGeneratorSubConceptRepresentatives(generators);
+				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(generators);
 				for (TreeWitnessGenerator g : allTWgenerators) 
-					if (subc.stream().anyMatch(s -> g.endPointEntailsAnyOf(s))) {
+					if (g.endPointEntailsAny(genreps)) {
 						if (generators.add(g))
 							saturated = false;
 					}		 		

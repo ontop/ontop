@@ -39,7 +39,7 @@ public class TreeWitnessGenerator {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);
 
-	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/, ImmutableSet<ClassExpression> concepts) {
+	public TreeWitnessGenerator(ObjectPropertyExpression property/*, OClass filler*/, ImmutableSet<ClassExpression> concepts) {
 		this.property = property;
 //		this.filler = filler;
 		this.concepts = concepts;
@@ -61,7 +61,7 @@ public class TreeWitnessGenerator {
 								.collect(ImmutableCollectors.toSet());
 
 						flatSubClasses.forEach(subConcept -> log.debug("GENERATING CI: {} <= {}", subConcept, concept));
-						gens.add(new TreeWitnessGenerator(reasoner, ((ObjectSomeValuesFrom) concept).getProperty(), flatSubClasses));
+						gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), flatSubClasses));
 					}
 				}
 			}
@@ -148,17 +148,16 @@ public class TreeWitnessGenerator {
 		return concepts;
 	}
 
-
 	public ObjectPropertyExpression getProperty() {
 		return property;
 	}
-	
-	public boolean endPointEntailsAnyOf(ImmutableSet<ClassExpression> subc) {
-		return subc.contains(property.getRange()); // || subc.contains(filler);
+
+	public boolean endPointEntailsAny(ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> list) {
+		return list.stream().anyMatch(s -> this.endPointEntails(s));
 	}
-	
-	public boolean endPointEntailsAnyOf(DownwardSaturatedImmutableSet<ClassExpression> subc) {
-		return subc.subsumes(property.getRange()); // || subc.subsumes(filler);
+
+	public boolean endPointEntails(DownwardSaturatedImmutableSet<ClassExpression> s) {
+		return s.subsumes(property.getRange()); // || s.subsumes(filler);
 	}
 	
 	@Override 
