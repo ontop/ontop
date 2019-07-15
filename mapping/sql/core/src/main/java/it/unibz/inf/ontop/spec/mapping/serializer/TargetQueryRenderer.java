@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,9 +35,11 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -55,33 +57,34 @@ public class TargetQueryRenderer {
 		for (TargetAtom atom : body) {
 			String subject, predicate, object = "";
 			String originalString = atom.getProjectionAtom().getPredicate().toString();
-			if (isUnary(atom.getProjectionAtom())) {
-				ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
-				subject = getDisplayName(subjectTerm, prefixManager);
-				predicate = "a";
-				object = getAbbreviatedName(originalString, prefixManager, false);
-				if (originalString.equals(object)) {
-					object = "<" + object + ">";
-				}
-			}
-			else if (originalString.equals("triple")) {
+//			if (isUnary(atom.getProjectionAtom())) {
+//				ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
+//				subject = getDisplayName(subjectTerm, prefixManager);
+//				predicate = "a";
+//				object = getAbbreviatedName(originalString, prefixManager, false);
+//				if (originalString.equals(object)) {
+//					object = "<" + object + ">";
+//				}
+//			}
+//			else
+			//    if (originalString.equals("triple")) {
                 ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
                 subject = getDisplayName(subjectTerm, prefixManager);
                 ImmutableTerm predicateTerm = atom.getSubstitutedTerm(1);
                 predicate = getDisplayName(predicateTerm, prefixManager);
                 ImmutableTerm objectTerm = atom.getSubstitutedTerm(2);
                 object = getDisplayName(objectTerm, prefixManager);
-			}
-			else {
-                ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
-				subject = getDisplayName(subjectTerm, prefixManager);
-				predicate = getAbbreviatedName(originalString, prefixManager, false);
-				if (originalString.equals(predicate)) {
-					predicate = "<" + predicate + ">";
-				}
-                ImmutableTerm objectTerm = atom.getSubstitutedTerm(1);
-				object = getDisplayName(objectTerm, prefixManager);
-			}
+			//}
+//			else {
+//                ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
+//				subject = getDisplayName(subjectTerm, prefixManager);
+//				predicate = getAbbreviatedName(originalString, prefixManager, false);
+//				if (originalString.equals(predicate)) {
+//					predicate = "<" + predicate + ">";
+//				}
+//                ImmutableTerm objectTerm = atom.getSubstitutedTerm(1);
+//				object = getDisplayName(objectTerm, prefixManager);
+//			}
 			turtleWriter.put(subject, predicate, object);
 		}
 		return turtleWriter.print();
@@ -213,45 +216,38 @@ public class TargetQueryRenderer {
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         StringBuilder sb = new StringBuilder();
-        ImmutableTerm lexicalTerm = function.getTerms().get(0);
 
-        if (lexicalTerm instanceof Variable) {
-            sb.append("<{");
-            sb.append(((Variable) lexicalTerm).getName());
-            sb.append("}>");
-        }
-        else if (lexicalTerm instanceof RDFLiteralConstant) {
-            return "<" + ((RDFLiteralConstant) lexicalTerm).getValue() + ">";
-        }
-        else if ((lexicalTerm instanceof ImmutableFunctionalTerm)
-                && ((ImmutableFunctionalTerm) lexicalTerm).getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
+        String template = ((IRIStringTemplateFunctionSymbol) function.getFunctionSymbol()).getTemplate();
 
-            ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-            String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
+        // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
+        String templateFormat = template.replace("{}", "%s");
+//        List<String> varNames = new ArrayList<>();
+//        for (ImmutableTerm innerTerm : function.getTerms()) {
+//            if (innerTerm instanceof Variable) {
+//                varNames.add(getDisplayName(innerTerm, prefixManager));
+//            }
+//        }
 
-            // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
-            String templateFormat = template.replace("{}", "%s");
-            List<String> varNames = new ArrayList<>();
-            for (ImmutableTerm innerTerm : lexicalFunctionalTerm.getTerms()) {
-                if (innerTerm instanceof Variable) {
-                    varNames.add(getDisplayName(innerTerm, prefixManager));
-                }
-            }
-            String originalUri = String.format(templateFormat, varNames.toArray());
-            if (originalUri.equals(RDF.TYPE.getIRIString())) {
-                sb.append("a");
+        final Object[] varNames = function.getTerms().stream()
+                .filter(Variable.class::isInstance)
+                .map(var -> getDisplayName(var, prefixManager))
+                .toArray();
+
+        String originalUri = String.format(templateFormat, varNames);
+        if (originalUri.equals(RDF.TYPE.getIRIString())) {
+            sb.append("a");
+        } else {
+            String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
+            if (!shortenUri.equals(originalUri)) {
+                sb.append(shortenUri);
             } else {
-                String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
-                if (!shortenUri.equals(originalUri)) {
-                    sb.append(shortenUri);
-                } else {
-                    // If the URI can't be shorten then use the full URI within brackets
-                    sb.append("<");
-                    sb.append(originalUri);
-                    sb.append(">");
-                }
+                // If the URI can't be shorten then use the full URI within brackets
+                sb.append("<");
+                sb.append(originalUri);
+                sb.append(">");
             }
         }
+
         return sb.toString();
     }
 

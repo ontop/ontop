@@ -26,9 +26,9 @@ import java.util.concurrent.CountDownLatch;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,8 +59,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private OntopProtegeReasoner reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
-
+	private static String QUEST_START_MESSAGE = "Ontop reasoner must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
@@ -77,9 +76,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 * Must be implemented by the subclass for getting the current reasoner
-	 * 
+	 *
 	 */
-	public abstract OWLEditorKit getEditorKit(); 
+	public abstract OWLEditorKit getEditorKit();
 
 	/**
 	 * This function displays or handles the result
@@ -158,7 +157,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 						log.error(e.getMessage(), e);
 						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
 					}
-				}	
+				}
 			}
 		};
 		thread.start();
@@ -196,7 +195,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 			}
 		}
 	}
-	
+
 	public void actionCanceled() {
 		this.isCanceled = true;
 		if(!actionStarted)
