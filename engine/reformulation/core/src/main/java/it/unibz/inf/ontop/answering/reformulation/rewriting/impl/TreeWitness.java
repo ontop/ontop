@@ -79,9 +79,9 @@ public class TreeWitness {
 	
 	/**
 	 * boolean isMergeable()
-	 * TODO: check
-	 * @return true if all root terms are quantified variables and
-	 *                 the intersection of root concepts is non-empty
+	 * @return true if all root terms are quantified variables
+	 *                  (otherwise, the constructing code sets the rootConcepts to BOT)
+	 *                 and the intersection of root concepts is non-empty
 	 */
 	public boolean isMergeable() {
 		return !rootConcepts.isBottom();
@@ -111,18 +111,6 @@ public class TreeWitness {
 		return generators;
 	}
 
-	/**
-	 * ImmutableSet<ClassExpression> getGeneratorSubConcepts()
-	 * 
-	 * @return the set of all sub-concepts for all of the tree witness generators
-	 */
-	
-	public ImmutableSet<ClassExpression> getGeneratorSubConcepts() {
-		return generators.stream()
-				.flatMap(twg -> twg.getSubConcepts().stream())
-				.collect(ImmutableCollectors.toSet());
-	}
-	
 	
 	/**
 	 * ImmutableSet<DataAtom<RDFAtomPredicate>> getRootAtoms()

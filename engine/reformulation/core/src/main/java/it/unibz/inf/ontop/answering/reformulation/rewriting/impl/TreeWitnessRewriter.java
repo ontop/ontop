@@ -141,7 +141,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
+	private ImmutableList<Function> getAtomsForGenerators(ImmutableList<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
 		return TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner).stream()
 				.map(con -> {
 					log.debug("  BASIC CONCEPT: {}", con);
@@ -176,7 +176,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
-				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
+				for (Function a : getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable())) {
 					outputRules.add(datalogFactory.getCQIE(headAtom, a));
 				}
 		}

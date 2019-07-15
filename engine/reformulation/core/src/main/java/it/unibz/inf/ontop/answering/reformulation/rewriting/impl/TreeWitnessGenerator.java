@@ -35,15 +35,11 @@ public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
 //	private final OClass filler;
 
-	private final Set<ClassExpression> concepts;
-	private ImmutableSet<ClassExpression> subconcepts;
+	private final ImmutableSet<ClassExpression> concepts; // set of generating-concepts
 
-	private final ClassifiedTBox reasoner;
+	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);
 
-	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
-
-	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/, Set<ClassExpression> concepts) {
-		this.reasoner = reasoner;
+	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/, ImmutableSet<ClassExpression> concepts) {
 		this.property = property;
 //		this.filler = filler;
 		this.concepts = concepts;
@@ -55,13 +51,12 @@ public class TreeWitnessGenerator {
 		
 		ImmutableList.Builder<TreeWitnessGenerator> gens = ImmutableList.builder();
 
-		// COLLECT GENERATING CONCEPTS (together with their subclasses)
 		for (Equivalences<ClassExpression> set : reasoner.classesDAG()) {
 			Set<Equivalences<ClassExpression>> subClasses = reasoner.classesDAG().getSub(set);
 			if (set.size() > 1 || subClasses.size() > 1) { // otherwise cannot give rise to any generator
 				for (ClassExpression concept : set) {
 					if (concept instanceof ObjectSomeValuesFrom) {
-						Set<ClassExpression> flatSubClasses = subClasses.stream().flatMap(s -> s.stream())
+						ImmutableSet<ClassExpression> flatSubClasses = subClasses.stream().flatMap(s -> s.stream())
 								.filter(s -> !s.equals(concept))
 								.collect(ImmutableCollectors.toSet());
 
@@ -73,11 +68,10 @@ public class TreeWitnessGenerator {
 		}
 
 		return gens.build();
-		
 	}
 	
 	
-	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
+	public static Set<ClassExpression> getMaximalBasicConcepts(ImmutableList<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
 		Set<ClassExpression> concepts = new HashSet<>();
 		for (TreeWitnessGenerator twg : gens) 
 			concepts.addAll(twg.concepts);
@@ -90,7 +84,7 @@ public class TreeWitnessGenerator {
 		
 		log.debug("MORE THAN ONE GENERATING CONCEPT: {}", concepts);
 		// add all sub-concepts of all \exists R
-		Set<ClassExpression> extension = new HashSet<ClassExpression>();
+		Set<ClassExpression> extension = new HashSet<>();
 		for (ClassExpression b : concepts) 
 			if (b instanceof ObjectSomeValuesFrom)
 				extension.addAll(reasoner.classesDAG().getSubRepresentatives(b));
@@ -149,18 +143,12 @@ public class TreeWitnessGenerator {
 		
 		return concepts;
 	}
-	
-	
-	public ImmutableSet<ClassExpression> getSubConcepts() {
-		if (subconcepts == null) {
-			subconcepts = concepts.stream()
-					.flatMap(c -> reasoner.classesDAG().getSubRepresentatives(c).stream())
-					.collect(ImmutableCollectors.toSet());
-		}
-		return subconcepts;
+
+	public ImmutableSet<ClassExpression> getGeneratingConcepts() {
+		return concepts;
 	}
-	
-	
+
+
 	public ObjectPropertyExpression getProperty() {
 		return property;
 	}

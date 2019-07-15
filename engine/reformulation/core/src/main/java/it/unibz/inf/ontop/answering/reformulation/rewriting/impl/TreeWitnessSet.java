@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -237,7 +238,7 @@ public class TreeWitnessSet {
 
 			boolean failed = false;
 			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) 
-				if (!g.endPointEntailsAnyOf(tw.getGeneratorSubConcepts())) { 
+				if (!g.endPointEntailsAnyOf(getGeneratorSubConceptRepresentatives(tw.getGenerators()))) {
 					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
@@ -475,7 +476,7 @@ public class TreeWitnessSet {
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntailsAnyOf(subc)) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
-								if (twg.endPointEntailsAnyOf(tw.getGeneratorSubConcepts())) {
+								if (twg.endPointEntailsAnyOf(getGeneratorSubConceptRepresentatives(tw.getGenerators()))) {
 									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
@@ -491,9 +492,7 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				ImmutableSet<ClassExpression> subc = generators.stream()
-						.flatMap(twg -> twg.getSubConcepts().stream())
-						.collect(ImmutableCollectors.toSet());
+				ImmutableSet<ClassExpression> subc = getGeneratorSubConceptRepresentatives(generators);
 
 				for (TreeWitnessGenerator g : allTWgenerators) 
 					if (g.endPointEntailsAnyOf(subc)) {
@@ -503,5 +502,13 @@ public class TreeWitnessSet {
 			} 									
 		}	
 		return generators;
+	}
+
+	private ImmutableSet<ClassExpression> getGeneratorSubConceptRepresentatives(Collection<TreeWitnessGenerator> generators) {
+		return generators.stream()
+				.flatMap(twg -> twg.getGeneratingConcepts().stream())
+				.distinct()
+				.flatMap(c -> cache.classifiedTBoxWrapper.reasoner.classesDAG().getSubRepresentatives(c).stream())
+				.collect(ImmutableCollectors.toSet());
 	}
 }
