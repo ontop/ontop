@@ -157,7 +157,7 @@ public class TreeWitnessGenerator {
 		return subc.contains(property.getRange()); // || subc.contains(filler);
 	}
 	
-	public boolean endPointEntailsAnyOf(Intersection<ClassExpression> subc) {
+	public boolean endPointEntailsAnyOf(DownwardSaturatedImmutableSet<ClassExpression> subc) {
 		return subc.subsumes(property.getRange()); // || subc.subsumes(filler);
 	}
 	

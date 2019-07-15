@@ -42,14 +42,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.answering.reformulation.rewriting.impl.Intersection.intersectionOf;
+import static it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DownwardSaturatedImmutableSet.intersectionOf;
 
 public class QueryFolding {
 	private final CachedClassifiedTBoxWrapper cache;
 	
-	private Intersection<ObjectPropertyExpression> properties;
+	private DownwardSaturatedImmutableSet<ObjectPropertyExpression> properties;
 	private Set<QueryConnectedComponent.Loop> roots;
-	private Intersection<ClassExpression> internalRootConcepts;
+	private DownwardSaturatedImmutableSet<ClassExpression> internalRootConcepts;
 	private Set<VariableOrGroundTerm> internalRoots;
 	private Set<VariableOrGroundTerm> internalDomain;
 	private List<TreeWitness> interior;
@@ -65,9 +65,9 @@ public class QueryFolding {
 	
 	public QueryFolding(CachedClassifiedTBoxWrapper cache) {
 		this.cache = cache;
-		properties = Intersection.top();
+		properties = DownwardSaturatedImmutableSet.top();
 		roots = new HashSet<>();
-		internalRootConcepts = Intersection.top();
+		internalRootConcepts = DownwardSaturatedImmutableSet.top();
 		internalRoots = new HashSet<>();
 		internalDomain = new HashSet<>();
 		interior = Collections.emptyList(); // in-place QueryFolding for one-step TreeWitnesses, 
@@ -118,16 +118,16 @@ public class QueryFolding {
 	}
 	
 	public void newOneStepFolding(VariableOrGroundTerm t) {
-		properties = Intersection.top();
+		properties = DownwardSaturatedImmutableSet.top();
 		roots.clear();
-		internalRootConcepts = Intersection.top();
+		internalRootConcepts = DownwardSaturatedImmutableSet.top();
 		internalDomain = Collections.singleton(t);
 		terms = null;
 		status = true;		
 	}
 
 	public void newQueryFolding(TreeWitness tw) {
-		properties = Intersection.top();
+		properties = DownwardSaturatedImmutableSet.top();
 		roots.clear(); 
 		internalRootConcepts = tw.getRootConcepts();
 		internalRoots = new HashSet<>(tw.getRoots());
@@ -139,7 +139,7 @@ public class QueryFolding {
 	}
 
 	
-	public Intersection<ObjectPropertyExpression> getProperties() {
+	public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getProperties() {
 		return properties;
 	}
 	
@@ -159,7 +159,7 @@ public class QueryFolding {
 		return internalRoots.contains(t0.getTerm()) && !internalDomain.contains(t1.getTerm()); // && !roots.contains(t1);
 	}
 	
-	public Intersection<ClassExpression> getInternalRootConcepts() {
+	public DownwardSaturatedImmutableSet<ClassExpression> getInternalRootConcepts() {
 		return internalRootConcepts;
 	}
 	
@@ -198,9 +198,9 @@ public class QueryFolding {
 				.collect(ImmutableCollectors.toSet());
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		Intersection<ClassExpression> rootType;
+		DownwardSaturatedImmutableSet<ClassExpression> rootType;
 		if (nonExistentialRoot || !edgesInRoots.isEmpty()) {
-			rootType = Intersection.bottom();
+			rootType = DownwardSaturatedImmutableSet.bottom();
 			if (nonExistentialRoot)
 				log.debug("  NOT MERGEABLE: {} ARE NOT QUANTIFIED", roots.stream().filter(r -> r.isExistentialVariable()).collect(ImmutableCollectors.toList()));
 			if (!edgesInRoots.isEmpty())
@@ -209,7 +209,7 @@ public class QueryFolding {
 		else {
 			rootType = roots.stream()
 					.map(root -> cache.getLoopConcepts(root))
-					.collect(Intersection.toIntersection());
+					.collect(DownwardSaturatedImmutableSet.toIntersection());
 			if (rootType.isBottom())
 				log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
 		}

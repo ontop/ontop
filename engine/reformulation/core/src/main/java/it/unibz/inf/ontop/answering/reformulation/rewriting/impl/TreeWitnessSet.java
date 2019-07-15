@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -220,7 +219,7 @@ public class TreeWitnessSet {
 		Collection<TreeWitnessGenerator> twg = null;
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
 		for (TreeWitnessGenerator g : allTWgenerators) {
-			Intersection<ObjectPropertyExpression> subp = qf.getProperties();
+			DownwardSaturatedImmutableSet<ObjectPropertyExpression> subp = qf.getProperties();
 			if (!subp.subsumes(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
 				continue;
@@ -228,7 +227,7 @@ public class TreeWitnessSet {
 			else
 				log.debug("      POSITIVE PROPERTY CHECK {}", g.getProperty());
 
-			Intersection<ClassExpression> subc = qf.getInternalRootConcepts();
+			DownwardSaturatedImmutableSet<ClassExpression> subc = qf.getInternalRootConcepts();
 			if (!g.endPointEntailsAnyOf(subc)) {
 				 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, g);
 				 continue;			
@@ -237,15 +236,16 @@ public class TreeWitnessSet {
 				 log.debug("        ENDTYPE IS FINE: TOP FOR {}", g);
 
 			boolean failed = false;
-			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) 
-				if (!g.endPointEntailsAnyOf(getGeneratorSubConceptRepresentatives(tw.getGenerators()))) {
+			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) {
+				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
+				if (!genreps.stream().anyMatch(s -> g.endPointEntailsAnyOf(s))) {
 					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
-				} 
+				}
 				else
 					log.debug("        ENDTYPE IS FINE: {} FOR {}", tw, g);
-				
+			}
 			if (failed)
 				continue;
 			
@@ -356,8 +356,8 @@ public class TreeWitnessSet {
 	
 	
 	static class CachedClassifiedTBoxWrapper {
-		private final Map<TermOrderedPair, Intersection<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
-		private final Map<VariableOrGroundTerm, Intersection<ClassExpression>> conceptsCache = new HashMap<>();
+		private final Map<TermOrderedPair, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
+		private final Map<VariableOrGroundTerm, DownwardSaturatedImmutableSet<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final ClassifiedTBoxWrapper classifiedTBoxWrapper;
 
@@ -365,12 +365,12 @@ public class TreeWitnessSet {
 			this.classifiedTBoxWrapper = classifiedTBoxWrapper;
 		}
 
-		public Intersection<ClassExpression> getLoopConcepts(Loop loop) {
+		public DownwardSaturatedImmutableSet<ClassExpression> getLoopConcepts(Loop loop) {
 			return conceptsCache.computeIfAbsent(loop.getTerm(),
 					t -> classifiedTBoxWrapper.getSubConcepts(loop.getAtoms()));
 		}
 
-		public Intersection<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
+		public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
 			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
 					idx -> classifiedTBoxWrapper.getSubProperties(edge.getBAtoms(), idx));
 		}
@@ -383,17 +383,17 @@ public class TreeWitnessSet {
 			this.reasoner = reasoner;
 		}
 
-		public Intersection<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, TermOrderedPair idx) {
-			return atoms.stream().map(a -> getSubProperties(a, idx)).collect(Intersection.toIntersectionOfSets());
+		public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, TermOrderedPair idx) {
+			return atoms.stream().map(a -> getSubProperties(a, idx)).collect(DownwardSaturatedImmutableSet.toIntersection());
 		}
 
-		private ImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TermOrderedPair idx) {
+		private DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TermOrderedPair idx) {
 			return atom.getPredicate().getPropertyIRI(atom.getArguments())
 					.filter(i -> reasoner.objectProperties().contains(i))
 					.map(i -> reasoner.objectProperties().get(i))
 					.map(p -> isInverse(atom, idx) ? p.getInverse() : p)
-					.map(p -> reasoner.objectPropertiesDAG().getSubRepresentatives(p))
-					.orElse(ImmutableSet.of());
+					.map(p -> DownwardSaturatedImmutableSet.create(reasoner.objectPropertiesDAG().getSubRepresentatives(p)))
+					.orElse(DownwardSaturatedImmutableSet.bottom());
 		}
 
 		private boolean isInverse(DataAtom<RDFAtomPredicate> a, TermOrderedPair idx) {
@@ -407,15 +407,19 @@ public class TreeWitnessSet {
 		}
 
 
-		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
-			return atoms.stream().map(this::getSubConcepts).collect(Intersection.toIntersectionOfSets());
+		public DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
+			return atoms.stream().map(this::getSubConcepts).collect(DownwardSaturatedImmutableSet.toIntersection());
 		}
 
-		private ImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
+		private DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
 			return atom.getPredicate().getClassIRI(atom.getArguments())
 					.filter(i -> reasoner.classes().contains(i))
-					.map(i -> reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(i)))
-					.orElse(ImmutableSet.of());
+					.map(i -> getSubConcepts(reasoner.classes().get(i)))
+					.orElse(DownwardSaturatedImmutableSet.bottom());
+		}
+
+		public DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(ClassExpression c) {
+			return DownwardSaturatedImmutableSet.create(reasoner.classesDAG().getSubRepresentatives(c));
 		}
 	}
 	
@@ -455,7 +459,7 @@ public class TreeWitnessSet {
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
 
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
-			Intersection<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
+			DownwardSaturatedImmutableSet<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : allTWgenerators) {
@@ -464,19 +468,20 @@ public class TreeWitnessSet {
 						generators.add(twg);					
 					}
 					else 
-						 log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, twg);
+						log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", subc, twg);
 				}
 		} 
 		else {
 			for (TreeWitness tw : tws) 
 				if (tw.getDomain().containsAll(cc.getVariables())) {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
-					Intersection<ClassExpression> subc = cache.classifiedTBoxWrapper.getSubConcepts(tw.getRootAtoms());
+					DownwardSaturatedImmutableSet<ClassExpression> subc = cache.classifiedTBoxWrapper.getSubConcepts(tw.getRootAtoms());
+					ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntailsAnyOf(subc)) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
-								if (twg.endPointEntailsAnyOf(getGeneratorSubConceptRepresentatives(tw.getGenerators()))) {
+								if (genreps.stream().anyMatch(s -> twg.endPointEntailsAnyOf(s))) {
 									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
@@ -492,10 +497,9 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				ImmutableSet<ClassExpression> subc = getGeneratorSubConceptRepresentatives(generators);
-
+				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> subc = getGeneratorSubConceptRepresentatives(generators);
 				for (TreeWitnessGenerator g : allTWgenerators) 
-					if (g.endPointEntailsAnyOf(subc)) {
+					if (subc.stream().anyMatch(s -> g.endPointEntailsAnyOf(s))) {
 						if (generators.add(g))
 							saturated = false;
 					}		 		
@@ -504,11 +508,11 @@ public class TreeWitnessSet {
 		return generators;
 	}
 
-	private ImmutableSet<ClassExpression> getGeneratorSubConceptRepresentatives(Collection<TreeWitnessGenerator> generators) {
+	private ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> getGeneratorSubConceptRepresentatives(Collection<TreeWitnessGenerator> generators) {
 		return generators.stream()
 				.flatMap(twg -> twg.getGeneratingConcepts().stream())
 				.distinct()
-				.flatMap(c -> cache.classifiedTBoxWrapper.reasoner.classesDAG().getSubRepresentatives(c).stream())
-				.collect(ImmutableCollectors.toSet());
+				.map(c -> cache.classifiedTBoxWrapper.getSubConcepts(c))
+				.collect(ImmutableCollectors.toList());
 	}
 }

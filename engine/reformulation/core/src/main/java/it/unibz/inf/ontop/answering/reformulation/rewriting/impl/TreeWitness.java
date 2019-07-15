@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
  * TreeWitness: universal tree witnesses as in the KR 2012 paper
@@ -55,16 +54,16 @@ public class TreeWitness {
 	private final ImmutableList<TreeWitnessGenerator> generators; // the \exists R.B concepts that realise the tree witness
 	                                          // in the canonical model of the TBox
 	
-	private final Intersection<ClassExpression> rootConcepts; // store concept for merging tree witnesses
+	private final DownwardSaturatedImmutableSet<ClassExpression> rootConcepts; // store concept for merging tree witnesses
 	
-	public TreeWitness(ImmutableList<TreeWitnessGenerator> generators, TermCover terms, ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms, Intersection<ClassExpression> rootConcepts) {
+	public TreeWitness(ImmutableList<TreeWitnessGenerator> generators, TermCover terms, ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms, DownwardSaturatedImmutableSet<ClassExpression> rootConcepts) {
 		this.generators = generators;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
 		this.rootConcepts = rootConcepts;
 	}
 
-	public Intersection<ClassExpression> getRootConcepts() {
+	public DownwardSaturatedImmutableSet<ClassExpression> getRootConcepts() {
 		return rootConcepts;
 	}
 	

@@ -18,7 +18,7 @@ import java.util.stream.Collector;
  * @param <T>
  */
 
-public class Intersection<T> {
+public class DownwardSaturatedImmutableSet<T> {
 
 	/**
 	 * downward-saturated set
@@ -29,7 +29,7 @@ public class Intersection<T> {
 	 */
 	private final ImmutableSet<T> elements;
 
-	private Intersection(ImmutableSet<T> elements) {
+	private DownwardSaturatedImmutableSet(ImmutableSet<T> elements) {
 		this.elements = elements;
 	}
 
@@ -55,20 +55,20 @@ public class Intersection<T> {
 	 * @param e a non-empty downward saturated set for class / property
 	 */
 	
-	public Intersection<T> intersectionWith(Collection<T> e) {
+	private DownwardSaturatedImmutableSet<T> intersectionWith(ImmutableSet<T> e) {
 
-		Collection<T> result;
+		ImmutableSet<T> result;
 		if (elements != null) {
 			Set<T> set = new HashSet<>(elements);
 			set.retainAll(e);
-			result = set;
+			result = ImmutableSet.copyOf(set);
 		}
 		else
 			result = e; // we have top, the intersection is sub
 
 		return result.isEmpty()
 				? BOTTOM
-				: new Intersection<>(ImmutableSet.copyOf(result)); // copy the set
+				: new DownwardSaturatedImmutableSet<>(result);
 	}
 	
 	/**
@@ -78,7 +78,7 @@ public class Intersection<T> {
 	 * @param i2
 	 */
 	
-	public static <T> Intersection<T> intersectionOf(Intersection<T> i1, Intersection<T> i2) {
+	public static <T> DownwardSaturatedImmutableSet<T> intersectionOf(DownwardSaturatedImmutableSet<T> i1, DownwardSaturatedImmutableSet<T> i2) {
 		if (i1.elements == null) // i1 is top
 			return i2;
 
@@ -87,36 +87,29 @@ public class Intersection<T> {
 				: i2.intersectionWith(i1.elements);
 	}
 
+	public static <T> DownwardSaturatedImmutableSet<T> create(ImmutableSet<T> e) {
+		return e.isEmpty() ? BOTTOM : new DownwardSaturatedImmutableSet<>(e);
+	}
 
-	private static final Intersection TOP = new Intersection<>(null);
-	private static final Intersection BOTTOM = new Intersection<>(ImmutableSet.of());
+	private static final DownwardSaturatedImmutableSet TOP = new DownwardSaturatedImmutableSet<>(null);
+	private static final DownwardSaturatedImmutableSet BOTTOM = new DownwardSaturatedImmutableSet<>(ImmutableSet.of());
 
-	public static <T> Intersection<T> top() { return TOP; }
-	public static <T> Intersection<T> bottom() { return BOTTOM; }
+	public static <T> DownwardSaturatedImmutableSet<T> top() { return TOP; }
+	public static <T> DownwardSaturatedImmutableSet<T> bottom() { return BOTTOM; }
 
 	public boolean isBottom() { return elements != null && elements.isEmpty(); }
 
 	private final static class Accumulator<T> {
-		private Intersection<T> r = Intersection.top();
+		private DownwardSaturatedImmutableSet<T> r = DownwardSaturatedImmutableSet.top();
 
-		Accumulator<T> intersectWith(Intersection<T> i) { r = intersectionOf(r, i); return this; }
-		Accumulator<T> intersectWith(Collection<T> e) { r = r.intersectionWith(e); return this; }
+		Accumulator<T> intersectWith(DownwardSaturatedImmutableSet<T> i) { r = intersectionOf(r, i); return this; }
 		Accumulator<T> intersectWith(Accumulator<T> a) { r = intersectionOf(r, a.r); return this; }
 
-		Intersection<T> result() { return r; }
+		DownwardSaturatedImmutableSet<T> result() { return r; }
 	}
 
 
-	public static <T> Collector<Intersection<T>, Accumulator<T>, Intersection<T>> toIntersection() {
-		return Collector.of(
-				Accumulator::new, // Supplier
-				Accumulator::intersectWith, // Accumulator
-				Accumulator::intersectWith, // Merger
-				Accumulator::result, // Finisher
-				Collector.Characteristics.UNORDERED);
-	}
-
-	public static <T> Collector<ImmutableSet<T>, Accumulator<T>, Intersection<T>> toIntersectionOfSets() {
+	public static <T> Collector<DownwardSaturatedImmutableSet<T>, Accumulator<T>, DownwardSaturatedImmutableSet<T>> toIntersection() {
 		return Collector.of(
 				Accumulator::new, // Supplier
 				Accumulator::intersectWith, // Accumulator
@@ -133,8 +126,8 @@ public class Intersection<T> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Intersection) {
-			Intersection other = (Intersection)o;
+		if (o instanceof DownwardSaturatedImmutableSet) {
+			DownwardSaturatedImmutableSet other = (DownwardSaturatedImmutableSet)o;
 			return this.elements == null && other.elements == null ||
 					this.elements != null && this.elements.equals(other.elements);
 		}
