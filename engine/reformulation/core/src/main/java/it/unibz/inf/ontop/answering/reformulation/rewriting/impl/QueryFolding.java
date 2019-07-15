@@ -41,6 +41,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.answering.reformulation.rewriting.impl.Intersection.intersectionOf;
+
 public class QueryFolding {
 	private final QueryConnectedComponentCache cache;
 	
@@ -91,7 +93,7 @@ public class QueryFolding {
 		c.internalRoots.addAll(tw.getRoots());
 		c.internalDomain.addAll(tw.getDomain());
 		c.interior.add(tw);
-		c.internalRootConcepts = c.internalRootConcepts.intersectionWith(tw.getRootConcepts());
+		c.internalRootConcepts = intersectionOf(c.internalRootConcepts, tw.getRootConcepts());
 		if (c.internalRootConcepts.isBottom())
 			c.status = false;
 		return c;
@@ -100,10 +102,10 @@ public class QueryFolding {
 	public boolean extend(QueryConnectedComponent.Loop root, QueryConnectedComponent.Edge edge, QueryConnectedComponent.Loop internalRoot) {
 		assert(status);
 
-		properties = properties.intersectionWith(cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
+		properties = intersectionOf(properties, cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
 		
 		if (!properties.isBottom()) {
-			internalRootConcepts = internalRootConcepts.intersectionWith(cache.getLoopConcepts(internalRoot));
+			internalRootConcepts = intersectionOf(internalRootConcepts, cache.getLoopConcepts(internalRoot));
 			if (!internalRootConcepts.isBottom()) {
 				roots.add(root);
 				return true;
@@ -206,7 +208,7 @@ public class QueryFolding {
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
 		if (!rootType.isBottom()) {
-			rootType = rootType.intersectionWith(roots.stream()
+			rootType = intersectionOf(rootType, roots.stream()
 					.map(root -> cache.getLoopConcepts(root))
 					.collect(Intersection.toIntersection()));
 			if (rootType.isBottom())

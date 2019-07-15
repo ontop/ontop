@@ -47,7 +47,7 @@ public class Intersection<T> {
 	}
 	
 	/**
-	 * modifies the intersection by further intersecting it with a class / property
+	 * returns the intersection with a class / property
 	 * 
 	 * IMPORTANT: the class / property is given by the DOWNWARD-SATURATED SET
 	 *              (in other words, by the result of EquivalencesDAG.getSubRepresentatives
@@ -72,19 +72,19 @@ public class Intersection<T> {
 	}
 	
 	/**
-	 * modifies by intersecting with another intersection
-	 * 
-	 * @param arg another intersection 
+	 * intersection of two intersections
+	 *
+	 * @param i1
+	 * @param i2
 	 */
 	
-	public Intersection<T> intersectionWith(Intersection<T> arg) {
+	public static <T> Intersection<T> intersectionOf(Intersection<T> i1, Intersection<T> i2) {
+		if (i1.elements == null) // i1 is top
+			return i2;
 
-		if (arg.elements != null) {
-			return arg.elements.isEmpty()
-				? arg   // arg is bottom
-				: intersectionWith(arg.elements);
-		}
-		return this; // if the argument is top then leave all as is
+		return i1.elements.isEmpty()
+				? i1   // i1 is bottom
+				: i2.intersectionWith(i1.elements);
 	}
 
 
@@ -99,9 +99,9 @@ public class Intersection<T> {
 	private final static class Accumulator<T> {
 		private Intersection<T> r = Intersection.top();
 
-		Accumulator<T> intersectWith(Intersection<T> i) { r = r.intersectionWith(i); return this; }
+		Accumulator<T> intersectWith(Intersection<T> i) { r = intersectionOf(r, i); return this; }
 		Accumulator<T> intersectWith(Collection<T> e) { r = r.intersectionWith(e); return this; }
-		Accumulator<T> intersectWith(Accumulator<T> a) { r = r.intersectionWith(a.r); return this; }
+		Accumulator<T> intersectWith(Accumulator<T> a) { r = intersectionOf(r, a.r); return this; }
 
 		Intersection<T> result() { return r; }
 	}
