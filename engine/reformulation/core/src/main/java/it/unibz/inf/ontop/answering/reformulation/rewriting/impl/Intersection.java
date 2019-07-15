@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collector;
 
 /**
  * Represents intersections of classes or properties as 
@@ -94,6 +95,27 @@ public class Intersection<T> {
 	public static <T> Intersection<T> bottom() { return BOTTOM; }
 
 	public boolean isBottom() { return elements != null && elements.isEmpty(); }
+
+
+
+	public static <T> Collector<Intersection<T>, Intersection<T>, Intersection<T>> toIntersection() {
+		return Collector.of(
+				() -> Intersection.top(), // Supplier
+				(i, e) -> i.intersectionWith(e), // Accumulator
+				(b1, b2) -> b1.intersectionWith(b2), // Merger
+				i -> i, // Finisher
+				Collector.Characteristics.UNORDERED);
+	}
+
+	public static <T> Collector<ImmutableSet<T>, Intersection<T>, Intersection<T>> toIntersectionOfSets() {
+		return Collector.of(
+				() -> Intersection.top(), // Supplier
+				(i, e) -> i.intersectionWith(e), // Accumulator
+				(b1, b2) -> b1.intersectionWith(b2), // Merger
+				i -> i, // Finisher
+				Collector.Characteristics.UNORDERED);
+	}
+
 
 	@Override
 	public String toString() {
