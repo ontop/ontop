@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -56,9 +56,9 @@ import java.util.stream.Stream;
 
 
 /***
- * 
+ *
  * A class that provides manipulation for Direct Mapping
- * 
+ *
  * @author Victor
  *
  */
@@ -270,7 +270,7 @@ public class DirectMappingEngine {
 
 	/***
 	 * generate a mapping axiom from a table of a database
-	 * 
+	 *
 	 * @param table : the data definition from which mappings are extraced
 	 * @param baseUri : the base uri needed for direct mapping axiom
 	 *
@@ -287,7 +287,7 @@ public class DirectMappingEngine {
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,
 				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
 		currentMappingIndex++;
-		
+
 		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
 		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
             OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
@@ -295,7 +295,7 @@ public class DirectMappingEngine {
             axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
 			currentMappingIndex++;
 		}
-		
+
 		return axioms;
 	}
 }

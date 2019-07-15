@@ -1,146 +1,39 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
 
-public class SumSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
-
-    private final boolean isDistinct;
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     protected SumSPARQLFunctionSymbolImpl(boolean isDistinct, RDFTermType rootRdfTermType) {
-        super("SP_SUM", SPARQL.SUM, ImmutableList.of(rootRdfTermType));
-        this.isDistinct = isDistinct;
+        super("SP_SUM", SPARQL.SUM, isDistinct, rootRdfTermType, "sum1");
     }
 
     @Override
-    protected boolean tolerateNulls() {
-        return true;
+    protected ImmutableFunctionalTerm createAggregate(ConcreteNumericRDFDatatype rdfType, ImmutableTerm dbTerm,
+                                                      TermFactory termFactory) {
+
+        DBTermType dbType = rdfType.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory());
+        return termFactory.getDBSum(dbTerm, dbType, isDistinct());
     }
 
     @Override
-    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return false;
-    }
-
-    /**
-     * Too complex to be implemented (for the moment)
-     */
-    @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.empty();
+    protected ImmutableTerm combineAggregates(ImmutableTerm aggregate1, ImmutableTerm aggregate2, TermFactory termFactory) {
+        DBTermType dbDecimalType = termFactory.getTypeFactory().getDBTypeFactory().getDBDecimalType();
+        return termFactory.getDBBinaryNumericFunctionalTerm(SPARQL.NUMERIC_ADD, dbDecimalType, aggregate1, aggregate2);
     }
 
     @Override
-    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
-    }
-
-    /**
-     * Nullable due to typing errors
-     */
-    @Override
-    public boolean isNullable(ImmutableSet<Integer> nullableIndexes) {
-        return true;
+    protected ConcreteNumericRDFDatatype inferTypeWhenNonEmpty(ConcreteNumericRDFDatatype inputNumericDatatype, TypeFactory typeFactory) {
+        return inputNumericDatatype.getCommonPropagatedOrSubstitutedType(inputNumericDatatype);
     }
 
     @Override
-    public Optional<AggregationSimplification> decomposeIntoDBAggregation(
-            ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
-            boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
-        if (possibleRDFTypes.size() != getArity()) {
-            throw new IllegalArgumentException("The size of possibleRDFTypes is expected to match the arity of " +
-                    "the function symbol");
-        }
-        ImmutableTerm subTerm = subTerms.get(0);
-        ImmutableSet<RDFTermType> subTermPossibleTypes = possibleRDFTypes.get(0);
-
-        switch (subTermPossibleTypes.size()) {
-            case 0:
-                throw new MinorOntopInternalBugException("At least one RDF type was expected to be inferred for the first sub-term");
-            case 1:
-                return decomposeUniTyped(subTerm, subTermPossibleTypes.iterator().next(), hasGroupBy, variableNullability,
-                        variableGenerator, termFactory);
-            default:
-                return decomposeMultiTyped(subTerm, subTermPossibleTypes, hasGroupBy, termFactory);
-        }
-
-
-    }
-
-    private Optional<AggregationSimplification> decomposeUniTyped(ImmutableTerm subTerm, RDFTermType subTermType,
-                                                                  boolean hasGroupBy, VariableNullability variableNullability,
-                                                                  VariableGenerator variableGenerator, TermFactory termFactory) {
-        if (!(subTermType instanceof ConcreteNumericRDFDatatype)) {
-            FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(termFactory.getNullConstant());
-            return Optional.of(AggregationSimplification.create(decomposition));
-        }
-
-        ConcreteNumericRDFDatatype numericDatatype = (ConcreteNumericRDFDatatype) subTermType;
-        ImmutableTerm subTermLexicalTerm = extractLexicalTerm(subTerm, termFactory);
-
-        TypeFactory typeFactory = termFactory.getTypeFactory();
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-
-        ImmutableFunctionalTerm dbSumTerm = termFactory.getDBSum(
-                termFactory.getConversionFromRDFLexical2DB(subTermLexicalTerm, numericDatatype),
-                numericDatatype.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()),
-                isDistinct);
-
-        RDFTermTypeConstant inferredTypeTermWhenNonEmpty = termFactory.getRDFTermTypeConstant(
-                numericDatatype.getCommonPropagatedOrSubstitutedType(numericDatatype));
-
-        Variable dbAggregationVariable = variableGenerator.generateNewVariable("sum");
-
-        boolean isSubTermNullable = subTermLexicalTerm.isNullable(variableNullability.getNullableVariables());
-        DBConstant zero = termFactory.getDBConstant("0", dbTypeFactory.getDBLargeIntegerType());
-
-        // If DB sum returns a NULL, replaces it by 0
-        boolean dbSumMayReturnNull = !(hasGroupBy && (!isSubTermNullable));
-        ImmutableTerm nonNullDBAggregate = dbSumMayReturnNull
-                ? termFactory.getDBCoalesce(dbAggregationVariable, zero)
-                : dbAggregationVariable;
-
-        // TODO: consider the possibility to disable it through the settings
-        ImmutableTerm inferredType = isSubTermNullable
-                ? termFactory.getIfThenElse(
-                    termFactory.getDBIsNotNull(dbAggregationVariable),
-                    inferredTypeTermWhenNonEmpty,
-                    termFactory.getRDFTermTypeConstant(typeFactory.getXsdIntegerDatatype()))
-                : inferredTypeTermWhenNonEmpty;
-
-        ImmutableFunctionalTerm liftedTerm = termFactory.getRDFFunctionalTerm(
-                termFactory.getConversion2RDFLexical(nonNullDBAggregate, numericDatatype),
-                inferredType);
-
-        FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(
-                liftedTerm,
-                ImmutableMap.of(dbAggregationVariable, dbSumTerm));
-
-        return Optional.of(AggregationSimplification.create(decomposition));
-    }
-
-    /**
-     * TODO: support
-     */
-    private Optional<AggregationSimplification> decomposeMultiTyped(ImmutableTerm subTerm,
-                                                                    ImmutableSet<RDFTermType> subTermPossibleTypes,
-                                                                    boolean hasGroupBy, TermFactory termFactory) {
-        throw new RuntimeException("TODO: the multityped case for SUM is not yet supported");
-    }
-
-    @Override
-    public boolean isAggregation() {
-        return true;
+    protected ImmutableTerm getNeutralElement(TermFactory termFactory) {
+        return termFactory.getDBIntegerConstant(0);
     }
 }

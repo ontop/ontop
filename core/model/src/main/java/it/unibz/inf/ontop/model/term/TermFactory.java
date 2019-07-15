@@ -373,6 +373,16 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term);
 
 	/**
+	 * The first sub-term encodes the index of the term to return.
+	 * Such values correspond to the following sub-terms
+	 *
+	 * For instance DB_IDX(1, "roger", "francis", "ernest") returns "francis"
+	 *
+	 */
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues);
+	ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues);
+
+	/**
 	 * May "normalize"
 	 */
 	ImmutableFunctionalTerm getConversion2RDFLexical(DBTermType inputType, ImmutableTerm term, RDFTermType rdfTermType);
@@ -581,4 +591,8 @@ public interface TermFactory {
     ImmutableFunctionalTerm getDBCount(ImmutableTerm subTerm, boolean isDistinct);
 
 	ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+    ImmutableFunctionalTerm getDBAvg(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct);
+
+	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
+    ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
 }

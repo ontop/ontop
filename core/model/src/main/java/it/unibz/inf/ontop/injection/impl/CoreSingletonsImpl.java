@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -28,6 +29,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final TargetAtomFactory targetAtomFactory;
     private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
+    private final OntopModelSettings settings;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
@@ -35,7 +37,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
                                TargetAtomFactory targetAtomFactory, UniqueTermTypeExtractor uniqueTermTypeExtractor,
-                               IntermediateQueryFactory iqFactory) {
+                               IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -46,6 +48,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.targetAtomFactory = targetAtomFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
+        this.settings = settings;
     }
 
     @Override
@@ -101,5 +104,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public UniqueTermTypeExtractor getUniqueTermTypeExtractor() {
         return uniqueTermTypeExtractor;
+    }
+
+    @Override
+    public OntopModelSettings getSettings() {
+        return settings;
     }
 }

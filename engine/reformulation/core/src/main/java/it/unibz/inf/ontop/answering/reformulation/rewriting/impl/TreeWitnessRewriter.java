@@ -76,7 +76,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private final DatalogFactory datalogFactory;
     private final EQNormalizer eqNormalizer;
 	private final UnifierUtilities unifierUtilities;
-	private final SubstitutionUtilities substitutionUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final IQ2DatalogTranslator iqConverter;
     private final DatalogProgram2QueryConverter datalogConverter;
@@ -87,7 +86,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 								DatalogFactory datalogFactory,
                                 EQNormalizer eqNormalizer,
 								UnifierUtilities unifierUtilities,
-                                SubstitutionUtilities substitutionUtilities,
                                 ImmutabilityTools immutabilityTools,
                                 DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
@@ -98,7 +96,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.datalogFactory = datalogFactory;
         this.eqNormalizer = eqNormalizer;
 		this.unifierUtilities = unifierUtilities;
-		this.substitutionUtilities = substitutionUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.iqConverter = iqConverter;
         this.datalogConverter = datalogConverter;
@@ -126,9 +123,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
 	 */
 	
-	private Function getHeadAtom(String base, String suffix, List<Term> arguments) {
+	private Function getHeadAtom(String base, String suffix, ImmutableList<Variable> arguments) {
 		Predicate predicate = datalogFactory.getSubqueryPredicate(base + suffix, arguments.size());
-		return termFactory.getFunction(predicate, arguments);
+		return termFactory.getFunction(predicate, new ArrayList(arguments));
 	}
 	
 	private int freshVarIndex = 0;
@@ -381,7 +378,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		}
 
         DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
-        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting, ImmutableList.of(),
+        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting,
 				query.getProjectionAtom().getArguments());
 
         IQTree optimisedTree = convertedIQ.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
@@ -501,8 +498,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                         for (Function a : rule.getBody())
                             newbody.add(getFreshAtom(a, suffix));
 
-                        // newquery contains only cloned atoms, so it is safe to unify "in-place"
-                        substitutionUtilities.applySubstitution(newquery, mgu, false);
+						// apply substitutions in-place
+						Function head = newquery.getHead();
+						SubstitutionUtilities.applySubstitution(head, mgu);
+						for (Function bodyatom : newquery.getBody())
+							SubstitutionUtilities.applySubstitution(bodyatom, mgu);
 
                         // REDUCE
                         eqNormalizer.enforceEqualities(newquery);

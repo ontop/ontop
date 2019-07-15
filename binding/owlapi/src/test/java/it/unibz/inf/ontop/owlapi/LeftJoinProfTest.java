@@ -594,6 +594,143 @@ public class LeftJoinProfTest {
 
     @Ignore
     @Test
+    public void testAvgStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (AVG(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("11.25");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testAvgStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (AVG(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("10.5","12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testAvgStudents3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (AVG(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :teaches ?c .\n" +
+                "      ?c :nbStudents ?nb .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "10.5", "12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMinStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (MIN(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("10");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMinStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MIN(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("10","12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMaxStudents1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT (MAX(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?c a :Course ; \n" +
+                "        :nbStudents ?nb .\n" +
+                "}\n";
+
+        List<String> expectedValues = ImmutableList.of("13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMaxStudents2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MAX(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p \n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("11","12", "13");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
     public void testDuration1() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -609,7 +746,121 @@ public class LeftJoinProfTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
+        List<String> expectedValues = ImmutableList.of("0.0", "0.0", "0.0", "0.0", "0.0", "18.0", "20.0", "54.5");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMultitypedSum1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   { ?c :duration ?n } \n" +
+                "   UNION" +
+                "   { ?c :nbStudents ?n }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("31.0", "32.0", "75.5");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Ignore
+    @Test
+    public void testMultitypedAvg1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (AVG(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   { ?c :duration ?n } \n" +
+                "   UNION" +
+                "   { ?c :nbStudents ?n }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("15.5", "16.0", "18.875");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    /**
+     * Checks that the type error is detected
+     */
+    @Ignore
+    @Test
+    public void testMinusMultitypedSum() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "        :lastName ?v .\n" +
+                "   MINUS {\n " +
+                "     SELECT ?p (SUM(?n) AS ?v){\n" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?c :duration ?n " +
+                "       } \n" +
+                "       UNION" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?p :lastName ?n " +
+                "       }\n" +
+                "     } GROUP BY ?p\n" +
+                "  }\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    /**
+     * Checks that the type error is detected
+     */
+    @Ignore
+    @Test
+    public void testMinusMultitypedAvg() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p ?v\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor ;\n" +
+                "        :lastName ?v .\n" +
+                "   MINUS {\n " +
+                "     SELECT ?p (AVG(?n) AS ?v){\n" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?c :duration ?n " +
+                "       } \n" +
+                "       UNION" +
+                "       { \n" +
+                "          ?p :teaches ?c .\n" +
+                "          ?p :lastName ?n " +
+                "       }\n" +
+                "     } GROUP BY ?p\n" +
+                "  }\n" +
+                "}\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("Dodero", "Gamper", "Helmer", "Jackson", "Pitt");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);

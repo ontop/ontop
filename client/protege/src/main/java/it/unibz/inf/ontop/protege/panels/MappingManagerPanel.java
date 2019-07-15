@@ -36,8 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.validation.SQLSourceQueryValidator;
 import it.unibz.inf.ontop.utils.IDGenerator;
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -255,7 +253,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         txtFilter = new javax.swing.JTextField();
         chkFilter = new javax.swing.JCheckBox();
         mappingScrollPane = new javax.swing.JScrollPane();
-        mappingList = new javax.swing.JList<>();
+        mappingList = new JList<SQLPPTriplesMap>();
 
         setLayout(new java.awt.GridBagLayout());
 

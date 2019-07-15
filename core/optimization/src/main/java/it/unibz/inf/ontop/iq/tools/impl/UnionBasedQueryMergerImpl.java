@@ -65,7 +65,11 @@ public class UnionBasedQueryMergerImpl implements UnionBasedQueryMerger {
 
         IQ firstDefinition = predicateDefinitions.iterator().next();
         if (predicateDefinitions.size() == 1) {
-            return Optional.of(firstDefinition);
+            if (optionalTopModifiers.isPresent())
+                return Optional.of(iqFactory.createIQ(firstDefinition.getProjectionAtom(),
+                        optionalTopModifiers.get().insertAbove(firstDefinition.getTree(), iqFactory)));
+            else
+                return Optional.of(firstDefinition);
         }
 
         DistinctVariableOnlyDataAtom projectionAtom = firstDefinition.getProjectionAtom();

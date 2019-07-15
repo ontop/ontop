@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -44,17 +46,33 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                   AggregationNormalizer aggregationNormalizer,
                                   ImmutableUnificationTools unificationTools, ConstructionNodeTools constructionNodeTools,
                                   ImmutableSubstitutionTools substitutionTools, TermFactory termFactory,
-                                  CoreUtilsFactory coreUtilsFactory) {
+                                  CoreUtilsFactory coreUtilsFactory, OntopModelSettings settings) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools,
                 termFactory, coreUtilsFactory);
         this.groupingVariables = groupingVariables;
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = Sets.union(groupingVariables,
+        this.childVariables = extractChildVariables(groupingVariables, substitution);
+
+        if (settings.isTestModeEnabled())
+            validateNode();
+    }
+
+    public static ImmutableSet<Variable> extractChildVariables(ImmutableSet<Variable> groupingVariables,
+                                                               ImmutableSubstitution<ImmutableFunctionalTerm> substitution) {
+        return Sets.union(groupingVariables,
                 substitution.getImmutableMap().values().stream()
-                .flatMap(ImmutableTerm::getVariableStream)
+                        .flatMap(ImmutableTerm::getVariableStream)
                         .collect(ImmutableCollectors.toSet())).immutableCopy();
+    }
+
+    @Override
+    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
+                                                                        ImmutableSubstitution<ImmutableTerm> theta, IQTree newChild) {
+        return Optional.of(iqFactory.createAggregationNode(
+                Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
+                (ImmutableSubstitution<ImmutableFunctionalTerm>) (ImmutableSubstitution<?>)theta));
     }
 
     @Override
@@ -139,13 +157,34 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         return isSyntacticallyEquivalentTo(queryNode);
     }
 
-    /**
-     * TODO: implement seriously
-     */
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
-        // TODO: check that the grouping variables and the substitution domain are disjoint
+        validateNode();
+
+        Sets.SetView<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
+        if (!missingVariables.isEmpty()) {
+            throw new InvalidIntermediateQueryException("The child of the aggregation node is missing some variables: "
+                    + missingVariables);
+        }
     }
+
+    protected void validateNode() throws InvalidIntermediateQueryException {
+        if (!Sets.intersection(groupingVariables, substitution.getDomain()).isEmpty()) {
+            throw new InvalidIntermediateQueryException(
+                    String.format("AggregationNode: " +
+                                    "the grouping variables (%s) and the substitution domain (%s) must be disjoint",
+                            groupingVariables, substitution.getDomain()));
+        }
+
+        ImmutableMap<Variable, ImmutableFunctionalTerm> nonAggregateMap = substitution.getImmutableMap().entrySet().stream()
+                .filter(e -> !e.getValue().getFunctionSymbol().isAggregation())
+                .collect(ImmutableCollectors.toMap());
+        if (!nonAggregateMap.isEmpty()) {
+            throw new InvalidIntermediateQueryException("The substitution of the aggregation node " +
+                    "should only define aggregates, not " + nonAggregateMap);
+        }
+    }
+
 
     @Override
     public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {

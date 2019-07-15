@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
-import it.unibz.inf.ontop.spec.ontology.EquivalencesDAG;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +13,7 @@ import java.util.Set;
  * 
  * @author Roman Kontchakov
  *
- * @param <T> BasicClassDescription or Property
+ * @param <T>
  */
 
 public class Intersection<T> {
@@ -27,15 +26,12 @@ public class Intersection<T> {
 	 * the empty set is the minimal element -- bottom
 	 */
 	private Set<T> elements; // initially is top
-	
-	private final EquivalencesDAG<T> dag;
-	
+
 	/**
 	 * default constructor -- the intersection equals to top
 	 * 
 	 */
-	public Intersection(EquivalencesDAG<T> dag) {
-		this.dag = dag;
+	public Intersection() {
 		elements = null;
 	}
 	
@@ -46,12 +42,7 @@ public class Intersection<T> {
 	 */
 	
 	public Intersection(Intersection<T> arg) {
-		this.dag = arg.dag;
-		
-		if (arg.elements == null)
-			elements = null;
-		else
-			elements = new HashSet<T>(arg.elements);
+		elements = (arg.elements == null) ? null : new HashSet<>(arg.elements);
 	}
 	
 	/**
@@ -96,12 +87,12 @@ public class Intersection<T> {
 	 * @param e a non-empty downward saturated set for class / property
 	 */
 	
-	public void intersectWith(T e) {
-		
+	public void intersectWith(Collection<T> e) {
+
 		if (elements == null) // we have top, the intersection is sub
-			elements = new HashSet<>(dag.getSubRepresentatives(e)); // copy the set
+			elements = new HashSet<>(e); // copy the set
 		else
-			elements.retainAll(dag.getSubRepresentatives(e));			
+			elements.retainAll(e);
 	}
 	
 	/**
@@ -111,18 +102,12 @@ public class Intersection<T> {
 	 */
 	
 	public void intersectWith(Intersection<T> arg) {
-		// if the argument is top then leave all as is
-		if (arg.elements != null) {
-			
-			// if arg is empty, the result is empty
-			if (arg.elements.isEmpty())
+
+		if (arg.elements != null) {  // if the argument is top then leave all as is
+			if (arg.elements.isEmpty()) // if arg is empty, the result is empty
 				elements = Collections.emptySet();
-			else {
-				if (elements == null) // we have top, the intersection is sub
-					elements = new HashSet<>(arg.elements); // copy the set
-				else
-					elements.retainAll(arg.elements);							
-			}
+			else
+				intersectWith(arg.elements);
 		}
 	}
 

@@ -31,7 +31,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final BooleanFunctionSymbol lexicalEBVFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
-    private final ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
@@ -48,6 +47,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final DBTermType dbBooleanType;
     private final DBTermType dbStringType;
 
+    /**
+     * Created in init()
+     */
+    private ImmutableTable<String, Integer, SPARQLFunctionSymbol> regularSparqlFunctionTable;
+    /**
+     * Created in init()
+     */
+    private ImmutableTable<String, Integer, SPARQLFunctionSymbol> distinctSparqlAggregateFunctionTable;
+
+
     @Inject
     private FunctionSymbolFactoryImpl(TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
         this.typeFactory = typeFactory;
@@ -58,12 +67,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
-        DBTermType rootDBType = dbTypeFactory.getAbstractRootDBType();
 
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
-        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable(typeFactory, dbFunctionSymbolFactory);
         this.commonDenominatorMap = new ConcurrentHashMap<>();
         this.concatMap = new ConcurrentHashMap<>();
         this.coalesceMap = new ConcurrentHashMap<>();
@@ -81,11 +88,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
         this.EBVSPARQLLikeFunctionSymbol = new EBVSPARQLLikeFunctionSymbolImpl(typeFactory.getAbstractRDFSLiteral(), typeFactory.getXsdBooleanDatatype());
         this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
-
     }
 
-    protected static ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable(
-            TypeFactory typeFactory, DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+    @Inject
+    protected void init() {
+        this.regularSparqlFunctionTable = createSPARQLFunctionSymbolTable();
+        this.distinctSparqlAggregateFunctionTable = createDistinctSPARQLAggregationFunctionSymbolTable();
+    }
+
+
+    protected ImmutableTable<String, Integer, SPARQLFunctionSymbol> createSPARQLFunctionSymbolTable() {
         RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
         RDFDatatype xsdDecimal = typeFactory.getXsdDecimalDatatype();
@@ -167,13 +179,43 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, false),
                 new CountSPARQLFunctionSymbolImpl(xsdInteger, false),
                 new SumSPARQLFunctionSymbolImpl(false, abstractRDFType),
-                new DummyMinSPARQLFunctionSymbol(abstractRDFType),
-                new DummyMaxSPARQLFunctionSymbol(abstractRDFType),
-                new DummyAvgSPARQLFunctionSymbol(abstractRDFType),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new DummySampleSPARQLFunctionSymbol(abstractRDFType),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
                 );
+
+        ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
+
+        for(SPARQLFunctionSymbol functionSymbol : functionSymbols) {
+            tableBuilder.put(functionSymbol.getOfficialName(), functionSymbol.getArity(), functionSymbol);
+        }
+        return tableBuilder.build();
+    }
+
+    private ImmutableTable<String, Integer, SPARQLFunctionSymbol> createDistinctSPARQLAggregationFunctionSymbolTable() {
+        RDFDatatype xsdString = typeFactory.getXsdStringDatatype();
+        RDFDatatype xsdInteger = typeFactory.getXsdIntegerDatatype();
+        RDFTermType abstractRDFType = typeFactory.getAbstractRDFTermType();
+
+        ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
+                new CountSPARQLFunctionSymbolImpl(abstractRDFType, xsdInteger, true),
+                new CountSPARQLFunctionSymbolImpl(xsdInteger, true),
+                new SumSPARQLFunctionSymbolImpl(true, abstractRDFType),
+                // Distinct can be safely ignored
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
+                // Distinct can be safely ignored
+                new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
+                // Distinct can be safely ignored
+                new DummySampleSPARQLFunctionSymbol(abstractRDFType),
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
+                // TODO: update
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
+                // TODO: update
+                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
+        );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -260,8 +302,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName) {
-        throw new RuntimeException("TODO: implement");
+    public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity) {
+        return Optional.ofNullable(distinctSparqlAggregateFunctionTable.get(officialName, arity));
     }
 
     @Override
