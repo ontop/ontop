@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -185,36 +186,34 @@ public class QueryFolding {
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		Intersection<ClassExpression> rootType = Intersection.top();
+		boolean nonExistentialRoot = roots.stream().anyMatch(r -> !r.isExistentialVariable());
 
-		Set<DataAtom<RDFAtomPredicate>> rootAtoms = new HashSet<>();
-		for (QueryConnectedComponent.Loop root : roots) {
-			rootAtoms.addAll(root.getAtoms());
-			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
-				rootType = Intersection.bottom();
-				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
-			}
-		}
-		
-		// EXTEND ROOT ATOMS BY ALL-ROOT EDGES
-		for (QueryConnectedComponent.Edge edge : edges) {
-			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
-				rootAtoms.addAll(edge.getBAtoms());
-				rootType = Intersection.bottom();
-				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
-			}
-		}
-		
+		ImmutableList<QueryConnectedComponent.Edge> edgesInRoots = edges.stream()
+				.filter(edge -> roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1()))
+				.collect(ImmutableCollectors.toList());
+
+		ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms = Streams.concat(
+					roots.stream().flatMap(root -> root.getAtoms().stream()),
+					edgesInRoots.stream().flatMap(edge -> edge.getBAtoms().stream()))
+				.collect(ImmutableCollectors.toSet());
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (!rootType.isBottom()) {
-			rootType = intersectionOf(rootType, roots.stream()
+		Intersection<ClassExpression> rootType;
+		if (nonExistentialRoot || !edgesInRoots.isEmpty()) {
+			rootType = Intersection.bottom();
+			if (nonExistentialRoot)
+				log.debug("  NOT MERGEABLE: {} ARE NOT QUANTIFIED", roots.stream().filter(r -> r.isExistentialVariable()).collect(ImmutableCollectors.toList()));
+			if (!edgesInRoots.isEmpty())
+				log.debug("  NOT MERGEABLE: {} ARE WITHIN THE ROOTS", edgesInRoots);
+		}
+		else {
+			rootType = roots.stream()
 					.map(root -> cache.getLoopConcepts(root))
-					.collect(Intersection.toIntersection()));
+					.collect(Intersection.toIntersection());
 			if (rootType.isBottom())
 				log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
 		}
 		
-		return new TreeWitness(twg, getTerms(), ImmutableSet.copyOf(rootAtoms), rootType);
+		return new TreeWitness(twg, getTerms(), rootAtoms, rootType);
 	}
 }
