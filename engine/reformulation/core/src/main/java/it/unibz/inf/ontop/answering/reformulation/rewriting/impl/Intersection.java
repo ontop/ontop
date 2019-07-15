@@ -1,7 +1,8 @@
 package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,52 +20,18 @@ import java.util.Set;
 public class Intersection<T> {
 
 	/**
-	 * downward saturated set 
+	 * downward-saturated set
 	 * 		(contains all sub-class or sub-properties) 
 	 * 
 	 * null represents the maximal element -- top
 	 * the empty set is the minimal element -- bottom
 	 */
-	private Set<T> elements; // initially is top
+	private final ImmutableSet<T> elements;
 
-	/**
-	 * default constructor -- the intersection equals to top
-	 * 
-	 */
-	public Intersection() {
-		elements = null;
+	private Intersection(ImmutableSet<T> elements) {
+		this.elements = elements;
 	}
-	
-	/**
-	 * construct from another intersection by copying the set
-	 * 
-	 * @param arg an intersection
-	 */
-	
-	public Intersection(Intersection<T> arg) {
-		elements = (arg.elements == null) ? null : new HashSet<>(arg.elements);
-	}
-	
-	/**
-	 * checks if the intersection is in fact the empty class or property
-	 * 
-	 * @return true if it is equivalent to bottom
-	 */
-	
-	public boolean isBottom() {
-		return (elements != null) && elements.isEmpty();
-	}
-	
-	/**
-	 * checks if the intersection is equivalent to top (i.e., contains all elements)
-	 * 
-	 * @return true if it is equivalent to top
-	 */
-	
-	public boolean isTop() {
-		return (elements == null);
-	}
-	
+
 	/**
 	 * checks if the intersection is entailed (subsumes) e
 	 *  
@@ -87,12 +54,20 @@ public class Intersection<T> {
 	 * @param e a non-empty downward saturated set for class / property
 	 */
 	
-	public void intersectWith(Collection<T> e) {
+	public Intersection<T> intersectionWith(Collection<T> e) {
 
-		if (elements == null) // we have top, the intersection is sub
-			elements = new HashSet<>(e); // copy the set
+		Collection<T> result;
+		if (elements != null) {
+			Set<T> set = new HashSet<>(elements);
+			set.retainAll(e);
+			result = set;
+		}
 		else
-			elements.retainAll(e);
+			result = e; // we have top, the intersection is sub
+
+		return result.isEmpty()
+				? BOTTOM
+				: new Intersection<>(ImmutableSet.copyOf(result)); // copy the set
 	}
 	
 	/**
@@ -101,34 +76,37 @@ public class Intersection<T> {
 	 * @param arg another intersection 
 	 */
 	
-	public void intersectWith(Intersection<T> arg) {
+	public Intersection<T> intersectionWith(Intersection<T> arg) {
 
-		if (arg.elements != null) {  // if the argument is top then leave all as is
-			if (arg.elements.isEmpty()) // if arg is empty, the result is empty
-				elements = Collections.emptySet();
-			else
-				intersectWith(arg.elements);
+		if (arg.elements != null) {
+			return arg.elements.isEmpty()
+				? arg   // arg is bottom
+				: intersectionWith(arg.elements);
 		}
+		return this; // if the argument is top then leave all as is
 	}
 
-	/**
-	 * resets the intersection to the trivial case (top)
-	 */
-	public void setToTop() {
-		elements = null;
-	}
 
-	/**
-	 * empties the intersection 
-	 */
-	
-	public void setToBottom() {
-		elements = Collections.emptySet();
-	}
-		
+	private static final Intersection TOP = new Intersection<>(null);
+	private static final Intersection BOTTOM = new Intersection<>(ImmutableSet.of());
+
+	public static <T> Intersection<T> top() { return TOP; }
+	public static <T> Intersection<T> bottom() { return BOTTOM; }
+
+	public boolean isBottom() { return elements != null && elements.isEmpty(); }
+
 	@Override
 	public String toString() {
 		return ((elements == null) ? "TOP" : elements.toString());
 	}
-	
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Intersection) {
+			Intersection other = (Intersection)o;
+			return this.elements == null && other.elements == null ||
+					this.elements != null && this.elements.equals(other.elements);
+		}
+		return false;
+	}
 }

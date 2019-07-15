@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.rdf4j.query.algebra.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,7 +196,7 @@ public class TreeWitnessGenerator {
 	}
 	
 	public boolean endPointEntailsAnyOf(Intersection<ClassExpression> subc) {
-		if (subc.isTop())
+		if (subc == Intersection.<ClassExpression>top())
 			return true;
 		
 		ensureExistsRinv();

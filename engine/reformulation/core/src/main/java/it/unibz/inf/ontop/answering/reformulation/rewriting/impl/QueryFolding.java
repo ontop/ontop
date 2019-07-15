@@ -62,9 +62,9 @@ public class QueryFolding {
 	
 	public QueryFolding(QueryConnectedComponentCache cache) {
 		this.cache = cache;
-		properties = cache.getTopProperty(); 
+		properties = Intersection.top();
 		roots = new HashSet<>();
-		internalRootConcepts = cache.getTopClass(); 
+		internalRootConcepts = Intersection.top();
 		internalRoots = new HashSet<>();
 		internalDomain = new HashSet<>();
 		interior = Collections.emptyList(); // in-place QueryFolding for one-step TreeWitnesses, 
@@ -75,9 +75,9 @@ public class QueryFolding {
 	public QueryFolding(QueryFolding qf) {
 		this.cache = qf.cache;
 
-		properties = new Intersection<>(qf.properties);
+		properties = qf.properties;
 		roots = new HashSet<>(qf.roots);
-		internalRootConcepts = new Intersection<>(qf.internalRootConcepts);
+		internalRootConcepts = qf.internalRootConcepts;
 		internalRoots = new HashSet<>(qf.internalRoots);
 		internalDomain = new HashSet<>(qf.internalDomain);
 		interior = new LinkedList<>(qf.interior);
@@ -91,7 +91,7 @@ public class QueryFolding {
 		c.internalRoots.addAll(tw.getRoots());
 		c.internalDomain.addAll(tw.getDomain());
 		c.interior.add(tw);
-		c.internalRootConcepts.intersectWith(tw.getRootConcepts());
+		c.internalRootConcepts = c.internalRootConcepts.intersectionWith(tw.getRootConcepts());
 		if (c.internalRootConcepts.isBottom())
 			c.status = false;
 		return c;
@@ -100,10 +100,10 @@ public class QueryFolding {
 	public boolean extend(QueryConnectedComponent.Loop root, QueryConnectedComponent.Edge edge, QueryConnectedComponent.Loop internalRoot) {
 		assert(status);
 
-		properties.intersectWith(cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
+		properties = properties.intersectionWith(cache.getEdgeProperties(edge, root.getTerm(), internalRoot.getTerm()));
 		
 		if (!properties.isBottom()) {
-			internalRootConcepts.intersectWith(cache.getLoopConcepts(internalRoot));
+			internalRootConcepts = internalRootConcepts.intersectionWith(cache.getLoopConcepts(internalRoot));
 			if (!internalRootConcepts.isBottom()) {
 				roots.add(root);
 				return true;
@@ -115,18 +115,18 @@ public class QueryFolding {
 	}
 	
 	public void newOneStepFolding(VariableOrGroundTerm t) {
-		properties.setToTop();
+		properties = Intersection.top();
 		roots.clear();
-		internalRootConcepts.setToTop(); 
+		internalRootConcepts = Intersection.top();
 		internalDomain = Collections.singleton(t);
 		terms = null;
 		status = true;		
 	}
 
 	public void newQueryFolding(TreeWitness tw) {
-		properties.setToTop(); 
+		properties = Intersection.top();
 		roots.clear(); 
-		internalRootConcepts = new Intersection<>(tw.getRootConcepts());
+		internalRootConcepts = tw.getRootConcepts();
 		internalRoots = new HashSet<>(tw.getRoots());
 		internalDomain = new HashSet<>(tw.getDomain());
 		interior = new LinkedList<>();
@@ -183,13 +183,13 @@ public class QueryFolding {
 		log.debug("  PROPERTIES {}", properties);
 		log.debug("  ENDTYPE {}", internalRootConcepts);
 
-		Intersection<ClassExpression> rootType = cache.getTopClass();
+		Intersection<ClassExpression> rootType = Intersection.top();
 
 		Set<DataAtom<RDFAtomPredicate>> rootAtoms = new HashSet<>();
 		for (QueryConnectedComponent.Loop root : roots) {
 			rootAtoms.addAll(root.getAtoms());
 			if (!root.isExistentialVariable()) { // if the variable is not quantified -- not mergeable
-				rootType.setToBottom();
+				rootType = Intersection.bottom();
 				log.debug("  NOT MERGEABLE: {} IS NOT QUANTIFIED", root);				
 			}
 		}
@@ -198,17 +198,17 @@ public class QueryFolding {
 		for (QueryConnectedComponent.Edge edge : edges) {
 			if (roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1())) {
 				rootAtoms.addAll(edge.getBAtoms());
-				rootType.setToBottom();
+				rootType = Intersection.bottom();
 				log.debug("  NOT MERGEABLE: {} IS WITHIN THE ROOTS", edge);				
 			}
 		}
 		
 		log.debug("  ROOTTYPE {}", rootAtoms);
 
-		if (!rootType.isBottom()) // not empty 
+		if (!rootType.isBottom())
 			for (QueryConnectedComponent.Loop root : roots) {
-				rootType.intersectWith(cache.getLoopConcepts(root));
-				if (rootType.isBottom()) { // empty intersection -- not mergeable
+				rootType = rootType.intersectionWith(cache.getLoopConcepts(root));
+				if (rootType.isBottom()) {
 					log.debug("  NOT MERGEABLE: BOTTOM ROOT CONCEPT");
 					break;
 				}

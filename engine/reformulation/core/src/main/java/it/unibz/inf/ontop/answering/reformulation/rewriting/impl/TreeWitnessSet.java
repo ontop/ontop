@@ -364,28 +364,20 @@ public class TreeWitnessSet {
 			this.reasoner = reasoner;
 		}
 		
-		public Intersection<ClassExpression> getTopClass() {
-			return new Intersection<>();
-		}
-
-		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<>();
-		}
-		
 		public Intersection<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<>();
+			Intersection<ClassExpression> subc = Intersection.top();
 			for (DataAtom<RDFAtomPredicate> a : atoms) {
 				Optional<IRI> optionalClassIRI = a.getPredicate().getClassIRI(a.getArguments());
 				if (!optionalClassIRI.isPresent()) {
-					subc.setToBottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
+					subc = Intersection.bottom();   // binary predicates R(x,x) cannot be matched to the anonymous part
 					break;
 				}
 				IRI classIRI = optionalClassIRI.get();
 
 				 if (reasoner.classes().contains(classIRI))
-					 subc.intersectWith(reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(classIRI)));
+					 subc = subc.intersectionWith(reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(classIRI)));
 				 else
-					 subc.setToBottom();
+					 subc = Intersection.bottom();
 				 if (subc.isBottom())
 					 break;
 			}
@@ -408,7 +400,7 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<>();
+				properties = Intersection.top();
 				for (DataAtom<RDFAtomPredicate> a : edge.getBAtoms()) {
 					log.debug("EDGE {} HAS PROPERTY {}",  edge, a);
 					Optional<IRI> optionalPropertyIRIString = a.getPredicate().getPropertyIRI(a.getArguments());
@@ -418,10 +410,10 @@ public class TreeWitnessSet {
 						ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
 						if (!root.equals(a.getTerm(0)))
 							prop = prop.getInverse();
-						properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
+						properties = properties.intersectionWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
 					}
 					else
-						properties.setToBottom();
+						properties = Intersection.bottom();
 
 					if (properties.isBottom())
 						break;
