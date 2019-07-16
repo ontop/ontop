@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -56,12 +57,8 @@ public class TreeWitnessGenerator {
 			if (set.size() > 1 || subClasses.size() > 1) { // otherwise cannot give rise to any generator
 				for (ClassExpression concept : set) {
 					if (concept instanceof ObjectSomeValuesFrom) {
-						ImmutableSet<ClassExpression> flatSubClasses = subClasses.stream().flatMap(s -> s.stream())
-								.filter(s -> !s.equals(concept))
-								.collect(ImmutableCollectors.toSet());
-
-						flatSubClasses.forEach(subConcept -> log.debug("GENERATING CI: {} <= {}", subConcept, concept));
-						gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), flatSubClasses));
+						if (!getMaximalRepresentatives(reasoner, (ObjectSomeValuesFrom) concept).isEmpty())
+						gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), ImmutableSet.of(concept)));
 					}
 				}
 			}
@@ -70,78 +67,20 @@ public class TreeWitnessGenerator {
 		return gens.build();
 	}
 	
-	
-	public static Set<ClassExpression> getMaximalBasicConcepts(ImmutableList<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
-		Set<ClassExpression> concepts = new HashSet<>();
-		for (TreeWitnessGenerator twg : gens) 
-			concepts.addAll(twg.concepts);
+	public static Set<ClassExpression> getMaximalRepresentatives(ClassifiedTBox reasoner, ObjectSomeValuesFrom generatingConcept) {
+		Equivalences<ClassExpression> eq = reasoner.classesDAG().getVertex(generatingConcept);
+		Stream<ClassExpression> opRep = Stream.of();
+		if (eq.getRepresentative() instanceof ObjectSomeValuesFrom) {
+			ObjectSomeValuesFrom rep = (ObjectSomeValuesFrom)eq.getRepresentative();
+			if (!reasoner.objectPropertiesDAG().getVertex(generatingConcept.getProperty()).contains(rep.getProperty()))
+				opRep = Stream.of(rep);
+		}
+		else
+			opRep = Stream.of(eq.getRepresentative());
 
-		if (concepts.isEmpty())
-			return concepts;
-		
-		if (concepts.size() == 1 && concepts.iterator().next() instanceof OClass)
-			return concepts;
-		
-		log.debug("MORE THAN ONE GENERATING CONCEPT: {}", concepts);
-		// add all sub-concepts of all \exists R
-		Set<ClassExpression> extension = new HashSet<>();
-		for (ClassExpression b : concepts) 
-			if (b instanceof ObjectSomeValuesFrom)
-				extension.addAll(reasoner.classesDAG().getSubRepresentatives(b));
-		concepts.addAll(extension);
-		
-		// use all concept names to subsume their sub-concepts
-		{
-			boolean modified = true; 
-			while (modified) {
-				modified = false;
-				for (ClassExpression b : concepts) 
-					if (b instanceof OClass) {
-						Set<ClassExpression> bsubconcepts = reasoner.classesDAG().getSubRepresentatives(b);
-						Iterator<ClassExpression> i = concepts.iterator();
-						while (i.hasNext()) {
-							ClassExpression bp = i.next();
-							if ((b != bp) && bsubconcepts.contains(bp)) { 
-								i.remove();
-								modified = true;
-							}
-						}
-						if (modified)
-							break;
-					}
-			}
-		}
-		
-		// use all \exists R to subsume their sub-concepts of the form \exists R
-		{
-			boolean modified = true;
-			while (modified) {
-				modified = false;
-				for (ClassExpression b : concepts) 
-					if (b instanceof ObjectSomeValuesFrom) {
-						ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)b;
-						ObjectPropertyExpression prop = some.getProperty();
-						Set<ObjectPropertyExpression> bsubproperties = reasoner.objectPropertiesDAG().getSubRepresentatives(prop);
-						Iterator<ClassExpression> i = concepts.iterator();
-						while (i.hasNext()) {
-							ClassExpression bp = i.next();
-							if ((b != bp) && (bp instanceof ObjectSomeValuesFrom)) {
-								ObjectSomeValuesFrom somep = (ObjectSomeValuesFrom)bp;
-								ObjectPropertyExpression propp = somep.getProperty();
-								
-								if (bsubproperties.contains(propp)) {
-									i.remove();
-									modified = true;
-								}
-							}
-						}
-						if (modified)
-							break;
-					}
-			}
-		}
-		
-		return concepts;
+		ImmutableSet<Equivalences<ClassExpression>> directSubEqs = reasoner.classesDAG().getDirectSub(eq);
+		return Stream.concat(directSubEqs.stream().map(e -> e.getRepresentative()), opRep)
+				.collect(ImmutableCollectors.toSet());
 	}
 
 	public ImmutableSet<ClassExpression> getGeneratingConcepts() {
