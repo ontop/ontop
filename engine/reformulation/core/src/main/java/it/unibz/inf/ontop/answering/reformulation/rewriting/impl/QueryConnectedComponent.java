@@ -156,8 +156,7 @@ public class QueryConnectedComponent {
 	 */
 	
 	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(TreeWitnessRewriterReasoner reasoner, CQIE cqie,
-																	   AtomFactory atomFactory,
-																	   ImmutabilityTools immutabilityTools) {
+																	   AtomFactory atomFactory) {
 
 		ImmutableSet<Variable> headVariables = ImmutableSet.copyOf(cqie.getHead().getVariables());
 
@@ -172,9 +171,9 @@ public class QueryConnectedComponent {
 		for (Function atom : cqie.getBody()) {
 			// TODO: support quads
 			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, atom, atomFactory, immutabilityTools);
+				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, atom, atomFactory);
 
-				boolean isClass = ((TriplePredicate) a.getPredicate()).getClassIRI(a.getArguments()).isPresent();
+				boolean isClass = a.getPredicate().getClassIRI(a.getArguments()).isPresent();
 
 				// proper DL edge between two distinct terms
 				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
@@ -428,7 +427,7 @@ public class QueryConnectedComponent {
 	}
 
 	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, Function bodyAtom,
-															AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+															AtomFactory atomFactory) {
 		ClassifiedTBox reasoner = r.getClassifiedTBox();
 		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
 

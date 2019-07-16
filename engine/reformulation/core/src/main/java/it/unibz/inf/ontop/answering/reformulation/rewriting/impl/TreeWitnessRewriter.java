@@ -320,8 +320,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
 
 		for (CQIE cqie : program.getRules()) {
-			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
-					atomFactory, immutabilityTools);
+			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie, atomFactory);
 			Function cqieAtom = cqie.getHead();
 		
 			if (ccs.size() == 1) {
