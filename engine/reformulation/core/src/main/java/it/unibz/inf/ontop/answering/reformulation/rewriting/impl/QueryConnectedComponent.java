@@ -155,7 +155,7 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(ClassifiedTBox reasoner, CQIE cqie,
+	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(TreeWitnessRewriterReasoner reasoner, CQIE cqie,
 																	   AtomFactory atomFactory,
 																	   ImmutabilityTools immutabilityTools) {
 
@@ -427,8 +427,9 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static DataAtom<RDFAtomPredicate> getCanonicalForm(ClassifiedTBox reasoner, Function bodyAtom,
+	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, Function bodyAtom,
 															AtomFactory atomFactory, ImmutabilityTools immutabilityTools) {
+		ClassifiedTBox reasoner = r.getClassifiedTBox();
 		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
 
 		ImmutableList<VariableOrGroundTerm> arguments = bodyAtom.getTerms().stream()

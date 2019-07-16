@@ -69,7 +69,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
-	private ClassifiedTBox reasoner;
+	private TreeWitnessRewriterReasoner reasoner;
 	private Collection<TreeWitnessGenerator> generators;
 	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
 
@@ -102,15 +102,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
     }
 
 	@Override
-	public void setTBox(ClassifiedTBox reasoner) {
+	public void setTBox(ClassifiedTBox classifiedTBox) {
 		double startime = System.currentTimeMillis();
 
-		this.reasoner = reasoner;
-		super.setTBox(reasoner);
+		this.reasoner = new TreeWitnessRewriterReasoner(classifiedTBox);
+		super.setTBox(classifiedTBox);
 
         containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
 
-		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner, new TreeWitnessSet.ClassifiedTBoxWrapper(reasoner));
+		generators = reasoner.getTreeWitnessGenerators();
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;

@@ -50,9 +50,9 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 
-	private TreeWitnessSet(QueryConnectedComponent cc, ClassifiedTBox reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
 		this.cc = cc;
-		this.cache = new CachedClassifiedTBoxWrapper(new ClassifiedTBoxWrapper(reasoner));
+		this.cache = new CachedClassifiedTBoxWrapper(reasoner);
 		this.allTWgenerators = allTWgenerators;
 	}
 	
@@ -64,7 +64,7 @@ public class TreeWitnessSet {
 		return hasConflicts;
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, ClassifiedTBox reasoner,
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner,
 												  Collection<TreeWitnessGenerator> generators) {
 		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
 		
@@ -264,71 +264,25 @@ public class TreeWitnessSet {
 		private final Map<TermOrderedPair, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<VariableOrGroundTerm, DownwardSaturatedImmutableSet<ClassExpression>> conceptsCache = new HashMap<>();
 
-		private final ClassifiedTBoxWrapper classifiedTBoxWrapper;
+		private final TreeWitnessRewriterReasoner reasoner;
 
-		private CachedClassifiedTBoxWrapper(ClassifiedTBoxWrapper classifiedTBoxWrapper) {
-			this.classifiedTBoxWrapper = classifiedTBoxWrapper;
+		private CachedClassifiedTBoxWrapper(TreeWitnessRewriterReasoner reasoner) {
+			this.reasoner = reasoner;
 		}
 
 		public DownwardSaturatedImmutableSet<ClassExpression> getLoopConcepts(Loop loop) {
 			return conceptsCache.computeIfAbsent(loop.getTerm(),
-					t -> classifiedTBoxWrapper.getSubConcepts(loop.getAtoms()));
+					t -> reasoner.getSubConcepts(loop.getAtoms()));
 		}
 
 		public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
 			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
-					idx -> classifiedTBoxWrapper.getSubProperties(edge.getBAtoms(), idx));
+					idx -> reasoner.getSubProperties(edge.getBAtoms(), idx));
 		}
 	}
 
-	static class ClassifiedTBoxWrapper {
-		private final ClassifiedTBox reasoner;
 
-		ClassifiedTBoxWrapper(ClassifiedTBox reasoner) {
-			this.reasoner = reasoner;
-		}
-
-		public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, TermOrderedPair idx) {
-			return atoms.stream().map(a -> getSubProperties(a, idx)).collect(DownwardSaturatedImmutableSet.toIntersection());
-		}
-
-		private DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TermOrderedPair idx) {
-			return atom.getPredicate().getPropertyIRI(atom.getArguments())
-					.filter(i -> reasoner.objectProperties().contains(i))
-					.map(i -> reasoner.objectProperties().get(i))
-					.map(p -> isInverse(atom, idx) ? p.getInverse() : p)
-					.map(p -> DownwardSaturatedImmutableSet.create(reasoner.objectPropertiesDAG().getSubRepresentatives(p)))
-					.orElse(DownwardSaturatedImmutableSet.bottom());
-		}
-
-		private boolean isInverse(DataAtom<RDFAtomPredicate> a, TermOrderedPair idx) {
-			VariableOrGroundTerm subject = a.getPredicate().getSubject(a.getArguments());
-			VariableOrGroundTerm object = a.getPredicate().getObject(a.getArguments());
-			if (subject.equals(idx.t0) && object.equals(idx.t1))
-				return false;
-			if (subject.equals(idx.t1) && object.equals(idx.t0))
-				return true;
-			throw new MinorOntopInternalBugException("non-matching arguments: " + a + " " + idx);
-		}
-
-
-		public DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(Collection<DataAtom<RDFAtomPredicate>> atoms) {
-			return atoms.stream().map(this::getSubConcepts).collect(DownwardSaturatedImmutableSet.toIntersection());
-		}
-
-		private DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(DataAtom<RDFAtomPredicate> atom) {
-			return atom.getPredicate().getClassIRI(atom.getArguments())
-					.filter(i -> reasoner.classes().contains(i))
-					.map(i -> getSubConcepts(reasoner.classes().get(i)))
-					.orElse(DownwardSaturatedImmutableSet.bottom());
-		}
-
-		public DownwardSaturatedImmutableSet<ClassExpression> getSubConcepts(ClassExpression c) {
-			return DownwardSaturatedImmutableSet.create(reasoner.classesDAG().getSubRepresentatives(c));
-		}
-	}
-	
-	private static class TermOrderedPair {
+	static class TermOrderedPair {
 		private final VariableOrGroundTerm t0, t1;
 		private final int hashCode;
 
@@ -337,6 +291,10 @@ public class TreeWitnessSet {
 			this.t1 = t1;
 			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);
 		}
+
+		public VariableOrGroundTerm getTerm0() { return t0; }
+
+		public VariableOrGroundTerm getTerm1() { return t1; }
 
 		@Override
 		public boolean equals(Object o) {
@@ -380,7 +338,7 @@ public class TreeWitnessSet {
 			for (TreeWitness tw : tws) 
 				if (tw.getDomain().containsAll(cc.getVariables())) {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
-					DownwardSaturatedImmutableSet<ClassExpression> subc = cache.classifiedTBoxWrapper.getSubConcepts(tw.getRootAtoms());
+					DownwardSaturatedImmutableSet<ClassExpression> subc = cache.reasoner.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntails(subc)) {
