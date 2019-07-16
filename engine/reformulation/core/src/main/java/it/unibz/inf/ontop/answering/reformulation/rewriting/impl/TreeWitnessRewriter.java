@@ -141,28 +141,30 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private ImmutableList<Function> getAtomsForGenerators(ImmutableList<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
+	private ImmutableList<DataAtom<RDFAtomPredicate>> getAtomsForGenerators(ImmutableList<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
 		return gens.stream()
 				.flatMap(g -> g.getMaximalGeneratorRepresentatives().stream())
-				.map(con -> {
-					log.debug("  BASIC CONCEPT: {}", con);
-					if (con instanceof OClass) {
-						return atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), ((OClass) con).getIRI());
-					}
-					else if (con instanceof ObjectSomeValuesFrom) {
-						ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
-						return (!ope.isInverse())
-								? atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), ope.getIRI(), getFreshVariable())
-								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), immutabilityTools.convertToMutableTerm(r0));
-					}
-					else {
-						DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
-						return atomFactory.getMutableTripleBodyAtom(immutabilityTools.convertToMutableTerm(r0), dpe.getIRI(), getFreshVariable());
-					}
-				})
+				.distinct()
+				.map(ce -> getAtomForGenerator(ce, r0))
 				.collect(ImmutableCollectors.toList());
 	}
-	
+
+	private DataAtom<RDFAtomPredicate> getAtomForGenerator(ClassExpression con, VariableOrGroundTerm r0) {
+		log.debug("  BASIC CONCEPT: {}", con);
+		if (con instanceof OClass) {
+			return (DataAtom)atomFactory.getIntensionalTripleAtom(r0, ((OClass) con).getIRI());
+		}
+		else if (con instanceof ObjectSomeValuesFrom) {
+			ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
+			return !ope.isInverse()
+					? (DataAtom)atomFactory.getIntensionalTripleAtom(r0, ope.getIRI(), getFreshVariable())
+					: (DataAtom)atomFactory.getIntensionalTripleAtom(getFreshVariable(), ope.getIRI(), r0);
+		}
+		else {
+			DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
+			return (DataAtom)atomFactory.getIntensionalTripleAtom(r0, dpe.getIRI(), getFreshVariable());
+		}
+	}
 	
 	
 	/*
@@ -177,7 +179,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
-				for (Function a : getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable())) {
+				for (Function a : getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable()).stream()
+						.map(a -> immutabilityTools.convertToMutableFunction(a))
+						.collect(ImmutableCollectors.toList())) {
 					outputRules.add(datalogFactory.getCQIE(headAtom, a));
 				}
 		}
@@ -205,7 +209,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						: atomFactory.getMutableTripleAtom(immutabilityTools.convertToMutableTerm(r0), immutabilityTools.convertToMutableTerm(a.getTerm(1)), immutabilityTools.convertToMutableTerm(r0)));
 			}
 			
-			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
+			ImmutableList<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0).stream()
+					.map(a -> immutabilityTools.convertToMutableFunction(a))
+					.collect(ImmutableCollectors.toList());
 			boolean subsumes = false;
 //			for (Function a : genAtoms) 				
 //				if (twf.subsumes(a)) {
