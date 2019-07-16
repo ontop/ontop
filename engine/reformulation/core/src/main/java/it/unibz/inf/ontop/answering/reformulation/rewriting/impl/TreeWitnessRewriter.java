@@ -236,7 +236,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		final String headURI = headAtom.getFunctionSymbol().getName();
 		if (!cc.isDegenerate()) {
-			if (tws.hasConflicts()) { 
+			if (!TreeWitness.isCompatible(tws.getTWs())) {
 				// there are conflicting tree witnesses
 				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
 				CompatibleTreeWitnessSetIterator iterator = tws.getIterator();

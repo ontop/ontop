@@ -28,13 +28,13 @@ import java.util.*;
 
 public class CompatibleTreeWitnessSetIterator implements Iterator<Collection<TreeWitness>> {
 
-    private final ImmutableCollection<TreeWitness> tws;
+    private final ImmutableList<TreeWitness> tws;
 
     private final boolean isInNext[];  // subset number - binary representation
 
     private ImmutableList<TreeWitness> nextSet = null; // the first subset is empty - still need to find a compatible non-empty subset
 
-    CompatibleTreeWitnessSetIterator(ImmutableCollection<TreeWitness> tws) {
+    CompatibleTreeWitnessSetIterator(ImmutableList<TreeWitness> tws) {
         this.tws = tws;
         this.isInNext = new boolean[tws.size()];
     }
@@ -94,18 +94,14 @@ public class CompatibleTreeWitnessSetIterator implements Iterator<Collection<Tre
                 isInNext[i] = !isInNext[i];
             }
         }
-        // extract the subset and check whether it's compatible
-        ArrayList<TreeWitness> set = new ArrayList<>();
-        int i = 0;
-        for (TreeWitness tw : tws)
-            if (isInNext[i++]) {
-                for (TreeWitness tw0 : set)
-                    if (!TreeWitness.isCompatible(tw0, tw))
-                        return null;
+        // extract the respective subset of tree witnesses
+        ImmutableList.Builder<TreeWitness> builder = ImmutableList.builder();
+        for (int i = 0; i < isInNext.length; i++)
+            if (isInNext[i])
+                builder.add(tws.get(i));
 
-                set.add(tw);
-            }
-        return ImmutableList.copyOf(set);
+        ImmutableList<TreeWitness> set = builder.build();
+        return TreeWitness.isCompatible(set) ? set : null;
     }
 
     /**

@@ -41,8 +41,7 @@ public class TreeWitnessSet {
 	private final QueryConnectedComponent cc;
 	private final Collection<TreeWitnessGenerator> allTWgenerators;
 	private final CachedClassifiedTBoxWrapper cache;
-	private boolean hasConflicts = false;
-	
+
 	// working lists (may all be nulls)
 	private List<TreeWitness> mergeable;
 	private Queue<TreeWitness> delta;
@@ -56,12 +55,8 @@ public class TreeWitnessSet {
 		this.allTWgenerators = allTWgenerators;
 	}
 	
-	public Collection<TreeWitness> getTWs() {
-		return tws;
-	}
-	
-	public boolean hasConflicts() {
-		return hasConflicts;
+	public ImmutableList<TreeWitness> getTWs() {
+		return ImmutableList.copyOf(tws);
 	}
 	
 	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner,
@@ -98,7 +93,7 @@ public class TreeWitnessSet {
 				ImmutableList<TreeWitnessGenerator> twg = getTreeWitnessGenerators(qf);
 				if (!twg.isEmpty()) {
 					// no need to copy the query folding: it creates all temporary objects anyway (including NewLiterals)
-					addTWS(qf.getTreeWitness(twg, cc.getEdges()));
+					tws.add(qf.getTreeWitness(twg, cc.getEdges()));
 				}
 			}
 		}		
@@ -125,7 +120,7 @@ public class TreeWitnessSet {
 				
 				while (!delta.isEmpty()) {
 					TreeWitness tw = delta.poll();
-					addTWS(tw);
+					tws.add(tw);
 					if (tw.isMergeable())  {
 						working.add(tw);			
 						mergeable.add(tw);
@@ -137,18 +132,7 @@ public class TreeWitnessSet {
 		log.debug("TREE WITNESSES FOUND: {}", tws.size());
 	}
 	
-	private void addTWS(TreeWitness tw1) {
-		for (TreeWitness tw0 : tws)
-			if (!tw0.getDomain().containsAll(tw1.getDomain()) && !tw1.getDomain().containsAll(tw0.getDomain())) {
-				if (!TreeWitness.isCompatible(tw0, tw1)) {
-					hasConflicts = true;
-					log.debug("CONFLICT: {}  AND {}", tw0, tw1);
-				}
-			}
-		tws.add(tw1);
-	}
-	
-	private void saturateTreeWitnesses(QueryFolding qf) { 
+	private void saturateTreeWitnesses(QueryFolding qf) {
 		boolean saturated = true; 
 		
 		for (Edge edge : cc.getEdges()) { 
