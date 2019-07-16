@@ -378,7 +378,7 @@ public class TreeWitnessSet {
 	static class ClassifiedTBoxWrapper {
 		private final ClassifiedTBox reasoner;
 
-		private ClassifiedTBoxWrapper(ClassifiedTBox reasoner) {
+		ClassifiedTBoxWrapper(ClassifiedTBox reasoner) {
 			this.reasoner = reasoner;
 		}
 
@@ -509,9 +509,7 @@ public class TreeWitnessSet {
 
 	private ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> getGeneratorSubConceptRepresentatives(Collection<TreeWitnessGenerator> generators) {
 		return generators.stream()
-				.flatMap(twg -> twg.getGeneratingConcepts().stream())
-				.distinct()
-				.map(c -> cache.classifiedTBoxWrapper.getSubConcepts(c))
+				.map(twg -> twg.getGeneratorConcepts())
 				.collect(ImmutableCollectors.toList());
 	}
 }

@@ -111,7 +111,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
 
-		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
+		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner, new TreeWitnessSet.ClassifiedTBoxWrapper(reasoner));
 		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
@@ -143,8 +143,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 	private ImmutableList<Function> getAtomsForGenerators(ImmutableList<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
 		return gens.stream()
-				.flatMap(g -> g.getGeneratingConcepts().stream())
-				.flatMap(c -> TreeWitnessGenerator.getMaximalRepresentatives(reasoner, (ObjectSomeValuesFrom)c).stream())
+				.flatMap(g -> g.getMaximalGeneratorRepresentatives().stream())
 				.map(con -> {
 					log.debug("  BASIC CONCEPT: {}", con);
 					if (con instanceof OClass) {

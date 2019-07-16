@@ -29,26 +29,25 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
 //	private final OClass filler;
 
-	private final ImmutableSet<ClassExpression> concepts; // set of generating-concepts
+	private final DownwardSaturatedImmutableSet<ClassExpression> concepts;
+	private final ImmutableSet<ClassExpression> maximalRepresentatives;
 
-	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);
 
-	public TreeWitnessGenerator(ObjectPropertyExpression property/*, OClass filler*/, ImmutableSet<ClassExpression> concepts) {
+	public TreeWitnessGenerator(ObjectPropertyExpression property/*, OClass filler*/, DownwardSaturatedImmutableSet<ClassExpression> concepts, ImmutableSet<ClassExpression> maximalRepresentatives) {
 		this.property = property;
 //		this.filler = filler;
 		this.concepts = concepts;
+		this.maximalRepresentatives = maximalRepresentatives;
 	}
 
 	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-	public static ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
+	public static ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner, TreeWitnessSet.ClassifiedTBoxWrapper reasonerWrapper) {
 		
 		ImmutableList.Builder<TreeWitnessGenerator> gens = ImmutableList.builder();
 
@@ -57,8 +56,9 @@ public class TreeWitnessGenerator {
 			if (set.size() > 1 || subClasses.size() > 1) { // otherwise cannot give rise to any generator
 				for (ClassExpression concept : set) {
 					if (concept instanceof ObjectSomeValuesFrom) {
-						if (!getMaximalRepresentatives(reasoner, (ObjectSomeValuesFrom) concept).isEmpty())
-						gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), ImmutableSet.of(concept)));
+						ImmutableSet<ClassExpression> minimalRepresentatives = getMaximalRepresentatives(reasoner, (ObjectSomeValuesFrom) concept);
+						if (!minimalRepresentatives.isEmpty())
+							gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), reasonerWrapper.getSubConcepts(concept), minimalRepresentatives));
 					}
 				}
 			}
@@ -67,7 +67,7 @@ public class TreeWitnessGenerator {
 		return gens.build();
 	}
 	
-	public static Set<ClassExpression> getMaximalRepresentatives(ClassifiedTBox reasoner, ObjectSomeValuesFrom generatingConcept) {
+	private static ImmutableSet<ClassExpression> getMaximalRepresentatives(ClassifiedTBox reasoner, ObjectSomeValuesFrom generatingConcept) {
 		Equivalences<ClassExpression> eq = reasoner.classesDAG().getVertex(generatingConcept);
 		Stream<ClassExpression> opRep = Stream.of();
 		if (eq.getRepresentative() instanceof ObjectSomeValuesFrom) {
@@ -83,8 +83,12 @@ public class TreeWitnessGenerator {
 				.collect(ImmutableCollectors.toSet());
 	}
 
-	public ImmutableSet<ClassExpression> getGeneratingConcepts() {
+	public DownwardSaturatedImmutableSet<ClassExpression> getGeneratorConcepts() {
 		return concepts;
+	}
+
+	public ImmutableSet<ClassExpression> getMaximalGeneratorRepresentatives() {
+		return maximalRepresentatives;
 	}
 
 	public ObjectPropertyExpression getProperty() {
