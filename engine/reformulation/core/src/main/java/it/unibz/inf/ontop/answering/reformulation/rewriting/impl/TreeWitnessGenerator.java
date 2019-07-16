@@ -51,29 +51,37 @@ public class TreeWitnessGenerator {
 		
 		ImmutableList.Builder<TreeWitnessGenerator> gens = ImmutableList.builder();
 
-		for (Equivalences<ClassExpression> set : reasoner.classesDAG()) {
-			Set<Equivalences<ClassExpression>> subClasses = reasoner.classesDAG().getSub(set);
-			if (set.size() > 1 || subClasses.size() > 1) { // otherwise cannot give rise to any generator
-				for (ClassExpression concept : set) {
-					if (concept instanceof ObjectSomeValuesFrom) {
-						ImmutableSet<ClassExpression> minimalRepresentatives = getMaximalRepresentatives(reasoner, (ObjectSomeValuesFrom) concept);
-						if (!minimalRepresentatives.isEmpty())
-							gens.add(new TreeWitnessGenerator(((ObjectSomeValuesFrom) concept).getProperty(), reasonerWrapper.getSubConcepts(concept), minimalRepresentatives));
-					}
+		for (Equivalences<ClassExpression> eq : reasoner.classesDAG()) {
+				ImmutableSet<ClassExpression> maximalRepresentatives = getMaximalRepresentatives(reasoner, eq);
+				if (!maximalRepresentatives.isEmpty()) {
+					DownwardSaturatedImmutableSet<ClassExpression> generators = reasonerWrapper.getSubConcepts(eq.getRepresentative());
+					eq.stream()
+							.filter(ce -> ce instanceof ObjectSomeValuesFrom)
+							.map(ce -> reasoner.objectPropertiesDAG().getVertex(((ObjectSomeValuesFrom) ce).getProperty()))
+							.distinct()
+							.map(v -> v.getRepresentative())
+							.map(r -> new TreeWitnessGenerator(r, generators, maximalRepresentatives))
+							.forEach(twg -> gens.add(twg));
 				}
-			}
 		}
 
 		return gens.build();
 	}
 	
-	private static ImmutableSet<ClassExpression> getMaximalRepresentatives(ClassifiedTBox reasoner, ObjectSomeValuesFrom generatingConcept) {
-		Equivalences<ClassExpression> eq = reasoner.classesDAG().getVertex(generatingConcept);
-		Stream<ClassExpression> opRep = Stream.of();
+	private static ImmutableSet<ClassExpression> getMaximalRepresentatives(ClassifiedTBox reasoner, Equivalences<ClassExpression> eq) {
+		Stream<ClassExpression> opRep;
 		if (eq.getRepresentative() instanceof ObjectSomeValuesFrom) {
-			ObjectSomeValuesFrom rep = (ObjectSomeValuesFrom)eq.getRepresentative();
-			if (!reasoner.objectPropertiesDAG().getVertex(generatingConcept.getProperty()).contains(rep.getProperty()))
-				opRep = Stream.of(rep);
+			// in particular, there are no class names in eq,
+			// but the property is a representative its equivalence class
+			ObjectPropertyExpression property = ((ObjectSomeValuesFrom)eq.getRepresentative()).getProperty();
+			// collect domains of all distinct representatives different from the property
+			opRep = eq.stream()
+					.filter(ce -> ce instanceof ObjectSomeValuesFrom)
+					.map(ce -> reasoner.objectPropertiesDAG().getVertex(((ObjectSomeValuesFrom)ce).getProperty()))
+					.distinct()
+					.map(v -> v.getRepresentative())
+					.filter(r -> r != property)
+					.map(r -> r.getDomain());
 		}
 		else
 			opRep = Stream.of(eq.getRepresentative());
