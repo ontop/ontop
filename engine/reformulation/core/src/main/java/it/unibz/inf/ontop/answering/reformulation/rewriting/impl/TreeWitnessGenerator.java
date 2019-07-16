@@ -95,8 +95,8 @@ public class TreeWitnessGenerator {
 		return property;
 	}
 
-	public boolean endPointEntailsAny(ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> list) {
-		return list.stream().anyMatch(s -> this.endPointEntails(s));
+	public boolean endPointEntailsAny(Collection<TreeWitnessGenerator> twgs) {
+		return twgs.stream().anyMatch(twg -> this.endPointEntails(twg.getGeneratorConcepts()));
 	}
 
 	public boolean endPointEntails(DownwardSaturatedImmutableSet<ClassExpression> s) {

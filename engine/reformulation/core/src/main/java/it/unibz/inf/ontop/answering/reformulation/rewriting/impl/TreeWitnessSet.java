@@ -33,7 +33,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedC
 
 import java.util.*;
 
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,8 +235,7 @@ public class TreeWitnessSet {
 
 			boolean failed = false;
 			for (TreeWitness tw : qf.getInteriorTreeWitnesses()) {
-				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
-				if (!g.endPointEntailsAny(genreps)) {
+				if (!g.endPointEntailsAny(tw.getGenerators())) {
 					log.debug("        ENDTYPE TOO SPECIFIC: {} FOR {}", tw, g);
 					failed = true;
 					break;
@@ -257,102 +255,10 @@ public class TreeWitnessSet {
 	}
 	
 	public CompatibleTreeWitnessSetIterator getIterator() {
-		return new CompatibleTreeWitnessSetIterator(tws.size());
+		return new CompatibleTreeWitnessSetIterator(ImmutableList.copyOf(tws));
 	}
 	
-	public class CompatibleTreeWitnessSetIterator implements Iterator<Collection<TreeWitness>> {
-		private boolean isInNext[];
-		private boolean atNextPosition = true;
-		private boolean finished = false;
-		private Collection<TreeWitness> nextSet = new LinkedList<>();
 
-		private CompatibleTreeWitnessSetIterator(int len) {
-			isInNext = new boolean[len];
-		}
-
-		/**
-	     * Returns the next subset of tree witnesses
-	     *
-	     * @return the next subset of tree witnesses
-	     * @exception NoSuchElementException has no more subsets.
-	     */
-		@Override
-		public Collection<TreeWitness> next() {
-			if (atNextPosition) {
-				atNextPosition = false;
-				return nextSet;
-			}
-			
-			while (!isLast()) 
-				if (moveToNext()) {
-					atNextPosition = false;
-					return nextSet;
-				}
-			finished = true;
-			
-			throw new NoSuchElementException("The next method was called when no more objects remained.");
-	    }
-
-	  	/**
-	     * @return <tt>true</tt> if the PowerSet has more subsets.
-	     */
-		@Override
-	  	public boolean hasNext() {
-			if (atNextPosition)
-				return !finished;
-			
-			while (!isLast()) 
-				if (moveToNext()) {
-					atNextPosition = true;
-					return true;
-				}
-			
-			return false;
-	  	}
-		
-		private boolean isLast() {
-	  		for (int i = 0; i < isInNext.length; i++)
-	  			if (!isInNext[i])
-	  				return false;
-	  		return true;
-			
-		}
-		
-		// return true if the next is compatible
-		
-		private boolean moveToNext() {
-		    boolean carry = true;
-			for (int i = 0; i < isInNext.length; i++)
-				if(!carry)
-					break;
-				else {
-			        carry = isInNext[i];
-			        isInNext[i] = !isInNext[i];
-				}			
-
-			nextSet.clear();
-			int i = 0;
-	      	for (TreeWitness tw : tws)
-	      		if (isInNext[i++]) {
-	      			for (TreeWitness tw0 : nextSet)
-	      				if (!TreeWitness.isCompatible(tw0, tw)) 
-	      					return false;
-	      					
-	      			nextSet.add(tw);
-	      		}
-	      	return true;
-		}
-		
-		/**
-	     * @exception UnsupportedOperationException because the <tt>remove</tt>
-	     *		  operation is not supported by this Iterator.
-	     */
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException("The PowerSet class does not support the remove method.");
-		}
-	}
-	
 	
 	static class CachedClassifiedTBoxWrapper {
 		private final Map<TermOrderedPair, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
@@ -475,12 +381,11 @@ public class TreeWitnessSet {
 				if (tw.getDomain().containsAll(cc.getVariables())) {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
 					DownwardSaturatedImmutableSet<ClassExpression> subc = cache.classifiedTBoxWrapper.getSubConcepts(tw.getRootAtoms());
-					ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(tw.getGenerators());
 					if (!subc.isBottom())
 						for (TreeWitnessGenerator twg : allTWgenerators)
 							if (twg.endPointEntails(subc)) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
-								if (twg.endPointEntailsAny(genreps)) {
+								if (twg.endPointEntailsAny(tw.getGenerators())) {
 									log.debug("        ENDTYPE IS FINE: {} FOR {}",  tw, twg);
 									generators.add(twg);					
 								}
@@ -496,9 +401,8 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> genreps = getGeneratorSubConceptRepresentatives(generators);
-				for (TreeWitnessGenerator g : allTWgenerators) 
-					if (g.endPointEntailsAny(genreps)) {
+				for (TreeWitnessGenerator g : allTWgenerators)
+					if (g.endPointEntailsAny(generators)) {
 						if (generators.add(g))
 							saturated = false;
 					}		 		
@@ -507,9 +411,4 @@ public class TreeWitnessSet {
 		return generators;
 	}
 
-	private ImmutableList<DownwardSaturatedImmutableSet<ClassExpression>> getGeneratorSubConceptRepresentatives(Collection<TreeWitnessGenerator> generators) {
-		return generators.stream()
-				.map(twg -> twg.getGeneratorConcepts())
-				.collect(ImmutableCollectors.toList());
-	}
 }

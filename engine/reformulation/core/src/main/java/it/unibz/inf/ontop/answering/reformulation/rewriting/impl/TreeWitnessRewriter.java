@@ -48,7 +48,6 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
 
 import java.util.*;
 
@@ -237,7 +236,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				while (iterator.hasNext()) {
 					Collection<TreeWitness> compatibleTWs = iterator.next();
 					log.debug("COMPATIBLE: {}", compatibleTWs);
-					LinkedList<Function> mainbody = new LinkedList<Function>(); 
+					LinkedList<Function> mainbody = new LinkedList<>();
 					
 					for (Edge edge : cc.getEdges()) {
 						boolean contained = false;
