@@ -21,12 +21,8 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
@@ -38,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 public class TreeWitnessSet {
 	private final List<TreeWitness> tws = new LinkedList<>();
+
 	private final QueryConnectedComponent cc;
-	private final Collection<TreeWitnessGenerator> allTWgenerators;
 	private final CachedClassifiedTBoxWrapper cache;
 
 	// working lists (may all be nulls)
@@ -49,19 +45,17 @@ public class TreeWitnessSet {
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessSet.class);
 
-	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner, Collection<TreeWitnessGenerator> allTWgenerators) {
+	private TreeWitnessSet(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner) {
 		this.cc = cc;
 		this.cache = new CachedClassifiedTBoxWrapper(reasoner);
-		this.allTWgenerators = allTWgenerators;
 	}
 	
 	public ImmutableList<TreeWitness> getTWs() {
 		return ImmutableList.copyOf(tws);
 	}
 	
-	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner,
-												  Collection<TreeWitnessGenerator> generators) {
-		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner, generators);
+	public static TreeWitnessSet getTreeWitnesses(QueryConnectedComponent cc, TreeWitnessRewriterReasoner reasoner) {
+		TreeWitnessSet treewitnesses = new TreeWitnessSet(cc, reasoner);
 		
 		if (!cc.isDegenerate())
 			treewitnesses.computeTreeWitnesses();
@@ -200,7 +194,7 @@ public class TreeWitnessSet {
 	private ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators(QueryFolding qf) {
 		ImmutableList.Builder<TreeWitnessGenerator> twg = ImmutableList.builder();
 		log.debug("CHECKING WHETHER THE FOLDING {} CAN BE GENERATED: ", qf); 
-		for (TreeWitnessGenerator g : allTWgenerators) {
+		for (TreeWitnessGenerator g : cache.reasoner.getTreeWitnessGenerators()) {
 			DownwardSaturatedImmutableSet<ObjectPropertyExpression> subp = qf.getProperties();
 			if (!subp.subsumes(g.getProperty())) {
 				log.debug("      NEGATIVE PROPERTY CHECK {}", g.getProperty());
@@ -307,7 +301,7 @@ public class TreeWitnessSet {
 			DownwardSaturatedImmutableSet<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
-				for (TreeWitnessGenerator twg : allTWgenerators) {
+				for (TreeWitnessGenerator twg : cache.reasoner.getTreeWitnessGenerators()) {
 					if (twg.endPointEntails(subc)) {
 						log.debug("        ENDTYPE IS FINE: {} FOR {}", subc, twg);
 						generators.add(twg);					
@@ -322,7 +316,7 @@ public class TreeWitnessSet {
 					log.debug("TREE WITNESS {} COVERS THE QUERY",  tw);
 					DownwardSaturatedImmutableSet<ClassExpression> subc = cache.reasoner.getSubConcepts(tw.getRootAtoms());
 					if (!subc.isBottom())
-						for (TreeWitnessGenerator twg : allTWgenerators)
+						for (TreeWitnessGenerator twg : cache.reasoner.getTreeWitnessGenerators())
 							if (twg.endPointEntails(subc)) {
 								log.debug("        ENDTYPE IS FINE: {} FOR {}",  subc, twg);
 								if (twg.endPointEntailsAny(tw.getGenerators())) {
@@ -341,7 +335,7 @@ public class TreeWitnessSet {
 			boolean saturated = false;
 			while (!saturated) {
 				saturated = true;
-				for (TreeWitnessGenerator g : allTWgenerators)
+				for (TreeWitnessGenerator g : cache.reasoner.getTreeWitnessGenerators())
 					if (g.endPointEntailsAny(generators)) {
 						if (generators.add(g))
 							saturated = false;

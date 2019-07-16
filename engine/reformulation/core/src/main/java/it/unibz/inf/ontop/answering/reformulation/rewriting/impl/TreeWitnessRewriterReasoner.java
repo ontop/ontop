@@ -15,9 +15,13 @@ import java.util.stream.Stream;
 public class TreeWitnessRewriterReasoner {
 
     private final ClassifiedTBox classifiedTBox;
+    private final ImmutableList<TreeWitnessGenerator> treeWitnessGenerators;
 
     TreeWitnessRewriterReasoner(ClassifiedTBox classifiedTBox) {
         this.classifiedTBox = classifiedTBox;
+        this.treeWitnessGenerators = classifiedTBox.classesDAG().stream()
+                .flatMap(this::getTreeWitnessGenerators)
+                .collect(ImmutableCollectors.toList());
     }
 
     public ClassifiedTBox getClassifiedTBox() { return classifiedTBox; }
@@ -64,11 +68,7 @@ public class TreeWitnessRewriterReasoner {
 
     // tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-    public ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators() {
-        return classifiedTBox.classesDAG().stream()
-                .flatMap(this::getTreeWitnessGenerators)
-                .collect(ImmutableCollectors.toList());
-    }
+    public ImmutableList<TreeWitnessGenerator> getTreeWitnessGenerators() { return treeWitnessGenerators; }
 
     private Stream<TreeWitnessGenerator> getTreeWitnessGenerators(Equivalences<ClassExpression> eq) {
         ImmutableList<ObjectPropertyExpression> properties = getDistinctRepresentativesForProperties(eq)

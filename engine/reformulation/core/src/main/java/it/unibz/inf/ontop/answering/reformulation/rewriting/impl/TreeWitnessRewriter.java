@@ -71,7 +71,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessRewriterReasoner reasoner;
-	private Collection<TreeWitnessGenerator> generators;
 	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
 
 	private final DatalogFactory datalogFactory;
@@ -111,8 +110,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
 
-		generators = reasoner.getTreeWitnessGenerators();
-		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
@@ -175,7 +172,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		
 		List<CQIE> outputRules = new LinkedList<>();	
 
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop() != null) 
