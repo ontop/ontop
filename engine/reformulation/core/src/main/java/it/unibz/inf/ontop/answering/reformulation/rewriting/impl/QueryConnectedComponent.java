@@ -171,7 +171,13 @@ public class QueryConnectedComponent {
 		for (Function atom : cqie.getBody()) {
 			// TODO: support quads
 			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, atom, atomFactory);
+				TriplePredicate triplePredicate = (TriplePredicate) atom.getFunctionSymbol();
+
+				ImmutableList<VariableOrGroundTerm> arguments = atom.getTerms().stream()
+						.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
+						.collect(ImmutableCollectors.toList());
+
+				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, triplePredicate, arguments, atomFactory);
 
 				boolean isClass = a.getPredicate().getClassIRI(a.getArguments()).isPresent();
 
@@ -374,12 +380,12 @@ public class QueryConnectedComponent {
 			return bAtoms;
 		}
 		
-		public ImmutableList<Function> getAtoms(ImmutabilityTools immutabilityTools) {
+		public ImmutableList<DataAtom<RDFAtomPredicate>> getAtoms() {
 			ImmutableList.Builder<DataAtom<RDFAtomPredicate>> allAtoms = ImmutableList.builder();
 			allAtoms.addAll(bAtoms);
 			allAtoms.addAll(l0.getAtoms());
 			allAtoms.addAll(l1.getAtoms());
-			return allAtoms.build().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList());
+			return allAtoms.build();
 		}
 		
 		@Override
@@ -426,14 +432,9 @@ public class QueryConnectedComponent {
 		}
 	}
 
-	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, Function bodyAtom,
+	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, TriplePredicate triplePredicate, ImmutableList<VariableOrGroundTerm> arguments,
 															AtomFactory atomFactory) {
 		ClassifiedTBox reasoner = r.getClassifiedTBox();
-		TriplePredicate triplePredicate = (TriplePredicate) bodyAtom.getFunctionSymbol();
-
-		ImmutableList<VariableOrGroundTerm> arguments = bodyAtom.getTerms().stream()
-				.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
-				.collect(ImmutableCollectors.toList());
 
 		Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
 		Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);

@@ -50,6 +50,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedC
 import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -248,7 +249,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 							}
 						if (!contained) {
 							log.debug("EDGE {} NOT COVERED BY ANY TW",  edge);
-							mainbody.addAll(edge.getAtoms(immutabilityTools));
+							mainbody.addAll(edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList()));
 						}
 					}
 					for (TreeWitness tw : compatibleTWs) {
@@ -277,8 +278,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 										"_EDGE_" + (edgeDP.size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
 								mainbody.add(edgeAtom);				
 								
-								LinkedList<Function> edgeAtoms = new LinkedList<>();
-								edgeAtoms.addAll(edge.getAtoms(immutabilityTools));
+								List<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList());
 								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
@@ -287,7 +287,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
-						mainbody.addAll(edge.getAtoms(immutabilityTools));
+						mainbody.addAll(edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList()));
 				}
 				mainbody.addAll(cc.getNonDLAtoms());
 				outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
