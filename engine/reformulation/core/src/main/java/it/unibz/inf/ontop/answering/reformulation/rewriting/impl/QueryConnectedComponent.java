@@ -89,13 +89,10 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, Set<VariableOrGroundTerm> ccTerms, ImmutableSet<Variable> headVariables) {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
-
-		Set<VariableOrGroundTerm> ccTerms = new HashSet<>((allLoops.size() * 2) / 3);
-		ccTerms.add(seed);
 
 		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded;
@@ -199,20 +196,19 @@ public class QueryConnectedComponent {
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			VariableOrGroundTerm seed = pairs.iterator().next().getKey().iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, new HashSet<>(pairs.iterator().next().getKey()), headVariables));
 		}
 		
 		while (!nonDLAtoms.isEmpty()) {
 			Function atom = nonDLAtoms.iterator().next();
-			Variable seed = atom.getVariables().iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, new HashSet<>(atom.getVariables()), headVariables));
 		}
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
 		while (!allLoops.isEmpty()) {
-			VariableOrGroundTerm seed = allLoops.keySet().iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
+			HashSet<VariableOrGroundTerm> ccTerms = new HashSet<>();
+			ccTerms.add(allLoops.keySet().iterator().next());
+			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, ccTerms, headVariables));
 		}
 				
 		return ccs.build();
