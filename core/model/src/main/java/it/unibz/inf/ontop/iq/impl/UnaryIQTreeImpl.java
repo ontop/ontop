@@ -31,6 +31,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
     @Nullable
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+    @Nullable
     private Boolean isDistinct;
     private VariableNullability variableNullability;
 
@@ -141,6 +143,14 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         if (possibleVariableDefinitions == null)
             possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
         return possibleVariableDefinitions;
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            uniqueConstraints = getRootNode().inferUniqueConstraints(getChild());
+        }
+        return uniqueConstraints;
     }
 
     @Override

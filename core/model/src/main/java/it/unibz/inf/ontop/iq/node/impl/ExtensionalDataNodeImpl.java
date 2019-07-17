@@ -37,6 +37,10 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     // LAZY
     @Nullable
     private VariableNullability variableNullability;
+    //LAZY
+    @Nullable
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+
     private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
@@ -131,6 +135,22 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            ImmutableList<? extends VariableOrGroundTerm> arguments = getProjectionAtom().getArguments();
+
+            uniqueConstraints = getProjectionAtom().getPredicate().getRelationDefinition().getUniqueConstraints().stream()
+                    .map(uc -> uc.getAttributes().stream()
+                            .map(a ->  arguments.get(a.getIndex() -1))
+                            .filter(t -> t instanceof Variable)
+                            .map(v -> (Variable)v)
+                            .collect(ImmutableCollectors.toSet()))
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return uniqueConstraints;
     }
 
     @Override

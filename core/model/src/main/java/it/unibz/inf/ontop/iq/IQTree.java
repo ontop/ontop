@@ -125,4 +125,11 @@ public interface IQTree {
      *
      */
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions();
+
+    /**
+     * NOT guaranteed to return all the unique constraints (MAY BE INCOMPLETE)
+     *
+     * Set of sets of determinants
+     */
+    ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
 }

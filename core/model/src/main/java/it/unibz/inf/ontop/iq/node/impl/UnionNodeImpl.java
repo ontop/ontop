@@ -229,6 +229,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return iqFactory.createNaryIQTree(this, children, newProperties);
     }
 
+    /**
+     * TODO: implement it seriously
+     */
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
+        return ImmutableSet.of();
+    }
+
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;

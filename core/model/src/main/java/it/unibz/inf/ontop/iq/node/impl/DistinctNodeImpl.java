@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -82,6 +83,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
         return child.removeDistincts();
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        return Sets.union(
+                child.inferUniqueConstraints(),
+                ImmutableSet.of(child.getVariables())).immutableCopy();
     }
 
     @Override

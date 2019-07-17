@@ -56,4 +56,6 @@ public interface NaryOperatorNode extends QueryNode {
     ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children);
 
     IQTree removeDistincts(ImmutableList<IQTree> children, IQProperties properties);
+
+    ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children);
 }
