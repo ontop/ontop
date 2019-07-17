@@ -32,6 +32,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 /**
  * QueryConnectedComponent represents a connected component of a CQ
@@ -100,7 +101,7 @@ public class QueryConnectedComponent {
 		boolean expanded;
 		do {
 			expanded = false;
-			for (Iterator<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext();) {
+			for (Iterator<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext(); ) {
 				Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
 				Iterator<VariableOrGroundTerm> iterator = e.getKey().iterator();
 				VariableOrGroundTerm t0 = iterator.next();
@@ -119,23 +120,15 @@ public class QueryConnectedComponent {
 				i.remove();
 			}
 			
-			for (Iterator<Function> ni = nonDLAtoms.iterator(); ni.hasNext(); ) {
-				Function atom = ni.next();
-				boolean intersects = false;
+			for (Iterator<Function> i = nonDLAtoms.iterator(); i.hasNext(); ) {
+				Function atom = i.next();
 				Set<Variable> atomVars = atom.getVariables();
-				for (Variable t : atomVars)
-					if (ccTerms.contains(t)) {
-						intersects = true;
-						break;
-					}
-				
-				if (!intersects)
-					continue;
-
-				ccTerms.addAll(atomVars);
-				ccNonDLAtoms.add(atom);
-				expanded = true;
-				ni.remove();
+				if (atomVars.stream().anyMatch(ccTerms::contains)) {
+					ccTerms.addAll(atomVars);
+					ccNonDLAtoms.add(atom);
+					expanded = true;
+					i.remove();
+				}
 			}
 		} while (expanded);
 
@@ -185,6 +178,7 @@ public class QueryConnectedComponent {
 
 				// proper DL edge between two distinct terms
 				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
+					// the index is an *unordered* pair
 					pz.put(ImmutableSet.of(a.getTerm(0), a.getTerm(2)), a);
 				else
 					lz.put(a.getTerm(0), a);
@@ -316,9 +310,7 @@ public class QueryConnectedComponent {
 			return term;
 		}
 		
-		public ImmutableList<DataAtom<RDFAtomPredicate>> getAtoms() {
-			return atoms;
-		}
+		public ImmutableList<DataAtom<RDFAtomPredicate>> getAtoms() { return atoms; }
 		
 		public boolean isExistentialVariable() {
 			return isExistentialVariable;
@@ -383,11 +375,9 @@ public class QueryConnectedComponent {
 		}
 		
 		public ImmutableList<DataAtom<RDFAtomPredicate>> getAtoms() {
-			ImmutableList.Builder<DataAtom<RDFAtomPredicate>> allAtoms = ImmutableList.builder();
-			allAtoms.addAll(bAtoms);
-			allAtoms.addAll(l0.getAtoms());
-			allAtoms.addAll(l1.getAtoms());
-			return allAtoms.build();
+			return Stream.concat(bAtoms.stream(),
+					Stream.concat(l0.getAtoms().stream(), l1.getAtoms().stream()))
+					.collect(ImmutableCollectors.toList());
 		}
 		
 		@Override
@@ -396,43 +386,6 @@ public class QueryConnectedComponent {
 		}
 	}
 	
-	/**
-	 * TermPair: a simple abstraction of *unordered* pair of Terms (i.e., {t1, t2} and {t2, t1} are equal)
-	 * 
-	 * @author Roman Kontchakov
-	 *
-	 */
-	
-	private static class TermPair {
-		private final VariableOrGroundTerm t0, t1;
-
-		public TermPair(VariableOrGroundTerm t0, VariableOrGroundTerm t1) {
-			this.t0 = t0;
-			this.t1 = t1;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof TermPair) {
-				TermPair other = (TermPair) o;
-				if (this.t0.equals(other.t0) && this.t1.equals(other.t1))
-					return true;
-				if (this.t0.equals(other.t1) && this.t1.equals(other.t0))
-					return true;
-			}
-			return false;
-		}
-
-		@Override
-		public String toString() {
-			return "term pair: {" + t0 + ", " + t1 + "}";
-		}
-		
-		@Override
-		public int hashCode() {
-			return t0.hashCode() ^ t1.hashCode();
-		}
-	}
 
 	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, TriplePredicate triplePredicate, ImmutableList<VariableOrGroundTerm> arguments,
 															AtomFactory atomFactory) {
