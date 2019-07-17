@@ -37,9 +37,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
     }
 
+    /**
+     * TODO: implement it seriously! (is currently blocking)
+     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
+        // TODO: stop blocking
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override
