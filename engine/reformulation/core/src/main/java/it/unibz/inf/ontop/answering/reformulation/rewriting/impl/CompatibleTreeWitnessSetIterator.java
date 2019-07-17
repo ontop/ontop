@@ -26,22 +26,19 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
-public class CompatibleTreeWitnessSetIterator implements Iterator<Collection<TreeWitness>> {
+public class CompatibleTreeWitnessSetIterator implements Iterator<ImmutableCollection<TreeWitness>> {
 
     private final ImmutableList<TreeWitness> tws;
 
-    private final boolean isInNext[];  // subset number - binary representation
-
+    private final boolean in[];  // subset number - binary representation
     private ImmutableList<TreeWitness> nextSet = null; // the first subset is empty - still need to find a compatible non-empty subset
 
     CompatibleTreeWitnessSetIterator(ImmutableList<TreeWitness> tws) {
         this.tws = tws;
-        this.isInNext = new boolean[tws.size()];
+        this.in = new boolean[tws.size()];
     }
 
     /**
-     * Returns the next compatible subset of tree witnesses
-     *
      * @return the next compatible subset of tree witnesses
      * @exception NoSuchElementException if it has no more subsets
      */
@@ -62,46 +59,42 @@ public class CompatibleTreeWitnessSetIterator implements Iterator<Collection<Tre
 
     @Override
     public boolean hasNext() {
+
         if (nextSet != null)
             return !isLast();
 
-        while (!isLast())
-            if ((nextSet = moveToNext()) != null)
+        while (!isLast()) {
+            // increment the number of the current subset
+            boolean carry = true;
+            for (int i = 0; i < in.length; i++) {
+                if (carry) {
+                    carry = in[i];
+                    in[i] = !in[i];
+                }
+                else
+                    break;
+            }
+            // extract the respective subset of tree witnesses
+            ImmutableList.Builder<TreeWitness> builder = ImmutableList.builder();
+            for (int i = 0; i < in.length; i++)
+                if (in[i])
+                    builder.add(tws.get(i));
+            nextSet = builder.build();
+
+            if (TreeWitness.isCompatible(nextSet))
                 return true;
 
+            // if not compatible, continue to the next iteration with clear nextSet
+            nextSet = null;
+        }
         return false;
     }
 
     private boolean isLast() {
-        for (int i = 0; i < isInNext.length; i++)
-            if (!isInNext[i])
+        for (int i = 0; i < in.length; i++)
+            if (!in[i])
                 return false;
         return true;
-    }
-
-    /**
-     *   @return null if the next set is not compatible
-     */
-
-    private ImmutableList<TreeWitness> moveToNext() {
-        // increment the number of the current subset
-        boolean carry = true;
-        for (int i = 0; i < isInNext.length; i++) {
-            if (!carry)
-                break;
-            else {
-                carry = isInNext[i];
-                isInNext[i] = !isInNext[i];
-            }
-        }
-        // extract the respective subset of tree witnesses
-        ImmutableList.Builder<TreeWitness> builder = ImmutableList.builder();
-        for (int i = 0; i < isInNext.length; i++)
-            if (isInNext[i])
-                builder.add(tws.get(i));
-
-        ImmutableList<TreeWitness> set = builder.build();
-        return TreeWitness.isCompatible(set) ? set : null;
     }
 
     /**
