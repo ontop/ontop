@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
@@ -41,11 +42,11 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
     }
 
     private IQ updateQuery(IQ query) {
-        return iqFactory.createIQ(
-                query.getProjectionAtom(),
-                iqFactory.createUnaryIQTree(
-                        iqFactory.createDistinctNode(),
-                        query.getTree()
-        ));
+        IQTree newTree = iqFactory.createUnaryIQTree(
+                iqFactory.createDistinctNode(),
+                query.getTree())
+                .normalizeForOptimization(query.getVariableGenerator());
+
+        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
     }
 }
