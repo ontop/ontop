@@ -88,7 +88,7 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, VariableOrGroundTerm seed, ImmutableSet<Variable> headVariables) {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
 		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
@@ -100,18 +100,20 @@ public class QueryConnectedComponent {
 		boolean expanded;
 		do {
 			expanded = false;
-			for (Iterator<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext();) {
-				Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
-				TermPair pair = e.getKey();
-				if (ccTerms.contains(pair.t0))
-					ccTerms.add(pair.t1);   // the other term is already there
-				else if (ccTerms.contains(pair.t1))
-					ccTerms.add(pair.t0);   // the other term is already there
+			for (Iterator<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext();) {
+				Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
+				Iterator<VariableOrGroundTerm> iterator = e.getKey().iterator();
+				VariableOrGroundTerm t0 = iterator.next();
+				VariableOrGroundTerm t1 = iterator.next();
+				if (ccTerms.contains(t0))
+					ccTerms.add(t1);   // the other term is already there
+				else if (ccTerms.contains(t1))
+					ccTerms.add(t0);   // the other term is already there
 				else
 					continue;
 
-				Loop l0 =  allLoops.computeIfAbsent(pair.t0, n -> new Loop(n, headVariables, ImmutableList.of()));
-				Loop l1 =  allLoops.computeIfAbsent(pair.t1, n -> new Loop(n, headVariables, ImmutableList.of()));
+				Loop l0 =  allLoops.computeIfAbsent(t0, n -> new Loop(n, headVariables, ImmutableList.of()));
+				Loop l1 =  allLoops.computeIfAbsent(t1, n -> new Loop(n, headVariables, ImmutableList.of()));
 				ccEdges.add(new Edge(l0, l1, ImmutableList.copyOf(e.getValue())));
 				expanded = true;
 				i.remove();
@@ -164,7 +166,7 @@ public class QueryConnectedComponent {
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
 		//      a nonDL atom is an atom with a non-data predicate 
-		ImmutableMultimap.Builder<TermPair, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<Set<VariableOrGroundTerm>, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
 		ImmutableMultimap.Builder<VariableOrGroundTerm, DataAtom<RDFAtomPredicate>> lz = ImmutableMultimap.builder();
 		List<Function> nonDLAtoms = new LinkedList<>();
 
@@ -183,7 +185,7 @@ public class QueryConnectedComponent {
 
 				// proper DL edge between two distinct terms
 				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
-					pz.put(new TermPair(a.getTerm(0), a.getTerm(2)), a);
+					pz.put(ImmutableSet.of(a.getTerm(0), a.getTerm(2)), a);
 				else
 					lz.put(a.getTerm(0), a);
 			}
@@ -197,13 +199,13 @@ public class QueryConnectedComponent {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
-		List<Entry<TermPair, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
+		List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
 
 		ImmutableList.Builder<QueryConnectedComponent> ccs = ImmutableList.builder();
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty()) {
-			VariableOrGroundTerm seed = pairs.iterator().next().getKey().t0;
+			VariableOrGroundTerm seed = pairs.iterator().next().getKey().iterator().next();
 			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, seed, headVariables));
 		}
 		
