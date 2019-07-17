@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class TreeWitnessRewriterReasoner {
@@ -26,11 +27,11 @@ public class TreeWitnessRewriterReasoner {
 
     public ClassifiedTBox getClassifiedTBox() { return classifiedTBox; }
 
-    public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, TreeWitnessSet.TermOrderedPair idx) {
+    public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(Collection<DataAtom<RDFAtomPredicate>> atoms, Map.Entry<VariableOrGroundTerm, VariableOrGroundTerm> idx) {
         return atoms.stream().map(a -> getSubProperties(a, idx)).collect(DownwardSaturatedImmutableSet.toIntersection());
     }
 
-    private DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, TreeWitnessSet.TermOrderedPair idx) {
+    private DownwardSaturatedImmutableSet<ObjectPropertyExpression> getSubProperties(DataAtom<RDFAtomPredicate> atom, Map.Entry<VariableOrGroundTerm, VariableOrGroundTerm> idx) {
         return atom.getPredicate().getPropertyIRI(atom.getArguments())
                 .filter(i -> classifiedTBox.objectProperties().contains(i))
                 .map(i -> classifiedTBox.objectProperties().get(i))
@@ -39,12 +40,12 @@ public class TreeWitnessRewriterReasoner {
                 .orElse(DownwardSaturatedImmutableSet.bottom());
     }
 
-    private boolean isInverse(DataAtom<RDFAtomPredicate> a, TreeWitnessSet.TermOrderedPair idx) {
+    private boolean isInverse(DataAtom<RDFAtomPredicate> a, Map.Entry<VariableOrGroundTerm, VariableOrGroundTerm> idx) {
         VariableOrGroundTerm subject = a.getPredicate().getSubject(a.getArguments());
         VariableOrGroundTerm object = a.getPredicate().getObject(a.getArguments());
-        if (subject.equals(idx.getTerm0()) && object.equals(idx.getTerm1()))
+        if (subject.equals(idx.getKey()) && object.equals(idx.getValue()))
             return false;
-        if (subject.equals(idx.getTerm1()) && object.equals(idx.getTerm0()))
+        if (subject.equals(idx.getValue()) && object.equals(idx.getKey()))
             return true;
         throw new MinorOntopInternalBugException("non-matching arguments: " + a + " " + idx);
     }

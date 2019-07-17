@@ -237,7 +237,7 @@ public class TreeWitnessSet {
 
 	
 	static class CachedClassifiedTBoxWrapper {
-		private final Map<TermOrderedPair, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
+		private final Map<Map.Entry<VariableOrGroundTerm, VariableOrGroundTerm>, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<VariableOrGroundTerm, DownwardSaturatedImmutableSet<ClassExpression>> conceptsCache = new HashMap<>();
 
 		private final TreeWitnessRewriterReasoner reasoner;
@@ -252,47 +252,11 @@ public class TreeWitnessSet {
 		}
 
 		public DownwardSaturatedImmutableSet<ObjectPropertyExpression> getEdgeProperties(Edge edge, VariableOrGroundTerm root, VariableOrGroundTerm nonroot) {
-			return propertiesCache.computeIfAbsent(new TermOrderedPair(root, nonroot),
+			return propertiesCache.computeIfAbsent(new AbstractMap.SimpleImmutableEntry<>(root, nonroot),
 					idx -> reasoner.getSubProperties(edge.getBAtoms(), idx));
 		}
 	}
 
-
-	static class TermOrderedPair {
-		private final VariableOrGroundTerm t0, t1;
-		private final int hashCode;
-
-		public TermOrderedPair(VariableOrGroundTerm t0, VariableOrGroundTerm t1) {
-			this.t0 = t0;
-			this.t1 = t1;
-			this.hashCode = t0.hashCode() ^ (t1.hashCode() << 4);
-		}
-
-		public VariableOrGroundTerm getTerm0() { return t0; }
-
-		public VariableOrGroundTerm getTerm1() { return t1; }
-
-		@Override
-		public boolean equals(Object o) {
-			if (o instanceof TermOrderedPair) {
-				TermOrderedPair other = (TermOrderedPair) o;
-				return (this.t0.equals(other.t0) && this.t1.equals(other.t1));
-			}
-			return false;
-		}
-
-		@Override
-		public String toString() {
-			return "term pair: (" + t0 + ", " + t1 + ")";
-		}
-		
-		@Override
-		public int hashCode() {
-			return hashCode;
-		}
-	}	
-
-	
 
 	public Set<TreeWitnessGenerator> getGeneratorsOfDetachedCC() {		
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
