@@ -172,7 +172,7 @@ public class URINamesH2Test {
 	@Test
 	public void testURIDifferentArities2() throws Exception {
 		String query = "PREFIX : <http://www.ontop.org/> SELECT ?x WHERE {?x a :Entertainment }";
-		runTests(query, 3);
+		runTests(query, 2);
 	}
 
 
