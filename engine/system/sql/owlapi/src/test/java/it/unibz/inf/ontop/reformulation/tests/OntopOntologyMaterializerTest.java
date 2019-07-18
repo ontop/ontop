@@ -131,7 +131,7 @@ public class OntopOntologyMaterializerTest extends TestCase {
 					propAss++;
 			}
 			assertEquals(6, classAss); //2 classes * 3 data rows for T1
-			assertEquals(42, propAss); //2 properties * 7 tables * 3 data rows each T2-T8
+			assertEquals(40, propAss); //2 properties * 7 tables * 3 data rows each T2-T8 - 2 redundant
 			assertEquals(3, objAss); //3 data rows for T9
 		}
 	}
@@ -175,7 +175,7 @@ public class OntopOntologyMaterializerTest extends TestCase {
 					propAss++;
 			}
 			assertEquals(6, classAss); //3 data rows x2 for subclass prop
-			assertEquals(42, propAss); //8 tables * 3 data rows each x2 for subclass
+			assertEquals(40, propAss); //8 tables * 3 data rows each x2 for subclass - 2 redundant
 			assertEquals(3, objAss); //3 since no subprop for obj prop
 		}
 	}
