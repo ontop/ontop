@@ -24,4 +24,9 @@ public class OntopBindingImpl implements OntopBinding {
     public RDFConstant getValue() {
         return constant;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s/%s", name, constant);
+    }
 }

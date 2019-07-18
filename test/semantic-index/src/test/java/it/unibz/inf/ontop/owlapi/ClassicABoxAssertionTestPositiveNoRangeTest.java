@@ -91,7 +91,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsLiteral() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uliteral ?y}";
 		int count = executeQuery(query);
-		assertEquals(2, count);
+		assertEquals(1, count);
 	}
 
 	public void testDataPropertyAssertionsBoolean() throws OWLException{
@@ -107,7 +107,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :udateTime ?y}";
 		int count = executeQuery(query);
-		assertEquals(5, count);
+		assertEquals(1, count);
 	}
 
 	public void testDataPropertyAssertionsDecimal() throws OWLException{
