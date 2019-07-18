@@ -128,7 +128,8 @@ public class OrderByNormalizerImpl implements OrderByNormalizer {
             else if (newChildRoot instanceof EmptyNode)
                 return declareAsEmpty(newChild);
             else if (newChildRoot instanceof DistinctNode) {
-                return updateParentOrderByAndChild((DistinctNode) newChildRoot, Optional.of(orderBy), newChild);
+                return updateParentOrderByAndChild((DistinctNode) newChildRoot, Optional.of(orderBy),
+                        ((UnaryIQTree)newChild).getChild());
             }
             else
                 return updateChild(newChild);
