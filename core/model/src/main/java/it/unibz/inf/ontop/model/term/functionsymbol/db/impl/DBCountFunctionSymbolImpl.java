@@ -25,8 +25,8 @@ public class DBCountFunctionSymbolImpl extends AbstractDBAggregationFunctionSymb
                                         @Nonnull DBTermType targetType, boolean isDistinct) {
         this(inputType, targetType, isDistinct,
                 isDistinct
-                        ? Serializers.getRegularSerializer("COUNT")
-                        : Serializers.getDistinctAggregationSerializer("COUNT"));
+                        ? Serializers.getDistinctAggregationSerializer("COUNT")
+                        : Serializers.getRegularSerializer("COUNT"));
     }
 
     protected DBCountFunctionSymbolImpl(@Nonnull DBTermType targetType, boolean isDistinct) {

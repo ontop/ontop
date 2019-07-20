@@ -23,8 +23,8 @@ public class NullIgnoringDBAvgFunctionSymbol extends AbstractDBAggregationFuncti
     protected NullIgnoringDBAvgFunctionSymbol(@Nonnull DBTermType inputType, @Nonnull DBTermType targetType, boolean isDistinct) {
         this(inputType, targetType, isDistinct,
                 isDistinct
-                        ? Serializers.getRegularSerializer("AVG")
-                        : Serializers.getDistinctAggregationSerializer("AVG"));
+                        ? Serializers.getDistinctAggregationSerializer("AVG")
+                        : Serializers.getRegularSerializer("AVG"));
     }
 
     @Override
