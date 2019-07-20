@@ -25,6 +25,7 @@ public interface SQLAlgebraFactory {
                                                        ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                                        @Assisted("fromExpression") SQLExpression fromExpression,
                                                        @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
+                                                       @Assisted("groupBy") ImmutableSet<Variable> groupByVariables,
                                                        boolean isDistinct,
                                                        @Assisted("limit") Optional<Long> limit,
                                                        @Assisted("offset") Optional<Long> offset,

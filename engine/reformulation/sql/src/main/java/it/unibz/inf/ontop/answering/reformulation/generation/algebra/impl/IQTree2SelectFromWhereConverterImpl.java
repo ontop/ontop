@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -73,21 +75,35 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
                 .orElse(firstNonSliceDistinctConstructionTree);
 
-        Optional<FilterNode> filterNode = Optional.of(firstNonSliceDistinctConstructionOrderByTree)
+        Optional<AggregationNode> aggregationNode = Optional.of(firstNonSliceDistinctConstructionOrderByTree)
+                .map(IQTree::getRootNode)
+                .filter(n -> n instanceof AggregationNode)
+                .map(n -> (AggregationNode) n);
+
+        IQTree firstNonSliceDistinctConstructionOrderByAggregationTree = aggregationNode
+                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByTree).getChild())
+                .orElse(firstNonSliceDistinctConstructionOrderByTree);
+
+        Optional<FilterNode> filterNode = Optional.of(firstNonSliceDistinctConstructionOrderByAggregationTree)
                 .map(IQTree::getRootNode)
                 .filter(n -> n instanceof FilterNode)
                 .map(n -> (FilterNode) n);
 
         IQTree childTree = filterNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionOrderByTree);
+                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByAggregationTree).getChild())
+                .orElse(firstNonSliceDistinctConstructionOrderByAggregationTree);
 
         ImmutableSubstitution<ImmutableTerm> substitution = constructionNode
-                .map(ConstructionNode::getSubstitution)
-                .orElseGet(substitutionFactory::getSubstitution);
+                .map(c -> aggregationNode
+                        .map(AggregationNode::getSubstitution)
+                        .map(s2 -> s2.composeWith(c.getSubstitution()).reduceDomainToIntersectionWith(c.getVariables()))
+                        .orElseGet(c::getSubstitution))
+                .orElseGet(() -> aggregationNode
+                        .map(AggregationNode::getSubstitution)
+                        .map(s -> (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)s)
+                        .orElseGet(substitutionFactory::getSubstitution));
 
-        SQLExpression fromExpression = convertIntoFromExpression(
-                childTree);
+        SQLExpression fromExpression = convertIntoFromExpression(childTree);
 
         /*
          * Where expression: from the filter node or from the top inner join of the child tree
@@ -99,16 +115,37 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(n -> (InnerJoinNode) n)
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
+        ImmutableList<OrderByNode.OrderComparator> comparators = extractComparators(orderByNode, aggregationNode);
+
         return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromExpression, whereExpression,
+                aggregationNode
+                        .map(AggregationNode::getGroupingVariables)
+                        .orElseGet(ImmutableSet::of),
                 distinctNode.isPresent(),
                 sliceNode
                         .flatMap(SliceNode::getLimit),
                 sliceNode
                         .map(SliceNode::getOffset)
                         .filter(o -> o > 0),
-                orderByNode
-                        .map(OrderByNode::getComparators)
-                        .orElseGet(ImmutableList::of));
+                comparators);
+    }
+
+    private ImmutableList<OrderByNode.OrderComparator> extractComparators(Optional<OrderByNode> orderByNode,
+                                                                          Optional<AggregationNode> aggregationNode) {
+        return orderByNode
+                .map(OrderByNode::getComparators)
+                .map(cs -> aggregationNode
+                        .map(AggregationNode::getSubstitution)
+                        .map(s -> cs.stream()
+                                .map(c -> Optional.of(s.apply(c.getTerm()))
+                                                .filter(t -> !t.isGround())
+                                                .map(t -> (NonGroundTerm)t)
+                                                .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(ImmutableCollectors.toList()))
+                        .orElse(cs))
+                .orElseGet(ImmutableList::of);
     }
 
     /**

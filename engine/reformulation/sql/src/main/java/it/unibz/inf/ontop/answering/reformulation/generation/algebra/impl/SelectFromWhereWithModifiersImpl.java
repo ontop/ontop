@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -25,6 +26,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     private final ImmutableSubstitution<? extends ImmutableTerm> substitution;
     private final SQLExpression fromExpression;
     private final Optional<ImmutableExpression> whereExpression;
+    private final ImmutableSet<Variable> groupByVariables;
     private final boolean isDistinct;
     private final Optional<Long> limit;
     private final Optional<Long> offset;
@@ -35,6 +37,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
                                              @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                              @Assisted("fromExpression") SQLExpression fromExpression,
                                              @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
+                                             @Assisted("groupBy") ImmutableSet<Variable> groupByVariables,
                                              @Assisted boolean isDistinct,
                                              @Assisted("limit") Optional<Long> limit,
                                              @Assisted("offset") Optional<Long> offset,
@@ -43,6 +46,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
         this.substitution = substitution;
         this.fromExpression = fromExpression;
         this.whereExpression = whereExpression;
+        this.groupByVariables = groupByVariables;
         this.isDistinct = isDistinct;
         this.limit = limit;
         this.offset = offset;
@@ -93,5 +97,10 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     @Override
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getGroupByVariables() {
+        return groupByVariables;
     }
 }

@@ -531,7 +531,6 @@ public class LeftJoinProfTest {
         assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
-    @Ignore
     @Test
     public void testSumStudents1() throws Exception {
 
@@ -549,7 +548,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testSumStudents2() throws Exception {
 

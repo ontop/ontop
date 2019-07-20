@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -25,6 +26,8 @@ public interface SelectFromWhereWithModifiers extends SQLExpression {
     SQLExpression getFromSQLExpression();
 
     Optional<ImmutableExpression> getWhereExpression();
+
+    ImmutableSet<Variable> getGroupByVariables();
 
     boolean isDistinct();
     Optional<Long> getLimit();
