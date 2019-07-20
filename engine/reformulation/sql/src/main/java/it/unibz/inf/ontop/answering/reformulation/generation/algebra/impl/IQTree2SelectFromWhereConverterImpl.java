@@ -131,6 +131,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             return convertIntoOrdinaryExpression(tree);
     }
 
+    /**
+     * TODO: use an IQVisitor
+     */
     private SQLExpression convertIntoOrdinaryExpression(IQTree tree) {
         QueryNode rootNode = tree.getRootNode();
         if (rootNode instanceof NativeNode) {
@@ -176,7 +179,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof TrueNode){
             return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
         }
-        else if (rootNode instanceof ConstructionNode){
+        else if ((rootNode instanceof ConstructionNode) || (rootNode instanceof QueryModifierNode)){
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             return convert(tree, signature);
         }

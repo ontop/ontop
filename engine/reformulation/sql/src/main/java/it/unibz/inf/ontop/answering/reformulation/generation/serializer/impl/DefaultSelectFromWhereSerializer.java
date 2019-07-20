@@ -65,7 +65,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         @Override
         public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
 
-            QuerySerialization fromQuerySerialization = selectFromWhere.getFromSQLExpression().acceptVisitor(this);
+            QuerySerialization fromQuerySerialization = getSQLSerializationForChild(selectFromWhere.getFromSQLExpression());
 
             // Assumes that from expressions all use different variables
             ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();

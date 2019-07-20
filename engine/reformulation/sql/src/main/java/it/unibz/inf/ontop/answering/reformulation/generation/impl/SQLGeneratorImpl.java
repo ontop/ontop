@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
  * See TranslationFactory for creating a new instance.
  *
  */
-public class LegacySQLGenerator implements NativeQueryGenerator {
+public class SQLGeneratorImpl implements NativeQueryGenerator {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(LegacySQLGenerator.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(SQLGeneratorImpl.class);
     private final RDBMetadata metadata;
     private final IntermediateQueryFactory iqFactory;
     private final IQConverter iqConverter;
@@ -53,21 +53,19 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     private final TermTypeTermLifter rdfTypeLifter;
     private final PostProcessableFunctionLifter functionLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
-    private final LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator;
     private final DialectExtraNormalizer extraNormalizer;
 
     @AssistedInject
-    private LegacySQLGenerator(@Assisted DBMetadata metadata,
-                               IntermediateQueryFactory iqFactory,
-                               IQConverter iqConverter, UnionFlattener unionFlattener,
-                               PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
-                               AtomFactory atomFactory, OptimizerFactory optimizerFactory,
-                               PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
-                               PostProcessingProjectionSplitter projectionSplitter,
-                               TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
-                               IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
-                               LegacySQLIQTree2NativeNodeGenerator legacyIQTree2NativeNodeGenerator,
-                               DialectExtraNormalizer extraNormalizer)
+    private SQLGeneratorImpl(@Assisted DBMetadata metadata,
+                             IntermediateQueryFactory iqFactory,
+                             IQConverter iqConverter, UnionFlattener unionFlattener,
+                             PushDownBooleanExpressionOptimizer pushDownExpressionOptimizer,
+                             AtomFactory atomFactory, OptimizerFactory optimizerFactory,
+                             PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+                             PostProcessingProjectionSplitter projectionSplitter,
+                             TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
+                             IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
+                             DialectExtraNormalizer extraNormalizer)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
@@ -85,7 +83,6 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
         this.projectionSplitter = projectionSplitter;
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
-        this.legacyIQTree2NativeNodeGenerator = legacyIQTree2NativeNodeGenerator;
     }
 
     @Override
@@ -111,6 +108,8 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     /**
      * TODO: what about the distinct?
      * TODO: move the distinct and slice lifting to the post-processing splitter
+     *
+     * TODO: check what is still needed
      */
     private IQTree normalizeSubTree(IQTree subTree, VariableGenerator variableGenerator,
                                     ExecutorRegistry executorRegistry) {
@@ -142,7 +141,8 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
 
 
             // Pulling up is needed when filtering conditions appear above a data atom on the left
-            // (causes problems to the IQ2DatalogConverter)
+            // (was causing problems to the IQ2DatalogConverter)
+            // TODO: check if still needed
             IntermediateQuery queryAfterPullUp = pullUpExpressionOptimizer.optimize(pushedDownQuery);
             log.debug("New query after pulling up the boolean expressions: \n" + queryAfterPullUp);
 
@@ -176,68 +176,6 @@ public class LegacySQLGenerator implements NativeQueryGenerator {
     }
 
     private NativeNode generateNativeNode(IQTree normalizedSubTree) {
-
-        QueryModifierSplit queryModifierSplit = splitQueryModifiers(normalizedSubTree);
-
-        NativeNode subNativeNode = defaultIQTree2NativeNodeGenerator.generate(
-                queryModifierSplit.treeToConvertUsingLegacyConverter, metadata.getDBParameters());
-
-        if (queryModifierSplit.ancestors.isEmpty())
-            return subNativeNode;
-
-        IQTree tree = queryModifierSplit.ancestors.reverse().stream()
-                .reduce((IQTree) subNativeNode,
-                        (t, n) -> iqFactory.createUnaryIQTree(n, t),
-                        (t1, t2) -> {
-                            throw new MinorOntopInternalBugException("No combination expected");
-                        });
-
-        return defaultIQTree2NativeNodeGenerator.generate(tree, metadata.getDBParameters());
-
-    }
-
-    /**
-     * Ancestors:  "top" query modifiers from the tree, including the first construction node if followed by an OrderBy.
-     */
-    private QueryModifierSplit splitQueryModifiers(IQTree tree) {
-        ImmutableList.Builder<UnaryOperatorNode> ancestorBuilder = ImmutableList.builder();
-
-        //Non-final
-        IQTree currentTree = tree;
-        do {
-            QueryNode rootNode = currentTree.getRootNode();
-            if (rootNode instanceof QueryModifierNode) {
-                ancestorBuilder.add((UnaryOperatorNode) rootNode);
-                currentTree = ((UnaryIQTree) currentTree).getChild();
-            }
-            else if (rootNode instanceof ConstructionNode) {
-                IQTree child = ((UnaryIQTree) currentTree).getChild();
-                if (child.getRootNode() instanceof QueryModifierNode) {
-                    ancestorBuilder.add((UnaryOperatorNode) rootNode);
-                    currentTree = child;
-                }
-                else
-                    break;
-            }
-            else break;
-        } while (true);
-
-        // TODO: shall we try to create a construction for projecting away variables?
-        return new QueryModifierSplit(ancestorBuilder.build(), currentTree);
-    }
-
-    /**
-     * Temporary class
-     */
-    private static class QueryModifierSplit {
-
-        final ImmutableList<UnaryOperatorNode> ancestors;
-        final IQTree treeToConvertUsingLegacyConverter;
-
-        private QueryModifierSplit(ImmutableList<UnaryOperatorNode> ancestors,
-                                   IQTree treeToConvertUsingLegacyConverter) {
-            this.ancestors = ancestors;
-            this.treeToConvertUsingLegacyConverter = treeToConvertUsingLegacyConverter;
-        }
+        return defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, metadata.getDBParameters());
     }
 }
