@@ -786,7 +786,6 @@ public class LeftJoinProfTest {
     /**
      * Checks that the type error is detected
      */
-    @Ignore("TODO: simply EQ with CASE")
     @Test
     public void testMinusMultitypedSum() throws Exception {
 
@@ -821,7 +820,6 @@ public class LeftJoinProfTest {
     /**
      * Checks that the type error is detected
      */
-    @Ignore("TODO: simply EQ with CASE")
     @Test
     public void testMinusMultitypedAvg() throws Exception {
 

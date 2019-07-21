@@ -33,22 +33,25 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        /*
-         * If unary, tries to lift an IF_ELSE_* above
-         */
+        return tryToLiftIfThenTerm(newTerms, termFactory, variableNullability)
+                .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    protected Optional<ImmutableTerm> tryToLiftIfThenTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                          VariableNullability variableNullability) {
         Optional<ImmutableFunctionalTerm> firstIfThenTerm = newTerms.stream()
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
                 .findAny();
 
-        if (firstIfThenTerm.isPresent()) {
-            ImmutableFunctionalTerm functionalTerm = firstIfThenTerm.get();
-                return ((DBIfThenFunctionSymbol) functionalTerm.getFunctionSymbol()).pushDownExpression(
-                        termFactory.getImmutableExpression(this, newTerms), 0, termFactory)
-                        .simplify(variableNullability);
-        }
-        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+        return firstIfThenTerm
+                .map(f -> {
+                    int index = newTerms.indexOf(f);
+                    return ((DBIfThenFunctionSymbol) f.getFunctionSymbol()).pushDownExpression(
+                            termFactory.getImmutableExpression(this, newTerms), index, termFactory)
+                            .simplify(variableNullability);
+                });
     }
 
     @Override

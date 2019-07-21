@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.Optional;
+
 public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunctionSymbolImpl
         implements DBIsNullOrNotFunctionSymbol {
 
@@ -47,6 +49,11 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
+        // Priority for lifting IfThenElse
+        Optional<ImmutableTerm> optionalLifted = tryToLiftIfThenTerm(newTerms, termFactory, variableNullability);
+        if (optionalLifted.isPresent())
+            return optionalLifted.get();
+
         ImmutableTerm newTerm = newTerms.get(0);
 
         IncrementalEvaluation incrementalEvaluation = newTerm.evaluateIsNotNull(variableNullability);
