@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -10,8 +9,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SQLBooleanCaseFunctionSymbolImpl extends DefaultSQLCaseFunctionSymbol implements DBBooleanFunctionSymbol {
-    protected SQLBooleanCaseFunctionSymbolImpl(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
+public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol implements DBBooleanFunctionSymbol {
+    protected DBBooleanCaseFunctionSymbolImpl(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super("BOOL_CASE" + arity, arity, dbBooleanType, rootDBTermType);
     }
 

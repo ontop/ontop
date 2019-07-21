@@ -142,7 +142,7 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBBooleanFunctionSymbol createDBBooleanCase(int arity) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new DBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
     }
 
     @Override

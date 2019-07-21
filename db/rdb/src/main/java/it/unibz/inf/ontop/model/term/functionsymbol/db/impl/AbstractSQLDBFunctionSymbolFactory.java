@@ -407,12 +407,12 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected DBFunctionSymbol createDBCase(int arity) {
-        return new DefaultSQLCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
+        return new DefaultDBCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType);
     }
 
     @Override
     protected DBBooleanFunctionSymbol createDBBooleanCase(int arity) {
-        return new SQLBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
+        return new DBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
     }
 
     @Override
