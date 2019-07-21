@@ -935,6 +935,27 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
+												ImmutableExpression defaultExpression) {
+		ImmutableList<ImmutableExpression> terms = Stream.concat(
+				whenPairs
+						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
+				Stream.of(defaultExpression))
+				.collect(ImmutableCollectors.toList());
+
+		int arity = terms.size();
+
+		if (arity < 3) {
+			throw new IllegalArgumentException("whenPairs must be non-empty");
+		}
+
+		//if (arity == 3)
+		//	return getBooleanIfThenElse(terms.get(0), terms.get(1), defaultExpression);
+
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCase(arity), terms);
+    }
+
+    @Override
     public ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms) {
 		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
 		builder.add(term1);

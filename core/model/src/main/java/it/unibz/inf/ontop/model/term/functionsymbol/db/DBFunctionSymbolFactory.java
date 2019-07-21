@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonNullConstant;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -83,6 +84,8 @@ public interface DBFunctionSymbolFactory {
      * Arity must be odd and >= 3
      */
     DBFunctionSymbol getDBCase(int arity);
+
+    DBBooleanFunctionSymbol getDBBooleanCase(int arity);
 
     DBIfElseNullFunctionSymbol getDBIfElseNull();
 
@@ -267,5 +270,4 @@ public interface DBFunctionSymbolFactory {
      *
      */
     DBFunctionSymbol getDBIntIndex(int nbValues);
-
 }

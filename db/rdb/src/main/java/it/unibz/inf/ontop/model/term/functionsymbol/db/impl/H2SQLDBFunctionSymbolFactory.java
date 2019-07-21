@@ -134,7 +134,18 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
+        // To make sure the AVG does not return an integer but a decimal
+        if (inputType.equals(dbIntegerType))
+            return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
+
+        return super.createDBAvg(inputType, isDistinct);
+    }
+
+    @Override
     protected String getUUIDNameInDialect() {
         return UUID_STR;
     }
+
+
 }

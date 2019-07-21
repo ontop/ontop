@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,7 +49,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
         protected static final String VIEW_PREFIX = "v";
-        private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s";
+        private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s%s";
         private final AtomicInteger viewCounter;
         protected final SQLTermSerializer sqlTermSerializer;
         protected final SQLDialectAdapter dialectAdapter;
@@ -85,11 +86,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(s -> String.format("WHERE %s\n", s))
                     .orElse("");
 
+            String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), fromColumnIDs);
+
             String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), fromColumnIDs);
             String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
 
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
-                    fromString, whereString, orderByString, sliceString);
+                    fromString, whereString, groupByString, orderByString, sliceString);
 
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
@@ -145,6 +148,18 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .map(s -> s + " AS " + projectedColumnMap.get(v))
                             .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + dialectAdapter.sqlQuote(v.getName())))
                     .collect(Collectors.joining(", "));
+        }
+
+        protected String serializeGroupBy(ImmutableSet<Variable> groupByVariables,
+                                          ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+            if (groupByVariables.isEmpty())
+                return "";
+
+            String variableString = groupByVariables.stream()
+                    .map(v -> sqlTermSerializer.serialize(v, fromColumnMap))
+                    .collect(Collectors.joining(", "));
+
+            return String.format("GROUP BY %s\n", variableString);
         }
 
         protected String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,

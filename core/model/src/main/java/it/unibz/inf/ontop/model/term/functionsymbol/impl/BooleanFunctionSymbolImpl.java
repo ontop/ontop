@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
@@ -34,15 +35,15 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
         /*
-         * If unary, tries to lift an IF_ELSE_NULL above
+         * If unary, tries to lift an IF_ELSE_* above
          */
-        if (getArity() == 1 && (!tolerateNulls())) {
+        if (getArity() == 1) {
             ImmutableTerm newTerm = newTerms.get(0);
             if (newTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newTerm;
                 FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-                if (functionSymbol instanceof DBIfElseNullFunctionSymbol) {
-                    return ((DBIfElseNullFunctionSymbol) functionSymbol).liftUnaryBooleanFunctionSymbol(
+                if (functionSymbol instanceof DBIfThenFunctionSymbol) {
+                    return ((DBIfThenFunctionSymbol) functionSymbol).pushDownUnaryBoolean(
                             functionalTerm.getTerms(), this, termFactory)
                             .simplify(variableNullability);
                 }

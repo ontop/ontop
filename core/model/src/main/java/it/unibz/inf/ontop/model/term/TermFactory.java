@@ -429,6 +429,9 @@ public interface TermFactory {
 	 */
 	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
 
+	ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
+										 ImmutableExpression defaultValue);
+
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms);
@@ -595,4 +598,5 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
+
 }

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -48,7 +49,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
         ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
                 .map(s -> s.apply(rdfTypeTerm))
                 .map(t -> t.simplify(childTree.getVariableNullability()))
-                .map(this::unwrapIfElseNull)
+                .flatMap(this::extractPossibleFromCase)
                 .filter(t -> !t.isNull())
                 .collect(ImmutableCollectors.toSet());
 
@@ -58,6 +59,16 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
                         .map(t -> (RDFTermTypeConstant) t)
                         .map(RDFTermTypeConstant::getRDFTermType)
                         .collect(ImmutableCollectors.toSet()));
+    }
+
+    private Stream<ImmutableTerm> extractPossibleFromCase(ImmutableTerm immutableTerm) {
+        if ((immutableTerm instanceof ImmutableFunctionalTerm) &&
+                (((ImmutableFunctionalTerm) immutableTerm).getFunctionSymbol() instanceof DBIfThenFunctionSymbol)) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) immutableTerm;
+            return ((DBIfThenFunctionSymbol)functionalTerm.getFunctionSymbol()).extractPossibleValues(functionalTerm.getTerms());
+        }
+        else
+            return Stream.of(immutableTerm);
     }
 
     /**
