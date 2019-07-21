@@ -15,7 +15,11 @@ public class DefaultSQLCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol
     private static final String FULL_TEMPLATE = "CASE %s    ELSE %s \nEND";
 
     protected DefaultSQLCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super("CASE"+arity, arity, dbBooleanType, rootDBTermType);
+        this("CASE"+arity, arity, dbBooleanType, rootDBTermType);
+    }
+
+    protected DefaultSQLCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        super(name, arity, dbBooleanType, rootDBTermType);
         if ((arity % 2 == 0) && (arity < 3))
             throw new IllegalArgumentException("A CASE function symbol must an odd arity >= 3");
     }

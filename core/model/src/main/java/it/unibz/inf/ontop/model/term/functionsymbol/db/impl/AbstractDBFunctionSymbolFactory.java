@@ -139,6 +139,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private final Map<Integer, DBFunctionSymbol> caseMap;
 
     /**
+     * For the CASE functions
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCaseMap;
+
+    /**
      * For the strict equalities
      */
     private final Map<Integer, DBStrictEqFunctionSymbol> strictEqMap;
@@ -236,6 +241,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.untypedBinaryMathMap = new ConcurrentHashMap<>();
         this.caseMap = new ConcurrentHashMap<>();
+        this.booleanCaseMap = new ConcurrentHashMap<>();
         this.strictEqMap = new ConcurrentHashMap<>();
         this.strictNEqMap = new ConcurrentHashMap<>();
         this.falseOrNullMap = new ConcurrentHashMap<>();
@@ -496,6 +502,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         return caseMap
                 .computeIfAbsent(arity, a -> createDBCase(arity));
+
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBBooleanCase(int arity) {
+        if ((arity < 3) || (arity % 2 == 0))
+            throw new IllegalArgumentException("Arity of a CASE function symbol must be odd and >= 3");
+
+        return booleanCaseMap
+                .computeIfAbsent(arity, a -> createDBBooleanCase(arity));
 
     }
 
@@ -1002,6 +1018,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                                                      DBTermType targetType);
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
+    protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
 

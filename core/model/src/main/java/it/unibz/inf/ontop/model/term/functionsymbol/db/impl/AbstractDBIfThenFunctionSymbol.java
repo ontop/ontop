@@ -5,12 +5,10 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -65,7 +63,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                                   TermFactory termFactory, VariableNullability variableNullability) {
         int arity = getArity();
 
-        List<Map.Entry<ImmutableExpression, ImmutableTerm>> newWhenPairs = new ArrayList<>();
+        List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs = new ArrayList<>();
 
         /*
          * When conditions
@@ -82,7 +80,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
             if (evaluation.getValue().isPresent()) {
                 switch (evaluation.getValue().get()) {
                     case TRUE:
-                        ImmutableTerm possibleValue = terms.get(i+1).simplify(variableNullability);
+                        ImmutableTerm possibleValue = simplifyValue(terms.get(i+1),variableNullability, termFactory);
                         if (newWhenPairs.isEmpty())
                             return possibleValue;
                         else
@@ -95,18 +93,17 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                 ImmutableExpression newExpression = evaluation.getExpression()
                         .orElseThrow(() -> new MinorOntopInternalBugException("The evaluation was expected " +
                                 "to return an expression because no value was returned"));
-                ImmutableTerm possibleValue = terms.get(i+1).simplify(variableNullability);
+                ImmutableTerm possibleValue = simplifyValue(terms.get(i+1), variableNullability, termFactory);
                 newWhenPairs.add(Maps.immutableEntry(newExpression, possibleValue));
             }
         }
 
-        ImmutableTerm defaultValue = extractDefaultValue(terms, termFactory)
-                .simplify(variableNullability);
+        ImmutableTerm defaultValue = simplifyValue(extractDefaultValue(terms, termFactory), variableNullability, termFactory);
 
         if (newWhenPairs.isEmpty())
             return defaultValue;
 
-        ImmutableFunctionalTerm newTerm = termFactory.getDBCase(newWhenPairs.stream(), defaultValue);
+        ImmutableFunctionalTerm newTerm = buildCase(newWhenPairs.stream(), defaultValue, termFactory);
 
         // Make sure the size was reduced so as to avoid an infinite loop
         // For instance, new opportunities may appear when reduced to a IF_ELSE_NULL
@@ -114,6 +111,22 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                 ? newTerm.simplify(variableNullability)
                 : newTerm;
     }
+
+    /**
+     * Can be overridden
+     */
+    protected ImmutableTerm simplifyValue(ImmutableTerm immutableTerm, VariableNullability variableNullability, TermFactory termFactory) {
+        return immutableTerm.simplify(variableNullability);
+    }
+
+    /**
+     * Can be overridden
+     */
+    protected ImmutableFunctionalTerm buildCase(Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs,
+                                                ImmutableTerm defaultValue, TermFactory termFactory) {
+        return termFactory.getDBCase(newWhenPairs, defaultValue);
+    }
+
 
     /**
      * Conservative: can only be post-processed when all sub-functional terms (at different levels of depth)
@@ -170,5 +183,21 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                         ? termFactory.getIsTrue(arguments.get(i))
                         : arguments.get(i))
                 .collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public ImmutableExpression pushDownUnaryBoolean(ImmutableList<? extends ImmutableTerm> arguments,
+                                                    BooleanFunctionSymbol unaryBooleanFunctionSymbol,
+                                                    TermFactory termFactory) {
+        Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs = IntStream.range(0, arguments.size() / 2)
+                .boxed()
+                .map(i -> Maps.immutableEntry(
+                        (ImmutableExpression) arguments.get(2 * i),
+                        termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, arguments.get(2 * i + 1))));
+
+        ImmutableExpression defaultValue = termFactory.getImmutableExpression(unaryBooleanFunctionSymbol,
+                extractDefaultValue(arguments, termFactory));
+
+        return termFactory.getDBBooleanCase(whenPairs, defaultValue);
     }
 }

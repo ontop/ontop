@@ -411,6 +411,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity) {
+        return new SQLBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
+    }
+
+    @Override
     protected DBFunctionSymbol createCoalesceFunctionSymbol(int arity) {
         return new DefaultDBCoalesceFunctionSymbol(COALESCE_STR, arity, abstractRootDBType,
                 Serializers.getRegularSerializer(COALESCE_STR));

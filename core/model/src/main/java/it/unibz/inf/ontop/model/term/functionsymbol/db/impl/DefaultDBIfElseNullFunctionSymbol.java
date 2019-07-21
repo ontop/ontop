@@ -208,4 +208,16 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
         }
         return super.analyzeInjectivity(arguments, nonFreeVariables, variableNullability, variableGenerator, termFactory);
     }
+
+    @Override
+    public ImmutableExpression pushDownUnaryBoolean(ImmutableList<? extends ImmutableTerm> arguments,
+                                                    BooleanFunctionSymbol unaryBooleanFunctionSymbol, TermFactory termFactory) {
+        if (termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, termFactory.getNullConstant())
+                .simplify()
+                .isNull()) {
+            return liftUnaryBooleanFunctionSymbol(arguments, unaryBooleanFunctionSymbol, termFactory);
+        }
+        else
+            return super.pushDownUnaryBoolean(arguments, unaryBooleanFunctionSymbol, termFactory);
+    }
 }
