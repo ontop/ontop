@@ -49,17 +49,12 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
-        // Priority for lifting IfThenElse
-        Optional<ImmutableTerm> optionalLifted = tryToLiftIfThenTerm(newTerms, termFactory, variableNullability);
-        if (optionalLifted.isPresent())
-            return optionalLifted.get();
-
         ImmutableTerm newTerm = newTerms.get(0);
 
         IncrementalEvaluation incrementalEvaluation = newTerm.evaluateIsNotNull(variableNullability);
         switch (incrementalEvaluation.getStatus()) {
             case SAME_EXPRESSION:
-                return termFactory.getImmutableExpression(this, newTerm);
+                return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
             case SIMPLIFIED_EXPRESSION:
                 return incrementalEvaluation.getNewExpression()
                         .map(e -> isNull ? e.negate(termFactory) : e)
