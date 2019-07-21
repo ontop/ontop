@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 
-public interface DBIfElseNullFunctionSymbol extends DBFunctionSymbol {
+public interface DBIfElseNullFunctionSymbol extends DBIfThenFunctionSymbol {
 
     /**
      * Returns BOOL_IF_ELSE_NULL(c, f(v)) where f is an unary BooleanFunctionSymbol, and c and v and the initial terms

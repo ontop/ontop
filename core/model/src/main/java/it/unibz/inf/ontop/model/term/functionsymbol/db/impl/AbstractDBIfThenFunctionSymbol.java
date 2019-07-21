@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -25,7 +26,8 @@ import java.util.stream.Stream;
  *
  * Arguments are an alternation of (ImmutableExpression, ImmutableTerm) plus optionally an ImmutableTerm for the default case
  */
-public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol {
+public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol
+        implements DBIfThenFunctionSymbol {
 
     protected AbstractDBIfThenFunctionSymbol(@Nonnull String name, int arity, DBTermType dbBooleanType,
                                              DBTermType rootDBTermType) {
@@ -50,7 +52,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     }
 
     @Override
-    protected Stream<ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
+    public Stream<ImmutableTerm> extractPossibleValues(ImmutableList<? extends ImmutableTerm> terms) {
         return IntStream.range(1, terms.size())
                 .filter(i -> i % 2 == 1)
                 .boxed()
