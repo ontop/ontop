@@ -12,10 +12,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -100,14 +97,17 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
 
         ImmutableTerm defaultValue = simplifyValue(extractDefaultValue(terms, termFactory), variableNullability, termFactory);
 
-        if (newWhenPairs.isEmpty())
+        ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrunkWhenPairs =
+                shrinkWhenPairs(newWhenPairs, defaultValue);
+
+        if (shrunkWhenPairs.isEmpty())
             return defaultValue;
 
-        ImmutableFunctionalTerm newTerm = buildCase(newWhenPairs.stream(), defaultValue, termFactory);
+        ImmutableFunctionalTerm newTerm = buildCase(shrunkWhenPairs.stream(), defaultValue, termFactory);
 
         // Make sure the size was reduced so as to avoid an infinite loop
         // For instance, new opportunities may appear when reduced to a IF_ELSE_NULL
-        return (newWhenPairs.size() < terms.size() % 2)
+        return (shrunkWhenPairs.size() < terms.size() % 2)
                 ? newTerm.simplify(variableNullability)
                 : newTerm;
     }
@@ -125,6 +125,25 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     protected ImmutableFunctionalTerm buildCase(Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs,
                                                 ImmutableTerm defaultValue, TermFactory termFactory) {
         return termFactory.getDBCase(newWhenPairs, defaultValue);
+    }
+
+    /*
+     * Removes the last when pairs that return the same value as the default "else" case
+     */
+    private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairs(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs, ImmutableTerm defaultValue) {
+
+        int nbPairs = newWhenPairs.size();
+
+        Optional<Integer> lastIncompatibleIndex = IntStream.range(0, nbPairs)
+                .map(i -> nbPairs - i - 1)
+                .filter(i -> !newWhenPairs.get(i).getValue().equals(defaultValue))
+                .boxed()
+                .findFirst();
+
+        return lastIncompatibleIndex
+                .map(i -> ImmutableList.copyOf(newWhenPairs.subList(0, i + 1)))
+                .orElseGet(ImmutableList::of);
     }
 
 
