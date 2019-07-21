@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -37,17 +36,17 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
         /*
          * If unary, tries to lift an IF_ELSE_* above
          */
-        if (getArity() == 1) {
-            ImmutableTerm newTerm = newTerms.get(0);
-            if (newTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newTerm;
-                FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-                if (functionSymbol instanceof DBIfThenFunctionSymbol) {
-                    return ((DBIfThenFunctionSymbol) functionSymbol).pushDownUnaryBoolean(
-                            functionalTerm.getTerms(), this, termFactory)
-                            .simplify(variableNullability);
-                }
-            }
+        Optional<ImmutableFunctionalTerm> firstIfThenTerm = newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .findAny();
+
+        if (firstIfThenTerm.isPresent()) {
+            ImmutableFunctionalTerm functionalTerm = firstIfThenTerm.get();
+                return ((DBIfThenFunctionSymbol) functionalTerm.getFunctionSymbol()).pushDownExpression(
+                        termFactory.getImmutableExpression(this, newTerms), 0, termFactory)
+                        .simplify(variableNullability);
         }
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }

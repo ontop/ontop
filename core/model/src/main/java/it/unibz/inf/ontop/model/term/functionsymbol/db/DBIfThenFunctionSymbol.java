@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 
 import java.util.stream.Stream;
 
@@ -18,9 +17,9 @@ public interface DBIfThenFunctionSymbol extends DBFunctionSymbol {
     /**
      * Pushes a unary boolean function symbol down to the "then" arguments
      *
-     * For instance, f(CASE(c1, t1, c2, t2, t3)) -> IS_TRUE(CASE(c1, f(t1), c2, f(t2), f(t3)))
+     * For instance, f(CASE(c1, t1, c2, t2, t3), t4) -> IS_TRUE(CASE(c1, f(t1,t4), c2, f(t2,t4), f(t3,t4)))
      */
-    ImmutableExpression pushDownUnaryBoolean(ImmutableList<? extends ImmutableTerm> arguments,
-                                             BooleanFunctionSymbol unaryBooleanFunctionSymbol,
-                                             TermFactory termFactory);
+    ImmutableExpression pushDownExpression(ImmutableExpression expression,
+                                           int indexOfDBIfThenFunctionSymbol,
+                                           TermFactory termFactory);
 }
