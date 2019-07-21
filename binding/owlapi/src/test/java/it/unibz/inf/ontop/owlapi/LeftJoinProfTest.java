@@ -567,7 +567,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testSumStudents3() throws Exception {
 
@@ -590,7 +589,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testAvgStudents1() throws Exception {
 
@@ -602,13 +600,12 @@ public class LeftJoinProfTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = ImmutableList.of("11.25");
+        List<String> expectedValues = ImmutableList.of("11.5");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testAvgStudents2() throws Exception {
 
@@ -628,7 +625,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testAvgStudents3() throws Exception {
 
@@ -651,7 +647,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMinStudents1() throws Exception {
 
@@ -669,7 +664,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMinStudents2() throws Exception {
 
@@ -689,7 +683,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMaxStudents1() throws Exception {
 
@@ -707,7 +700,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMaxStudents2() throws Exception {
 
@@ -727,7 +719,6 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testDuration1() throws Exception {
 
@@ -744,13 +735,12 @@ public class LeftJoinProfTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0.0", "0.0", "0.0", "0.0", "0.0", "18.0", "20.0", "54.5");
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMultitypedSum1() throws Exception {
 
@@ -766,13 +756,12 @@ public class LeftJoinProfTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("31.0", "32.0", "75.5");
+        List<String> expectedValues = ImmutableList.of("31", "32", "75.5");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
     }
 
-    @Ignore
     @Test
     public void testMultitypedAvg1() throws Exception {
 
@@ -788,7 +777,7 @@ public class LeftJoinProfTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("15.5", "16.0", "18.875");
+        List<String> expectedValues = ImmutableList.of("15.5", "16", "18.875");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
 
         System.out.println("SQL Query: \n" + sql);
@@ -797,7 +786,7 @@ public class LeftJoinProfTest {
     /**
      * Checks that the type error is detected
      */
-    @Ignore
+    @Ignore("TODO: simply EQ with CASE")
     @Test
     public void testMinusMultitypedSum() throws Exception {
 
@@ -832,7 +821,7 @@ public class LeftJoinProfTest {
     /**
      * Checks that the type error is detected
      */
-    @Ignore
+    @Ignore("TODO: simply EQ with CASE")
     @Test
     public void testMinusMultitypedAvg() throws Exception {
 
