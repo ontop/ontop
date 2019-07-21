@@ -205,18 +205,40 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     }
 
     @Override
-    public ImmutableExpression pushDownUnaryBoolean(ImmutableList<? extends ImmutableTerm> arguments,
-                                                    BooleanFunctionSymbol unaryBooleanFunctionSymbol,
-                                                    TermFactory termFactory) {
-        Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs = IntStream.range(0, arguments.size() / 2)
+    public ImmutableExpression pushDownExpression(ImmutableExpression expression, int indexOfDBIfThenFunctionSymbol,
+                                                  TermFactory termFactory) {
+        ImmutableList<? extends ImmutableTerm> expressionArguments = expression.getTerms();
+        if (indexOfDBIfThenFunctionSymbol >= expressionArguments.size())
+            throw new IllegalArgumentException("Wrong index given");
+
+        ImmutableList<? extends ImmutableTerm> ifThenArguments = Optional.of(expressionArguments.get(indexOfDBIfThenFunctionSymbol))
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> equals(t.getFunctionSymbol()))
+                .map(ImmutableFunctionalTerm::getTerms)
+                .orElseThrow(() -> new IllegalArgumentException("Was expected to find this function symbol at the indicated position"));
+
+        BooleanFunctionSymbol booleanFunctionSymbol = expression.getFunctionSymbol();
+
+        Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs = IntStream.range(0, ifThenArguments.size() / 2)
                 .boxed()
                 .map(i -> Maps.immutableEntry(
-                        (ImmutableExpression) arguments.get(2 * i),
-                        termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, arguments.get(2 * i + 1))));
+                        (ImmutableExpression) ifThenArguments.get(2 * i),
+                        termFactory.getImmutableExpression(booleanFunctionSymbol,
+                                updateArguments(ifThenArguments.get(2 * i + 1), indexOfDBIfThenFunctionSymbol, expressionArguments))));
 
-        ImmutableExpression defaultValue = termFactory.getImmutableExpression(unaryBooleanFunctionSymbol,
-                extractDefaultValue(arguments, termFactory));
+        ImmutableExpression defaultValue = termFactory.getImmutableExpression(booleanFunctionSymbol,
+                updateArguments(extractDefaultValue(ifThenArguments, termFactory), indexOfDBIfThenFunctionSymbol,
+                        expressionArguments));
 
         return termFactory.getDBBooleanCase(whenPairs, defaultValue);
+    }
+
+    private ImmutableList<? extends ImmutableTerm> updateArguments(ImmutableTerm subTerm, int index,
+                                                                   ImmutableList<? extends ImmutableTerm> expressionArguments) {
+        return IntStream.range(0, expressionArguments.size())
+                .boxed()
+                .map(i -> i == index ? subTerm : expressionArguments.get(i))
+                .collect(ImmutableCollectors.toList());
     }
 }

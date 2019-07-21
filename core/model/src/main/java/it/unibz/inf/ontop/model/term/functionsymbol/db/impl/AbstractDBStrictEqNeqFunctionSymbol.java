@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -42,6 +43,11 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
 
         if (newTerms.size() < 2)
             throw new IllegalArgumentException("newTerms must have at least two elements");
+
+        // Priority for lifting IfThenElse
+        Optional<ImmutableTerm> optionalLifted = tryToLiftIfThenTerm(newTerms, termFactory, variableNullability);
+        if (optionalLifted.isPresent())
+            return optionalLifted.get();
 
         ImmutableSet<ImmutableTerm> nonNullTerms = newTerms.stream()
                 .filter(t -> !t.isNull())

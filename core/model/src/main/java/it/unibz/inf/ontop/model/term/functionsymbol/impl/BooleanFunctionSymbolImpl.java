@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -34,22 +33,25 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        /*
-         * If unary, tries to lift an IF_ELSE_* above
-         */
-        if (getArity() == 1) {
-            ImmutableTerm newTerm = newTerms.get(0);
-            if (newTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newTerm;
-                FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
-                if (functionSymbol instanceof DBIfThenFunctionSymbol) {
-                    return ((DBIfThenFunctionSymbol) functionSymbol).pushDownUnaryBoolean(
-                            functionalTerm.getTerms(), this, termFactory)
+        return tryToLiftIfThenTerm(newTerms, termFactory, variableNullability)
+                .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    protected Optional<ImmutableTerm> tryToLiftIfThenTerm(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                          VariableNullability variableNullability) {
+        Optional<ImmutableFunctionalTerm> firstIfThenTerm = newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .findAny();
+
+        return firstIfThenTerm
+                .map(f -> {
+                    int index = newTerms.indexOf(f);
+                    return ((DBIfThenFunctionSymbol) f.getFunctionSymbol()).pushDownExpression(
+                            termFactory.getImmutableExpression(this, newTerms), index, termFactory)
                             .simplify(variableNullability);
-                }
-            }
-        }
-        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+                });
     }
 
     @Override

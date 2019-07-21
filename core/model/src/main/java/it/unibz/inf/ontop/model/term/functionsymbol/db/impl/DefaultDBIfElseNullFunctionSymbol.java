@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -210,14 +209,22 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     @Override
-    public ImmutableExpression pushDownUnaryBoolean(ImmutableList<? extends ImmutableTerm> arguments,
-                                                    BooleanFunctionSymbol unaryBooleanFunctionSymbol, TermFactory termFactory) {
-        if (termFactory.getImmutableExpression(unaryBooleanFunctionSymbol, termFactory.getNullConstant())
+    public ImmutableExpression pushDownExpression(ImmutableExpression expression, int indexOfDBIfThenFunctionSymbol,
+                                                  TermFactory termFactory) {
+        BooleanFunctionSymbol booleanFunctionSymbol = expression.getFunctionSymbol();
+
+        if ((booleanFunctionSymbol.getArity() == 1) &&
+                termFactory.getImmutableExpression(booleanFunctionSymbol, termFactory.getNullConstant())
                 .simplify()
                 .isNull()) {
-            return liftUnaryBooleanFunctionSymbol(arguments, unaryBooleanFunctionSymbol, termFactory);
+            ImmutableList<? extends ImmutableTerm> ifThenArguments = Optional.of(expression.getTerm(indexOfDBIfThenFunctionSymbol))
+                    .filter(t -> t instanceof ImmutableFunctionalTerm)
+                    .map(t -> ((ImmutableFunctionalTerm) t).getTerms())
+                    .orElseThrow(() -> new IllegalArgumentException("Wrong index"));
+
+            return liftUnaryBooleanFunctionSymbol(ifThenArguments, booleanFunctionSymbol, termFactory);
         }
         else
-            return super.pushDownUnaryBoolean(arguments, unaryBooleanFunctionSymbol, termFactory);
+            return super.pushDownExpression(expression, indexOfDBIfThenFunctionSymbol, termFactory);
     }
 }

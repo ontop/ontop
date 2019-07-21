@@ -9,16 +9,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DefaultSQLCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
+public class DefaultDBCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
 
     private static final String WHEN_THEN_TEMPLATE = "    WHEN %s THEN %s\n";
     private static final String FULL_TEMPLATE = "CASE %s    ELSE %s \nEND";
 
-    protected DefaultSQLCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DefaultDBCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
         this("CASE"+arity, arity, dbBooleanType, rootDBTermType);
     }
 
-    protected DefaultSQLCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
+    protected DefaultDBCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
         super(name, arity, dbBooleanType, rootDBTermType);
         if ((arity % 2 == 0) && (arity < 3))
             throw new IllegalArgumentException("A CASE function symbol must an odd arity >= 3");
