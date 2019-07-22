@@ -39,17 +39,11 @@ public class BooleanDBIfElseNullFunctionSymbolImpl extends DefaultDBIfElseNullFu
         if (canBeReplacedByValue(newCondition, newThenValue, termFactory)) {
             return newThenValue;
         }
-
         if (newThenValue instanceof ImmutableExpression) {
             return termFactory.getImmutableExpression(this, newCondition, newThenValue);
         }
         else if (newThenValue instanceof DBConstant) {
-            if (newThenValue.equals(termFactory.getDBBooleanConstant(true)))
-                return newCondition;
-            else if (newThenValue.equals(termFactory.getDBBooleanConstant(false)))
-                return newCondition.negate(termFactory);
-            else
-                throw new MinorOntopInternalBugException("Was expecting the constant to be boolean");
+            return termFactory.getIsTrue((DBConstant) newThenValue);
         }
         else if (newThenValue.isNull())
             return newThenValue;

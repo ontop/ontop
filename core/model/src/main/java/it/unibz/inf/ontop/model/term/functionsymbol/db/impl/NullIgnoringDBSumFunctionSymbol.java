@@ -22,8 +22,8 @@ public class NullIgnoringDBSumFunctionSymbol extends AbstractDBAggregationFuncti
     protected NullIgnoringDBSumFunctionSymbol(@Nonnull DBTermType inputType, boolean isDistinct) {
         this(inputType, isDistinct,
                 isDistinct
-                        ? Serializers.getRegularSerializer("SUM")
-                        : Serializers.getDistinctAggregationSerializer("SUM"));
+                        ? Serializers.getDistinctAggregationSerializer("SUM")
+                        : Serializers.getRegularSerializer("SUM"));
     }
 
     @Override

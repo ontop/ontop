@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
+import java.util.Optional;
+
 public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunctionSymbolImpl
         implements DBIsNullOrNotFunctionSymbol {
 
@@ -52,7 +54,7 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
         IncrementalEvaluation incrementalEvaluation = newTerm.evaluateIsNotNull(variableNullability);
         switch (incrementalEvaluation.getStatus()) {
             case SAME_EXPRESSION:
-                return termFactory.getImmutableExpression(this, newTerm);
+                return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
             case SIMPLIFIED_EXPRESSION:
                 return incrementalEvaluation.getNewExpression()
                         .map(e -> isNull ? e.negate(termFactory) : e)
