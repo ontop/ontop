@@ -30,10 +30,12 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import java.util.Optional;
@@ -82,31 +84,18 @@ public class TargetQueryRenderer {
         return pm.getShortForm(uri, insideQuotes);
     }
 
-    private static String appendTerms(ImmutableTerm term) {
-        if (term instanceof Constant) {
-            String st = ((Constant) term).getValue();
-            if (st.contains("{")) {
-                st = st.replace("{", "\\{");
-                st = st.replace("}", "\\}");
-            }
-            return st;
-        } else {
-            return "{" + ((Variable) term).getName() + "}";
-        }
-    }
-
     /**
      * Prints the text representation of different terms.
      */
     private static String getDisplayName(ImmutableTerm term, PrefixManager prefixManager) {
-        if (term instanceof ImmutableFunctionalTerm)
+        if (term instanceof ImmutableFunctionalTerm) // RDF(..) or ||n(...) or TmpToTEXT(...)
             return displayFunction((ImmutableFunctionalTerm) term, prefixManager);
         if (term instanceof Variable)
             return displayVariable((Variable)term);
         if (term instanceof IRIConstant)
             return displayIRIConstant((IRIConstant)term, prefixManager);
         if (term instanceof RDFLiteralConstant)
-            return displayValueConstant((Constant)term);
+            return displayValueConstant((RDFLiteralConstant)term);
         if (term instanceof BNode)
             return displayBnode((BNode)term);
         throw new UnexpectedTermException(term);
@@ -144,9 +133,7 @@ public class TargetQueryRenderer {
 
             if (optionalDatatype.isPresent()) {
                 return displayDatatypeFunction(lexicalTerm, optionalDatatype.get(), prefixManager);
-            }
-
-            if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+            }  else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
                 FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
                 if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
@@ -154,11 +141,18 @@ public class TargetQueryRenderer {
                 else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
                     return displayFunctionalBnode(lexicalFunctionalTerm);
             }
-        }
-        if (functionSymbol instanceof DBConcatFunctionSymbol)
+                throw new IllegalArgumentException("unsupported function " + function);
+
+        } else if (functionSymbol instanceof DBConcatFunctionSymbol) {
             return displayConcat(function);
-        return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
+        } else if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
+            return displayVariable((Variable) function.getTerm(0));
+        } else {
+            return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
+        }
+     //   return null; // TODO: why do we need a return here??
     }
+
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
         StringBuilder sb = new StringBuilder("_:");
@@ -186,12 +180,15 @@ public class TargetQueryRenderer {
     }
 
     private static String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype, PrefixManager prefixManager) {
-        String lexicalString = getDisplayName(lexicalTerm, prefixManager);
+        final String lexicalString = getDisplayName(lexicalTerm, prefixManager);
 
         return datatype.getLanguageTag()
                 .map(tag -> lexicalString + "@" + tag.getFullString())
-                .orElseGet(() -> lexicalString + "^^"
-                        + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager, false));
+                .orElseGet(() -> {
+                    final String typePostfix = datatype.getIRI().equals(RDFS.LITERAL) ? "" : "^^"
+                            + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager, false);
+                    return lexicalString + typePostfix;
+                });
     }
 
 
@@ -204,8 +201,10 @@ public class TargetQueryRenderer {
         String templateFormat = template.replace("{}", "%s");
 
         final Object[] varNames = function.getTerms().stream()
+                // If the term is a cast-to-string function, we take out the first (0-th) argument
+                .map(t -> t instanceof ImmutableFunctionalTerm ? ((ImmutableFunctionalTerm) t).getTerm(0) : t)
                 .filter(Variable.class::isInstance)
-                .map(var -> getDisplayName(var, prefixManager))
+                .map(var -> getDisplayName((Variable)var, prefixManager))
                 .toArray();
 
         String originalUri = String.format(templateFormat, varNames);
@@ -233,7 +232,18 @@ public class TargetQueryRenderer {
         StringBuilder sb = new StringBuilder();
         ImmutableList<? extends ImmutableTerm> terms = function.getTerms();
         sb.append("\"");
-        terms.forEach(TargetQueryRenderer::appendTerms);
+        for (ImmutableTerm term : terms) {
+            if (term instanceof Constant) {
+                String st = ((Constant) term).getValue();
+                if (st.contains("{")) {
+                    st = st.replace("{", "\\{");
+                    st = st.replace("}", "\\}");
+                }
+                sb.append(st);
+            } else {
+                sb.append("{").append(((Variable) term).getName()).append("}");
+            }
+        }
         sb.append("\"");
         return sb.toString();
     }

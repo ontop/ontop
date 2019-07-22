@@ -730,7 +730,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
             }
         }
         // TODO(xiao):
-        //  We may need to import other functionality (but probabaly never used) from the old ANTLR file:
+        //  We may need to import other functionality (but probably never used) from the old ANTLR file:
         //  ontop/client/protege/src/main/java/it/unibz/inf/ontop/protege/utils/MappingFilter.g
 
 //		if (textToParse != null) {
@@ -771,7 +771,6 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 		model.setFocusedSource(newSource.getSourceID());
 
 		mappingList.revalidate();
-
 	}
 
 

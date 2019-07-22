@@ -369,10 +369,12 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 //		ImmutableList<TargetAtom> targetQuery = map.getTargetAtoms();
 //		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		// TODO: the orElse part
-		String trgQuery = map.getTargetString()
-				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
+//		String trgQuery = map.getOptionalTargetString()
+//				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
 
-		//String trgQuery = map.getTargetString();
+		String trgQuery = TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager);
+
+		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
 
  		OBDASQLQuery sourceQuery = map.getSourceQuery();

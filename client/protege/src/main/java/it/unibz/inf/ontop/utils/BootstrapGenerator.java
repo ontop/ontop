@@ -75,6 +75,7 @@ public class BootstrapGenerator {
         Set<OWLDeclarationAxiom> declarationAxioms = directMappingEngine.extractDeclarationAxioms(manager,
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()));
+
         List<AddAxiom> addAxioms = declarationAxioms.stream()
                 .map(ax -> new AddAxiom(owlManager.getActiveOntology(), ax))
                 .collect(Collectors.toList());
@@ -94,7 +95,7 @@ public class BootstrapGenerator {
             conn = connManager.getConnection(configuration.getSettings());
         }
         catch (SQLException e) {
-            throw new RuntimeException("JDBC connection are missing, have you setup Ontop Mapping properties?" +
+            throw new RuntimeException("JDBC connection is missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
         RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);

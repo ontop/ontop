@@ -38,6 +38,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -218,7 +219,9 @@ public class DirectMappingEngine {
 
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
-            it.unibz.inf.ontop.spec.mapping.PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+            PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
+
+
             MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
             mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
         }
