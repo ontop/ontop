@@ -183,12 +183,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         return projectedVariables.stream()
                 // We don't consider variables nullable on both side
-                .filter(v -> !(variableNullability1.isPossiblyNullable(v) || variableNullability2.isPossiblyNullable(v)))
+                .filter(v -> !(variableNullability1.isPossiblyNullable(v) && variableNullability2.isPossiblyNullable(v)))
                 .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
     }
 
     private static ImmutableSet<ImmutableTerm> extractDefs(ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs,
                                                            Variable v) {
+        if (possibleDefs.isEmpty())
+            return ImmutableSet.of(v);
+
         return possibleDefs.stream()
                 .map(s -> s.apply(v))
                 .collect(ImmutableCollectors.toSet());
