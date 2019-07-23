@@ -26,7 +26,8 @@ public class OntopSemanticIndexLoaderImpl implements OntopSemanticIndexLoader {
     OntopSemanticIndexLoaderImpl(SIRepository repo, Connection connection, Properties properties, Optional<OWLOntology> tbox) {
         this.connection = connection;
 
-        Properties newProperties = new Properties(properties);
+        Properties newProperties = new Properties();
+        newProperties.putAll(properties);
         // The SI unfortunately does not provide unique constraints... and is not robust to DISTINCTs in a sub-query
         newProperties.putIfAbsent(OntopModelSettings.CARDINALITY_MODE, "LOOSE");
 
