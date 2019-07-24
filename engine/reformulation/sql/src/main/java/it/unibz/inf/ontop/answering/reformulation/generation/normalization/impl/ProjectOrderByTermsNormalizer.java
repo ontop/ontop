@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -27,13 +28,14 @@ import java.util.stream.Stream;
 
 public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
 
+    private final boolean onlyInPresenceOfDistinct;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
 
-    @Inject
-    protected ProjectOrderByTermsNormalizer(SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory) {
-        this.substitutionFactory = substitutionFactory;
-        this.iqFactory = iqFactory;
+    protected ProjectOrderByTermsNormalizer(boolean onlyInPresenceOfDistinct, CoreSingletons coreSingletons) {
+        this.onlyInPresenceOfDistinct = onlyInPresenceOfDistinct;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
@@ -77,6 +79,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
                 .map(n -> (OrderByNode) n);
 
         return orderByNode
+                .filter(o -> distinctNode.isPresent() || (!onlyInPresenceOfDistinct))
                 .map(o -> new Analysis(distinctNode.isPresent(), constructionNode, o.getComparators()));
     }
 
