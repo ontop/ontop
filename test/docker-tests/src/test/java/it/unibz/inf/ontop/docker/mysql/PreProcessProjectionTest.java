@@ -21,32 +21,32 @@ public class PreProcessProjectionTest extends AbstractVirtualModeTest {
     public void testSimpleQueryJoin() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Customer}";
-        countResults(query, 2155);
+        countResults(query, 89);
     }
     @Test
     public void testSimpleQueryAlias() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :locationRegion ?y}";
-        countResults(query, 53);
+        countResults(query, 4);
     }
     @Test
     public void testSimpleQueryView() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :orderDetailDiscount ?y}";
-        countResults(query, 2155);
+        countResults(query, 830);
     }
     @Test
     public void testComplexQueryView() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x a :Location}";
-        countResults(query, 53);
+        countResults(query, 4);
     }
 
     @Test
     public void testjoinWithAliasInSubQuery() throws Exception {
         String query = "PREFIX : <http://www.semanticweb.org/vidar/ontologies/2014/11/northwind-handmade#>" +
                 " select * {?x :locationAddress ?y}";
-        countResults(query, 19);
+        countResults(query, 1);
     }
 
 
