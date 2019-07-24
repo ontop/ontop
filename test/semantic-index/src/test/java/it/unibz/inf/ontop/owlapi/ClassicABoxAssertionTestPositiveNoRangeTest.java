@@ -93,7 +93,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsLiteral() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :uliteral ?y}";
 		int count = executeQuery(query);
-		assertEquals(1, count);
+		assertEquals(2, count);
 	}
 
 	public void testDataPropertyAssertionsBoolean() throws OWLException{
