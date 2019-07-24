@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -42,8 +43,17 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         if (focusNode instanceof UnionNode || focusNode instanceof ConstructionNode) {
             optionalProposal = makeProposal((ExplicitVariableProjectionNode) focusNode, retainedVariables);
         }
-
-        if (focusNode instanceof JoinOrFilterNode) {
+        /*
+         * Currently, for a DISTINCT node we assume that all its variables are required (whatever the parent actually requires)
+         * TODO: try to relax it
+         */
+        else if (focusNode instanceof  DistinctNode) {
+            QueryNode childNode = query.getChildrenStream(focusNode)
+                    .findAny()
+                    .orElseThrow(() -> new MinorOntopInternalBugException("One child was expected for the distinct node"));
+            return optimizeSubtree(childNode, query, query.getVariables(focusNode));
+        }
+        else if (focusNode instanceof JoinOrFilterNode) {
             retainedVariables = updateRetainedVariables((JoinOrFilterNode) focusNode, query, retainedVariables);
         } else if (focusNode instanceof ExtendedProjectionNode) {
             retainedVariables = updateRetainedVariables((ExtendedProjectionNode) focusNode);
