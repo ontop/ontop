@@ -24,7 +24,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String ABSTRACT_DB_TYPE_STR = "AbstractDBType";
 
     public static final String TEXT_STR = "TEXT";
-    protected static final String CHAR_STR = "CHAR";
+    public static final String CHAR_STR = "CHAR";
     protected static final String CHARACTER_STR = "CHARACTER";
     protected static final String VARCHAR_STR = "VARCHAR";
     protected static final String CHAR_VAR_STR = "CHARACTER VARYING";
