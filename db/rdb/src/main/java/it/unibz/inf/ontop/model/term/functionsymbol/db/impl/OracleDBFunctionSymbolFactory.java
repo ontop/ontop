@@ -63,9 +63,13 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
         // Default TO_CHAR (unknown input type)
-        DBFunctionSymbol toCharFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_CHAR_STR, 1, dbStringType,
+        DBFunctionSymbol toChar1FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_CHAR_STR, 1, dbStringType,
                 false, abstractRootDBType);
-        table.put(TO_CHAR_STR, 1, toCharFunctionSymbol);
+        table.put(TO_CHAR_STR, 1, toChar1FunctionSymbol);
+        DBFunctionSymbol toChar2FunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(TO_CHAR_STR, 2, dbStringType,
+                false, abstractRootDBType);
+
+        table.put(TO_CHAR_STR, 2, toChar2FunctionSymbol);
 
         return ImmutableTable.copyOf(table);
     }
