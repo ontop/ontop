@@ -135,7 +135,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
 
             return liftedTree.getRootNode().isEquivalentTo(constructionNode)
                     ? possibleChildTree
-                    : tree;
+                    : iqFactory.createUnaryIQTree(constructionNode, tree);
         }
         else
             return iqFactory.createUnaryIQTree(constructionNode, tree);
