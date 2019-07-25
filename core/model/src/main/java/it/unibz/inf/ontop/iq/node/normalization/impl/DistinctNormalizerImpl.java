@@ -74,11 +74,21 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
 
         IQTree grandChildTree = state.getGrandChildTree();
+        // No need to have a DISTINCT as a grand child
+        IQTree newGrandChildTree = (grandChildTree.getRootNode() instanceof DistinctNode)
+                ? ((UnaryIQTree)grandChildTree).getChild()
+                : grandChildTree;
+
+        IQProperties childProperties = (newGrandChildTree == grandChildTree)
+                ? iqFactory.createIQProperties().declareNormalizedForOptimization()
+                : iqFactory.createIQProperties();
 
         IQTree newChildTree = state.getChildConstructionNode()
-                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, grandChildTree,
-                        iqFactory.createIQProperties().declareNormalizedForOptimization()))
-                .orElse(grandChildTree);
+                .map(c -> iqFactory.createUnaryIQTree(c, newGrandChildTree, childProperties))
+                // To be normalized again in case a DISTINCT was present as a grand child.
+                // NB: does nothing if it is not the case
+                .map(t -> t.normalizeForOptimization(variableGenerator))
+                .orElse(newGrandChildTree);
 
         IQTree distinctTree = createDistinctTree(iqFactory.createDistinctNode(), newChildTree,
                 currentIQProperties.declareNormalizedForOptimization());
