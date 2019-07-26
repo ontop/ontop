@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.Constant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import java.util.Optional;
 
@@ -58,6 +56,23 @@ public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
                             .orElse(""))
                     .map(s -> (Constant) termFactory.getDBStringConstant(s))
                     .orElseGet(termFactory::getNullConstant);
+        }
+        else if ((newTerm instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) newTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)) {
+            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newTerm;
+            RDFTermTypeFunctionSymbol functionSymbol = (RDFTermTypeFunctionSymbol) functionalTerm.getFunctionSymbol();
+
+            return functionSymbol.lift(
+                    functionalTerm.getTerms(),
+                    c -> Optional.of(c)
+                            .map(RDFTermTypeConstant::getRDFTermType)
+                            .filter(t -> t instanceof RDFDatatype)
+                            .map(t -> ((RDFDatatype) t).getLanguageTag()
+                                    .map(LanguageTag::getFullString)
+                                    .orElse(""))
+                            .map(s -> (ImmutableTerm) termFactory.getDBStringConstant(s))
+                            .orElseGet(termFactory::getNullConstant),
+                    termFactory);
         }
         // TODO: simplify in the presence of magic numbers
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
