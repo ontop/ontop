@@ -63,7 +63,7 @@ ENTRYPOINT java -cp ./lib/*:./jdbc/* -Dlogback.configurationFile=file:./log/logb
         --mapping=input/university-complete.obda \
         --properties=input/university-complete.docker.properties \
         --cors-allowed-origins=http://yasgui.org \
-        --lazy=true
+        --lazy
 ```
 
 Then, run the commands to build and run the Docker image:
