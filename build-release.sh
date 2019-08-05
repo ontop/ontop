@@ -80,11 +80,11 @@ PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0
 
 
 # location and name for jetty distribution (should be ZIP)
-JETTY_COPY_FILENAME=jetty-distribution-9.4.6
-JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.6.v20170531
+JETTY_COPY_FILENAME=jetty-distribution-9.4.19.v20190610
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.19.v20190610
 
 # location and name for tomcat distribution (should be zip)
-TOMCAT_FILENAME=apache-tomcat-8.5.9
+TOMCAT_FILENAME=apache-tomcat-9.0.22
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
@@ -227,7 +227,7 @@ mvn assembly:assembly
 rm -fr ${ONTOP_CLI}
 mkdir -p ${ONTOP_CLI}
 echo "[INFO] Copying files..."
-cp target/ontop-distribution-${VERSION}.zip ${ONTOP_CLI}
+cp target/${ONTOP_CLI}-${VERSION}.zip ${ONTOP_CLI}
 
 echo ""
 echo "========================================="
