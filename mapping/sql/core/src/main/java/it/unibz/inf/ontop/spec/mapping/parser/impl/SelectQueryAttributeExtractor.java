@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -60,7 +61,7 @@ public class SelectQueryAttributeExtractor {
     public ImmutableList<QuotedID> extract(String sql) throws InvalidSelectQueryException {
 
         try {
-            ImmutableMap<QualifiedAttributeID, Term> attrs = sqae.parse(sql).getAttributes();
+            ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sqae.parse(sql).getAttributes();
 
             return attrs.keySet().stream()
                     .filter(id -> id.getRelation() == null)

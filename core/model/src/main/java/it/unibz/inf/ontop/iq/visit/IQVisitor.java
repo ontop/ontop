@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 
+
 public interface IQVisitor<T> {
 
     T visitIntensionalData(IntensionalDataNode dataNode);
@@ -15,6 +16,7 @@ public interface IQVisitor<T> {
     T visitNonStandardLeafNode(LeafIQTree leafNode);
 
     T visitConstruction(ConstructionNode rootNode, IQTree child);
+    T visitAggregation(AggregationNode aggregationNode, IQTree child);
     T visitFilter(FilterNode rootNode, IQTree child);
     T visitDistinct(DistinctNode rootNode, IQTree child);
     T visitSlice(SliceNode sliceNode, IQTree child);

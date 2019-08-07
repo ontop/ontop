@@ -55,6 +55,11 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer implements IQTre
     }
 
     @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        return transformUnaryNode(rootNode, child);
+    }
+
+    @Override
     public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
         return transformUnaryNode(rootNode, child);
     }

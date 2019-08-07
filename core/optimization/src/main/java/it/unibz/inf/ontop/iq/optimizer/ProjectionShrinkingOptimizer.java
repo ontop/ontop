@@ -45,10 +45,9 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
 
         if (focusNode instanceof JoinOrFilterNode) {
             retainedVariables = updateRetainedVariables((JoinOrFilterNode) focusNode, query, retainedVariables);
-        } else if (focusNode instanceof ConstructionNode) {
-            retainedVariables = updateRetainedVariables((ConstructionNode) focusNode);
+        } else if (focusNode instanceof ExtendedProjectionNode) {
+            retainedVariables = updateRetainedVariables((ExtendedProjectionNode) focusNode);
         }
-
 
         if (optionalProposal.isPresent()) {
             NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults;
@@ -132,7 +131,7 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         return ImmutableSet.copyOf(Sets.union(allRetainedVariables, joinOrFilterVariables));
     }
 
-    private ImmutableSet<Variable> updateRetainedVariables(ConstructionNode constructionNode) {
+    private ImmutableSet<Variable> updateRetainedVariables(ExtendedProjectionNode extendedProjectionNode) {
 
 
         /*
@@ -141,15 +140,15 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
           - variables projected independently of the substitution
          */
         //P: all projected variables
-        ImmutableSet<Variable> projectedVariables = constructionNode.getVariables();
+        ImmutableSet<Variable> projectedVariables = extendedProjectionNode.getVariables();
         //O: variables corresponding to the substitution's output
-        ImmutableSet<Variable> substitutionOutput = constructionNode.getSubstitution().getDomain();
+        ImmutableSet<Variable> substitutionOutput = extendedProjectionNode.getSubstitution().getDomain();
         //P' = P - O
         ImmutableSet<Variable> simpleProjectionVariables = projectedVariables.stream()
                 .filter(v -> !substitutionOutput.contains(v))
                 .collect(ImmutableCollectors.toSet());
         //R: variables required by the substitution
-        ImmutableSet<Variable> variablesRequiredBySubstitution = constructionNode.getSubstitution().getImmutableMap().values().stream()
+        ImmutableSet<Variable> variablesRequiredBySubstitution = extendedProjectionNode.getSubstitution().getImmutableMap().values().stream()
                 .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet());
 
         //return P' + R

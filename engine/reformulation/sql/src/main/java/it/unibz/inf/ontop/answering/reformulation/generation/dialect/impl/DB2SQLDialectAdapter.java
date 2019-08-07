@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	private static Map<Integer, String> SqlDatatypes;
@@ -144,6 +145,11 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String getDummyTable() {
 		return "SELECT 1 from sysibm.sysdummy1";
+	}
+
+	@Override
+	public Optional<String> getTrueTable() {
+		return Optional.of("sysibm.sysdummy1");
 	}
 
 	@Override 

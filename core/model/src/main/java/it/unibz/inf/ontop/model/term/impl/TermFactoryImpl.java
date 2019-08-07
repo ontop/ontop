@@ -351,18 +351,18 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
     public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
-    		ImmutableFunctionalTerm liftableFunctionalTerm) {
-		return new FunctionalTermDecompositionImpl(liftableFunctionalTerm);
+    		ImmutableTerm liftableTerm) {
+		return new FunctionalTermDecompositionImpl(liftableTerm);
     }
 
 	@Override
 	public ImmutableFunctionalTerm.FunctionalTermDecomposition getFunctionalTermDecomposition(
-			ImmutableFunctionalTerm liftableFunctionalTerm,
+			ImmutableTerm liftableTerm,
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap) {
 
 		return (subTermSubstitutionMap.isEmpty())
-				? getFunctionalTermDecomposition(liftableFunctionalTerm)
-				: new FunctionalTermDecompositionImpl(liftableFunctionalTerm, subTermSubstitutionMap);
+				? getFunctionalTermDecomposition(liftableTerm)
+				: new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitutionMap);
 	}
 
 	@Override
@@ -589,6 +589,36 @@ public class TermFactoryImpl implements TermFactory {
     }
 
     @Override
+    public ImmutableFunctionalTerm getDBCount(boolean isDistinct) {
+        return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(0, isDistinct));
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBCount(ImmutableTerm term, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCount(1, isDistinct), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBSum(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBSum(dbType, isDistinct), subTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBAvg(ImmutableTerm subTerm, DBTermType dbType, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBAvg(dbType, isDistinct), subTerm);
+	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMin(dbType), subTerm);
+    }
+
+	@Override
+	public ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMax(dbType), subTerm);
+	}
+
+    @Override
 	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
@@ -775,7 +805,7 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate, 
+	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(
 				dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(bnodeTemplate),
@@ -799,6 +829,28 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getDBCastFunctionalTerm(DBTermType inputType, DBTermType targetType, ImmutableTerm term) {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCastFunctionSymbol(inputType, targetType), term);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableTerm... possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(ImmutableList.copyOf(possibleValues));
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.length),
+				argumentBuilder.build());
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getDBIntIndex(ImmutableTerm idTerm, ImmutableList<ImmutableTerm> possibleValues) {
+		ImmutableList.Builder<ImmutableTerm> argumentBuilder = ImmutableList.builder();
+		argumentBuilder.add(idTerm);
+		argumentBuilder.addAll(possibleValues);
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBIntIndex(possibleValues.size()),
+				argumentBuilder.build());
 	}
 
 	@Override
@@ -881,6 +933,36 @@ public class TermFactoryImpl implements TermFactory {
 	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs) {
 		return getDBCase(whenPairs, valueNull);
 	}
+
+    @Override
+    public ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
+												ImmutableExpression defaultExpression) {
+		ImmutableList<ImmutableExpression> terms = Stream.concat(
+				whenPairs
+						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
+				Stream.of(defaultExpression))
+				.collect(ImmutableCollectors.toList());
+
+		int arity = terms.size();
+
+		if (arity < 3) {
+			throw new IllegalArgumentException("whenPairs must be non-empty");
+		}
+
+		//if (arity == 3)
+		//	return getBooleanIfThenElse(terms.get(0), terms.get(1), defaultExpression);
+
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCase(arity), terms);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms) {
+		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
+		builder.add(term1);
+		builder.add(term2);
+		builder.addAll(ImmutableList.copyOf(terms));
+        return getDBCoalesce(builder.build());
+    }
 
     @Override
     public ImmutableFunctionalTerm getDBCoalesce(ImmutableList<ImmutableTerm> terms) {

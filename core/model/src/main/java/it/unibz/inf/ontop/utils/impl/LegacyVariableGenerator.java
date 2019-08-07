@@ -67,6 +67,11 @@ public class LegacyVariableGenerator implements VariableGenerator {
         return newVariable;
     }
 
+    @Override
+    public Variable generateNewVariable(String suggestedString) {
+        return generateNewVariableIfConflicting(termFactory.getVariable(suggestedString));
+    }
+
     public ImmutableSet<Variable> getKnownVariables() {
         return ImmutableSet.copyOf(knownVariables);
     }

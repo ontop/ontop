@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.transform.node.HeterogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
@@ -41,13 +39,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @AssistedInject
     protected InnerJoinNodeImpl(@Assisted Optional<ImmutableExpression> optionalFilterCondition,
                                 TermNullabilityEvaluator nullabilityEvaluator,
-                                TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                                TermFactory termFactory, TypeFactory typeFactory,
                                 IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                                 ConstructionNodeTools constructionNodeTools,
                                 ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                                 JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier,
                                 InnerJoinNormalizer normalizer) {
-        super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
+        super(optionalFilterCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.variableNullabilityTools = variableNullabilityTools;
@@ -58,12 +56,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @AssistedInject
     private InnerJoinNodeImpl(@Assisted ImmutableExpression joiningCondition,
                               TermNullabilityEvaluator nullabilityEvaluator,
-                              TermFactory termFactory, TypeFactory typeFactory, DatalogTools datalogTools,
+                              TermFactory termFactory, TypeFactory typeFactory,
                               IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
                               ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
+        super(Optional.of(joiningCondition), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.variableNullabilityTools = variableNullabilityTools;
@@ -73,12 +71,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @AssistedInject
     private InnerJoinNodeImpl(TermNullabilityEvaluator nullabilityEvaluator, TermFactory termFactory,
-                              TypeFactory typeFactory, DatalogTools datalogTools,
-                              IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory,
-                              ConstructionNodeTools constructionNodeTools,
+                              TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
+                              SubstitutionFactory substitutionFactory, ConstructionNodeTools constructionNodeTools,
                               ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools,
                               JoinOrFilterVariableNullabilityTools variableNullabilityTools, ConditionSimplifier conditionSimplifier, InnerJoinNormalizer normalizer) {
-        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
+        super(Optional.empty(), nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools);
         this.constructionNodeTools = constructionNodeTools;
         this.variableNullabilityTools = variableNullabilityTools;
@@ -175,11 +172,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public boolean isEquivalentTo(QueryNode queryNode) {
         return (queryNode instanceof InnerJoinNode)
                 && getOptionalFilterCondition().equals(((InnerJoinNode) queryNode).getOptionalFilterCondition());
-    }
-
-    @Override
-    public NodeTransformationProposal acceptNodeTransformer(HeterogeneousQueryNodeTransformer transformer) {
-        return transformer.transform(this);
     }
 
     @Override

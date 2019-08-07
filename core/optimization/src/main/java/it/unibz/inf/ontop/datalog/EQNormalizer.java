@@ -17,12 +17,10 @@ import java.util.List;
 public class EQNormalizer {
 
     private final TermFactory termFactory;
-    private final SubstitutionUtilities substitutionUtilities;
 
     @Inject
-    private EQNormalizer(TermFactory termFactory, SubstitutionUtilities substitutionUtilities) {
+    private EQNormalizer(TermFactory termFactory) {
         this.termFactory = termFactory;
-        this.substitutionUtilities = substitutionUtilities;
     }
 
     /***
@@ -49,7 +47,7 @@ public class EQNormalizer {
 
 		for (int i = 0; i < body.size(); i++) {
 			Function atom = body.get(i);
-			substitutionUtilities.applySubstitution(atom, mgu);
+			SubstitutionUtilities.applySubstitution(atom, mgu);
 
             if ((atom.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol) && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function)) ) {
                 if (!mgu.composeTerms(atom.getTerm(0), atom.getTerm(1)))
@@ -77,7 +75,11 @@ public class EQNormalizer {
             }
         }
 
-		substitutionUtilities.applySubstitution(result, mgu, false);
+		// apply substitutions in-place
+        Function head = result.getHead();
+        SubstitutionUtilities.applySubstitution(head, mgu);
+        for (Function bodyatom : result.getBody())
+            SubstitutionUtilities.applySubstitution(bodyatom, mgu);
 	}
 
     /**
@@ -95,7 +97,7 @@ public class EQNormalizer {
 
             if (t instanceof Function) {
                 Function t2 = (Function) t;
-                substitutionUtilities.applySubstitution(t2, mgu);
+                SubstitutionUtilities.applySubstitution(t2, mgu);
 
                 //in case of equalities do the substitution and remove the term
                 if ((t2.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol) && ! ((atom.getTerm(0) instanceof Function) && (atom.getTerm(1) instanceof Function))) {

@@ -59,7 +59,35 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return ImmutableTable.of();
     }
 
-        @Override
+    @Override
+    protected DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct) {
+        DBTermType integerType = dbTypeFactory.getDBLargeIntegerType();
+        return isUnary
+                ? new DBCountFunctionSymbolImpl(abstractRootDBType, integerType, isDistinct)
+                : new DBCountFunctionSymbolImpl(integerType, isDistinct);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBMin(DBTermType termType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBMax(DBTermType termType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     protected DBFunctionSymbol createRegularUntypedFunctionSymbol(String nameInDialect, int arity) {
         switch (nameInDialect) {
             case AND_STR:
@@ -110,6 +138,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     @Override
     protected DBFunctionSymbol createDBCase(int arity) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity) {
+        return new DBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
     }
 
     @Override

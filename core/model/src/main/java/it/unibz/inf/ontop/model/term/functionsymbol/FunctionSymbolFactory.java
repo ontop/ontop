@@ -53,12 +53,12 @@ public interface FunctionSymbolFactory {
                         + " is not available for the arity " + arity));
     }
 
-    Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName);
+    Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity);
 
-    default SPARQLFunctionSymbol getRequiredSPARQLDistinctAggregateFunctionSymbol(String officialName){
-        return getSPARQLDistinctAggregateFunctionSymbol(officialName)
+    default SPARQLFunctionSymbol getRequiredSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity){
+        return getSPARQLDistinctAggregateFunctionSymbol(officialName, arity)
                 .orElseThrow(() -> new IllegalArgumentException("The SPARQL distinct aggregate function " + officialName
-                        + " is not available"));
+                        + " with arity " + arity + " is not available"));
     }
 
 

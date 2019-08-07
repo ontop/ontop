@@ -1,30 +1,8 @@
 package it.unibz.inf.ontop.protege.core;
 
-/*
- * #%L
- * ontop-protege
- * %%
- * Copyright (C) 2009 - 2013 KRDB Research Centre. Free University of Bozen Bolzano.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.dbschema.Relation2Predicate;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
@@ -117,8 +95,6 @@ public class OBDAModelManager implements Disposable {
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private java.util.Optional<OWLOntologyID> lastKnownOntologyId;
 	private final AtomFactory atomFactory;
-	private final Relation2Predicate relation2Predicate;
-	private final DatalogFactory datalogFactory;
 	private final TargetAtomFactory targetAtomFactory;
 
 	public OBDAModelManager(EditorKit editorKit) {
@@ -139,8 +115,6 @@ public class OBDAModelManager implements Disposable {
 		atomFactory = defaultInjector.getInstance(AtomFactory.class);
 		termFactory = defaultInjector.getInstance(TermFactory.class);
 		typeFactory = defaultInjector.getInstance(TypeFactory.class);
-		datalogFactory = defaultInjector.getInstance(DatalogFactory.class);
-		relation2Predicate = defaultInjector.getInstance(Relation2Predicate.class);
 		targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		rdfFactory = defaultInjector.getInstance(RDF.class);
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
@@ -168,7 +142,7 @@ public class OBDAModelManager implements Disposable {
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
 		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, datalogFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory);
+				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -184,20 +158,8 @@ public class OBDAModelManager implements Disposable {
 		return configurationManager;
 	}
 
-	public AtomFactory getAtomFactory() {
-		return atomFactory;
-	}
-
-	public Relation2Predicate getRelation2Predicate() {
-		return relation2Predicate;
-	}
-
 	public TermFactory getTermFactory() {
 		return termFactory;
-	}
-
-	public DatalogFactory getDatalogFactory() {
-		return datalogFactory;
 	}
 
 	public TypeFactory getTypeFactory() {

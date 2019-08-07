@@ -29,7 +29,6 @@ public class MappingTools {
                 .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
                         "is not having a RDFAtomPredicate: " + mappingAssertion));
 
-
         ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
                 = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
                 .map(s -> s.apply(projectionAtom.getArguments()))
@@ -53,7 +52,7 @@ public class MappingTools {
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
 
         if (possibleIris.size() != 1)
-            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique");
+            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
 
         return possibleIris.stream()
                 .map(Optional::get)
@@ -85,6 +84,21 @@ public class MappingTools {
         public IRI getIri() {
             return iri;
         }
+
+        @Override
+        public int hashCode() { return iri.hashCode(); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof RDFPredicateInfo) {
+                RDFPredicateInfo other = (RDFPredicateInfo)o;
+                return iri.equals(other.iri) && isClass == other.isClass;
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() { return (isClass ? "C/" : "P/") + iri; }
     }
 
 

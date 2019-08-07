@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -23,8 +24,9 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
 
     private final ImmutableSortedSet<Variable> projectedVariables;
     private final ImmutableSubstitution<? extends ImmutableTerm> substitution;
-    private final ImmutableList<? extends SQLExpression> fromRelations;
+    private final SQLExpression fromExpression;
     private final Optional<ImmutableExpression> whereExpression;
+    private final ImmutableSet<Variable> groupByVariables;
     private final boolean isDistinct;
     private final Optional<Long> limit;
     private final Optional<Long> offset;
@@ -33,16 +35,18 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     @AssistedInject
     private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSortedSet<Variable> projectedVariables,
                                              @Assisted ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                             @Assisted("fromRelations") ImmutableList<? extends SQLExpression> fromRelations,
+                                             @Assisted("fromExpression") SQLExpression fromExpression,
                                              @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
+                                             @Assisted("groupBy") ImmutableSet<Variable> groupByVariables,
                                              @Assisted boolean isDistinct,
                                              @Assisted("limit") Optional<Long> limit,
                                              @Assisted("offset") Optional<Long> offset,
                                              @Assisted("sortConditions") ImmutableList<OrderByNode.OrderComparator> sortConditions) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
-        this.fromRelations = fromRelations;
+        this.fromExpression = fromExpression;
         this.whereExpression = whereExpression;
+        this.groupByVariables = groupByVariables;
         this.isDistinct = isDistinct;
         this.limit = limit;
         this.offset = offset;
@@ -61,8 +65,8 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     }
 
     @Override
-    public ImmutableList<? extends SQLExpression> getFromSQLExpressions() {
-        return fromRelations;
+    public SQLExpression getFromSQLExpression() {
+        return fromExpression;
     }
 
     @Override
@@ -93,5 +97,10 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     @Override
     public <T> T acceptVisitor(SQLRelationVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ImmutableSet<Variable> getGroupByVariables() {
+        return groupByVariables;
     }
 }

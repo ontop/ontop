@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -18,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbolFactory {
 
@@ -108,6 +106,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> deNormalizationTable;
 
     /**
+     * Created in init()
+     */
+    private ImmutableTable<Integer, Boolean, DBFunctionSymbol> countTable;
+
+    /**
      * Only for SIMPLE casts to DB string.
      * (Source DB type -> function symbol)
      *
@@ -134,6 +137,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      * For the CASE functions
      */
     private final Map<Integer, DBFunctionSymbol> caseMap;
+
+    /**
+     * For the CASE functions
+     */
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCaseMap;
 
     /**
      * For the strict equalities
@@ -195,6 +203,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     private final Map<String, IRIStringTemplateFunctionSymbol> iriTemplateMap;
     private final Map<String, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap;
+
+    private final Map<DBTermType, DBFunctionSymbol> distinctSumMap;
+    private final Map<DBTermType, DBFunctionSymbol> regularSumMap;
+
+    private final Map<DBTermType, DBFunctionSymbol> distinctAvgMap;
+    private final Map<DBTermType, DBFunctionSymbol> regularAvgMap;
+
+    private final Map<DBTermType, DBFunctionSymbol> minMap;
+    private final Map<DBTermType, DBFunctionSymbol> maxMap;
+
     // NB: Multi-threading safety is NOT a concern here
     // (we don't create fresh bnode templates for a SPARQL query)
     private final AtomicInteger counter;
@@ -223,6 +241,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         this.untypedBinaryMathMap = new ConcurrentHashMap<>();
         this.caseMap = new ConcurrentHashMap<>();
+        this.booleanCaseMap = new ConcurrentHashMap<>();
         this.strictEqMap = new ConcurrentHashMap<>();
         this.strictNEqMap = new ConcurrentHashMap<>();
         this.falseOrNullMap = new ConcurrentHashMap<>();
@@ -243,6 +262,15 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.floorMap = new ConcurrentHashMap<>();
         this.roundMap = new ConcurrentHashMap<>();
 
+        this.distinctSumMap = new ConcurrentHashMap<>();
+        this.regularSumMap = new ConcurrentHashMap<>();
+
+        this.distinctAvgMap = new ConcurrentHashMap<>();
+        this.regularAvgMap = new ConcurrentHashMap<>();
+
+        this.minMap = new ConcurrentHashMap<>();
+        this.maxMap = new ConcurrentHashMap<>();
+
         this.typeNullMap = new ConcurrentHashMap<>();
     }
 
@@ -253,6 +281,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected void init() {
         normalizationTable = createNormalizationTable();
         deNormalizationTable = createDenormalizationTable();
+        countTable = createDBCountTable();
 
         temporaryToStringCastFunctionSymbol = new TemporaryDBTypeConversionToStringFunctionSymbolImpl(rootDBType, dbStringType);
         dbStartsWithFunctionSymbol = createStrStartsFunctionSymbol();
@@ -285,6 +314,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         secondsFunctionSymbol = createSecondsFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
     }
+
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -319,6 +349,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         // Boolean
         builder.put(booleanType, typeFactory.getXsdBooleanDatatype(), createBooleanDenormFunctionSymbol());
 
+        return builder.build();
+    }
+
+    protected ImmutableTable<Integer, Boolean, DBFunctionSymbol> createDBCountTable() {
+
+        ImmutableTable.Builder<Integer, Boolean, DBFunctionSymbol> builder = ImmutableTable.builder();
+        Stream.of(false, true)
+                .forEach(isUnary -> Stream.of(false, true)
+                        .forEach(isDistinct ->
+                                builder.put(isUnary ? 1 : 0, isDistinct, createDBCount(isUnary, isDistinct))));
         return builder.build();
     }
 
@@ -462,6 +502,16 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
         return caseMap
                 .computeIfAbsent(arity, a -> createDBCase(arity));
+
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBBooleanCase(int arity) {
+        if ((arity < 3) || (arity % 2 == 0))
+            throw new IllegalArgumentException("Arity of a CASE function symbol must be odd and >= 3");
+
+        return booleanCaseMap
+                .computeIfAbsent(arity, a -> createDBBooleanCase(arity));
 
     }
 
@@ -743,6 +793,64 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 .computeIfAbsent(termType, this::createTypeNullFunctionSymbol);
     }
 
+    @Override
+    public DBFunctionSymbol getDBCount(int arity, boolean isDistinct) {
+        if (arity > 1) {
+            throw new IllegalArgumentException("COUNT is 0-ary or unary");
+        }
+        return countTable.get(arity, isDistinct);
+    }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBSum(DBTermType dbType, boolean isDistinct) {
+        Function<DBTermType, DBFunctionSymbol> creationFct = t -> createDBSum(dbType, isDistinct);
+
+        return isDistinct
+                ? distinctSumMap.computeIfAbsent(dbType, creationFct)
+                : regularSumMap.computeIfAbsent(dbType, creationFct);
+    }
+
+    /**
+     * By default, we assume that the DB sum complies to the semantics of a null-ignoring sum.
+     */
+    @Override
+    public DBFunctionSymbol getDBSum(DBTermType dbType, boolean isDistinct) {
+        return getNullIgnoringDBSum(dbType, isDistinct);
+    }
+
+    @Override
+    public DBFunctionSymbol getNullIgnoringDBAvg(DBTermType dbType, boolean isDistinct) {
+        Function<DBTermType, DBFunctionSymbol> creationFct = t -> createDBAvg(dbType, isDistinct);
+
+        return isDistinct
+                ? distinctAvgMap.computeIfAbsent(dbType, creationFct)
+                : regularAvgMap.computeIfAbsent(dbType, creationFct);
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMin(DBTermType dbType) {
+        return minMap
+                .computeIfAbsent(dbType, t -> createDBMin(t));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMax(DBTermType dbType) {
+        return maxMap
+                .computeIfAbsent(dbType, t -> createDBMax(t));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBIntIndex(int nbValues) {
+        // TODO: cache it
+        return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
+    }
+
+    protected abstract DBFunctionSymbol createDBCount(boolean isUnary, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBSum(DBTermType termType, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
+    protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
+    protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
+
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
@@ -910,6 +1018,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                                                      DBTermType targetType);
 
     protected abstract DBFunctionSymbol createDBCase(int arity);
+    protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
 

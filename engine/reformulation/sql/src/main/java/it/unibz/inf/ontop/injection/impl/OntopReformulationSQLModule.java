@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.IQTree2SelectFromWhereConverter;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLAlgebraFactory;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
@@ -36,7 +33,13 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(
                         SelectFromWhereWithModifiers.class,
-                        SQLSerializedQuery.class),
+                        SQLSerializedQuery.class,
+                        SQLTable.class,
+                        SQLInnerJoinExpression.class,
+                        SQLLeftJoinExpression.class,
+                        SQLNaryJoinExpression.class,
+                        SQLUnionExpression.class,
+                        SQLOneTupleDummyQueryExpression.class),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
     }

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection;
 
-import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -41,6 +40,8 @@ public interface CoreSingletons {
     QueryTransformerFactory getQueryTransformerFactory();
 
     UniqueTermTypeExtractor getUniqueTermTypeExtractor();
+
+    OntopModelSettings getSettings();
 
     // TODO: complete
 }

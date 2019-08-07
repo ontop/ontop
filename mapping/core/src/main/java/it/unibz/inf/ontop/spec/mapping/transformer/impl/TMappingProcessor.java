@@ -22,65 +22,64 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.impl.CQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
-import it.unibz.inf.ontop.spec.ontology.ClassExpression;
-import it.unibz.inf.ontop.spec.ontology.DataPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.DataSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.OClass;
-import it.unibz.inf.ontop.spec.ontology.ObjectPropertyExpression;
-import it.unibz.inf.ontop.spec.ontology.ObjectSomeValuesFrom;
-import it.unibz.inf.ontop.spec.ontology.Equivalences;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class TMappingProcessor {
 
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
 
-
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
-	private final DatalogFactory datalogFactory;
-	private final SubstitutionUtilities substitutionUtilities;
-	private final ImmutabilityTools immutabilityTools;
-    private final Datalog2QueryMappingConverter datalog2MappingConverter;
     private final QueryUnionSplitter unionSplitter;
-    private final IQ2DatalogTranslator iq2DatalogTranslator;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
+    private final NoNullValueEnforcer noNullValueEnforcer;
+    private final SpecificationFactory specificationFactory;
+    private final IntermediateQueryFactory iqFactory;
+    private final UnionBasedQueryMerger queryMerger;
+    private final SubstitutionFactory substitutionFactory;
 
-	@Inject
-	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory, DatalogFactory datalogFactory,
-                              SubstitutionUtilities substitutionUtilities,
-                              ImmutabilityTools immutabilityTools, Datalog2QueryMappingConverter datalog2MappingConverter, QueryUnionSplitter unionSplitter, IQ2DatalogTranslator iq2DatalogTranslator, UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer) {
+    @Inject
+	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory,
+                              QueryUnionSplitter unionSplitter,
+                              UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
+                              NoNullValueEnforcer noNullValueEnforcer,
+                              SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
+                              UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
-		this.datalogFactory = datalogFactory;
-		this.substitutionUtilities = substitutionUtilities;
-		this.immutabilityTools = immutabilityTools;
-        this.datalog2MappingConverter = datalog2MappingConverter;
         this.unionSplitter = unionSplitter;
-        this.iq2DatalogTranslator = iq2DatalogTranslator;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
+        this.noNullValueEnforcer = noNullValueEnforcer;
+        this.specificationFactory = specificationFactory;
+        this.iqFactory = iqFactory;
+        this.queryMerger = queryMerger;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
@@ -91,303 +90,134 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, CQContainmentCheckUnderLIDs cqc, TMappingExclusionConfig excludeFromTMappings) {
+	public Mapping getTMappings(Mapping mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
 
-		// Creates an index of all mappings based on the predicate of the head of
-		// the mapping. The returned map can be used for fast access to the mapping list.
-        ImmutableMultimap<IRI, TMappingRule> originalMappingIndex = mapping.getRDFAtomPredicates().stream()
+	    // index mapping assertions by the predicate type
+        //     same IRI can be a class name and a property name
+        //     but the same IRI cannot be an object and a data or annotation property name at the same time
+        // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
+
+        ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> source = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
-                .map(q -> mappingCqcOptimizer.optimize(q))
-                .flatMap(q -> iq2DatalogTranslator.translate(q).getRules().stream())
-                .map(m -> cqc.removeRedundantAtoms(m))
-                .collect(ImmutableCollectors.toMultimap(m -> extractRDFPredicate(m.getHead()),
-                        m -> new TMappingRule(m.getHead(), m.getBody(), datalogFactory, termFactory)));
+                .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
+                .map(q -> new TMappingRule(q, termFactory, atomFactory))
+                .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
 
-        ImmutableMap.Builder<IRI, ImmutableList<TMappingRule>> builder = ImmutableMap.builder();
+        ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
+                saturate(reasoner.objectPropertiesDAG(),
+                        p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
+                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, p -> !p.isInverse()),
 
-        for (Equivalences<ObjectPropertyExpression> propertySet : reasoner.objectPropertiesDAG()) {
-            ObjectPropertyExpression representative = propertySet.getRepresentative();
-            if (representative.isInverse() || excludeFromTMappings.contains(representative))
-                continue;
+                saturate(reasoner.dataPropertiesDAG(),
+                        p -> !excludeFromTMappings.contains(p), source,
+                        this::indexOf, p -> getNewHeadP(false), cqContainmentCheck, p -> true)),
 
-            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
-                reasoner.objectPropertiesDAG().getSub(propertySet).stream()
-                        .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubObjectProperties(representative.getIRI(), child, originalMappingIndex)), cqc);
+                saturate(reasoner.classesDAG(),
+                        s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), source,
+                        this::indexOf, this::getNewHeadC, cqContainmentCheck, c -> c instanceof OClass))
 
-            propertySet.getMembers().stream()
-                    .filter(p -> !p.isInverse())
-                    .forEach(p -> builder.put(p.getIRI(), getPropertyTMappingIndexEntry(currentNodeMappings, p.getIRI())));
-        } // object properties loop ended
+                .collect(ImmutableCollectors.toMap());
 
-        for (Equivalences<DataPropertyExpression> propertySet : reasoner.dataPropertiesDAG()) {
-            DataPropertyExpression representative = propertySet.getRepresentative();
-            if (excludeFromTMappings.contains(representative))
-                continue;
-
-            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
-                reasoner.dataPropertiesDAG().getSub(propertySet).stream()
-                        .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubDataProperties(representative.getIRI(), child, originalMappingIndex)), cqc);
-
-            propertySet.getMembers().stream()
-                    .forEach(p -> builder.put(p.getIRI(), getPropertyTMappingIndexEntry(currentNodeMappings, p.getIRI())));
-        } // data properties loop ended
-
-		for (Equivalences<ClassExpression> classSet : reasoner.classesDAG()) {
-			if (!(classSet.getRepresentative() instanceof OClass))
-				continue;
-
-			OClass representative = (OClass)classSet.getRepresentative();
-			if (excludeFromTMappings.contains(representative))
-				continue;
-
-            ImmutableList<TMappingRule> currentNodeMappings = getTMappingIndexEntry(
-                reasoner.classesDAG().getSub(classSet).stream()
-                        .flatMap(descendants -> descendants.getMembers().stream())
-                        .flatMap(child -> getRulesFromSubclasses(representative.getIRI(), child, originalMappingIndex)), cqc);
-
-            classSet.getMembers().stream()
-                    .filter(c -> c instanceof OClass)
-                    .map(c -> (OClass)c)
-                    .forEach(c -> builder.put(c.getIRI(), getClassTMappingIndexEntry(currentNodeMappings, c.getIRI())));
-		} // class loop end
-
-        ImmutableMap<IRI, ImmutableList<TMappingRule>> index = builder.build();
-
-		ImmutableList<CQIE> tmappingsProgram = Stream.concat(
-                index.values().stream(),
-                originalMappingIndex.asMap().entrySet().stream()
+        ImmutableList<TMappingEntry> entries = Stream.concat(
+                saturated.values().stream(),
+                source.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
-                        .filter(e -> !index.containsKey(e.getKey()))
-                        .map(e -> getTMappingIndexEntry(e.getValue().stream(), cqc)))
-                .flatMap(m -> m.stream())
-                .map(m -> m.asCQIE())
-				.collect(ImmutableCollectors.toSet()).stream() // REMOVE DUPLICATES
-		        .collect(ImmutableCollectors.toList());
+                        // also, for all "excluded" mappings
+                        .filter(e -> !saturated.containsKey(e.getKey()))
+                        .map(e -> e.getValue().stream()
+                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, termFactory))))
+                .collect(ImmutableCollectors.toList());
 
-		return datalog2MappingConverter.convertMappingRules(tmappingsProgram, mapping.getMetadata());
-	}
+        return specificationFactory.createMapping(mapping.getMetadata(),
+                        entries.stream()
+                                .filter(e -> !e.getPredicateInfo().isClass())
+                                .map(this::toCell)
+                                .collect(ImmutableCollectors.toTable()),
+                        entries.stream()
+                                .filter(e -> e.getPredicateInfo().isClass())
+                                .map(this::toCell)
+                                .collect(ImmutableCollectors.toTable()));
+    }
 
-	private Stream<TMappingRule> getRulesFromSubclasses(IRI currentPredicate, ClassExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
-        final int arg;
-        final IRI childPredicate;
+    private Table.Cell<RDFAtomPredicate, IRI, IQ> toCell(TMappingEntry e) {
+	    return Tables.immutableCell(
+	            e.getRDFAtomPredicate(),
+                e.getPredicateInfo().getIri(),
+                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                noNullValueEnforcer.transform(e.asIQ(iqFactory, queryMerger)).normalizeForOptimization());
+    }
+
+    private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
+                                                                                         Predicate<T> representativeFilter,
+                                                                                         ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
+                                                                                         java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
+                                                                                         java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
+                                                                                         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
+                                                                                         Predicate<T> populationFilter) {
+
+	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
+
+	    ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> representatives = dag.stream()
+                .filter(s -> representativeFilter.test(s.getRepresentative()))
+                .collect(ImmutableCollectors.toMap(
+                        s -> indexOf.apply(s.getRepresentative()),
+                        s -> dag.getSub(s).stream()
+                                .flatMap(ss -> ss.getMembers().stream())
+                                .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
+                                        .map(headReplacer.apply(d, s.getRepresentative())))
+                                .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
+
+	    return dag.stream()
+                .filter(s -> representativeFilter.test(s.getRepresentative()))
+                .flatMap(s -> s.getMembers().stream()
+                    .filter(populationFilter)
+                    .collect(ImmutableCollectors.toMap(
+                            d -> indexOf.apply(d),
+                            d -> representatives.get(indexOf.apply(s.getRepresentative()))
+                                    .createCopy(headReplacer.apply(s.getRepresentative(), d))))
+                    .entrySet().stream())
+                .filter(e -> !e.getValue().isEmpty());
+    }
+
+	private MappingTools.RDFPredicateInfo indexOf(ClassExpression child) {
+        if (child instanceof OClass)
+            return new MappingTools.RDFPredicateInfo(true, ((OClass) child).getIRI());
+        else if (child instanceof ObjectSomeValuesFrom)
+            return indexOf(((ObjectSomeValuesFrom) child).getProperty());
+        else
+            return indexOf(((DataSomeValuesFrom) child).getProperty());
+    }
+
+    private MappingTools.RDFPredicateInfo indexOf(ObjectPropertyExpression child) {
+        return new MappingTools.RDFPredicateInfo(false, child.getIRI());
+    }
+
+    private MappingTools.RDFPredicateInfo indexOf(DataPropertyExpression child) {
+        return new MappingTools.RDFPredicateInfo(false, child.getIRI());
+    }
+
+    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {
         if (child instanceof OClass) {
-            childPredicate = ((OClass) child).getIRI();
-            arg = 0;
+            return Function.identity();
         }
         else if (child instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
-            childPredicate = some.getIRI();
-            arg = some.isInverse() ? 2 : 0;
+            return some.isInverse()
+                ? head -> ImmutableList.of(head.get(1))
+                : head -> ImmutableList.of(head.get(0));
         }
         else {
             DataPropertyExpression some = ((DataSomeValuesFrom) child).getProperty();
-            childPredicate = some.getIRI();
-            arg = 0; // can never be an inverse
+            // can never be an inverse
+            return head -> ImmutableList.of(head.get(0));
         }
-
-        return originalMappingIndex.get(childPredicate).stream()
-                .map(childmapping -> {
-                    Function newMappingHead = atomFactory.getMutableTripleHeadAtom(
-                            childmapping.getHead().getTerm(arg), currentPredicate);
-                    return new TMappingRule(newMappingHead, childmapping);
-                });
     }
 
-    private Stream<TMappingRule> getRulesFromSubObjectProperties(IRI currentPredicate, ObjectPropertyExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
-        return originalMappingIndex.get(child.getIRI()).stream()
-                .map(childmapping -> {
-                    List<Term> terms = childmapping.getHead().getTerms();
-                    Function newMappingHead = !child.isInverse()
-                            ? atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2))
-                            : atomFactory.getMutableTripleHeadAtom(terms.get(2), currentPredicate, terms.get(0));
-
-                    return new TMappingRule(newMappingHead, childmapping);
-                });
-    }
-
-    private Stream<TMappingRule> getRulesFromSubDataProperties(IRI currentPredicate, DataPropertyExpression child, ImmutableMultimap<IRI, TMappingRule> originalMappingIndex) {
-        return originalMappingIndex.get(child.getIRI()).stream()
-                .map(childmapping -> {
-                    List<Term> terms = childmapping.getHead().getTerms();
-                    Function newMappingHead = atomFactory.getMutableTripleHeadAtom(terms.get(0), currentPredicate, terms.get(2));
-                    return new TMappingRule(newMappingHead, childmapping);
-                });
-    }
-
-    private IRI extractRDFPredicate(Function headAtom) {
-		if (!(headAtom.getFunctionSymbol() instanceof RDFAtomPredicate))
-			throw new MinorOntopInternalBugException("Mapping assertion without an RDFAtomPredicate found");
-
-		RDFAtomPredicate predicate = (RDFAtomPredicate) headAtom.getFunctionSymbol();
-
-		ImmutableList<ImmutableTerm> arguments = headAtom.getTerms().stream()
-				.map(immutabilityTools::convertIntoImmutableTerm)
-				.collect(ImmutableCollectors.toList());
-
-		return predicate.getClassIRI(arguments)
-				.orElseGet(() -> predicate.getPropertyIRI(arguments)
-						.orElseThrow(() -> new MinorOntopInternalBugException("Could not extract a predicate IRI from " + headAtom)));
-	}
-
-
-    private ImmutableList<TMappingRule> getPropertyTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
-        return original.stream()
-                .map(rule -> new TMappingRule(
-                        atomFactory.getMutableTripleHeadAtom(rule.getHead().getTerm(0), newPredicate, rule.getHead().getTerm(2)), rule))
-                .collect(ImmutableCollectors.toList());
-    }
-
-    private ImmutableList<TMappingRule> getClassTMappingIndexEntry(ImmutableList<TMappingRule> original, IRI newPredicate) {
-        return original.stream()
-                .map(rule -> new TMappingRule(
-                        atomFactory.getMutableTripleHeadAtom(rule.getHead().getTerm(0), newPredicate), rule))
-                .collect(ImmutableCollectors.toList());
-    }
-
-
-    private ImmutableList<TMappingRule> getTMappingIndexEntry(Stream<TMappingRule> stream, CQContainmentCheckUnderLIDs cqc) {
-        ImmutableList<TMappingRule> rs = stream.collect(ImmutableCollectors.toList());
-        List<TMappingRule> rules = new ArrayList<>(rs.size());
-        for (TMappingRule newRule : rs)
-            mergeMappingsWithCQC(rules, newRule, cqc);
-        return ImmutableList.copyOf(rules);
-    }
-
-    /***
-     *
-     * This is an optimization mechanism that allows T-mappings to produce a
-     * smaller number of mappings, and hence, the unfolding will be able to
-     * produce fewer queries.
-     *
-     * Given a set of mappings for a class/property A in currentMappings
-     * , this method tries to add a the data coming from a new mapping for A in
-     * an optimal way, that is, this method will attempt to include the content
-     * of coming from newmapping by modifying an existing mapping
-     * instead of adding a new mapping.
-     *
-     * <p/>
-     *
-     * To do this, this method will strip newmapping from any
-     * (in)equality conditions that hold over the variables of the query,
-     * leaving only the raw body. Then it will look for another "stripped"
-     * mapping <bold>m</bold> in currentMappings such that m is
-     * equivalent to stripped(newmapping). If such a m is found, this method
-     * will add the extra semantics of newmapping to "m" by appending
-     * newmapping's conditions into an OR atom, together with the existing
-     * conditions of m.
-     *
-     * </p>
-     * If no such m is found, then this method simply adds newmapping to
-     * currentMappings.
-     *
-     *
-     * <p/>
-     * For example. If new mapping is equal to
-     * <p/>
-     *
-     * S(x,z) :- R(x,y,z), y = 2
-     *
-     * <p/>
-     * and there exists a mapping m
-     * <p/>
-     * S(x,z) :- R(x,y,z), y > 7
-     *
-     * This method would modify 'm' as follows:
-     *
-     * <p/>
-     * S(x,z) :- R(x,y,z), OR(y > 7, y = 2)
-     *
-     * <p/>
-     *
-     */
-
-    private void mergeMappingsWithCQC(List<TMappingRule> rules, TMappingRule newRule, CQContainmentCheckUnderLIDs cqc) {
-
-        // Facts are just added
-        if (newRule.isFact()) {
-            rules.add(newRule);
-            return;
-        }
-
-        Iterator<TMappingRule> mappingIterator = rules.iterator();
-        while (mappingIterator.hasNext()) {
-
-            TMappingRule currentRule = mappingIterator.next();
-            // ROMAN (14 Oct 2015): quick fix, but one has to be more careful with variables in filters
-            if (currentRule.equals(newRule))
-                return;
-
-            boolean couldIgnore = false;
-
-            Substitution toNewRule = newRule.computeHomomorphsim(currentRule, cqc);
-            if ((toNewRule != null) && checkConditions(newRule, currentRule, toNewRule)) {
-                if (newRule.getDatabaseAtoms().size() < currentRule.getDatabaseAtoms().size()) {
-                    couldIgnore = true;
-                }
-                else {
-                    // if the new mapping is redundant and there are no conditions then do not add anything
-                    return;
-                }
-            }
-
-            Substitution fromNewRule = currentRule.computeHomomorphsim(newRule, cqc);
-            if ((fromNewRule != null) && checkConditions(currentRule, newRule, fromNewRule)) {
-                // The existing query is more specific than the new query, so we
-                // need to add the new query and remove the old
-                mappingIterator.remove();
-                continue;
-            }
-
-            if (couldIgnore) {
-                // if the new mapping is redundant and there are no conditions then do not add anything
-                return;
-            }
-
-            if ((toNewRule != null) && (fromNewRule != null)) {
-                // We found an equivalence, we will try to merge the conditions of
-                // newRule into the currentRule
-                // Here we can merge conditions of the new query with the one we have just found
-                // new map always has just one set of filters  !!
-                ImmutableList<Function> newf = newRule.getConditions().get(0).stream()
-                        .map(atom -> applySubstitution(atom, fromNewRule))
-                        .collect(ImmutableCollectors.toList());
-
-                // if each of the existing conditions in one of the filter groups
-                // is found in the new filter then the new filter is redundant
-                if (currentRule.getConditions().stream().anyMatch(f -> newf.containsAll(f)))
-                    return;
-
-                // REPLACE THE CURRENT RULE
-                mappingIterator.remove();
-                rules.add(new TMappingRule(currentRule,
-                        Stream.concat(currentRule.getConditions().stream()
-                                // if each of the new conditions is found among econd then the old condition is redundant
-                                .filter(f -> !f.containsAll(newf)), // no need to clone
-                        Stream.of(newf))
-                        .collect(ImmutableCollectors.toList())));
-                return;
-            }
-        }
-        rules.add(newRule);
-    }
-
-    private boolean checkConditions(TMappingRule rule1, TMappingRule rule2, Substitution toRule1) {
-        if (rule2.getConditions().size() == 0)
-            return true;
-        if (rule2.getConditions().size() > 1 || rule1.getConditions().size() != 1)
-            return false;
-
-        return rule2.getConditions().get(0).stream()
-                .map(atom -> applySubstitution(atom, toRule1))
-                .allMatch(atom -> rule1.getConditions().get(0).contains(atom));
-    }
-
-    private Function applySubstitution(Function atom, Substitution sub) {
-        Function clone = (Function)atom.clone();
-        substitutionUtilities.applySubstitution(clone, sub);
-        return clone;
+    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadP(boolean isInverse) {
+        return isInverse
+                ? head -> ImmutableList.of(head.get(1), head.get(0))
+                : Function.identity();
     }
 }

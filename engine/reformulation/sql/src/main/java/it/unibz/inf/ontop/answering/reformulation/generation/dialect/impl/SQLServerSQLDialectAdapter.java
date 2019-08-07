@@ -26,6 +26,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	
@@ -257,6 +258,11 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	@Override
 	public String getDummyTable() {
 		return "SELECT 1 as \"example\"";
+	}
+
+	@Override
+	public Optional<String> getTrueTable() {
+		return Optional.of("\"example\"");
 	}
 	
 	@Override 

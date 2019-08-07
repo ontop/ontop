@@ -32,4 +32,11 @@ public class ImmutableCQContainmentCheckUnderLIDs<P extends AtomPredicate> imple
         }
         return false;
     }
+
+    public ImmutableHomomorphismIterator homomorphismIterator(ImmutableHomomorphism base, ImmutableList<DataAtom<P>> from, ImmutableList<DataAtom<P>> to) {
+         return new ImmutableHomomorphismIterator(
+                base,
+                from,
+                chaseCache.computeIfAbsent(to, dependencies::chaseAllAtoms));
+    }
 }

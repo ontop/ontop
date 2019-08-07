@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface SQLDialectAdapter {
@@ -108,6 +109,11 @@ public interface SQLDialectAdapter {
 	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode);
 	
 	public String getDummyTable();
+
+	/**
+	 * Returns the name of special system table having one tuple only if the FROM clause is always required in the dialect
+	 */
+	Optional<String> getTrueTable();
 	
 	public String getSQLLexicalFormString(String constant);
 	

@@ -367,15 +367,15 @@ public class TreeWitnessSet {
 		}
 		
 		public Intersection<ClassExpression> getTopClass() {
-			return new Intersection<>(reasoner.classesDAG());
+			return new Intersection<>();
 		}
 
 		public Intersection<ObjectPropertyExpression> getTopProperty() {
-			return new Intersection<>(reasoner.objectPropertiesDAG());
+			return new Intersection<>();
 		}
 		
 		public Intersection<ClassExpression> getSubConcepts(Collection<Function> atoms) {
-			Intersection<ClassExpression> subc = new Intersection<>(reasoner.classesDAG());
+			Intersection<ClassExpression> subc = new Intersection<>();
 			for (Function a : atoms) {
 				Optional<IRI> optionalClassIRI = extractClassIRI(a);
 				if (!optionalClassIRI.isPresent()) {
@@ -385,7 +385,7 @@ public class TreeWitnessSet {
 				IRI classIRI = optionalClassIRI.get();
 
 				 if (reasoner.classes().contains(classIRI))
-					 subc.intersectWith(reasoner.classes().get(classIRI));
+					 subc.intersectWith(reasoner.classesDAG().getSubRepresentatives(reasoner.classes().get(classIRI)));
 				 else
 					 subc.setToBottom();
 				 if (subc.isBottom())
@@ -410,7 +410,7 @@ public class TreeWitnessSet {
 			TermOrderedPair idx = new TermOrderedPair(root, nonroot);
 			Intersection<ObjectPropertyExpression> properties = propertiesCache.get(idx);			
 			if (properties == null) {
-				properties = new Intersection<>(reasoner.objectPropertiesDAG());
+				properties = new Intersection<>();
 				for (Function a : edge.getBAtoms()) {
 					if (a.isOperation()) {
 						log.debug("EDGE {} HAS PROPERTY {} NO BOOLEAN OPERATION PREDICATES ALLOWED IN PROPERTIES", edge, a);
@@ -426,7 +426,7 @@ public class TreeWitnessSet {
 							ObjectPropertyExpression prop = reasoner.objectProperties().get(optionalPropertyIRIString.get());
 							if (!root.equals(a.getTerm(0)))
 									prop = prop.getInverse();
-							properties.intersectWith(prop);
+							properties.intersectWith(reasoner.objectPropertiesDAG().getSubRepresentatives(prop));
 						}
 						else
 							properties.setToBottom();

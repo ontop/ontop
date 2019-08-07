@@ -41,6 +41,11 @@ public class QueryNodeCloner implements HomogeneousQueryNodeTransformer {
     }
 
     @Override
+    public AggregationNode transform(AggregationNode aggregationNode) {
+        return aggregationNode.clone();
+    }
+
+    @Override
     public EmptyNode transform(EmptyNode emptyNode) {
         return emptyNode.clone();
     }

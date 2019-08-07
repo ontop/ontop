@@ -1,29 +1,8 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.substitution.AppendableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
@@ -32,25 +11,20 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  *
- * TODO: rename it AppendableSubstitutionImpl
- *
  */
-public class SubstitutionImpl implements AppendableSubstitution {
+public class SubstitutionImpl implements Substitution {
 
     private final Map<Variable, Term> map;
-    private final SubstitutionUtilities substitutionUtilities;
     private final TermFactory termFactory;
 
     public SubstitutionImpl(TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
     public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = substitutionMap;
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
     @Override
@@ -68,12 +42,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return map.isEmpty();
     }
 
-    @Override
-    @Deprecated
-    public void put(Variable var, Term term) {
-        map.put(var, term);
-    }
-
     @Deprecated
     public Set<Variable> keySet() {
         return map.keySet();
@@ -84,17 +52,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 
-    /**
-     * Composes the current substitution with another substitution function.
-     *
-     * Remind that composition is not commutative.
-     *
-     * TODO: implement it
-     */
-    @Override
-    public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Not implemented yet! But looks interesting.");
-    }
 
     /***
      * Creates a unifier (singleton substitution) out of term1 and term2.
@@ -220,8 +177,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            substitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
-            substitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
         }
 
         return true;

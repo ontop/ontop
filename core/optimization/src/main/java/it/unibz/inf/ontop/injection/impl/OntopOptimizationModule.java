@@ -65,6 +65,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PushUpBooleanExpressionOptimizer.class);
         bindFromSettings(TermTypeTermLifter.class);
         bindFromSettings(OrderBySimplifier.class);
+        bindFromSettings(AggregationSimplifier.class);
         bindFromSettings(PostProcessableFunctionLifter.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);

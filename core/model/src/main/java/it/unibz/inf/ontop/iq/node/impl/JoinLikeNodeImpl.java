@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.datalog.impl.DatalogTools;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -27,10 +26,9 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
     protected JoinLikeNodeImpl(Optional<ImmutableExpression> optionalJoinCondition,
                                TermNullabilityEvaluator nullabilityEvaluator,
                                TermFactory termFactory, IntermediateQueryFactory iqFactory,
-                               TypeFactory typeFactory, DatalogTools datalogTools,
-                               SubstitutionFactory substitutionFactory,
+                               TypeFactory typeFactory, SubstitutionFactory substitutionFactory,
                                ImmutableUnificationTools unificationTools, ImmutableSubstitutionTools substitutionTools) {
-        super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory, datalogTools,
+        super(optionalJoinCondition, nullabilityEvaluator, termFactory, iqFactory, typeFactory,
                 substitutionFactory, unificationTools, substitutionTools);
     }
 
