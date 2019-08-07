@@ -51,6 +51,14 @@
             <id>juliencorman</id>
             <name>Julien Corman</name>
         </developer>
+        <developer>
+            <id>konchakov</id>
+            <name>Roman Konchakov</name>
+        </developer>
+        <developer>
+            <id>tirrolo</id>
+            <name>Davide Lanti</name>
+        </developer>
     </developers>
 
     <modules>

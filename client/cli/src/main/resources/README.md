@@ -49,13 +49,14 @@ Another approach is to copy it somewhere (e.g. ~/.ontop-completion.sh) and put t
 Usage
 -----
 
-```
+```console
 $ ./ontop
 usage: ontop <command> [ <args> ]
 
 Commands are:
     --version     Show version of ontop
     bootstrap     Bootstrap ontology and mapping from the database
+    endpoint      starts a SPARQL endpoint powered by Ontop
     help          Display help information
     materialize   Materialize the RDF graph exposed by the mapping and the OWL ontology
     query         Query the RDF graph exposed by the mapping and the OWL ontology
@@ -63,7 +64,6 @@ Commands are:
     mapping       Manipulate mapping files
 
 See 'ontop help <command>' for more information on a specific command.
-
 ```
 
 More information is available on the wiki:
