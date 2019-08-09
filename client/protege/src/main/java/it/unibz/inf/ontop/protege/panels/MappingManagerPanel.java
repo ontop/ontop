@@ -725,11 +725,9 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
         final String PRED = "pred:";
 
         if (textToParse != null) {
-//            if (textToParse.startsWith(PRED)) {
                 final MappingPredicateTreeModelFilter filter = new MappingPredicateTreeModelFilter();
                 filter.addStringFilter(textToParse);
                 listOfFilters.add(filter);
-//            }
         }
         // TODO(xiao):
         //  We may need to import other functionality (but probabaly never used) from the old ANTLR file:
