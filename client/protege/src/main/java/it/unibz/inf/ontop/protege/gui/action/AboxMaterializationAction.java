@@ -20,6 +20,8 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.exception.OBDASpecificationException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
@@ -39,6 +41,11 @@ import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
+import org.semanticweb.owlapi.io.WriterDocumentTarget;
+import org.semanticweb.owlapi.model.OWLAxiom;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
@@ -49,6 +56,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /***
@@ -68,7 +77,6 @@ public class AboxMaterializationAction extends ProtegeAction {
 
     private static final boolean DO_STREAM_RESULTS = true;
 
-    private OWLEditorKit editorKit = null;
     private OWLWorkspace workspace;
     private OWLModelManager modelManager;
     private String lineSeparator;
@@ -78,7 +86,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
     @Override
     public void initialise() {
-        editorKit = (OWLEditorKit) getEditorKit();
+        OWLEditorKit editorKit = (OWLEditorKit) getEditorKit();
         workspace = editorKit.getWorkspace();
         modelManager = editorKit.getOWLModelManager();
         obdaModelManager = (OBDAModelManager) editorKit.get(SQLPPMappingImpl.class.getName());
@@ -151,7 +159,6 @@ public class AboxMaterializationAction extends ProtegeAction {
         int res = JOptionPane.showOptionDialog(workspace, panel, "Materialization options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
         if (res == JOptionPane.OK_OPTION) {
 
-
             if (radioAdd.isSelected()) {
                 //add to current ontology
                 materializeOnto(modelManager.getActiveOntology(), modelManager.getOWLOntologyManager());
@@ -162,71 +169,122 @@ public class AboxMaterializationAction extends ProtegeAction {
 
                 //save materialized values in a new file
                 materializeToFile(outputFormat);
-
-
             }
         }
-
     }
 
     private void materializeToFile(String format) {
         String fileName = "";
-        long count = 0;
-        long time = 0;
-        int vocab = 0;
         final JFileChooser fc = new JFileChooser();
         fc.setSelectedFile(new File(fileName));
         fc.showSaveDialog(workspace);
 
+        MaterializationStats stats;
         try {
             File file = fc.getSelectedFile();
-            if (file != null) {
-
+            if (file == null) {
+                String msg = "Could not open output file";
+                log.error(msg);
+                JOptionPane.showMessageDialog(workspace, msg);
+            } else {
                 OWLOntology ontology = modelManager.getActiveOntology();
                 OntopSQLOWLAPIConfiguration configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(ontology);
                 MaterializationParams params = MaterializationParams.defaultBuilder()
                         .enableDBResultsStreaming(DO_STREAM_RESULTS)
                         .build();
-                RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(configuration, params);
                 final long startTime = System.currentTimeMillis();
-                MaterializationGraphQuery graphQuery = materializer.materialize();
-                try (OutputStream out = new FileOutputStream(file); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"))) {
-                    RDFHandler handler;
-                    switch (format) {
-                        case RDF_XML:
-                        case OWL_XML:
-                            handler = new RDFXMLWriter(writer);
-                            break;
-                        case TURTLE:
-                            handler = new TurtleWriter(writer);
-                            ((TurtleWriter) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
-                            break;
-                        case N3:
-                            handler = new N3Writer(writer);
-                            ((N3Writer) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
-                            break;
-                        default:
-                            throw new Exception("Unknown format: " + format);
-                    }
-                    graphQuery.evaluate(handler);
-                    count = graphQuery.getTripleCountSoFar();
-                    vocab = graphQuery.getSelectedVocabulary().size();
-
+                switch (format) {
+                    case OWL_XML:
+                        stats = exportWithOWLAPI(configuration, params, file);
+                        break;
+                    case TURTLE:
+                    case RDF_XML:
+                    case N3:
+                        stats = exportWithRDF4J(configuration, params, format, file);
+                        break;
+                    default:
+                        throw new Exception("Unknown format: " + format);
                 }
                 final long endTime = System.currentTimeMillis();
-                time = endTime - startTime;
-
-                JOptionPane.showMessageDialog(this.workspace,
-                        "Task is completed" + lineSeparator + "Nr. of triples: " + count
-                                + lineSeparator + "Vocabulary size: " + vocab
-                                + lineSeparator + "Elapsed time: " + time + " ms.", "Done",
-                        JOptionPane.INFORMATION_MESSAGE);
-
+                if (stats == null) {
+                    String msg = "Materialization failed.";
+                    log.error(msg);
+                    JOptionPane.showMessageDialog(workspace, msg);
+                } else {
+                    JOptionPane.showMessageDialog(this.workspace,
+                            "Task is completed" + lineSeparator + "Nr. of triples: " + stats.getCount()
+                                    + lineSeparator + "Vocabulary size: " + stats.getVocabSize()
+                                    + lineSeparator + "Elapsed time: " + (endTime - startTime) + " ms.", "Done",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            JOptionPane.showMessageDialog(workspace, "ERROR: could not materialize data instances. ");
+            JOptionPane.showMessageDialog(workspace, "ERROR: could not materialize data instances.");
         }
+    }
+
+    private MaterializationStats exportWithRDF4J(OntopSQLOWLAPIConfiguration configuration, MaterializationParams params,
+                                                 String format, File file) throws OBDASpecificationException, IOException {
+
+        MaterializationGraphQuery graphQuery = RDF4JMaterializer.defaultMaterializer(configuration, params)
+                .materialize();
+        try (OutputStream out = new FileOutputStream(file); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
+            RDFHandler handler;
+            switch (format) {
+                case RDF_XML:
+                    handler = new RDFXMLWriter(writer);
+                    break;
+                case TURTLE:
+                    handler = new TurtleWriter(writer);
+                    ((TurtleWriter) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
+                    break;
+                case N3:
+                    handler = new N3Writer(writer);
+                    ((N3Writer) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
+                    break;
+                default:
+                    throw new ABoxMaterializationActionException("Unexpected format: " + format);
+            }
+            graphQuery.evaluate(handler);
+
+            return new MaterializationStats(
+                    graphQuery.getTripleCountSoFar(),
+                    graphQuery.getSelectedVocabulary().size()
+            );
+        }
+    }
+
+    private MaterializationStats exportWithOWLAPI(OntopSQLOWLAPIConfiguration configuration, MaterializationParams params,
+                                                  File file) throws OWLException, OBDASpecificationException, IOException {
+
+        MaterializationStats stats;
+        try (MaterializedGraphOWLResultSet graphResultSet = OntopOWLAPIMaterializer.defaultMaterializer(
+                configuration,
+                params
+        ).materialize()) {
+
+            HashSet<OWLAxiom> axiomSet = new HashSet();
+            while (graphResultSet.hasNext()) {
+                axiomSet.add(graphResultSet.next());
+            }
+            OutputStream out = new FileOutputStream(file);
+            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(
+                    out,
+                    StandardCharsets.UTF_8
+            ));
+            OWLManager.createOWLOntologyManager().createOntology(axiomSet).saveOntology(
+                    new OWLXMLDocumentFormat(),
+                    new WriterDocumentTarget(fileWriter)
+            );
+            fileWriter.close();
+            out.close();
+            stats = new MaterializationStats(
+                    graphResultSet.getTripleCountSoFar(),
+                    graphResultSet.getSelectedVocabulary().size()
+            );
+        }
+        return stats;
     }
 
 
@@ -278,5 +336,27 @@ public class AboxMaterializationAction extends ProtegeAction {
         }
     }
 
+    private static class MaterializationStats {
+        private final long count;
+        private final int vocabSize;
 
+        MaterializationStats(long count, int vocabSize) {
+            this.count = count;
+            this.vocabSize = vocabSize;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        int getVocabSize() {
+            return vocabSize;
+        }
+    }
+
+    private static class ABoxMaterializationActionException extends OntopInternalBugException {
+        ABoxMaterializationActionException(String message) {
+            super(message);
+        }
+    }
 }
