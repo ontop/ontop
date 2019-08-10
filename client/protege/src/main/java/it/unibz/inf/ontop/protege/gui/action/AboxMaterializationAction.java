@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.protege.editor.core.ui.action.ProtegeAction;
@@ -73,7 +74,7 @@ public class AboxMaterializationAction extends ProtegeAction {
     private static final String RDF_XML = "RDF/XML";
     private static final String OWL_XML = "OWL/XML";
     private static final String TURTLE = "Turtle";
-    private static final String N3 = "N3";
+    private static final String NTRIPLES = "N-Triples";
 
     private static final boolean DO_STREAM_RESULTS = true;
 
@@ -120,7 +121,7 @@ public class AboxMaterializationAction extends ProtegeAction {
 
         //combo box for output format,
         JLabel lFormat = new JLabel("Output format:\t");
-        String[] fileOptions = {RDF_XML, OWL_XML, TURTLE, N3};
+        String[] fileOptions = {RDF_XML, OWL_XML, TURTLE, NTRIPLES};
         final JComboBox comboFormats = new JComboBox(fileOptions);
         //should be enabled only when radio button export is selected
         comboFormats.setEnabled(false);
@@ -199,7 +200,7 @@ public class AboxMaterializationAction extends ProtegeAction {
                         break;
                     case TURTLE:
                     case RDF_XML:
-                    case N3:
+                    case NTRIPLES:
                         stats = exportWithRDF4J(configuration, params, format, file);
                         break;
                     default:
@@ -239,9 +240,9 @@ public class AboxMaterializationAction extends ProtegeAction {
                     handler = new TurtleWriter(writer);
                     ((TurtleWriter) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
                     break;
-                case N3:
-                    handler = new N3Writer(writer);
-                    ((N3Writer) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
+                case NTRIPLES:
+                    handler = new NTriplesWriter(writer);
+                    ((NTriplesWriter) handler).set(BasicWriterSettings.PRETTY_PRINT, false);
                     break;
                 default:
                     throw new ABoxMaterializationActionException("Unexpected format: " + format);
