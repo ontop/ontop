@@ -30,7 +30,7 @@ import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import junit.framework.TestCase;
 import org.eclipse.rdf4j.rio.RDFHandler;
-import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -54,8 +54,8 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 	private static boolean DO_STREAM_RESULTS = true;
 	
 	public void testModelN3() throws Exception {
-		runRDF4JTestWithoutOntology("src/test/resources/mysql/materializer/materializeN3.N3",
-				N3Writer::new);
+		runRDF4JTestWithoutOntology("src/test/resources/mysql/materializer/materializeNTriples.nt",
+				NTriplesWriter::new);
 	}
 	
 	public void testModelTurtle() throws Exception {
@@ -69,8 +69,8 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 	}
 	
 	public void testModelOntoN3() throws Exception {
-		runRDF4JTestWithOntology("src/test/resources/mysql/materializer/materializeN3.N3",
-				N3Writer::new);
+		runRDF4JTestWithOntology("src/test/resources/mysql/materializer/materializeNTriples.nt",
+				NTriplesWriter::new);
 	}
 
 	public void testModelOntoTurtle() throws Exception {

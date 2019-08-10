@@ -89,10 +89,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-rio-n3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-rio-ntriples</artifactId>
 		</dependency>
 		<dependency>
