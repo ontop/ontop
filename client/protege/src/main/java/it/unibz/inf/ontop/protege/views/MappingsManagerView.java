@@ -76,7 +76,7 @@ public class MappingsManagerView extends AbstractOWLViewComponent implements OBD
 						String iri = entity.getIRI().toString();
 						shortf = iri.substring(iri.lastIndexOf("/"));
 					}
-					mappingPanel.setFilter("pred:" + shortf);
+					mappingPanel.setFilter(shortf);
 				} else {
 					mappingPanel.setFilter("");
 				}

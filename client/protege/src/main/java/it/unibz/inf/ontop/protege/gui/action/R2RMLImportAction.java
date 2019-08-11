@@ -156,11 +156,11 @@ public class R2RMLImportAction extends ProtegeAction {
 			 * TODO: improve this inefficient method (batch processing, not one by one)
 			 */
 			for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
-				if (mapping.getTargetAtoms().toString().contains("BNODE")) {
-					JOptionPane.showMessageDialog(getWorkspace(), "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
-				} else {
+//				if (mapping.getTargetAtoms().toString().contains("BNODE")) {
+//					JOptionPane.showMessageDialog(getWorkspace(), "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
+//				} else {
 					obdaModelController.addTriplesMap(mapping, false);
-				}
+//				}
 			}
 			} catch (DuplicateMappingException dm) {
 				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
