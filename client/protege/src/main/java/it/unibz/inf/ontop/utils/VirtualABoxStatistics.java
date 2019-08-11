@@ -23,20 +23,20 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A utility class about the ABox materialization.
@@ -45,9 +45,9 @@ public class VirtualABoxStatistics {
 
 	private final OBDAModel obdaModel;
 
-	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<String, HashMap<String, Integer>>();
+	private HashMap<String, HashMap<String, Integer>> statistics = new HashMap<>();
 
-	Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
+	private Logger log = LoggerFactory.getLogger(VirtualABoxStatistics.class);
 
 	public VirtualABoxStatistics(OBDAModel obdaModel) {
 		this.obdaModel = obdaModel;
@@ -85,22 +85,18 @@ public class VirtualABoxStatistics {
 	 */
 	public int getStatistics(String datasourceId, String mappingId) {
 		final HashMap<String, Integer> mappingStat = getStatistics(datasourceId);
-		int triplesCount = mappingStat.get(mappingId).intValue();
 
-		return triplesCount;
+		return mappingStat.get(mappingId);
 	}
 
 	/**
 	 * Gets the total number of triples from all the data sources and mappings.
-	 * 
-	 * @return The total number of triples.
-	 * @throws Exception
 	 */
 	public int getTotalTriples() throws Exception {
 		int total = 0;
 		for (HashMap<String, Integer> mappingStat : statistics.values()) {
 			for (Integer triplesCount : mappingStat.values()) {
-				int triples = triplesCount.intValue();
+				int triples = triplesCount;
 				if (triples == -1) {
 					throw new Exception("An error was occurred in the counting process.");
 				}
@@ -131,7 +127,7 @@ public class VirtualABoxStatistics {
 		List<SQLPPTriplesMap> mappingList = obdaModel.generatePPMapping().getTripleMaps();
 
 
-		HashMap<String, Integer> mappingStat = new HashMap<String, Integer>();
+		HashMap<String, Integer> mappingStat = new HashMap<>();
 		for (SQLPPTriplesMap mapping : mappingList) {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
@@ -145,7 +141,7 @@ public class VirtualABoxStatistics {
 				triplesCount = tuples * atoms;
 			} catch (Exception e) {
 				triplesCount = -1; // fails to count
-				log.error(e.getMessage());
+				log.error("Exception while computing mapping statistics", e);
 			}
 			mappingStat.put(mappingId, triplesCount);
 		}
@@ -153,7 +149,7 @@ public class VirtualABoxStatistics {
 	}
 
 	private int getTuplesCount(OBDASQLQuery query, OBDADataSource source)
-			throws ClassNotFoundException, SQLException {
+			throws Exception {
 		Statement st = null;
 		ResultSet rs = null;
 		int count = -1;
@@ -169,8 +165,6 @@ public class VirtualABoxStatistics {
 			while (rs.next()) {
 				count = rs.getInt(1);
 			}
-		} catch (SQLException e) {
-			throw e;
 		} finally {
 			try {
 				rs.close();
@@ -186,14 +180,16 @@ public class VirtualABoxStatistics {
 		return count;
 	}
 
-	private String getSelectionString(OBDASQLQuery query) {
+	private String getSelectionString(OBDASQLQuery query) throws Exception {
 		final String originalSql = query.toString();
-		
+
 		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
-        String fromStr = " from "; //spaces are added to the begining and the end of 'from' word. Because there could be any field that includes from string in mapping.
-		int start = sql.indexOf(fromStr);
-		int end = sql.length();
-		
-		return originalSql.substring(start, end);
+		Matcher m = Pattern.compile("[\\n\\s\\t]*from[\\n\\s\\t]*").matcher(sql);
+		if (m.find()) {
+			int start = m.start();
+			int end = sql.length();
+			return originalSql.substring(start, end);
+		}
+		throw new Exception("Could not find the \"from\" keyword in the source query\n"+ query);
 	}
 }
