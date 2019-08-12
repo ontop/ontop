@@ -54,45 +54,25 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			/* AGGREGATES
-			not supported yet */
+			/* AGGREGATES: TODO: enable them */
 
 			aggregatesManifest + "agg01",
 			aggregatesManifest + "agg02",
 			aggregatesManifest + "agg03",
-			aggregatesManifest + "agg04",
-			aggregatesManifest + "agg05",
 			aggregatesManifest + "agg06",
 			aggregatesManifest + "agg07",
-			aggregatesManifest + "agg08",
-			aggregatesManifest + "agg08b",
-			aggregatesManifest + "agg09",
-			aggregatesManifest + "agg10",
-			aggregatesManifest + "agg11",
-			aggregatesManifest + "agg12",
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
-			aggregatesManifest + "agg-sum-01",
-			aggregatesManifest + "agg-sum-01-ontop",
-			aggregatesManifest + "agg-sum-02",
-			aggregatesManifest + "agg-sum-02-ontop",
-			aggregatesManifest + "agg-avg-01",
-			aggregatesManifest + "agg-avg-01-ontop",
 			aggregatesManifest + "agg-avg-02",
-			aggregatesManifest + "agg-min-01",
-			aggregatesManifest + "agg-min-01-ontop",
 			aggregatesManifest + "agg-min-02",
-			aggregatesManifest + "agg-min-02-ontop",
 			aggregatesManifest + "agg-max-01",
-			aggregatesManifest + "agg-max-01-ontop",
 			aggregatesManifest + "agg-max-02",
-			aggregatesManifest + "agg-max-02-ontop",
 			aggregatesManifest + "agg-sample-01",
 			aggregatesManifest + "agg-err-01",
+			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 			aggregatesManifest + "agg-sum-order-01",
-			aggregatesManifest + "agg-empty-group",
 
 			/* BIND */
 			//The sub-term: ADD(o,http://www.w3.org/2001/XMLSchema#integer(+1)) is not a VariableOrGroundTerm

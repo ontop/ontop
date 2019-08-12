@@ -4,7 +4,8 @@
 		<variable name="max"/>
 	</head>
 	<results>
-		<result>
-		</result>
+	    # Benjamin Cogrel 12/08/19: test fixed: there should be no result because there are grouping variables
+		<!--result>
+		</result-->
 	</results>
 </sparql>
