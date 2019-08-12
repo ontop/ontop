@@ -20,7 +20,16 @@ package it.unibz.inf.ontop.rdf4j.completeness;
  * #L%
  */
 
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Collection;
+
+import static it.unibz.inf.ontop.rdf4j.completeness.CompletenessTestUtils.parametersFromSuperManifest;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test the sound and completeness of Quest reasoner with respect to DL-Lite
@@ -28,29 +37,42 @@ import junit.framework.Test;
  * 
  * Setting: Without Optimizing Equivalences and Without Using TBox Sigma. 
  */
-public class DLLiteCompletenessNoEqNoSigTest extends CompletenessParent {
+@RunWith(Parameterized.class)
+public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 
-	public DLLiteCompletenessNoEqNoSigTest(String tid, String name, String resf,
-			String propf, String owlf, String sparqlf) throws Exception {
-		super(tid, name, resf, propf, owlf, sparqlf);
+	private static final ImmutableSet IGNORE = ImmutableSet.of();
+	private final String testIRI;
+	private final String resultFile;
+	private final String parameterFile;
+	private final String ontologyFile;
+	private final String queryFile;
+	private final ImmutableSet<String> ignoredTests;
+
+	public DLLiteCompletenessNoEqNoSigTest(String testIRI, String name, String resultFile, String parameterFile,
+										   String ontologyFile, String queryFile,
+										   ImmutableSet<String> ignoredTests) {
+		super(name);
+		this.testIRI = testIRI;
+		this.resultFile = resultFile;
+		this.parameterFile = parameterFile;
+		this.ontologyFile = ontologyFile;
+		this.queryFile = queryFile;
+		this.ignoredTests = ignoredTests;
 	}
 
-	public static Test suite() throws Exception {
-		return CompletenessTestUtils.suite(new Factory() {
-			@Override
-			public CompletenessParent createCompletenessTest(String testId,
-					String testName, String testResultPath,
-					String testParameterPath, String testOntologyPath,
-					String testQueryPath) throws Exception {
-				return new DLLiteCompletenessNoEqNoSigTest(testId, testName,
-						testResultPath, testParameterPath, testOntologyPath,
-						testQueryPath);
-			}
+	@Parameterized.Parameters(name="{1}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return parametersFromSuperManifest(
+				"/completeness/manifest-noeq-nosig.ttl",
+				IGNORE);
+	}
 
-			@Override
-			public String getMainManifestFile() {
-				return "/completeness/manifest-noeq-nosig.ttl";
-			}
-		});
+	@Test
+	@Override
+	public void runTest() throws Exception {
+		assumeTrue(!ignoredTests.contains(testIRI));
+
+		CompletenessTestExecutor executor = new CompletenessTestExecutor(testIRI, getName(), resultFile, parameterFile, ontologyFile, queryFile);
+		executor.runTest();
 	}
 }
