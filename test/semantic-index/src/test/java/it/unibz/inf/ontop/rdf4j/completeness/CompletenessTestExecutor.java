@@ -1,32 +1,8 @@
 package it.unibz.inf.ontop.rdf4j.completeness;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.text.StringUtil;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
 import org.eclipse.rdf4j.model.util.ModelUtil;
@@ -38,15 +14,12 @@ import org.eclipse.rdf4j.query.impl.TupleQueryResultBuilder;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,96 +30,51 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 
-public abstract class CompletenessParent extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-	static final Logger logger = LoggerFactory.getLogger(CompletenessParent.class);
+public class CompletenessTestExecutor {
 
 	protected final String testId;
 	protected final String queryFile;
 	protected final String resultFile;
-	protected final String ontologyFile;
-	protected final String parameterFile;
 	
 	protected final boolean laxCardinality = false;
-	
-	protected Repository repository;
-	
-	public interface Factory 
-	{
-		CompletenessParent createCompletenessTest(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception;
-	
-		String getMainManifestFile();
-	}
-	
-	public CompletenessParent(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception {
-		super(name);
+
+	static final Logger logger = LoggerFactory.getLogger(CompletenessTestExecutor.class);
+	private final String name;
+	private final Repository repository;
+
+	public CompletenessTestExecutor(String tid, String name, String resf, String sparqlf,
+									Repository repository) {
 		testId = tid;
 		resultFile = resf;
-		parameterFile = propf;
-		ontologyFile = owlf;
 		queryFile = sparqlf;
+		this.name = name;
+		this.repository = repository;
 	}
 
-	protected Properties loadReasonerParameters(String path) throws IOException {
-		Properties p = new Properties();
-		p.load(new URL(path).openStream());
-		return p;
-
-	}
-
-	protected Repository createRepository() throws Exception {
-		Properties properties = loadReasonerParameters(parameterFile);
-		String ontologyPath = new URL(ontologyFile).getPath();
-
-		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
-			Repository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
-			return repository;
-		}
-	}
-	
-	@Override
-	protected void setUp() throws Exception {
-		repository = createRepository();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception {
-		if (repository != null) {
-			repository.shutDown();
-			repository = null;
-		}
-	}
-
-	@Override
-	protected void runTest() throws Exception {
+	public void runTest() throws Exception {
 		logger.info("\n\n\n============== " + testId + " ==============\n");
-		RepositoryConnection con = repository.getConnection();
-		try {
+		try (RepositoryConnection con = repository.getConnection()) {
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFile);
 			if (query instanceof TupleQuery) {
 				TupleQueryResult queryResult = ((TupleQuery) query).evaluate();
-				TupleQueryResult expectedResult = readExpectedTupleQueryResult();
+				TupleQueryResult expectedResult = readExpectedTupleQueryResult(repository);
 				compareTupleQueryResults(queryResult, expectedResult);
 			} else if (query instanceof GraphQuery) {
 				GraphQueryResult gqr = ((GraphQuery) query).evaluate();
 				Set<Statement> queryResult = Iterations.asSet(gqr);
-				Set<Statement> expectedResult = readExpectedGraphQueryResult();
+				Set<Statement> expectedResult = readExpectedGraphQueryResult(repository);
 				compareGraphs(queryResult, expectedResult);
 			} else if (query instanceof BooleanQuery) {
 				boolean queryResult = ((BooleanQuery)query).evaluate();
-				boolean expectedResult = readExpectedBooleanQueryResult();
+				boolean expectedResult = readExpectedBooleanQueryResult(repository);
 				assertEquals(expectedResult, queryResult);
 			} else {
 				throw new RuntimeException("Unexpected query type: " + query.getClass());
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertTrue(false);
-		}
-		finally {
-			con.close();
 		}
 	}
 
@@ -251,7 +179,11 @@ public abstract class CompletenessParent extends TestCase {
 			}
 			*/
 		}
-	
+
+	private String getName() {
+		return name;
+	}
+
 	/**
 	 * Compares the two query results by converting them to graphs and returns
 	 * true if they are equal. QueryResults are equal if they contain the same
@@ -477,7 +409,7 @@ public abstract class CompletenessParent extends TestCase {
 		}
 	}
 	
-	private TupleQueryResult readExpectedTupleQueryResult() throws Exception {
+	private TupleQueryResult readExpectedTupleQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
 		if (tqrFormat.isPresent()) {
 			InputStream in = new URL(resultFile).openStream();
@@ -494,12 +426,12 @@ public abstract class CompletenessParent extends TestCase {
 				in.close();
 			}
 		} else {
-			Set<Statement> resultGraph = readExpectedGraphQueryResult();
+			Set<Statement> resultGraph = readExpectedGraphQueryResult(repository);
 			return DAWGTestResultSetUtil.toTupleQueryResult(resultGraph);
 		}
 	}
 	
-	private Set<Statement> readExpectedGraphQueryResult() throws Exception {
+	private Set<Statement> readExpectedGraphQueryResult(Repository repository) throws Exception {
 		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFile);
 		if (rdfFormat.isPresent()) {
 			RDFParser parser = Rio.createParser(rdfFormat.get(), repository.getValueFactory());
@@ -528,7 +460,7 @@ public abstract class CompletenessParent extends TestCase {
 		}
 	}
 
-	private boolean readExpectedBooleanQueryResult() throws Exception {
+	private boolean readExpectedBooleanQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry
 				.getInstance().getFileFormatForFileName(resultFile);
 
@@ -537,96 +469,10 @@ public abstract class CompletenessParent extends TestCase {
                 return QueryResultIO.parseBoolean(in, bqrFormat.get());
             }
 		} else {
-			Set<Statement> resultGraph = readExpectedGraphQueryResult();
+			Set<Statement> resultGraph = readExpectedGraphQueryResult(repository);
 			return DAWGTestResultSetUtil.toBooleanQueryResult(resultGraph);
 		}
 	}
-	
-	public static TestSuite suite(String manifestFileURL, Factory factory) throws Exception {
-		return suite(manifestFileURL, factory, true);
-	}
 
-	public static TestSuite suite(String manifestFileURL, Factory factory, boolean approvedOnly) throws Exception {
-		logger.info("Building test suite for {}", manifestFileURL);
 
-		TestSuite suite = new TestSuite(factory.getClass().getName());
-
-		// Read manifest and create declared test cases
-		Repository manifestRep = new SailRepository(new MemoryStore());
-		manifestRep.initialize();
-		RepositoryConnection con = manifestRep.getConnection();
-
-		CompletenessTestUtils.addTurtle(con, new URL(manifestFileURL), manifestFileURL);
-
-		suite.setName(getManifestName(manifestRep, con, manifestFileURL));
-
-		/* 
-		 * Extract test case information from the manifest file. Note that we only
-		 * select those test cases that are mentioned in the list.
-		 */
-		StringBuilder query = new StringBuilder(512);
-		query.append("SELECT DISTINCT tid, name, resf, propf, owlf, sparqlf\n");
-		query.append("FROM {} rdf:first {tid} \n");
-		if (approvedOnly) {
-			query.append("   obdat:approval {obdat:Approved};\n");
-		}
-		query.append("   mf:name {name};\n");
-		query.append("   mf:result {resf};\n");
-		query.append("   mf:parameters {propf};\n");
-		query.append("   mf:action {action} qt:ontology {owlf};\n");
-		query.append("                       qt:query {sparqlf}\n");
-		query.append("USING NAMESPACE \n");
-		query.append("   mf = <http://obda.org/quest/tests/test-manifest#>,\n");
-		query.append("   qt = <http://obda.org/quest/tests/test-query#>,\n");
-		query.append("   obdat = <http://obda.org/quest/tests/test-scenario#>");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
-		
-		logger.debug("Evaluating query..");
-		TupleQueryResult testCases = testCaseQuery.evaluate();
-		while (testCases.hasNext()) {
-			BindingSet bindingSet = testCases.next();
-
-			String testId = bindingSet.getValue("tid").toString();
-			String testName = bindingSet.getValue("name").toString();
-			String resultFile = bindingSet.getValue("resf").toString();
-			String parameterFile = bindingSet.getValue("propf").toString();
-			String ontologyFile = bindingSet.getValue("owlf").toString();
-			String queryFile = bindingSet.getValue("sparqlf").toString();
-
-			logger.debug("Found test case: {}", testName);
-
-			CompletenessParent test = factory.createCompletenessTest(testId, testName, resultFile, parameterFile, ontologyFile, queryFile);
-			if (test != null) {
-				suite.addTest(test);
-			}
-		}
-
-		testCases.close();
-		con.close();
-
-		manifestRep.shutDown();
-		logger.info("Created test suite with " + suite.countTestCases() + " test cases.");
-		return suite;
-	}
-
-	protected static String getManifestName(Repository manifestRep, RepositoryConnection con, String manifestFileURL)
-		throws QueryEvaluationException, RepositoryException, MalformedQueryException
-	{
-		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL, "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
-		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
-		try {
-			if (manifestNames.hasNext()) {
-				return manifestNames.next().getValue("ManifestName").stringValue();
-			}
-		}
-		finally {
-			manifestNames.close();
-		}
-		// Derive name from manifest URL
-		int lastSlashIdx = manifestFileURL.lastIndexOf('/');
-		int secLastSlashIdx = manifestFileURL.lastIndexOf('/', lastSlashIdx - 1);
-		return manifestFileURL.substring(secLastSlashIdx + 1, lastSlashIdx);
-	}
 }
