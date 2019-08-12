@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -10,7 +11,7 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public abstract class AbstractAggregationFunctionSymbol extends FunctionSymbolImpl {
+public abstract class AbstractAggregationFunctionSymbol extends FunctionSymbolImpl implements AggregationFunctionSymbol {
 
     private final DBTermType targetType;
     private final boolean isDistinct;

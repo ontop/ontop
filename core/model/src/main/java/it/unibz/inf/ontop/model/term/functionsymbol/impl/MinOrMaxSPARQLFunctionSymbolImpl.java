@@ -327,4 +327,8 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
     }
 
 
+    @Override
+    public Constant evaluateEmptyBag(TermFactory termFactory) {
+        return termFactory.getNullConstant();
+    }
 }

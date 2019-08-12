@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -53,5 +55,10 @@ public class DBCountFunctionSymbolImpl extends AbstractDBAggregationFunctionSymb
     @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
+    }
+
+    @Override
+    public Constant evaluateEmptyBag(TermFactory termFactory) {
+        return termFactory.getDBIntegerConstant(0);
     }
 }
