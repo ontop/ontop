@@ -21,12 +21,20 @@ package it.unibz.inf.ontop.rdf4j.completeness;
  */
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import junit.framework.TestCase;
+import org.eclipse.rdf4j.repository.Repository;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.Properties;
 
 import static it.unibz.inf.ontop.rdf4j.completeness.CompletenessTestUtils.parametersFromSuperManifest;
 import static org.junit.Assume.assumeTrue;
@@ -41,6 +49,7 @@ import static org.junit.Assume.assumeTrue;
 public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 
 	private static final ImmutableSet IGNORE = ImmutableSet.of();
+	private static final CompletenessRepositoryRegistry REGISTRY = new CompletenessRepositoryRegistry();
 	private final String testIRI;
 	private final String resultFile;
 	private final String parameterFile;
@@ -72,7 +81,37 @@ public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 	public void runTest() throws Exception {
 		assumeTrue(!ignoredTests.contains(testIRI));
 
-		CompletenessTestExecutor executor = new CompletenessTestExecutor(testIRI, getName(), resultFile, parameterFile, ontologyFile, queryFile);
+		Repository repository = getRepository();
+
+		CompletenessTestExecutor executor = new CompletenessTestExecutor(testIRI, getName(), resultFile, queryFile, repository);
 		executor.runTest();
+	}
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
+	}
+
+	protected Repository getRepository() throws Exception {
+
+		// Already existing
+		Optional<Repository> optionalRepository = REGISTRY.getRepository(ontologyFile, parameterFile);
+		if (optionalRepository.isPresent())
+			return optionalRepository.get();
+
+		Properties properties = loadReasonerParameters(parameterFile);
+		String ontologyPath = new URL(ontologyFile).getPath();
+
+		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
+			OntopRepository repository = OntopRepository.defaultRepository(loader.getConfiguration());
+			repository.initialize();
+			return repository;
+		}
+	}
+
+	protected Properties loadReasonerParameters(String path) throws IOException {
+		Properties p = new Properties();
+		p.load(new URL(path).openStream());
+		return p;
 	}
 }

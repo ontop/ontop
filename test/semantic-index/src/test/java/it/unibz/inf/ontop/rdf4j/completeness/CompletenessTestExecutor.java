@@ -1,28 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.completeness;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
-import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
 import org.eclipse.rdf4j.common.io.IOUtil;
 import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.text.StringUtil;
@@ -35,6 +12,7 @@ import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
 import org.eclipse.rdf4j.query.impl.MutableTupleQueryResult;
 import org.eclipse.rdf4j.query.impl.TupleQueryResultBuilder;
 import org.eclipse.rdf4j.query.resultio.*;
+import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -60,45 +38,25 @@ public class CompletenessTestExecutor {
 	protected final String testId;
 	protected final String queryFile;
 	protected final String resultFile;
-	protected final String ontologyFile;
-	protected final String parameterFile;
 	
 	protected final boolean laxCardinality = false;
 
 	static final Logger logger = LoggerFactory.getLogger(CompletenessTestExecutor.class);
 	private final String name;
+	private final Repository repository;
 
-	public CompletenessTestExecutor(String tid, String name, String resf, String propf, String owlf, String sparqlf) throws Exception {
+	public CompletenessTestExecutor(String tid, String name, String resf, String sparqlf,
+									Repository repository) {
 		testId = tid;
 		resultFile = resf;
-		parameterFile = propf;
-		ontologyFile = owlf;
 		queryFile = sparqlf;
 		this.name = name;
-	}
-
-	protected Properties loadReasonerParameters(String path) throws IOException {
-		Properties p = new Properties();
-		p.load(new URL(path).openStream());
-		return p;
-
-	}
-
-	protected OntopRepository createRepository() throws Exception {
-		Properties properties = loadReasonerParameters(parameterFile);
-		String ontologyPath = new URL(ontologyFile).getPath();
-
-		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
-			OntopRepository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
-			return repository;
-		}
+		this.repository = repository;
 	}
 
 	public void runTest() throws Exception {
 		logger.info("\n\n\n============== " + testId + " ==============\n");
-		try (OntopRepository repository = createRepository();
-			 RepositoryConnection con = repository.getConnection()) {
+		try (RepositoryConnection con = repository.getConnection()) {
 			String queryString = readQueryString();
 			Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString, queryFile);
 			if (query instanceof TupleQuery) {
@@ -451,7 +409,7 @@ public class CompletenessTestExecutor {
 		}
 	}
 	
-	private TupleQueryResult readExpectedTupleQueryResult(OntopRepository repository) throws Exception {
+	private TupleQueryResult readExpectedTupleQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
 		if (tqrFormat.isPresent()) {
 			InputStream in = new URL(resultFile).openStream();
@@ -473,7 +431,7 @@ public class CompletenessTestExecutor {
 		}
 	}
 	
-	private Set<Statement> readExpectedGraphQueryResult(OntopRepository repository) throws Exception {
+	private Set<Statement> readExpectedGraphQueryResult(Repository repository) throws Exception {
 		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFile);
 		if (rdfFormat.isPresent()) {
 			RDFParser parser = Rio.createParser(rdfFormat.get(), repository.getValueFactory());
@@ -502,7 +460,7 @@ public class CompletenessTestExecutor {
 		}
 	}
 
-	private boolean readExpectedBooleanQueryResult(OntopRepository repository) throws Exception {
+	private boolean readExpectedBooleanQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry
 				.getInstance().getFileFormatForFileName(resultFile);
 
