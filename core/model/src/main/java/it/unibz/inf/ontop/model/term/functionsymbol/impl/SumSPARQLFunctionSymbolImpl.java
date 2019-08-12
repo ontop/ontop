@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -35,5 +36,10 @@ public class SumSPARQLFunctionSymbolImpl extends SumLikeSPARQLAggregationFunctio
     @Override
     protected ImmutableTerm getNeutralElement(TermFactory termFactory) {
         return termFactory.getDBIntegerConstant(0);
+    }
+
+    @Override
+    public Constant evaluateEmptyBag(TermFactory termFactory) {
+        return termFactory.getRDFLiteralConstant("0", XSD.INTEGER);
     }
 }

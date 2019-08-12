@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-public interface SPARQLAggregationFunctionSymbol extends SPARQLFunctionSymbol {
+public interface SPARQLAggregationFunctionSymbol extends SPARQLFunctionSymbol, AggregationFunctionSymbol {
 
     Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,

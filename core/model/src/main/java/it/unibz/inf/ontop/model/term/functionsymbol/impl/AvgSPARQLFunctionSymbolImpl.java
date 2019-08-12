@@ -302,4 +302,8 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
     }
 
 
+    @Override
+    public Constant evaluateEmptyBag(TermFactory termFactory) {
+        return termFactory.getRDFLiteralConstant("0", XSD.INTEGER);
+    }
 }

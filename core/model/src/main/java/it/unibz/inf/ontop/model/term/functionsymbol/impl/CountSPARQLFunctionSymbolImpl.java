@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -91,5 +92,10 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
             boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {
         return Optional.empty();
+    }
+
+    @Override
+    public Constant evaluateEmptyBag(TermFactory termFactory) {
+        return termFactory.getRDFLiteralConstant("0", XSD.INTEGER);
     }
 }
