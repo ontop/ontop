@@ -469,10 +469,13 @@ public class R2RMLParser {
 		if (!string.contains("{")) {
 			if (type == 1) {
 				if (!R2RMLVocabulary.isResourceString(string)) {
-					string = R2RMLVocabulary.prefixUri("{" + string + "}");
+					string = "{" + string + "}";
 				} else {
 					type = 0;
 				}
+			}
+			if(type == 2){
+				string = "{" + string + "}";
 			}
 		}
 		if (type == 1) {
