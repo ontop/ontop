@@ -55,10 +55,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 			/* AGGREGATES: TODO: enable them */
-			
-			aggregatesManifest + "agg03",
-			aggregatesManifest + "agg06",
-			aggregatesManifest + "agg07",
+
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
