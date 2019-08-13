@@ -259,6 +259,15 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
                 .collect(ImmutableCollectors.toList());
     }
 
+    private BiFunction<Variable, Variable, ImmutableExpression> orOnlyFirstArgumentIsNotNull(
+            BiFunction<Variable, Variable, ImmutableExpression> fct, TermFactory termFactory) {
+        return (agg1, agg2) -> termFactory.getDisjunction(
+                fct.apply(agg1, agg2),
+                termFactory.getConjunction(
+                        termFactory.getDBIsNotNull(agg1),
+                        termFactory.getDBIsNull(agg2)));
+    }
+
     private Map.Entry<ImmutableExpression, RDFTermTypeConstant> createRegularTypeWhenPair(Variable aggregateVariable,
                                                                                               RDFTermType rdfType,
                                                                                               TermFactory termFactory) {
@@ -269,8 +278,11 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
 
     private Stream<Map.Entry<ImmutableExpression, RDFTermTypeConstant>> computeNumericOrDatetimeTypePairs(
             RDFDatatype baseDatatype, ImmutableMap<RDFTermType, Variable> aggregateMap,
-            BiFunction<Variable, Variable, ImmutableExpression> comparisonFct,
+            BiFunction<Variable, Variable, ImmutableExpression> partialComparisonFct,
             TermFactory termFactory) {
+
+        BiFunction<Variable, Variable, ImmutableExpression> comparisonFct = orOnlyFirstArgumentIsNotNull(
+                partialComparisonFct, termFactory);
 
         ImmutableList<RDFTermType> matchingTypes = aggregateMap.keySet().stream()
                 .filter(t -> t.isA(baseDatatype))
