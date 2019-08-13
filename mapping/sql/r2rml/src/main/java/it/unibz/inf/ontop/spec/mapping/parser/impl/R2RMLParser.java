@@ -536,7 +536,7 @@ public class R2RMLParser {
 			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
-			uriTemplate = termFactory.getConstantBNode(string);
+			uriTemplate = termFactory.getVariable(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
 			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
