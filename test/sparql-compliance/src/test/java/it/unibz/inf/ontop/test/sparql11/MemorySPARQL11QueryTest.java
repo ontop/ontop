@@ -67,7 +67,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			aggregatesManifest + "agg-err-01",
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
-			aggregatesManifest + "agg-sum-order-01",
 
 			/* BIND */
 			//The sub-term: ADD(o,http://www.w3.org/2001/XMLSchema#integer(+1)) is not a VariableOrGroundTerm
