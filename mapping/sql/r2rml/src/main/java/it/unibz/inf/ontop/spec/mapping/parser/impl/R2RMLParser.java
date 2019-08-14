@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -539,7 +538,7 @@ public class R2RMLParser {
 			return termFactory.getImmutableUriTemplate(ImmutableList.copyOf(terms));
 			// BNODE
 		case 2:
-			uriTemplate = termFactory.getConstantBNode(string);
+			uriTemplate = termFactory.getConstantLiteral(string);
 			terms.add(0, uriTemplate); // the URI template is always on the
 										// first position in the term list
 			return termFactory.getImmutableBNodeTemplate(ImmutableList.copyOf(terms));
