@@ -187,18 +187,24 @@ public class TargetQueryRenderer {
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
         ImmutableTerm firstTerm = function.getTerms().get(0);
-        if(!(firstTerm instanceof ObjectConstant)){
-            throw new UnexpectedTermException(function, "The first argument of a BNode is expected to be a pattern");
+        if(firstTerm instanceof Variable){
+            return "_:"+ displayVariable((Variable)firstTerm);
         }
-        String templateFormat = ((ObjectConstant) firstTerm).getValue().replace("{}", "%s");
-        ImmutableList<String> varNames = function.getTerms().stream().skip(1)
-                .filter(t -> t instanceof Variable)
-                .map(t -> (Variable)t)
-                .map(v -> displayVariable(v))
-                .collect(ImmutableCollectors.toList());
+        if(firstTerm instanceof ValueConstant) {
+            String templateFormat = ((ValueConstant) firstTerm).getValue().replace("{}", "%s");
+            if(function.getTerms().stream().skip(1).
+                    anyMatch(t -> !(t instanceof Variable)))
+                throw new UnexpectedTermException(function, "All argument of the BNode function but the first one are expected to be variables");
+            ImmutableList<String> varNames = function.getTerms().stream().skip(1)
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable) t)
+                    .map(v -> displayVariable(v))
+                    .collect(ImmutableCollectors.toList());
 
-        String originalUri = String.format(templateFormat, varNames.toArray());
-        return "_:"+ String.format(templateFormat, varNames.toArray());
+            String originalUri = String.format(templateFormat, varNames.toArray());
+            return "_:" + String.format(templateFormat, varNames.toArray());
+        }
+        throw new UnexpectedTermException(function, "The first argument of the BNode function is expected to be either a variable or a template");
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
