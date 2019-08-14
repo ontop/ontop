@@ -230,7 +230,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
                         .map(v -> createRegularTypeWhenPair(v, bnodeType, termFactory));
 
         Optional<Map.Entry<ImmutableExpression, RDFTermTypeConstant>> iriEntry =
-                Optional.ofNullable(aggregateMap.get(bnodeType))
+                Optional.ofNullable(aggregateMap.get(iriType))
                         .map(v -> createRegularTypeWhenPair(v, iriType, termFactory));
 
         Stream<Map.Entry<ImmutableExpression, RDFTermTypeConstant>> objectEntries = Stream.of(bnodeEntry, iriEntry)
