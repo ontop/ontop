@@ -26,8 +26,10 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,12 +186,19 @@ public class TargetQueryRenderer {
     }
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
-        StringBuilder sb = new StringBuilder("_:");
-        sb.append("{"+function.getTerm(0)+"}");
-        function.getTerms().stream()
-                .skip(1)
-                .forEach(t -> sb.append("_{"+t.toString()+"}"));
-        return sb.toString();
+        ImmutableTerm firstTerm = function.getTerms().get(0);
+        if(!(firstTerm instanceof ObjectConstant)){
+            throw new UnexpectedTermException(function, "The first argument of a BNode is expected to be a pattern");
+        }
+        String templateFormat = ((ObjectConstant) firstTerm).getValue().replace("{}", "%s");
+        ImmutableList<String> varNames = function.getTerms().stream().skip(1)
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .map(v -> displayVariable(v))
+                .collect(ImmutableCollectors.toList());
+
+        String originalUri = String.format(templateFormat, varNames.toArray());
+        return "_:"+ String.format(templateFormat, varNames.toArray());
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
@@ -209,30 +218,19 @@ public class TargetQueryRenderer {
     }
 
     private static String displayDatatypeFunction(ImmutableFunctionalTerm function, Predicate functionSymbol, String fname, PrefixManager prefixManager) {
-        StringBuilder sb = new StringBuilder();
         // Language tag case
-        if (functionSymbol.getName().equals(RDF.LANGSTRING.getIRIString())) {
-            // with the language tag
-            ImmutableTerm var = function.getTerms().get(0);
-            ImmutableTerm lang = function.getTerms().get(1);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("@");
-            if (lang instanceof ValueConstant) {
-                // Don't pass this to getDisplayName() because
-                // language constant is not written as @"lang-tag"
-                sb.append(((ValueConstant) lang).getValue());
-            } else {
-                sb.append(getDisplayName(lang, prefixManager));
+        if (functionSymbol.getName().startsWith(RDF.LANGSTRING.getIRIString())) {
+            String functionSymbolString = function.getFunctionSymbol().getName();
+            int index = functionSymbolString.indexOf("@");
+            if (index == -1){
+                throw new UnexpectedTermException(function, "The langString IRI should contain \'@\'");
             }
-        } else { // for the other data types
-            ImmutableTerm var = function.getTerms().get(0);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("^^");
-            sb.append(fname);
+            return getDisplayName(function.getTerms().get(0), prefixManager)+functionSymbolString.substring(index);
         }
-        return sb.toString();
+        // for the other data types
+        ImmutableTerm var = function.getTerms().get(0);
+        return getDisplayName(var, prefixManager)+ "^^"+ fname;
     }
-
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         StringBuilder sb = new StringBuilder();
@@ -291,6 +289,10 @@ public class TargetQueryRenderer {
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);
+        }
+
+        private UnexpectedTermException(ImmutableTerm term, String message) {
+            super("Unexpected term " + term + ":\n"+message);
         }
     }
 }
