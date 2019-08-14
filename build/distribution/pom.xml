@@ -35,7 +35,7 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			 <plugin>
@@ -56,6 +56,7 @@
 					<descriptors>
 						<descriptor>src/assembly/ontop-distribution-bin.xml</descriptor>
 					</descriptors>
+					<finalName>ontop-cli-${project.version}</finalName>
 				</configuration>
 			</plugin>
 			<plugin>

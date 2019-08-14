@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import it.unibz.inf.ontop.protege.core.MutablePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -103,6 +104,12 @@ public class BootstrapAction extends ProtegeAction {
 					throw new RuntimeException("Base URI " + baseUri
 							+ " contains '#' character!");
 				} else {
+					String bootstrapPrefix = "g:";
+					MutablePrefixManager prefixManager = currentModel.getMutablePrefixManager();
+					while(prefixManager.contains(bootstrapPrefix)){
+						bootstrapPrefix = "g"+bootstrapPrefix;
+					}
+					currentModel.addPrefix(bootstrapPrefix, baseUri);
 					Thread th = new Thread("Bootstrapper Action Thread"){
 						@Override
 						public void run() {

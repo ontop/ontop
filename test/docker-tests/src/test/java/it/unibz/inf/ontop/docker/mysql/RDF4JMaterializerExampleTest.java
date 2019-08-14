@@ -25,7 +25,7 @@ import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,7 +37,7 @@ public class RDF4JMaterializerExampleTest {
 
 	private static final String inputFile = "/mysql/example/exampleBooks.obda";
 	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
-	private static final String OUTPUT_BASENAME = "exampleBooks.n3";
+	private static final String OUTPUT_BASENAME = "exampleBooks.nt";
 
 	/**
 	 * TODO: try with result streaming
@@ -73,7 +73,7 @@ public class RDF4JMaterializerExampleTest {
 		BufferedWriter out = null;
 		try {
 		    out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout, true)));
-		    RDFWriter writer = new N3Writer(out);
+		    RDFWriter writer = new NTriplesWriter(out);
 			graphQuery.evaluate(writer);
 
 			long numberOfTriples = graphQuery.getTripleCountSoFar();
