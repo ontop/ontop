@@ -52,6 +52,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QueryPainter {
 	private final OBDAModel apic;
@@ -439,13 +441,18 @@ public class QueryPainter {
 		}
 
 		ColorTask[] taskArray = order(tasks);
-		for (int i = 0; i < taskArray.length; i++) {
-			if (taskArray[i].text != null) {
-				int index = input.indexOf(taskArray[i].text, 0);
-				while (index != -1) {
-					doc.setCharacterAttributes(index, taskArray[i].text.length(), taskArray[i].set, true);
-					index = input.indexOf(taskArray[i].text, index + 1);
+		for (ColorTask ct: taskArray){
+			if (ct.text != null) {
+				Matcher matcher = Pattern.compile("\\s("+ct.text+")[\\s\\.;,]")
+						.matcher(input);
+				while (matcher.find()){
+					doc.setCharacterAttributes(matcher.start(1), ct.text.length(), ct.set, true);
 				}
+//				int index = input.indexOf(ct.text, 0);
+//				while (index != -1) {
+//					doc.setCharacterAttributes(index, ct.text.length(), ct.set, true);
+//					index = input.indexOf(ct.text, index + 1);
+//				}
 			}
 		}
 		tasks.clear();
