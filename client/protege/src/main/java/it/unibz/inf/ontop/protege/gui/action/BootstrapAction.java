@@ -103,7 +103,7 @@ public class BootstrapAction extends ProtegeAction {
 					throw new RuntimeException("Base URI " + baseUri
 							+ " contains '#' character!");
 				} else {
-					currentModel.addPrefix("bootstrap:", baseUri);
+					currentModel.addPrefix("g:", baseUri);
 					Thread th = new Thread("Bootstrapper Action Thread"){
 						@Override
 						public void run() {
