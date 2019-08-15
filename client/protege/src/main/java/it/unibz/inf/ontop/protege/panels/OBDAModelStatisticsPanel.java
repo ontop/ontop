@@ -49,7 +49,8 @@ public class OBDAModelStatisticsPanel extends javax.swing.JPanel implements OBDA
 		catch (Exception e) {
 			message = String.format("%s. Please try again!", e.getMessage());
             errorShown = true;
-		}
+            e.printStackTrace();
+        }
     	lblSummaryValue.setText(message); 	
     	
     	/* Fill the triples summary table */

@@ -511,11 +511,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-rio-n3</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-sail-api</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
