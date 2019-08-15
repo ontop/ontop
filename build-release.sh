@@ -181,9 +181,10 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${ONTOP_JETTY_DIST}/ontop-jetty-
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${ONTOP_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/webapps
+mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/lib/ext
 cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
-cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
-cp ${ONTOP_DEP_HOME}/README-ontop.txt ${JETTY_FOLDER}
+cp ${BUILD_ROOT}/client/jetty/start.ini ${JETTY_FOLDER}/ontop-base
+cp ${BUILD_ROOT}/client/jetty/README.md ${JETTY_FOLDER}/README_ONTOP_JETTY.md
 
 zip -rq ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ || exit 1
 
