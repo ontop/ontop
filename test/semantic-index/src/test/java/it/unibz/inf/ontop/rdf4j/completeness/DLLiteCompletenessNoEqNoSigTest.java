@@ -20,7 +20,24 @@ package it.unibz.inf.ontop.rdf4j.completeness;
  * #L%
  */
 
-import junit.framework.Test;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
+import junit.framework.TestCase;
+import org.eclipse.rdf4j.repository.Repository;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Properties;
+
+import static it.unibz.inf.ontop.rdf4j.completeness.CompletenessTestUtils.parametersFromSuperManifest;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test the sound and completeness of Quest reasoner with respect to DL-Lite
@@ -28,29 +45,73 @@ import junit.framework.Test;
  * 
  * Setting: Without Optimizing Equivalences and Without Using TBox Sigma. 
  */
-public class DLLiteCompletenessNoEqNoSigTest extends CompletenessParent {
+@RunWith(Parameterized.class)
+public class DLLiteCompletenessNoEqNoSigTest extends TestCase {
 
-	public DLLiteCompletenessNoEqNoSigTest(String tid, String name, String resf,
-			String propf, String owlf, String sparqlf) throws Exception {
-		super(tid, name, resf, propf, owlf, sparqlf);
+	private static final ImmutableSet IGNORE = ImmutableSet.of();
+	private static final CompletenessRepositoryRegistry REGISTRY = new CompletenessRepositoryRegistry();
+	private final String testIRI;
+	private final String resultFile;
+	private final String parameterFile;
+	private final String ontologyFile;
+	private final String queryFile;
+	private final ImmutableSet<String> ignoredTests;
+
+	public DLLiteCompletenessNoEqNoSigTest(String testIRI, String name, String resultFile, String parameterFile,
+										   String ontologyFile, String queryFile,
+										   ImmutableSet<String> ignoredTests) {
+		super(name);
+		this.testIRI = testIRI;
+		this.resultFile = resultFile;
+		this.parameterFile = parameterFile;
+		this.ontologyFile = ontologyFile;
+		this.queryFile = queryFile;
+		this.ignoredTests = ignoredTests;
 	}
 
-	public static Test suite() throws Exception {
-		return CompletenessTestUtils.suite(new Factory() {
-			@Override
-			public CompletenessParent createCompletenessTest(String testId,
-					String testName, String testResultPath,
-					String testParameterPath, String testOntologyPath,
-					String testQueryPath) throws Exception {
-				return new DLLiteCompletenessNoEqNoSigTest(testId, testName,
-						testResultPath, testParameterPath, testOntologyPath,
-						testQueryPath);
-			}
+	@Parameterized.Parameters(name="{1}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return parametersFromSuperManifest(
+				"/completeness/manifest-noeq-nosig.ttl",
+				IGNORE);
+	}
 
-			@Override
-			public String getMainManifestFile() {
-				return "/completeness/manifest-noeq-nosig.ttl";
-			}
-		});
+	@Test
+	@Override
+	public void runTest() throws Exception {
+		assumeTrue(!ignoredTests.contains(testIRI));
+
+		Repository repository = getRepository();
+
+		CompletenessTestExecutor executor = new CompletenessTestExecutor(testIRI, getName(), resultFile, queryFile, repository);
+		executor.runTest();
+	}
+
+	@AfterClass
+	public static void after() {
+		REGISTRY.shutdown();
+	}
+
+	protected Repository getRepository() throws Exception {
+
+		// Already existing
+		Optional<Repository> optionalRepository = REGISTRY.getRepository(ontologyFile, parameterFile);
+		if (optionalRepository.isPresent())
+			return optionalRepository.get();
+
+		Properties properties = loadReasonerParameters(parameterFile);
+		String ontologyPath = new URL(ontologyFile).getPath();
+
+		try (OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadOntologyIndividuals(ontologyPath, properties)) {
+			OntopRepository repository = OntopRepository.defaultRepository(loader.getConfiguration());
+			repository.initialize();
+			return repository;
+		}
+	}
+
+	protected Properties loadReasonerParameters(String path) throws IOException {
+		Properties p = new Properties();
+		p.load(new URL(path).openStream());
+		return p;
 	}
 }
