@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.rdf4j.repository.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,13 +74,12 @@ public class OntopVirtualRepository implements OntopRepository {
 	/**
 	 * This method leads to the reasoner being initialized (connecting to the database,
 	 * analyzing mappings, etc.). This must be called before any queries are run, i.e. before {@code getConnection}.
-	 * 
+	 *
 	 */
 	@Override
 	public void initialize() throws RepositoryException{
 		initialized = true;
 		try {
-
 			queryEngine = configuration.loadQueryEngine();
 			queryEngine.connect();
 		}
@@ -88,7 +87,7 @@ public class OntopVirtualRepository implements OntopRepository {
 			throw new RepositoryException(e);
 		}
 	}
-	
+
 	/**
 	 * Returns a connection which can be used to run queries over the repository
 	 * Before this method can be used, initialize() must be called once.
