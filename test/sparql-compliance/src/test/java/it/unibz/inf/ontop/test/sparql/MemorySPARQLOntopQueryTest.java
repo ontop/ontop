@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.test.sparql;
 
-/*
- * #%L
- * ontop-sparql-compliance
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
@@ -27,7 +7,10 @@ import it.unibz.inf.ontop.si.SemanticIndexException;
 import junit.framework.Test;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.repository.Repository;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 
@@ -74,7 +57,8 @@ expr-equals/result-eq2-2.ttl
 
 */
 
-public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
+@RunWith(Parameterized.class)
+public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 	/* List of UNSUPPORTED QUERIES */
 
@@ -94,7 +78,7 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 	private static final String sortManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/sort/manifest#";
 	private static final String typePromotionManifest ="http://www.w3.org/2001/sw/DataAccess/tests/data-r2/type-promotion/manifest#";
 
-	private static Set<String> IGNORE = ImmutableSet.of(
+	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
 
 
@@ -292,45 +276,18 @@ public class MemorySPARQLOntopQueryTest extends SPARQLQueryParent {
 			typePromotionManifest + "type-promotion-17"
 
 
-
 	);
 
-	public static Test suite() throws Exception{
-		return suite(true);
+	public MemorySPARQLOntopQueryTest(String testIRI, String name, String queryFileURL, String resultFileURL,
+									  Dataset dataSet, boolean laxCardinality, boolean checkOrder,
+									  ImmutableSet<String> ignoredTests) {
+		super(testIRI, name, queryFileURL, resultFileURL, dataSet, laxCardinality, checkOrder, ignoredTests);
 	}
 
-	public static Test suite(boolean ignoreFailures) throws Exception {
-		return ManifestTestUtils.suite(new Factory() {
-
-			public MemorySPARQLOntopQueryTest createSPARQLQueryTest(
-					String testURI, String name, String queryFileURL,
-					String resultFileURL, Dataset dataSet,
-					boolean laxCardinality, boolean checkOrder) {
-				if(!ignoreFailures || !IGNORE.contains(testURI)) {
-					return new MemorySPARQLOntopQueryTest(testURI, name,
-							queryFileURL, resultFileURL, dataSet, laxCardinality,
-							checkOrder);
-				}
-				return null;
-
-			}
-		}, "/testcases-dawg-quest/data-r2/manifest-evaluation.ttl");
-	}
-
-
-	protected MemorySPARQLOntopQueryTest(String testURI, String name,
-                                         String queryFileURL, String resultFileURL, Dataset dataSet,
-                                         boolean laxCardinality, boolean checkOrder) {
-		super(testURI, name, queryFileURL, resultFileURL, dataSet,
-				laxCardinality, checkOrder);
-	}
-
-	@Override
-	protected Repository newRepository() throws SemanticIndexException {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
-			Repository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
-			return repository;
-		}
+	@Parameterized.Parameters(name="{1}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-dawg-quest/data-r2/manifest-evaluation.ttl",
+				IGNORE);
 	}
 }

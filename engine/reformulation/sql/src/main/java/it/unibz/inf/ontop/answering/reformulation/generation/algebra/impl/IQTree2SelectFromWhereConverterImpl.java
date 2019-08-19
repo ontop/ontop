@@ -216,7 +216,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof TrueNode){
             return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
         }
-        else if ((rootNode instanceof ConstructionNode) || (rootNode instanceof QueryModifierNode)){
+        else if (rootNode instanceof ExtendedProjectionNode || rootNode instanceof QueryModifierNode){
             ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
             return convert(tree, signature);
         }

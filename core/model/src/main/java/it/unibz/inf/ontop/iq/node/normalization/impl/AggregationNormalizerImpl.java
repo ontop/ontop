@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.impl.AggregationNodeImpl;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.AggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -54,7 +54,13 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
     @Override
     public IQTree normalizeForOptimization(AggregationNode aggregationNode, IQTree child,
                                            VariableGenerator variableGenerator, IQProperties currentIQProperties) {
+        IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
+
         IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
+
+        if (normalizedChild.isDeclaredAsEmpty()) {
+            return normalizeEmptyChild(aggregationNode, normalizedProperties);
+        }
 
         QueryNode rootNode = normalizedChild.getRootNode();
 
@@ -68,11 +74,39 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                         normalizedChild, variableGenerator));
 
         AggregationNormalizationState finalState = stateAfterLiftingBindings.simplifyAggregationSubstitution();
-
-        IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
         // TODO: consider filters
 
         return finalState.createNormalizedTree(normalizedProperties);
+    }
+
+    /**
+     * If the child is empty, returns no tuple if there are some grouping variables.
+     * Otherwise, returns a single tuple.
+     */
+    private IQTree normalizeEmptyChild(AggregationNode aggregationNode, IQProperties normalizedProperties) {
+        ImmutableSet<Variable> projectedVariables = aggregationNode.getVariables();
+
+        if (!aggregationNode.getGroupingVariables().isEmpty())
+            return iqFactory.createEmptyNode(projectedVariables);
+
+        ImmutableMap<Variable, ImmutableTerm> newSubstitutionMap = aggregationNode.getSubstitution().getImmutableMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> simplifyEmptyAggregate(e.getValue())));
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                projectedVariables,
+                substitutionFactory.getSubstitution(newSubstitutionMap));
+
+        return iqFactory.createUnaryIQTree(constructionNode, iqFactory.createTrueNode(), normalizedProperties);
+    }
+
+    private ImmutableTerm simplifyEmptyAggregate(ImmutableFunctionalTerm aggregateTerm) {
+        FunctionSymbol functionSymbol = aggregateTerm.getFunctionSymbol();
+        if (functionSymbol instanceof AggregationFunctionSymbol) {
+            return ((AggregationFunctionSymbol) functionSymbol).evaluateEmptyBag(termFactory);
+        }
+        throw new MinorOntopInternalBugException("Was expecting an AggregationFunctionSymbol");
     }
 
     private AggregationNormalizationState normalizeWithChildConstructionNode(AggregationNode aggregationNode,

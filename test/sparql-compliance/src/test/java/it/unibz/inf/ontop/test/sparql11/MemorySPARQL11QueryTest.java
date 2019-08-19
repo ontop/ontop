@@ -21,22 +21,19 @@ package it.unibz.inf.ontop.test.sparql11;
  */
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.si.OntopSemanticIndexLoader;
-import it.unibz.inf.ontop.si.SemanticIndexException;
 import it.unibz.inf.ontop.test.sparql.ManifestTestUtils;
-import it.unibz.inf.ontop.test.sparql.SPARQLQueryParent;
-import junit.framework.Test;
+import it.unibz.inf.ontop.test.sparql.MemoryOntopTestCase;
 import org.eclipse.rdf4j.query.Dataset;
-import org.eclipse.rdf4j.repository.Repository;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.util.Properties;
-import java.util.Set;
+import java.util.Collection;
 
 
 //Test of SPARQL 1.1 compliance
 
-public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
+@RunWith(Parameterized.class)
+public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 	/* List of UNSUPPORTED QUERIES */
 
@@ -55,47 +52,18 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 	private static final String serviceManifest = "http://www.w3.org/2009/sparql/docs/tests/data-sparql11/service/manifest#";
 
 
-	private static Set<String> IGNORE = ImmutableSet.of(
+	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			/* AGGREGATES
-			not supported yet */
+			/* AGGREGATES: TODO: enable them */
 
-			aggregatesManifest + "agg01",
-			aggregatesManifest + "agg02",
-			aggregatesManifest + "agg03",
-			aggregatesManifest + "agg04",
-			aggregatesManifest + "agg05",
-			aggregatesManifest + "agg06",
-			aggregatesManifest + "agg07",
-			aggregatesManifest + "agg08",
-			aggregatesManifest + "agg08b",
-			aggregatesManifest + "agg09",
-			aggregatesManifest + "agg10",
-			aggregatesManifest + "agg11",
-			aggregatesManifest + "agg12",
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
-			aggregatesManifest + "agg-sum-01",
-			aggregatesManifest + "agg-sum-01-ontop",
-			aggregatesManifest + "agg-sum-02",
-			aggregatesManifest + "agg-sum-02-ontop",
-			aggregatesManifest + "agg-avg-01",
-			aggregatesManifest + "agg-avg-01-ontop",
 			aggregatesManifest + "agg-avg-02",
-			aggregatesManifest + "agg-min-01",
-			aggregatesManifest + "agg-min-01-ontop",
-			aggregatesManifest + "agg-min-02",
-			aggregatesManifest + "agg-min-02-ontop",
-			aggregatesManifest + "agg-max-01",
-			aggregatesManifest + "agg-max-01-ontop",
-			aggregatesManifest + "agg-max-02",
-			aggregatesManifest + "agg-max-02-ontop",
 			aggregatesManifest + "agg-sample-01",
 			aggregatesManifest + "agg-err-01",
+			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
-			aggregatesManifest + "agg-sum-order-01",
-			aggregatesManifest + "agg-empty-group",
 
 			/* BIND */
 			//The sub-term: ADD(o,http://www.w3.org/2001/XMLSchema#integer(+1)) is not a VariableOrGroundTerm
@@ -335,43 +303,17 @@ public class MemorySPARQL11QueryTest extends SPARQLQueryParent {
 
 			//missing results
 			subqueryManifest + "subquery14"
-
-
 	);
 
-    public static Test suite() throws Exception{
-        return suite(true);
-    }
-	public static Test suite(boolean ignoreFailures) throws Exception {
-		return ManifestTestUtils.suite(new Factory() {
-
-			public MemorySPARQL11QueryTest createSPARQLQueryTest(
-					String testURI, String name, String queryFileURL,
-					String resultFileURL, Dataset dataSet,
-					boolean laxCardinality, boolean checkOrder) {
-				if(ignoreFailures && !IGNORE.contains(testURI)) {
-				return new MemorySPARQL11QueryTest(testURI, name,
-						queryFileURL, resultFileURL, dataSet, laxCardinality,
-						checkOrder);
-				}
-				return null;
-			}
-		}, "/testcases-dawg-sparql-1.1/manifest-all.ttl");
+	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,
+								   boolean laxCardinality, boolean checkOrder, ImmutableSet<String> ignoredTests) {
+		super(testIRI, name, queryFileURL, resultFileURL, dataSet, laxCardinality, checkOrder, ignoredTests);
 	}
 
-	protected MemorySPARQL11QueryTest(String testURI, String name,
-									  String queryFileURL, String resultFileURL, Dataset dataSet,
-									  boolean laxCardinality, boolean checkOrder) {
-		super(testURI, name, queryFileURL, resultFileURL, dataSet,
-				laxCardinality, checkOrder);
-	}
-
-	@Override
-	protected Repository newRepository() throws SemanticIndexException {
-		try(OntopSemanticIndexLoader loader = OntopSemanticIndexLoader.loadRDFGraph(dataset, new Properties())) {
-			Repository repository = OntopRepository.defaultRepository(loader.getConfiguration());
-			repository.initialize();
-			return repository;
-		}
+	@Parameterized.Parameters(name="{1}")
+	public static Collection<Object[]> parameters() throws Exception {
+		return ManifestTestUtils.parametersFromSuperManifest(
+				"/testcases-dawg-sparql-1.1/manifest-all.ttl",
+				IGNORE);
 	}
 }

@@ -18,7 +18,7 @@
             <uri>http://example/org-3</uri>
           </binding>
           <binding name="totalPrice">
-            <literal datatype="http://www.w3.org/2001/XMLSchema#integer">6</literal>
+            <literal datatype="http://www.w3.org/2001/XMLSchema#decimal">7.1</literal>
           </binding>
         </result>
             <result>
