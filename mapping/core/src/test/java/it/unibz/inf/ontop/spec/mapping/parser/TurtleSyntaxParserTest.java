@@ -281,13 +281,6 @@ public class TurtleSyntaxParserTest {
 				"{first_name} a :Name . ", 8);
 		TestCase.assertTrue(result);
 	}
-
-	@Test
-	public void test_BNODE_object(){
-		final boolean result = compareCQIE("<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> _:{deptId} .", 1);
-		TestCase.assertTrue(result);
-	}
-
 	@Test
 	public void test_9_2(){
 		final boolean result = compareCQIE("{idEmigrante} a  :E21_Person ; :P131_is_identified_by {nome} ; :P11i_participated_in {numCM} .\n" +
@@ -319,6 +312,13 @@ public class TurtleSyntaxParserTest {
 		TestCase.assertFalse(result);
 
 	}
+
+	@Test
+	public void test_BNODE_object(){
+		final boolean result = compareCQIE("<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> _:{deptId} .", 1);
+		TestCase.assertTrue(result);
+	}
+
 
 	private boolean compareCQIE(String input, int countBody) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),

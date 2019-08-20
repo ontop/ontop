@@ -112,7 +112,7 @@ subject
 
 object
   : resource
-//  | BlankNode
+  | blank
   | literal
   | variableLiteral
   | variable
