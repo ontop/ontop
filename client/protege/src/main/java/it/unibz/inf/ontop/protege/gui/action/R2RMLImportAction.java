@@ -36,6 +36,7 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
@@ -104,12 +105,12 @@ public class R2RMLImportAction extends ProtegeAction {
 
 
 					File finalFile = file;
-					Thread th = new Thread("Bootstrapper Action Thread"){
+					Thread th = new Thread("R2RML Import Thread"){
 						@Override
 						public void run() {
 							try {
 								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-										"Bootstrapping ontology and mappings...", workspace);
+										"Importing R2RML mapping ...", workspace);
 								R2RMLImportThread t = new R2RMLImportThread();
 								monitor.addProgressListener(t);
 								monitor.start();
@@ -165,16 +166,16 @@ public class R2RMLImportAction extends ProtegeAction {
 			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
 			tripleMaps.forEach(tm -> registerTripleMap(tm));
 
-			ImmutableList<AddAxiom> addAxioms = directMappingEngine.extractDeclarationAxioms(
+			ImmutableList<AddAxiom> addAxioms = MappingOntologyUtils.extractDeclarationAxioms(
 					manager,
 					tripleMaps.stream()
-							.flatMap(tm -> tm.getTargetAtoms().stream()))
-					.stream()
+							.flatMap(tm -> tm.getTargetAtoms().stream()),
+					false
+			).stream()
 					.map(ax -> new AddAxiom(
 							modelManager.getActiveOntology(),
 							ax
 					)).collect(ImmutableCollectors.toList());
-
 			modelManager.applyChanges(addAxioms);
 		}
 
