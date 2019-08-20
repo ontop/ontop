@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -280,7 +280,12 @@ public class TurtleSyntaxParserTest {
 				":P_{id} a :Professor ; :teaches :C_{course_id} .\n" +
 				"{first_name} a :Name . ", 8);
 		TestCase.assertTrue(result);
+	}
 
+	@Test
+	public void test_BNODE_object(){
+		final boolean result = compareCQIE("<http://example.com/emp/{empno}> <http://example.com/emp#c_ref_deptno> _:{deptId} .", 1);
+		TestCase.assertTrue(result);
 	}
 
 	@Test
@@ -289,7 +294,6 @@ public class TurtleSyntaxParserTest {
 				"{nome} a :E82_Actor_Appellation ; :P3_has_note {nome}^^xsd:string .\n" +
 				"{numCM} a :E9_Move .", 6);
 		TestCase.assertTrue(result);
-
 	}
 
 		//Test for value constant
@@ -350,7 +354,7 @@ public class TurtleSyntaxParserTest {
 		}
 		return true;
 	}
-	
+
 	private PrefixManager getPrefixManager() {
         return specificationFactory.createPrefixManager(ImmutableMap.of(
 				PrefixManager.DEFAULT_PREFIX, "http://obda.inf.unibz.it/testcase#",
