@@ -123,7 +123,10 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
 
             // Stops if the child tree is projecting more variables than what the construction node expects
             if (!childTree.getVariables().equals(constructionNode.getChildVariables()))
-                return tree;
+                return iqFactory.createUnaryIQTree(
+                        constructionNode,
+                        tree
+                );
 
             UnaryIQTree possibleChildTree = iqFactory.createUnaryIQTree(constructionNode, childTree);
 
@@ -132,7 +135,7 @@ public class PostProcessingProjectionSplitterImpl implements PostProcessingProje
 
             return liftedTree.getRootNode().isEquivalentTo(constructionNode)
                     ? possibleChildTree
-                    : tree;
+                    : iqFactory.createUnaryIQTree(constructionNode, tree);
         }
         else
             return iqFactory.createUnaryIQTree(constructionNode, tree);

@@ -87,6 +87,11 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     }
 
     @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        return ImmutableSet.of(getVariables());
+    }
+
+    @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof IntensionalDataNode)
                 && ((IntensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());

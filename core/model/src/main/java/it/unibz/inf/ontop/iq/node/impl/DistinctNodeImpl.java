@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
@@ -37,9 +38,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         return normalizer.normalizeForOptimization(this, child, variableGenerator, currentIQProperties);
     }
 
+    /**
+     * TODO: implement it seriously! (is currently blocking)
+     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        throw new RuntimeException("TODO: implement it");
+        // TODO: stop blocking
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override
@@ -78,6 +83,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
         return child.removeDistincts();
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        return Sets.union(
+                child.inferUniqueConstraints(),
+                ImmutableSet.of(child.getVariables())).immutableCopy();
     }
 
     @Override

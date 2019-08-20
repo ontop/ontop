@@ -101,10 +101,15 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 
 			
 			
-			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {?country a :CountriesWithSpaceNoWhere . ?country :position ?pos . FILTER (?pos >0)}";
+			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {" +
+					"?country a :CountriesWithSpaceNoWhere . " +
+					"?country :position ?pos . " +
+					"FILTER (?pos >0)" +
+					"}\n" +
+					"ORDER BY ?country";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
-			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
+			assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
 		
 		
 			
@@ -126,10 +131,16 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 		try {
 			st = conn.createStatement();
 			
-			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?country ?pos WHERE {?country a :CountriesWithSpaceNoWhereNoSubquery . ?country :position ?pos . FILTER (?pos >0)}";
+			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
+					"SELECT ?country ?pos WHERE {" +
+					"  ?country a :CountriesWithSpaceNoWhereNoSubquery . " +
+					"  ?country :position ?pos . " +
+					"  FILTER (?pos >0)" +
+					"}\n" +
+					"ORDER BY ?country";
 			String countryName = runTest(st, query, true);
 			System.out.println(countryName);
-			assertEquals(countryName, "<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>");
+			assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country-United%20Kingdom>", countryName);
 
 		} catch (Exception e) {
 			throw e;

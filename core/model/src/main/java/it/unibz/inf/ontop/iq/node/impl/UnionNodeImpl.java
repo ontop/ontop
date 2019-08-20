@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -160,13 +161,67 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .anyMatch(c -> c.isConstructed(variable));
     }
 
-    /**
-     * TODO: detect when children are disjoint and distinct
-     */
     @Override
     public boolean isDistinct(ImmutableList<IQTree> children) {
-        return false;
+        if (children.stream().anyMatch(c -> !c.isDistinct()))
+            return false;
+
+        return IntStream.range(0, children.size())
+                .allMatch(i -> children.subList(i+1, children.size()).stream()
+                        .allMatch(o -> areDisjoint(children.get(i), o)));
     }
+
+    /**
+     * Returns true if we are sure the two children can only return different tuples
+     */
+    private boolean areDisjoint(IQTree child1, IQTree child2) {
+        VariableNullability variableNullability1 = child1.getVariableNullability();
+        VariableNullability variableNullability2 = child2.getVariableNullability();
+
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs1 = child1.getPossibleVariableDefinitions();
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs2 = child2.getPossibleVariableDefinitions();
+
+        return projectedVariables.stream()
+                // We don't consider variables nullable on both side
+                .filter(v -> !(variableNullability1.isPossiblyNullable(v) && variableNullability2.isPossiblyNullable(v)))
+                .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
+    }
+
+    private static ImmutableSet<ImmutableTerm> extractDefs(ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs,
+                                                           Variable v) {
+        if (possibleDefs.isEmpty())
+            return ImmutableSet.of(v);
+
+        return possibleDefs.stream()
+                .map(s -> s.apply(v))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private boolean areDisjointWhenNonNull(ImmutableSet<ImmutableTerm> defs1, ImmutableSet<ImmutableTerm> defs2,
+                                           VariableNullability variableNullability) {
+        return defs1.stream()
+                .allMatch(d1 -> defs2.stream()
+                        .allMatch(d2 -> areDisjointWhenNonNull(d1, d2, variableNullability)));
+    }
+
+    private boolean areDisjointWhenNonNull(ImmutableTerm t1, ImmutableTerm t2, VariableNullability variableNullability) {
+        IncrementalEvaluation evaluation = t1.evaluateStrictEq(t2, variableNullability);
+        switch(evaluation.getStatus()) {
+            case SIMPLIFIED_EXPRESSION:
+                return evaluation.getNewExpression()
+                        .orElseThrow(() -> new MinorOntopInternalBugException("An expression was expected"))
+                        .evaluate2VL(variableNullability)
+                        .isEffectiveFalse();
+            case IS_NULL:
+            case IS_FALSE:
+                return true;
+            case SAME_EXPRESSION:
+            case IS_TRUE:
+            default:
+                return false;
+        }
+    }
+
 
     /**
      * TODO: make it compatible definitions together (requires a VariableGenerator so as to lift bindings)
@@ -227,6 +282,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 : properties.declareDistinctRemovalWithEffect();
 
         return iqFactory.createNaryIQTree(this, children, newProperties);
+    }
+
+    /**
+     * TODO: implement it seriously
+     */
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
+        return ImmutableSet.of();
     }
 
     @Override

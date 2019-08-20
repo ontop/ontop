@@ -34,6 +34,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Nullable
     private VariableNullability variableNullability;
     @Nullable
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+    @Nullable
     private Boolean isDistinct;
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
@@ -183,5 +185,13 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(leftChild, rightChild);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            uniqueConstraints = getRootNode().inferUniqueConstraints(leftChild, rightChild);
+        }
+        return uniqueConstraints;
     }
 }

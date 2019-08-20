@@ -74,11 +74,12 @@ public class OracleDateTimeTest extends AbstractVirtualModeTest {
 
 				String query = "PREFIX :	<http://meraka/moss/exampleBooks.owl#> \n " +
 						" SELECT ?x ?y WHERE " +
-						"{?x :dateOfPublication ?y .}";
+						"{?x :dateOfPublication ?y .}\n" +
+						"ORDER BY DESC(?y)";
 				String date = runTest(st, query, true);
 				log.debug(date);
 				
-				assertEquals("\"2010-02-18T10:02:30\"^^xsd:dateTime", date);
+				assertEquals("\"2010-05-01T10:02:30\"^^xsd:dateTime", date);
 			
 		} catch (Exception e) {
 			throw e;

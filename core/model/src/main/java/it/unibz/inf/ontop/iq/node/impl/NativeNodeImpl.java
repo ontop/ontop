@@ -23,6 +23,8 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
+import java.util.Optional;
+
 
 public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
@@ -163,6 +165,14 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
     @Override
     public void validate() throws InvalidIntermediateQueryException {
+    }
+
+    /**
+     * Dummy implementation (considered too late for inferring it)
+     */
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        return ImmutableSet.of();
     }
 
     @Override

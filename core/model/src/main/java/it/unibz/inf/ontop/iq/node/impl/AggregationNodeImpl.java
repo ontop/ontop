@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
 
@@ -215,6 +216,19 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public IQTree removeDistincts(IQTree child, IQProperties iqProperties) {
         return iqFactory.createUnaryIQTree(this, child, iqProperties.declareDistinctRemovalWithoutEffect());
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        return groupingVariables.isEmpty()
+                // Only one tuple (NO GROUP BY)
+                ? ImmutableSet.of(getVariables())
+                // Grouping variables + possible sub-sets of them
+                : Stream.concat(
+                        child.inferUniqueConstraints().stream()
+                                .filter(groupingVariables::containsAll),
+                        Stream.of(getGroupingVariables()))
+                  .collect(ImmutableCollectors.toSet());
     }
 
     @Override

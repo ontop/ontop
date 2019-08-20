@@ -392,6 +392,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     /**
+     * TODO: implement it seriously
+     */
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild) {
+        return ImmutableSet.of();
+    }
+
+    /**
      * Can propagate on the left, but not on the right.
      *
      * Transforms the left join into an inner join when the constraint is rejecting nulls from the right

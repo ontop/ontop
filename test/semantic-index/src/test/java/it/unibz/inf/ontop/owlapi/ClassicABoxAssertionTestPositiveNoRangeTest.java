@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
+import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -48,6 +49,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 
 	public ClassicABoxAssertionTestPositiveNoRangeTest() throws Exception {
 		Properties p = new Properties();
+		p.setProperty(OntopModelSettings.CARDINALITY_MODE, "STRICT");
 
 		String owlfile = "src/test/resources/test/owl-types-simple-split.owl";
 
@@ -107,7 +109,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :udateTime ?y}";
 		int count = executeQuery(query);
-		assertEquals(5, count);
+		assertEquals(1, count);
 	}
 
 	public void testDataPropertyAssertionsDecimal() throws OWLException{

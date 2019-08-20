@@ -328,6 +328,14 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return iqFactory.createNaryIQTree(this, children, newProperties);
     }
 
+    /**
+     * TODO: implement it seriously
+     */
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
+        return ImmutableSet.of();
+    }
+
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
         VariableNullability childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children);
 

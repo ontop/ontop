@@ -3,5 +3,6 @@
 @prefix :        <http://example.org/#> .
 
 []    rdf:type      rsi:ResultSetInfo ;
-      rsi:size      "45" .
+      rsi:size      "37" .
+      # it was 45 before being strict on cardinality preservation
       # it was 46 before. The difference is a trivial triple with topDataProperty.

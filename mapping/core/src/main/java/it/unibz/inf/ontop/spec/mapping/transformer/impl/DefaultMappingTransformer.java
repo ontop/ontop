@@ -14,6 +14,8 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
+
 public class DefaultMappingTransformer implements MappingTransformer {
 
     private final MappingVariableNameNormalizer mappingNormalizer;
@@ -24,6 +26,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final SpecificationFactory specificationFactory;
     private final RDF rdfFactory;
+    private MappingDistinctTransformer mappingDistinctTransformer;
 
     @Inject
     private DefaultMappingTransformer(MappingVariableNameNormalizer mappingNormalizer,
@@ -33,7 +36,8 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       OntopMappingSettings settings,
                                       MappingSameAsInverseRewriter sameAsInverseRewriter,
                                       SpecificationFactory specificationFactory,
-                                      RDF rdfFactory) {
+                                      RDF rdfFactory,
+                                      MappingDistinctTransformer mappingDistinctTransformer) {
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
         this.factConverter = inserter;
@@ -42,6 +46,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.sameAsInverseRewriter = sameAsInverseRewriter;
         this.specificationFactory = specificationFactory;
         this.rdfFactory = rdfFactory;
+        this.mappingDistinctTransformer = mappingDistinctTransformer;
     }
 
     @Override
@@ -63,6 +68,11 @@ public class DefaultMappingTransformer implements MappingTransformer {
         Mapping saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
         Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
-        return specificationFactory.createSpecification(normalizedMapping, dbMetadata, tbox);
+        // Don't insert the distinct if the cardinality preservation is set to LOOSE
+        Mapping finalMapping = settings.getCardinalityPreservationMode() == LOOSE
+                ? normalizedMapping
+                : mappingDistinctTransformer.addDistinct(normalizedMapping);
+
+        return specificationFactory.createSpecification(finalMapping, dbMetadata, tbox);
     }
 }

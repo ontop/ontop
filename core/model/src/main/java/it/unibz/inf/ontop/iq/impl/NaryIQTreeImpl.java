@@ -30,6 +30,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
     @Nullable
+    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+    @Nullable
     private Boolean isDistinct;
 
     @AssistedInject
@@ -169,5 +171,13 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         return properties.areDistinctAlreadyRemoved()
                 ? this
                 : getRootNode().removeDistincts(getChildren(), properties);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        if (uniqueConstraints == null) {
+            uniqueConstraints = getRootNode().inferUniqueConstraints(getChildren());
+        }
+        return uniqueConstraints;
     }
 }

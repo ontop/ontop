@@ -116,8 +116,8 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
                 "}";
 
 
-
-        countResults(queryBind, 876722);
+        // TODO: double-check this number (obtained after inserting DISTINCT)
+        countResults(queryBind, 546032);
 
     }
 
@@ -174,7 +174,8 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
                 "}";
 
-        countResults(queryBind, 705859);
+        // TODO: double-check this number (obtained after inserting DISTINCT)
+        countResults(queryBind, 131645);
 //        countResults(queryBind, 10000);
 
     }

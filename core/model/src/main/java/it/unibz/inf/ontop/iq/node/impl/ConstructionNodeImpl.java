@@ -197,12 +197,9 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .orElseThrow(() -> new IllegalArgumentException("The variable " + variable + " is not projected by " + this));
     }
 
-    /**
-     * TODO: implement it seriously!
-     */
     @Override
     public boolean isDistinct(IQTree child) {
-        return false;
+        return !inferUniqueConstraints(child).isEmpty();
     }
 
     @Override
@@ -284,6 +281,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 : iqProperties.declareDistinctRemovalWithEffect();
 
         return iqFactory.createUnaryIQTree(this, newChild, newProperties);
+    }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
+        return child.inferUniqueConstraints().stream()
+                .filter(projectedVariables::containsAll)
+                .collect(ImmutableCollectors.toSet());
     }
 
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {

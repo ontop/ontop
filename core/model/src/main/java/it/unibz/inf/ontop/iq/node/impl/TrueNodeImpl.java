@@ -132,4 +132,9 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public void validate() throws InvalidIntermediateQueryException {
     }
+
+    @Override
+    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        return ImmutableSet.of();
+    }
 }

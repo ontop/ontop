@@ -271,7 +271,13 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
             case NTEXT_STR:
             case TEXT_STR:
                 return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
-                        Serializers.getCastSerializer(targetType));
+                        Serializers.getCastSerializer(targetType)) {
+                    // Trick: force it to be non-injective (to prevent it to be lifted above DISTINCT)
+                    @Override
+                    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
+                        return false;
+                    }
+                };
             default:
                 // Implicit cast
                 return super.createStringToStringCastFunctionSymbol(inputType, targetType);

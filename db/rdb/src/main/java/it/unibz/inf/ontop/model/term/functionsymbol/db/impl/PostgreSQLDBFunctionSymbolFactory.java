@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.TIMESTAMP_STR;
+import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.BOOL_STR;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMESTAMPTZ_STR;
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMETZ_STR;
@@ -233,5 +233,21 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                             termConverter.apply(terms.get(0)),
                             termConverter.apply(extendedPatternTerm));
                 }));
+    }
+
+    /**
+     * Cast made explicit when the input type is char
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
+                                                                                    DBTermType targetType) {
+        switch (inputType.getName()) {
+            case CHAR_STR:
+                return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+                        Serializers.getCastSerializer(targetType));
+            default:
+                // Implicit cast
+                return super.createStringToStringCastFunctionSymbol(inputType, targetType);
+        }
     }
 }

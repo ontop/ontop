@@ -63,4 +63,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     void validateNode(IQTree leftChild, IQTree rightChild) throws InvalidIntermediateQueryException;
 
     IQTree removeDistincts(IQTree leftChild, IQTree rightChild, IQProperties properties);
+
+    ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild);
 }
