@@ -59,8 +59,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             State newState = state
                     .propagateDownCondition()
+                    // Lifts bindings but children still project away irrelevant variables
+                    // (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
+                    // NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
                     .liftBindings()
                     .liftDistincts()
+                    .liftChildProjectingAwayConstructionNodes()
                     .liftConditionAndMergeJoins();
 
             if (newState.equals(state))
@@ -208,10 +212,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
             ConstructionNode selectedChildConstructionNode = (ConstructionNode) selectedLiftedChild.getRootNode();
             IQTree selectedGrandChild = selectedLiftedChild.getChild();
 
+            ImmutableSet<Variable> requiredGrandChildVariables = selectedChildConstructionNode.getChildVariables();
+
+            IQTree selectedGrandChildWithLimitedProjection = selectedGrandChild.getVariables().equals(requiredGrandChildVariables)
+                    ? selectedGrandChild
+                    : iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(requiredGrandChildVariables),
+                            selectedGrandChild);
+
             try {
                 return bindingLift.liftRegularChildBinding(selectedChildConstructionNode,
                         selectedChildPosition,
-                        selectedGrandChild,
+                        selectedGrandChildWithLimitedProjection,
                         liftedChildren, ImmutableSet.of(), joiningCondition, variableGenerator,
                         childrenVariableNullability, this::convertIntoState);
             } catch (UnsatisfiableConditionException e) {
@@ -388,6 +400,29 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
         }
 
+        /**
+         * Gets rid of construction without substitution at the top of children
+         */
+        public State liftChildProjectingAwayConstructionNodes() {
+            ImmutableList<IQTree> newChildren = children.stream()
+                    .map(c -> Optional.of(c)
+                            .filter(t -> (t.getRootNode() instanceof ConstructionNode)
+                                    && ((ConstructionNode) t.getRootNode()).getSubstitution().isEmpty())
+                            .map(t -> ((UnaryIQTree) t).getChild())
+                            .orElse(c))
+                    .collect(ImmutableCollectors.toList());
+
+            if (newChildren.equals(children))
+                return this;
+
+            ImmutableSet<Variable> childrenVariables = children.stream()
+                    .flatMap(c -> c.getVariables().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            ConstructionNode newParent = iqFactory.createConstructionNode(childrenVariables);
+
+            return updateParentConditionAndChildren(newParent, joiningCondition, newChildren);
+        }
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
