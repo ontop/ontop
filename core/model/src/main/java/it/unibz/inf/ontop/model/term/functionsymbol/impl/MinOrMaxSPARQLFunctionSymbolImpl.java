@@ -34,8 +34,10 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
     private final InequalityLabel inequalityLabel;
 
     protected MinOrMaxSPARQLFunctionSymbolImpl(TypeFactory typeFactory, boolean isMax) {
-        super(isMax ? "SP_MAX" : "SP_MIN", isMax ? SPARQL.MAX : SPARQL.MIN,
-                ImmutableList.of(typeFactory.getAbstractRDFTermType()));
+        this(isMax ? "SP_MAX" : "SP_MIN", isMax ? SPARQL.MAX : SPARQL.MIN, typeFactory, isMax);
+    }
+    protected MinOrMaxSPARQLFunctionSymbolImpl(String name, String officialName, TypeFactory typeFactory, boolean isMax) {
+        super(name, officialName, ImmutableList.of(typeFactory.getAbstractRDFTermType()));
         this.typeFactory = typeFactory;
         this.isMax = isMax;
         this.abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();

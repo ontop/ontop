@@ -182,7 +182,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new DummySampleSPARQLFunctionSymbol(abstractRDFType),
+                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
                 );
@@ -209,7 +209,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 // Distinct can be safely ignored
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 // Distinct can be safely ignored
-                new DummySampleSPARQLFunctionSymbol(abstractRDFType),
+                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
                 // TODO: update
                 new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
