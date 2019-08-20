@@ -50,7 +50,8 @@ public class ImdbPostgresTest extends AbstractVirtualModeTest {
                 "   $y :hasCompanyLocation [ a mo:Eastern_Asia ] .\n" +
                 "}\n";
 
-        countResults(query2, 15175);
+        // TODO: double-check: was 15175
+        countResults(query2, 15173);
     }
 
     @Test
