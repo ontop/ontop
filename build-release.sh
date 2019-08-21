@@ -10,7 +10,7 @@
 #   - Java 8
 #   - Maven
 #   - git
-#   - git-lfs
+#   - wget
 #
 ########################################################################
 
@@ -50,41 +50,41 @@ echo "$ git --version"
 git --version || exit 1
 echo ""
 
-echo "$ git lfs env"
-git lfs env ||  { echo "ERROR: git-lfs is not installed or not configured!" ; exit 1 ; }
-echo ""
-
 # location for the build ROOT folder (i.e. the directory of this script)
 BUILD_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location for the build dependencies home
 ONTOP_DEP_HOME=${BUILD_ROOT}/build/dependencies
 
-
-if [ -d "${ONTOP_DEP_HOME}" ] && [ -f "${ONTOP_DEP_HOME}/.git" ]
-then
-  echo ""
-  echo "========================================="
-  echo " Starting Ontop build script ... "
-  echo "-----------------------------------------"
-  echo ""
-else
-  echo "ERROR: git submodule 'ontop-build/dependencies' is missing or uninitiated!"
-  echo "Please run 'git submodule init && git submodule update'"
-  exit 1
-fi
+echo ""
+echo "========================================="
+echo " Starting Ontop build script ... "
+echo "-----------------------------------------"
+echo ""
 
 # location for protege clean folder
+PROTEGE_URL="https://github.com/protegeproject/protege-distribution/releases/download/v5.5.0/Protege-5.5.0-platform-independent.zip"
 PROTEGE_COPY_FILENAME=Protege-5.5.0-platform-independent
 PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0
-
+if [ ! -f ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ] ; then
+  wget ${PROTEGE_URL} -P ${ONTOP_DEP_HOME}
+fi
 
 # location and name for jetty distribution (should be ZIP)
-JETTY_COPY_FILENAME=jetty-distribution-9.4.19.v20190610
-JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.19.v20190610
+# location for protege clean folder
+JETTY_URL="https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.20.v20190813/jetty-distribution-9.4.20.v20190813.zip"
+JETTY_COPY_FILENAME=jetty-distribution-9.4.20.v20190813
+JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.20.v20190813
+if [ ! -f ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ] ; then
+  wget ${JETTY_URL} -P ${ONTOP_DEP_HOME}
+fi
 
 # location and name for tomcat distribution (should be zip)
+TOMCAT_URL="https://www-eu.apache.org/dist/tomcat/tomcat-9/v9.0.22/bin/apache-tomcat-9.0.22.zip"
 TOMCAT_FILENAME=apache-tomcat-9.0.22
+if [ ! -f ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ] ; then
+  wget ${TOMCAT_URL} -P ${ONTOP_DEP_HOME}
+fi
 
 # folder names of the output
 PROTEGE_DIST=ontop-protege
@@ -181,9 +181,10 @@ cp ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ${ONTOP_JETTY_DIST}/ontop-jetty-
 JETTY_FOLDER=${JETTY_INNER_FOLDERNAME}
 cd ${ONTOP_JETTY_DIST}
 mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/webapps
+mkdir -p ${JETTY_INNER_FOLDERNAME}/ontop-base/lib/ext
 cp ${BUILD_ROOT}/build/distribution/ontop-webapps/*.war ${JETTY_FOLDER}/ontop-base/webapps
-cp ${ONTOP_DEP_HOME}/start.ini ${JETTY_FOLDER}/ontop-base
-cp ${ONTOP_DEP_HOME}/README-ontop.txt ${JETTY_FOLDER}
+cp ${BUILD_ROOT}/client/jetty/start.ini ${JETTY_FOLDER}/ontop-base
+cp ${BUILD_ROOT}/client/jetty/README.md ${JETTY_FOLDER}/README_ONTOP_JETTY.md
 
 zip -rq ontop-jetty-bundle-${VERSION}.zip ${JETTY_FOLDER}/ || exit 1
 
