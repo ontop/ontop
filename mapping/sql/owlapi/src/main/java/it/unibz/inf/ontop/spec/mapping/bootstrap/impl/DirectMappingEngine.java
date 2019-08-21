@@ -41,6 +41,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.UriTemplateMatcher;
 import org.apache.commons.rdf.api.RDF;
@@ -140,9 +141,12 @@ public class DirectMappingEngine {
 
             // update ontology
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(manager,
+            Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+            		manager,
                     newPPMapping.getTripleMaps().stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream()));
+                            .flatMap(ax -> ax.getTargetAtoms().stream()),
+					true
+			);
             manager.addAxioms(ontology, declarationAxioms);
 
             return new DefaultBootstrappingResults(newPPMapping, ontology);
@@ -162,50 +166,6 @@ public class DirectMappingEngine {
 		}
 	}
 
-
-	public Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, Stream<TargetAtom> targetAtoms) {
-
-        OWLDataFactory dataFactory = manager.getOWLDataFactory();
-        return targetAtoms
-				.map(targetAtom -> {
-
-			ImmutableList<ImmutableTerm> terms = targetAtom.getSubstitutedTerms();
-			RDFAtomPredicate predicate = (RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate();
-
-			Optional<org.apache.commons.rdf.api.IRI> classIRI = predicate.getClassIRI(terms);
-			Optional<org.apache.commons.rdf.api.IRI> propertyIRI = predicate.getPropertyIRI(terms);
-
-            final OWLEntity entity;
-            if (classIRI.isPresent()) {
-                entity = dataFactory.getOWLClass(IRI.create(classIRI.get().getIRIString()));
-            }
-            else if (propertyIRI.isPresent()) {
-            	IRI iri = IRI.create(propertyIRI.get().getIRIString());
-
-            	ImmutableTerm objectTerm = predicate.getObject(terms);
-            	if (objectTerm instanceof ImmutableFunctionalTerm) {
-					/*
-					 * Temporary (later we will use the type of the RDF function)
-					 */
-					Predicate objectFunctionSymbol = ((ImmutableFunctionalTerm) objectTerm).getFunctionSymbol();
-					if (objectFunctionSymbol instanceof DatatypePredicate)
-					{
-						entity = dataFactory.getOWLDataProperty(iri);
-					}
-					else {
-						entity = dataFactory.getOWLObjectProperty(iri);
-					}
-				}
-				else
-					throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);
-			}
-            else {
-				throw new MinorOntopInternalBugException("No IRI could extracted from " + targetAtom);
-            }
-            return dataFactory.getOWLDeclarationAxiom(entity);
-        })
-				.collect(Collectors.toSet());
-    }
 
 	/***
 	 * extract all the mappings from a datasource
