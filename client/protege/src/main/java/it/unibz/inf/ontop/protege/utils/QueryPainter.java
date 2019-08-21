@@ -405,7 +405,7 @@ public class QueryPainter {
 
 			if (optionalPredicateIri.isPresent()) {
 				IRI predicateIri = optionalPredicateIri.get();
-				String shortIRIForm = man.getShortForm(predicateIri.getIRIString());
+				String shortIRIForm = man.getShortForm("<"+predicateIri.getIRIString()+">");
 
 				if (vocabulary.classes().contains(predicateIri)) {
 					ColorTask task = new ColorTask(shortIRIForm, clazz);
@@ -448,11 +448,6 @@ public class QueryPainter {
 				while (matcher.find()){
 					doc.setCharacterAttributes(matcher.start(1), ct.text.length(), ct.set, true);
 				}
-//				int index = input.indexOf(ct.text, 0);
-//				while (index != -1) {
-//					doc.setCharacterAttributes(index, ct.text.length(), ct.set, true);
-//					index = input.indexOf(ct.text, index + 1);
-//				}
 			}
 		}
 		tasks.clear();

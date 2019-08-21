@@ -157,7 +157,6 @@ public class R2RMLImportAction extends ProtegeAction {
 
 
 			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
-			DirectMappingEngine directMappingEngine = configuration.getInjector().getInstance(DirectMappingEngine.class);
 			OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 
 			/**
