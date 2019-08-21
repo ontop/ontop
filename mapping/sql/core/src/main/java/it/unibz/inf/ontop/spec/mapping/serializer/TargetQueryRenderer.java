@@ -173,15 +173,15 @@ public class TargetQueryRenderer {
 
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         Predicate functionSymbol = function.getFunctionSymbol();
-        String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-        if (functionSymbol instanceof DatatypePredicate)
-            return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
         if (functionSymbol instanceof URITemplatePredicate)
             return displayURITemplate(function, prefixManager);
         if (functionSymbol == ExpressionOperation.CONCAT)
             return displayConcat(function);
         if (functionSymbol instanceof BNodePredicate)
             return displayFunctionalBnode(function);
+        String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
+        if (functionSymbol instanceof DatatypePredicate)
+            return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
         return displayOrdinaryFunction(function, fname, prefixManager);
     }
 
