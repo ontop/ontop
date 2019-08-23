@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.panels;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,7 @@ import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.io.File;
 
 public class ResultViewTablePanel extends javax.swing.JPanel {
@@ -36,12 +35,11 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	private static final long serialVersionUID = -8494558136315031084L;
 
 	private OBDADataQueryAction countAllTuplesAction;
-	private OBDADataQueryAction countAllTuplesActionEQL;
 	private QueryInterfacePanel querypanel;
 	private OBDASaveQueryResultToFileAction saveToFileAction;
-	
-	/** 
-	 * Creates new form ResultViewTablePanel 
+
+	/**
+	 * Creates new form ResultViewTablePanel
 	 */
 	public ResultViewTablePanel(QueryInterfacePanel panel) {
 		querypanel = panel;
@@ -53,16 +51,24 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        scrQueryResult = new javax.swing.JScrollPane();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        sparqlQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
         pnlCommandButton = new javax.swing.JPanel();
         pnlComment = new javax.swing.JPanel();
         lblHint = new javax.swing.JLabel();
         lblComment = new javax.swing.JLabel();
         cmdExportResult = new javax.swing.JButton();
+        sqlTranslationPanel = new javax.swing.JScrollPane();
+        sqlTranslationArea = new javax.swing.JTextArea();
 
         setMinimumSize(new java.awt.Dimension(400, 480));
         setLayout(new java.awt.BorderLayout(0, 5));
+
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        sparqlQueryResult.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -72,9 +78,9 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
                 "Results"
             }
         ));
-        scrQueryResult.setViewportView(tblQueryResult);
+        sparqlQueryResult.setViewportView(tblQueryResult);
 
-        add(scrQueryResult, java.awt.BorderLayout.CENTER);
+        jPanel1.add(sparqlQueryResult, java.awt.BorderLayout.CENTER);
 
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
         pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
@@ -82,7 +88,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
         pnlComment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 7, 5));
 
-        lblHint.setFont(new java.awt.Font("Tahoma", 1, 11));
+        lblHint.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         lblHint.setText("Hint:");
         pnlComment.add(lblHint);
 
@@ -107,7 +113,20 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         });
         pnlCommandButton.add(cmdExportResult, java.awt.BorderLayout.EAST);
 
-        add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+        jPanel1.add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+
+        jTabbedPane1.addTab("SPARQL results", jPanel1);
+
+        sqlTranslationPanel.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        sqlTranslationArea.setColumns(20);
+        sqlTranslationArea.setRows(5);
+        sqlTranslationArea.setLayout(new BorderLayout());
+        sqlTranslationPanel.setViewportView(sqlTranslationArea);
+
+        jTabbedPane1.addTab("SQL Translation", sqlTranslationPanel);
+
+        add(jTabbedPane1, java.awt.BorderLayout.PAGE_START);
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -119,18 +138,14 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 			File targetFile = fileChooser.getSelectedFile();
 			final String fileLocation = targetFile.getPath();
 			if (canWrite(targetFile)) {
-				Thread thread = new Thread() {
-					public void run() {						
-						getOBDASaveQueryToFileAction().run(fileLocation);
-					}
-				};
+				Thread thread = new Thread(() -> getOBDASaveQueryToFileAction().run(fileLocation));
 				thread.start();
 			}
 		}
 	}// GEN-LAST:event_buttonSaveResultsActionPerformed
 
 	/**
-	 * A utility method to check if the result should be written to the target file. 
+	 * A utility method to check if the result should be written to the target file.
 	 * Return true if the target file doesn't exist yet or the user allows overwriting.
 	 */
 	private boolean canWrite(File outputFile) {
@@ -151,47 +166,48 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		}
 		return fileIsValid;
 	}
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExportResult;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel lblComment;
     private javax.swing.JLabel lblHint;
     private javax.swing.JPanel pnlCommandButton;
     private javax.swing.JPanel pnlComment;
-    private javax.swing.JScrollPane scrQueryResult;
+    private javax.swing.JScrollPane sparqlQueryResult;
+    private javax.swing.JTextArea sqlTranslationArea;
+    private javax.swing.JScrollPane sqlTranslationPanel;
     private javax.swing.JTable tblQueryResult;
     // End of variables declaration//GEN-END:variables
-	
+
 	public void setTableModel(final TableModel newmodel) {
-		Runnable updateModel = new Runnable() {
-			@Override
-			public void run() {
-				tblQueryResult.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-				ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult);
-				ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult.getTableHeader());
+		Runnable updateModel = () -> {
+			tblQueryResult.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult);
+			ToolTipManager.sharedInstance().unregisterComponent(tblQueryResult.getTableHeader());
 
-				TableModel oldmodel = tblQueryResult.getModel();
-				if (oldmodel != null) {
-					oldmodel.removeTableModelListener(tblQueryResult);
-					if (oldmodel instanceof IncrementalResultSetTableModel) {
-						IncrementalResultSetTableModel incm = (IncrementalResultSetTableModel) oldmodel;
-						incm.close();
-					}
+			TableModel oldmodel = tblQueryResult.getModel();
+			if (oldmodel != null) {
+				oldmodel.removeTableModelListener(tblQueryResult);
+				if (oldmodel instanceof IncrementalResultSetTableModel) {
+					IncrementalResultSetTableModel incm = (IncrementalResultSetTableModel) oldmodel;
+					incm.close();
 				}
-				tblQueryResult.setModel(newmodel);
-
-				addNotify();
-
-				tblQueryResult.invalidate();
-				tblQueryResult.repaint();
 			}
+			tblQueryResult.setModel(newmodel);
+
+			addNotify();
+
+			tblQueryResult.invalidate();
+			tblQueryResult.repaint();
 		};
 		SwingUtilities.invokeLater(updateModel);
-		
+
 		// Write a hint in the comment panel for user information
 		writeHintMessage();
 	}
-	
+
 	// TODO Change the implementation of checking the table model after refactoring the code.
 	private void writeHintMessage() {
 		String msg = "--";
@@ -203,19 +219,14 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
 	private void addPopUpMenu(){
 		JPopupMenu menu = new JPopupMenu();
-		JMenuItem countAll = new JMenuItem(); 
+		JMenuItem countAll = new JMenuItem();
 		countAll.setText("count all tuples");
-		countAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Thread thread = new Thread() {
-					public void run() {
-						String query = querypanel.getQuery();
-						getCountAllTuplesActionForUCQ().run(query);
-					}
-				};
-				thread.start();
-			}
+		countAll.addActionListener(e -> {
+			Thread thread = new Thread(() -> {
+				String query = querypanel.getQuery();
+				getCountAllTuplesActionForUCQ().run(query);
+			});
+			thread.start();
 		});
 		menu.add(countAll);
 		tblQueryResult.setComponentPopupMenu(menu);
@@ -229,12 +240,15 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 		this.countAllTuplesAction = countAllTuples;
 	}
 
-	
 	public void setOBDASaveQueryToFileAction(OBDASaveQueryResultToFileAction action){
 		this.saveToFileAction = action;
 	}
-	
+
 	public OBDASaveQueryResultToFileAction getOBDASaveQueryToFileAction(){
 		return saveToFileAction;
+	}
+
+	public void setSQLTranslation(String sql){
+		sqlTranslationArea.setText(sql);
 	}
 }
