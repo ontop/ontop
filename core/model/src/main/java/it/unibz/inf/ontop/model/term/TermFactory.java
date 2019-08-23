@@ -557,6 +557,10 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType dbNumericType,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
+	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
+			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
+			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
 	ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
 			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
@@ -577,9 +581,9 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBRand(UUID uuid);
 
-	ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm);
-	ImmutableFunctionalTerm getDBMonth(ImmutableTerm dbDatetimeTerm);
-	ImmutableFunctionalTerm getDBDay(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBYearFromDatetime(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBMonthFromDatetime(ImmutableTerm dbDatetimeTerm);
+	ImmutableFunctionalTerm getDBDayFromDatetime(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBHours(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBMinutes(ImmutableTerm dbDatetimeTerm);
 	ImmutableFunctionalTerm getDBSeconds(ImmutableTerm dbDatetimeTerm);

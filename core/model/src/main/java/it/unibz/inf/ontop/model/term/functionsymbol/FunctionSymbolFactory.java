@@ -107,5 +107,8 @@ public interface FunctionSymbolFactory {
 
     FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName);
 
+    FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+                                                     DBTermType targetType);
+
     FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
 }

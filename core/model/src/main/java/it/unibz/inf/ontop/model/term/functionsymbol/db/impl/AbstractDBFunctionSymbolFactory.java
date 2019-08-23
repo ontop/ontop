@@ -60,11 +60,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol sha512FunctionSymbol;
     // Created in init()
-    private DBFunctionSymbol yearFunctionSymbol;
+    private DBFunctionSymbol yearFromDatetimeFunctionSymbol;
     // Created in init()
-    private DBFunctionSymbol monthFunctionSymbol;
+    private DBFunctionSymbol yearFromDateFunctionSymbol;
     // Created in init()
-    private DBFunctionSymbol dayFunctionSymbol;
+    private DBFunctionSymbol monthFromDatetimeFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol monthFromDateFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol dayFromDatetimeFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol dayFromDateFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol hoursFunctionSymbol;
     // Created in init()
@@ -306,9 +312,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         sha256FunctionSymbol = createSHA256FunctionSymbol();
         sha512FunctionSymbol = createSHA512FunctionSymbol();
 
-        yearFunctionSymbol = createYearFunctionSymbol();
-        monthFunctionSymbol = createMonthFunctionSymbol();
-        dayFunctionSymbol = createDayFunctionSymbol();
+        yearFromDatetimeFunctionSymbol = createYearFromDatetimeFunctionSymbol();
+        yearFromDateFunctionSymbol = createYearFromDateFunctionSymbol();
+        monthFromDatetimeFunctionSymbol = createMonthFromDatetimeFunctionSymbol();
+        monthFromDateFunctionSymbol = createMonthFromDateFunctionSymbol();
+        dayFromDatetimeFunctionSymbol = createDayFromDatetimeFunctionSymbol();
+        dayFromDateFunctionSymbol = createDayFromDateFunctionSymbol();
         hoursFunctionSymbol = createHoursFunctionSymbol();
         minutesFunctionSymbol = createMinutesFunctionSymbol();
         secondsFunctionSymbol = createSecondsFunctionSymbol();
@@ -753,18 +762,33 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBYear() {
-        return yearFunctionSymbol;
+    public DBFunctionSymbol getDBYearFromDatetime() {
+        return yearFromDatetimeFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getDBMonth() {
-        return monthFunctionSymbol;
+    public DBFunctionSymbol getDBYearFromDate() {
+        return yearFromDateFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getDBDay() {
-        return dayFunctionSymbol;
+    public DBFunctionSymbol getDBMonthFromDatetime() {
+        return monthFromDatetimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMonthFromDate() {
+        return monthFromDateFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDayFromDatetime() {
+        return dayFromDatetimeFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBDayFromDate() {
+        return dayFromDateFunctionSymbol;
     }
 
     @Override
@@ -943,19 +967,34 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
 
-    protected DBFunctionSymbol createYearFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
-                this::serializeYear);
+    protected DBFunctionSymbol createYearFromDatetimeFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATETIME", rootDBType, dbIntegerType, false,
+                this::serializeYearFromDatetime);
     }
 
-    protected DBFunctionSymbol createMonthFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH", rootDBType, dbIntegerType, false,
-                this::serializeMonth);
+    protected DBFunctionSymbol createYearFromDateFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATE", rootDBType, dbIntegerType, false,
+                this::serializeYearFromDate);
     }
 
-    protected DBFunctionSymbol createDayFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY", rootDBType, dbIntegerType, false,
-                this::serializeDay);
+    protected DBFunctionSymbol createMonthFromDatetimeFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH_FROM_DATETIME", rootDBType, dbIntegerType, false,
+                this::serializeMonthFromDatetime);
+    }
+
+    protected DBFunctionSymbol createMonthFromDateFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_MONTH_FROM_DATE", rootDBType, dbIntegerType, false,
+                this::serializeMonthFromDate);
+    }
+
+    protected DBFunctionSymbol createDayFromDatetimeFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATE", rootDBType, dbIntegerType, false,
+                this::serializeDayFromDatetime);
+    }
+
+    protected DBFunctionSymbol createDayFromDateFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_DAY_FROM_DATE", rootDBType, dbIntegerType, false,
+                this::serializeDayFromDate);
     }
 
     protected DBFunctionSymbol createHoursFunctionSymbol() {
@@ -1072,17 +1111,29 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
-    protected abstract String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+    protected abstract String serializeYearFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
-    protected abstract String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
+    protected abstract String serializeYearFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
+
+    protected abstract String serializeMonthFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
-    protected abstract String serializeDay(ImmutableList<? extends ImmutableTerm> terms,
+    protected abstract String serializeMonthFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                         Function<ImmutableTerm, String> termConverter,
+                                                         TermFactory termFactory);
+
+    protected abstract String serializeDayFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
+
+    protected abstract String serializeDayFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                       Function<ImmutableTerm, String> termConverter,
+                                                       TermFactory termFactory);
 
     protected abstract String serializeHours(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,

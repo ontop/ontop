@@ -214,9 +214,12 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getFloor(DBTermType dbTermType);
     DBFunctionSymbol getRound(DBTermType dbTermType);
 
-    DBFunctionSymbol getDBYear();
-    DBFunctionSymbol getDBMonth();
-    DBFunctionSymbol getDBDay();
+    DBFunctionSymbol getDBYearFromDatetime();
+    DBFunctionSymbol getDBYearFromDate();
+    DBFunctionSymbol getDBMonthFromDatetime();
+    DBFunctionSymbol getDBMonthFromDate();
+    DBFunctionSymbol getDBDayFromDatetime();
+    DBFunctionSymbol getDBDayFromDate();
     DBFunctionSymbol getDBHours();
     DBFunctionSymbol getDBMinutes();
     DBFunctionSymbol getDBSeconds();

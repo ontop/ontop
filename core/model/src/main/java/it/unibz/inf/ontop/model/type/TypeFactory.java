@@ -24,6 +24,8 @@ public interface TypeFactory {
 	RDFDatatype getUnsupportedDatatype();
 
 	RDFDatatype getAbstractOntopNumericDatatype();
+	RDFDatatype getAbstractOntopDateOrDatetimeDatatype();
+
 	RDFDatatype getAbstractRDFSLiteral();
 
 	TermType getAbstractAtomicTermType();
