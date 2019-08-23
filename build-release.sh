@@ -67,7 +67,7 @@ PROTEGE_URL="https://github.com/protegeproject/protege-distribution/releases/dow
 PROTEGE_COPY_FILENAME=Protege-5.5.0-platform-independent
 PROTEGE_MAIN_FOLDER_NAME=Protege-5.5.0
 if [ ! -f ${ONTOP_DEP_HOME}/${PROTEGE_COPY_FILENAME}.zip ] ; then
-  wget ${PROTEGE_URL} -P ${ONTOP_DEP_HOME} || echo "protege download failed" && exit 1
+  wget ${PROTEGE_URL} -P ${ONTOP_DEP_HOME} || exit 1
 fi
 
 # location and name for jetty distribution (should be ZIP)
@@ -76,14 +76,14 @@ JETTY_URL="https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9
 JETTY_COPY_FILENAME=jetty-distribution-9.4.20.v20190813
 JETTY_INNER_FOLDERNAME=jetty-distribution-9.4.20.v20190813
 if [ ! -f ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ] ; then
-  wget ${JETTY_URL} -P ${ONTOP_DEP_HOME} || echo "jetty download failed" && exit 1
+  wget ${JETTY_URL} -P ${ONTOP_DEP_HOME} ||  exit 1
 fi
 
 # location and name for tomcat distribution (should be zip)
 TOMCAT_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.24/bin/apache-tomcat-9.0.24.zip"
 TOMCAT_FILENAME=apache-tomcat-9.0.24
 if [ ! -f ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ] ; then
-  wget ${TOMCAT_URL} -P ${ONTOP_DEP_HOME} echo "tomcat download failed" && exit 1
+  wget ${TOMCAT_URL} -P ${ONTOP_DEP_HOME} || exit 1
 fi
 
 # folder names of the output
