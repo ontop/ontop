@@ -778,8 +778,8 @@ public class BindWithFunctionsTest {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"46\"^^xsd:integer");
+        expectedValues.add("\"45\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -801,8 +801,8 @@ public class BindWithFunctionsTest {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"18\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
-        expectedValues.add("\"0\"^^xsd:integer");
+        expectedValues.add("\"17\"^^xsd:integer");
+        expectedValues.add("\"16\"^^xsd:integer");
         expectedValues.add("\"0\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -824,8 +824,8 @@ public class BindWithFunctionsTest {
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"52\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"51\"^^xsd:decimal");
+        expectedValues.add("\"50\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
         checkReturnedValues(queryBind, expectedValues);
     }
