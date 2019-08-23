@@ -176,12 +176,26 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                             else
                                 throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
                         }),
-                // TODO: update
-                new SimpleUnarySPARQLFunctionSymbolImpl("SP_MONTH", XPathFunction.MONTH_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBMonthFromDatetime),
-                // TODO: update
-                new SimpleUnarySPARQLFunctionSymbolImpl("SP_DAY", XPathFunction.DAY_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBDayFromDatetime),
+                new MultitypedInputUnarySPARQLFunctionSymbolImpl("SP_MONTH", SPARQL.MONTH,
+                        dateOrDatetime, xsdInteger, false, dbTypeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTimestamp))
+                                return dbFunctionSymbolFactory.getDBMonthFromDatetime();
+                            else if (t.isA(dbDate))
+                                return dbFunctionSymbolFactory.getDBMonthFromDate();
+                            else
+                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                        }),
+                new MultitypedInputUnarySPARQLFunctionSymbolImpl("SP_DAY", SPARQL.DAY,
+                        dateOrDatetime, xsdInteger, false, dbTypeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTimestamp))
+                                return dbFunctionSymbolFactory.getDBDayFromDatetime();
+                            else if (t.isA(dbDate))
+                                return dbFunctionSymbolFactory.getDBDayFromDate();
+                            else
+                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                        }),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_HOURS", XPathFunction.HOURS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBHours),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MINUTES", XPathFunction.MINUTES_FROM_DATETIME,

@@ -1340,7 +1340,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
         if (uri.equals(XPathFunction.YEAR_FROM_DATETIME.getIRIString()))
             return SPARQL.YEAR;
-        // TODO: handle the case of MONTH and DAY.
+        else if (uri.equals(XPathFunction.MONTH_FROM_DATETIME.getIRIString()))
+            return SPARQL.MONTH;
+        else if (uri.equals(XPathFunction.DAY_FROM_DATETIME.getIRIString()))
+            return SPARQL.DAY;
         else
             return uri;
     }

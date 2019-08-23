@@ -718,7 +718,6 @@ public class BindWithFunctionsTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore("TODO: support")
     @Test
     public void testMonthDate() throws Exception {
 
@@ -807,7 +806,6 @@ public class BindWithFunctionsTest {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore("TODO: support it")
     @Test
     public void testDayDate() throws Exception {
 

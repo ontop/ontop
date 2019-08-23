@@ -47,4 +47,6 @@ public class SPARQL {
      * restrictive function.
      */
     public static final String YEAR = "YEAR";
+    public static final String MONTH = "MONTH";
+    public static final String DAY = "DAY";
 }

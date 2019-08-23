@@ -217,7 +217,9 @@ public interface DBFunctionSymbolFactory {
     DBFunctionSymbol getDBYearFromDatetime();
     DBFunctionSymbol getDBYearFromDate();
     DBFunctionSymbol getDBMonthFromDatetime();
+    DBFunctionSymbol getDBMonthFromDate();
     DBFunctionSymbol getDBDayFromDatetime();
+    DBFunctionSymbol getDBDayFromDate();
     DBFunctionSymbol getDBHours();
     DBFunctionSymbol getDBMinutes();
     DBFunctionSymbol getDBSeconds();
