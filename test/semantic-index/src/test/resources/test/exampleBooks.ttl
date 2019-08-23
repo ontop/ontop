@@ -1,0 +1,180 @@
+@prefix : <http://meraka/moss/exampleBooks.owl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://meraka/moss/exampleBooks.owl> .
+
+<http://meraka/moss/exampleBooks.owl> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#editedBy
+:editedBy rdf:type owl:ObjectProperty ,
+                   owl:FunctionalProperty ;
+          rdfs:domain :Edition ;
+          rdfs:range :Editor .
+
+
+###  http://meraka/moss/exampleBooks.owl#hasEdition
+:hasEdition rdf:type owl:ObjectProperty ;
+            rdfs:domain :Book ;
+            rdfs:range :Edition .
+
+
+###  http://meraka/moss/exampleBooks.owl#writtenBy
+:writtenBy rdf:type owl:ObjectProperty ;
+           rdfs:domain :Book ;
+           rdfs:range :Author .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#dateOfFirstPublication
+:dateOfFirstPublication rdf:type owl:DatatypeProperty ,
+                                 owl:FunctionalProperty ;
+                        rdfs:domain :Edition ;
+                        rdfs:range xsd:dateTime .
+
+
+###  http://meraka/moss/exampleBooks.owl#dateOfPublication
+:dateOfPublication rdf:type owl:DatatypeProperty ,
+                            owl:FunctionalProperty ;
+                   rdfs:domain :Edition ;
+                   rdfs:range xsd:dateTime .
+
+
+###  http://meraka/moss/exampleBooks.owl#editionNumber
+:editionNumber rdf:type owl:DatatypeProperty ,
+                        owl:FunctionalProperty ;
+               rdfs:domain :Edition ;
+               rdfs:range xsd:integer .
+
+
+###  http://meraka/moss/exampleBooks.owl#genre
+:genre rdf:type owl:DatatypeProperty ;
+       rdfs:domain :Book ;
+       rdfs:range xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#name
+:name rdf:type owl:DatatypeProperty ,
+               owl:FunctionalProperty ;
+      rdfs:range xsd:string .
+
+
+###  http://meraka/moss/exampleBooks.owl#title
+:title rdf:type owl:DatatypeProperty ,
+                owl:FunctionalProperty ;
+       rdfs:domain :Book ;
+       rdfs:range xsd:string .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://meraka/moss/exampleBooks.owl#AudioBook
+:AudioBook rdf:type owl:Class ;
+           rdfs:subClassOf :Book ;
+           owl:disjointWith :E-Book ,
+                            :PrintedBook .
+
+
+###  http://meraka/moss/exampleBooks.owl#Author
+:Author rdf:type owl:Class ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :name ;
+                          owl:minCardinality "1"^^xsd:nonNegativeInteger
+                        ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#Book
+:Book rdf:type owl:Class ;
+      rdfs:subClassOf [ rdf:type owl:Restriction ;
+                        owl:onProperty :writtenBy ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :genre ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] ,
+                      [ rdf:type owl:Restriction ;
+                        owl:onProperty :title ;
+                        owl:minCardinality "1"^^xsd:nonNegativeInteger
+                      ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#E-Book
+:E-Book rdf:type owl:Class ;
+        rdfs:subClassOf :Book .
+
+
+###  http://meraka/moss/exampleBooks.owl#EconomicEdition
+:EconomicEdition rdf:type owl:Class ;
+                 rdfs:subClassOf :Edition ;
+                 owl:disjointWith :SpecialEdition .
+
+
+###  http://meraka/moss/exampleBooks.owl#Edition
+:Edition rdf:type owl:Class ;
+         rdfs:subClassOf [ rdf:type owl:Restriction ;
+                           owl:onProperty :editedBy ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :dateOfFirstPublication ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :dateOfPublication ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :editionNumber ;
+                           owl:minCardinality "1"^^xsd:nonNegativeInteger
+                         ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#Editor
+:Editor rdf:type owl:Class ;
+        rdfs:subClassOf [ rdf:type owl:Restriction ;
+                          owl:onProperty :name ;
+                          owl:minCardinality "1"^^xsd:nonNegativeInteger
+                        ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#EmergingWriter
+:EmergingWriter rdf:type owl:Class ;
+                rdfs:subClassOf :Author .
+
+
+###  http://meraka/moss/exampleBooks.owl#IneditedBook
+:IneditedBook rdf:type owl:Class ;
+              rdfs:subClassOf :Book ;
+              owl:disjointWith [ rdf:type owl:Restriction ;
+                                 owl:onProperty :hasEdition ;
+                                 owl:minCardinality "1"^^xsd:nonNegativeInteger
+                               ] .
+
+
+###  http://meraka/moss/exampleBooks.owl#PrintedBook
+:PrintedBook rdf:type owl:Class ;
+             rdfs:subClassOf :Book .
+
+
+###  http://meraka/moss/exampleBooks.owl#SpecialEdition
+:SpecialEdition rdf:type owl:Class ;
+                rdfs:subClassOf :Edition .
+
+
+###  http://www.w3.org/2002/07/owl#Thing
+owl:Thing rdf:type owl:Class .
+
+
+###  Generated by the OWL API (version 5.0.5.20170104-0800) https://github.com/owlcs/owlapi/

@@ -1,0 +1,19 @@
+[PrefixDeclaration]
+:		http://www.ontorais.de#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping_<http://www.ontorais.de/ArchiveObject>
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/ArchiveObject> ;   <http://www.ontorais.de/title> {title}^^xsd:string ;  <http://www.ontorais.de/archivalDate> {archivaldate}^^xsd:string .
+source		SELECT id, financiallysupportedby, title, archivaldate FROM archiveobject
+
+mappingId	mapping_<http://www.ontorais.de/PhysicalObject>
+target		<http://www.ontorais.de/ArchiveObject/{id}> a <http://www.ontorais.de/PhysicalObject> ;  <http://www.ontorais.de/archivalDate> {archivaldate}^^xsd:string .
+source		SELECT id, financiallysupportedby, title, archivaldate FROM physicalobject
+
+]]
+

@@ -1,0 +1,15 @@
+@prefix : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix quest: <http://obda.org/quest#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<#Professor> a rr:TriplesMap;
+        rr:logicalTable [ rr:tableName "professors" ];
+        rr:subjectMap [
+        rr:template "http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/{prof_id}/{prof_id}";
+        rr:class :Professor;
+        ]
+        .

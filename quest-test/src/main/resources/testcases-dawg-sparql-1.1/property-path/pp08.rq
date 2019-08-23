@@ -1,6 +1,0 @@
-prefix ex:	<http://www.example.org/schema#>
-prefix in:	<http://www.example.org/instance#>
-
-ask {
-in:b ^ex:p in:a
-}

@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/wellbore#
+owl:    http://www.w3.org/2002/07/owl#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+
+[MappingDeclaration] @collection [[
+mappingId	mappingNameSpain
+target		:spain-{ids} a :Wellbore ; :hasName {name}^^xsd:string .
+source		select ids, name from wellboreSpain
+
+mappingId	mappingNameFinland
+target		:finland-{idf}  a :Wellbore ; :hasName {name} ; :hasValue {depth} .
+source		select idf, name, depth from wellboreFinland
+
+mappingId	sameAsName
+target		:spain-{idspain} owl:sameAs :finland-{idfinland} .
+source		select idspain, idfinland from namesmap
+
+]]

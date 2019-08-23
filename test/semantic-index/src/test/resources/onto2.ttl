@@ -1,0 +1,9 @@
+@prefix : <http://it.unibz.inf/obda/ontologies/test/translation/onto2.owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+:Lisa a :Person.
+:Alice  a :Person.
+:Bob  a :Person.
+:Bob  :age "5".
+:Alice  :age "14".

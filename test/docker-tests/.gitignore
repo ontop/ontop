@@ -1,0 +1,5 @@
+src/test/resources/mysql/example/exampleBooks.nt
+src/test/resources/mysql/materializer/materializeNTriples.nt
+src/test/resources/mysql/materializer/materializeTurtle.ttl
+src/test/resources/mysql/materializer/materializeRdf.owl
+src/test/resources/mysql/materializer/materializeOWL.owl

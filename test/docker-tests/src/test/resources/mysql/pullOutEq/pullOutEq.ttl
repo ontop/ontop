@@ -1,0 +1,16 @@
+@prefix : <http://example.com/vocab#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Person a rdfs:Class .
+
+:firstName a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:string .
+
+:lastName a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:string .
+
+:hasId a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:int .
+
+:age a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:int .
+
+:gender a owl:DatatypeProperty ; rdfs:domain :Person ; rdfs:range xsd:string .

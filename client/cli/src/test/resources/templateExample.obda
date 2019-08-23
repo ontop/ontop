@@ -1,0 +1,14 @@
+[PrefixDeclaration]
+:		http://meraka/moss/exampleBooks.owl#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	cl_Authors
+target		:author/{wr_code}/ a :class/{wr_name} ; :name {wr_name} .
+source		select "wr_code", "wr_name" from "tb_affiliated_writers"
+]]
+

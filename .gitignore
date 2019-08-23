@@ -7,6 +7,9 @@ target
 *.releaseBackup
 release.properties
 
+# gradle generated files
+.gradle
+
 # Eclipse generated files
 .classpath
 .projecttmp.*
@@ -18,6 +21,9 @@ bin
 # Intellij generated files
 *.iml
 .idea
+
+# Visual Studio Code
+.vscode
 
 # Protege generated files
 catalog-v*.xml
@@ -36,3 +42,4 @@ plugin-runtime
 ontop-optique-test
 tmp
 *.log
+

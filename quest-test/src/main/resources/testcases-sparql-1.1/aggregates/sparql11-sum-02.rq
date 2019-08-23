@@ -1,6 +1,0 @@
-PREFIX : <http://example/>
-SELECT (SUM(?lprice) AS ?totalPrice)
-WHERE {
-  ?book :price ?lprice .
-}
-GROUP BY ?book

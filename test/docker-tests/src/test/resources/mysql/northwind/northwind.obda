@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:		http://www.optique-project.eu/resource/northwind/northwind/
+
+
+[MappingDeclaration] @collection [[
+mappingId	MAPID-simpleexample
+target		:OrderDetails/{OrderID}/{ProductID} a :OrderDetails .
+source		Select * from  `Order Details`
+
+]]
+

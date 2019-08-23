@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="org"/>
+    <variable name="totalPrice"/>
+  </head>
+  <results>
+    <result>
+      <binding name="org">
+        <uri>http://example/org-2</uri>
+      </binding>
+      <binding name="totalPrice">
+        <literal datatype="http://www.w3.org/2001/XMLSchema#integer">100</literal>
+      </binding>
+    </result>
+        <result>
+          <binding name="org">
+            <uri>http://example/org-3</uri>
+          </binding>
+          <binding name="totalPrice">
+            <literal datatype="http://www.w3.org/2001/XMLSchema#integer">6</literal>
+          </binding>
+        </result>
+            <result>
+              <binding name="org">
+                <uri>http://example/org-1</uri>
+              </binding>
+              <binding name="totalPrice">
+                <literal datatype="http://www.w3.org/2001/XMLSchema#integer">2</literal>
+              </binding>
+            </result>
+  </results>
+</sparql>

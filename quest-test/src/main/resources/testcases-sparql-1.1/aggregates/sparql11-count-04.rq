@@ -1,6 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT (count(distinct ?o) as ?c)
-WHERE { 
-          ?s :p ?o .
-          FILTER NOT EXISTS { ?o a :T . }
-} 

@@ -1,0 +1,94 @@
+[PrefixDeclaration]
+:		http://example.org/voc#
+ex:		http://example.org/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+obda:       https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+mappingId	uni1-student
+target		ex:uni1/student/{s_id} a :Student ; foaf:firstName {first_name}^^xsd:string ; foaf:lastName {last_name}^^xsd:string . 
+source		SELECT * FROM "uni1"."student"
+
+mappingId	uni1-academic
+target		ex:uni1/academic/{a_id} foaf:firstName {first_name}^^xsd:string ; foaf:lastName {last_name}^^xsd:string . 
+source		SELECT * FROM "uni1"."academic"
+
+mappingId	uni1-fullProfessor
+target		ex:uni1/academic/{a_id} a :FullProfessor . 
+source		SELECT * FROM "uni1"."academic"
+			WHERE "position" = 1
+
+mappingId	uni1-AssociateProfessor
+target		ex:uni1/academic/{a_id} a :AssociateProfessor . 
+source		SELECT * FROM "uni1"."academic"
+			WHERE "position" = 2
+
+mappingId	uni1-PostDoc
+target		ex:uni1/academic/{a_id} a :PostDoc . 
+source		SELECT * FROM "uni1"."academic"
+			WHERE "position" = 9
+
+mappingId	uni1-externalTeacher
+target		ex:uni1/academic/{a_id} a :ExternalTeacher . 
+source		SELECT * FROM "uni1"."academic"
+			WHERE "position" = 8
+
+mappingId	uni1-teaching
+target		ex:uni1/academic/{a_id} :teaches ex:uni1/course/{c_id} . 
+source		SELECT * FROM "uni1"."teaching"
+
+mappingId	uni1-course
+target		ex:uni1/course/{c_id} a :Course ; :title {title} . 
+source		SELECT * FROM "uni1"."course"
+
+mappingId	uni2-person
+target		ex:uni2/person/{pid} foaf:firstName {fname}^^xsd:string ; foaf:lastName {lname}^^xsd:string . 
+source		SELECT * FROM "uni2"."person"
+
+mappingId	uni2-undergraduate
+target		ex:uni2/person/{pid} a :UndergraduateStudent . 
+source		SELECT * FROM "uni2"."person"
+			WHERE "status" = 1
+
+mappingId	uni2-graduate
+target		ex:uni2/person/{pid} a :GraduateStudent . 
+source		SELECT * FROM "uni2"."person"
+			WHERE "status" = 2
+
+mappingId	uni2-associate-prof
+target		ex:uni2/person/{pid} a :AssociateProfessor . 
+source		SELECT * FROM "uni2"."person"
+			WHERE "status" = 8
+
+mappingId	uni2-course
+target		ex:uni2/course/{cid} a :Course ; :title {topic}^^xsd:string . 
+source		SELECT * FROM "uni2"."course"
+
+mappingId	uni2-lecturer
+target		ex:uni2/person/{lecturer} :givesLecture ex:uni2/course/{cid} . 
+source		SELECT * FROM "uni2"."course"
+
+mappingId	uni2-lab-teacher
+target		ex:uni2/person/{lab_teacher} :givesLab ex:uni2/course/{cid} . 
+source		SELECT * FROM "uni2"."course"
+
+mappingId	mapping_canUni1
+target		<http://ontop/uni/{a_ssn}> obda:isCanonicalIRIOf ex:uni1/academic/{a_id} .
+source		select "a_id","a_ssn" FROM "uni1"."academic"
+
+mappingId	mapping_canUni2
+target		<http://ontop/uni/{pssn}> obda:isCanonicalIRIOf ex:uni2/person/{pid} .
+source		select "pid","pssn" FROM "uni2"."person"
+
+mappingId	mapping_canUni3
+target		<http://ontop/uni/{s_ssn}> obda:isCanonicalIRIOf ex:uni1/student/{s_id} .
+source		select "s_id","s_ssn" FROM "uni1"."student"
+
+
+]]
+

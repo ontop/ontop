@@ -1,0 +1,13 @@
+[PrefixDeclaration]
+:		    http://www.ola.fr#
+oboe-core:  http://ecoinformatics.org/oboe/oboe.1.0/oboe-core.owl#
+
+
+[MappingDeclaration] @collection [[
+mappingId	mappingMeasure
+target		:measurement/unit/name/{unite_code} a oboe-core:Measurement ; oboe-core:usesStandard oboe-core:Unit ; oboe-core:ofCharacteristic oboe-core:Name ; oboe-core:hasValue <{unite_url}> .
+source		select unite_code, unite_url from measure
+
+
+]]
+

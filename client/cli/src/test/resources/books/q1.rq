@@ -1,0 +1,8 @@
+#    Get the book information that is stored in the database
+
+PREFIX : <http://meraka/moss/exampleBooks.owl#>
+SELECT DISTINCT ?x ?title ?author ?genre ?edition
+WHERE { ?x a :Book; :title ?title; :genre ?genre; :writtenBy ?y; :hasEdition ?z.
+		 ?y a :Author; :name ?author.
+		 ?z a :Edition; :editionNumber ?edition
+}

@@ -1,4 +1,0 @@
-SELECT *
-WHERE { ?s ?p ?o 
-        MINUS { ?x ?y ?z } 
-}

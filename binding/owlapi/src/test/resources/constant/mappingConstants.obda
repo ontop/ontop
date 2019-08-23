@@ -1,0 +1,38 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/smallDatabase#
+
+
+[MappingDeclaration] @collection [[
+mappingId	mappingAddress
+target		:address-{id} a :Address ; :inStreet {street} ; :hasNumber 35 ; :inCity {city} .
+source		select id, street, number, city from address
+
+mappingId	mappingCompanies
+target		:company-{id} a :Company ; :companyName {name} ; :hasSupplier true ; :hasNetworth 1.2345678e+03 .
+source		select id, name, networth from company
+
+mappingId	mappingCompanyAddress
+target		:company-{id} :useSupplier :address-{addressid} .
+source		select id, addressid from company
+
+mappingId	mappingClient
+target		:person-{id} a :Client ; :firstName {name} . 
+source		select id, name from client
+
+mappingId	mappingMan
+target		:person-{id} a :Man . 
+source		select id, name, sex from client where sex='M'
+
+mappingId	mappingWoman
+target		:person-{id} a :Woman . 
+source		select id, name, sex from client where sex='F'
+
+mappingId	mappingBigCompanies
+target		:company-{id} a :BigBusiness  .
+source		select id, marketshares from company where marketshares > 200000
+
+mappingId	mappingSmallCompanies
+target		:company-{id} a :SmallBusiness ; :hasMarketShares 1.000433564392849540 .
+source		select id, marketshares from company where marketshares < 200000
+]]
+

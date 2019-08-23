@@ -1,3 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?t
-WHERE { :a a ?t . ?t :p+ :A } 

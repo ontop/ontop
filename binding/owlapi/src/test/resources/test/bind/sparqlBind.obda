@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+dc:  http://purl.org/dc/elements/1.1/
+:   http://example.org/book
+ns:  http://example.org/ns#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{id} a :Book ; dc:title {title}@en ; ns:price {price} ; ns:discount {discount} .
+source	SELECT id, title, price, discount FROM books
+
+mappingId	mapping2
+target	:{id}  dc:description {description}@en .
+source	SELECT id, description, lang FROM books WHERE lang = 'en'
+
+]]
+

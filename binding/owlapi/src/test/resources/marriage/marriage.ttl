@@ -1,0 +1,53 @@
+@prefix : <http://example.org/marriage/voc#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://example.org/marriage/voc#> .
+
+<http://example.org/marriage/voc#> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://example.org/marriage/voc#hasSpouse
+:hasSpouse rdf:type owl:ObjectProperty ;
+           rdfs:domain :Spouse ;
+           rdfs:range :Spouse .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://example.org/marriage/voc#firstName
+:firstName rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Person ;
+           rdfs:range xsd:string .
+
+
+###  http://example.org/marriage/voc#lastName
+:lastName rdf:type owl:DatatypeProperty ;
+          rdfs:domain :Person ;
+          rdfs:range xsd:string .
+
+:playsInstrument rdf:type owl:DatatypeProperty ;
+                           rdfs:domain :Musician ;
+                           rdfs:range xsd:string .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://example.org/marriage/voc#Person
+:Person rdf:type owl:Class .
+
+
+###  http://example.org/marriage/voc#Spouse
+:Spouse rdf:type owl:Class ;
+        rdfs:subClassOf :Person .
+
+:Musician rdf:type owl:Class .

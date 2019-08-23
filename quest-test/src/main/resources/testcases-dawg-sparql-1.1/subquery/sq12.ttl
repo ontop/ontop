@@ -1,3 +1,0 @@
-@prefix foaf: <http://xmlns.com/foaf/0.1/> .
-
-<http://p1> foaf:firstName "John" ; foaf:lastName "Doe".

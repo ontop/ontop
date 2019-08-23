@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:		http://ontop.inf.unibz.it/test/datatypes#
+xsd:	http://www.w3.org/2001/XMLSchema#
+
+
+[MappingDeclaration] @collection [[
+mappingId	Date-Time Types
+target		:datetime-{ID} a :Row ; :hasDate {TYPE_DATE}^^xsd:string . 
+source		select ID, TYPE_DATE, TYPE_INTERVAL_DAY, TYPE_INTERVAL_YEAR, TYPE_TIMESTAMP from DATETIME
+]]
+

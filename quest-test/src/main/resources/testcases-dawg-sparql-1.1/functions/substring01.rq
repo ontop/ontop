@@ -1,4 +1,0 @@
-PREFIX : <http://example.org/>
-SELECT ?s ?str (SUBSTR(?str,1,1) AS ?substr) WHERE {
-	?s :str ?str
-}

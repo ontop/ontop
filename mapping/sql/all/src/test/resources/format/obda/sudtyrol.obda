@@ -1,0 +1,236 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/ding/ontologies/2017/10/untitled-ontology-2#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+skos:		http://www.w3.org/2004/02/skos/core#
+terms:		http://purl.org/dc/terms/
+geosparql:	http://www.opengis.net/ont/geosparql#
+sf:			http://www.opengis.net/ont/sf#
+
+[MappingDeclaration] @collection [[
+mappingId	address_geom
+target		:address/{id} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT id, ST_AsText(geom) AS wkt FROM addresses
+
+mappingId	district
+target		:district/district={bez} a :District ; rdfs:label {name_d}@de , {name_i}@it . 
+source		SELECT  bez, name_d, name_i FROM districts
+
+mappingId	street_geom
+target		:street/municipality={comistat}/frazione={fraistat}/street={ascot_wege} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT comistat, fraistat, ascot_wege, ST_AsText(geom) AS wkt FROM roads
+
+mappingId	municipality_geom
+target		:municipality/municipality={istat_code} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT istat_code, ST_AsText(geom) AS wkt FROM municipalities
+
+mappingId	district_geom
+target		:district/district={bez} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT  bez, ST_AsText(geom) AS wkt FROM districts
+
+mappingId	street
+target		:street/municipality={comistat}/frazione={fraistat}/street={ascot_wege} a :Street ; rdfs:label {desc_d}@de , {desc_i}@it ; :belongsToMunicipality :municipality/municipality={comistat} ; :belongsToFrazione :frazione/municipality={comistat}/frazione={fraistat} . 
+source		SELECT * FROM roads
+
+mappingId	municipality
+target		:municipality/municipality={istat_code} a :Municipality ; rdfs:label {name_i}@it , {name_d}@de ; :hasIStatCode {istat_code}^^xsd:integer . 
+source		SELECT istat_code, name_i, name_d FROM municipalities
+
+mappingId	frazione
+target		:frazione/municipality={istat}/frazione={frac_code} a :Frazione ; :belongsToMunicipality :municipality/municipality={istat} ; :hasFrazioneCode {frac_code}^^xsd:integer . 
+source		SELECT istat, frac_code FROM addresses
+
+mappingId	address_sfWithin_district
+target		:address/{id} geosparql:sfWithin :district/district={bez} . 
+source		SELECT addresses.id, districts.bez FROM districts, addresses
+			WHERE ST_Within(addresses.geom, districts.geom)
+
+mappingId	address_sfWithin_municipality
+target		:address/{id} geosparql:sfWithin :municipality/municipality={istat_code} . 
+source		SELECT addresses.id, municipalities.istat_code FROM municipalities, addresses
+			WHERE ST_Within(addresses.geom, municipalities.geom)
+
+mappingId	address_sfDisjoint_municipality
+target		:address/{id} geosparql:sfDisjoint :municipality/municipality={istat_code} . 
+source		SELECT addresses.id, municipalities.istat_code FROM municipalities, addresses
+			WHERE ST_Disjoint(addresses.geom, municipalities.geom)
+
+mappingId	address
+target		:address/{id} a :Address ; rdfs:label {label_de}@de , {label_it}@it ; :hasStreet :street/municipality={istat}/frazione={frac_code}/street={strt_code} ; :hasPostcode {plz}^^xsd:string ; :hasHouseNumber {num}^^xsd:string ; :hasStreetName {strt_de}@de , {strt_it}@it ; :hasStreetCode {strt_code}^^xsd:integer ; :belongsToMunicipality :municipality/municipality={istat} ; :belongsToFrazione :frazione/municipality={istat}/frazione={frac_code} . 
+source		SELECT * FROM addresses
+
+mappingId	agency
+target		:organization/{struttura} a :Agency . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'AGE'
+
+mappingId	area
+target		:organization/{struttura} a :Area . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'BER'
+
+mappingId	centralService
+target		:organization/{struttura} a :CentralService . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'LAN'
+
+mappingId	department
+target		:organization/{struttura} a :Department . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'ABT'
+
+mappingId	external
+target		:organization/{struttura} a :External . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'EXT'
+
+mappingId	office
+target		:organization/{struttura} a :Office . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'AMT'
+
+mappingId	resort
+target		:organization/{struttura} a :Resort . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'RES'
+
+mappingId	servicePoint
+target		:organization/{struttura} a :ServicePoint . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'DIE'
+
+mappingId	unclassifiedOrganization
+target		:organization/{struttura} a :UnclassifiedOrganization . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'NKL'
+
+mappingId	museum
+target		:organization/{struttura} a :Museum . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'MUS'
+
+mappingId	direzioneDidattica
+target		:organization/{struttura} a :DirezioneDidattica . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'DID'
+
+mappingId	intendenza
+target		:organization/{struttura} a :Intendenza . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'INT'
+
+mappingId	scuola
+target		:organization/{struttura} a :Scuola . 
+source		SELECT struttura FROM organizations WHERE tipologia = 'SCH'
+
+mappingId	point_osm_geom
+target		:osm_point/{osm_id} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM osm_points
+
+mappingId	pharmacy_geom_od
+target		:pharmacy/{phar_id} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT phar_id,  ST_AsText(geom) as wkt FROM pharmacies, addresses
+			WHERE pharmacies.phar_adress_i = addresses.label_it AND pharmacies.geme_istat = addresses.istat
+
+mappingId	pharmacy_address_od
+target		:pharmacy/{phar_id} :hasAddress :address/{address_id} . 
+source		SELECT phar_id, addresses.id AS address_id FROM pharmacies, addresses
+			WHERE (LOWER(pharmacies.phar_adress_i) = LOWER(addresses.label_it)
+			       OR LOWER(pharmacies.phar_adress_d) = LOWER(addresses.label_de)
+			       OR (LOWER(substr(phar_adress_i, 0, strpos(phar_adress_i, ' -'))) = LOWER(addresses.label_it))
+			       OR (LOWER(substr(phar_adress_d, 0, strpos(phar_adress_d, ' -'))) = LOWER(addresses.label_de))
+			      )
+			      AND pharmacies.geme_istat = addresses.istat
+
+mappingId	healthcare_address_od
+target		:healthcare/{itemid} :hasAddress :address/{address_id} . 
+source		SELECT itemid, addresses.id AS address_id FROM sanitary, addresses WHERE LOWER(addresses.label_it) = LOWER(sanitary.street_it)
+
+mappingId	fillingstations_geom_od
+target		:fillingStation/{ts_identnr} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT ts_identnr, ST_AsText(geom) AS wkt FROM fillingstations
+
+mappingId	fillingStation_od
+target		:fillingstation/{ts_identnr} a :FillingStation ; :provenance "OD"^^xsd:string ; :hasStreetName {strasse}@de , {strasse_i}@it ; :hasHouseNumber {hausnummer}^^xsd:string ; :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT ts_identnr, strasse, strasse_i, hausnummer, ST_AsText(geom) AS wkt  FROM fillingstations
+
+mappingId	pharmacy_od
+target		:pharmacy/{phar_id} a :Pharmacy ; :provenance "OD"^^xsd:string ; rdfs:label {phar_desc_i}@it , {phar_desc_d}@de ; :belongsToMunicipality :municipality/municipality={geme_istat} . 
+source		SELECT * FROM pharmacies
+
+mappingId	healthcare_od
+target		:healthcare/{itemid} a :Healthcare ; :provenance "OD"^^xsd:string . 
+source		SELECT * FROM sanitary
+
+mappingId	pharmacy_osm
+target		:osm_point/{osm_id} a :Pharmacy ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_points WHERE amenity='pharmacy'
+
+mappingId	school_osm
+target		:osm_point/{osm_id} a :School ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_points WHERE amenity='school' or amenity='kindergarten'
+
+mappingId	fillingStation_osm
+target		:osm_point/{osm_id} a :FillingStation ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT osm_id, "addr:housenumber", "addr:street" FROM osm_points WHERE "amenity" = 'fuel'
+
+mappingId	point_osm
+target		:osm_point/{osm_id} a :POI ; :provenance "OSM"^^xsd:string . 
+source		SELECT * FROM osm_points
+
+mappingId	organization
+target		:organization/{struttura} a :Organization ; :provenance "OD"^^xsd:string ; :organizationType {tipologia} ; rdfs:label {descrizione_it}@it , {descrizione_de}@de ; :hasHouseNumber {civico}^^xsd:string ; :hasStreetName {via_de}@de , {via_it}@it ; :hasPostcode {cap}^^xsd:string . 
+source		SELECT * FROM organizations
+
+mappingId	organization_address
+target		:organization/{struttura} :hasAddress :address/{address_id} . 
+source		SELECT organizations.struttura, addresses.id AS address_id FROM organizations, addresses
+			WHERE organizations.via_it = addresses.strt_it AND
+			  organizations.civico = addresses.num AND
+			  organizations.cap = addresses.plz
+
+mappingId	organization_geom
+target		:organization/{struttura} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT organizations.struttura, ST_AsText(geom) as wkt FROM organizations, addresses
+			WHERE organizations.via_it = addresses.strt_it AND
+			  organizations.civico = addresses.num AND
+			  organizations.cap = addresses.plz
+
+mappingId	healthcare_geom_od
+target		:healthcare/{itemid} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT itemid,  ST_AsText(geom) as wkt FROM sanitary, addresses WHERE LOWER(addresses.label_it) = LOWER(sanitary.streetit_norm)
+
+mappingId	healthcare_osm
+target		:osm_point/{osm_id} a :Healthcare ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_points WHERE "amenity" = 'clinic'  OR "amenity" = 'dentist'  OR "amenity" = 'doctors' OR "amenity" = 'hospital'
+
+mappingId	polygon_osm_geom
+target		:osm_polygon/{osm_id} :hasGeometryInWKT {wkt}^^xsd:string . 
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM planet_osm_polygon
+
+mappingId	school_osm_polygon
+target		:osm_polygon/{osm_id} a :School ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_polygons WHERE amenity = 'school'
+
+mappingId	fillingStation_osm_polygon
+target		:osm_polygon/{osm_id} a :FillingStation ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT osm_id, "addr:housenumber", "addr:street" FROM osm_polygons WHERE "amenity" = 'fuel'
+
+mappingId	pharmacy_osm_polygon
+target		:osm_polygon/{osm_id} a :Pharmacy ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_polygons WHERE amenity='pharmacy'
+
+mappingId	healthcare_osm_polygon
+target		:osm_polygon/{osm_id} a :Healthcare ; :provenance "OSM"^^xsd:string ; :hasHouseNumber {addr:housenumber}^^xsd:string ; :hasStreetName {addr:street}^^xsd:string . 
+source		SELECT * FROM osm_polygons WHERE "amenity" = 'clinic'  OR "amenity" = 'dentist'  OR "amenity" = 'doctors' OR "amenity" = 'hospital'
+
+mappingId	polygon_osm_defaultGeometry
+target		:osm_polygon/{osm_id} geosparql:defaultGeometry :osm_polygon_geom/{osm_id} . 
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM osm_polygons
+
+mappingId	polygon_osm_geom_wkt
+target		:osm_polygon_geom/{osm_id} a sf:Polygon ; geosparql:asWKT {wkt}^^xsd:string. 
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM osm_polygons
+
+mappingId	point_osm_defaultGeometry
+target		:osm_point/{osm_id} geosparql:defaultGeometry :osm_point_geom/{osm_id} . 
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM osm_points
+
+mappingId	point_osm_geom_wkt
+target		:osm_point_geom/{osm_id} a sf:Point ; geosparql:asWKT {wkt}^^xsd:string.  
+source		SELECT osm_id, ST_AsText(geom_3044) AS wkt FROM osm_points
+]]
+

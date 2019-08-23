@@ -1,7 +1,0 @@
-PREFIX : <http://example/>
-
-SELECT ?s ?v
-{
-  ?s :p ?v .
-}
-GROUP BY ?s

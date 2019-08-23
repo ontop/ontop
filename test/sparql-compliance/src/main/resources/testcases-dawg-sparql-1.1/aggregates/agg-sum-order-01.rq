@@ -1,0 +1,11 @@
+# Non-standard query (created our own means)
+PREFIX : <http://example/>
+
+SELECT  ?org (SUM(?price) AS ?totalPrice)
+WHERE {
+    ?org :affiliates ?auth .
+    ?auth :writesBook ?book .
+    ?book :price ?price.
+}
+GROUP BY ?org 
+ORDER BY DESC(?totalPrice)

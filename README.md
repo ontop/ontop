@@ -7,6 +7,7 @@
 |-----------|---------------|
 | [master](https://github.com/ontop/ontop/tree/master)  |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=master)](https://travis-ci.org/ontop/ontop)|
 | [develop](https://github.com/ontop/ontop/tree/develop) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=develop)](https://travis-ci.org/ontop/ontop)|
+| [version3](https://github.com/ontop/ontop/tree/version3) |[![Build Status](https://travis-ci.org/ontop/ontop.svg?branch=version3)](https://travis-ci.org/ontop/ontop)|
 
 
 Ontop
@@ -29,6 +30,7 @@ Links
 
 - [Official Website](http://ontop.inf.unibz.it/)
 - [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
+- [Docker Hub](https://hub.docker.com/r/ontop/ontop-endpoint)
 - [GitHub](https://github.com/ontop/ontop/)
 - [GitHub Wiki](https://github.com/ontop/ontop/wiki)
 - [GitHub Issues](https://github.com/ontop/ontop/issues)
@@ -43,7 +45,7 @@ License
 The -ontop- framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2016 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2018 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.

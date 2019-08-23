@@ -1,0 +1,10 @@
+[PrefixDeclaration]
+:		http://it.unibz.inf/obda/test/simple#
+quest:		http://obda.org/quest#
+
+[MappingDeclaration] @collection [[
+mappingId	mapping1
+target	:{uri} a :A ; :P :{uri} ; :U {val} .
+source	SELECT uri, val FROM TABLE1 where REPLACE(uri,'u','v') = 'vri1'
+]]
+

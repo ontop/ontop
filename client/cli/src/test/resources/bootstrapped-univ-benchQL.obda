@@ -1,0 +1,100 @@
+[PrefixDeclaration]
+obda:		https://w3id.org/obda/vocabulary#
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[SourceDeclaration]
+sourceUri	11886239-8df8-484c-88de-0b96e716d159
+connectionUrl	jdbc:mysql://10.7.20.39/lubm1
+username	fish
+password	fish
+driverClass	com.mysql.jdbc.Driver
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID1
+target		BNODE({depid}, {uniid}, {publicationid}, {authortype}, {authorid}) a <http://www.example.org/coauthors> ; <http://www.example.org/coauthors#depid> {depid}^^xsd:integer ; <http://www.example.org/coauthors#uniid> {uniid}^^xsd:integer ; <http://www.example.org/coauthors#publicationid> {publicationid}^^xsd:integer ; <http://www.example.org/coauthors#authortype> {authortype}^^xsd:integer ; <http://www.example.org/coauthors#authorid> {authorid}^^xsd:integer . 
+source		SELECT * FROM `coauthors`
+
+mappingId	MAPPING-ID2
+target		BNODE({coauthors_depid}, {coauthors_uniid}, {coauthors_publicationid}, {coauthors_authortype}, {coauthors_authorid}) <http://www.example.org/coauthors#ref-depid;uniid;authortype;authorid> <http://www.example.org/students/depid={students_depid};uniid={students_uniid};stype={students_stype};id={students_id}> . 
+source		SELECT `coauthors`.`depid` AS coauthors_depid, `coauthors`.`uniid` AS coauthors_uniid, `coauthors`.`publicationid` AS coauthors_publicationid, `coauthors`.`authortype` AS coauthors_authortype, `coauthors`.`authorid` AS coauthors_authorid, `students`.`depid` AS students_depid, `students`.`uniid` AS students_uniid, `students`.`stype` AS students_stype, `students`.`id` AS students_id FROM `coauthors`, `students` WHERE `coauthors`.`depid` = `students`.`depid` AND `coauthors`.`uniid` = `students`.`uniid` AND `coauthors`.`authortype` = `students`.`stype` AND `coauthors`.`authorid` = `students`.`id`
+
+mappingId	MAPPING-ID3
+target		<http://www.example.org/courses/depid={depid};uniid={uniid};ctype={ctype};id={id}> a <http://www.example.org/courses> ; <http://www.example.org/courses#depid> {depid}^^xsd:integer ; <http://www.example.org/courses#uniid> {uniid}^^xsd:integer ; <http://www.example.org/courses#ctype> {ctype}^^xsd:integer ; <http://www.example.org/courses#id> {id}^^xsd:integer ; <http://www.example.org/courses#teacherid> {teacherid}^^xsd:integer ; <http://www.example.org/courses#teachertype> {teachertype}^^xsd:integer . 
+source		SELECT * FROM `courses`
+
+mappingId	MAPPING-ID4
+target		<http://www.example.org/courses/depid={courses_depid};uniid={courses_uniid};ctype={courses_ctype};id={courses_id}> <http://www.example.org/courses#ref-depid;uniid;teachertype;teacherid> <http://www.example.org/teachers/depid={teachers_depid};uniid={teachers_uniid};ttype={teachers_ttype};id={teachers_id}> . 
+source		SELECT `courses`.`depid` AS courses_depid, `courses`.`uniid` AS courses_uniid, `courses`.`ctype` AS courses_ctype, `courses`.`id` AS courses_id, `teachers`.`depid` AS teachers_depid, `teachers`.`uniid` AS teachers_uniid, `teachers`.`ttype` AS teachers_ttype, `teachers`.`id` AS teachers_id FROM `courses`, `teachers` WHERE `courses`.`depid` = `teachers`.`depid` AND `courses`.`uniid` = `teachers`.`uniid` AND `courses`.`teachertype` = `teachers`.`ttype` AND `courses`.`teacherid` = `teachers`.`id`
+
+mappingId	MAPPING-ID5
+target		<http://www.example.org/departments/departmentid={departmentid};universityid={universityid}> a <http://www.example.org/departments> ; <http://www.example.org/departments#departmentid> {departmentid}^^xsd:integer ; <http://www.example.org/departments#universityid> {universityid}^^xsd:integer . 
+source		SELECT * FROM `departments`
+
+mappingId	MAPPING-ID6
+target		<http://www.example.org/heads/depid={depid};uniid={uniid};proftype={proftype};profid={profid}> a <http://www.example.org/heads> ; <http://www.example.org/heads#depid> {depid}^^xsd:integer ; <http://www.example.org/heads#uniid> {uniid}^^xsd:integer ; <http://www.example.org/heads#proftype> {proftype}^^xsd:integer ; <http://www.example.org/heads#profid> {profid}^^xsd:integer . 
+source		SELECT * FROM `heads`
+
+mappingId	MAPPING-ID7
+target		<http://www.example.org/heads/depid={heads_depid};uniid={heads_uniid};proftype={heads_proftype};profid={heads_profid}> <http://www.example.org/heads#ref-depid;uniid> <http://www.example.org/departments/departmentid={departments_departmentid};universityid={departments_universityid}> . 
+source		SELECT `heads`.`depid` AS heads_depid, `heads`.`uniid` AS heads_uniid, `heads`.`proftype` AS heads_proftype, `heads`.`profid` AS heads_profid, `departments`.`departmentid` AS departments_departmentid, `departments`.`universityid` AS departments_universityid FROM `heads`, `departments` WHERE `heads`.`depid` = `departments`.`departmentid` AND `heads`.`uniid` = `departments`.`universityid`
+
+mappingId	MAPPING-ID8
+target		BNODE({depid}, {uniid}, {publicationid}, {authortype}, {authorid}) a <http://www.example.org/publications> ; <http://www.example.org/publications#depid> {depid}^^xsd:integer ; <http://www.example.org/publications#uniid> {uniid}^^xsd:integer ; <http://www.example.org/publications#publicationid> {publicationid}^^xsd:integer ; <http://www.example.org/publications#authortype> {authortype}^^xsd:integer ; <http://www.example.org/publications#authorid> {authorid}^^xsd:integer . 
+source		SELECT * FROM `publications`
+
+mappingId	MAPPING-ID9
+target		BNODE({publications_depid}, {publications_uniid}, {publications_publicationid}, {publications_authortype}, {publications_authorid}) <http://www.example.org/publications#ref-depid;uniid;authortype;authorid> <http://www.example.org/teachers/depid={teachers_depid};uniid={teachers_uniid};ttype={teachers_ttype};id={teachers_id}> . 
+source		SELECT `publications`.`depid` AS publications_depid, `publications`.`uniid` AS publications_uniid, `publications`.`publicationid` AS publications_publicationid, `publications`.`authortype` AS publications_authortype, `publications`.`authorid` AS publications_authorid, `teachers`.`depid` AS teachers_depid, `teachers`.`uniid` AS teachers_uniid, `teachers`.`ttype` AS teachers_ttype, `teachers`.`id` AS teachers_id FROM `publications`, `teachers` WHERE `publications`.`depid` = `teachers`.`depid` AND `publications`.`uniid` = `teachers`.`uniid` AND `publications`.`authortype` = `teachers`.`ttype` AND `publications`.`authorid` = `teachers`.`id`
+
+mappingId	MAPPING-ID10
+target		BNODE({depid}, {uniid}, {studid}) a <http://www.example.org/ra> ; <http://www.example.org/ra#depid> {depid}^^xsd:integer ; <http://www.example.org/ra#uniid> {uniid}^^xsd:integer ; <http://www.example.org/ra#studid> {studid}^^xsd:integer . 
+source		SELECT * FROM `ra`
+
+mappingId	MAPPING-ID11
+target		<http://www.example.org/researchgroups/id={id};depid={depid};uniid={uniid}> a <http://www.example.org/researchgroups> ; <http://www.example.org/researchgroups#depid> {depid}^^xsd:integer ; <http://www.example.org/researchgroups#uniid> {uniid}^^xsd:integer ; <http://www.example.org/researchgroups#id> {id}^^xsd:integer . 
+source		SELECT * FROM `researchgroups`
+
+mappingId	MAPPING-ID12
+target		<http://www.example.org/researchgroups/id={researchgroups_id};depid={researchgroups_depid};uniid={researchgroups_uniid}> <http://www.example.org/researchgroups#ref-depid;uniid> <http://www.example.org/departments/departmentid={departments_departmentid};universityid={departments_universityid}> . 
+source		SELECT `researchgroups`.`id` AS researchgroups_id, `researchgroups`.`depid` AS researchgroups_depid, `researchgroups`.`uniid` AS researchgroups_uniid, `departments`.`departmentid` AS departments_departmentid, `departments`.`universityid` AS departments_universityid FROM `researchgroups`, `departments` WHERE `researchgroups`.`depid` = `departments`.`departmentid` AND `researchgroups`.`uniid` = `departments`.`universityid`
+
+mappingId	MAPPING-ID13
+target		<http://www.example.org/students/depid={depid};uniid={uniid};stype={stype};id={id}> a <http://www.example.org/students> ; <http://www.example.org/students#depid> {depid}^^xsd:integer ; <http://www.example.org/students#uniid> {uniid}^^xsd:integer ; <http://www.example.org/students#stype> {stype}^^xsd:integer ; <http://www.example.org/students#id> {id}^^xsd:integer ; <http://www.example.org/students#name> {name}^^rdfs:Literal ; <http://www.example.org/students#degreeuniid> {degreeuniid}^^xsd:integer ; <http://www.example.org/students#email> {email}^^rdfs:Literal ; <http://www.example.org/students#phone> {phone}^^rdfs:Literal ; <http://www.example.org/students#advisortype> {advisortype}^^xsd:integer ; <http://www.example.org/students#advisorid> {advisorid}^^xsd:integer . 
+source		SELECT * FROM `students`
+
+mappingId	MAPPING-ID14
+target		<http://www.example.org/students/depid={students_depid};uniid={students_uniid};stype={students_stype};id={students_id}> <http://www.example.org/students#ref-depid;uniid> <http://www.example.org/departments/departmentid={departments_departmentid};universityid={departments_universityid}> . 
+source		SELECT `students`.`depid` AS students_depid, `students`.`uniid` AS students_uniid, `students`.`stype` AS students_stype, `students`.`id` AS students_id, `departments`.`departmentid` AS departments_departmentid, `departments`.`universityid` AS departments_universityid FROM `students`, `departments` WHERE `students`.`depid` = `departments`.`departmentid` AND `students`.`uniid` = `departments`.`universityid`
+
+mappingId	MAPPING-ID15
+target		BNODE({depid}, {uniid}, {studid}, {coursetype}, {courseid}) a <http://www.example.org/ta> ; <http://www.example.org/ta#depid> {depid}^^xsd:integer ; <http://www.example.org/ta#uniid> {uniid}^^xsd:integer ; <http://www.example.org/ta#studid> {studid}^^xsd:integer ; <http://www.example.org/ta#coursetype> {coursetype}^^xsd:integer ; <http://www.example.org/ta#courseid> {courseid}^^xsd:integer . 
+source		SELECT * FROM `ta`
+
+mappingId	MAPPING-ID16
+target		BNODE({ta_depid}, {ta_uniid}, {ta_studid}, {ta_coursetype}, {ta_courseid}) <http://www.example.org/ta#ref-depid;uniid;coursetype;courseid> <http://www.example.org/courses/depid={courses_depid};uniid={courses_uniid};ctype={courses_ctype};id={courses_id}> . 
+source		SELECT `ta`.`depid` AS ta_depid, `ta`.`uniid` AS ta_uniid, `ta`.`studid` AS ta_studid, `ta`.`coursetype` AS ta_coursetype, `ta`.`courseid` AS ta_courseid, `courses`.`depid` AS courses_depid, `courses`.`uniid` AS courses_uniid, `courses`.`ctype` AS courses_ctype, `courses`.`id` AS courses_id FROM `ta`, `courses` WHERE `ta`.`depid` = `courses`.`depid` AND `ta`.`uniid` = `courses`.`uniid` AND `ta`.`coursetype` = `courses`.`ctype` AND `ta`.`courseid` = `courses`.`id`
+
+mappingId	MAPPING-ID17
+target		BNODE({depid}, {uniid}, {studtype}, {studid}, {coursetype}, {courseid}) a <http://www.example.org/takescourses> ; <http://www.example.org/takescourses#depid> {depid}^^xsd:integer ; <http://www.example.org/takescourses#uniid> {uniid}^^xsd:integer ; <http://www.example.org/takescourses#studtype> {studtype}^^xsd:integer ; <http://www.example.org/takescourses#studid> {studid}^^xsd:integer ; <http://www.example.org/takescourses#coursetype> {coursetype}^^xsd:integer ; <http://www.example.org/takescourses#courseid> {courseid}^^xsd:integer . 
+source		SELECT * FROM `takescourses`
+
+mappingId	MAPPING-ID18
+target		BNODE({takescourses_depid}, {takescourses_uniid}, {takescourses_studtype}, {takescourses_studid}, {takescourses_coursetype}, {takescourses_courseid}) <http://www.example.org/takescourses#ref-depid;uniid;studtype;studid> <http://www.example.org/students/depid={students_depid};uniid={students_uniid};stype={students_stype};id={students_id}> . 
+source		SELECT `takescourses`.`depid` AS takescourses_depid, `takescourses`.`uniid` AS takescourses_uniid, `takescourses`.`studtype` AS takescourses_studtype, `takescourses`.`studid` AS takescourses_studid, `takescourses`.`coursetype` AS takescourses_coursetype, `takescourses`.`courseid` AS takescourses_courseid, `students`.`depid` AS students_depid, `students`.`uniid` AS students_uniid, `students`.`stype` AS students_stype, `students`.`id` AS students_id FROM `takescourses`, `students` WHERE `takescourses`.`depid` = `students`.`depid` AND `takescourses`.`uniid` = `students`.`uniid` AND `takescourses`.`studtype` = `students`.`stype` AND `takescourses`.`studid` = `students`.`id`
+
+mappingId	MAPPING-ID19
+target		BNODE({takescourses_depid}, {takescourses_uniid}, {takescourses_studtype}, {takescourses_studid}, {takescourses_coursetype}, {takescourses_courseid}) <http://www.example.org/takescourses#ref-depid;uniid;coursetype;courseid> <http://www.example.org/courses/depid={courses_depid};uniid={courses_uniid};ctype={courses_ctype};id={courses_id}> . 
+source		SELECT `takescourses`.`depid` AS takescourses_depid, `takescourses`.`uniid` AS takescourses_uniid, `takescourses`.`studtype` AS takescourses_studtype, `takescourses`.`studid` AS takescourses_studid, `takescourses`.`coursetype` AS takescourses_coursetype, `takescourses`.`courseid` AS takescourses_courseid, `courses`.`depid` AS courses_depid, `courses`.`uniid` AS courses_uniid, `courses`.`ctype` AS courses_ctype, `courses`.`id` AS courses_id FROM `takescourses`, `courses` WHERE `takescourses`.`depid` = `courses`.`depid` AND `takescourses`.`uniid` = `courses`.`uniid` AND `takescourses`.`coursetype` = `courses`.`ctype` AND `takescourses`.`courseid` = `courses`.`id`
+
+mappingId	MAPPING-ID20
+target		<http://www.example.org/teachers/depid={depid};uniid={uniid};ttype={ttype};id={id}> a <http://www.example.org/teachers> ; <http://www.example.org/teachers#depid> {depid}^^xsd:integer ; <http://www.example.org/teachers#uniid> {uniid}^^xsd:integer ; <http://www.example.org/teachers#ttype> {ttype}^^xsd:integer ; <http://www.example.org/teachers#id> {id}^^xsd:integer ; <http://www.example.org/teachers#name> {name}^^rdfs:Literal ; <http://www.example.org/teachers#underD> {underD}^^xsd:integer ; <http://www.example.org/teachers#masterD> {masterD}^^xsd:integer ; <http://www.example.org/teachers#docD> {docD}^^xsd:integer ; <http://www.example.org/teachers#email> {email}^^rdfs:Literal ; <http://www.example.org/teachers#phone> {phone}^^rdfs:Literal ; <http://www.example.org/teachers#research> {research}^^xsd:integer . 
+source		SELECT * FROM `teachers`
+
+mappingId	MAPPING-ID21
+target		<http://www.example.org/teachers/depid={teachers_depid};uniid={teachers_uniid};ttype={teachers_ttype};id={teachers_id}> <http://www.example.org/teachers#ref-depid;uniid> <http://www.example.org/departments/departmentid={departments_departmentid};universityid={departments_universityid}> . 
+source		SELECT `teachers`.`depid` AS teachers_depid, `teachers`.`uniid` AS teachers_uniid, `teachers`.`ttype` AS teachers_ttype, `teachers`.`id` AS teachers_id, `departments`.`departmentid` AS departments_departmentid, `departments`.`universityid` AS departments_universityid FROM `teachers`, `departments` WHERE `teachers`.`depid` = `departments`.`departmentid` AND `teachers`.`uniid` = `departments`.`universityid`
+]]
+

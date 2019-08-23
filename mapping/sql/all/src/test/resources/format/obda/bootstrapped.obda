@@ -1,0 +1,69 @@
+[PrefixDeclaration]
+obda:		https://w3id.org/obda/vocabulary#
+xsd:		http://www.w3.org/2001/XMLSchema#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID1
+target		<http://base.org/tb_affiliated_writers/wr_code={wr_code}> a <http://base.org/tb_affiliated_writers> ; <http://base.org/tb_affiliated_writers#wr_code> {wr_code}^^xsd:integer ; <http://base.org/tb_affiliated_writers#wr_name> {wr_name}^^xsd:string . 
+source		SELECT * FROM "public"."tb_affiliated_writers"
+
+mappingId	MAPPING-ID2
+target		<http://base.org/tb_authors/bk_code={bk_code};wr_id={wr_id}> a <http://base.org/tb_authors> ; <http://base.org/tb_authors#bk_code> {bk_code}^^xsd:integer ; <http://base.org/tb_authors#wr_id> {wr_id}^^xsd:integer . 
+source		SELECT * FROM "public"."tb_authors"
+
+mappingId	MAPPING-ID3
+target		<http://base.org/tb_authors/bk_code={tb_authors_bk_code};wr_id={tb_authors_wr_id}> <http://base.org/tb_authors#ref-wr_id> <http://base.org/tb_affiliated_writers/wr_code={tb_affiliated_writers_wr_code}> . 
+source		SELECT "public"."tb_authors"."bk_code" AS tb_authors_bk_code, "public"."tb_authors"."wr_id" AS tb_authors_wr_id, "public"."tb_affiliated_writers"."wr_code" AS tb_affiliated_writers_wr_code FROM "public"."tb_authors", "public"."tb_affiliated_writers" WHERE "public"."tb_authors"."wr_id" = "public"."tb_affiliated_writers"."wr_code"
+
+mappingId	MAPPING-ID4
+target		<http://base.org/tb_authors/bk_code={tb_authors_bk_code};wr_id={tb_authors_wr_id}> <http://base.org/tb_authors#ref-bk_code> <http://base.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "public"."tb_authors"."bk_code" AS tb_authors_bk_code, "public"."tb_authors"."wr_id" AS tb_authors_wr_id, "public"."tb_books"."bk_code" AS tb_books_bk_code FROM "public"."tb_authors", "public"."tb_books" WHERE "public"."tb_authors"."bk_code" = "public"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID5
+target		<http://base.org/tb_bk_gen/id_bk={id_bk};gen_name={gen_name}> a <http://base.org/tb_bk_gen> ; <http://base.org/tb_bk_gen#id_bk> {id_bk}^^xsd:integer ; <http://base.org/tb_bk_gen#gen_name> {gen_name}^^xsd:string . 
+source		SELECT * FROM "public"."tb_bk_gen"
+
+mappingId	MAPPING-ID6
+target		<http://base.org/tb_bk_gen/id_bk={tb_bk_gen_id_bk};gen_name={tb_bk_gen_gen_name}> <http://base.org/tb_bk_gen#ref-id_bk> <http://base.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "public"."tb_bk_gen"."id_bk" AS tb_bk_gen_id_bk, "public"."tb_bk_gen"."gen_name" AS tb_bk_gen_gen_name, "public"."tb_books"."bk_code" AS tb_books_bk_code FROM "public"."tb_bk_gen", "public"."tb_books" WHERE "public"."tb_bk_gen"."id_bk" = "public"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID7
+target		<http://base.org/tb_books/bk_code={bk_code}> a <http://base.org/tb_books> ; <http://base.org/tb_books#bk_code> {bk_code}^^xsd:integer ; <http://base.org/tb_books#bk_title> {bk_title}^^xsd:string ; <http://base.org/tb_books#bk_type> {bk_type}^^xsd:string . 
+source		SELECT * FROM "public"."tb_books"
+
+mappingId	MAPPING-ID8
+target		<http://base.org/tb_edition/ed_code={ed_code}> a <http://base.org/tb_edition> ; <http://base.org/tb_edition#ed_code> {ed_code}^^xsd:integer ; <http://base.org/tb_edition#ed_type> {ed_type}^^xsd:string ; <http://base.org/tb_edition#pub_date> {pub_date}^^xsd:date ; <http://base.org/tb_edition#n_edt> {n_edt}^^xsd:integer ; <http://base.org/tb_edition#editor> {editor}^^xsd:integer ; <http://base.org/tb_edition#bk_id> {bk_id}^^xsd:integer . 
+source		SELECT * FROM "public"."tb_edition"
+
+mappingId	MAPPING-ID9
+target		<http://base.org/tb_edition/ed_code={tb_edition_ed_code}> <http://base.org/tb_edition#ref-bk_id> <http://base.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "public"."tb_edition"."ed_code" AS tb_edition_ed_code, "public"."tb_books"."bk_code" AS tb_books_bk_code FROM "public"."tb_edition", "public"."tb_books" WHERE "public"."tb_edition"."bk_id" = "public"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID10
+target		<http://base.org/tb_edition/ed_code={tb_edition_ed_code}> <http://base.org/tb_edition#ref-editor> <http://base.org/tb_editor/ed_code={tb_editor_ed_code}> . 
+source		SELECT "public"."tb_edition"."ed_code" AS tb_edition_ed_code, "public"."tb_editor"."ed_code" AS tb_editor_ed_code FROM "public"."tb_edition", "public"."tb_editor" WHERE "public"."tb_edition"."editor" = "public"."tb_editor"."ed_code"
+
+mappingId	MAPPING-ID11
+target		<http://base.org/tb_editor/ed_code={ed_code}> a <http://base.org/tb_editor> ; <http://base.org/tb_editor#ed_code> {ed_code}^^xsd:integer ; <http://base.org/tb_editor#ed_name> {ed_name}^^xsd:string . 
+source		SELECT * FROM "public"."tb_editor"
+
+mappingId	MAPPING-ID12
+target		<http://base.org/tb_emerge_authors/bk_code={bk_code};wr_id={wr_id}> a <http://base.org/tb_emerge_authors> ; <http://base.org/tb_emerge_authors#bk_code> {bk_code}^^xsd:integer ; <http://base.org/tb_emerge_authors#wr_id> {wr_id}^^xsd:integer . 
+source		SELECT * FROM "public"."tb_emerge_authors"
+
+mappingId	MAPPING-ID13
+target		<http://base.org/tb_emerge_authors/bk_code={tb_emerge_authors_bk_code};wr_id={tb_emerge_authors_wr_id}> <http://base.org/tb_emerge_authors#ref-wr_id> <http://base.org/tb_on_prob_wr/wr_code={tb_on_prob_wr_wr_code}> . 
+source		SELECT "public"."tb_emerge_authors"."bk_code" AS tb_emerge_authors_bk_code, "public"."tb_emerge_authors"."wr_id" AS tb_emerge_authors_wr_id, "public"."tb_on_prob_wr"."wr_code" AS tb_on_prob_wr_wr_code FROM "public"."tb_emerge_authors", "public"."tb_on_prob_wr" WHERE "public"."tb_emerge_authors"."wr_id" = "public"."tb_on_prob_wr"."wr_code"
+
+mappingId	MAPPING-ID14
+target		<http://base.org/tb_emerge_authors/bk_code={tb_emerge_authors_bk_code};wr_id={tb_emerge_authors_wr_id}> <http://base.org/tb_emerge_authors#ref-bk_code> <http://base.org/tb_books/bk_code={tb_books_bk_code}> . 
+source		SELECT "public"."tb_emerge_authors"."bk_code" AS tb_emerge_authors_bk_code, "public"."tb_emerge_authors"."wr_id" AS tb_emerge_authors_wr_id, "public"."tb_books"."bk_code" AS tb_books_bk_code FROM "public"."tb_emerge_authors", "public"."tb_books" WHERE "public"."tb_emerge_authors"."bk_code" = "public"."tb_books"."bk_code"
+
+mappingId	MAPPING-ID15
+target		<http://base.org/tb_on_prob_wr/wr_code={wr_code}> a <http://base.org/tb_on_prob_wr> ; <http://base.org/tb_on_prob_wr#wr_code> {wr_code}^^xsd:integer ; <http://base.org/tb_on_prob_wr#wr_name> {wr_name}^^xsd:string . 
+source		SELECT * FROM "public"."tb_on_prob_wr"
+]]
+

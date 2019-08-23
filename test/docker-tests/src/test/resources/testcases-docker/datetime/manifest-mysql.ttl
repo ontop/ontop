@@ -1,0 +1,202 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : 		<http://fishdelish.cs.man.ac.uk/rdf/vocab/resource/> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix mf:     <http://obda.org/quest/tests/test-manifest#> .
+@prefix qt:     <http://obda.org/quest/tests/test-query#> .
+@prefix obdat:  <http://obda.org/quest/tests/test-scenario#> .
+
+<>  rdf:type mf:Manifest ;
+    rdfs:label "Date-Time Type Tests" ;
+    mf:entries
+    ( 
+      :dateLiteral :date :date-str :date-bgp
+      :timeLiteral :time :time-str :time-bgp
+      :datetime :datetime-str
+      :timestamp :timestamp-str
+      :year :yearLiteral :year-str :year-bgp
+    ) .
+
+## >>> This test should fail!
+:dateLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE LITERAL" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <dateLiteral.rq> ] ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+    
+:date rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE" ;
+    mf:comment	"Quest can now support xsd:date in filter" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date.rq> ] ;
+    mf:result <date.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:date-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - using basic graph pattern" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date-bgp.rq> ] ;
+    mf:result <date.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:date-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date-str.rq> ] ;
+    mf:result <date.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+## >>> This test should fail!
+:timeLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME LITERAL" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <timeLiteral.rq> ] ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:time rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME" ;
+    mf:comment	"Quest can now support xsd:time in filter" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time.rq> ] ;
+    mf:result <time.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:time-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - using basic graph pattern" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time-bgp.rq> ] ;
+    mf:result <time.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:time-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIME - cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <time-str.rq> ] ;
+    mf:result <time.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+    
+:datetime rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATETIME" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <datetime.rq> ] ;
+    mf:result <datetime.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:datetime-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATETIME - cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <datetime-str.rq> ] ;
+    mf:result <datetime.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+    
+:timestamp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <timestamp.rq> ] ;
+    mf:result <timestamp.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+ 
+:timestamp-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: TIMESTAMP - cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <timestamp-str.rq> ] ;
+    mf:result <timestamp.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+    
+## >>> This test should fail!
+:yearLiteral rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR Literal" ;
+    mf:comment	"Quest will assign this column into rdfs:Literal type" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <yearLiteral.rq> ] ;
+    mf:result <noresult.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+
+:year rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <year.rq> ] ;
+    mf:result <year.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:year-bgp rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR - using basic graph pattern" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <year-bgp.rq> ] ;
+    mf:result <year.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .
+
+:year-str rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: YEAR - cast to xsd:string" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <year-str.rq> ] ;
+    mf:result <year.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-mysql.obda> ;
+	mf:parameters <datatypes-mysql.properties> .

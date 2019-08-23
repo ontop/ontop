@@ -1,3 +1,0 @@
-PREFIX : <http://example/>
-SELECT ?X (MIN(?r) AS ?rating)
-WHERE { ?X :rating ?r . } GROUP BY ?X

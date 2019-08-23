@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+:		http://www.movieontology.org/2009/11/09/movieontology.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+www:		http://www.movieontology.org/2009/11/09/
+xsd:		http://www.w3.org/2001/XMLSchema#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+
+[MappingDeclaration] @collection [[
+
+mappingId	Movie has title and production year
+target		:title/{id} :title {ltitle}^^xsd:string .
+source		select id, lower(title) as ltitle from title
+
+
+]]
+

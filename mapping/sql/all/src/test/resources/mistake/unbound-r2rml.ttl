@@ -1,0 +1,26 @@
+@prefix rr:    <http://www.w3.org/ns/r2rml#> .
+@prefix :      <http://example.org/voc#> .
+@prefix obda:  <https://w3id.org/obda/vocabulary#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+<urn:mapping-unbound-target-variable>
+        a                      rr:TriplesMap ;
+        rr:logicalTable        [ a            rr:R2RMLView ;
+                                 rr:sqlQuery  "SELECT ID FROM PERSON"
+                               ] ;
+        rr:predicateObjectMap  [ a             rr:PredicateObjectMap ;
+                                 rr:objectMap  [ a            rr:TermMap , rr:ObjectMap ;
+                                                 rr:datatype  xsd:string ;
+                                                 rr:template  "{FNAME}" ;
+                                                 rr:termType  rr:Literal
+                                               ] ;
+                                 rr:predicate  :firstName
+                               ] ;
+        rr:subjectMap          [ a            rr:TermMap , rr:SubjectMap ;
+                                 rr:template  "http:/localhost/person/{ID}" ;
+                                 rr:termType  rr:IRI
+                               ] .

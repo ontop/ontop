@@ -1,0 +1,27 @@
+[PrefixDeclaration]
+:		http://www.owl-ontologies.com/Ontology1207768242.owl#
+dc:		http://purl.org/dc/elements/1.1/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+foaf:		http://xmlns.com/foaf/0.1/
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+swrl:		http://www.w3.org/2003/11/swrl#
+swrlb:		http://www.w3.org/2003/11/swrlb#
+dctype:		http://purl.org/dc/dcmitype/Image#
+dcterms:		http://purl.org/dc/terms/
+owl2xml:		http://www.w3.org/2006/12/owl2-xml#
+
+
+[MappingDeclaration] @collection [[
+mappingId	mapping-addresses
+target		:Address-{id} a :BolzanoAddress ; :hasAddress <{address}> ; :inStreet {street} ; :hasNumber {number}^^xsd:int ; :inCity {city} ; :inState {state} ; :inCountry {country} .
+source		select id, 'http://example.com/resource/?repository=repo&uri=http://www.owl-ontologies.com/Ontology1207768242.owl/Address-' || id as address, street, number, city, state, country from address_new
+
+mappingId	mapping-brokers
+target		:Person-{id} a :PhysicalPerson ; :firstName {name} ; :lastName {lastname} ; :dateOfBirth {dateofbirth} ; :ssn {ssn} .
+source		select id, name, lastname, dateofbirth, ssn from person_new
+
+
+]]
+

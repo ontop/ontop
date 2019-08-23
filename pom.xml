@@ -1,154 +1,169 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.unibz.inf.ontop</groupId>
-	<artifactId>ontop</artifactId>
-	<packaging>pom</packaging>
-	<version>1.18.1</version>
-	<name>ontop</name>
-	<url>http://ontop.inf.unibz.it/</url>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>it.unibz.inf.ontop</groupId>
+    <artifactId>ontop</artifactId>
+    <packaging>pom</packaging>
+    <version>3.0.0</version>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <name>ontop</name>
+    <url>http://ontop.inf.unibz.it/</url>
 
-	<inceptionYear>2009</inceptionYear>
-	<organization>
-		<name>Free University of Bozen-Bolzano</name>
-	</organization>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
+    <inceptionYear>2009</inceptionYear>
+    <organization>
+        <name>Free University of Bozen-Bolzano</name>
+    </organization>
 
-	<scm>
-		<connection>scm:git:git@github.com:ontop/ontop.git</connection>
-		<developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
-		<url>git@github.com:ontop/ontop.git</url>
-	  <tag>ontop-1.18.1</tag>
-  </scm>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
-	<developers>
-		<developer>
-			<id>ghxiao</id>
-			<name>Guohui Xiao</name>
-		</developer>
-		<developer>
-			<id>martinrezk</id>
-			<name>Martin Rezk</name>
-		</developer>
-		<developer>
-			<id>skomlaebri</id>
-			<name>Sarah Komla-Ebri</name>
-		</developer>
-		<developer>
-			<id>bcogrel</id>
-			<name>Benjamin Cogrel</name>
-		</developer>
-		<developer>
-			<id>elemguzel</id>
-			<name>Elem Güzel</name>
-		</developer>
-	</developers>
+    <scm>
+        <connection>scm:git:git@github.com:ontop/ontop.git</connection>
+        <developerConnection>scm:git:git@github.com:ontop/ontop.git</developerConnection>
+        <url>git@github.com:ontop/ontop.git</url>
+        <tag>ontop-3.0.0</tag>
+    </scm>
 
-    <prerequisites>
-        <maven>3.3</maven>
-    </prerequisites>
+    <developers>
+        <developer>
+            <id>ghxiao</id>
+            <name>Guohui Xiao</name>
+        </developer>
+        <developer>
+            <id>bcogrel</id>
+            <name>Benjamin Cogrel</name>
+        </developer>
+        <developer>
+            <id>elemguzel</id>
+            <name>Elem Güzel</name>
+        </developer>
+        <developer>
+            <id>juliencorman</id>
+            <name>Julien Corman</name>
+        </developer>
+        <developer>
+            <id>konchakov</id>
+            <name>Roman Konchakov</name>
+        </developer>
+        <developer>
+            <id>tirrolo</id>
+            <name>Davide Lanti</name>
+        </developer>
+    </developers>
 
     <modules>
-		<module>obdalib-core</module>
-		<module>reformulation-core</module>
-		<module>obdalib-owlapi3</module>
-        <module>obdalib-sesame</module>
-		<module>obdalib-r2rml</module>
-		<module>quest-owlapi3</module>
-		<module>quest-distribution</module>
-		<module>quest-sparql-compliance</module>
-		<module>quest-sesame</module>
-		<module>quest-db</module>
-		<module>quest-rdb2rdf-compliance</module>
-        <module>ontop-protege</module>
-        <module>ontop-cli</module>
-		<module>quest-test</module>
+        <module>binding</module>
+        <module>build</module>
+        <module>client</module>
+        <module>core</module>
+        <module>db</module>
+        <module>engine</module>
+        <module>mapping</module>
+        <module>ontology</module>
+        <module>test</module>
+    </modules>
 
-		<module>ontop-docker-test-env</module>
-	</modules>
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>set-docker-jdbc-url</id>
+            <activation>
+                <!--<property>-->
+                <!--<name>setDockerUrl</name>-->
+                <!--<value>true</value>-->
+                <!--</property>-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <docker.url>localhost</docker.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>doclint-java8-disable</id>
+            <activation>
+                <jdk>[1.8,</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-	<profiles>
-		<profile>
-			<id>release-sign-artifacts</id>
-			<activation>
-				<property>
-					<name>performRelease</name>
-					<value>true</value>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>doclint-java8-disable</id>
-			<activation>
-				<jdk>[1.8,</jdk>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<configuration>
-							<additionalparam>-Xdoclint:none</additionalparam>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- for org.codehaus.mojo:license-maven-plugin -->
+        <license.licenseName>apache_v2</license.licenseName>
+        <license.roots>src/main/java,src/test/java</license.roots>
 
-		<!-- for org.codehaus.mojo:license-maven-plugin -->
-		<license.licenseName>apache_v2</license.licenseName>
-		<license.roots>src/main/java,src/test/java</license.roots>
-
-		<sesame.version>2.7.10</sesame.version>
-		<owlapi.version>4.2.5</owlapi.version>
+        <rdf4j.version>2.4.2</rdf4j.version>
+        <owlapi.version>4.5.7</owlapi.version>
         <logback.version>1.1.3</logback.version>
-        <antlr.version>3.5.2</antlr.version>
-        <airline.version>2.1.0</airline.version>
-        <tomcat-jdbc.version>9.0.0.M1</tomcat-jdbc.version>
-        <r2rml-api.version>0.3.1</r2rml-api.version>
+        <antlr4.version>4.7</antlr4.version>
+        <airline.version>2.6.0</airline.version>
+        <tomcat-jdbc.version>9.0.0.M22</tomcat-jdbc.version>
+        <r2rml-api.version>0.6.0</r2rml-api.version>
+        <jetty.version>9.4.6.v20170531</jetty.version>
+        <hikari-cp.version>2.6.3</hikari-cp.version>
+        <commons-rdf.version>0.5.0</commons-rdf.version>
+        <guava.version>18.0</guava.version>
+        <jsqlparser.version>1.0</jsqlparser.version>
+        <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
+        <jackson.version>2.9.7</jackson.version>
+        <jena.version>3.9.0</jena.version>
     </properties>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.6</version>
-				</plugin>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
@@ -175,66 +190,66 @@
                     <version>2.20</version>
                 </plugin>
                 <plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>2.4</version>
-				</plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.10.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.6.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>3.0.2</version>
                 </plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.20</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>maven-bundle-plugin</artifactId>
-					<version>3.3.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>1.6</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.3</version>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.20</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -249,351 +264,564 @@
                 </configuration>
             </plugin>
 
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<!-- explicitly define maven-deploy-plugin after other to force exec
-					order -->
-				<artifactId>maven-deploy-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>deploy</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- explicitly define maven-deploy-plugin after other to force exec
+                    order -->
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>1.7.13</version>
-			</dependency>
-			<dependency>
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-classic</artifactId>
-				<version>${logback.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ch.qos.logback</groupId>
-				<artifactId>logback-core</artifactId>
-				<version>${logback.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr</artifactId>
-				<version>${antlr.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.antlr</groupId>
-				<artifactId>antlr-runtime</artifactId>
-				<version>${antlr.version}</version>
-			</dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.13</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4</artifactId>
+                <version>${antlr4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${antlr4.version}</version>
+            </dependency>
+            <!--<dependency>-->
+            <!--<groupId>org.antlr</groupId>-->
+            <!--<artifactId>antlr</artifactId>-->
+            <!--<version>${antlr.version}</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+            <!--<groupId>org.antlr</groupId>-->
+            <!--<artifactId>antlr-runtime</artifactId>-->
+            <!--<version>${antlr.version}</version>-->
+            <!--</dependency>-->
 
-			<dependency>
-				<groupId>org.javabits.jgrapht</groupId>
-				<artifactId>jgrapht-core</artifactId>
-				<version>0.9.3</version>
-			</dependency>
+            <dependency>
+                <groupId>org.javabits.jgrapht</groupId>
+                <artifactId>jgrapht-core</artifactId>
+                <version>0.9.3</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.apache.tomcat</groupId>
-				<artifactId>tomcat-jdbc</artifactId>
-				<version>${tomcat-jdbc.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jdbc</artifactId>
+                <version>${tomcat-jdbc.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-juli</artifactId>
                 <version>${tomcat-jdbc.version}</version>
             </dependency>
 
-			<dependency>
-				<groupId>com.github.jsqlparser</groupId>
-				<artifactId>jsqlparser</artifactId>
-				<version>0.9.1</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>18.0</version>
-			</dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari-cp.version}</version>
+            </dependency>
 
             <dependency>
-                 <groupId>com.github.rvesse</groupId>
-                 <artifactId>airline</artifactId>
-                 <version>${airline.version}</version>
-             </dependency>
+                <groupId>com.github.jsqlparser</groupId>
+                <artifactId>jsqlparser</artifactId>
+                <version>${jsqlparser.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.rvesse</groupId>
+                <artifactId>airline</artifactId>
+                <version>${airline.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.github.rvesse</groupId>
                 <artifactId>airline-help-bash</artifactId>
                 <version>${airline.version}</version>
             </dependency>
 
-			<!-- OWL API -->
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-api</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-apibinding</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-impl</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-parsers</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-oboformat</artifactId>
-				<version>${owlapi.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-api</artifactId>
+                <version>${commons-rdf.version}</version>
+            </dependency>
 
-			<!-- Sesame API -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-simple</artifactId>
+                <version>${commons-rdf.version}</version>
+            </dependency>
 
-			<dependency>
-				<!-- this includes ALL seasame -->
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-runtime</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-rdf4j</artifactId>
+                <version>${commons-rdf.version}</version>
+            </dependency>
 
-			<!-- These will download some of the sources -->
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-repository-api</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
+            <!-- OWL API -->
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-api</artifactId>
+                <version>${owlapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-apibinding</artifactId>
+                <version>${owlapi.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryparser-sparql</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-impl</artifactId>
+                <version>${owlapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-parsers</artifactId>
+                <version>${owlapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.owlapi</groupId>
+                <artifactId>owlapi-oboformat</artifactId>
+                <version>${owlapi.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-util</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-ntriples</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-api</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-sparql-compliance</artifactId>
-				<version>${sesame.version}</version>
-				<type>war</type>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-sparql-testsuite</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-model</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-turtle</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-rdfxml</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-n3</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryresultio-api</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryresultio-text</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryresultio-sparqlxml</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryalgebra-model</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-repository-sparql</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-repository-manager</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-query</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryparser-api</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-queryalgebra-evaluation</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-datatypes</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openrdf.sesame</groupId>
-				<artifactId>sesame-rio-languages</artifactId>
-				<version>${sesame.version}</version>
-			</dependency>
+            <!-- rdf4j API -->
 
-			<!-- JDBC Drivers -->
+            <dependency>
+                <!-- this includes ALL seasame -->
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-runtime</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>9.4-1201-jdbc41</version>
-			</dependency>
-			<dependency>
-				<groupId>com.ibm</groupId>
-				<artifactId>db2jcc4.jar</artifactId>
-				<version>10.1.4</version>
-			</dependency>
-			<dependency>
-				<groupId>com.h2database</groupId>
-				<artifactId>h2</artifactId>
-				<version>1.4.190</version>
-			</dependency>
-			<dependency>
-				<groupId>com.microsoft.sqlserver</groupId>
-				<artifactId>sqljdbc4</artifactId>
-				<version>4.0.2206.100</version>
-			</dependency>
-			<dependency>
-				<groupId>com.oracle</groupId>
-				<artifactId>ojdbc16</artifactId>
-				<version>11.2.0.3</version>
-			</dependency>
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>5.1.35</version>
-			</dependency>
+            <!-- These will download some of the sources -->
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-repository-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryparser-sparql</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-util</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-sparql-compliance</artifactId>
+                <version>${rdf4j.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-sparql-testsuite</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-model</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-ntriples</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-nquads</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-turtle</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-rdfxml</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-sail-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryresultio-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryresultio-text</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryresultio-sparqlxml</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryalgebra-model</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-repository-sparql</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-repository-manager</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-repository-sail</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-query</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryparser-api</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-datatypes</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-languages</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-nquad</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-trig</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-jsonld</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryrender</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-rio-rdfjson</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-sail-memory</artifactId>
+                <version>${rdf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.jsonld-java</groupId>
+                <artifactId>jsonld-java</artifactId>
+                <version>0.12.1</version>
+            </dependency>
+
+
+            <!-- JDBC Drivers -->
+
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ibm</groupId>
+                <artifactId>db2jcc4.jar</artifactId>
+                <version>10.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>1.4.196</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.sqlserver</groupId>
+                <artifactId>sqljdbc4</artifactId>
+                <version>4.0.2206.100</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>12.2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <!--<version>5.1.35</version>-->
+                <version>8.0.12</version>
+            </dependency>
 
             <dependency>
                 <groupId>monetdb</groupId>
                 <artifactId>monetdb-jdbc</artifactId>
                 <version>11.19.15</version>
             </dependency>
+            <dependency>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>2.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sap.db.jdbc.Driver</groupId>
+                <artifactId>hana</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dremio.jdbc</groupId>
+                <artifactId>dremio-jdbc</artifactId>
+                <version>1.4.4</version>
+            </dependency>
 
-			<!-- Optique R2RML API -->
-			<dependency>
-				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api</artifactId>
-				<version>${r2rml-api.version}</version>
-			</dependency>
+            <!-- Optique R2RML API -->
+            <dependency>
+                <groupId>eu.optique-project</groupId>
+                <artifactId>r2rml-api-core</artifactId>
+                <version>${r2rml-api.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>eu.optique-project</groupId>
-				<artifactId>r2rml-api-sesame-bridge</artifactId>
-				<version>${r2rml-api.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>eu.optique-project</groupId>
+                <artifactId>r2rml-api-rdf4j-binding</artifactId>
+                <version>${r2rml-api.version}</version>
+            </dependency>
 
-		</dependencies>
-	</dependencyManagement>
+            <dependency>
+                <groupId>eu.optique-project</groupId>
+                <artifactId>r2rml-api-jena-binding</artifactId>
+                <version>${r2rml-api.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.jena</groupId>
+                        <artifactId>jena-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-report-plugin</artifactId>
-				<configuration>
-					<outputDirectory>/build/report</outputDirectory>
-					<showSuccess>true</showSuccess>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<configuration>
-					<outputDirectory>/var/lib/tomcat7/webapps/ontop-test-result</outputDirectory>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jxr-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-rdf-jena</artifactId>
+                <version>${commons-rdf.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.jena</groupId>
+                        <artifactId>jena-osgi</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.jena</groupId>
+                <artifactId>jena-arq</artifactId>
+                <version>${jena.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.jena</groupId>
+                <artifactId>jena-core</artifactId>
+                <version>${jena.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- needed by jena -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.17</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>1.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.functionaljava</groupId>
+                <artifactId>functionaljava</artifactId>
+                <version>4.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-assistedinject</artifactId>
+                <version>4.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>aopalliance</groupId>
+                <artifactId>aopalliance</artifactId>
+                <version>1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+
+            <!-- jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+
+        </dependencies>
+    </dependencyManagement>
 
 </project>
-			
