@@ -65,7 +65,9 @@ public class CommonDenominatorFunctionSymbolImpl extends AbstractCommonDenominat
                             .add(c)
                             .addAll(otherTerms)
                             .build()))
-                    .orElseGet(() -> termFactory.getCommonDenominatorFunctionalTerm(otherTerms));
+                    .filter(t -> t.getArity() < getArity())
+                    .map(t -> t.simplify(variableNullability))
+                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
         }
     }
 

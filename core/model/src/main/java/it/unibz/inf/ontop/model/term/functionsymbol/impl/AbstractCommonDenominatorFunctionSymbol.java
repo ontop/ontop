@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -54,7 +56,29 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
     }
 
     /**
-     * otherTerms: all use a RDFTermTypeFunctionSymbol . Non-empty.
+     * To be overridden by concrete classes
+     *
+     * Default case: looks for DBIfThen
+     */
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
+                                                     TermFactory termFactory, VariableNullability variableNullability) {
+        return newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm)t)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .findAny()
+                .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
+                        .pushDownRegularFunctionalTerm(
+                                termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                newTerms.indexOf(t),
+                                termFactory))
+                .map(t -> t.simplify(variableNullability))
+                .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+    }
+
+    /**
+     * otherTerms: all use a RDFTermTypeFunctionSymbol. Non-empty.
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected ImmutableTerm simplifyUsingMagicNumbers(ImmutableList<ImmutableFunctionalTerm> otherTerms,

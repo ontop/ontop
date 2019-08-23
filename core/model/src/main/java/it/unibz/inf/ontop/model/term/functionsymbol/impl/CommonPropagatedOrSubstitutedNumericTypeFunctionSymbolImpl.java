@@ -55,7 +55,7 @@ public class CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl extends 
                         optionalTypeConstant, termFactory);
         }
         else
-            return termFactory.getImmutableFunctionalTerm(this, newTerms);
+            return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 
     @Override
