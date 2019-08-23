@@ -10,6 +10,7 @@ public class OntopInternal {
 
 
     public static final IRI NUMERIC;
+    public static final IRI DATE_OR_DATETIME;
 
     /**
      * TODO: remove it!
@@ -26,6 +27,7 @@ public class OntopInternal {
         RDF rdfFactory = new SimpleRDF();
 
         NUMERIC = rdfFactory.createIRI(PREFIX + "numeric");
+        DATE_OR_DATETIME = rdfFactory.createIRI(PREFIX + "dateOrDateTime");
         UNSUPPORTED = rdfFactory.createIRI(PREFIX + "unsupported");
         PREFIX_XSD = "xsd:";
         PREFIX_RDF = "rdf:";

@@ -1307,8 +1307,10 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                     .map(a -> getTerm(a, knownVariables))
                     .collect(ImmutableCollectors.toList());
 
+            String functionName = extractFunctionName(f.getURI());
+
             Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
-                    f.getURI(), terms.size());
+                    functionName, terms.size());
 
             if (optionalFunctionSymbol.isPresent()) {
                 return termFactory.getImmutableFunctionalTerm(optionalFunctionSymbol.get(), terms);
@@ -1320,6 +1322,27 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // BNodeGenerator
         // NAryValueOperator (ListMemberOperator and Coalesce)
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
+    }
+
+    /**
+     * Changes some function names when RDF4J abuses the SPARQL standard (i.e. is too tightly-coupled)
+     *
+     * The typical example is the YEAR() function which is replaced by RDF4J by fn:year-from-dateTime because
+     * the SPARQL 1.1 specification has only consider the case of xsd:dateTime, not xsd:date.
+     * Obviously, all the major implementations also support the case of xsd:date and use the fun:year-from-date when
+     * appropriated.
+     *
+     * This method reverses fn:year-from-dateTime into YEAR, as it now maps to a function symbol that accepts
+     * both xsd:date and xsd:dateTime.
+     *
+     */
+    private String extractFunctionName(String uri) {
+
+        if (uri.equals(XPathFunction.YEAR_FROM_DATETIME.getIRIString()))
+            return SPARQL.YEAR;
+        // TODO: handle the case of MONTH and DAY.
+        else
+            return uri;
     }
 
 

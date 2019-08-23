@@ -519,6 +519,15 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
+	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
+																	 ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
+																	 java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getUnaryLatelyTypedFunctionSymbol(dbFunctionSymbolFct, targetType),
+				lexicalTerm, inputRDFTypeTerm);
+	}
+
+	@Override
 	public ImmutableFunctionalTerm getUnaryLexicalFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm rdfDatatypeTerm,
 			java.util.function.Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct) {
@@ -548,19 +557,19 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRand(uuid));
 	}
 
-    @Override
-    public ImmutableFunctionalTerm getDBYear(ImmutableTerm dbDatetimeTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBYear(), dbDatetimeTerm);
+	@Override
+    public ImmutableFunctionalTerm getDBYearFromDatetime(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBYearFromDatetime(), dbDatetimeTerm);
     }
 
     @Override
-    public ImmutableFunctionalTerm getDBMonth(ImmutableTerm dbDatetimeTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMonth(), dbDatetimeTerm);
+    public ImmutableFunctionalTerm getDBMonthFromDatetime(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBMonthFromDatetime(), dbDatetimeTerm);
     }
 
 	@Override
-	public ImmutableFunctionalTerm getDBDay(ImmutableTerm dbDatetimeTerm) {
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDay(), dbDatetimeTerm);
+	public ImmutableFunctionalTerm getDBDayFromDatetime(ImmutableTerm dbDatetimeTerm) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDayFromDatetime(), dbDatetimeTerm);
 	}
 
 	@Override

@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.impl.MultitypedInputUnarySPARQLFunctionSymbolImpl.TriFunction;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
@@ -108,8 +108,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         ObjectRDFType iriType = typeFactory.getIRITermType();
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+        RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
 
-        DBTermType dbBoolean = typeFactory.getDBTypeFactory().getDBBooleanType();
+        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
+        DBTermType dbBoolean = dbTypeFactory.getDBBooleanType();
+        DBTermType dbInteger = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType dbTimestamp = dbTypeFactory.getDBDateTimestampType();
+        DBTermType dbDate = dbTypeFactory.getDBDateType();
 
         ImmutableSet<SPARQLFunctionSymbol> functionSymbols = ImmutableSet.of(
                 new UcaseSPARQLFunctionSymbolImpl(xsdString),
@@ -154,19 +159,29 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new SameTermSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ABS", XPathFunction.NUMERIC_ABS, abstractNumericType,
-                        dbFunctionSymbolFactory::getAbs),
+                        this.dbFunctionSymbolFactory::getAbs),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_CEIL", XPathFunction.NUMERIC_CEIL, abstractNumericType,
-                        dbFunctionSymbolFactory::getCeil),
+                        this.dbFunctionSymbolFactory::getCeil),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_FLOOR", XPathFunction.NUMERIC_FLOOR, abstractNumericType,
-                        dbFunctionSymbolFactory::getFloor),
+                        this.dbFunctionSymbolFactory::getFloor),
                 new UnaryNumericSPARQLFunctionSymbolImpl("SP_ROUND", XPathFunction.NUMERIC_ROUND, abstractNumericType,
-                        dbFunctionSymbolFactory::getRound),
-                new SimpleUnarySPARQLFunctionSymbolImpl("SP_YEAR", XPathFunction.YEAR_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBYear),
+                        this.dbFunctionSymbolFactory::getRound),
+                new MultitypedInputUnarySPARQLFunctionSymbolImpl("SP_YEAR", SPARQL.YEAR, dateOrDatetime,
+                        xsdInteger, false, dbTypeFactory,
+                        (DBTermType t) ->  {
+                            if (t.isA(dbTimestamp))
+                                return dbFunctionSymbolFactory.getDBYearFromDatetime();
+                            else if (t.isA(dbDate))
+                                return dbFunctionSymbolFactory.getDBYearFromDate();
+                            else
+                                throw new MinorOntopInternalBugException("Unexpected db term type: " + t);
+                        }),
+                // TODO: update
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MONTH", XPathFunction.MONTH_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBMonth),
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBMonthFromDatetime),
+                // TODO: update
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_DAY", XPathFunction.DAY_FROM_DATETIME,
-                        xsdDatetime, xsdInteger, false, TermFactory::getDBDay),
+                        xsdDatetime, xsdInteger, false, TermFactory::getDBDayFromDatetime),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_HOURS", XPathFunction.HOURS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBHours),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MINUTES", XPathFunction.MINUTES_FROM_DATETIME,
@@ -380,6 +395,12 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
         return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
+    }
+
+    @Override
+    public FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct,
+                                                            DBTermType targetType) {
+        return new UnaryLatelyTypedFunctionSymbolImpl(dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
     }
 
     @Override

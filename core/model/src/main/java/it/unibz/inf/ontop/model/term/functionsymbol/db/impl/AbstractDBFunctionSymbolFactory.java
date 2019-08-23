@@ -60,7 +60,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     // Created in init()
     private DBFunctionSymbol sha512FunctionSymbol;
     // Created in init()
-    private DBFunctionSymbol yearFunctionSymbol;
+    private DBFunctionSymbol yearFromDatetimeFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol yearFromDateFunctionSymbol;
     // Created in init()
     private DBFunctionSymbol monthFunctionSymbol;
     // Created in init()
@@ -306,7 +308,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         sha256FunctionSymbol = createSHA256FunctionSymbol();
         sha512FunctionSymbol = createSHA512FunctionSymbol();
 
-        yearFunctionSymbol = createYearFunctionSymbol();
+        yearFromDatetimeFunctionSymbol = createYearFromDatetimeFunctionSymbol();
+        yearFromDateFunctionSymbol = createYearFromDateFunctionSymbol();
         monthFunctionSymbol = createMonthFunctionSymbol();
         dayFunctionSymbol = createDayFunctionSymbol();
         hoursFunctionSymbol = createHoursFunctionSymbol();
@@ -753,17 +756,22 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBYear() {
-        return yearFunctionSymbol;
+    public DBFunctionSymbol getDBYearFromDatetime() {
+        return yearFromDatetimeFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getDBMonth() {
+    public DBFunctionSymbol getDBYearFromDate() {
+        return yearFromDateFunctionSymbol;
+    }
+
+    @Override
+    public DBFunctionSymbol getDBMonthFromDatetime() {
         return monthFunctionSymbol;
     }
 
     @Override
-    public DBFunctionSymbol getDBDay() {
+    public DBFunctionSymbol getDBDayFromDatetime() {
         return dayFunctionSymbol;
     }
 
@@ -943,9 +951,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         return new DBHashFunctionSymbolImpl("DB_SHA512", rootDBType, dbStringType, this::serializeSHA512);
     }
 
-    protected DBFunctionSymbol createYearFunctionSymbol() {
-        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR", rootDBType, dbIntegerType, false,
-                this::serializeYear);
+    protected DBFunctionSymbol createYearFromDatetimeFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATETIME", rootDBType, dbIntegerType, false,
+                this::serializeYearFromDatetime);
+    }
+
+    protected DBFunctionSymbol createYearFromDateFunctionSymbol() {
+        return new UnaryDBFunctionSymbolWithSerializerImpl("DB_YEAR_FROM_DATE", rootDBType, dbIntegerType, false,
+                this::serializeYearFromDate);
     }
 
     protected DBFunctionSymbol createMonthFunctionSymbol() {
@@ -1072,9 +1085,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
 
-    protected abstract String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
+    protected abstract String serializeYearFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,
                                             TermFactory termFactory);
+
+    protected abstract String serializeYearFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter,
+                                                    TermFactory termFactory);
 
     protected abstract String serializeMonth(ImmutableList<? extends ImmutableTerm> terms,
                                             Function<ImmutableTerm, String> termConverter,

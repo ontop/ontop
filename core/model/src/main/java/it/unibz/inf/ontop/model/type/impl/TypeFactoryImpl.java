@@ -31,7 +31,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final MetaRDFTermType metaRDFTermType;
 	private final RDFTermType rootRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
-	private final RDFDatatype rdfsLiteralDatatype;
+	private final RDFDatatype rdfsLiteralDatatype, dateOrDatetimeDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
 	private final ConcreteNumericRDFDatatype owlRationalDatatype, xsdDecimalDatatype;
 	private final ConcreteNumericRDFDatatype xsdDoubleDatatype, xsdFloatDatatype;
@@ -164,10 +164,14 @@ public class TypeFactoryImpl implements TypeFactory {
 		xsdTimeDatatype = createSimpleConcreteRDFDatatype(XSD.TIME, rdfsLiteralDatatype.getAncestry(),
 				DBTypeFactory::getDBTimeType);
 		registerDatatype(xsdTimeDatatype);
-		xsdDateDatatype = createSimpleConcreteRDFDatatype(XSD.DATE, rdfsLiteralDatatype.getAncestry(),
+
+		dateOrDatetimeDatatype = createSimpleAbstractRDFDatatype(OntopInternal.DATE_OR_DATETIME, rdfsLiteralDatatype.getAncestry());
+		registerDatatype(dateOrDatetimeDatatype);
+
+		xsdDateDatatype = createSimpleConcreteRDFDatatype(XSD.DATE, dateOrDatetimeDatatype.getAncestry(),
 				DBTypeFactory::getDBDateType);
 		registerDatatype(xsdDateDatatype);
-		xsdDatetimeDatatype = createSimpleConcreteRDFDatatype(XSD.DATETIME, rdfsLiteralDatatype.getAncestry(),
+		xsdDatetimeDatatype = createSimpleConcreteRDFDatatype(XSD.DATETIME, dateOrDatetimeDatatype.getAncestry(),
 				// TODO: check
 				DBTypeFactory::getDBDateTimestampType);
 		registerDatatype(xsdDatetimeDatatype);
@@ -223,6 +227,11 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public RDFDatatype getAbstractOntopNumericDatatype() {
 		return numericDatatype;
+	}
+
+	@Override
+	public RDFDatatype getAbstractOntopDateOrDatetimeDatatype() {
+		return dateOrDatetimeDatatype;
 	}
 
 	@Override

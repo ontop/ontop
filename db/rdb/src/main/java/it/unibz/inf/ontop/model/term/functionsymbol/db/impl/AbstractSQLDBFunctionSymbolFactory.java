@@ -457,6 +457,20 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeYearFromDatetime(ImmutableList<? extends ImmutableTerm> terms,
+                                   Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeYear(terms, termConverter, termFactory);
+    }
+
+    @Override
+    protected String serializeYearFromDate(ImmutableList<? extends ImmutableTerm> terms,
+                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return serializeYear(terms, termConverter, termFactory);
+    }
+
+    /**
+     * By default, we assume that this function works both for TIMESTAMP and DATE
+     */
     protected String serializeYear(ImmutableList<? extends ImmutableTerm> terms,
                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("EXTRACT(YEAR FROM %s)", termConverter.apply(terms.get(0)));
