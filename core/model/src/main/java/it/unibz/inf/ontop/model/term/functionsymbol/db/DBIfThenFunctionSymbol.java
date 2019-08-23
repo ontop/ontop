@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
@@ -17,9 +18,16 @@ public interface DBIfThenFunctionSymbol extends DBFunctionSymbol {
     /**
      * Pushes a unary boolean function symbol down to the "then" arguments
      *
-     * For instance, f(CASE(c1, t1, c2, t2, t3), t4) -> IS_TRUE(CASE(c1, f(t1,t4), c2, f(t2,t4), f(t3,t4)))
+     * For instance, f(CASE(c1, t1, c2, t2, t3), t4) -> BOOL_CASE(c1, f(t1,t4), c2, f(t2,t4), f(t3,t4))
      */
     ImmutableExpression pushDownExpression(ImmutableExpression expression,
                                            int indexOfDBIfThenFunctionSymbol,
                                            TermFactory termFactory);
+
+    /**
+     * Similar to pushDownExpression(...) but for regular functional terms
+     */
+    ImmutableFunctionalTerm pushDownRegularFunctionalTerm(ImmutableFunctionalTerm functionalTerm,
+                                                          int indexOfDBIfThenFunctionSymbol,
+                                                          TermFactory termFactory);
 }
