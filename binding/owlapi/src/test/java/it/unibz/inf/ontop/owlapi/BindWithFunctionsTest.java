@@ -31,6 +31,7 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -695,7 +696,7 @@ public class BindWithFunctionsTest {
     
     
     @Test
-    public void testMonth() throws Exception {
+    public void testMonthDatetime() throws Exception {
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -704,8 +705,8 @@ public class BindWithFunctionsTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (MONTH(?year) AS ?w)\n"
+                + "   ?x ns:pubYear ?d .\n"
+                + "   BIND (MONTH(?d) AS ?w)\n"
              + "}";
 
 
@@ -715,10 +716,11 @@ public class BindWithFunctionsTest {
         expectedValues.add("\"7\"^^xsd:integer");
         expectedValues.add("\"11\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
-    } 
-    
+    }
+
+    @Ignore("TODO: support")
     @Test
-    public void testYear() throws Exception {
+    public void testMonthDate() throws Exception {
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -727,8 +729,31 @@ public class BindWithFunctionsTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (YEAR(?year) AS ?w)\n"
+                + "   ?x ns:pubDate ?d .\n"
+                + "   BIND (MONTH(?d) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"6\"^^xsd:integer");
+        expectedValues.add("\"12\"^^xsd:integer");
+        expectedValues.add("\"7\"^^xsd:integer");
+        expectedValues.add("\"11\"^^xsd:integer");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+    
+    @Test
+    public void testYearDatetime() throws Exception {
+
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?d .\n"
+                + "   BIND (YEAR(?d) AS ?w)\n"
              + "}";
 
 
@@ -741,16 +766,59 @@ public class BindWithFunctionsTest {
     }
 
     @Test
-    public void testDay() throws Exception {
-        
+    public void testYearDate() throws Exception {
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (DAY(?year) AS ?w)\n"
+                + "   ?x ns:pubDate ?d .\n"
+                + "   BIND (YEAR(?d) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2014\"^^xsd:integer");
+        expectedValues.add("\"2011\"^^xsd:integer");
+        expectedValues.add("\"1866\"^^xsd:integer");
+        expectedValues.add("\"1967\"^^xsd:integer");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testDayDatetime() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?d .\n"
+                + "   BIND (DAY(?d) AS ?w)\n"
+                + "}";
+
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"5\"^^xsd:integer");
+        expectedValues.add("\"8\"^^xsd:integer");
+        expectedValues.add("\"1\"^^xsd:integer");
+        expectedValues.add("\"5\"^^xsd:integer");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Ignore("TODO: support it")
+    @Test
+    public void testDayDate() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubDate ?d .\n"
+                + "   BIND (DAY(?d) AS ?w)\n"
                 + "}";
 
 
@@ -785,7 +853,7 @@ public class BindWithFunctionsTest {
     }
 
     @Test
-    public void testHours() throws Exception {
+    public void testHoursDatetime() throws Exception {
 
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -794,8 +862,8 @@ public class BindWithFunctionsTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (HOURS(?year) AS ?w)\n"
+                + "   ?x ns:pubYear ?d .\n"
+                + "   BIND (HOURS(?d) AS ?w)\n"
                 + "}";
 
 
@@ -817,8 +885,8 @@ public class BindWithFunctionsTest {
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
-                + "   ?x ns:pubYear ?year .\n"
-                + "   BIND (SECONDS(?year) AS ?w)\n"
+                + "   ?x ns:pubYear ?d .\n"
+                + "   BIND (SECONDS(?d) AS ?w)\n"
                 + "}";
 
 
