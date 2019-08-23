@@ -80,8 +80,8 @@ if [ ! -f ${ONTOP_DEP_HOME}/${JETTY_COPY_FILENAME}.zip ] ; then
 fi
 
 # location and name for tomcat distribution (should be zip)
-TOMCAT_URL="https://www-eu.apache.org/dist/tomcat/tomcat-9/v9.0.22/bin/apache-tomcat-9.0.22.zip"
-TOMCAT_FILENAME=apache-tomcat-9.0.22
+TOMCAT_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.24/bin/apache-tomcat-9.0.24.zip"
+TOMCAT_FILENAME=apache-tomcat-9.0.24
 if [ ! -f ${ONTOP_DEP_HOME}/${TOMCAT_FILENAME}.zip ] ; then
   wget ${TOMCAT_URL} -P ${ONTOP_DEP_HOME}
 fi

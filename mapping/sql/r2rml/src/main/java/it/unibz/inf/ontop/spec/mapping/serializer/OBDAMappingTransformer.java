@@ -27,10 +27,7 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.DatatypePredicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.ExpressionOperation;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.functionsymbol.URITemplatePredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.type.LanguageTag;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -188,14 +185,16 @@ public class OBDAMappingTransformer {
 					//check if uritemplate we create a template, in case of datatype with single variable we create a column
  					ImmutableFunctionalTerm o = (ImmutableFunctionalTerm) object;
  					Predicate objectPred = o.getFunctionSymbol();
-					if (objectPred instanceof URITemplatePredicate) {
+					if (objectPred instanceof URITemplatePredicate || objectPred instanceof BNodePredicate) {
+						IRI termType = objectPred instanceof URITemplatePredicate?
+								R2RMLVocabulary.iri:
+								R2RMLVocabulary.blankNode;
 
 						ImmutableTerm objectTerm = o.getTerm(0);
 
 						if(objectTerm instanceof Variable)
 						{
 							obm = mfact.createObjectMap(((Variable) objectTerm).getName());
-							obm.setTermType(R2RMLVocabulary.iri);
 						}
 						else {
 
@@ -205,8 +204,8 @@ public class OBDAMappingTransformer {
 							//obm.setTemplate(mfact.createTemplate(objectURI));
 							obm = mfact.createObjectMap(mfact.createTemplate(objectURI));
 						}
-					}
-					else if (objectPred instanceof DatatypePredicate) {
+						obm.setTermType(termType);
+					} else if (objectPred instanceof DatatypePredicate) {
 						ImmutableTerm objectTerm = o.getTerm(0);
 						
 						if (objectTerm instanceof Variable) {
