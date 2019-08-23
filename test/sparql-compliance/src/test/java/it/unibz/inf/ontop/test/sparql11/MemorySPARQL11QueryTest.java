@@ -63,20 +63,11 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			aggregatesManifest + "agg-err-02",
 
 			/* BIND */
-			//The sub-term: ADD(o,http://www.w3.org/2001/XMLSchema#integer(+1)) is not a VariableOrGroundTerm
-			bindManifest + "bind03",
-            //converision in SPARQL failed: Projection source of ProjectionElem "nova"
             // not found in Extension
 			bindManifest + "bind04",
-            //typing exception In ADD("null",http://www.w3.org/2001/XMLSchema#integer(+2)): Incompatible type inferred : expected: numeric term, actual: NULL
-			bindManifest + "bind07",
 
 			/* BINDINGS
 			 */
-			//Unexpected bindings
-			bindingsManifest + "values7",
-            //Missing bindings:
-			bindingsManifest + "values6",
 			bindingsManifest + "values8",
 			bindingsManifest + "values5",
 
@@ -92,12 +83,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//coalesce not supported in SPARQL transformation
 			functionsManifest + "coalesce01",
 
-			//wrong equality with lang
-			functionsManifest + "concat02",
-
-			//encoding is simply removed
-			functionsManifest + "encode01",
-
 			//problem with the numbers format
 			functionsManifest + "floor01",
 
@@ -111,9 +96,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "in02",
 			functionsManifest + "iri01",
 
-			//missing info about lang
-			functionsManifest + "lcase01",
-
 			//not supported in H2 transformation
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
@@ -121,24 +103,14 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//extract minutes return 0
 			functionsManifest + "minutes",
 
-			// No data or composite atom in List
-			functionsManifest + "notin01",
-			functionsManifest + "notin02",
-			functionsManifest + "now01",
-
 			//Incompatible type inferred : expected: numeric term, actual: LITERAL
 			functionsManifest + "plus-1",
 			functionsManifest + "plus-2",
 
-			// No data or composite atom in List
-			functionsManifest + "rand01",
-
-			//missing info about lang
-			functionsManifest + "replace01",
-
 			//problem with the numbers format
 			functionsManifest + "round01",
 
+			// TODO: continue enabling already passing tests
 			//extract seconds return 0
 			functionsManifest + "seconds",
 
