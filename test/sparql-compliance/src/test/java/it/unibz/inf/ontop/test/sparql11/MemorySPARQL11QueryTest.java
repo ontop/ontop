@@ -59,7 +59,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
-			aggregatesManifest + "agg-err-01",
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 
