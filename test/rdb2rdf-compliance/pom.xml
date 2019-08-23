@@ -3,7 +3,7 @@
   	<parent>
     	<artifactId>ontop-test</artifactId>
     	<groupId>it.unibz.inf.ontop</groupId>
-    	<version>3.0.0-SNAPSHOT</version>
+    	<version>3.0.0</version>
   	</parent>
   	
   	<artifactId>ontop-rdb2rdf-compliance</artifactId>
