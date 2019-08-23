@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -207,7 +209,26 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     @Override
     public ImmutableExpression pushDownExpression(ImmutableExpression expression, int indexOfDBIfThenFunctionSymbol,
                                                   TermFactory termFactory) {
-        ImmutableList<? extends ImmutableTerm> expressionArguments = expression.getTerms();
+        return pushDownFunctionalTerm(expression, indexOfDBIfThenFunctionSymbol, termFactory,
+                (f, terms) -> termFactory.getImmutableExpression((BooleanFunctionSymbol)f, terms),
+                termFactory::getDBBooleanCase);
+    }
+
+    @Override
+    public ImmutableFunctionalTerm pushDownRegularFunctionalTerm(ImmutableFunctionalTerm functionalTerm,
+                                                                 int indexOfDBIfThenFunctionSymbol,
+                                                                 TermFactory termFactory) {
+        return pushDownFunctionalTerm(functionalTerm, indexOfDBIfThenFunctionSymbol, termFactory,
+                termFactory::getImmutableFunctionalTerm,
+                termFactory::getDBCase);
+    }
+
+    protected <T extends ImmutableFunctionalTerm> T pushDownFunctionalTerm(
+            T functionalTerm, int indexOfDBIfThenFunctionSymbol, TermFactory termFactory,
+            BiFunction<FunctionSymbol, ImmutableList<? extends ImmutableTerm>, T> functionalTermCst,
+            BiFunction<Stream<Map.Entry<ImmutableExpression, T>>, T, T> caseCst) {
+
+        ImmutableList<? extends ImmutableTerm> expressionArguments = functionalTerm.getTerms();
         if (indexOfDBIfThenFunctionSymbol >= expressionArguments.size())
             throw new IllegalArgumentException("Wrong index given");
 
@@ -218,20 +239,20 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                 .map(ImmutableFunctionalTerm::getTerms)
                 .orElseThrow(() -> new IllegalArgumentException("Was expected to find this function symbol at the indicated position"));
 
-        BooleanFunctionSymbol booleanFunctionSymbol = expression.getFunctionSymbol();
+        FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
 
-        Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs = IntStream.range(0, ifThenArguments.size() / 2)
+        Stream<Map.Entry<ImmutableExpression, T>> whenPairs = IntStream.range(0, ifThenArguments.size() / 2)
                 .boxed()
                 .map(i -> Maps.immutableEntry(
                         (ImmutableExpression) ifThenArguments.get(2 * i),
-                        termFactory.getImmutableExpression(booleanFunctionSymbol,
+                        functionalTermCst.apply(functionSymbol,
                                 updateArguments(ifThenArguments.get(2 * i + 1), indexOfDBIfThenFunctionSymbol, expressionArguments))));
 
-        ImmutableExpression defaultValue = termFactory.getImmutableExpression(booleanFunctionSymbol,
+        T defaultValue = functionalTermCst.apply(functionSymbol,
                 updateArguments(extractDefaultValue(ifThenArguments, termFactory), indexOfDBIfThenFunctionSymbol,
                         expressionArguments));
 
-        return termFactory.getDBBooleanCase(whenPairs, defaultValue);
+        return caseCst.apply(whenPairs, defaultValue);
     }
 
     private ImmutableList<? extends ImmutableTerm> updateArguments(ImmutableTerm subTerm, int index,

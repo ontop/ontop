@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecom
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;

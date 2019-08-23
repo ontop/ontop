@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
@@ -85,8 +86,19 @@ public class UnaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
             return transformNaturalDBTerm(dbTerm, dbType, rdfType, termFactory)
                     .simplify(variableNullability);
         }
-
-        return termFactory.getImmutableFunctionalTerm(this, newTerms);
+        else
+            // Tries to lift the DB case of the rdf type term if there is any
+            return Optional.of(rdfTypeTerm)
+                    .filter(t -> t instanceof ImmutableFunctionalTerm)
+                    .map(t -> (ImmutableFunctionalTerm)t)
+                    .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                    .map(t -> ((DBIfThenFunctionSymbol) t.getFunctionSymbol())
+                            .pushDownRegularFunctionalTerm(
+                                    termFactory.getImmutableFunctionalTerm(this, newTerms),
+                                    newTerms.indexOf(t),
+                                    termFactory))
+                    .map(t -> t.simplify(variableNullability))
+                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
     }
 
     /**

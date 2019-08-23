@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol extends BooleanFunctionSymbolImpl {
 
@@ -64,36 +66,71 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
          * Simplifies when both type terms are constant
          */
         if ((typeTerm1 instanceof RDFTermTypeConstant) && (typeTerm2 instanceof RDFTermTypeConstant)){
-            RDFTermType termType1 = ((RDFTermTypeConstant)typeTerm1).getRDFTermType();
-            RDFTermType termType2 = ((RDFTermTypeConstant)typeTerm2).getRDFTermType();
+            return simplifyWithConstantTypes(termFactory, variableNullability, dbTypeFactory, lexicalTerm1, lexicalTerm2,
+                    (RDFTermTypeConstant) typeTerm1, (RDFTermTypeConstant) typeTerm2);
+        }
 
-            ImmutableTerm dbTerm1 = termFactory.getConversionFromRDFLexical2DB(
-                    termType1.getClosestDBType(dbTypeFactory), lexicalTerm1, termType1);
+        return liftFirstIfThen(lexicalTerm1, lexicalTerm2, typeTerm1, typeTerm2, termFactory)
+                .map(t -> t.simplify(variableNullability))
+                .orElseGet(() -> termFactory.getImmutableExpression(this, lexicalTerm1, typeTerm1,
+                        lexicalTerm2, typeTerm2));
+    }
 
-            ImmutableTerm dbTerm2 = termFactory.getConversionFromRDFLexical2DB(
-                    termType1.getClosestDBType(dbTypeFactory), lexicalTerm2, termType2);
+    /**
+     * Lifts the first argument that is an IF-THEN
+     */
+    private Optional<ImmutableExpression> liftFirstIfThen(ImmutableTerm lexicalTerm1, ImmutableTerm lexicalTerm2,
+                                                          ImmutableTerm typeTerm1, ImmutableTerm typeTerm2,
+                                                          TermFactory termFactory) {
+        Optional<ImmutableFunctionalTerm> firstIfThenType = Stream.of(typeTerm1, typeTerm2)
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm)t)
+                .filter(t -> t.getFunctionSymbol() instanceof DBIfThenFunctionSymbol)
+                .findAny();
 
-            if ((termType1 instanceof ConcreteNumericRDFDatatype) && (termType2 instanceof ConcreteNumericRDFDatatype))
-                return computeNumericEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+        return firstIfThenType
+                .map(ifThenTypeTerm -> {
+                    DBIfThenFunctionSymbol functionSymbol = (DBIfThenFunctionSymbol) ifThenTypeTerm.getFunctionSymbol();
+                    int ifThenIndex = (typeTerm1 == ifThenTypeTerm) ? 1 : 3;
 
-            else if (termType1.equals(termType2)) {
-                if (termType1.equals(xsdBooleanType))
-                    return computeBooleanEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
-                else if (termType1.equals(xsdStringType))
-                    return computeStringEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
-                else if (termType1.equals(xsdDateTimeType) || termType1.equals(xsdDateTimeStampType))
-                    return computeDatetimeEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
-                else if (termType1.equals(xsdDate))
-                    return computeDateEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
-                else
-                    return computeDefaultSameTypeEqualityOrInequality(termType1, dbTerm1, dbTerm2, termFactory,
-                            variableNullability);
-            }
+                    ImmutableExpression expressionBeforeLifting = termFactory.getImmutableExpression(
+                            this, lexicalTerm1, typeTerm1, lexicalTerm2, typeTerm2);
+
+                    return functionSymbol.pushDownExpression(expressionBeforeLifting, ifThenIndex, termFactory);
+                });
+    }
+
+    protected ImmutableTerm simplifyWithConstantTypes(TermFactory termFactory, VariableNullability variableNullability,
+                                                      DBTypeFactory dbTypeFactory, ImmutableTerm lexicalTerm1,
+                                                      ImmutableTerm lexicalTerm2, RDFTermTypeConstant typeTerm1,
+                                                      RDFTermTypeConstant typeTerm2) {
+        RDFTermType termType1 = typeTerm1.getRDFTermType();
+        RDFTermType termType2 = typeTerm2.getRDFTermType();
+
+        ImmutableTerm dbTerm1 = termFactory.getConversionFromRDFLexical2DB(
+                termType1.getClosestDBType(dbTypeFactory), lexicalTerm1, termType1);
+
+        ImmutableTerm dbTerm2 = termFactory.getConversionFromRDFLexical2DB(
+                termType1.getClosestDBType(dbTypeFactory), lexicalTerm2, termType2);
+
+        if ((termType1 instanceof ConcreteNumericRDFDatatype) && (termType2 instanceof ConcreteNumericRDFDatatype))
+            return computeNumericEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+
+        else if (termType1.equals(termType2)) {
+            if (termType1.equals(xsdBooleanType))
+                return computeBooleanEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+            else if (termType1.equals(xsdStringType))
+                return computeStringEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+            else if (termType1.equals(xsdDateTimeType) || termType1.equals(xsdDateTimeStampType))
+                return computeDatetimeEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
+            else if (termType1.equals(xsdDate))
+                return computeDateEqualityOrInequality(dbTerm1, dbTerm2, termFactory, variableNullability);
             else
-                return computeDefaultDifferentTypeEqualityOrInequality(termType1, termType2, termFactory);
+                return computeDefaultSameTypeEqualityOrInequality(termType1, dbTerm1, dbTerm2, termFactory,
+                        variableNullability);
         }
         else
-            return termFactory.getImmutableExpression(this, lexicalTerm1, typeTerm1, lexicalTerm2, typeTerm2);
+            return computeDefaultDifferentTypeEqualityOrInequality(termType1, termType2, termFactory);
     }
 
     private ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
