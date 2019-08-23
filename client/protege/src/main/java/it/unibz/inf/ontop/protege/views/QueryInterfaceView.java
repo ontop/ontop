@@ -117,7 +117,6 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
         splQueryInterface.setOneTouchExpandable(true);
         splQueryInterface.setTopComponent(queryEditorPanel);
         splQueryInterface.setBottomComponent(resultTablePanel);
-
         JPanel pnlQueryInterfacePane = new JPanel();
         pnlQueryInterfacePane.setLayout(new BorderLayout());
         pnlQueryInterfacePane.add(splQueryInterface, BorderLayout.CENTER);

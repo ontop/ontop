@@ -51,8 +51,8 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTabbedPane1 = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
+        resultTabbedPanel = new javax.swing.JTabbedPane();
+        sparqlResultPanel = new javax.swing.JPanel();
         sparqlQueryResult = new javax.swing.JScrollPane();
         tblQueryResult = new javax.swing.JTable();
         pnlCommandButton = new javax.swing.JPanel();
@@ -61,14 +61,16 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         lblComment = new javax.swing.JLabel();
         cmdExportResult = new javax.swing.JButton();
         sqlTranslationPanel = new javax.swing.JScrollPane();
-        sqlTranslationArea = new javax.swing.JTextArea();
+        txtSqlTranslation = new javax.swing.JTextArea();
 
-        setMinimumSize(new java.awt.Dimension(400, 480));
+        setMinimumSize(new java.awt.Dimension(400, 250));
+        setPreferredSize(new java.awt.Dimension(400, 250));
         setLayout(new java.awt.BorderLayout(0, 5));
 
-        jPanel1.setLayout(new java.awt.BorderLayout());
+        resultTabbedPanel.setPreferredSize(new java.awt.Dimension(400, 240));
 
-        sparqlQueryResult.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        sparqlResultPanel.setPreferredSize(new java.awt.Dimension(400, 230));
+        sparqlResultPanel.setLayout(new java.awt.BorderLayout());
 
         tblQueryResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -80,12 +82,13 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         ));
         sparqlQueryResult.setViewportView(tblQueryResult);
 
-        jPanel1.add(sparqlQueryResult, java.awt.BorderLayout.CENTER);
+        sparqlResultPanel.add(sparqlQueryResult, java.awt.BorderLayout.CENTER);
 
         pnlCommandButton.setMinimumSize(new java.awt.Dimension(500, 32));
-        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 32));
+        pnlCommandButton.setPreferredSize(new java.awt.Dimension(500, 36));
         pnlCommandButton.setLayout(new java.awt.BorderLayout(0, 5));
 
+        pnlComment.setPreferredSize(new java.awt.Dimension(64, 36));
         pnlComment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 7, 5));
 
         lblHint.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
@@ -105,7 +108,7 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         cmdExportResult.setIconTextGap(5);
         cmdExportResult.setMaximumSize(new java.awt.Dimension(125, 25));
         cmdExportResult.setMinimumSize(new java.awt.Dimension(125, 25));
-        cmdExportResult.setPreferredSize(new java.awt.Dimension(125, 20));
+        cmdExportResult.setPreferredSize(new java.awt.Dimension(125, 36));
         cmdExportResult.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdExportResultActionPerformed(evt);
@@ -113,20 +116,15 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
         });
         pnlCommandButton.add(cmdExportResult, java.awt.BorderLayout.EAST);
 
-        jPanel1.add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
+        sparqlResultPanel.add(pnlCommandButton, java.awt.BorderLayout.SOUTH);
 
-        jTabbedPane1.addTab("SPARQL results", jPanel1);
+        resultTabbedPanel.addTab("SPARQL results", sparqlResultPanel);
 
-        sqlTranslationPanel.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        sqlTranslationPanel.setViewportView(txtSqlTranslation);
 
-        sqlTranslationArea.setColumns(20);
-        sqlTranslationArea.setRows(5);
-        sqlTranslationArea.setLayout(new BorderLayout());
-        sqlTranslationPanel.setViewportView(sqlTranslationArea);
+        resultTabbedPanel.addTab("SQL Translation", sqlTranslationPanel);
 
-        jTabbedPane1.addTab("SQL Translation", sqlTranslationPanel);
-
-        add(jTabbedPane1, java.awt.BorderLayout.PAGE_START);
+        add(resultTabbedPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
@@ -169,16 +167,16 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdExportResult;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel lblComment;
     private javax.swing.JLabel lblHint;
     private javax.swing.JPanel pnlCommandButton;
     private javax.swing.JPanel pnlComment;
+    private javax.swing.JTabbedPane resultTabbedPanel;
     private javax.swing.JScrollPane sparqlQueryResult;
-    private javax.swing.JTextArea sqlTranslationArea;
+    private javax.swing.JPanel sparqlResultPanel;
     private javax.swing.JScrollPane sqlTranslationPanel;
     private javax.swing.JTable tblQueryResult;
+    private javax.swing.JTextArea txtSqlTranslation;
     // End of variables declaration//GEN-END:variables
 
 	public void setTableModel(final TableModel newmodel) {
@@ -249,6 +247,6 @@ public class ResultViewTablePanel extends javax.swing.JPanel {
 	}
 
 	public void setSQLTranslation(String sql){
-		sqlTranslationArea.setText(sql);
+		txtSqlTranslation.setText(sql);
 	}
 }
