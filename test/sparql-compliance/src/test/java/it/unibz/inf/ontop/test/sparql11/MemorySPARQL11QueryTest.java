@@ -46,7 +46,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* BINDINGS
 			 */
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values8",
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values5",
 
 			/* FUNCTIONS*/
@@ -145,8 +147,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			existsManifest + "exists05",
 
 			/* PROJECT */
-			// TODO: fix
-			projectExpressionManifest + "projexp07",
 			//TODO: fix
 			projectExpressionManifest + "projexp02",
 
