@@ -62,9 +62,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//problem with the numbers format e.g. 1.0 instead of 1
 			functionsManifest + "ceil01",
 
-			//coalesce not supported in SPARQL transformation
-			functionsManifest + "coalesce01",
-
 			//problem with the numbers format
 			functionsManifest + "floor01",
 
@@ -92,7 +89,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//problem with the numbers format
 			functionsManifest + "round01",
 
-			// TODO: continue enabling already passing tests
 			//extract seconds return 0
 			functionsManifest + "seconds",
 
@@ -139,8 +135,11 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			csvTscResManifest + "tsv03",
 
 			/* GROUPING */
+			// TODO: fix
 			groupingManifest + "group01",
+			// TODO: fix
 			groupingManifest + "group04",
+			// TODO: fix
 			groupingManifest + "group05",
 
 			/* NEGATION
