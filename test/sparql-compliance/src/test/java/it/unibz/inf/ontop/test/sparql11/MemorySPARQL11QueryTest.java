@@ -59,8 +59,10 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "bnode01",
 			functionsManifest + "bnode02",
 
-			//extract hours return 0
+			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
+			// the SI does not preserve the original timezone
+			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
 			functionsManifest + "if01",
@@ -73,15 +75,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
 
-			//extract minutes return 0
-			functionsManifest + "minutes",
-
 			//Incompatible type inferred : expected: numeric term, actual: LITERAL
 			functionsManifest + "plus-1",
 			functionsManifest + "plus-2",
-
-			//extract seconds return 0
-			functionsManifest + "seconds",
 
 			//SHA1 is not supported in H2
 			functionsManifest + "sha1-01",

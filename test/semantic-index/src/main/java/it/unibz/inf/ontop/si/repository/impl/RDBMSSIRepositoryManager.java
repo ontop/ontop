@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.answering.reformulation.generation.utils.XsdDatatypeConverter;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -580,7 +579,8 @@ public class RDBMSSIRepositoryManager {
 				break;
 			case DATETIME_STAMP: // 15
 			case DATETIME: // 13
-				stm.setTimestamp(2, XsdDatatypeConverter.parseXsdDateTime(value));
+				Timestamp timestamp = XsdDatatypeConverter.parseXsdDateTime(value);
+				stm.setTimestamp(2, timestamp);
 				break;
 			case BOOLEAN: // 14				
 				stm.setBoolean(2, XsdDatatypeConverter.parseXsdBoolean(value));
