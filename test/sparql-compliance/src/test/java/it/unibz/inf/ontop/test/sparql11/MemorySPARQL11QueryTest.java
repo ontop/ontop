@@ -59,12 +59,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "bnode01",
 			functionsManifest + "bnode02",
 
-			//problem with the numbers format e.g. 1.0 instead of 1
-			functionsManifest + "ceil01",
-
-			//problem with the numbers format
-			functionsManifest + "floor01",
-
 			//extract hours return 0
 			functionsManifest + "hours",
 
@@ -85,9 +79,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//Incompatible type inferred : expected: numeric term, actual: LITERAL
 			functionsManifest + "plus-1",
 			functionsManifest + "plus-2",
-
-			//problem with the numbers format
-			functionsManifest + "round01",
 
 			//extract seconds return 0
 			functionsManifest + "seconds",
