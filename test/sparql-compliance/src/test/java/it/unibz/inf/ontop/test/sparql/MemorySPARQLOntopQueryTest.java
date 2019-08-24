@@ -80,21 +80,10 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-
-
-			//Unexpected exception: Unbounded variable: v2 Problem already appears in the filter datalog translation (missing variable v)
-			//LeftJoin(http://example/q(URI1(0),w),http://example/p(URI1(0),v2),EQ("null",http://www.w3.org/2001/XMLSchema#integer(1)))
-			algebraManifest + "filter-scope-1",
-
-			//Empty results. WON'T FIX: GRAPH issue Problem already appears in the datalog  translation
+			//TODO: fix (quads are translated as triples)
 			algebraManifest + "join-combo-2",
-
-			//error, missing a result, null equalities
+			//error, missing a result, null equalities. TODO: fix
 			algebraManifest + "join-combo-1",
-
-			//Unexpected exception: Unbounded variable: v2 Problem already appears in the filter datalog translation (missing variable v) # ?v is not in scope so ?v2 never set
-			//expected empty ripTesult
-			algebraManifest + "opt-filter-3",
 
 			/* DATA-R2: BASIC*/
 
@@ -111,10 +100,6 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// Ontop must not return a result, test not passed due to a fair design choice of the Semantic Index (canonicalization of numbers)
 			basicManifest + "term-8",
 
-			/* DATA-R2: BOOLEAN EFFECTIVE VALUE */
-			//Cannot return the SQL type for: w is not lifted from the right side of left join
-			booleanManifest + "dawg-bev-5",
-
 			/* DATA-R2: CAST
 			Cast with function call on the datatype is not yet supported e.g. FILTER(datatype(xsd:double(?v)) = xsd:double) . */
 
@@ -128,28 +113,24 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			/* DATA-R2: CONSTRUCT Null pointer exception */
 
+			// TODO: make the result non-empty
 			constructManifest + "construct-3",
+			// TODO: make the result non-empty
 			constructManifest + "construct-4",
 
-			/* DATA-R2: DISTINCT Missing and unexpected bindings  */
+			/* DATA-R2: DISTINCT */
+			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values)
 			distinctManifest + "no-distinct-9",
+			// NB: includes 3 tests. Incompatible with the SI (normalized lexical values + DISTINCT on IRI)
 			distinctManifest + "distinct-9",
 
 			// The DISTINCT blocks a CASE using the IRI dictionary function (SI limitation)
 			distinctManifest + "distinct-3",
 
-			/* DATA-R2: EXPR-BUILTIN   */
-
-			//unknown datatype are not supported, so missing type
-//			exprBuiltInManifest + "dawg-isLiteral-1",
-
-			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
-//			exprBuiltInManifest + "dawg-langMatches-2",
-
-			//missing and unexpected bindings:
+			//Incompatible with the SI mode: normalized lexical values + custom datatype
 			exprBuiltInManifest + "sameTerm-eq",
 
-			//Missing bindings:
+			//Incompatible with the SI mode: normalized lexical values
 			exprBuiltInManifest + "sameTerm-not-eq",
 
 			//missing and unexpected bindings:
@@ -157,37 +138,18 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// of the original data no support for custom datatype
 			exprBuiltInManifest + "sameTerm-simple",
 
-			//Missing bindings The reason is because DBMS may modify the string representation
-			//  of the original data, i.e., "1"^^xsd:double --> 1.0
-//			exprBuiltInManifest + "dawg-str-1",
-
-			//Illegal subject value: ""^^<http://www.w3.org/2001/XMLSchema#integer>
-//			exprBuiltInManifest + "dawg-str-2",
-
-//			//java.lang.NumberFormatException: For input string: "zzz" no support for custom datatype. missing cast to char on a URI
+			// TODO: fix it (fatal error). str(?o) = "zzz" when ?o is sometimes a number
 			exprBuiltInManifest + "dawg-str-3",
 
-//			//NumberFormatException: For input string: "" (it should not be considered as a number) missing cast to char on a URI
+			// TODO: fix it (fatal error). str(?o) = "" when ?o is sometimes a number
 			exprBuiltInManifest + "dawg-str-4",
 
-            //unknownType not supported, custom datatype
-//            exprBuiltInManifest + "dawg-datatype-2",
-//            exprBuiltInManifest + "dawg-lang-1",
-//            exprBuiltInManifest + "dawg-lang-2",
-
 			/* DATA-R2: EXPR-EQUALS   */
-			//never ends don't manage to get the result from the sql query
-//			exprEqualsManifest + "eq-2-1",
 
 			//missing and unexpected bindings, no custom datatypes supported
 			exprEqualsManifest + "eq-2-2",
 
-			//missing bindings  equality between different
-			//      #    numerical datatypes is not recognized.
-//			exprEqualsManifest + "eq-1",
-//			exprEqualsManifest + "eq-2",
-
-			//Data conversion error converting "zzz" Bad datatype handling by the classic mode. missing cast to char on a URI
+			// TODO: fix it (fatal error). str(?o) = "zzz" when ?o is sometimes a number
 			exprEqualsManifest + "eq-4",
 
 			// SI is not supporting arbitrary datatypes and lexical terms are normalized
@@ -197,23 +159,19 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			exprEqualsManifest + "eq-graph-2",
 
 			/* DATA-R2: OPEN_WORLD   */
-			//missing and unexpected bindings, different time in the unexpected datetime result
+			//TODO: double-check
 			openWorldManifest +"date-2",
+			// > for xsd:date is not part of SPARQL 1.1
 			openWorldManifest +"date-3",
 
-			//Missing bindings no result while searching for xsd:date datatype
+			//TODO: check with there is no xsd:date in the mapping
 			openWorldManifest +"date-4",
 
-			//Data conversion error converting "v2" data conversion error in sql
-			openWorldManifest +"open-cmp-01",
+			// Datatype unsupported by the SI
 			openWorldManifest +"open-cmp-02",
-
-			//Unexpected bindings: we return values that do not strictly match 001
-			openWorldManifest +"open-eq-01",
-
+			
 			//Missing bindings: unsupported user-defined datatype
 			openWorldManifest +"open-eq-02",
-//            openWorldManifest +"open-eq-05",
 
 			//Unexpected bindings: should return empty result, we cannot know what is different from an unknown datatype
 			openWorldManifest +"open-eq-06",
@@ -240,14 +198,10 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 			// H2 has some restrictions on the combination of ORDER BY and DISTINCT
 			solutionSeqManifest + "slice-5",
 
-			/* DATA-R2: SORT
-			 * Problem with SPARQL translation
-			  * Error translating ORDER BY.
-			   * The current implementation can only sort by variables. This query has a more complex expression*/
-			sortManifest + "dawg-sort-numbers",
-			sortManifest + "dawg-sort-builtin",
-			sortManifest + "dawg-sort-function",
+			/* DATA-R2: SORT */
 
+			// TODO: support the xsd:integer cast
+			sortManifest + "dawg-sort-function",
 			// Sorted by an IRI, not supported by the SI
 			sortManifest + "dawg-sort-3",
 			// Sorted by an IRI, not supported by the SI
@@ -258,6 +212,7 @@ public class MemorySPARQLOntopQueryTest extends MemoryOntopTestCase {
 
 			/* DATA-R2: TYPE-PROMOTION
 			 * all removed because of unsupported types */
+			// TODO: double-check why it is the case
 			typePromotionManifest + "type-promotion-13",
 			typePromotionManifest + "type-promotion-11",
 			typePromotionManifest + "type-promotion-07",

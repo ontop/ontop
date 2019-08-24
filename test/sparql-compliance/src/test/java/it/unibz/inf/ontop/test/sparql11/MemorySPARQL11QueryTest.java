@@ -73,8 +73,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
 
-			//Incompatible type inferred : expected: numeric term, actual: LITERAL
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-1",
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-2",
 
 			//SHA1 is not supported in H2
@@ -85,8 +86,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "sha512-01",
 			functionsManifest + "sha512-02",
 
-			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
+			//TODO: fix it
 			functionsManifest + "strafter02",
+			//TODO: fix it
 			functionsManifest + "strbefore02",
 
 			//not supported in SPARQL transformation
