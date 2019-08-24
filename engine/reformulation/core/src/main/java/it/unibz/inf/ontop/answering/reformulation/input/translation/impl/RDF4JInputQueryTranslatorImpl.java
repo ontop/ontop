@@ -740,11 +740,19 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         }
 
         subQuery = subQuery.applyDescendingSubstitutionWithoutOptimizing(substitution);
-        ConstructionNode projectNode = iqFactory.createConstructionNode(
-                projectionElems.stream()
-                        .map(pe -> termFactory.getVariable(pe.getTargetName()))
-                        .collect(ImmutableCollectors.toSet())
-        );
+        projectedVars = projectionElems.stream()
+                .map(pe -> termFactory.getVariable(pe.getTargetName()))
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> subQueryVariables = subQuery.getVariables();
+
+        // Substitution for possibly unbound variables
+        ImmutableSubstitution<ImmutableTerm> newSubstitution = substitutionFactory.getSubstitution(projectedVars.stream()
+                .filter(v -> !subQueryVariables.contains(v))
+                .collect(ImmutableCollectors.toMap(
+                        v -> v,
+                        v -> termFactory.getNullConstant())));
+
+        ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
         return new TranslationResult(
                 iqFactory.createUnaryIQTree(
                         projectNode,

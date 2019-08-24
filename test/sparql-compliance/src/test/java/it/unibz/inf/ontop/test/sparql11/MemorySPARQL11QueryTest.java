@@ -44,10 +44,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 
-			/* BIND */
-            // TODO: fix it
-			bindManifest + "bind04",
-
 			/* BINDINGS
 			 */
 			bindingsManifest + "values8",
