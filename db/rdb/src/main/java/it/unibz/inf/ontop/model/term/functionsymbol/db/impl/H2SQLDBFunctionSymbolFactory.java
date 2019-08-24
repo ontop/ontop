@@ -122,15 +122,34 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
         return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
+    @Override
+    protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
+        return new UnaryDBFunctionSymbolWithSerializerImpl(CEIL_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(CEIL(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+    }
+
+    @Override
+    protected DBFunctionSymbol createFloorFunctionSymbol(DBTermType dbTermType) {
+        return new UnaryDBFunctionSymbolWithSerializerImpl(FLOOR_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(FLOOR(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+    }
+
+    @Override
+    protected DBFunctionSymbol createRoundFunctionSymbol(DBTermType dbTermType) {
+        return new UnaryDBFunctionSymbolWithSerializerImpl(ROUND_STR, dbTermType, dbTermType, false,
+                (terms, termConverter, termFactory) -> String.format(
+                        "CAST(ROUND(%s) AS %s)", termConverter.apply(terms.get(0)), dbTermType.getCastName()));
+    }
+
     /**
      * Asks the timezone to be included
-     *
-     * TODO: fix the timezone
      */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSZ'), ' ', 'T')", termConverter.apply(terms.get(0)));
+        return String.format("REPLACE(FORMATDATETIME(%s,'yyyy-MM-dd HH:mm:ss.SSSXXX'), ' ', 'T')", termConverter.apply(terms.get(0)));
     }
 
     @Override

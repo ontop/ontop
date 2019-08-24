@@ -44,10 +44,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 
-			/* BIND */
-            // TODO: fix it
-			bindManifest + "bind04",
-
 			/* BINDINGS
 			 */
 			bindingsManifest + "values8",
@@ -59,17 +55,10 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "bnode01",
 			functionsManifest + "bnode02",
 
-			//problem with the numbers format e.g. 1.0 instead of 1
-			functionsManifest + "ceil01",
-
-			//coalesce not supported in SPARQL transformation
-			functionsManifest + "coalesce01",
-
-			//problem with the numbers format
-			functionsManifest + "floor01",
-
-			//extract hours return 0
+			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
+			// the SI does not preserve the original timezone
+			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
 			functionsManifest + "if01",
@@ -82,19 +71,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
 
-			//extract minutes return 0
-			functionsManifest + "minutes",
-
 			//Incompatible type inferred : expected: numeric term, actual: LITERAL
 			functionsManifest + "plus-1",
 			functionsManifest + "plus-2",
-
-			//problem with the numbers format
-			functionsManifest + "round01",
-
-			// TODO: continue enabling already passing tests
-			//extract seconds return 0
-			functionsManifest + "seconds",
 
 			//SHA1 is not supported in H2
 			functionsManifest + "sha1-01",
@@ -139,8 +118,11 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			csvTscResManifest + "tsv03",
 
 			/* GROUPING */
+			// TODO: fix
 			groupingManifest + "group01",
+			// TODO: fix
 			groupingManifest + "group04",
+			// TODO: fix
 			groupingManifest + "group05",
 
 			/* NEGATION

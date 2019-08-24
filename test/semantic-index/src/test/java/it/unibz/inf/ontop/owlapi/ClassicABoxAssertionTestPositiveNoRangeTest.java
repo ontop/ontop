@@ -109,7 +109,7 @@ public class ClassicABoxAssertionTestPositiveNoRangeTest extends TestCase {
 	public void testDataPropertyAssertionsDatetime() throws OWLException{
 		String query = "SELECT ?x WHERE {?x :udateTime ?y}";
 		int count = executeQuery(query);
-		assertEquals(1, count);
+		assertEquals(5, count);
 	}
 
 	public void testDataPropertyAssertionsDecimal() throws OWLException{

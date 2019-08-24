@@ -220,10 +220,10 @@ public class BindWithFunctionsTest {
                 + "}";
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"0.0, 43.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 23.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 34.0\"^^xsd:string");
-        expectedValues.add("\"0.0, 10.0\"^^xsd:string");
+        expectedValues.add("\"0.0, 43\"^^xsd:string");
+        expectedValues.add("\"0.0, 23\"^^xsd:string");
+        expectedValues.add("\"0.0, 34\"^^xsd:string");
+        expectedValues.add("\"0.0, 10\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
     }
 	
