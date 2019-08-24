@@ -122,7 +122,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			/* GROUPING */
 			// TODO: fix
 			groupingManifest + "group01",
-			// TODO: fix
+			// Multi-typed COALESCE as grouping condition TODO: support it
 			groupingManifest + "group04",
 			// TODO: fix
 			groupingManifest + "group05",
@@ -145,10 +145,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			existsManifest + "exists03",
 			existsManifest + "exists04",
 			existsManifest + "exists05",
-
-			/* PROJECT */
-			//TODO: fix
-			projectExpressionManifest + "projexp02",
 
 			/* PROPERTY PATH*/
 			// Not supported: ArbitraryLengthPath
@@ -191,9 +187,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* SUBQUERY
 			*/
-			//TODO: fix
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery02",
-			//TODO: fix
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery04",
 			// EXISTS is not supported yet
 			subqueryManifest + "subquery10",
@@ -201,7 +197,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//ORDER BY IRI (for supported by the SI)
 			subqueryManifest + "subquery11",
 
-			//unbound variable: Var
+			//unbound variable: Var TODO: fix it
 			subqueryManifest + "subquery12",
 
 			//ORDER BY IRI (for supported by the SI)
