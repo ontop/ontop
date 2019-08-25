@@ -43,7 +43,8 @@ public class BooleanDBIfElseNullFunctionSymbolImpl extends DefaultDBIfElseNullFu
             return termFactory.getImmutableExpression(this, newCondition, newThenValue);
         }
         else if (newThenValue instanceof DBConstant) {
-            return termFactory.getIsTrue((DBConstant) newThenValue);
+            return termFactory.getConjunction(newCondition, termFactory.getIsTrue((DBConstant) newThenValue))
+                    .simplify(variableNullability);
         }
         else if (newThenValue.isNull())
             return newThenValue;

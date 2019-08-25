@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
@@ -69,6 +70,19 @@ public class BinaryNumericLexicalFunctionSymbolImpl extends FunctionSymbolImpl {
                     termFactory.getConversionFromRDFLexical2DB(dbType, newTerms.get(1), rdfType));
 
             return termFactory.getConversion2RDFLexical(dbType, numericTerm, rdfType);
+        }
+        else if ((rdfTypeTerm instanceof ImmutableFunctionalTerm)
+                && ((ImmutableFunctionalTerm) rdfTypeTerm).getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol) {
+            ImmutableFunctionalTerm typeFunctionalTerm = (ImmutableFunctionalTerm) rdfTypeTerm;
+            RDFTermTypeFunctionSymbol termTypeFunctionSymbol = (RDFTermTypeFunctionSymbol) typeFunctionalTerm.getFunctionSymbol();
+
+            return termTypeFunctionSymbol.lift(
+                    typeFunctionalTerm.getTerms(),
+                    c -> buildTermAfterEvaluation(
+                            ImmutableList.of(newTerms.get(0), newTerms.get(1), c),
+                            termFactory, variableNullability),
+                    termFactory)
+                    .simplify(variableNullability);
         }
         else
             // Tries to lift the DB case of the rdf type term if there is any

@@ -46,7 +46,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* BINDINGS
 			 */
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values8",
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values5",
 
 			/* FUNCTIONS*/
@@ -71,8 +73,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
 
-			//Incompatible type inferred : expected: numeric term, actual: LITERAL
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-1",
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-2",
 
 			//SHA1 is not supported in H2
@@ -83,8 +86,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "sha512-01",
 			functionsManifest + "sha512-02",
 
-			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
+			//TODO: fix it
 			functionsManifest + "strafter02",
+			//TODO: fix it
 			functionsManifest + "strbefore02",
 
 			//not supported in SPARQL transformation
@@ -120,7 +124,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			/* GROUPING */
 			// TODO: fix
 			groupingManifest + "group01",
-			// TODO: fix
+			// Multi-typed COALESCE as grouping condition TODO: support it
 			groupingManifest + "group04",
 			// TODO: fix
 			groupingManifest + "group05",
@@ -143,12 +147,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			existsManifest + "exists03",
 			existsManifest + "exists04",
 			existsManifest + "exists05",
-
-			/* PROJECT */
-			// TODO: fix
-			projectExpressionManifest + "projexp07",
-			//TODO: fix
-			projectExpressionManifest + "projexp02",
 
 			/* PROPERTY PATH*/
 			// Not supported: ArbitraryLengthPath
@@ -191,9 +189,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* SUBQUERY
 			*/
-			//TODO: fix
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery02",
-			//TODO: fix
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery04",
 			// EXISTS is not supported yet
 			subqueryManifest + "subquery10",
@@ -201,7 +199,7 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//ORDER BY IRI (for supported by the SI)
 			subqueryManifest + "subquery11",
 
-			//unbound variable: Var
+			//unbound variable: Var TODO: fix it
 			subqueryManifest + "subquery12",
 
 			//ORDER BY IRI (for supported by the SI)
