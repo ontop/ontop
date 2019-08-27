@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>it.unibz.inf.ontop</groupId>
     <artifactId>ontop</artifactId>
@@ -51,6 +50,14 @@
         <developer>
             <id>juliencorman</id>
             <name>Julien Corman</name>
+        </developer>
+        <developer>
+            <id>konchakov</id>
+            <name>Roman Konchakov</name>
+        </developer>
+        <developer>
+            <id>tirrolo</id>
+            <name>Davide Lanti</name>
         </developer>
     </developers>
 
@@ -507,11 +514,6 @@
             <dependency>
                 <groupId>org.eclipse.rdf4j</groupId>
                 <artifactId>rdf4j-rio-rdfxml</artifactId>
-                <version>${rdf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.rdf4j</groupId>
-                <artifactId>rdf4j-rio-n3</artifactId>
                 <version>${rdf4j.version}</version>
             </dependency>
             <dependency>

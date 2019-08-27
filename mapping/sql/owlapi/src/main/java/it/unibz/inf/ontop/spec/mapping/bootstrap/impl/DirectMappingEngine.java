@@ -43,6 +43,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -142,9 +143,12 @@ public class DirectMappingEngine {
 
             // update ontology
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
-            Set<OWLDeclarationAxiom> declarationAxioms = extractDeclarationAxioms(manager,
+            Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+            		manager,
                     newPPMapping.getTripleMaps().stream()
-                            .flatMap(ax -> ax.getTargetAtoms().stream()));
+                            .flatMap(ax -> ax.getTargetAtoms().stream()),
+					true
+			);
             manager.addAxioms(ontology, declarationAxioms);
 
             return new DefaultBootstrappingResults(newPPMapping, ontology);

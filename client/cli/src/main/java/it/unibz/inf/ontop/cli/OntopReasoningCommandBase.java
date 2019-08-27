@@ -27,34 +27,7 @@ public abstract class OntopReasoningCommandBase extends OntopMappingOntologyRela
             description = "enable annotation properties defined in the ontology. Default: false")
     public boolean enableAnnotations = false;
 
-    protected static OWLDocumentFormat getDocumentFormat(String format) throws Exception {
-		OWLDocumentFormat ontoFormat;
-
-		if(format == null){
-			ontoFormat = new RDFXMLDocumentFormat();
-		}
-		else {
-		switch (format) {
-			case "rdfxml":
-				ontoFormat = new RDFXMLDocumentFormat();
-				break;
-			case "owlxml":
-				ontoFormat = new OWLXMLDocumentFormat();
-				break;
-			case "turtle":
-				ontoFormat = new TurtleDocumentFormat();
-				break;
-            case "n3":
-                ontoFormat = new N3DocumentFormat();
-                break;
-			default:
-				throw new Exception("Unknown format: " + format);
-			}
-		}
-		return ontoFormat;
-	}
-
-    protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
+	protected static OWLOntology extractDeclarations(OWLOntologyManager manager, OWLOntology ontology) throws OWLOntologyCreationException {
 
         IRI ontologyIRI = ontology.getOntologyID().getOntologyIRI().get();
         System.err.println("Ontology " + ontologyIRI);

@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,6 +34,8 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +150,7 @@ public class TargetQueryRenderer {
         return "{" + ((Variable) term).getName() + "}";
     }
 
+    // TODO: check it again with version3 to merge to merge it properly
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         FunctionSymbol functionSymbol = function.getFunctionSymbol();
         if (functionSymbol instanceof RDFTermFunctionSymbol) {
@@ -176,13 +179,27 @@ public class TargetQueryRenderer {
         return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
     }
 
+    // TODO: check it again with version3 to merge to merge it properly
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
-        StringBuilder sb = new StringBuilder("_:");
-        sb.append("{"+function.getTerm(0)+"}");
-        function.getTerms().stream()
-                .skip(1)
-                .forEach(t -> sb.append("_{"+t.toString()+"}"));
-        return sb.toString();
+        ImmutableTerm firstTerm = function.getTerms().get(0);
+        if(firstTerm instanceof Variable){
+            return "_:"+ displayVariable((Variable)firstTerm);
+        }
+        if(firstTerm instanceof ValueConstant) {
+            String templateFormat = ((ValueConstant) firstTerm).getValue().stringValue().replace("{}", "%s");
+            if(function.getTerms().stream().skip(1).
+                    anyMatch(t -> !(t instanceof Variable)))
+                throw new UnexpectedTermException(function, "All argument of the BNode function but the first one are expected to be variables");
+            ImmutableList<String> varNames = function.getTerms().stream().skip(1)
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable) t)
+                    .map(v -> displayVariable(v))
+                    .collect(ImmutableCollectors.toList());
+
+            String originalUri = String.format(templateFormat, varNames.toArray());
+            return "_:" + String.format(templateFormat, varNames.toArray());
+        }
+        throw new UnexpectedTermException(function, "The first argument of the BNode function is expected to be either a variable or a template");
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
@@ -278,6 +295,10 @@ public class TargetQueryRenderer {
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);
+        }
+
+        private UnexpectedTermException(ImmutableTerm term, String message) {
+            super("Unexpected term " + term + ":\n"+message);
         }
     }
 }

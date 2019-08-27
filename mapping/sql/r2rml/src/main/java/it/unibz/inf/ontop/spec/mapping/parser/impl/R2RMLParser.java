@@ -6,7 +6,10 @@ import eu.optique.r2rml.api.binding.rdf4j.RDF4JR2RMLMappingManager;
 import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonVariableTerm;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -190,18 +193,18 @@ public class R2RMLParser {
 		}
 		throw new R2RMLParsingBugException("Was expecting a Constant/Column/Template");
 	}
-	
-	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{" 
+
+	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{"
 	private int getIndexOfCurlyB(String str){
 		int i;
 		int j;
 		i = str.indexOf("{");
 		j = str.indexOf("\\{");
-		
-		while((i-1 == j) && (j != -1)){		
+
+		while((i-1 == j) && (j != -1)){
 			i = str.indexOf("{",i+1);
-			j = str.indexOf("\\{",j+1);		
-		}	
+			j = str.indexOf("\\{",j+1);
+		}
 		return i;
 	}
 
@@ -295,7 +298,7 @@ public class R2RMLParser {
 	/**
 	 * method that trims a string of all its double apostrophes from beginning
 	 * and end
-	 * 
+	 *
 	 * @param string
 	 *            - to be trimmed
 	 * @return the string without any quotes

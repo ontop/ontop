@@ -13,7 +13,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
-import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.model.type.LanguageTag;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
+import it.unibz.inf.ontop.model.type.RDFDatatype;
+import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLQueryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.R2RMLVocabulary;
@@ -67,7 +70,7 @@ public class OBDAMappingTransformer {
             mapping_id = baseIRIString + mapping_id;
         }
 		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
-		
+
 		//Table
 		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQLQuery());
 
@@ -219,11 +222,11 @@ public class OBDAMappingTransformer {
 	}
 
 	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType, boolean acceptBNode,
-														   java.util.function.Function<Template, T> templateFct,
-														   java.util.function.Function<String, T> columnFct,
-														   java.util.function.Function<IRI, T> iriFct,
-														   java.util.function.Function<BlankNode, T> bNodeFct,
-														   PrefixManager prefixManager) {
+                                                           java.util.function.Function<Template, T> templateFct,
+                                                           java.util.function.Function<String, T> columnFct,
+                                                           java.util.function.Function<IRI, T> iriFct,
+                                                           java.util.function.Function<BlankNode, T> bNodeFct,
+                                                           PrefixManager prefixManager) {
 		if ((!acceptBNode) && termType.isBlankNode())
 			throw new MinorOntopInternalBugException("Bnode term map found in an unexpected area: " + lexicalTerm);
 
@@ -316,6 +319,6 @@ public class OBDAMappingTransformer {
 			super(message);
 		}
 	}
-	
+
 
 }

@@ -233,8 +233,8 @@ function _complete_ontop_command_endpoint() {
   PREV_WORD=${COMP_WORDS[COMP_CWORD-1]}
   COMMANDS=$1
 
-  FLAG_OPTS=""
-  ARG_OPTS="-m -p --mapping -t --properties --port --ontology"
+  FLAG_OPTS="--lazy"
+  ARG_OPTS="-m -p --mapping -t --properties --port --cors-allowed-origins --ontology"
 
   $( containsElement ${PREV_WORD} ${ARG_OPTS[@]} )
   SAW_ARG=$?
@@ -253,6 +253,11 @@ function _complete_ontop_command_endpoint() {
         return 0
         ;;
       --port)
+        COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
+        echo ${COMPREPLY[@]}
+        return 0
+        ;;
+      --cors-allowed-origins)
         COMPREPLY=( $(compgen -W "${ARG_VALUES} ${ARG_GENERATED_VALUES}" -- ${CURR_WORD}) )
         echo ${COMPREPLY[@]}
         return 0

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
@@ -26,9 +27,9 @@ import java.util.concurrent.CountDownLatch;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,9 +43,11 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	// The string shown to the user in the dialog during execution of action
 	String msg;
 
-
 	// The result object
 	T result;
+
+	// Translated SQL query
+	private String sqlQuery;
 
 	// THe time used by the execution
 	private long time;
@@ -54,13 +57,13 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	private CountDownLatch latch = null;
 	private Thread thread = null;
 	private String queryString = null;
+
 	private boolean isCanceled = false;
 	private boolean actionStarted = false;
 	private OntopProtegeReasoner reasoner;
 	private Component rootView;  // Davide> DAG's hack protegeQueryTabFreezeBug
 
-	private static String QUEST_START_MESSAGE = "Quest must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
-
+	private static String QUEST_START_MESSAGE = "Ontop reasoner must be started before using this feature. To proceed \n * select Ontop in the \"Reasoners\" menu and \n * click \"Start reasoner\" in the same menu.";
 
 	private static final Logger log = LoggerFactory.getLogger(OBDADataQueryAction.class);
 
@@ -77,9 +80,9 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 	/**
 	 * Must be implemented by the subclass for getting the current reasoner
-	 * 
+	 *
 	 */
-	public abstract OWLEditorKit getEditorKit(); 
+	public abstract OWLEditorKit getEditorKit();
 
 	/**
 	 * This function displays or handles the result
@@ -87,6 +90,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 	 */
 	public abstract void handleResult(T res) throws OWLException;
 
+	public abstract void handleSQLTranslation(String sqlQuery);
 
 	public void run(String query) {
 		this.queryString = query;
@@ -109,6 +113,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 				monitor.stop();
 				if(!this.isCancelled() && !this.isErrorShown()){
 					this.time = System.currentTimeMillis() - startTime;
+					handleSQLTranslation(sqlQuery);
 					handleResult(result);
 				}
 			} else /* reasoner not OntopProtegeReasoner */ {
@@ -138,29 +143,28 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 
 
 	private void runAction() {
+		thread = new Thread(() -> {
+			try {
+				statement = reasoner.getStatement();
+				if(statement == null)
+					throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
 
-		thread = new Thread() {
-
-			@Override
-			public void run() {
-
-				try {
-					statement = reasoner.getStatement();
-					if(statement == null)
-						throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
-					actionStarted = true;
-					result = executeQuery(statement, queryString);
+				final IQ sqlExecutableQuery = statement.getExecutableQuery(queryString);
+				// FIXME
+				// sqlQuery = sqlExecutableQuery.getSQL();
+				sqlQuery = sqlExecutableQuery.toString();
+				actionStarted = true;
+				result = executeQuery(statement, queryString);
+				latch.countDown();
+			} catch (Exception e) {
+				if(!isCancelled()){
 					latch.countDown();
-				} catch (Exception e) {
-					if(!isCancelled()){
-						latch.countDown();
-						queryExecError = true;
-						log.error(e.getMessage(), e);
-						DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
-					}
-				}	
+					queryExecError = true;
+					log.error(e.getMessage(), e);
+					DialogUtils.showQuickErrorDialog(rootView, e, "Error executing query");
+				}
 			}
-		};
+		});
 		thread.start();
 	}
 
@@ -196,7 +200,7 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 			}
 		}
 	}
-	
+
 	public void actionCanceled() {
 		this.isCanceled = true;
 		if(!actionStarted)

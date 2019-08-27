@@ -35,6 +35,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.rio.RDFHandler;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
+import org.eclipse.rdf4j.rio.ntriples.NTriplesWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -76,6 +77,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
     private static final String RDF_XML = "rdfxml";
     private static final String TURTLE = "turtle";
+    private static final String NTRIPLES = "ntriples";
 
 
     @Option(type = OptionType.COMMAND, override = true, name = {"-o", "--output"},
@@ -87,7 +89,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             description = "The format of the materialized ontology. " +
                     //" Options: rdfxml, turtle. " +
                     "Default: rdfxml")
-    @AllowedValues(allowedValues = {RDF_XML, TURTLE})
+    @AllowedValues(allowedValues = {RDF_XML, TURTLE, NTRIPLES})
     public String format = RDF_XML;
 
     @Option(type = OptionType.COMMAND, name = {"--separate-files"}, title = "output to separate files",
@@ -314,6 +316,8 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     return ".rdf";
                 case TURTLE:
                     return ".ttl";
+                case NTRIPLES:
+                    return ".nt";
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
@@ -327,6 +331,9 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                     TurtleWriter tw  = new TurtleWriter(writer);
                     tw.set(BasicWriterSettings.PRETTY_PRINT, false);
                     return tw;
+                case NTRIPLES:
+                    NTriplesWriter btw  = new NTriplesWriter(writer);
+                    btw.set(BasicWriterSettings.PRETTY_PRINT, false);
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
