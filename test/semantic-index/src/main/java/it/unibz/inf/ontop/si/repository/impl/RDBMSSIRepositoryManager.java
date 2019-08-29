@@ -913,7 +913,7 @@ public class RDBMSSIRepositoryManager {
 		if (!type.isBlankNode())
 			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
+			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type));
 		}
 
 		ImmutableTerm predTerm = termFactory.getConstantIRI(RDF.TYPE);
@@ -933,13 +933,13 @@ public class RDBMSSIRepositoryManager {
 		if (!type1.isBlankNode())
 			subjectTerm = getEncodedIRIFunctionalTerm(X);
 		else {
-			subjectTerm = termFactory.getFreshBnodeFunctionalTerm(X);
+			subjectTerm = termFactory.getRDFFunctionalTerm(X, termFactory.getRDFTermTypeConstant(type1));
 		}
 
 		ImmutableFunctionalTerm objectTerm;
 		if (type2 instanceof ObjectRDFType) {
 			objectTerm = ((ObjectRDFType)type2).isBlankNode()
-					? termFactory.getFreshBnodeFunctionalTerm(Y)
+					? termFactory.getRDFFunctionalTerm(Y, termFactory.getRDFTermTypeConstant(type2))
 					: getEncodedIRIFunctionalTerm(Y);
 		}
 		else {
