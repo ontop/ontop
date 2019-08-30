@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 
 import java.util.function.Function;
 
@@ -26,4 +23,12 @@ public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
     ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
                        Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
                        TermFactory termFactory);
+
+    /**
+     * Builds a boolean DB CASE functional term with an "entry" for possible DBConstant value.
+     * Returns IS_TRUE(NULL) in the default case
+     */
+    ImmutableExpression liftExpression(ImmutableList<? extends ImmutableTerm> terms,
+                                       Function<RDFTermTypeConstant, ImmutableExpression> caseExpressionFct,
+                                       TermFactory termFactory);
 }
