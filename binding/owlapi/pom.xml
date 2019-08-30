@@ -3,7 +3,11 @@
 	<parent>
 		<groupId>it.unibz.inf.ontop</groupId>
 		<artifactId>ontop-binding</artifactId>
+<<<<<<< HEAD
 		<version>4.0.0-SNAPSHOT</version>
+=======
+		<version>3.0.1-SNAPSHOT</version>
+>>>>>>> version3
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-owlapi</artifactId>

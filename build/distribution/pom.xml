@@ -3,7 +3,11 @@
 	<parent>
 		<artifactId>ontop-build</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
+<<<<<<< HEAD
 		<version>4.0.0-SNAPSHOT</version>
+=======
+		<version>3.0.1-SNAPSHOT</version>
+>>>>>>> version3
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>ontop-distribution</artifactId>
@@ -35,7 +39,7 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			 <plugin>
@@ -56,6 +60,7 @@
 					<descriptors>
 						<descriptor>src/assembly/ontop-distribution-bin.xml</descriptor>
 					</descriptors>
+					<finalName>ontop-cli-${project.version}</finalName>
 				</configuration>
 			</plugin>
 			<plugin>

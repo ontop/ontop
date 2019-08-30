@@ -4,7 +4,11 @@
 	<parent>
 		<artifactId>ontop-core</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
+<<<<<<< HEAD
 		<version>4.0.0-SNAPSHOT</version>
+=======
+		<version>3.0.1-SNAPSHOT</version>
+>>>>>>> version3
 	</parent>
 	<artifactId>ontop-obda-core</artifactId>
 	<name>ontop-obda-core</name>

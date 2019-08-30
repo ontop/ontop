@@ -34,6 +34,8 @@ import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +169,7 @@ public class TargetQueryRenderer {
                 FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
                 if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
                     return displayURITemplate(lexicalFunctionalTerm, prefixManager);
-                else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
+                if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
                     return displayFunctionalBnode(lexicalFunctionalTerm);
             }
         }
@@ -177,12 +179,25 @@ public class TargetQueryRenderer {
     }
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
-        StringBuilder sb = new StringBuilder("_:");
-        sb.append("{"+function.getTerm(0)+"}");
-        function.getTerms().stream()
-                .skip(1)
-                .forEach(t -> sb.append("_{"+t.toString()+"}"));
-        return sb.toString();
+        ImmutableTerm firstTerm = function.getTerms().get(0);
+        if(firstTerm instanceof Variable){
+            return "_:"+ displayVariable((Variable)firstTerm);
+        }
+        if(firstTerm instanceof ValueConstant) {
+            String templateFormat = ((ValueConstant) firstTerm).getValue().stringValue().replace("{}", "%s");
+            if(function.getTerms().stream().skip(1).
+                    anyMatch(t -> !(t instanceof Variable)))
+                throw new UnexpectedTermException(function, "All argument of the BNode function but the first one are expected to be variables");
+            ImmutableList<String> varNames = function.getTerms().stream().skip(1)
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable) t)
+                    .map(v -> displayVariable(v))
+                    .collect(ImmutableCollectors.toList());
+
+            String originalUri = String.format(templateFormat, varNames.toArray());
+            return "_:" + String.format(templateFormat, varNames.toArray());
+        }
+        throw new UnexpectedTermException(function, "The first argument of the BNode function is expected to be either a variable or a template");
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
@@ -209,7 +224,6 @@ public class TargetQueryRenderer {
                 .orElseGet(() -> lexicalString + "^^"
                         + getAbbreviatedName(datatype.getIRI().getIRIString(), prefixManager, false));
     }
-
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         StringBuilder sb = new StringBuilder();
@@ -278,6 +292,10 @@ public class TargetQueryRenderer {
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);
+        }
+
+        private UnexpectedTermException(ImmutableTerm term, String message) {
+            super("Unexpected term " + term + ":\n"+message);
         }
     }
 }

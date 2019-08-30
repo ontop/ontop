@@ -3,7 +3,11 @@
     <parent>
         <artifactId>ontop-test</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
+<<<<<<< HEAD
         <version>4.0.0-SNAPSHOT</version>
+=======
+        <version>3.0.1-SNAPSHOT</version>
+>>>>>>> version3
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <properties>
