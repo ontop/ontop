@@ -86,9 +86,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "sha512-01",
 			functionsManifest + "sha512-02",
 
-			//TODO: fix it
-			functionsManifest + "strafter02",
-			
 			//not supported in SPARQL transformation
 			functionsManifest + "strdt01",
 			functionsManifest + "strdt02",
