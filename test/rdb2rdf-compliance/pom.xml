@@ -3,16 +3,12 @@
   	<parent>
     	<artifactId>ontop-test</artifactId>
     	<groupId>it.unibz.inf.ontop</groupId>
-<<<<<<< HEAD
     	<version>4.0.0-SNAPSHOT</version>
-=======
-    	<version>3.0.1-SNAPSHOT</version>
->>>>>>> version3
   	</parent>
-  	
+
   	<artifactId>ontop-rdb2rdf-compliance</artifactId>
   	<name>ontop-rdb2rdf-compliance</name>
-  
+
   	<dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -27,7 +23,7 @@
 				<artifactId>junit</artifactId>
 				<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ontop-rdf4j</artifactId>
@@ -48,7 +44,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	             
+
 	<repositories>
 		<repository>
 			<id>bolzano-nexus-public</id>

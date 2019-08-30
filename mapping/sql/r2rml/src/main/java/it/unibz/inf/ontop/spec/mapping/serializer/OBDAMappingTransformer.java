@@ -67,7 +67,7 @@ public class OBDAMappingTransformer {
             mapping_id = baseIRIString + mapping_id;
         }
 		BlankNodeOrIRI mainNode = rdfFactory.createIRI(mapping_id);
-		
+
 		//Table
 		LogicalTable logicalTable = mappingFactory.createR2RMLView(squery.getSQLQuery());
 
@@ -236,11 +236,11 @@ public class OBDAMappingTransformer {
 //								R2RMLVocabulary.blankNode;
 
 	private <T extends TermMap> T extractIriOrBnodeTermMap(ImmutableTerm lexicalTerm, ObjectRDFType termType, boolean acceptBNode,
-														   java.util.function.Function<Template, T> templateFct,
-														   java.util.function.Function<String, T> columnFct,
-														   java.util.function.Function<IRI, T> iriFct,
-														   java.util.function.Function<BlankNode, T> bNodeFct,
-														   PrefixManager prefixManager) {
+                                                           java.util.function.Function<Template, T> templateFct,
+                                                           java.util.function.Function<String, T> columnFct,
+                                                           java.util.function.Function<IRI, T> iriFct,
+                                                           java.util.function.Function<BlankNode, T> bNodeFct,
+                                                           PrefixManager prefixManager) {
 		if ((!acceptBNode) && termType.isBlankNode())
 			throw new MinorOntopInternalBugException("Bnode term map found in an unexpected area: " + lexicalTerm);
 
@@ -333,6 +333,6 @@ public class OBDAMappingTransformer {
 			super(message);
 		}
 	}
-	
+
 
 }
