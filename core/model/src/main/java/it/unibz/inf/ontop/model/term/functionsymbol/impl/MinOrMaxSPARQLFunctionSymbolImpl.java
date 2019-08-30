@@ -217,7 +217,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
         ImmutableList<Map.Entry<ImmutableExpression, RDFTermTypeConstant>> typeTermWhenPairs = computeTypeTermWhenPairs(
                 aggregateMap, termFactory);
 
-        ImmutableFunctionalTerm typeTerm = termFactory.getDBCase(typeTermWhenPairs.stream(), termFactory.getNullConstant());
+        ImmutableFunctionalTerm typeTerm = termFactory.getDBCase(typeTermWhenPairs.stream(), termFactory.getNullConstant(), true);
         ImmutableFunctionalTerm lexicalTerm = computeLexicalTerm(typeTermWhenPairs, aggregateMap, termFactory);
 
         return termFactory.getRDFFunctionalTerm(lexicalTerm, typeTerm);
@@ -337,7 +337,9 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
                             return Maps.immutableEntry(e.getKey(), thenLexicalTerm);
                         });
 
-        return termFactory.getDBCase(lexicalWhenPairs, termFactory.getNullConstant());
+        return termFactory.getDBCase(lexicalWhenPairs, termFactory.getNullConstant(),
+                // TODO: double-check
+                true);
     }
 
 

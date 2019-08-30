@@ -912,7 +912,8 @@ public class TermFactoryImpl implements TermFactory {
 
     @Override
 	public ImmutableFunctionalTerm getDBCase(
-			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm) {
+			Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultTerm,
+			boolean doOrderingMatter) {
 		ImmutableList<ImmutableTerm> terms = Stream.concat(
 				whenPairs
 						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
@@ -930,17 +931,18 @@ public class TermFactoryImpl implements TermFactory {
 					? getIfElseNull((ImmutableExpression) terms.get(0), terms.get(1))
 					: getIfThenElse((ImmutableExpression) terms.get(0), terms.get(1), defaultTerm);
 
-		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity), terms);
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBCase(arity, doOrderingMatter), terms);
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs) {
-		return getDBCase(whenPairs, valueNull);
+	public ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+													 boolean doOrderingMatter) {
+		return getDBCase(whenPairs, valueNull, doOrderingMatter);
 	}
 
     @Override
     public ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
-												ImmutableExpression defaultExpression) {
+												ImmutableExpression defaultExpression, boolean doOrderingMatter) {
 		ImmutableList<ImmutableExpression> terms = Stream.concat(
 				whenPairs
 						.flatMap(e -> Stream.of(e.getKey(), e.getValue())),
@@ -956,7 +958,7 @@ public class TermFactoryImpl implements TermFactory {
 		//if (arity == 3)
 		//	return getBooleanIfThenElse(terms.get(0), terms.get(1), defaultExpression);
 
-		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCase(arity), terms);
+		return getImmutableExpression(dbFunctionSymbolFactory.getDBBooleanCase(arity, doOrderingMatter), terms);
     }
 
     @Override

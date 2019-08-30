@@ -82,10 +82,12 @@ public interface DBFunctionSymbolFactory {
      * IF THEN, ELSE IF ..., ELSE
      *
      * Arity must be odd and >= 3
+     *
+     * doOrderingMatter: if false, the when pairs can be re-ordered
      */
-    DBFunctionSymbol getDBCase(int arity);
+    DBFunctionSymbol getDBCase(int arity, boolean doOrderingMatter);
 
-    DBBooleanFunctionSymbol getDBBooleanCase(int arity);
+    DBBooleanFunctionSymbol getDBBooleanCase(int arity, boolean doOrderingMatter);
 
     DBIfElseNullFunctionSymbol getDBIfElseNull();
 

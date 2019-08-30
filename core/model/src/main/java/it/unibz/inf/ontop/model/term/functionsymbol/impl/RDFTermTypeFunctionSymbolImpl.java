@@ -88,7 +88,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
         return termFactory.getDBCase(
                 computeWhenPairs(terms, caseTermFct, termFactory),
                 // Default case
-                termFactory.getNullConstant());
+                termFactory.getNullConstant(), false);
     }
 
     private <T extends ImmutableTerm> Stream<Map.Entry<ImmutableExpression, T>> computeWhenPairs(
@@ -110,7 +110,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
         return termFactory.getDBBooleanCase(
                 computeWhenPairs(terms, caseExpressionFct, termFactory),
                 // Default case
-                termFactory.getIsTrue(termFactory.getNullConstant()));
+                termFactory.getIsTrue(termFactory.getNullConstant()), false);
     }
 
     @Override

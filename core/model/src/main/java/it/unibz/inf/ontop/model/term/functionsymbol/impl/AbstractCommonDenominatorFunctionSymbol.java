@@ -114,7 +114,8 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
         ImmutableFunctionalTerm caseTerm = termFactory.getDBCaseElseNull(validCombinations.entrySet().stream()
                 .map(e -> Maps.immutableEntry(
                         convertIntoConjunction(e.getKey(), subVariables, dictionary, termFactory),
-                        dictionary.convert(e.getValue()))));
+                        dictionary.convert(e.getValue()))),
+                false);
 
         return termFactory.getRDFTermTypeFunctionalTerm(caseTerm, dictionary,
                 ImmutableSet.copyOf(validCombinations.values()));

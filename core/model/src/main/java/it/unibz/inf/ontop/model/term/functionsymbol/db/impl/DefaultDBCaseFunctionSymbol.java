@@ -14,12 +14,14 @@ public class DefaultDBCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol 
     private static final String WHEN_THEN_TEMPLATE = "    WHEN %s THEN %s\n";
     private static final String FULL_TEMPLATE = "CASE %s    ELSE %s \nEND";
 
-    protected DefaultDBCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        this("CASE"+arity, arity, dbBooleanType, rootDBTermType);
+    protected DefaultDBCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType,
+                                          boolean doOrderingMatter) {
+        this("CASE"+arity, arity, dbBooleanType, rootDBTermType, doOrderingMatter);
     }
 
-    protected DefaultDBCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super(name, arity, dbBooleanType, rootDBTermType);
+    protected DefaultDBCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType,
+                                          boolean doOrderingMatter) {
+        super(name, arity, dbBooleanType, rootDBTermType, doOrderingMatter);
         if ((arity % 2 == 0) && (arity < 3))
             throw new IllegalArgumentException("A CASE function symbol must an odd arity >= 3");
     }

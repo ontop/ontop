@@ -23,7 +23,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
     }
 
     protected DefaultDBIfElseNullFunctionSymbol(String name, DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super(name, 2, dbBooleanType, rootDBTermType);
+        super(name, 2, dbBooleanType, rootDBTermType, false);
     }
 
     @Override

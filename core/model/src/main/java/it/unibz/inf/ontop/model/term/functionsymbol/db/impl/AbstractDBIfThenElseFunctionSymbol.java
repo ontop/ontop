@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 public abstract class AbstractDBIfThenElseFunctionSymbol extends AbstractDBIfThenFunctionSymbol {
 
     protected AbstractDBIfThenElseFunctionSymbol(DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super("IF_THEN_ELSE", 3, dbBooleanType, rootDBTermType);
+        super("IF_THEN_ELSE", 3, dbBooleanType, rootDBTermType, false);
     }
 
     @Override

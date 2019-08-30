@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol implements DBBooleanFunctionSymbol {
-    protected DBBooleanCaseFunctionSymbolImpl(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
-        super("BOOL_CASE" + arity, arity, dbBooleanType, rootDBTermType);
+    protected DBBooleanCaseFunctionSymbolImpl(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType,
+                                              boolean doOrderingMatter) {
+        super("BOOL_CASE" + arity, arity, dbBooleanType, rootDBTermType, doOrderingMatter);
     }
 
     @Override
@@ -40,7 +41,7 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
                                                 ImmutableTerm defaultValue, TermFactory termFactory) {
         return termFactory.getDBBooleanCase(
                 (Stream<Map.Entry<ImmutableExpression, ImmutableExpression>>)(Stream<?>) newWhenPairs,
-                (ImmutableExpression) defaultValue);
+                (ImmutableExpression) defaultValue, doOrderingMatter);
     }
 
     @Override
