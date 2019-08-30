@@ -74,7 +74,6 @@ public class LangTagFunctionSymbolImpl extends FunctionSymbolImpl {
                             .orElseGet(termFactory::getNullConstant),
                     termFactory);
         }
-        // TODO: simplify in the presence of magic numbers
         return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
     }
 

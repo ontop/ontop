@@ -37,7 +37,7 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
         ImmutableTerm newPossibleValue = terms.get(1).simplify(variableNullability);
 
         if (firstTerm.isNull() || newPossibleValue.isNull())
-            return newPossibleValue;
+            return termFactory.getNullConstant();
 
         ImmutableExpression condition = Optional.of(firstTerm)
                 .filter(t -> t instanceof ImmutableExpression)
