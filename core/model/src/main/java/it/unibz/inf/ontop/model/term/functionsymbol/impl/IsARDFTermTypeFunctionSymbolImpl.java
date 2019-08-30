@@ -69,7 +69,9 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
                 .collect(ImmutableCollectors.toSet());
 
         if (excludedMagicNumbers.size() == conversionMap.size())
-            return termFactory.getDBBooleanConstant(false);
+            return termFactory.getFalseOrNullFunctionalTerm(
+                    ImmutableList.of(termFactory.getDBIsNull(term)))
+                    .simplify(variableNullability);
 
         if (excludedMagicNumbers.isEmpty())
             return termFactory.getTrueOrNullFunctionalTerm(
