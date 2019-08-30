@@ -2,12 +2,15 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -59,15 +62,22 @@ public class IsARDFTermTypeFunctionSymbolImpl extends BooleanFunctionSymbolImpl 
 
     private ImmutableTerm simplifyIntoConjunction(ImmutableMap<DBConstant, RDFTermTypeConstant> conversionMap,
                                                   ImmutableTerm term, TermFactory termFactory, VariableNullability variableNullability) {
-        Stream<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
+        ImmutableSet<ImmutableExpression> excludedMagicNumbers = conversionMap.entrySet().stream()
                 .filter(e -> !e.getValue().getRDFTermType().isA(baseType))
                 .map(Map.Entry::getKey)
-                .map(n -> termFactory.getStrictNEquality(term, n));
+                .map(n -> termFactory.getStrictNEquality(term, n))
+                .collect(ImmutableCollectors.toSet());
 
-        return termFactory.getConjunction(Stream.concat(
-                    Stream.of(termFactory.getDBIsNotNull(term)),
-                    excludedMagicNumbers))
-                .get()
+        if (excludedMagicNumbers.size() == conversionMap.size())
+            return termFactory.getDBBooleanConstant(false);
+
+        if (excludedMagicNumbers.isEmpty())
+            return termFactory.getTrueOrNullFunctionalTerm(
+                    ImmutableList.of(termFactory.getDBIsNotNull(term)))
+                    .simplify(variableNullability);
+
+        return termFactory.getConjunction(excludedMagicNumbers.stream())
+                .orElseThrow(() -> new MinorOntopInternalBugException("The empty case should have already captured"))
                 .simplify(variableNullability);
     }
 
