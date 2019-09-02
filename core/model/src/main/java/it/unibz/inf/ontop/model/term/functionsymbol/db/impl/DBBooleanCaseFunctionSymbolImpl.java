@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
@@ -64,7 +65,8 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
         /*
          * Tries to simplify the CASE into a disjunction
          */
-        Optional<ImmutableExpression> optionalSimplification = tryToReduceToDisjunctionOrConjunction(twoVLExpressions, termFactory);
+        Optional<ImmutableExpression> optionalSimplification = tryToReduceToDisjunctionOrConjunction(
+                twoVLExpressions, variableNullability, termFactory);
         if (optionalSimplification.isPresent())
             return optionalSimplification.get()
                     .simplify2VL(variableNullability);
@@ -88,9 +90,11 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
      *
      *    - CASE_5(c1, IS_TRUE(TRUE), c2, IS_TRUE(TRUE), IS_TRUE(FALSE)) into OR_2(c1,c2)
      *    - CASE_5(c1, IS_TRUE(FALSE), c2, IS_TRUE(FALSE), IS_TRUE(TRUE)) into AND_2(NOT(c1),NOT(c2))
+     *         if c1 and c2 are not nullable
      *
      */
     private Optional<ImmutableExpression> tryToReduceToDisjunctionOrConjunction(ImmutableList<ImmutableExpression> twoVLExpressions,
+                                                                                VariableNullability variableNullability,
                                                                                 TermFactory termFactory) {
         if (!doOrderingMatter) {
             ImmutableTerm defaultValue = extractDefaultValue(twoVLExpressions, termFactory);
@@ -107,16 +111,29 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
                         .map(twoVLExpressions::get)
                         .allMatch(e -> e.equals(oppositeExpression))) {
 
-                    Stream<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size())
+                    ImmutableSet<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size())
                             .filter(i -> i % 2 == 0)
                             .boxed()
                             .map(twoVLExpressions::get)
-                            // Negated if the default value is TRUE
-                            .map(c -> isFalseByDefault ? c : termFactory.getDBNot(c));
+                            .collect(ImmutableCollectors.toSet());
 
-                    return isFalseByDefault
-                            ? termFactory.getDisjunction(conditions)
-                            : termFactory.getConjunction(conditions);
+                    /*
+                     * When the default value is TRUE, we have to make sure none of conditions is nullable
+                     * because of intented use of a negation
+                     *
+                     * Recall that NOT(NULL) -> NULL while NOT(FALSE) -> TRUE
+                     */
+                    if (isFalseByDefault || conditions.stream()
+                            .noneMatch(c -> c.isNullable(variableNullability.getNullableVariables()))) {
+
+                        Stream<ImmutableExpression> newConditionStream = conditions.stream()
+                                // Negated if the default value is TRUE
+                                .map(c -> isFalseByDefault ? c : termFactory.getDBNot(c));
+
+                        return isFalseByDefault
+                                ? termFactory.getDisjunction(newConditionStream)
+                                : termFactory.getConjunction(newConditionStream);
+                    }
                 }
             }
         }
