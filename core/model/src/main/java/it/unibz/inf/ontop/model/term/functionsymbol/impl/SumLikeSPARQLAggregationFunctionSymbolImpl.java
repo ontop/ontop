@@ -185,7 +185,7 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                                 .orElseGet(Stream::empty),
                         // Then the numeric values
                         numericLexicalWhenPairs),
-                termFactory.getDBStringConstant("0"));
+                termFactory.getDBStringConstant("0"), true);
 
         Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> numericTypeWhenPairs = IntStream.range(0, nbTypes)
                 .boxed()
@@ -199,7 +199,8 @@ public abstract class SumLikeSPARQLAggregationFunctionSymbolImpl extends UnaryNu
                                 .orElseGet(Stream::empty),
                         // Then the numeric values
                         numericTypeWhenPairs),
-                termFactory.getRDFTermTypeConstant(termFactory.getTypeFactory().getXsdIntegerDatatype()));
+                termFactory.getRDFTermTypeConstant(termFactory.getTypeFactory().getXsdIntegerDatatype()),
+                true);
 
         return termFactory.getRDFFunctionalTerm(lexicalTerm, typeTerm);
     }

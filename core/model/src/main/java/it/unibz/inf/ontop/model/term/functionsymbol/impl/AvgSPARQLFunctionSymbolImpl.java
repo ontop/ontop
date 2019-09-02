@@ -255,7 +255,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
 
         return termFactory.getDBCase(whenPairs,
                 // If there is no numeric value: returns 0
-                termFactory.getDBStringConstant("0"));
+                termFactory.getDBStringConstant("0"), true);
 
     }
 
@@ -298,7 +298,7 @@ public class AvgSPARQLFunctionSymbolImpl extends UnaryNumericSPARQLAggregationFu
         return termFactory.getDBCase(
                 whenPairs,
                 // Default: no value -> XSD.INTEGER
-                termFactory.getRDFTermTypeConstant(termFactory.getTypeFactory().getXsdIntegerDatatype()));
+                termFactory.getRDFTermTypeConstant(termFactory.getTypeFactory().getXsdIntegerDatatype()), true);
     }
 
 

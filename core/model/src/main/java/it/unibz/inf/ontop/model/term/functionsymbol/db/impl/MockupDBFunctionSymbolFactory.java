@@ -136,13 +136,13 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
-    protected DBFunctionSymbol createDBCase(int arity) {
+    protected DBFunctionSymbol createDBCase(int arity, boolean doOrderingMatter) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
     @Override
-    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity) {
-        return new DBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType);
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new DBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
     }
 
     @Override

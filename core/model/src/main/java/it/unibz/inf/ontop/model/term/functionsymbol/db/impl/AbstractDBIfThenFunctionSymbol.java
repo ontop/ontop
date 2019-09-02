@@ -26,9 +26,12 @@ import java.util.stream.Stream;
 public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependentTypedDBFunctionSymbol
         implements DBIfThenFunctionSymbol {
 
+    protected final boolean doOrderingMatter;
+
     protected AbstractDBIfThenFunctionSymbol(@Nonnull String name, int arity, DBTermType dbBooleanType,
-                                             DBTermType rootDBTermType) {
+                                             DBTermType rootDBTermType, boolean doOrderingMatter) {
         super(name, computeBaseTypes(arity, dbBooleanType, rootDBTermType));
+        this.doOrderingMatter = doOrderingMatter;
     }
 
     private static ImmutableList<TermType> computeBaseTypes(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType) {
@@ -83,7 +86,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                         if (newWhenPairs.isEmpty())
                             return possibleValue;
                         else
-                            return termFactory.getDBCase(newWhenPairs.stream(), possibleValue);
+                            return termFactory.getDBCase(newWhenPairs.stream(), possibleValue, doOrderingMatter);
                     default:
                         // Discard the case entry
                 }
@@ -126,26 +129,42 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
      */
     protected ImmutableFunctionalTerm buildCase(Stream<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs,
                                                 ImmutableTerm defaultValue, TermFactory termFactory) {
-        return termFactory.getDBCase(newWhenPairs, defaultValue);
+        return termFactory.getDBCase(newWhenPairs, defaultValue, doOrderingMatter);
     }
 
-    /*
-     * Removes the last when pairs that return the same value as the default "else" case
-     */
     private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairs(
             List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs, ImmutableTerm defaultValue) {
+        return doOrderingMatter
+                ? shrinkWhenPairsWithOrder(newWhenPairs, defaultValue)
+                : shrinkWhenPairsWithoutOrder(newWhenPairs, defaultValue);
+    }
 
-        int nbPairs = newWhenPairs.size();
+    /**
+     * Removes the last when pairs that return the same value as the default "else" case
+     */
+    private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairsWithOrder(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultValue) {
+        int nbPairs = whenPairs.size();
 
         Optional<Integer> lastIncompatibleIndex = IntStream.range(0, nbPairs)
                 .map(i -> nbPairs - i - 1)
-                .filter(i -> !newWhenPairs.get(i).getValue().equals(defaultValue))
+                .filter(i -> !whenPairs.get(i).getValue().equals(defaultValue))
                 .boxed()
                 .findFirst();
 
         return lastIncompatibleIndex
-                .map(i -> ImmutableList.copyOf(newWhenPairs.subList(0, i + 1)))
+                .map(i -> ImmutableList.copyOf(whenPairs.subList(0, i + 1)))
                 .orElseGet(ImmutableList::of);
+    }
+
+    /**
+     * When order does not matter, when pairs returning the same value as the default one are filtered out
+     */
+    private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairsWithoutOrder(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultValue) {
+        return whenPairs.stream()
+                .filter(p -> !p.getValue().equals(defaultValue))
+                .collect(ImmutableCollectors.toList());
     }
 
 
@@ -211,7 +230,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                                                   TermFactory termFactory) {
         return pushDownFunctionalTerm(expression, indexOfDBIfThenFunctionSymbol, termFactory,
                 (f, terms) -> termFactory.getImmutableExpression((BooleanFunctionSymbol)f, terms),
-                termFactory::getDBBooleanCase);
+                (pairs, defaultValue) -> termFactory.getDBBooleanCase(pairs, defaultValue, doOrderingMatter));
     }
 
     @Override
@@ -220,7 +239,7 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                                                                  TermFactory termFactory) {
         return pushDownFunctionalTerm(functionalTerm, indexOfDBIfThenFunctionSymbol, termFactory,
                 termFactory::getImmutableFunctionalTerm,
-                termFactory::getDBCase);
+                (pairs, defaultValue) -> termFactory.getDBCase(pairs, defaultValue, doOrderingMatter));
     }
 
     protected <T extends ImmutableFunctionalTerm> T pushDownFunctionalTerm(
