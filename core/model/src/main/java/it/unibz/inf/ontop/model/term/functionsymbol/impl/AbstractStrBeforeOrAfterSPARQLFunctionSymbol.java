@@ -42,15 +42,6 @@ public abstract class AbstractStrBeforeOrAfterSPARQLFunctionSymbol extends Reduc
         return termFactory.getIfThenElse(condition, firstArgType, termFactory.getRDFTermTypeConstant(xsdStringType));
     }
 
-    @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
-        return termFactory.getIfThenElse(
-                termFactory.getDBIsStringEmpty(subLexicalTerms.get(1)),
-                termFactory.getDBStringConstant(""),
-                computeLexicalTermWhenSecondArgIsNotEmpty(subLexicalTerms, termFactory));
-    }
-
     protected abstract ImmutableTerm computeLexicalTermWhenSecondArgIsNotEmpty(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                                                TermFactory termFactory);
 

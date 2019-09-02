@@ -13,6 +13,12 @@ public class StrAfterSPARQLFunctionSymbolImpl extends AbstractStrBeforeOrAfterSP
     }
 
     @Override
+    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
+        return computeLexicalTermWhenSecondArgIsNotEmpty(subLexicalTerms, termFactory);
+    }
+
+    @Override
     protected ImmutableTerm computeLexicalTermWhenSecondArgIsNotEmpty(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                                       TermFactory termFactory) {
         return termFactory.getDBStrAfter(subLexicalTerms.get(0), subLexicalTerms.get(1));
