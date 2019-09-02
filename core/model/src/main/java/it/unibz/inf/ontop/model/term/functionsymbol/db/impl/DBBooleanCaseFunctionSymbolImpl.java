@@ -64,7 +64,7 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
         /*
          * Tries to simplify the CASE into a disjunction
          */
-        Optional<ImmutableExpression> optionalSimplification = tryToReduceToDisjunction(twoVLExpressions, termFactory);
+        Optional<ImmutableExpression> optionalSimplification = tryToReduceToDisjunctionOrConjunction(twoVLExpressions, termFactory);
         if (optionalSimplification.isPresent())
             return optionalSimplification.get()
                     .simplify2VL(variableNullability);
@@ -84,30 +84,41 @@ public class DBBooleanCaseFunctionSymbolImpl extends DefaultDBCaseFunctionSymbol
     }
 
     /**
-     * Transforms, for instance, CASE_5(c1, IS_TRUE(TRUE), c2, IS_TRUE(TRUE), IS_TRUE(FALSE))
-     *   into OR_2(c1,c2)
+     * Transforms, for instance,
      *
-     *   TODO: shall we generalize to the inverse case where the default value is TRUE?
+     *    - CASE_5(c1, IS_TRUE(TRUE), c2, IS_TRUE(TRUE), IS_TRUE(FALSE)) into OR_2(c1,c2)
+     *    - CASE_5(c1, IS_TRUE(FALSE), c2, IS_TRUE(FALSE), IS_TRUE(TRUE)) into AND_2(NOT(c1),NOT(c2))
+     *
      */
-    private Optional<ImmutableExpression> tryToReduceToDisjunction(ImmutableList<ImmutableExpression> twoVLExpressions,
-                                                           TermFactory termFactory) {
+    private Optional<ImmutableExpression> tryToReduceToDisjunctionOrConjunction(ImmutableList<ImmutableExpression> twoVLExpressions,
+                                                                                TermFactory termFactory) {
         if (!doOrderingMatter) {
             ImmutableTerm defaultValue = extractDefaultValue(twoVLExpressions, termFactory);
             ImmutableExpression falseExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(false));
             ImmutableExpression trueExpression = termFactory.getIsTrue(termFactory.getDBBooleanConstant(true));
 
-            if (defaultValue.equals(falseExpression)
-                    && IntStream.range(0, twoVLExpressions.size() - 1)
-                    .filter(i -> i % 2 == 1)
-                    .boxed()
-                    .map(twoVLExpressions::get)
-                    .allMatch(e -> e.equals(trueExpression)))
+            if (defaultValue.equals(falseExpression) || defaultValue.equals(trueExpression)) {
+                boolean isFalseByDefault = defaultValue.equals(falseExpression);
+                ImmutableExpression oppositeExpression = isFalseByDefault ? trueExpression : falseExpression;
 
-                return termFactory.getDisjunction(
-                        IntStream.range(0, twoVLExpressions.size())
-                                .filter(i -> i % 2 == 0)
-                                .boxed()
-                                .map(twoVLExpressions::get));
+                if (IntStream.range(0, twoVLExpressions.size() - 1)
+                        .filter(i -> i % 2 == 1)
+                        .boxed()
+                        .map(twoVLExpressions::get)
+                        .allMatch(e -> e.equals(oppositeExpression))) {
+
+                    Stream<ImmutableExpression> conditions = IntStream.range(0, twoVLExpressions.size())
+                            .filter(i -> i % 2 == 0)
+                            .boxed()
+                            .map(twoVLExpressions::get)
+                            // Negated if the default value is TRUE
+                            .map(c -> isFalseByDefault ? c : termFactory.getDBNot(c));
+
+                    return isFalseByDefault
+                            ? termFactory.getDisjunction(conditions)
+                            : termFactory.getConjunction(conditions);
+                }
+            }
         }
         return Optional.empty();
     }
