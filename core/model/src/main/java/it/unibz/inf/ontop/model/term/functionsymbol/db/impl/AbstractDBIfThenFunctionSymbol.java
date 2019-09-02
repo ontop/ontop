@@ -132,23 +132,39 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         return termFactory.getDBCase(newWhenPairs, defaultValue, doOrderingMatter);
     }
 
-    /*
-     * Removes the last when pairs that return the same value as the default "else" case
-     */
     private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairs(
             List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> newWhenPairs, ImmutableTerm defaultValue) {
+        return doOrderingMatter
+                ? shrinkWhenPairsWithOrder(newWhenPairs, defaultValue)
+                : shrinkWhenPairsWithoutOrder(newWhenPairs, defaultValue);
+    }
 
-        int nbPairs = newWhenPairs.size();
+    /**
+     * Removes the last when pairs that return the same value as the default "else" case
+     */
+    private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairsWithOrder(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultValue) {
+        int nbPairs = whenPairs.size();
 
         Optional<Integer> lastIncompatibleIndex = IntStream.range(0, nbPairs)
                 .map(i -> nbPairs - i - 1)
-                .filter(i -> !newWhenPairs.get(i).getValue().equals(defaultValue))
+                .filter(i -> !whenPairs.get(i).getValue().equals(defaultValue))
                 .boxed()
                 .findFirst();
 
         return lastIncompatibleIndex
-                .map(i -> ImmutableList.copyOf(newWhenPairs.subList(0, i + 1)))
+                .map(i -> ImmutableList.copyOf(whenPairs.subList(0, i + 1)))
                 .orElseGet(ImmutableList::of);
+    }
+
+    /**
+     * When order does not matter, when pairs returning the same value as the default one are filtered out
+     */
+    private ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrinkWhenPairsWithoutOrder(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs, ImmutableTerm defaultValue) {
+        return whenPairs.stream()
+                .filter(p -> !p.getValue().equals(defaultValue))
+                .collect(ImmutableCollectors.toList());
     }
 
 

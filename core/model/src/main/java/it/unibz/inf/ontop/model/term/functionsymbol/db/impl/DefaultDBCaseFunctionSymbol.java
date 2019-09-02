@@ -16,7 +16,8 @@ public class DefaultDBCaseFunctionSymbol extends AbstractDBIfThenFunctionSymbol 
 
     protected DefaultDBCaseFunctionSymbol(int arity, DBTermType dbBooleanType, DBTermType rootDBTermType,
                                           boolean doOrderingMatter) {
-        this("CASE"+arity, arity, dbBooleanType, rootDBTermType, doOrderingMatter);
+        this("CASE"+arity + (doOrderingMatter ? "" : "_UNORDERED"),
+                arity, dbBooleanType, rootDBTermType, doOrderingMatter);
     }
 
     protected DefaultDBCaseFunctionSymbol(String name, int arity, DBTermType dbBooleanType, DBTermType rootDBTermType,
