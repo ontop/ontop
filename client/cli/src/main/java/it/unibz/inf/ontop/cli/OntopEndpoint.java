@@ -1,10 +1,13 @@
 package it.unibz.inf.ontop.cli;
 
+import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import it.unibz.inf.ontop.endpoint.OntopEndpointApplication;
 import org.springframework.boot.SpringApplication;
+
+import java.util.ArrayList;
 
 
 @Command(name = "endpoint",
@@ -25,14 +28,19 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Override
     public void run() {
-        String[] args = {
-                "--ontology=" + this.owlFile,
+
+        ArrayList<String> argList = Lists.newArrayList(
                 "--mapping=" + this.mappingFile,
                 "--properties=" + this.propertiesFile,
                 "--port=" + this.port,
                 "--cors-allowed-origins=" + this.corsAllowedOrigins,
-                "--lazy=" + this.lazy
-        };
+                "--lazy=" + this.lazy);
+
+        if (this.owlFile != null)
+            argList.add("--ontology=" + this.owlFile);
+
+        String[] args = new String[argList.size()];
+        argList.toArray(args);
 
         SpringApplication.run(OntopEndpointApplication.class, args);
     }
