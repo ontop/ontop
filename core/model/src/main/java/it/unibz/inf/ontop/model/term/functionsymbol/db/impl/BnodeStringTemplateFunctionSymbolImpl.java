@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.URITemplates;
+import it.unibz.inf.ontop.utils.Templates;
 
 public class BnodeStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFunctionSymbolImpl
         implements BnodeStringTemplateFunctionSymbol {
@@ -13,7 +13,7 @@ public class BnodeStringTemplateFunctionSymbolImpl extends ObjectStringTemplateF
 
     public static BnodeStringTemplateFunctionSymbol createFunctionSymbol(String template,
                                                                          TypeFactory typeFactory) {
-        int arity = URITemplates.getArity(template);
+        int arity = Templates.getArity(template);
         return new BnodeStringTemplateFunctionSymbolImpl(template, arity, typeFactory);
     }
 }
