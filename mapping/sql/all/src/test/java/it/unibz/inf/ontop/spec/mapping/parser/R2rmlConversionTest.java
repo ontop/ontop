@@ -79,8 +79,8 @@ public class R2rmlConversionTest {
         Collection<TriplesMap> triplesMaps = execute("src/test/resources/npd-literal-mapping.obda");
         for (TriplesMap triplesMap :triplesMaps){
             ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
-            assertEquals("\"someUntypedLiteral\"", objectMap.getConstant().ntriplesString());
-//            assertNull(objectMap.getDatatype());
+            assertEquals("someColName", objectMap.getColumn());
+            assertNull(objectMap.getDatatype());
             assertNull(objectMap.getTemplate());
         }
 

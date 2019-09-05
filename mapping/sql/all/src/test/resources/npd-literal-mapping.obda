@@ -22,7 +22,7 @@ diskosv:		http://sws.ifi.uio.no/vocab/diskos#
 [MappingDeclaration] @collection [[
 
 mappingId	Mapping:00015:Literal:wellbore_coordinates:dateSyncNPD
-target		npd:wellbore/{wlbNpdidWellbore}/point npdv:dateSyncNPD "someUntypedLiteral".
+target		npd:wellbore/{wlbNpdidWellbore}/point npdv:dateSyncNPD {someColName}.
 source		SELECT wlbNpdidWellbore,dateSyncNPD FROM wellbore_coordinates WHERE dateSyncNPD <> '9999-12-31'
 
 ]]
