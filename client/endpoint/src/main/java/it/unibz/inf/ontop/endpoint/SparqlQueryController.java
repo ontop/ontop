@@ -30,7 +30,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -50,19 +49,26 @@ public class SparqlQueryController {
     private volatile boolean initialized = false;
 
     @Autowired
-    public SparqlQueryController(@Value("${ontology}") String owlFile,
-                                 @Value("${mapping}") String mappingFile,
+    public SparqlQueryController(@Value("${mapping}") String mappingFile,
                                  @Value("${properties}") String propertiesFile,
-                                 @Value("${lazy:false}") boolean lazy) {
+                                 @Value("${lazy:false}") boolean lazy,
+                                 @Value("${ontology:#{null}}") String owlFile) {
         this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
     }
 
     private Repository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
-        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(mappings)
-                .ontologyFile(ontology)
-                .propertyFile(properties)
-                .build();
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .propertyFile(properties);
+
+        if (mappings.endsWith(".obda"))
+            builder.nativeOntopMappingFile(mappings);
+        else
+            builder.r2rmlMappingFile(mappings);
+
+        if ((ontology != null) && (!ontology.isEmpty()))
+            builder.ontologyFile(ontology);
+
+        OntopSQLOWLAPIConfiguration configuration = builder.build();
         OntopRepository repository = OntopRepository.defaultRepository(configuration);
 
         if (!lazy) {
