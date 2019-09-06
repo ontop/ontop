@@ -188,7 +188,7 @@ public class ReverseURIH2Test {
 				System.out.println("Result " + ind1.toString());
 				count += 1;
 			}
-			Assert.assertTrue(count == numberOfResults);
+			Assert.assertEquals(numberOfResults, count);
 
 			/*
 			 * assertEquals("<uri1>", ind1.toString()); assertEquals("<uri1>",

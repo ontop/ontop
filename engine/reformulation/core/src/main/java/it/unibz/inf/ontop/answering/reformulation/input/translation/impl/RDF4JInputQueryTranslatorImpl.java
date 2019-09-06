@@ -1392,14 +1392,8 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
      * @param v URI object
      * @return term (URI template)
      */
-
     private GroundTerm getTermForIri(IRI v) {
-
-        // Guohui(07 Feb, 2018): this logic should probably be moved to a different place, since some percentage-encoded
-        // string of an IRI might be a part of an IRI template, but not from database value.
-        String uri = R2RMLIRISafeEncoder.decode(v.stringValue());
-        //String uri = v.stringValue();
-        return termFactory.getConstantIRI(rdfFactory.createIRI(uri));
+        return termFactory.getConstantIRI(rdfFactory.createIRI(v.stringValue()));
     }
 
 
