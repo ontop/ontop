@@ -23,18 +23,21 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * A utility class for URI templates
+ * A utility class for URI and BNode templates
  *
  * @author xiao
  */
-public class URITemplates {
+public class Templates {
 
     private static final String PLACE_HOLDER = "{}";
     private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
@@ -102,24 +105,24 @@ public class URITemplates {
 
 
     /**
-     * Converts a IRI function into a URI template
+     * Converts a IRI or BNode template function into a template
      * <p>
      * For instance:
      * <pre>
      * http://example.org/{}/{}/{}(X, Y, X) -> "http://example.org/{X}/{Y}/{X}"
      * </pre>
      *
-     * @param lexicalFunctionalTerm URI Function
-     * @return a URI template with variable names inside the placeholders
+     * @param lexicalFunctionalTerm URI or BNode Function
+     * @return a template with variable names inside the placeholders
      */
-    public static String getUriTemplateString(ImmutableFunctionalTerm lexicalFunctionalTerm) {
+    public static String getTemplateString(ImmutableFunctionalTerm lexicalFunctionalTerm) {
 
-        if (!(lexicalFunctionalTerm.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol))
+        if (!(lexicalFunctionalTerm.getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol))
             throw new IllegalArgumentException(
-                    "The lexical term was expected to have a IRIStringTemplateFunctionSymbol: "
+                    "The lexical term was expected to have a ObjectStringTemplateFunctionSymbol: "
                             + lexicalFunctionalTerm);
 
-        final String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
+        final String template = ((ObjectStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
         ImmutableList<? extends ImmutableTerm> subTerms = lexicalFunctionalTerm.getTerms();
 
         List<String> splitParts = Splitter.on(PLACE_HOLDER).splitToList(template);
@@ -147,5 +150,12 @@ public class URITemplates {
         return templateWithVars.toString();
     }
 
-
+    public static String getDBConcatTemplateString(ImmutableFunctionalTerm lexicalTerm) {
+        if(!(lexicalTerm.getFunctionSymbol() instanceof DBConcatFunctionSymbol)){
+            throw new IllegalArgumentException("The lexical term was expected to have a DBConcatFunctionSymbol");
+        }
+        return lexicalTerm.getTerms().stream()
+                .map(t -> "{"+t+"}")
+                .collect(Collectors.joining());
+    }
 }

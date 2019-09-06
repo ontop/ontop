@@ -36,7 +36,7 @@ public interface SQLPPTriplesMap extends PreProcessedTriplesMap {
 	String getId();
 
 	// when created from OBDA files, or parsed from String, targetString is presented. If generated, e.g. from R2RML, targetString might be null
-	Optional<String> getTargetString();
+	Optional<String> getOptionalTargetString();
 
 	/**
 	 * PPMappingAssertion: a SQLPPTriplesMap with a single target atom.

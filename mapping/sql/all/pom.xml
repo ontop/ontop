@@ -2,11 +2,7 @@
     <parent>
         <artifactId>ontop-mapping-sql</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-<<<<<<< HEAD
         <version>4.0.0-SNAPSHOT</version>
-=======
-        <version>3.0.1-SNAPSHOT</version>
->>>>>>> version3
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>

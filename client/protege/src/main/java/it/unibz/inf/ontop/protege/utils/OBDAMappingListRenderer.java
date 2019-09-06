@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
@@ -369,9 +367,12 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 //		ImmutableList<TargetAtom> targetQuery = map.getTargetAtoms();
 //		String trgQuery = TargetQueryRenderer.encode(targetQuery, prefixManager);
 		// TODO: the orElse part
-		String trgQuery = map.getTargetString().orElse("");
+//		String trgQuery = map.getOptionalTargetString()
+//				.orElseGet(() -> TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager));
 
-		//String trgQuery = map.getTargetString();
+		String trgQuery = TargetQueryRenderer.encode(map.getTargetAtoms(), prefixManager);
+
+		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
 
  		OBDASQLQuery sourceQuery = map.getSourceQuery();

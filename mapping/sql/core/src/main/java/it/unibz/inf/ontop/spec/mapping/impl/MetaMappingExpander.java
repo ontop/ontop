@@ -49,7 +49,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.URITemplates;
+import it.unibz.inf.ontop.utils.Templates;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
@@ -387,7 +387,7 @@ public class MetaMappingExpander {
 			if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
 				String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
 						functionalLexicalTerm.getFunctionSymbol()).getTemplate();
-				return URITemplates.format(iriTemplate, values);
+				return Templates.format(iriTemplate, values);
 			} else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
 					&& ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
 				return getPredicateName(functionalLexicalTerm.getTerm(0), values);

@@ -566,8 +566,17 @@ public class OBDAModelManager implements Disposable {
 				// adding type information to the mapping predicates
 				for (SQLPPTriplesMap mapping : obdaModel.generatePPMapping().getTripleMaps()) {
 					ImmutableList<TargetAtom> tq = mapping.getTargetAtoms();
-					if (!TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary()).isEmpty()) {
-						throw new Exception("Found an invalid target query: " + tq.toString());
+					final ImmutableList<org.apache.commons.rdf.api.IRI> invalidIRIs = TargetQueryValidator.validate(tq, obdaModel.getCurrentVocabulary());
+					if (!invalidIRIs.isEmpty()) {
+						final StringBuilder stringBuilder = new StringBuilder();
+						stringBuilder.append("Found an invalid target query: \n  ");
+						stringBuilder.append("mappingId:\t").append(mapping.getId());
+						if (mapping.getOptionalTargetString().isPresent()) {
+							stringBuilder.append("\n  target:\t").append(mapping.getOptionalTargetString().get());
+						}
+						stringBuilder.append("\n  predicates not declared in the ontology: ").append(invalidIRIs);
+						final String message = stringBuilder.toString();
+						throw new Exception(message);
 					}
 				}
 			}

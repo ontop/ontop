@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.gui.action;
 
-import it.unibz.inf.ontop.answering.reformulation.impl.SQLExecutableQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.protege.core.OntopProtegeReasoner;
@@ -149,9 +149,10 @@ public abstract class OBDADataQueryAction<T> implements OBDAProgressListener {
 				if(statement == null)
 					throw new NullPointerException("QuestQueryAction received a null QuestOWLStatement object from the reasoner");
 
-				final SQLExecutableQuery sqlExecutableQuery = (SQLExecutableQuery) statement.getExecutableQuery(queryString);
-				sqlQuery = sqlExecutableQuery.getSQL();
-
+				final IQ sqlExecutableQuery = statement.getExecutableQuery(queryString);
+				// FIXME
+				// sqlQuery = sqlExecutableQuery.getSQL();
+				sqlQuery = sqlExecutableQuery.toString();
 				actionStarted = true;
 				result = executeQuery(statement, queryString);
 				latch.countDown();

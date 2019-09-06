@@ -342,14 +342,14 @@ public class QueryInterfaceView extends AbstractOWLViewComponent implements Save
             }
         });
 
-		//action after right click on the query for UCQ Unfolding
-		queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
-			@Override
-			public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
-				removeResultTable();
+        //action after right click on the query for UCQ Unfolding
+        queryEditorPanel.setRetrieveUCQUnfoldingAction(new OBDADataQueryAction<String>("Unfolding queries...", QueryInterfaceView.this) {
+            @Override
+            public String executeQuery(OntopOWLStatement st, String query) throws OWLException{
+                removeResultTable();
 				// TODO: should we show the SQL query only?
 				return st.getExecutableQuery(query).toString();
-			}
+            }
 
             @Override
             public OWLEditorKit getEditorKit(){

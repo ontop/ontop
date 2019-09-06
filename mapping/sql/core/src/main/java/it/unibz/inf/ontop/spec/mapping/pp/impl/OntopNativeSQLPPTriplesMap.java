@@ -57,7 +57,7 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
     }
 
     @Override
-    public Optional<String> getTargetString() {
+    public Optional<String> getOptionalTargetString() {
         return targetString;
     }
 
