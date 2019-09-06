@@ -241,7 +241,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
          * In case of injectivity
          */
         if (otherTerm.getFunctionSymbol().equals(this)
-                && isInjective(terms, variableNullability, termFactory)) {
+                && isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms()) {
             if (getArity() == 0)
                 return IncrementalEvaluation.declareIsTrue();
 
