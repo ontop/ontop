@@ -68,7 +68,7 @@ public class DefaultBooleanNormFunctionSymbol extends AbstractDBTypeConversionFu
         return termFactory.getDBCase(Stream.of(
                 buildEntry(subTerm, true, termFactory),
                 buildEntry(subTerm, false, termFactory)),
-                termFactory.getNullConstant());
+                termFactory.getNullConstant(), false);
     }
 
 

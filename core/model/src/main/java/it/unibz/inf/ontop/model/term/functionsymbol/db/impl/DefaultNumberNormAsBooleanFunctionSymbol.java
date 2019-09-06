@@ -65,7 +65,7 @@ public class DefaultNumberNormAsBooleanFunctionSymbol extends AbstractDBTypeConv
         return termFactory.getDBCase(Stream.of(
                 buildEntry(subTerm, true, termFactory),
                 buildEntry(subTerm, false, termFactory)),
-                termFactory.getNullConstant());
+                termFactory.getNullConstant(), false);
     }
 
     @Override

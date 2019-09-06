@@ -100,7 +100,8 @@ public class DefaultBooleanDenormFunctionSymbol
                 buildEntry(subTerm, termFactory.getXsdBooleanLexicalConstant(false), false, termFactory),
                 buildEntry(subTerm, termFactory.getDBStringConstant("0"), false, termFactory)),
                 // TODO: unclear if it should return NULL
-                termFactory.getNullConstant());
+                termFactory.getNullConstant(),
+                false);
     }
 
 

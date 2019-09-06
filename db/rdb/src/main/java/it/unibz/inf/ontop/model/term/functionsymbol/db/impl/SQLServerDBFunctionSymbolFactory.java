@@ -174,9 +174,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                                        Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        //FIXME when no match found should return empty string
-        return String.format("SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s))",
-                str, after, str, after, after, str, str);
+        return String.format("CASE WHEN LEN(%s) = 0 THEN %s ELSE SUBSTRING(%s,CHARINDEX(%s,%s)+LEN(%s),SIGN(CHARINDEX(%s,%s))*LEN(%s)) END",
+                after, str, str, after, str, after, after, str, str);
     }
 
     @Override

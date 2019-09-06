@@ -630,10 +630,10 @@ public abstract class AbstractBindTestWithFunctions {
 
     protected List<String> getBindWithAfter2ExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"The Semantic Web\"@en");
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
 
         return expectedValues;
     }

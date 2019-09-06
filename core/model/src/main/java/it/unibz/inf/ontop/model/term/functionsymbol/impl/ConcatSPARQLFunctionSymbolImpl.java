@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Arity >= 2
@@ -44,9 +42,10 @@ public class ConcatSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQL
                                             VariableNullability variableNullability) {
         ImmutableExpression condition = termFactory.getStrictEquality(typeTerms);
 
-        return termFactory.getDBCase(
-                Stream.of(Maps.immutableEntry(condition, typeTerms.get(0))),
-                termFactory.getRDFTermTypeConstant(xsdStringType))
+        return termFactory.getIfThenElse(
+                    condition,
+                    typeTerms.get(0),
+                    termFactory.getRDFTermTypeConstant(xsdStringType))
                 .simplify(variableNullability);
     }
 

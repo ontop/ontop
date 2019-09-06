@@ -414,19 +414,22 @@ public interface TermFactory {
 	 * IF THEN, ELSE IF ..., ELSE
 	 *
 	 * whenPairs must not be empty
+	 *
+	 * doOrderingMatter: if false, the when pairs can be re-ordered
 	 */
 	ImmutableFunctionalTerm getDBCase(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
-									  ImmutableTerm defaultTerm);
+									  ImmutableTerm defaultTerm, boolean doOrderingMatter);
 
 	/**
 	 * IF THEN, ELSE IF ..., ELSE NULL
 	 *
 	 * whenPairs must not be empty
 	 */
-	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs);
+	ImmutableFunctionalTerm getDBCaseElseNull(Stream<? extends Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+											  boolean doOrderingMatter);
 
 	ImmutableExpression getDBBooleanCase(Stream<Map.Entry<ImmutableExpression, ImmutableExpression>> whenPairs,
-										 ImmutableExpression defaultValue);
+										 ImmutableExpression defaultValue, boolean doOrderingMatter);
 
 	ImmutableFunctionalTerm getDBCoalesce(ImmutableTerm term1, ImmutableTerm term2, ImmutableTerm... terms);
 
