@@ -87,9 +87,8 @@ public class TargetQueryRenderer {
                 st = st.replace("}", "\\}");
             }
             return st;
-        } else {
-            return "{" + ((Variable) term).getName() + "}";
         }
+        return "{" + ((Variable) term).getName() + "}";
     }
 
     /**
@@ -118,11 +117,9 @@ public class TargetQueryRenderer {
     }
 
     private static String displayIRIConstant(IRIConstant iri, PrefixManager prefixManager) {
-        if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString())) {
+        if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString()))
             return "a";
-        } else {
-            return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
-        }
+        return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
     }
 
     private static String displayVariable(Variable term) {
@@ -141,23 +138,24 @@ public class TargetQueryRenderer {
 
             if (optionalDatatype.isPresent()) {
                 return displayDatatypeFunction(lexicalTerm, optionalDatatype.get(), prefixManager);
-            } else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+            }
+            if (lexicalTerm instanceof ImmutableFunctionalTerm) {
                 ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
                 FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
                 if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
                     return displayURITemplate(lexicalFunctionalTerm, prefixManager);
-                else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
+                if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
                     return displayFunctionalBnode(lexicalFunctionalTerm);
             }
             throw new IllegalArgumentException("unsupported function " + function);
-
-        } else if (functionSymbol instanceof DBConcatFunctionSymbol) {
-            return displayConcat(function);
-        } else if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
-            return displayVariable((Variable) function.getTerm(0));
-        } else {
-            return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
         }
+        if (functionSymbol instanceof DBConcatFunctionSymbol)
+            return displayConcat(function);
+
+        if (functionSymbol instanceof DBTypeConversionFunctionSymbol)
+            return displayVariable((Variable) function.getTerm(0));
+
+        return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
     }
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
@@ -218,54 +216,54 @@ public class TargetQueryRenderer {
         if (lexicalTerm instanceof Variable)
             return "<{" + ((Variable) lexicalTerm).getName() + "}>";
 
-//        DBTypeConversionFunctionSymbol termToTxt = termFactory.getDBFunctionSymbolFactory().getTemporaryConversionToDBStringFunctionSymbol();
-        if (lexicalTerm instanceof ImmutableFunctionalTerm){
+        if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 
             ImmutableFunctionalTerm fun = (ImmutableFunctionalTerm) lexicalTerm;
             FunctionSymbol fs = (fun.getFunctionSymbol());
-            if(fs instanceof  DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary()){
+            if (fs instanceof DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary()) {
                 ImmutableTerm arg = fun.getTerms().get(0);
-                if(arg instanceof Variable)
+                if (arg instanceof Variable)
                     return "<{" + ((Variable) arg).getName() + "}>";
                 throw new UnexpectedTermException(lexicalTerm);
             }
-            if(fs instanceof IRIStringTemplateFunctionSymbol){
-                    ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-                    String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
+            if (fs instanceof IRIStringTemplateFunctionSymbol) {
+                ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+                String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
 
-                    // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
-                    String templateFormat = template.replace("{}", "%s");
+                // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
+                String templateFormat = template.replace("{}", "%s");
 
-                    final Object[] varNames = function.getTerms().stream()
-                            .map(TargetQueryRenderer::asArg)
-                            .filter(Variable.class::isInstance)
-                            .map(var -> getDisplayName(var, prefixManager))
-                            .toArray();
+                final Object[] varNames = function.getTerms().stream()
+                        .map(TargetQueryRenderer::asArg)
+                        .filter(Variable.class::isInstance)
+                        .map(var -> getDisplayName(var, prefixManager))
+                        .toArray();
 
-                    String originalUri = String.format(templateFormat, varNames);
-                    if (originalUri.equals(RDF.TYPE.getIRIString()))
-                        return "a";
+                String originalUri = String.format(templateFormat, varNames);
+                if (originalUri.equals(RDF.TYPE.getIRIString()))
+                    return "a";
 
-                    String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
-                    if (!shortenUri.equals(originalUri))
-                        return shortenUri;
+                String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
+                if (!shortenUri.equals(originalUri))
+                    return shortenUri;
 
-                    return "<" + originalUri + ">";
-                }
+                return "<" + originalUri + ">";
+            }
         }
         throw new UnexpectedTermException(lexicalTerm);
     }
 
-    /** If the term is a cast-to-string function, return the first (0-th) argument, which must be a variable.
+    /**
+     * If the term is a cast-to-string function, return the first (0-th) argument, which must be a variable.
      * Otherwise return the term
      **/
     private static ImmutableTerm asArg(ImmutableTerm term) {
-        if (term instanceof ImmutableFunctionalTerm){
+        if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm fun = (ImmutableFunctionalTerm) term;
             FunctionSymbol fs = fun.getFunctionSymbol();
-            if(fs instanceof DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary()){
+            if (fs instanceof DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary()) {
                 ImmutableTerm arg = fun.getTerms().get(0);
-                if(arg instanceof Variable)
+                if (arg instanceof Variable)
                     return arg;
                 throw new UnexpectedTermException(term);
             }
@@ -277,10 +275,10 @@ public class TargetQueryRenderer {
      * Concat is expected to be flat
      */
     public static String displayConcat(ImmutableFunctionalTerm function) {
-        return  "\""+
-              function.getTerms().stream()
-                .map(TargetQueryRenderer::concatArg2String)
-                .collect(Collectors.joining()) +
+        return "\"" +
+                function.getTerms().stream()
+                        .map(TargetQueryRenderer::concatArg2String)
+                        .collect(Collectors.joining()) +
                 "\"";
     }
 
