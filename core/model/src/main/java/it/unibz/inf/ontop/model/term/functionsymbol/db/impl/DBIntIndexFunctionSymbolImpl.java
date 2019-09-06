@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonNullConstant;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -115,5 +112,34 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
         return true;
+    }
+
+    @Override
+    public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
+                                                  TermFactory termFactory, VariableNullability variableNullability) {
+        ImmutableTerm indexTerm = terms.get(0);
+
+        /*
+         * Same function symbol, same index term
+         *  --> simplifies into a disjunction
+         */
+        if ((otherTerm instanceof ImmutableFunctionalTerm)
+                && equals(((ImmutableFunctionalTerm) otherTerm).getFunctionSymbol())
+                && ((ImmutableFunctionalTerm) otherTerm).getTerm(0).equals(indexTerm)) {
+            ImmutableList<? extends ImmutableTerm> otherTerms = ((ImmutableFunctionalTerm) otherTerm).getTerms();
+
+            ImmutableExpression disjunction = termFactory.getDisjunction(
+                    IntStream.range(1, getArity())
+                            .boxed()
+                            .map(i -> termFactory.getConjunction(
+                                    termFactory.getStrictEquality(indexTerm, termFactory.getDBIntegerConstant(i)),
+                                    termFactory.getStrictEquality(terms.get(i), otherTerms.get(i+1)))))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("Arity > 1 was expected"));
+
+            return disjunction
+                    .evaluate(variableNullability, true);
+        }
+        else
+            return super.evaluateStrictEq(terms, otherTerm, termFactory, variableNullability);
     }
 }
