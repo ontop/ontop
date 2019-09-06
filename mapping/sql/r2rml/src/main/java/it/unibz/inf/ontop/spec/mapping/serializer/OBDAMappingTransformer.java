@@ -64,13 +64,13 @@ public class OBDAMappingTransformer {
     /**
 	 * Get R2RML TriplesMaps from OBDA mapping axiom
 	 */
-	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap axiom, PrefixManager prefixManager) {
+	public Stream<TriplesMap> getTriplesMaps(SQLPPTriplesMap triplesMap, PrefixManager prefixManager) {
 
-		SQLQueryImpl squery = (SQLQueryImpl) axiom.getSourceQuery();
-		ImmutableList<TargetAtom> targetAtoms = axiom.getTargetAtoms();
+		SQLQueryImpl squery = (SQLQueryImpl) triplesMap.getSourceQuery();
+		ImmutableList<TargetAtom> targetAtoms = triplesMap.getTargetAtoms();
 
 		//triplesMap node
-		String mapping_id = axiom.getId();
+		String mapping_id = triplesMap.getId();
 
 		// check if mapping id is an iri
 		if (!mapping_id.contains(":")) {
