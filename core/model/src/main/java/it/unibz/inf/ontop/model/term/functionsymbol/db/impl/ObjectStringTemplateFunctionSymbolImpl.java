@@ -28,6 +28,14 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     private final String template;
     private final DBTermType lexicalType;
     private final Pattern pattern;
+    private final boolean isInjective;
+
+    /**
+     * TODO: enrich this list (incomplete)
+     */
+    protected static final ImmutableList<Character> SOME_SAFE_SEPARATORS = ImmutableList.of(
+        '/','!','$','&','\'', '(', ')','*','+',',',';', '=');
+    protected static final String PLACE_HOLDER = "{}";
 
     // Lazy
     @Nullable
@@ -38,8 +46,46 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
-        // TODO: forbid separators (e.g. /)
-        this.pattern = Pattern.compile(template.replace("{}", "(.+)"));
+        // TODO: forbid safe separators (e.g. /)
+        this.pattern = Pattern.compile(template.replace(PLACE_HOLDER, "(.+)"));
+
+        this.isInjective = isInjective(arity, template);
+    }
+
+    /**
+     * Must not produce false positive
+     */
+    protected boolean isInjective(int arity, String template) {
+        if (arity < 2)
+            return true;
+
+        ImmutableList<String> intermediateStrings = extractIntermediateStrings(template);
+        if (intermediateStrings.size() != (arity - 1))
+            throw new IllegalArgumentException(
+                    String.format("The template %s is not matching the arity %d",
+                            template,
+                            arity));
+        return intermediateStrings.stream()
+                .allMatch(interm -> SOME_SAFE_SEPARATORS.stream()
+                        .anyMatch(sep -> interm.indexOf(sep) >= 0));
+    }
+
+    /**
+     * Strings between the place holders
+     */
+    protected static ImmutableList<String> extractIntermediateStrings(String template) {
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
+
+        // Non-final
+        int afterPlaceHolderIndex = template.indexOf(PLACE_HOLDER) + 2;
+        // Following index
+        int nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
+        while(nextPlaceHolderIndex > 0) {
+            builder.add(template.substring(afterPlaceHolderIndex, nextPlaceHolderIndex));
+            afterPlaceHolderIndex = nextPlaceHolderIndex + 2;
+            nextPlaceHolderIndex = template.indexOf(PLACE_HOLDER, afterPlaceHolderIndex);
+        }
+        return builder.build();
     }
 
     private static ImmutableList<TermType> createBaseTypes(int arity, TypeFactory typeFactory) {
@@ -109,12 +155,9 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
     }
 
 
-    /**
-     * TODO: implement is seriously based on the pattern and if it is unary
-     */
     @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return true;
+        return isInjective;
     }
 
     @Override
