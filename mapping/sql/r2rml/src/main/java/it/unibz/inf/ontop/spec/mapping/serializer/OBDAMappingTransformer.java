@@ -353,10 +353,21 @@ public class OBDAMappingTransformer {
 		return Optional.of(lexicalTerm)
 				.filter(t -> t instanceof ImmutableFunctionalTerm)
 				.map(t -> (ImmutableFunctionalTerm) t)
-				.filter(t -> (t.getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
-						&& t.getFunctionSymbol().getArity() == 1)
-				.map(t -> t.getTerm(0))
+				.map(t -> uncastFunction(t))
 				.orElse(lexicalTerm);
+	}
+
+	private ImmutableTerm uncastFunction(ImmutableFunctionalTerm fun) {
+			ImmutableList<ImmutableTerm> unCastArgs = fun.getTerms().stream()
+					.map(t -> uncast(t))
+					.collect(ImmutableCollectors.toList());
+			FunctionSymbol fs = fun.getFunctionSymbol();
+
+			if (fs instanceof DBTypeConversionFunctionSymbol
+					&& (((DBTypeConversionFunctionSymbol) fs).isTemporary())
+					&& fs.getArity() == 1)
+				return unCastArgs.iterator().next();
+			return termFactory.getImmutableFunctionalTerm(fs, unCastArgs);
 	}
 
 	/**
