@@ -22,35 +22,32 @@ package it.unibz.inf.ontop.protege.gui.action;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
-import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.AddAxiom;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.stream.Stream;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -170,6 +167,7 @@ public class R2RMLImportAction extends ProtegeAction {
 					manager,
 					tripleMaps.stream()
 							.flatMap(tm -> tm.getTargetAtoms().stream()),
+					obdaModelController.getTypeFactory(),
 					false
 			).stream()
 					.map(ax -> new AddAxiom(

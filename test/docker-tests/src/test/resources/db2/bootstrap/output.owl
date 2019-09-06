@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <rdf:RDF xmlns="http://db2-bootstrap-test#"
      xml:base="http://db2-bootstrap-test"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:xml="http://www.w3.org/XML/1998/namespace"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
@@ -21,9 +21,69 @@
     
 
 
+    <!-- http://db2-bootstrap-test/address#city -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#city"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/address#country -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#country"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/address#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/address#number -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#number"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/address#state -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#state"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/address#street -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/address#street"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/broker#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/broker#id"/>
+    
+
+
     <!-- http://db2-bootstrap-test/broker#ref-id -->
 
     <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/broker#ref-id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/brokerworksfor#brokerid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#brokerid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/brokerworksfor#clientid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#clientid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/brokerworksfor#companyid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#companyid"/>
     
 
 
@@ -45,9 +105,45 @@
     
 
 
+    <!-- http://db2-bootstrap-test/client#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/client#id"/>
+    
+
+
     <!-- http://db2-bootstrap-test/client#ref-id -->
 
     <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/client#ref-id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/company#addressid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/company#addressid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/company#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/company#id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/company#marketshares -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/company#marketshares"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/company#name -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/company#name"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/company#networth -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/company#networth"/>
     
 
 
@@ -57,9 +153,51 @@
     
 
 
+    <!-- http://db2-bootstrap-test/person#addressid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#addressid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/person#dateofbirth -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#dateofbirth"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/person#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/person#lastname -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#lastname"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/person#name -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#name"/>
+    
+
+
     <!-- http://db2-bootstrap-test/person#ref-addressid -->
 
     <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#ref-addressid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/person#ssn -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/person#ssn"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockbooklist#date -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockbooklist#date"/>
     
 
 
@@ -69,9 +207,81 @@
     
 
 
+    <!-- http://db2-bootstrap-test/stockbooklist#stockid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockbooklist#stockid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockinformation#companyid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#companyid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockinformation#description -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#description"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockinformation#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#id"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockinformation#numberofshares -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#numberofshares"/>
+    
+
+
     <!-- http://db2-bootstrap-test/stockinformation#ref-companyid -->
 
     <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#ref-companyid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/stockinformation#sharetype -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/stockinformation#sharetype"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#amount -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#amount"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#brokerid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#brokerid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#date -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#date"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#forclientid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#forclientid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#forcompanyid -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#forcompanyid"/>
+    
+
+
+    <!-- http://db2-bootstrap-test/transaction#id -->
+
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#id"/>
     
 
 
@@ -99,236 +309,15 @@
     
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Data properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://db2-bootstrap-test/address#city -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#city"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/address#country -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#country"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/address#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/address#number -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#number"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/address#state -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#state"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/address#street -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/address#street"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/broker#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/broker#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/brokerworksfor#brokerid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#brokerid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/brokerworksfor#clientid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#clientid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/brokerworksfor#companyid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/brokerworksfor#companyid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/client#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/client#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/company#addressid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/company#addressid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/company#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/company#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/company#marketshares -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/company#marketshares"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/company#name -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/company#name"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/company#networth -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/company#networth"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#addressid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#addressid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#dateofbirth -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#dateofbirth"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#lastname -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#lastname"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#name -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#name"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/person#ssn -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/person#ssn"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockbooklist#date -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockbooklist#date"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockbooklist#stockid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockbooklist#stockid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockinformation#companyid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockinformation#companyid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockinformation#description -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockinformation#description"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockinformation#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockinformation#id"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockinformation#numberofshares -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockinformation#numberofshares"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/stockinformation#sharetype -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/stockinformation#sharetype"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#amount -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#amount"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#brokerid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#brokerid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#date -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#date"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#forclientid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#forclientid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#forcompanyid -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#forcompanyid"/>
-    
-
-
-    <!-- http://db2-bootstrap-test/transaction#id -->
-
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#id"/>
-    
-
-
     <!-- http://db2-bootstrap-test/transaction#stockid -->
 
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#stockid"/>
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#stockid"/>
     
 
 
     <!-- http://db2-bootstrap-test/transaction#type -->
 
-    <owl:DatatypeProperty rdf:about="http://db2-bootstrap-test/transaction#type"/>
+    <owl:ObjectProperty rdf:about="http://db2-bootstrap-test/transaction#type"/>
     
 
 
@@ -398,5 +387,5 @@
 
 
 
-<!-- Generated by the OWL API (version 4.2.8) https://github.com/owlcs/owlapi -->
+<!-- Generated by the OWL API (version 4.5.7) https://github.com/owlcs/owlapi -->
 

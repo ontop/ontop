@@ -19,19 +19,19 @@ target		<http://db2-bootstrap-test/broker/id={broker_id}> <http://db2-bootstrap-
 source		SELECT "DB2INST1"."broker"."id" AS broker_id, "DB2INST1"."person"."id" AS person_id FROM "DB2INST1"."broker", "DB2INST1"."person" WHERE "DB2INST1"."broker"."id" = "DB2INST1"."person"."id"
 
 mappingId	MAPPING-ID4
-target		_:{brokerid}_{companyid}_{clientid} a <http://db2-bootstrap-test/brokerworksfor> ; <http://db2-bootstrap-test/brokerworksfor#brokerid> {brokerid}^^xsd:integer ; <http://db2-bootstrap-test/brokerworksfor#companyid> {companyid}^^xsd:integer ; <http://db2-bootstrap-test/brokerworksfor#clientid> {clientid}^^xsd:integer . 
+target		_:{brokerid} a <http://db2-bootstrap-test/brokerworksfor> ; <http://db2-bootstrap-test/brokerworksfor#brokerid> {brokerid}^^xsd:integer ; <http://db2-bootstrap-test/brokerworksfor#companyid> {companyid}^^xsd:integer ; <http://db2-bootstrap-test/brokerworksfor#clientid> {clientid}^^xsd:integer . 
 source		SELECT * FROM "DB2INST1"."brokerworksfor"
 
 mappingId	MAPPING-ID5
-target		_:{brokerworksfor_brokerid}_{brokerworksfor_companyid}_{brokerworksfor_clientid} <http://db2-bootstrap-test/brokerworksfor#ref-companyid> <http://db2-bootstrap-test/company/id={company_id}> . 
+target		_:{brokerworksfor_brokerid} <http://db2-bootstrap-test/brokerworksfor#ref-companyid> <http://db2-bootstrap-test/company/id={company_id}> . 
 source		SELECT "DB2INST1"."brokerworksfor"."brokerid" AS brokerworksfor_brokerid, "DB2INST1"."brokerworksfor"."companyid" AS brokerworksfor_companyid, "DB2INST1"."brokerworksfor"."clientid" AS brokerworksfor_clientid, "DB2INST1"."company"."id" AS company_id FROM "DB2INST1"."brokerworksfor", "DB2INST1"."company" WHERE "DB2INST1"."brokerworksfor"."companyid" = "DB2INST1"."company"."id"
 
 mappingId	MAPPING-ID6
-target		_:{brokerworksfor_brokerid}_{brokerworksfor_companyid}_{brokerworksfor_clientid} <http://db2-bootstrap-test/brokerworksfor#ref-brokerid> <http://db2-bootstrap-test/broker/id={broker_id}> . 
+target		_:{brokerworksfor_brokerid} <http://db2-bootstrap-test/brokerworksfor#ref-brokerid> <http://db2-bootstrap-test/broker/id={broker_id}> . 
 source		SELECT "DB2INST1"."brokerworksfor"."brokerid" AS brokerworksfor_brokerid, "DB2INST1"."brokerworksfor"."companyid" AS brokerworksfor_companyid, "DB2INST1"."brokerworksfor"."clientid" AS brokerworksfor_clientid, "DB2INST1"."broker"."id" AS broker_id FROM "DB2INST1"."brokerworksfor", "DB2INST1"."broker" WHERE "DB2INST1"."brokerworksfor"."brokerid" = "DB2INST1"."broker"."id"
 
 mappingId	MAPPING-ID7
-target		_:{brokerworksfor_brokerid}_{brokerworksfor_companyid}_{brokerworksfor_clientid} <http://db2-bootstrap-test/brokerworksfor#ref-clientid> <http://db2-bootstrap-test/client/id={client_id}> . 
+target		_:{brokerworksfor_brokerid} <http://db2-bootstrap-test/brokerworksfor#ref-clientid> <http://db2-bootstrap-test/client/id={client_id}> . 
 source		SELECT "DB2INST1"."brokerworksfor"."brokerid" AS brokerworksfor_brokerid, "DB2INST1"."brokerworksfor"."companyid" AS brokerworksfor_companyid, "DB2INST1"."brokerworksfor"."clientid" AS brokerworksfor_clientid, "DB2INST1"."client"."id" AS client_id FROM "DB2INST1"."brokerworksfor", "DB2INST1"."client" WHERE "DB2INST1"."brokerworksfor"."clientid" = "DB2INST1"."client"."id"
 
 mappingId	MAPPING-ID8

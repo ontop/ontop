@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.utils.URITemplates;
+import it.unibz.inf.ontop.utils.Templates;
 
 
 public class IRIStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFunctionSymbolImpl implements IRIStringTemplateFunctionSymbol {
@@ -13,7 +13,7 @@ public class IRIStringTemplateFunctionSymbolImpl extends ObjectStringTemplateFun
 
     protected static IRIStringTemplateFunctionSymbol createFunctionSymbol(String iriTemplate,
                                                                           TypeFactory typeFactory) {
-        int arity = URITemplates.getArity(iriTemplate);
+        int arity = Templates.getArity(iriTemplate);
 
         return new IRIStringTemplateFunctionSymbolImpl(iriTemplate, arity, typeFactory);
     }

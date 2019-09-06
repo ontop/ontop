@@ -77,6 +77,7 @@ public class BootstrapGenerator {
                 manager,
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()),
+                typeFactory,
                 true
         );
         List<AddAxiom> addAxioms = declarationAxioms.stream()

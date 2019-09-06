@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.protege.utils;
  * #L%
  */
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;

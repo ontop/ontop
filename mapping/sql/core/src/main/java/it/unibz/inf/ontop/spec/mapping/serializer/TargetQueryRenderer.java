@@ -22,18 +22,18 @@ package it.unibz.inf.ontop.spec.mapping.serializer;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TriplePredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.IRIStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.model.type.impl.BlankNodeTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -41,6 +41,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A utility class to render a Target Query object into its representational
@@ -48,15 +49,16 @@ import java.util.Optional;
  */
 public class TargetQueryRenderer {
 
-	/**
-	 * Transforms the given <code>OBDAQuery</code> into a string. The method requires
-	 * a prefix manager to shorten full IRI name.
-	 */
-	public static String encode(ImmutableList<TargetAtom> body, PrefixManager prefixManager) {
-		TurtleWriter turtleWriter = new TurtleWriter();
-		for (TargetAtom atom : body) {
-			final AtomPredicate p = atom.getProjectionAtom().getPredicate();
-            if (p instanceof TriplePredicate) {
+    /**
+     * Transforms the given <code>OBDAQuery</code> into a string. The method requires
+     * a prefix manager to shorten full IRI name.
+     */
+    public static String encode(ImmutableList<TargetAtom> body, PrefixManager prefixManager) {
+
+        TurtleWriter turtleWriter = new TurtleWriter();
+        for (TargetAtom atom : body) {
+            String originalString = atom.getProjectionAtom().getPredicate().toString();
+            if (originalString.equals("triple")) {
                 ImmutableTerm subjectTerm = atom.getSubstitutedTerm(0);
                 String subject = getDisplayName(subjectTerm, prefixManager);
                 ImmutableTerm predicateTerm = atom.getSubstitutedTerm(1);
@@ -65,17 +67,10 @@ public class TargetQueryRenderer {
                 String object = getDisplayName(objectTerm, prefixManager);
                 turtleWriter.put(subject, predicate, object);
             } else {
-                throw new UnsupportedOperationException("unsupported predicate! " + p);
-			}
-		}
-		return turtleWriter.print();
-	}
-
-    /**
-     * Checks if the atom is unary or not.
-     */
-    private static boolean isUnary(DataAtom atom) {
-        return atom.getArity() == 1;
+                throw new UnsupportedOperationException("unsupported predicate! " + originalString);
+            }
+        }
+        return turtleWriter.print();
     }
 
     /**
@@ -86,6 +81,18 @@ public class TargetQueryRenderer {
         return pm.getShortForm(uri, insideQuotes);
     }
 
+    private static String concatArg2String(ImmutableTerm term) {
+        if (term instanceof Constant) {
+            String st = ((Constant) term).getValue();
+            if (st.contains("{")) {
+                st = st.replace("{", "\\{");
+                st = st.replace("}", "\\}");
+            }
+            return st;
+        }
+        return "{" + ((Variable) term).getName() + "}";
+    }
+
     /**
      * Prints the text representation of different terms.
      */
@@ -93,17 +100,17 @@ public class TargetQueryRenderer {
         if (term instanceof ImmutableFunctionalTerm) // RDF(..) or ||n(...) or TmpToTEXT(...)
             return displayFunction((ImmutableFunctionalTerm) term, prefixManager);
         if (term instanceof Variable)
-            return displayVariable((Variable)term);
+            return displayVariable((Variable) term);
         if (term instanceof IRIConstant)
-            return displayIRIConstant((IRIConstant)term, prefixManager);
+            return displayIRIConstant((IRIConstant) term, prefixManager);
         if (term instanceof RDFLiteralConstant)
-            return displayValueConstant((RDFLiteralConstant)term);
+            return displayValueConstant((RDFLiteralConstant) term);
         if (term instanceof BNode)
-            return displayBnode((BNode)term);
+            return displayConstantBnode((BNode) term);
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayBnode(Term term) {
+    private static String displayConstantBnode(Term term) {
         return ((BNode) term).getName();
     }
 
@@ -112,19 +119,20 @@ public class TargetQueryRenderer {
     }
 
     private static String displayIRIConstant(IRIConstant iri, PrefixManager prefixManager) {
-        if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString())) {
+        if (iri.getIRI().getIRIString().equals(RDF.TYPE.getIRIString()))
             return "a";
-        } else {
-            return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
-        }
+        return getAbbreviatedName(iri.toString(), prefixManager, false); // shorten the URI if possible
     }
 
     private static String displayVariable(Variable term) {
         return "{" + term.getName() + "}";
     }
 
-    // TODO: check it again with version3 to merge to merge it properly
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
+
+        if (isTemporaryConversionFunction(function))
+            return displayVariable(extractUniqueVariableArgument(function));
+
         FunctionSymbol functionSymbol = function.getFunctionSymbol();
         if (functionSymbol instanceof RDFTermFunctionSymbol) {
             ImmutableTerm lexicalTerm = function.getTerm(0);
@@ -136,48 +144,88 @@ public class TargetQueryRenderer {
 
             if (optionalDatatype.isPresent()) {
                 return displayDatatypeFunction(lexicalTerm, optionalDatatype.get(), prefixManager);
-            }  else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
-                FunctionSymbol lexicalFunctionSymbol = lexicalFunctionalTerm.getFunctionSymbol();
-                if (lexicalFunctionSymbol instanceof IRIStringTemplateFunctionSymbol)
-                    return displayURITemplate(lexicalFunctionalTerm, prefixManager);
-                else if (lexicalFunctionSymbol instanceof BnodeStringTemplateFunctionSymbol)
-                    return displayFunctionalBnode(lexicalFunctionalTerm);
             }
-                throw new IllegalArgumentException("unsupported function " + function);
-
-        } else if (functionSymbol instanceof DBConcatFunctionSymbol) {
-            return displayConcat(function);
-        } else if (functionSymbol instanceof DBTypeConversionFunctionSymbol) {
-            return displayVariable((Variable) function.getTerm(0));
-        } else {
-            return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
+            ImmutableTerm termType = function.getTerm(1);
+            if (termType instanceof RDFTermTypeConstant &&
+                    ((RDFTermTypeConstant) termType).getRDFTermType() instanceof BlankNodeTermType) {
+                if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+                    ImmutableFunctionalTerm nestedFunction = (ImmutableFunctionalTerm) lexicalTerm;
+                    FunctionSymbol nestedFs = nestedFunction.getFunctionSymbol();
+                    if (nestedFs instanceof BnodeStringTemplateFunctionSymbol)
+                        return displayFunctionalBnode(nestedFunction);
+                    // case of RDF(TermToTxt(variable), BNODE)
+                    return displayNonFunctionalBNode(nestedFunction);
+                }
+                // case of RDF(variable, BNODE)
+                return displayNonFunctionalBNode(lexicalTerm);
+            }
+            if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm nestedFunction = (ImmutableFunctionalTerm) lexicalTerm;
+                FunctionSymbol nestedFs = nestedFunction.getFunctionSymbol();
+                if (nestedFs instanceof IRIStringTemplateFunctionSymbol)
+                    return displayURITemplate(nestedFunction, prefixManager);
+            }
+            throw new IllegalArgumentException("unsupported function " + function);
         }
-     //   return null; // TODO: why do we need a return here??
+        if (functionSymbol instanceof DBConcatFunctionSymbol)
+            return displayConcat(function);
+
+
+        return displayOrdinaryFunction(function, functionSymbol.getName(), prefixManager);
     }
 
+    private static String displayNonFunctionalBNode(ImmutableTerm term) {
+        if (term instanceof Variable)
+            return "_:" + displayVariable((Variable) term);
+        if (isTemporaryConversionFunction(term))
+            return "_:" + displayVariable(
+                    extractUniqueVariableArgument((ImmutableFunctionalTerm) term));
+        throw new UnexpectedTermException(term);
+    }
 
-    // TODO: check it again with version3 to merge to merge it properly
+    private static boolean isTemporaryConversionFunction(ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm) {
+            FunctionSymbol fs = ((ImmutableFunctionalTerm) term).getFunctionSymbol();
+            return (fs instanceof DBTypeConversionFunctionSymbol && ((DBTypeConversionFunctionSymbol) fs).isTemporary());
+        }
+        return false;
+    }
+
+    private static Variable extractUniqueVariableArgument(ImmutableFunctionalTerm fun) {
+        if (fun.getArity() == 1) {
+            ImmutableTerm arg = fun.getTerm(0);
+            if (arg instanceof Variable)
+                return (Variable) arg;
+        }
+        throw new UnexpectedTermException(fun);
+    }
+
+    /**
+     * If the term is a cast-to-string function, return the first (0-th) argument, which must be a variable.
+     * Otherwise return the term
+     **/
+    private static ImmutableTerm asArg(ImmutableTerm term) {
+        if(isTemporaryConversionFunction(term))
+            return extractUniqueVariableArgument((ImmutableFunctionalTerm) term);
+        return term;
+    }
+
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
         ImmutableTerm firstTerm = function.getTerms().get(0);
-        if(firstTerm instanceof Variable){
-            return "_:"+ displayVariable((Variable)firstTerm);
-        }
-        if(firstTerm instanceof ValueConstant) {
+        if (firstTerm instanceof ValueConstant) {
             String templateFormat = ((ValueConstant) firstTerm).getValue().stringValue().replace("{}", "%s");
-            if(function.getTerms().stream().skip(1).
+            if (function.getTerms().stream().skip(1).
                     anyMatch(t -> !(t instanceof Variable)))
-                throw new UnexpectedTermException(function, "All argument of the BNode function but the first one are expected to be variables");
+                throw new UnexpectedTermException(function, "All argument of the BNode template function but the first one are expected to be variables");
             ImmutableList<String> varNames = function.getTerms().stream().skip(1)
                     .filter(t -> t instanceof Variable)
                     .map(t -> (Variable) t)
-                    .map(v -> displayVariable(v))
+                    .map(TargetQueryRenderer::displayVariable)
                     .collect(ImmutableCollectors.toList());
 
-            String originalUri = String.format(templateFormat, varNames.toArray());
             return "_:" + String.format(templateFormat, varNames.toArray());
         }
-        throw new UnexpectedTermException(function, "The first argument of the BNode function is expected to be either a variable or a template");
+        throw new UnexpectedTermException(function, "The first argument of the BNode template function is expected to be a template");
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
@@ -208,61 +256,59 @@ public class TargetQueryRenderer {
                 });
     }
 
-
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
-        StringBuilder sb = new StringBuilder();
+        ImmutableTerm lexicalTerm = function.getTerms().get(0);
 
-        String template = ((IRIStringTemplateFunctionSymbol) function.getFunctionSymbol()).getTemplate();
+        if (lexicalTerm instanceof RDFLiteralConstant)
+            return "<" + ((RDFLiteralConstant) lexicalTerm).getValue() + ">";
 
-        // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
-        String templateFormat = template.replace("{}", "%s");
+        if (lexicalTerm instanceof Variable)
+            return "<{" + ((Variable) lexicalTerm).getName() + "}>";
 
-        final Object[] varNames = function.getTerms().stream()
-                // If the term is a cast-to-string function, we take out the first (0-th) argument
-                .map(t -> t instanceof ImmutableFunctionalTerm ? ((ImmutableFunctionalTerm) t).getTerm(0) : t)
-                .filter(Variable.class::isInstance)
-                .map(var -> getDisplayName((Variable)var, prefixManager))
-                .toArray();
+        if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 
-        String originalUri = String.format(templateFormat, varNames);
-        if (originalUri.equals(RDF.TYPE.getIRIString())) {
-            sb.append("a");
-        } else {
-            String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
-            if (!shortenUri.equals(originalUri)) {
-                sb.append(shortenUri);
-            } else {
-                // If the URI can't be shorten then use the full URI within brackets
-                sb.append("<");
-                sb.append(originalUri);
-                sb.append(">");
+            ImmutableFunctionalTerm fun = (ImmutableFunctionalTerm) lexicalTerm;
+            if (isTemporaryConversionFunction(fun))
+                return "<"+displayVariable(extractUniqueVariableArgument(fun))+">";
+
+            FunctionSymbol fs = function.getFunctionSymbol();
+            if (fs instanceof IRIStringTemplateFunctionSymbol) {
+                ImmutableFunctionalTerm lexicalFunctionalTerm = (ImmutableFunctionalTerm) lexicalTerm;
+                String template = ((IRIStringTemplateFunctionSymbol) lexicalFunctionalTerm.getFunctionSymbol()).getTemplate();
+
+                // Utilize the String.format() method so we replaced placeholders '{}' with '%s'
+                String templateFormat = template.replace("{}", "%s");
+
+                final Object[] varNames = function.getTerms().stream()
+                        .map(TargetQueryRenderer::asArg)
+                        .filter(Variable.class::isInstance)
+                        .map(var -> getDisplayName(var, prefixManager))
+                        .toArray();
+
+                String originalUri = String.format(templateFormat, varNames);
+                if (originalUri.equals(RDF.TYPE.getIRIString()))
+                    return "a";
+
+                String shortenUri = getAbbreviatedName(originalUri, prefixManager, false); // shorten the URI if possible
+                if (!shortenUri.equals(originalUri))
+                    return shortenUri;
+
+                return "<" + originalUri + ">";
             }
         }
-
-        return sb.toString();
+        throw new UnexpectedTermException(lexicalTerm);
     }
 
+
     /**
-     * Concat is now expected to be flat
+     * Concat is expected to be flat
      */
     public static String displayConcat(ImmutableFunctionalTerm function) {
-        StringBuilder sb = new StringBuilder();
-        ImmutableList<? extends ImmutableTerm> terms = function.getTerms();
-        sb.append("\"");
-        for (ImmutableTerm term : terms) {
-            if (term instanceof Constant) {
-                String st = ((Constant) term).getValue();
-                if (st.contains("{")) {
-                    st = st.replace("{", "\\{");
-                    st = st.replace("}", "\\}");
-                }
-                sb.append(st);
-            } else {
-                sb.append("{").append(((Variable) term).getName()).append("}");
-            }
-        }
-        sb.append("\"");
-        return sb.toString();
+        return "\"" +
+                function.getTerms().stream()
+                        .map(TargetQueryRenderer::concatArg2String)
+                        .collect(Collectors.joining()) +
+                "\"";
     }
 
     private TargetQueryRenderer() {
@@ -279,7 +325,8 @@ public class TargetQueryRenderer {
         }
 
         private UnexpectedTermException(ImmutableTerm term, String message) {
-            super("Unexpected term " + term + ":\n"+message);
+            super("Unexpected term " + term + ":\n" + message);
         }
     }
 }
+

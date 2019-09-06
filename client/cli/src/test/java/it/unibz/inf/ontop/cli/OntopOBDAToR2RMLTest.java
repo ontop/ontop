@@ -55,17 +55,6 @@ public class OntopOBDAToR2RMLTest {
         runCommand(argv);
     }
 
-    @Test
-    public void testOntopOBDAToR2RML3 (){
-        String[] argv = {"mapping", "to-r2rml",
-                "-i", "src/test/resources/oreda_bootstrapped_mapping.obda",
-                "-t", "src/test/resources/oreda_bootstrapped_ontology.owl",
-                "-o", "src/test/resources/output/oreda_bootstrapped_mapping.r2rml"
-        };
-        runCommand(argv);
-    }
-
-
     private void runCommand(String[] args) {
         Cli<OntopCommand> ontopCommandCLI = getOntopCommandCLI();
 

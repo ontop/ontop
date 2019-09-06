@@ -809,11 +809,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable) {
-		return getRDFFunctionalTerm(variable, bnodeTypeConstant);
-	}
-
-	@Override
 	public ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 														  ImmutableList<? extends ImmutableTerm> arguments) {
 		ImmutableFunctionalTerm lexicalTerm = getImmutableFunctionalTerm(

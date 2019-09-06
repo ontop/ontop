@@ -111,6 +111,7 @@
             </activation>
             <properties>
                 <docker.url>localhost</docker.url>
+<!--                <docker.url>tom.inf.unibz.it</docker.url>-->
             </properties>
         </profile>
         <profile>

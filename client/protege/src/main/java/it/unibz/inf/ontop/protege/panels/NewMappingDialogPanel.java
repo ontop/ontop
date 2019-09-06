@@ -36,7 +36,6 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.TurtleOBDASQLParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;

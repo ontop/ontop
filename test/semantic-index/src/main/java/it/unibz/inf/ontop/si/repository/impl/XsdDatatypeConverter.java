@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.utils;
+package it.unibz.inf.ontop.si.repository.impl;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -24,13 +24,15 @@ public class XsdDatatypeConverter {
 	
 
 	// TODO: double-check the formats
-	
-	private static final String[] formatStrings = { 
-				"yyyy-MM-dd HH:mm:ss.SS", 
-				"yyyy-MM-dd HH:mm:ss.S", 
-				"yyyy-MM-dd HH:mm:ss", 
-				"yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH:mm:ssz" };
+
+	private static final String[] formatStrings = {
+				"yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+				"yyyy-MM-dd'T'HH:mm:ssXXX",
+				"yyyy-MM-dd'T'HH:mm:ss.SSS",
+				"yyyy-MM-dd'T'HH:mm:ss.SS",
+				"yyyy-MM-dd'T'HH:mm:ss.S",
+				"yyyy-MM-dd'T'HH:mm:ss",
+				"yyyy-MM-dd"};
 	
 	/**
 	 * @see http://www.w3.org/TR/xmlschema11-2/#dateTime

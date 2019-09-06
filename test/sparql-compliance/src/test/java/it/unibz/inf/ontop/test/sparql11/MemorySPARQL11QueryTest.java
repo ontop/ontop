@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.test.sparql11;
 
-/*
- * #%L
- * ontop-sparql-compliance
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.test.sparql.ManifestTestUtils;
 import it.unibz.inf.ontop.test.sparql.MemoryOntopTestCase;
@@ -30,8 +10,9 @@ import org.junit.runners.Parameterized;
 import java.util.Collection;
 
 
-//Test of SPARQL 1.1 compliance
-
+/**
+ * Test of SPARQL 1.1 compliance
+ */
 @RunWith(Parameterized.class)
 public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
@@ -54,21 +35,20 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 	private static ImmutableSet<String> IGNORE = ImmutableSet.of(
 
-			/* AGGREGATES: TODO: enable them */
+			/* AGGREGATES */
 
+			// TODO: support GROUP_CONCAT
 			aggregatesManifest + "agg-groupconcat-01",
 			aggregatesManifest + "agg-groupconcat-02",
 			aggregatesManifest + "agg-groupconcat-03",
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 
-			/* BIND */
-            // not found in Extension
-			bindManifest + "bind04",
-
 			/* BINDINGS
 			 */
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values8",
+			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
 			bindingsManifest + "values5",
 
 			/* FUNCTIONS*/
@@ -77,17 +57,10 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "bnode01",
 			functionsManifest + "bnode02",
 
-			//problem with the numbers format e.g. 1.0 instead of 1
-			functionsManifest + "ceil01",
-
-			//coalesce not supported in SPARQL transformation
-			functionsManifest + "coalesce01",
-
-			//problem with the numbers format
-			functionsManifest + "floor01",
-
-			//extract hours return 0
+			// the SI does not preserve the original timezone
 			functionsManifest + "hours",
+			// the SI does not preserve the original timezone
+			functionsManifest + "day",
 
 			//not supported in SPARQL transformation
 			functionsManifest + "if01",
@@ -100,19 +73,10 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "md5-01",
 			functionsManifest + "md5-02",
 
-			//extract minutes return 0
-			functionsManifest + "minutes",
-
-			//Incompatible type inferred : expected: numeric term, actual: LITERAL
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-1",
+			//The SI does not support IRIs as ORDER BY conditions
 			functionsManifest + "plus-2",
-
-			//problem with the numbers format
-			functionsManifest + "round01",
-
-			// TODO: continue enabling already passing tests
-			//extract seconds return 0
-			functionsManifest + "seconds",
 
 			//SHA1 is not supported in H2
 			functionsManifest + "sha1-01",
@@ -122,12 +86,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "sha512-01",
 			functionsManifest + "sha512-02",
 
-			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
-			functionsManifest + "strafter01a",
+			//TODO: fix it
 			functionsManifest + "strafter02",
-			functionsManifest + "strbefore01a",
-			functionsManifest + "strbefore02",
-
+			
 			//not supported in SPARQL transformation
 			functionsManifest + "strdt01",
 			functionsManifest + "strdt02",
@@ -136,24 +97,11 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			functionsManifest + "strlang02",
 			functionsManifest + "strlang03",
 
-			//No data or composite atom in List
-			functionsManifest + "struuid01",
-
-			//The type should already be for a non-variable - non-expression term e.g "e"^^xsd:string
-			functionsManifest + "substring01",
-			functionsManifest + "substring02",
-
 			//not supported in SPARQL transformation
 			functionsManifest + "timezone",
 
 			//TZ is not supported in H2
 			functionsManifest + "tz",
-
-			// missing language tag
-			functionsManifest + "ucase01",
-
-			//No data or composite atom in List
-			functionsManifest + "uuid01",
 
 			/* CONSTRUCT not supported yet*/
 			//Projection cannot be cast to Reduced in rdf4j
@@ -171,17 +119,17 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//different format for number and not supported custom datatype
 			csvTscResManifest + "tsv03",
 
-			/* GROUPING
-			not supported yet */
+			/* GROUPING */
+			// TODO: fix
 			groupingManifest + "group01",
-			groupingManifest + "group03",
+			// Multi-typed COALESCE as grouping condition TODO: support it
 			groupingManifest + "group04",
+			// TODO: fix
 			groupingManifest + "group05",
 
 			/* NEGATION
 			not supported yet */
             negationManifest + "subset-by-exclusion-nex-1",
-//			negationManifest + "subset-by-exclusion-minus-1",
 			negationManifest + "temporal-proximity-by-exclusion-nex-1",
 			negationManifest + "subset-01",
 			negationManifest + "subset-02",
@@ -189,8 +137,15 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			negationManifest + "subset-03",
 			negationManifest + "exists-01",
 			negationManifest + "exists-02",
-//			negationManifest + "full-minuend",
-//			negationManifest + "partial-minuend",
+
+			// DISABLED DUE TO ORDER OVER IRI
+			negationManifest + "full-minuend",
+			// DISABLED DUE TO ORDER OVER IRI
+			negationManifest + "partial-minuend",
+			// TODO: enable it
+    		negationManifest + "full-minuend-modified",
+			// TODO: enable it
+    		negationManifest + "partial-minuend-modified",
 
 			/* EXISTS
 			not supported yet */
@@ -199,14 +154,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			existsManifest + "exists03",
 			existsManifest + "exists04",
 			existsManifest + "exists05",
-
-			/* PROJECT */
-			//Unexpected function in the query: SPARQL_DATATYPE
-			projectExpressionManifest + "projexp07",
-			projectExpressionManifest + "projexp05",
-
-			//Data conversion error converting "foobar"
-			projectExpressionManifest + "projexp02",
 
 			/* PROPERTY PATH*/
 			// Not supported: ArbitraryLengthPath
@@ -249,28 +196,23 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* SUBQUERY
 			*/
-			//Unexpected bindings
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery02",
+			//Quad translated as a triple. TODO: fix it
 			subqueryManifest + "subquery04",
-
-			//Problem SPARQL translation: Projection source of ProjectionElem "g"
-			// not found in StatementPattern FROM NAMED CONTEXT
-			subqueryManifest + "subquery07",
-
-			//fucntion is not supported
-			subqueryManifest + "subquery08",
+			// EXISTS is not supported yet
 			subqueryManifest + "subquery10",
 
-			//wrong SQL translation Column "SUB_QVIEW.O" missing
+			//ORDER BY IRI (for supported by the SI)
 			subqueryManifest + "subquery11",
 
-			//unbound variable: Var
+			//unbound variable: Var TODO: fix it
 			subqueryManifest + "subquery12",
 
-			//wrong SQL translation Column "SUB_QVIEW.O" missing
+			//ORDER BY IRI (for supported by the SI)
 			subqueryManifest + "subquery13",
 
-			//missing results
+			//missing results (TODO: fix)
 			subqueryManifest + "subquery14"
 	);
 

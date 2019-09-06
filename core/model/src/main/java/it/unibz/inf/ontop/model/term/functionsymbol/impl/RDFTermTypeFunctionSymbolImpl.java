@@ -16,6 +16,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermTypeFunctionSymbol {
 
@@ -83,17 +85,32 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     public ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
                               Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
                               TermFactory termFactory) {
-        ImmutableTerm term = terms.get(0);
-
         return termFactory.getDBCase(
-                conversionMap.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                // Condition
-                                termFactory.getStrictEquality(term, e.getKey()),
-                                // "Case" value
-                                caseTermFct.apply(e.getValue()))),
+                computeWhenPairs(terms, caseTermFct, termFactory),
                 // Default case
                 termFactory.getNullConstant());
+    }
+
+    private <T extends ImmutableTerm> Stream<Map.Entry<ImmutableExpression, T>> computeWhenPairs(
+            ImmutableList<? extends ImmutableTerm> terms,
+            Function<RDFTermTypeConstant, T> caseTermFct,
+            TermFactory termFactory) {
+        ImmutableTerm term = terms.get(0);
+        return conversionMap.entrySet().stream()
+                .map(e -> Maps.immutableEntry(
+                        // Condition
+                        termFactory.getStrictEquality(term, e.getKey()),
+                        // "Case" value
+                        caseTermFct.apply(e.getValue())));
+    }
+
+    @Override
+    public ImmutableExpression liftExpression(ImmutableList<? extends ImmutableTerm> terms, Function<RDFTermTypeConstant,
+            ImmutableExpression> caseExpressionFct, TermFactory termFactory) {
+        return termFactory.getDBBooleanCase(
+                computeWhenPairs(terms, caseExpressionFct, termFactory),
+                // Default case
+                termFactory.getIsTrue(termFactory.getNullConstant()));
     }
 
     @Override

@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import it.unibz.inf.ontop.utils.URITemplates;
+import it.unibz.inf.ontop.utils.Templates;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -77,7 +77,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                     .map(c -> encodeParameter(c, termFactory, variableNullability))
                     .collect(ImmutableCollectors.toList());
 
-            return termFactory.getDBConstant(URITemplates.format(template, values), lexicalType);
+            return termFactory.getDBConstant(Templates.format(template, values), lexicalType);
         }
         else
             return termFactory.getImmutableFunctionalTerm(this, newTerms);

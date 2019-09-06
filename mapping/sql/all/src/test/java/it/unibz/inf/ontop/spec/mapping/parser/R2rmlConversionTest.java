@@ -75,6 +75,18 @@ public class R2rmlConversionTest {
     }
 
     @Test
+    public void testUntypedLiteral() throws Exception {
+        Collection<TriplesMap> triplesMaps = execute("src/test/resources/npd-literal-mapping.obda");
+        for (TriplesMap triplesMap :triplesMaps){
+            ObjectMap objectMap = triplesMap.getPredicateObjectMap(0).getObjectMap(0);
+            assertEquals("someColName", objectMap.getColumn());
+            assertNull(objectMap.getDatatype());
+            assertNull(objectMap.getTemplate());
+        }
+
+    }
+
+    @Test
     public void testLang() throws Exception {
         Collection<TriplesMap> triplesMaps = execute("src/test/resources/langstring-mapping.obda");
         for (TriplesMap triplesMap :triplesMaps){

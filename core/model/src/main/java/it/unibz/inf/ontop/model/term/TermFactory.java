@@ -357,10 +357,6 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getIRIFunctionalTerm(IRIStringTemplateFunctionSymbol templateSymbol,
 												 ImmutableList<DBConstant> arguments);
 
-	/**
-	 * NB: a fresh Bnode template is created
-	 */
-	ImmutableFunctionalTerm getFreshBnodeFunctionalTerm(Variable variable);
 	ImmutableFunctionalTerm getBnodeFunctionalTerm(String bnodeTemplate,
 												   ImmutableList<? extends ImmutableTerm> arguments);
 

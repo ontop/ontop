@@ -23,27 +23,32 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.*;
-import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
+import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.MappingBootstrappingException;
+import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
@@ -52,9 +57,13 @@ import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 /***
@@ -148,6 +157,7 @@ public class DirectMappingEngine {
             		manager,
                     newPPMapping.getTripleMaps().stream()
                             .flatMap(ax -> ax.getTargetAtoms().stream()),
+					typeFactory,
 					true
 			);
             manager.addAxioms(ontology, declarationAxioms);
@@ -169,50 +179,6 @@ public class DirectMappingEngine {
 		}
 	}
 
-
-	public Set<OWLDeclarationAxiom> extractDeclarationAxioms(OWLOntologyManager manager, Stream<TargetAtom> targetAtoms) {
-
-        OWLDataFactory dataFactory = manager.getOWLDataFactory();
-        return targetAtoms
-				.map(targetAtom -> {
-
-			ImmutableList<ImmutableTerm> terms = targetAtom.getSubstitutedTerms();
-			RDFAtomPredicate predicate = (RDFAtomPredicate) targetAtom.getProjectionAtom().getPredicate();
-
-			Optional<org.apache.commons.rdf.api.IRI> classIRI = predicate.getClassIRI(terms);
-			Optional<org.apache.commons.rdf.api.IRI> propertyIRI = predicate.getPropertyIRI(terms);
-
-            final OWLEntity entity;
-            if (classIRI.isPresent()) {
-                entity = dataFactory.getOWLClass(IRI.create(classIRI.get().getIRIString()));
-            }
-            else if (propertyIRI.isPresent()) {
-            	IRI iri = IRI.create(propertyIRI.get().getIRIString());
-
-            	ImmutableTerm objectTerm = predicate.getObject(terms);
-            	if (objectTerm instanceof ImmutableFunctionalTerm) {
-					ImmutableFunctionalTerm objectFunctionalTerm = (ImmutableFunctionalTerm) objectTerm;
-
-					TermType termType = objectFunctionalTerm.inferType()
-							.flatMap(TermTypeInference::getTermType)
-							.filter(t -> t.isA(typeFactory.getAbstractRDFTermType()))
-							.orElseThrow(() -> new MinorOntopInternalBugException(
-									"Could not infer the RDF type of " + objectFunctionalTerm));
-
-					entity = (termType.isA(typeFactory.getAbstractRDFSLiteral()))
-							? dataFactory.getOWLDataProperty(iri)
-							: dataFactory.getOWLObjectProperty(iri);
-				}
-				else
-					throw new MinorOntopInternalBugException("A functional term was expected for the object: " + objectTerm);
-			}
-            else {
-				throw new MinorOntopInternalBugException("No IRI could extracted from " + targetAtom);
-            }
-            return dataFactory.getOWLDeclarationAxiom(entity);
-        })
-				.collect(Collectors.toSet());
-    }
 
 	/***
 	 * extract all the mappings from a datasource
@@ -236,7 +202,6 @@ public class DirectMappingEngine {
 		return bootstrapMappings(mapping);
 	}
 
-
 	/***
 	 * extract mappings from given datasource, and insert them into the pre-processed mapping
 	 *
@@ -255,7 +220,6 @@ public class DirectMappingEngine {
 			return bootstrapMappings(metadata, ppMapping);
 		}
 	}
-
 
 	private SQLPPMapping bootstrapMappings(RDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
