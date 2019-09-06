@@ -20,9 +20,7 @@ import java.util.function.Function;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.BOOL_STR;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMESTAMPTZ_STR;
-import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.TIMETZ_STR;
+import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
 public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -85,7 +83,14 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
      */
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-        return new NonSimplifiableTypedNullFunctionSymbol(termType);
+        DBTermType targetType;
+        // Cannot CAST to SERIAL --> CAST to INTEGER instead
+        if (termType.getCastName().equals(SERIAL_STR))
+            targetType = dbTypeFactory.getDBTermType(INTEGER_STR);
+        else
+            targetType = termType;
+
+        return new NonSimplifiableTypedNullFunctionSymbol(targetType);
     }
 
     @Override
