@@ -13,6 +13,15 @@ public class StrBeforeSPARQLFunctionSymbolImpl extends AbstractStrBeforeOrAfterS
     }
 
     @Override
+    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
+                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
+        return termFactory.getIfThenElse(
+                termFactory.getDBIsStringEmpty(subLexicalTerms.get(1)),
+                termFactory.getDBStringConstant(""),
+                computeLexicalTermWhenSecondArgIsNotEmpty(subLexicalTerms, termFactory));
+    }
+
+    @Override
     protected ImmutableTerm computeLexicalTermWhenSecondArgIsNotEmpty(ImmutableList<ImmutableTerm> subLexicalTerms,
                                                                       TermFactory termFactory) {
         return termFactory.getDBStrBefore(subLexicalTerms.get(0), subLexicalTerms.get(1));

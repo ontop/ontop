@@ -171,8 +171,9 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s),SIGN(INSTR(%s,%s))*LENGTH(%s)),'')",
-                str, str, after, after, str, after, str); //FIXME when no match found should return empty string
+        // NB: (%s IS NULL) here is for empty strings (NULL in Oracle...)
+        return String.format("CASE WHEN %s IS NULL THEN %s ELSE NVL(SUBSTR(%s,INSTR(%s,%s)+LENGTH(%s),SIGN(INSTR(%s,%s))*LENGTH(%s)),'') END",
+                after, str, str, str, after, after, str, after, str); //FIXME when no match found should return empty string
     }
 
     @Override

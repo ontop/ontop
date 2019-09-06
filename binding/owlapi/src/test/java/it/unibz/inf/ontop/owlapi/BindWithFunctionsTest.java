@@ -681,10 +681,10 @@ public class BindWithFunctionsTest {
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
-        expectedValues.add("\"\"@en");
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"The Semantic Web\"@en");
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition\"@en");
         checkReturnedValues(queryBind, expectedValues);
 
     }

@@ -102,7 +102,7 @@ public class DBIntIndexFunctionSymbolImpl extends AbstractArgDependentTypedDBFun
                                 termFactory.getStrictEquality(subTerm, termFactory.getDBIntegerConstant(i)),
                                 terms.get(i + 1))),
                 // TODO: find a way to cause a fatal error for the default case (instead of returning NULL)
-                termFactory.getNullConstant());
+                termFactory.getNullConstant(), false);
 
         return termConverter.apply(caseTerm);
     }

@@ -142,12 +142,14 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     /**
      * For the CASE functions
      */
-    private final Map<Integer, DBFunctionSymbol> caseMap;
+    private final Map<Integer, DBFunctionSymbol> caseMapWithOrder;
+    private final Map<Integer, DBFunctionSymbol> caseMapWithoutOrder;
 
     /**
      * For the CASE functions
      */
-    private final Map<Integer, DBBooleanFunctionSymbol> booleanCaseMap;
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCaseMapWithOrder;
+    private final Map<Integer, DBBooleanFunctionSymbol> booleanCaseMapWithoutOrder;
 
     /**
      * For the strict equalities
@@ -246,8 +248,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         this.otherSimpleCastTable = HashBasedTable.create();
 
         this.untypedBinaryMathMap = new ConcurrentHashMap<>();
-        this.caseMap = new ConcurrentHashMap<>();
-        this.booleanCaseMap = new ConcurrentHashMap<>();
+        this.caseMapWithOrder = new ConcurrentHashMap<>();
+        this.caseMapWithoutOrder = new ConcurrentHashMap<>();
+        this.booleanCaseMapWithOrder = new ConcurrentHashMap<>();
+        this.booleanCaseMapWithoutOrder = new ConcurrentHashMap<>();
         this.strictEqMap = new ConcurrentHashMap<>();
         this.strictNEqMap = new ConcurrentHashMap<>();
         this.falseOrNullMap = new ConcurrentHashMap<>();
@@ -505,23 +509,24 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
-    public DBFunctionSymbol getDBCase(int arity) {
+    public DBFunctionSymbol getDBCase(int arity, boolean doOrderingMatter) {
         if ((arity < 3) || (arity % 2 == 0))
             throw new IllegalArgumentException("Arity of a CASE function symbol must be odd and >= 3");
 
-        return caseMap
-                .computeIfAbsent(arity, a -> createDBCase(arity));
+        return doOrderingMatter
+                ? caseMapWithOrder.computeIfAbsent(arity, a -> createDBCase(arity, true))
+                : caseMapWithoutOrder.computeIfAbsent(arity, a -> createDBCase(arity, false));
 
     }
 
     @Override
-    public DBBooleanFunctionSymbol getDBBooleanCase(int arity) {
+    public DBBooleanFunctionSymbol getDBBooleanCase(int arity, boolean doOrderingMatter) {
         if ((arity < 3) || (arity % 2 == 0))
             throw new IllegalArgumentException("Arity of a CASE function symbol must be odd and >= 3");
 
-        return booleanCaseMap
-                .computeIfAbsent(arity, a -> createDBBooleanCase(arity));
-
+        return doOrderingMatter
+                ? booleanCaseMapWithOrder.computeIfAbsent(arity, a -> createDBBooleanCase(arity, true))
+                : booleanCaseMapWithoutOrder.computeIfAbsent(arity, a -> createDBBooleanCase(arity, false));
     }
 
     @Override
@@ -1056,8 +1061,8 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType inputType,
                                                                                      DBTermType targetType);
 
-    protected abstract DBFunctionSymbol createDBCase(int arity);
-    protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity);
+    protected abstract DBFunctionSymbol createDBCase(int arity, boolean doOrderingMatter);
+    protected abstract DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter);
 
     protected abstract DBFunctionSymbol createCoalesceFunctionSymbol(int arity);
 

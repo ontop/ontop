@@ -20,7 +20,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     protected static final String INT8_STR = "INT8";
     protected static final String FLOAT4_STR = "FLOAT4";
     protected static final String FLOAT8_STR = "FLOAT8";
-    protected static final String SERIAL_STR = "SERIAL";
+    public static final String SERIAL_STR = "SERIAL";
     protected static final String BIGSERIAL_STR = "BIGSERIAL";
     protected static final String BPCHAR_STR = "BPCHAR";
     protected static final String NAME_STR = "NAME";
