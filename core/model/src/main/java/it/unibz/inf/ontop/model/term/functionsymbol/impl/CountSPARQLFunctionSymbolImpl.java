@@ -75,6 +75,9 @@ public class CountSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl impl
                     termFactory.getConversion2RDFLexical(dbCountTerm, xsdIntegerType), xsdIntegerType)
                     .simplify(variableNullability);
         }
+        else if (newTerm.isNull()) {
+            return termFactory.getRDFLiteralConstant("0", XSD.INTEGER);
+        }
 
         return termFactory.getImmutableFunctionalTerm(this, newTerms);
     }
