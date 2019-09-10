@@ -38,7 +38,7 @@ public interface IQTree {
      * Union branches with compatible definitions are kept together
      *
      */
-    IQTree liftIncompatibleDefinitions(Variable variable);
+    IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator);
 
     default boolean isLeaf() {
         return getChildren().isEmpty();

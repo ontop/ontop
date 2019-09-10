@@ -81,8 +81,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
      * TODO: use the properties for optimization purposes?
      */
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable) {
-        return getRootNode().liftIncompatibleDefinitions(variable, getChildren());
+    public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
+        return getRootNode().liftIncompatibleDefinitions(variable, getChildren(), variableGenerator);
     }
 
     @Override

@@ -227,9 +227,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
      * TODO: make it compatible definitions together (requires a VariableGenerator so as to lift bindings)
      */
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         ImmutableList<IQTree> liftedChildren = children.stream()
-                .map(c -> c.liftIncompatibleDefinitions(variable))
+                .map(c -> c.liftIncompatibleDefinitions(variable, variableGenerator))
                 .collect(ImmutableCollectors.toList());
         
         return iqFactory.createNaryIQTree(this, liftedChildren);

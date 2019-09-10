@@ -203,12 +203,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         if (!childVariables.contains(variable)) {
             return iqFactory.createUnaryIQTree(this, child);
         }
 
-        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
         /*

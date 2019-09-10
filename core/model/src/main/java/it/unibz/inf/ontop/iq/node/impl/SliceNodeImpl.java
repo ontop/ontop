@@ -53,7 +53,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         throw new RuntimeException("TODO: implement it");
     }
 

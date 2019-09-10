@@ -270,12 +270,12 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return IntStream.range(0, children.size()).boxed()
                 .map(i -> Maps.immutableEntry(i, children.get(i)))
                 .filter(e -> e.getValue().isConstructed(variable))
                 // index -> new child
-                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable)))
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
                 .filter(e -> {
                             QueryNode newRootNode = e.getValue().getRootNode();
                             return (newRootNode instanceof UnionNode)
@@ -283,7 +283,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                                     e.getValue().getChildren());
                 })
                 .findFirst()
-                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children))
+                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
     }
 
@@ -387,7 +387,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         }
     }
 
-    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren) {
+    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
+                                  VariableGenerator variableGenerator) {
         UnionNode newUnionNode = iqFactory.createUnionNode(initialChildren.stream()
                 .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toSet()));
@@ -395,7 +396,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return iqFactory.createNaryIQTree(newUnionNode,
                 newUnionChild.getChildren().stream()
                         .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
-                        .collect(ImmutableCollectors.toList()));
+                        .collect(ImmutableCollectors.toList()))
+                .normalizeForOptimization(variableGenerator);
     }
 
     private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {

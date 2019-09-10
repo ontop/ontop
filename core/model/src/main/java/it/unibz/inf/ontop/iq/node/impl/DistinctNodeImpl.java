@@ -42,7 +42,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
      * TODO: implement it seriously! (is currently blocking)
      */
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         // TODO: stop blocking
         return iqFactory.createUnaryIQTree(this, child);
     }

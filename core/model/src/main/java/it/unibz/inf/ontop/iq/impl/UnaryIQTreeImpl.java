@@ -65,8 +65,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable) {
-        return getRootNode().liftIncompatibleDefinitions(variable, getChild());
+    public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
+        return getRootNode().liftIncompatibleDefinitions(variable, getChild(), variableGenerator);
     }
 
     @Override

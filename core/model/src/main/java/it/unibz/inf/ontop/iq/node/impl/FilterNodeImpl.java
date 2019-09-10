@@ -98,8 +98,8 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
-        IQTree newChild = child.liftIncompatibleDefinitions(variable);
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
+        IQTree newChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
         QueryNode newChildRoot = newChild.getRootNode();
 
         /*

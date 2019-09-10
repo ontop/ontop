@@ -37,7 +37,7 @@ public interface UnaryOperatorNode extends QueryNode {
     boolean isDistinct(IQTree child);
 
     @Deprecated
-    IQTree liftIncompatibleDefinitions(Variable variable, IQTree child);
+    IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child);
 

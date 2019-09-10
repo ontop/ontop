@@ -58,7 +58,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         throw new RuntimeException("TODO: implement");
     }
 

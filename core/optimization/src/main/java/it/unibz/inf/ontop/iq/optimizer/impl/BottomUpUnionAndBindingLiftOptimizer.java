@@ -120,7 +120,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
                 : iqFactory.createNaryIQTree(joinNode, newChildren);
 
         return extractCandidateVariables(queryTree, joinNode.getOptionalFilterCondition(), newChildren)
-                .map(newQueryTree::liftIncompatibleDefinitions)
+                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)
@@ -177,7 +177,7 @@ public class BottomUpUnionAndBindingLiftOptimizer implements UnionAndBindingLift
         return extractCandidateVariables(queryTree, leftJoinNode.getOptionalFilterCondition(),
                     ImmutableList.of(newLeftChild, newRightChild))
                 .filter(v -> newLeftChild.getVariables().contains(v))
-                .map(newQueryTree::liftIncompatibleDefinitions)
+                .map(variable -> newQueryTree.liftIncompatibleDefinitions(variable, variableGenerator))
                 .filter(t -> !t.equals(queryTree))
                 .findFirst()
                 .orElse(newQueryTree)

@@ -88,7 +88,7 @@ public abstract class LeafIQTreeImpl extends QueryNodeImpl implements LeafIQTree
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
         return this;
     }
 

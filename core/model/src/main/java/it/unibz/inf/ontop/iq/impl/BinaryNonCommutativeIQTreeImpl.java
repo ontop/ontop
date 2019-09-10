@@ -95,8 +95,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable) {
-        return getRootNode().liftIncompatibleDefinitions(variable, leftChild, rightChild);
+    public IQTree liftIncompatibleDefinitions(Variable variable, VariableGenerator variableGenerator) {
+        return getRootNode().liftIncompatibleDefinitions(variable, leftChild, rightChild, variableGenerator);
     }
 
     @Override

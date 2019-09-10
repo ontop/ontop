@@ -93,7 +93,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
      * TODO: see if in some cases we could lift
      */
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this, child);
     }
 

@@ -247,13 +247,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild) {
+    public IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild,
+                                              VariableGenerator variableGenerator) {
         if (leftChild.getVariables().contains(variable)) {
-            IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable);
+            IQTree liftedLeftChild = leftChild.liftIncompatibleDefinitions(variable, variableGenerator);
             QueryNode leftChildRoot = liftedLeftChild.getRootNode();
 
             if (leftChildRoot instanceof UnionNode
-                    && ((UnionNode) leftChildRoot).hasAChildWithLiftableDefinition(variable, leftChild.getChildren())) {
+                    && ((UnionNode) leftChildRoot).hasAChildWithLiftableDefinition(variable, liftedLeftChild.getChildren())) {
 
                 UnionNode newUnionNode = iqFactory.createUnionNode(
                         Stream.of(leftChild, rightChild)

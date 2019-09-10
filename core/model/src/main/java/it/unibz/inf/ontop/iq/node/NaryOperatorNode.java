@@ -37,7 +37,7 @@ public interface NaryOperatorNode extends QueryNode {
     boolean isDistinct(ImmutableList<IQTree> children);
 
     @Deprecated
-    IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children);
+    IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children);
 
