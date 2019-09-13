@@ -53,9 +53,9 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(FlattenUnionExecutor.class);
         bindFromSettings(ConstructionNodeCleaningExecutor.class);
         bindFromSettings(DatalogProgram2QueryConverter.class);
-        bindFromSettings(InnerJoinOptimizer.class);
+        bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
-        bindFromSettings(LeftJoinOptimizer.class);
+        bindFromSettings(LeftJoinMutableOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
         bindFromSettings(IQ2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
@@ -67,6 +67,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(OrderBySimplifier.class);
         bindFromSettings(AggregationSimplifier.class);
         bindFromSettings(PostProcessableFunctionLifter.class);
+        bindFromSettings(InnerJoinIQOptimizer.class);
+        bindFromSettings(LeftJoinIQOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
