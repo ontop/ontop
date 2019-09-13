@@ -74,7 +74,7 @@ public class FixedPointJoinLikeOptimizer implements JoinLikeOptimizer {
 
         for (int i=0; i < MAX_LOOP; i++){
 
-            IQ optimizedIQ = leftJoinIQOptimizer.optimize(innerJoinIQOptimizer.optimize(initialIQ))
+            IQ optimizedIQ = leftJoinIQOptimizer.optimize(innerJoinIQOptimizer.optimize(currentIQ))
                     .normalizeForOptimization();
             if (optimizedIQ.equals(currentIQ))
                 return optimizedIQ;
