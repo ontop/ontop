@@ -169,7 +169,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Function, CQIE> edgeDP) {
+	private ImmutableList<List<Function>> rewriteCC(QueryConnectedComponent cc, String prefix,  Multimap<Function, CQIE> edgeDP) {
 
 		List<ImmutableList<Function>> bodies = new LinkedList<>();
 
@@ -252,7 +252,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 							log.debug("EDGE {} COVERED BY {}", edge, cover.get());
 					}
 					for (TreeWitness tw : compatibleTWs) {
-						Function twAtom = getHeadAtom(headAtom.getFunctionSymbol().getName(), "_TW_" + (edgeDP.size() + 1), cc.getVariables());
+						Function twAtom = getHeadAtom(prefix, "_TW_" + (edgeDP.size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
 							edgeDP.put(twAtom, datalogFactory.getCQIE(twAtom, twfa));
@@ -271,8 +271,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					for (TreeWitness tw : tws.getTWs())
 						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
 							if (edgeAtom == null) {
-								edgeAtom = getHeadAtom(headAtom.getFunctionSymbol().getName(),
-										"_EDGE_" + (edgeDP.size() + 1), cc.getVariables());
+								edgeAtom = getHeadAtom(prefix, "_EDGE_" + (edgeDP.size() + 1), cc.getVariables());
 								mainbody.add(edgeAtom);				
 								
 								List<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList());
@@ -298,15 +297,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					.stream()
 					.map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList()));
 		}
-		List<CQIE> outputRules = new LinkedList<>();
-
-		for (ImmutableList<Function> body : bodies) {
-			List<Function> b = new ArrayList<>();
-			b.addAll(body);
-			b.addAll(cc.getNonDLAtoms());
-			outputRules.add(datalogFactory.getCQIE(headAtom, b));
-		}
-		return outputRules;
+		return bodies.stream()
+				.map(body -> {
+						List<Function> b = new ArrayList<>(body);
+						b.addAll(cc.getNonDLAtoms());
+						return b; })
+				.collect(ImmutableCollectors.toList());
 	}
 	
 	private double time = 0;
@@ -325,32 +321,32 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		for (CQIE cqie : program.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie, atomFactory);
 			Function cqieAtom = cqie.getHead();
-		
+			String cqieURI = cqieAtom.getFunctionSymbol().getName();
+
 			if (ccs.size() == 1) {
 				QueryConnectedComponent cc = ccs.iterator().next();
 				log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-				outputRules.addAll(rewriteCC(cc, cqieAtom, edgeDP)); 				
+				for (List<Function> b : rewriteCC(cc, cqieURI, edgeDP))
+					outputRules.add(datalogFactory.getCQIE(cqieAtom, b));
 			}
 			else {
 				if (ccDP == null)
 					ccDP = ArrayListMultimap.create();
-				String cqieURI = cqieAtom.getFunctionSymbol().getName();
 				List<Function> ccBody = new ArrayList<>(ccs.size());
 				for (QueryConnectedComponent cc : ccs) {
 					log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
 					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.size() + 1), cc.getFreeVariables());
-					for (CQIE cq : rewriteCC(cc, ccAtom, edgeDP))
-					    ccDP.put(cq.getHead(), cq);
+					for (List<Function> cq : rewriteCC(cc, cqieURI, edgeDP))
+					    ccDP.put(ccAtom, datalogFactory.getCQIE(ccAtom, cq));
 					ccBody.add(ccAtom);
 				}
 				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));
 			}
 		}
-		System.out.println("OUTPUT: " + outputRules + " CC " + ccDP + "EDGES " + edgeDP);
 		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		if (!edgeDP.isEmpty()) {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
