@@ -52,7 +52,7 @@ public class QueryConnectedComponent {
 	private final ImmutableList<Variable> freeVariables;
 	
 	private final ImmutableList<Edge> edges;  // a connected component contains a list of edges
-	private final Loop loop;  //                   or a loop if it is degenerate
+	private final Optional<Loop> loop;  //                   or a loop if it is degenerate
 	
 	private final ImmutableList<Function> nonDLAtoms;
 	
@@ -71,7 +71,7 @@ public class QueryConnectedComponent {
 		this.edges = edges;
 		this.nonDLAtoms = nonDLAtoms;
 
-		this.loop = isDegenerate() && !terms.isEmpty() ? terms.get(0) : null;
+		this.loop = isDegenerate() && !terms.isEmpty() ? Optional.of(terms.get(0)) : Optional.empty();
 
 		this.variables = terms.stream()
 				.map(Loop::getTerm)
@@ -214,7 +214,7 @@ public class QueryConnectedComponent {
 		return ccs.build();
 	}
 	
-	public Loop getLoop() {
+	public Optional<Loop> getLoop() {
 		return loop;
 	}
 	

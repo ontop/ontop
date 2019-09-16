@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
@@ -32,7 +33,7 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeWitnessSet {
+public class TreeWitnessSet implements Iterable<ImmutableCollection<TreeWitness>> {
 	private final List<TreeWitness> tws = new LinkedList<>();
 
 	private final QueryConnectedComponent cc;
@@ -230,12 +231,12 @@ public class TreeWitnessSet {
 		return twg.build();
 	}
 	
-	public CompatibleTreeWitnessSetIterator getIterator() {
+	@Override
+	public Iterator<ImmutableCollection<TreeWitness>> iterator() {
 		return new CompatibleTreeWitnessSetIterator(ImmutableList.copyOf(tws));
 	}
-	
 
-	
+
 	static class CachedClassifiedTBoxWrapper {
 		private final Map<Map.Entry<VariableOrGroundTerm, VariableOrGroundTerm>, DownwardSaturatedImmutableSet<ObjectPropertyExpression>> propertiesCache = new HashMap<>();
 		private final Map<VariableOrGroundTerm, DownwardSaturatedImmutableSet<ClassExpression>> conceptsCache = new HashMap<>();
@@ -262,7 +263,8 @@ public class TreeWitnessSet {
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
 
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
-			DownwardSaturatedImmutableSet<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop());
+			System.out.println("LOOPY: " + cc.getLoop() + cc.isDegenerate() + " " + cc.getEdges());
+			DownwardSaturatedImmutableSet<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop().get());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 
 				for (TreeWitnessGenerator twg : cache.reasoner.getTreeWitnessGenerators()) {

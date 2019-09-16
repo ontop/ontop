@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
@@ -169,17 +170,17 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 */
 	
 	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Predicate, CQIE> edgeDP) {
-		
-		List<CQIE> outputRules = new LinkedList<>();	
+
+		List<ImmutableList<Function>> bodies = new LinkedList<>();
 
 		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
 		if (cc.hasNoFreeTerms()) {  
-			if (!cc.isDegenerate() || cc.getLoop() != null) 
+			if (!cc.isDegenerate() || cc.getLoop().isPresent())
 				for (Function a : getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable()).stream()
 						.map(a -> immutabilityTools.convertToMutableFunction(a))
 						.collect(ImmutableCollectors.toList())) {
-					outputRules.add(datalogFactory.getCQIE(headAtom, a));
+					bodies.add(ImmutableList.of(a));
 				}
 		}
 
@@ -231,38 +232,32 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 			treeWitnessFormulas.put(tw.getTerms(), twfs);
 		}
 
-		final String headURI = headAtom.getFunctionSymbol().getName();
 		if (!cc.isDegenerate()) {
 			if (!TreeWitness.isCompatible(tws.getTWs())) {
 				// there are conflicting tree witnesses
 				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
-				CompatibleTreeWitnessSetIterator iterator = tws.getIterator();
-				while (iterator.hasNext()) {
-					Collection<TreeWitness> compatibleTWs = iterator.next();
+				for (ImmutableCollection<TreeWitness> compatibleTWs: tws) {
 					log.debug("COMPATIBLE: {}", compatibleTWs);
 					LinkedList<Function> mainbody = new LinkedList<>();
 					
 					for (Edge edge : cc.getEdges()) {
-						boolean contained = false;
-						for (TreeWitness tw : compatibleTWs)
-							if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
-								contained = true;
-								log.debug("EDGE {} COVERED BY {}", edge, tw);
-								break;
-							}
-						if (!contained) {
+						Optional<TreeWitness> cover = compatibleTWs.stream()
+								.filter(tw -> tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1()))
+								.findAny();
+						if (!cover.isPresent()) {
 							log.debug("EDGE {} NOT COVERED BY ANY TW",  edge);
 							mainbody.addAll(edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList()));
 						}
+						else
+							log.debug("EDGE {} COVERED BY {}", edge, cover.get());
 					}
 					for (TreeWitness tw : compatibleTWs) {
-						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.size() + 1), cc.getVariables());
+						Function twAtom = getHeadAtom(headAtom.getFunctionSymbol().getName(), "_TW_" + (edgeDP.size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
 							edgeDP.put(twAtom.getFunctionSymbol(), datalogFactory.getCQIE(twAtom, twfa));
-					}	
-					mainbody.addAll(cc.getNonDLAtoms());					
-					outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
+					}
+					bodies.add(ImmutableList.copyOf(mainbody));
 				}
 			}
 			else {
@@ -276,9 +271,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					for (TreeWitness tw : tws.getTWs())
 						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
 							if (edgeAtom == null) {
-								//IRI atomURI = edge.getBAtoms().iterator().next().getIRI().getName();
-								edgeAtom = getHeadAtom(headURI, 
-										"_EDGE_" + (edgeDP.size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
+								edgeAtom = getHeadAtom(headAtom.getFunctionSymbol().getName(),
+										"_EDGE_" + (edgeDP.size() + 1), cc.getVariables());
 								mainbody.add(edgeAtom);				
 								
 								List<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList());
@@ -292,19 +286,25 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
 						mainbody.addAll(edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList()));
 				}
-				mainbody.addAll(cc.getNonDLAtoms());
-				outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
+				bodies.add(ImmutableList.copyOf(mainbody));
 			}
 		}
 		else {
 			// degenerate connected component
-			LinkedList<Function> loopbody = new LinkedList<>();
-			Loop loop = cc.getLoop();
-			log.debug("LOOP {}", loop);
-			if (loop != null)
-				loopbody.addAll(loop.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList()));
-			loopbody.addAll(cc.getNonDLAtoms());
-			outputRules.add(datalogFactory.getCQIE(headAtom, loopbody));
+			log.debug("LOOP {}", cc.getLoop());
+			bodies.add(cc.getLoop()
+					.map(l -> l.getAtoms())
+					.orElse(ImmutableList.of())
+					.stream()
+					.map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList()));
+		}
+		List<CQIE> outputRules = new LinkedList<>();
+
+		for (ImmutableList<Function> body : bodies) {
+			List<Function> b = new ArrayList<>();
+			b.addAll(body);
+			b.addAll(cc.getNonDLAtoms());
+			outputRules.add(datalogFactory.getCQIE(headAtom, b));
 		}
 		return outputRules;
 	}
