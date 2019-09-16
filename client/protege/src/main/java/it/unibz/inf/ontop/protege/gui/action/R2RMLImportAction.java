@@ -20,8 +20,13 @@ package it.unibz.inf.ontop.protege.gui.action;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
+import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.parser.DataSource2PropertiesConvertor;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -31,18 +36,20 @@ import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressListener;
 import it.unibz.inf.ontop.protege.utils.OBDAProgressMonitor;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.protege.editor.core.ui.action.ProtegeAction;
 import org.protege.editor.owl.OWLEditorKit;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.protege.editor.owl.model.OWLWorkspace;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.stream.Stream;
 
 public class R2RMLImportAction extends ProtegeAction {
 
@@ -98,12 +105,12 @@ public class R2RMLImportAction extends ProtegeAction {
 
 
 					File finalFile = file;
-					Thread th = new Thread("Bootstrapper Action Thread"){
+					Thread th = new Thread("R2RML Import Thread"){
 						@Override
 						public void run() {
 							try {
 								OBDAProgressMonitor monitor = new OBDAProgressMonitor(
-										"Bootstrapping ontology and mappings...", workspace);
+										"Importing R2RML mapping ...", workspace);
 								R2RMLImportThread t = new R2RMLImportThread();
 								monitor.addProgressListener(t);
 								monitor.start();
@@ -150,18 +157,30 @@ public class R2RMLImportAction extends ProtegeAction {
 
 
 			SQLPPMapping parsedModel = configuration.loadProvidedPPMapping();
+			OWLOntologyManager manager = modelManager.getOWLOntologyManager();
 
-			try{
 			/**
 			 * TODO: improve this inefficient method (batch processing, not one by one)
 			 */
-			for (SQLPPTriplesMap mapping : parsedModel.getTripleMaps()) {
-				if (mapping.getTargetAtoms().toString().contains("BNODE")) {
-					JOptionPane.showMessageDialog(getWorkspace(), "The mapping " + mapping.getId() + " contains BNode. -ontoPro- does not support it yet.");
-				} else {
-					obdaModelController.addTriplesMap(mapping, false);
-				}
-			}
+			ImmutableList<SQLPPTriplesMap> tripleMaps = parsedModel.getTripleMaps();
+			tripleMaps.forEach(tm -> registerTripleMap(tm));
+
+			ImmutableList<AddAxiom> addAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+					manager,
+					tripleMaps.stream()
+							.flatMap(tm -> tm.getTargetAtoms().stream()),
+					false
+			).stream()
+					.map(ax -> new AddAxiom(
+							modelManager.getActiveOntology(),
+							ax
+					)).collect(ImmutableCollectors.toList());
+			modelManager.applyChanges(addAxioms);
+		}
+
+		private void registerTripleMap(SQLPPTriplesMap tm) {
+			try{
+				obdaModelController.addTriplesMap(tm, false);
 			} catch (DuplicateMappingException dm) {
 				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());

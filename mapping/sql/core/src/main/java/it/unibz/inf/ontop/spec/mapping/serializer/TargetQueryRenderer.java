@@ -26,8 +26,10 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
+import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,25 +173,38 @@ public class TargetQueryRenderer {
 
     private static String displayFunction(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         Predicate functionSymbol = function.getFunctionSymbol();
-        String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
-        if (functionSymbol instanceof DatatypePredicate)
-            return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
         if (functionSymbol instanceof URITemplatePredicate)
             return displayURITemplate(function, prefixManager);
         if (functionSymbol == ExpressionOperation.CONCAT)
             return displayConcat(function);
         if (functionSymbol instanceof BNodePredicate)
             return displayFunctionalBnode(function);
+        String fname = getAbbreviatedName(functionSymbol.toString(), prefixManager, false);
+        if (functionSymbol instanceof DatatypePredicate)
+            return displayDatatypeFunction(function, functionSymbol, fname, prefixManager);
         return displayOrdinaryFunction(function, fname, prefixManager);
     }
 
     private static String displayFunctionalBnode(ImmutableFunctionalTerm function) {
-        StringBuilder sb = new StringBuilder("_:");
-        sb.append("{"+function.getTerm(0)+"}");
-        function.getTerms().stream()
-                .skip(1)
-                .forEach(t -> sb.append("_{"+t.toString()+"}"));
-        return sb.toString();
+        ImmutableTerm firstTerm = function.getTerms().get(0);
+        if(firstTerm instanceof Variable){
+            return "_:"+ displayVariable((Variable)firstTerm);
+        }
+        if(firstTerm instanceof ValueConstant) {
+            String templateFormat = ((ValueConstant) firstTerm).getValue().replace("{}", "%s");
+            if(function.getTerms().stream().skip(1).
+                    anyMatch(t -> !(t instanceof Variable)))
+                throw new UnexpectedTermException(function, "All argument of the BNode function but the first one are expected to be variables");
+            ImmutableList<String> varNames = function.getTerms().stream().skip(1)
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable) t)
+                    .map(v -> displayVariable(v))
+                    .collect(ImmutableCollectors.toList());
+
+            String originalUri = String.format(templateFormat, varNames.toArray());
+            return "_:" + String.format(templateFormat, varNames.toArray());
+        }
+        throw new UnexpectedTermException(function, "The first argument of the BNode function is expected to be either a variable or a template");
     }
 
     private static String displayOrdinaryFunction(ImmutableFunctionalTerm function, String fname, PrefixManager prefixManager) {
@@ -209,30 +224,19 @@ public class TargetQueryRenderer {
     }
 
     private static String displayDatatypeFunction(ImmutableFunctionalTerm function, Predicate functionSymbol, String fname, PrefixManager prefixManager) {
-        StringBuilder sb = new StringBuilder();
         // Language tag case
-        if (functionSymbol.getName().equals(RDF.LANGSTRING.getIRIString())) {
-            // with the language tag
-            ImmutableTerm var = function.getTerms().get(0);
-            ImmutableTerm lang = function.getTerms().get(1);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("@");
-            if (lang instanceof ValueConstant) {
-                // Don't pass this to getDisplayName() because
-                // language constant is not written as @"lang-tag"
-                sb.append(((ValueConstant) lang).getValue());
-            } else {
-                sb.append(getDisplayName(lang, prefixManager));
+        if (functionSymbol.getName().startsWith(RDF.LANGSTRING.getIRIString())) {
+            String functionSymbolString = function.getFunctionSymbol().getName();
+            int index = functionSymbolString.indexOf("@");
+            if (index == -1){
+                throw new UnexpectedTermException(function, "The langString IRI should contain \'@\'");
             }
-        } else { // for the other data types
-            ImmutableTerm var = function.getTerms().get(0);
-            sb.append(getDisplayName(var, prefixManager));
-            sb.append("^^");
-            sb.append(fname);
+            return getDisplayName(function.getTerms().get(0), prefixManager)+functionSymbolString.substring(index);
         }
-        return sb.toString();
+        // for the other data types
+        ImmutableTerm var = function.getTerms().get(0);
+        return getDisplayName(var, prefixManager)+ "^^"+ fname;
     }
-
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
         StringBuilder sb = new StringBuilder();
@@ -291,6 +295,10 @@ public class TargetQueryRenderer {
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);
+        }
+
+        private UnexpectedTermException(ImmutableTerm term, String message) {
+            super("Unexpected term " + term + ":\n"+message);
         }
     }
 }

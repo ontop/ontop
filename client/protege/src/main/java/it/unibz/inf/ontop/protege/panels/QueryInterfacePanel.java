@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.protege.panels;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -45,7 +45,7 @@ import java.awt.event.KeyListener;
  * Creates a new panel to execute queries. Remember to execute the
  * setResultsPanel function to indicate where to display the results.
  */
-public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelListener, 
+public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelListener,
 		TableModelListener, OBDAPreferenceChangeListener {
 
 	/**
@@ -53,34 +53,32 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	 * query Variable currentId is the query's id that is selected
 	 */
 	private static final long serialVersionUID = -5902798157183352944L;
-	
+
 	private DefaultStyledDocument styledDocument;
-	
+
 	private OBDADataQueryAction<TupleOWLResultSet> executeSelectAction;
 	private OBDADataQueryAction<BooleanOWLResultSet> executeAskAction;
 	private OBDADataQueryAction<?> executeGraphQueryAction;
-	private OBDADataQueryAction<?> executeEQLAction;
 	private OBDADataQueryAction<String> retrieveUCQExpansionAction;
 	private OBDADataQueryAction<String> retrieveUCQUnfoldingAction;
-	private OBDADataQueryAction<?> retrieveEQLUnfoldingAction;
-	
+
 	private OBDAModel apic;
 
 	private QueryController qc;
-	
+
 	private double execTime = 0;
 	private int fetchSizeCache = 100;
-	
+
 	private String currentGroup = "";  // default value
 	private String currentId = "";  // default value
-	
-	/** 
+
+	/**
 	 * Creates new form QueryInterfacePanel
 	 */
 	public QueryInterfacePanel(OBDAModel apic, QueryController qc) {
 		this.qc = qc;
 		this.apic = apic;
-		
+
 		initComponents();
 
 		StyleContext style = new StyleContext();
@@ -317,12 +315,9 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	}// GEN-LAST:event_getSPARQLExpansionActionPerformed
 
 	private void getSPARQLSQLExpansionActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_getSPARQLSQLExpansionActionPerformed
-		Thread queryRunnerThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
-				action.run(queryTextPane.getText());
-			}
+		Thread queryRunnerThread = new Thread(() -> {
+			OBDADataQueryAction<?> action = QueryInterfacePanel.this.getRetrieveUCQUnfoldingAction();
+			action.run(queryTextPane.getText());
 		});
 		queryRunnerThread.start();
 	}// GEN-LAST:event_getSPARQLSQLExpansionActionPerformed
@@ -362,8 +357,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 						}
 					} while (action.isRunning());
 					int rows = action.getNumberOfRows();
-						updateStatus(rows);
-
+					updateStatus(rows);
 				}
             });
 			queryRunnerThread.start();
@@ -371,7 +365,6 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			DialogUtils.showQuickErrorDialog(QueryInterfacePanel.this, e);
 		}
 	}// GEN-LAST:event_buttonExecuteActionPerformed
-
 
 	private synchronized void cmdSaveChangesActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_buttonSaveActionPerformed
 		final String query = queryTextPane.getText();
@@ -386,21 +379,21 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 					"Please select first the query node that you would like to update",
 					"Warning",
 					JOptionPane.WARNING_MESSAGE);
-		}	
+		}
 	}// GEN-LAST:event_buttonSaveActionPerformed
 
-	
+
 	private class QueryChanger implements Runnable {
 		String new_query;
-		
+
 		QueryChanger(String new_query){
 			this.new_query = new_query;
 		}
 		public void run(){
-			queryTextPane.setText(new_query);	
+			queryTextPane.setText(new_query);
 		}
 	}
-	
+
 	public void selectedQueryChanged(String new_group, String new_query, String new_id) {
 			Runnable runner = new QueryChanger(new_query);
 			SwingUtilities.invokeLater(runner);
@@ -555,7 +548,7 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	public boolean isShortURISelect() {
 		return chkShowShortURI.isSelected();
 	}
-	
+
 	public boolean isFetchAllSelect() {
 		return chkShowAll.isSelected();
 	}
@@ -565,17 +558,17 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 	public boolean canGetMoreTuples() {
 		return getFetchSize() > 100;
 	}
-	
+
 	public String getQuery() {
 		return queryTextPane.getText();
 	}
-	
+
 	public int getFetchSize() {
 		int fetchSize = 0;
 		try {
 			fetchSize = Integer.parseInt(txtFetchSize.getText());
 		} catch (NumberFormatException e) {
-			DialogUtils.showQuickErrorDialog(this, 
+			DialogUtils.showQuickErrorDialog(this,
 					new Exception("Invalid input: " + txtFetchSize.getText()), e.toString());
 		}
 		return fetchSize;
@@ -588,10 +581,10 @@ public class QueryInterfacePanel extends JPanel implements SavedQueriesPanelList
 			this.query = query;
 		}
 		public void run(){
-			queryTextPane.setText(query);	
+			queryTextPane.setText(query);
 		}
 	}
-	
+
 	@Override
 	public synchronized void preferenceChanged() {
 		String query = queryTextPane.getText();

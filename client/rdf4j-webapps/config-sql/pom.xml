@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-rdf4j-webapps</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-beta-3-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>ontop-rdf4j-config-sql</artifactId>
     <name>ontop-rdf4j-sql</name>
@@ -85,10 +85,6 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-rdfxml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-n3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>

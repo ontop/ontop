@@ -10,8 +10,8 @@ cd build/distribution
 ${ONTOP_HOME}/mvnw assembly:assembly
 cd target
 rm -rf ontop
-unzip -o ontop-distr*.zip -d ontop
+unzip -o ontop-cli*.zip -d ontop
 cd ontop
-rm -r ontop ontop.bat ontop-completion.sh jdbc
+rm -r ontop.bat ontop-completion.sh jdbc
 docker build -t ontop/ontop-endpoint -f ${ONTOP_HOME}/client/docker/Dockerfile .
 cd ${CURRENT_DIR}

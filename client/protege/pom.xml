@@ -3,7 +3,7 @@
     <parent>
         <artifactId>ontop-client</artifactId>
         <groupId>it.unibz.inf.ontop</groupId>
-        <version>3.0.0-beta-3-SNAPSHOT</version>
+        <version>3.0.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -492,10 +492,6 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-languages</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-n3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>

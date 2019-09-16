@@ -30,7 +30,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -50,19 +49,26 @@ public class SparqlQueryController {
     private volatile boolean initialized = false;
 
     @Autowired
-    public SparqlQueryController(@Value("${ontology}") String owlFile,
-                                 @Value("${mapping}") String mappingFile,
+    public SparqlQueryController(@Value("${mapping}") String mappingFile,
                                  @Value("${properties}") String propertiesFile,
-                                 @Value("${lazy:false}") boolean lazy) {
+                                 @Value("${lazy:false}") boolean lazy,
+                                 @Value("${ontology:#{null}}") String owlFile) {
         this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
     }
 
     private Repository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
-        OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .nativeOntopMappingFile(mappings)
-                .ontologyFile(ontology)
-                .propertyFile(properties)
-                .build();
+        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
+                .propertyFile(properties);
+
+        if (mappings.endsWith(".obda"))
+            builder.nativeOntopMappingFile(mappings);
+        else
+            builder.r2rmlMappingFile(mappings);
+
+        if ((ontology != null) && (!ontology.isEmpty()))
+            builder.ontologyFile(ontology);
+
+        OntopSQLOWLAPIConfiguration configuration = builder.build();
         OntopRepository repository = OntopRepository.defaultRepository(configuration);
 
         if (!lazy) {
@@ -132,88 +138,89 @@ public class SparqlQueryController {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.OK;
 
-        RepositoryConnection connection = repository.getConnection();
-        Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        final String result;
+        try (RepositoryConnection connection = repository.getConnection()) {
+            Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
+            ByteArrayOutputStream bao = new ByteArrayOutputStream();
+            final String result;
 
-        if (q instanceof TupleQuery) {
-            TupleQuery selectQuery = (TupleQuery) q;
+            if (q instanceof TupleQuery) {
+                TupleQuery selectQuery = (TupleQuery) q;
 
-            if ("*/*".equals(accept) || accept.contains("json")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
-                selectQuery.evaluate(new SPARQLResultsJSONWriter(bao));
-                result = bao.toString();
-            } else if (accept.contains("xml")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
-                selectQuery.evaluate(new SPARQLResultsXMLWriter(bao));
-                result = bao.toString();
-            } else if (accept.contains("csv")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "text/sparql-results+csv");
-                selectQuery.evaluate(new SPARQLResultsCSVWriter(bao));
-                result = bao.toString();
-            } else if (accept.contains("tsv")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "text/sparql-results+tsv");
-                selectQuery.evaluate(new SPARQLResultsTSVWriter(bao));
-                result = bao.toString();
+                if ("*/*".equals(accept) || accept.contains("json")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
+                    selectQuery.evaluate(new SPARQLResultsJSONWriter(bao));
+                    result = bao.toString();
+                } else if (accept.contains("xml")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
+                    selectQuery.evaluate(new SPARQLResultsXMLWriter(bao));
+                    result = bao.toString();
+                } else if (accept.contains("csv")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "text/sparql-results+csv");
+                    selectQuery.evaluate(new SPARQLResultsCSVWriter(bao));
+                    result = bao.toString();
+                } else if (accept.contains("tsv")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "text/sparql-results+tsv");
+                    selectQuery.evaluate(new SPARQLResultsTSVWriter(bao));
+                    result = bao.toString();
+                } else {
+                    result = "";
+                    status = HttpStatus.BAD_REQUEST;
+                    //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
+                }
+
+            } else if (q instanceof BooleanQuery) {
+                BooleanQuery askQuery = (BooleanQuery) q;
+                boolean b = askQuery.evaluate();
+
+                if ("*/*".equals(accept) || accept.contains("json")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
+                    BooleanQueryResultWriter writer = new SPARQLBooleanJSONWriter(bao);
+                    writer.handleBoolean(b);
+                    result = bao.toString();
+                } else if (accept.contains("xml")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
+                    BooleanQueryResultWriter writer = new SPARQLBooleanXMLWriter(bao);
+                    writer.handleBoolean(b);
+                    result = bao.toString();
+                } else if (accept.contains("text")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "text/boolean");
+                    BooleanQueryResultWriter writer = new BooleanTextWriter(bao);
+                    writer.handleBoolean(b);
+                    result = bao.toString();
+                } else {
+                    result = "";
+                    status = HttpStatus.BAD_REQUEST;
+                    //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
+                }
+            } else if (q instanceof GraphQuery) {
+                GraphQuery graphQuery = (GraphQuery) q;
+                if ("*/*".equals(accept) || accept.contains("turtle")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "text/turtle");
+                    graphQuery.evaluate(new TurtleWriter(bao));
+                    result = bao.toString();
+                } else if (accept.contains("json")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
+                    graphQuery.evaluate(new org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter(bao, RDFFormat.JSONLD));
+                    result = bao.toString();
+                } else if (accept.contains("xml")) {
+                    headers.set(HttpHeaders.CONTENT_TYPE, "application/rdf+xml");
+                    graphQuery.evaluate(new RDFXMLWriter(bao));
+                    result = bao.toString();
+                } else {
+                    //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
+                    result = "";
+                    status = HttpStatus.BAD_REQUEST;
+                }
+            } else if (q instanceof Update) {
+                //else if (q instanceof Update)
+                result = "";
+                status = HttpStatus.NOT_IMPLEMENTED;
             } else {
                 result = "";
                 status = HttpStatus.BAD_REQUEST;
-                //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
             }
-
-        } else if (q instanceof BooleanQuery) {
-            BooleanQuery askQuery = (BooleanQuery) q;
-            boolean b = askQuery.evaluate();
-
-            if ("*/*".equals(accept) || accept.contains("json")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
-                BooleanQueryResultWriter writer = new SPARQLBooleanJSONWriter(bao);
-                writer.handleBoolean(b);
-                result = bao.toString();
-            } else if (accept.contains("xml")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
-                BooleanQueryResultWriter writer = new SPARQLBooleanXMLWriter(bao);
-                writer.handleBoolean(b);
-                result = bao.toString();
-            } else if (accept.contains("text")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "text/boolean");
-                BooleanQueryResultWriter writer = new BooleanTextWriter(bao);
-                writer.handleBoolean(b);
-                result = bao.toString();
-            } else {
-                result = "";
-                status = HttpStatus.BAD_REQUEST;
-                //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
-            }
-        } else if (q instanceof GraphQuery) {
-            GraphQuery graphQuery = (GraphQuery) q;
-            if ("*/*".equals(accept) || accept.contains("turtle")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "text/turtle");
-                graphQuery.evaluate(new TurtleWriter(bao));
-                result = bao.toString();
-            } else if (accept.contains("json")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
-                graphQuery.evaluate(new org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter(bao, RDFFormat.JSONLD));
-                result = bao.toString();
-            } else if (accept.contains("xml")) {
-                headers.set(HttpHeaders.CONTENT_TYPE, "application/rdf+xml");
-                graphQuery.evaluate(new RDFXMLWriter(bao));
-                result = bao.toString();
-            } else {
-                //throw new IllegalArgumentException("unsupported ACCEPT : " + accept);
-                result = "";
-                status = HttpStatus.BAD_REQUEST;
-            }
-        } else if (q instanceof Update) {
-            //else if (q instanceof Update)
-            result = "";
-            status = HttpStatus.NOT_IMPLEMENTED;
-        } else {
-            result = "";
-            status = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<>(result, headers, status);
         }
-        return new ResponseEntity<>(result, headers, status);
     }
 
 

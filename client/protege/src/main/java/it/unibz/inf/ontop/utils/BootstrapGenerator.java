@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
+import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
 import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.*;
@@ -70,9 +71,12 @@ public class BootstrapGenerator {
 
         // update protege ontology
         OWLOntologyManager manager = owlManager.getActiveOntology().getOWLOntologyManager();
-        Set<OWLDeclarationAxiom> declarationAxioms = directMappingEngine.extractDeclarationAxioms(manager,
+        Set<OWLDeclarationAxiom> declarationAxioms = MappingOntologyUtils.extractDeclarationAxioms(
+                manager,
                 sqlppTriplesMaps.stream()
-                        .flatMap(ax -> ax.getTargetAtoms().stream()));
+                        .flatMap(ax -> ax.getTargetAtoms().stream()),
+                true
+        );
         List<AddAxiom> addAxioms = declarationAxioms.stream()
                 .map(ax -> new AddAxiom(owlManager.getActiveOntology(), ax))
                 .collect(Collectors.toList());
