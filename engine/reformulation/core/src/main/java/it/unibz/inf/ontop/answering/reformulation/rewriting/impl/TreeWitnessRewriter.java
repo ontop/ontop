@@ -169,7 +169,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Predicate, CQIE> edgeDP) {
+	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Function, CQIE> edgeDP) {
 
 		List<ImmutableList<Function>> bodies = new LinkedList<>();
 
@@ -255,7 +255,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						Function twAtom = getHeadAtom(headAtom.getFunctionSymbol().getName(), "_TW_" + (edgeDP.size() + 1), cc.getVariables());
 						mainbody.add(twAtom);				
 						for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
-							edgeDP.put(twAtom.getFunctionSymbol(), datalogFactory.getCQIE(twAtom, twfa));
+							edgeDP.put(twAtom, datalogFactory.getCQIE(twAtom, twfa));
 					}
 					bodies.add(ImmutableList.copyOf(mainbody));
 				}
@@ -276,11 +276,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 								mainbody.add(edgeAtom);				
 								
 								List<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList());
-								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
+								edgeDP.put(edgeAtom, datalogFactory.getCQIE(edgeAtom, edgeAtoms));
 							}
 							
 							for (List<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
-								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, twfa));
+								edgeDP.put(edgeAtom, datalogFactory.getCQIE(edgeAtom, twfa));
 						}
 					
 					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
@@ -319,8 +319,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		DatalogProgram program = iqConverter.translate(query);
 
 		List<CQIE> outputRules = new LinkedList<>();
-		Multimap<Predicate, CQIE> ccDP = null;
-		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
+		Multimap<Function, CQIE> ccDP = null;
+		Multimap<Function, CQIE> edgeDP = ArrayListMultimap.create();
 
 		for (CQIE cqie : program.getRules()) {
 			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie, atomFactory);
@@ -344,20 +344,20 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
 					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.size() + 1), cc.getFreeVariables());
 					for (CQIE cq : rewriteCC(cc, ccAtom, edgeDP))
-					    ccDP.put(cq.getHead().getFunctionSymbol(), cq);
+					    ccDP.put(cq.getHead(), cq);
 					ccBody.add(ccAtom);
 				}
 				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));
 			}
 		}
-		
+		System.out.println("OUTPUT: " + outputRules + " CC " + ccDP + "EDGES " + edgeDP);
 		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
 		if (!edgeDP.isEmpty()) {
 			log.debug("EDGE DEFS\n{}", edgeDP);			
 			outputRules = plugInDefinitions(outputRules, edgeDP);
 			if (ccDP != null) {
-			    Multimap<Predicate, CQIE> ccDP2 = ArrayListMultimap.create();
-			    for (Predicate p : ccDP.keys())
+			    Multimap<Function, CQIE> ccDP2 = ArrayListMultimap.create();
+			    for (Function p : ccDP.keys())
 			        for (CQIE cq : plugInDefinitions(ccDP.get(p), edgeDP))
                         ccDP2.put(p, cq);
 			    ccDP = ccDP2;
@@ -442,7 +442,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	}
 
 
-    private List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
+    private List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Function, CQIE> defs) {
 
         PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
                 Comparator.comparingInt(cq -> cq.getBody().size()));
@@ -460,7 +460,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             ListIterator<Function> bodyIterator = body.listIterator();
             while (bodyIterator.hasNext()) {
                 Function currentAtom = bodyIterator.next();
-                Collection<CQIE> definitions = defs.get(currentAtom.getFunctionSymbol());
+                Collection<CQIE> definitions = defs.get(currentAtom);
                 if (!definitions.isEmpty()) {
                     if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
                         chosenDefinitions = definitions;
@@ -496,17 +496,16 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 						for (Function bodyatom : newquery.getBody())
 							SubstitutionUtilities.applySubstitution(bodyatom, mgu);
 
-                        // REDUCE
-                        eqNormalizer.enforceEqualities(newquery);
-                        removeRundantAtoms(newquery);
-
                         queue.add(newquery);
                         replaced = true;
                     }
-
                 }
             }
             if (!replaced) {
+				// REDUCE
+				eqNormalizer.enforceEqualities(query);
+				removeRundantAtoms(query);
+
                 boolean found = false;
                 ListIterator<CQIE> i = output.listIterator();
                 while (i.hasNext()) {
