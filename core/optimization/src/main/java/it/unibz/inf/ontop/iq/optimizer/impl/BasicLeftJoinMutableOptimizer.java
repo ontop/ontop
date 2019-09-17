@@ -6,18 +6,18 @@ import it.unibz.inf.ontop.iq.node.LeftJoinNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.LeftJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.LeftJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.iq.optimizer.LeftJoinOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.LeftJoinMutableOptimizer;
 
 import java.util.Optional;
 
 /**
  *
  */
-public class BasicLeftJoinOptimizer extends NodeCentricDepthFirstOptimizer<LeftJoinOptimizationProposal>
-        implements LeftJoinOptimizer {
+public class BasicLeftJoinMutableOptimizer extends NodeCentricDepthFirstOptimizer<LeftJoinOptimizationProposal>
+        implements LeftJoinMutableOptimizer {
 
     @Inject
-    private BasicLeftJoinOptimizer() {
+    private BasicLeftJoinMutableOptimizer() {
         super(true);
     }
 

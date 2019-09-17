@@ -83,14 +83,13 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
      */
     @Override
     protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-        DBTermType targetType;
         // Cannot CAST to SERIAL --> CAST to INTEGER instead
         if (termType.getCastName().equals(SERIAL_STR))
-            targetType = dbTypeFactory.getDBTermType(INTEGER_STR);
+            return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
         else
-            targetType = termType;
+            return new NonSimplifiableTypedNullFunctionSymbol(termType);
 
-        return new NonSimplifiableTypedNullFunctionSymbol(targetType);
+
     }
 
     @Override

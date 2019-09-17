@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.InnerJoinMutableOptimizer;
 
 import java.util.Optional;
 
@@ -17,11 +17,11 @@ import java.util.Optional;
  * Top-down exploration.
  */
 @Singleton
-public class BasicJoinOptimizer extends NodeCentricDepthFirstOptimizer<InnerJoinOptimizationProposal>
-        implements InnerJoinOptimizer {
+public class BasicJoinMutableOptimizer extends NodeCentricDepthFirstOptimizer<InnerJoinOptimizationProposal>
+        implements InnerJoinMutableOptimizer {
 
     @Inject
-    private BasicJoinOptimizer() {
+    private BasicJoinMutableOptimizer() {
         super(true);
     }
 
