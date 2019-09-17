@@ -10,8 +10,19 @@ import java.util.function.Function;
 
 public class NonSimplifiableTypedNullFunctionSymbol extends AbstractTypedDBFunctionSymbol {
 
+    /**
+     * May differ from the target type (e.g. INTEGER for SERIAL)
+     */
+    private final DBTermType castingType;
+
     protected NonSimplifiableTypedNullFunctionSymbol(DBTermType targetType) {
         super("NULL-" + targetType, ImmutableList.of(), targetType);
+        castingType = targetType;
+    }
+
+    protected NonSimplifiableTypedNullFunctionSymbol(DBTermType targetType, DBTermType castingType) {
+        super("NULL-" + castingType, ImmutableList.of(), targetType);
+        this.castingType = castingType;
     }
 
     @Override
@@ -29,6 +40,6 @@ public class NonSimplifiableTypedNullFunctionSymbol extends AbstractTypedDBFunct
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return termConverter.apply(
-                termFactory.getDBCastFunctionalTerm(getTargetType(), termFactory.getNullConstant()));
+                termFactory.getDBCastFunctionalTerm(castingType, termFactory.getNullConstant()));
     }
 }
