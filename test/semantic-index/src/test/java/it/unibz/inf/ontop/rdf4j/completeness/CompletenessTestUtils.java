@@ -2,21 +2,6 @@ package it.unibz.inf.ontop.rdf4j.completeness;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import org.eclipse.rdf4j.common.io.FileUtil;
-import org.eclipse.rdf4j.common.io.ZipUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.jar.JarFile;
-
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.eclipse.rdf4j.OpenRDFUtil;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -26,19 +11,20 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.repository.util.RDFInserter;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFHandlerException;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+
 public class CompletenessTestUtils {
-	
+
 	static final Logger LOGGER = LoggerFactory.getLogger(CompletenessTestUtils.class);
 
 	public static Collection<Object[]> parametersFromSuperManifest(String manifestFilePath,
@@ -56,11 +42,10 @@ public class CompletenessTestUtils {
 		String manifestFile = url.toString();
 		addTurtle(con, url, manifestFile);
 
-		String query = "SELECT DISTINCT manifestFile FROM {x} rdf:first {manifestFile} "
-				+ "USING NAMESPACE mf = <http://obda.org/quest/tests/test-manifest#>, "
-				+ "  qt = <http://obda.org/quest/tests/test-query#>";
+		String query = "SELECT DISTINCT ?manifestFile WHERE {?x rdf:first ?manifestFile}";
 
-		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SERQL, query, manifestFile).evaluate();
+		TupleQueryResult manifestResults = con.prepareTupleQuery(QueryLanguage.SPARQL, query, manifestFile).evaluate();
+
 		List<Object[]> testCaseParameters = Lists.newArrayList();
 		while (manifestResults.hasNext()) {
 			BindingSet bindingSet = manifestResults.next();
@@ -95,21 +80,24 @@ public class CompletenessTestUtils {
 		 * select those test cases that are mentioned in the list.
 		 */
 		StringBuilder query = new StringBuilder(512);
-		query.append("SELECT DISTINCT tid, name, resf, propf, owlf, sparqlf\n");
-		query.append("FROM {} rdf:first {tid} \n");
+		query.append("PREFIX   mf: <http://obda.org/quest/tests/test-manifest#>\n");
+		query.append("PREFIX   qt: <http://obda.org/quest/tests/test-query#>\n");
+		query.append("PREFIX   obdat: <http://obda.org/quest/tests/test-scenario#>");
+		query.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
+
+		query.append("SELECT DISTINCT ?tid  ?name ?resf ?propf ?owlf ?sparqlf\n");
+		query.append("{ ?x rdf:first ?tid. \n");
 		if (approvedOnly) {
-			query.append("   obdat:approval {obdat:Approved};\n");
+			query.append(" ?tid  obdat:approval obdat:Approved.\n");
 		}
-		query.append("   mf:name {name};\n");
-		query.append("   mf:result {resf};\n");
-		query.append("   mf:parameters {propf};\n");
-		query.append("   mf:action {action} qt:ontology {owlf};\n");
-		query.append("                       qt:query {sparqlf}\n");
-		query.append("USING NAMESPACE \n");
-		query.append("   mf = <http://obda.org/quest/tests/test-manifest#>,\n");
-		query.append("   qt = <http://obda.org/quest/tests/test-query#>,\n");
-		query.append("   obdat = <http://obda.org/quest/tests/test-scenario#>");
-		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SERQL, query.toString());
+		query.append(" ?tid  mf:name ?name;\n");
+		query.append("   mf:result ?resf;\n");
+		query.append("   mf:parameters ?propf;\n");
+		query.append("   mf:action [ qt:ontology ?owlf;\n");
+		query.append("                       qt:query ?sparqlf ]\n");
+		query.append("}");
+
+		TupleQuery testCaseQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, query.toString());
 
 		LOGGER.debug("Evaluating query..");
 		TupleQueryResult testCases = testCaseQuery.evaluate();
@@ -143,16 +131,12 @@ public class CompletenessTestUtils {
 			throws QueryEvaluationException, RepositoryException, MalformedQueryException
 	{
 		// Try to extract suite name from manifest file
-		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SERQL, "SELECT ManifestName FROM {ManifestURL} rdfs:label {ManifestName}");
-		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createURI(manifestFileURL));
-		TupleQueryResult manifestNames = manifestNameQuery.evaluate();
-		try {
+		TupleQuery manifestNameQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, "SELECT ?ManifestName WHERE {?ManifestURL rdfs:label ?ManifestName}");
+		manifestNameQuery.setBinding("ManifestURL", manifestRep.getValueFactory().createIRI(manifestFileURL));
+		try (TupleQueryResult manifestNames = manifestNameQuery.evaluate()) {
 			if (manifestNames.hasNext()) {
 				return manifestNames.next().getValue("ManifestName").stringValue();
 			}
-		}
-		finally {
-			manifestNames.close();
 		}
 		// Derive name from manifest URL
 		int lastSlashIdx = manifestFileURL.lastIndexOf('/');
@@ -173,12 +157,12 @@ public class CompletenessTestUtils {
 			RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
 
 			ParserConfig config = rdfParser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
+			// To emulate DatatypeHandling.IGNORE
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
 //			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-			
+
 //			rdfParser.setVerifyData(false);
 //			rdfParser.setStopAtFirstError(true);
 //			rdfParser.setDatatypeHandling(RDFParser.DatatypeHandling.IGNORE);
