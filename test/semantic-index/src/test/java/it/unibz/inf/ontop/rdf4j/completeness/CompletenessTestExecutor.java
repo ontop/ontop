@@ -5,7 +5,7 @@ import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.eclipse.rdf4j.common.text.StringUtil;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
-import org.eclipse.rdf4j.model.util.ModelUtil;
+import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.dawg.DAWGTestResultSetUtil;
@@ -38,7 +38,7 @@ public class CompletenessTestExecutor {
 	protected final String testId;
 	protected final String queryFile;
 	protected final String resultFile;
-	
+
 	protected final boolean laxCardinality = false;
 
 	static final Logger logger = LoggerFactory.getLogger(CompletenessTestExecutor.class);
@@ -157,7 +157,7 @@ public class CompletenessTestExecutor {
 				logger.error(message.toString());
 				fail(message.toString());
 			}
-			/* debugging only: print out result when test succeeds 
+			/* debugging only: print out result when test succeeds
 			else {
 				queryResultTable.beforeFirst();
 
@@ -174,7 +174,7 @@ public class CompletenessTestExecutor {
 					message.append(bs);
 					message.append("\n");
 				}
-				
+
 				System.out.print(message.toString());
 			}
 			*/
@@ -191,7 +191,7 @@ public class CompletenessTestExecutor {
 	 * relevant for equality, they are mapped from one model to the other by
 	 * using the attached properties. Note that the method consumes both query
 	 * results fully.
-	 * 
+	 *
 	 * @throws QueryEvaluationException
 	 */
 	public static boolean equals(TupleQueryResult tqr1, TupleQueryResult tqr2)
@@ -208,7 +208,7 @@ public class CompletenessTestExecutor {
 	{
 		List<BindingSet> list1 = Iterations.asList(tqr1);
 		List<BindingSet> list2 = Iterations.asList(tqr2);
-		
+
 		return matchBindingSets(list1, list2);
 	}
 
@@ -223,7 +223,7 @@ public class CompletenessTestExecutor {
 	 * queryResult1 and blank nodes in queryResult2. The algorithm does a
 	 * depth-first search trying to establish a mapping for each blank node
 	 * occurring in queryResult1.
-	 * 
+	 *
 	 * @return true if a complete mapping has been found, false otherwise.
 	 */
 	private static boolean matchBindingSets(List<? extends BindingSet> queryResult1,
@@ -370,9 +370,9 @@ public class CompletenessTestExecutor {
 
 		return true;
 	}
-	
+
 	private void compareGraphs(Set<Statement> queryResult, Set<Statement> expectedResult) throws Exception {
-		if (!ModelUtil.equals(expectedResult, queryResult)) {
+		if (!Models.isomorphic(expectedResult, queryResult)) {
 			StringBuilder message = new StringBuilder(128);
 			message.append("\n============ ");
 			message.append(getName());
@@ -399,7 +399,7 @@ public class CompletenessTestExecutor {
 			fail(message.toString());
 		}
 	}
-	
+
 	private String readQueryString() throws IOException {
 		InputStream stream = new URL(queryFile).openStream();
 		try {
@@ -408,7 +408,7 @@ public class CompletenessTestExecutor {
 			stream.close();
 		}
 	}
-	
+
 	private TupleQueryResult readExpectedTupleQueryResult(Repository repository) throws Exception {
 		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFile);
 		if (tqrFormat.isPresent()) {
@@ -430,18 +430,18 @@ public class CompletenessTestExecutor {
 			return DAWGTestResultSetUtil.toTupleQueryResult(resultGraph);
 		}
 	}
-	
+
 	private Set<Statement> readExpectedGraphQueryResult(Repository repository) throws Exception {
 		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFile);
 		if (rdfFormat.isPresent()) {
 			RDFParser parser = Rio.createParser(rdfFormat.get(), repository.getValueFactory());
 			ParserConfig config = parser.getParserConfig();
-			// To emulate DatatypeHandling.IGNORE 
+			// To emulate DatatypeHandling.IGNORE
 			config.addNonFatalError(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES);
 			config.addNonFatalError(BasicParserSettings.VERIFY_DATATYPE_VALUES);
 			config.addNonFatalError(BasicParserSettings.NORMALIZE_DATATYPE_VALUES);
 			config.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-			
+
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
