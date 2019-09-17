@@ -24,8 +24,11 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.AbstractCollection;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode {
@@ -329,11 +332,72 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     /**
-     * TODO: implement it seriously
+     * For unique constraints to emerge from an inner join, children must provide unique constraints
+     * and being naturally joined over some of such constraints.
      */
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
-        return ImmutableSet.of();
+
+        ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap = children.stream()
+                .collect(ImmutableCollectors.toMap(
+                        c -> c,
+                        IQTree::inferUniqueConstraints));
+
+        /*
+         * Conditions:
+         *   - All the children must have at least one unique constraint
+         *   - Each child is naturally joined with another child and such variables matches at least one unique constraint
+         *     on one of these two children.
+         */
+        if (constraintMap.values().stream().anyMatch(AbstractCollection::isEmpty))
+            return ImmutableSet.of();
+
+        ImmutableSet<IQTree> satisfyingChildren = IntStream.range(0, children.size() - 1)
+                .boxed()
+                .flatMap(i -> extractSatisfyingChildren(children.get(i), children.subList(i+1, children.size()), constraintMap))
+                .collect(ImmutableCollectors.toSet());
+
+        if (satisfyingChildren.containsAll(children))
+            return constraintMap.values().stream()
+                    .flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toSet());
+        else
+            return ImmutableSet.of();
+    }
+
+    /**
+     * TODO: find a better name
+     *
+     * Returns all the following children that "naturally joins" with the current child and for which an unique constraint is involved in the join.
+     * Also returns the current child if at least of one following child is selected.
+     *
+     */
+    private Stream<IQTree> extractSatisfyingChildren(IQTree currentChild, ImmutableList<IQTree> followingChildren,
+                                                     ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
+
+        ImmutableSet<IQTree> selectedFollowingChildren = followingChildren.stream()
+                .filter(o -> areJoiningOverUniqueConstraint(currentChild, o, constraintMap))
+                .collect(ImmutableCollectors.toSet());
+
+        return (selectedFollowingChildren.isEmpty())
+                ? Stream.empty()
+                : Stream.concat(Stream.of(currentChild), selectedFollowingChildren.stream());
+    }
+
+    private boolean areJoiningOverUniqueConstraint(IQTree child1, IQTree child2,
+                                                   ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
+        ImmutableSet<Variable> commonVariables = Sets.intersection(child1.getVariables(), child2.getVariables())
+                .immutableCopy();
+
+        if (commonVariables.isEmpty())
+            return false;
+
+        ImmutableSet<ImmutableSet<Variable>> constraints1 = constraintMap.get(child1);
+        ImmutableSet<ImmutableSet<Variable>> constraints2 = constraintMap.get(child2);
+
+        return Stream.of(constraints1, constraints2)
+                .flatMap(Collection::stream)
+                .anyMatch(commonVariables::containsAll);
     }
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
