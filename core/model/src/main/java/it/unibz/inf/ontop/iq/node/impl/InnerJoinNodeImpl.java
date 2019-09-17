@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.AbstractCollection;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -338,67 +339,72 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(ImmutableList<IQTree> children) {
 
-        ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap = children.stream()
+        ImmutableSet<IQTree> childrenSet = ImmutableSet.copyOf(children);
+
+        ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap = childrenSet.stream()
                 .collect(ImmutableCollectors.toMap(
                         c -> c,
                         IQTree::inferUniqueConstraints));
 
         /*
-         * Conditions:
-         *   - All the children must have at least one unique constraint
-         *   - Each child is naturally joined with another child and such variables matches at least one unique constraint
-         *     on one of these two children.
+         * Pre-condition: all the children must have at least one unique constraint
          */
         if (constraintMap.values().stream().anyMatch(AbstractCollection::isEmpty))
             return ImmutableSet.of();
 
-        ImmutableSet<IQTree> satisfyingChildren = IntStream.range(0, children.size() - 1)
+        // Non-saturated
+        ImmutableMultimap<IQTree, IQTree> directDependencyMap = IntStream.range(0, children.size() - 1)
                 .boxed()
-                .flatMap(i -> extractSatisfyingChildren(children.get(i), children.subList(i+1, children.size()), constraintMap))
-                .collect(ImmutableCollectors.toSet());
+                .flatMap(i -> IntStream.range(i +1, children.size())
+                        .boxed()
+                        .flatMap(j -> extractFunctionalDependencies(children.get(i), children.get(j), constraintMap)))
+                .collect(ImmutableCollectors.toMultimap());
 
-        if (satisfyingChildren.containsAll(children))
-            return constraintMap.values().stream()
-                    .flatMap(Collection::stream)
-                    .collect(ImmutableCollectors.toSet());
-        else
-            return ImmutableSet.of();
+        Multimap<IQTree, IQTree> saturatedDependencyMap = saturateDependencies(directDependencyMap);
+
+        return saturatedDependencyMap.asMap().entrySet().stream()
+                .filter(e -> e.getValue().containsAll(Sets.difference(childrenSet, ImmutableSet.of(e.getKey())).immutableCopy()))
+                .map(Map.Entry::getKey)
+                .flatMap(child -> constraintMap.get(child).stream())
+                .collect(ImmutableCollectors.toSet());
     }
 
-    /**
-     * TODO: find a better name
-     *
-     * Returns all the following children that "naturally joins" with the current child and for which an unique constraint is involved in the join.
-     * Also returns the current child if at least of one following child is selected.
-     *
-     */
-    private Stream<IQTree> extractSatisfyingChildren(IQTree currentChild, ImmutableList<IQTree> followingChildren,
-                                                     ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
-
-        ImmutableSet<IQTree> selectedFollowingChildren = followingChildren.stream()
-                .filter(o -> areJoiningOverUniqueConstraint(currentChild, o, constraintMap))
-                .collect(ImmutableCollectors.toSet());
-
-        return (selectedFollowingChildren.isEmpty())
-                ? Stream.empty()
-                : Stream.concat(Stream.of(currentChild), selectedFollowingChildren.stream());
-    }
-
-    private boolean areJoiningOverUniqueConstraint(IQTree child1, IQTree child2,
-                                                   ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
-        ImmutableSet<Variable> commonVariables = Sets.intersection(child1.getVariables(), child2.getVariables())
+    private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
+            IQTree t1, IQTree t2, ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
+        ImmutableSet<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables())
                 .immutableCopy();
-
         if (commonVariables.isEmpty())
-            return false;
+            return Stream.empty();
 
-        ImmutableSet<ImmutableSet<Variable>> constraints1 = constraintMap.get(child1);
-        ImmutableSet<ImmutableSet<Variable>> constraints2 = constraintMap.get(child2);
-
-        return Stream.of(constraints1, constraints2)
-                .flatMap(Collection::stream)
-                .anyMatch(commonVariables::containsAll);
+        return Stream.of(
+                Optional.of(Maps.immutableEntry(t1, t2))
+                        .filter(e -> constraintMap.get(e.getValue()).stream()
+                                .anyMatch(commonVariables::containsAll)),
+                Optional.of(Maps.immutableEntry(t2, t1))
+                        .filter(e -> constraintMap.get(e.getValue()).stream()
+                                .anyMatch(commonVariables::containsAll)))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
     }
+
+    private Multimap<IQTree, IQTree> saturateDependencies(ImmutableMultimap<IQTree, IQTree> directDependencyMap) {
+        Multimap<IQTree, IQTree> mutableMultimap = HashMultimap.create(directDependencyMap);
+
+        boolean hasConverged = false;
+        while (!hasConverged) {
+            hasConverged = true;
+
+            for (IQTree determinant : directDependencyMap.keys()) {
+                ImmutableSet<IQTree> dependents = ImmutableSet.copyOf(mutableMultimap.get(determinant));
+                for (IQTree dependent : dependents) {
+                    if (mutableMultimap.putAll(determinant, mutableMultimap.get(dependent)))
+                        hasConverged = false;
+                }
+            }
+        }
+        return mutableMultimap;
+    }
+
 
     private IQTree propagateDownCondition(Optional<ImmutableExpression> initialConstraint, ImmutableList<IQTree> children) {
         VariableNullability childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children);
