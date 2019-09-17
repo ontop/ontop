@@ -375,7 +375,11 @@ public class QueryConnectedComponent {
 					Stream.concat(l0.getAtoms().stream(), l1.getAtoms().stream()))
 					.collect(ImmutableCollectors.toList());
 		}
-		
+
+		public boolean isCoveredBy(TreeWitness tw) {
+		    return tw.getDomain().contains(l0.term) && tw.getDomain().contains(l1.term);
+        }
+
 		@Override
 		public String toString() {
 			return "edge: {" + l0.term + ", " + l1.term + "}" + bAtoms + l0.atoms + l1.atoms;

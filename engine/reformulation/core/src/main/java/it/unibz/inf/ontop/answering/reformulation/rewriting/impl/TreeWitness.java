@@ -96,10 +96,8 @@ public class TreeWitness {
 	public ImmutableSet<VariableOrGroundTerm> getDomain() {
 		return terms.domain;
 	}
-	
-	public TermCover getTerms() {
-		return terms;
-	}
+
+	public TermCover getTerms() { return terms; }
 	
 	/**
 	 * ImmutableList<TreeWitnessGenerator> getGenerator()

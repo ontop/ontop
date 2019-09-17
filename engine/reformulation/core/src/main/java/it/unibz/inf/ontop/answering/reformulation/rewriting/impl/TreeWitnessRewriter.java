@@ -241,7 +241,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 					
 					for (Edge edge : cc.getEdges()) {
 						Optional<TreeWitness> cover = compatibleTWs.stream()
-								.filter(tw -> tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1()))
+								.filter(edge::isCoveredBy)
 								.findAny();
 						if (!cover.isPresent()) {
 							log.debug("EDGE {} NOT COVERED BY ANY TW",  edge);
@@ -265,24 +265,25 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 				LinkedList<Function> mainbody = new LinkedList<>();
 				for (Edge edge : cc.getEdges()) {
 					log.debug("EDGE {}", edge);
-					
-					Function edgeAtom = null;
-					for (TreeWitness tw : tws.getTWs())
-						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
-							if (edgeAtom == null) {
-								edgeAtom = getHeadAtom(prefix, "_EDGE_" + (edgeDP.size() + 1), cc.getVariables());
-								mainbody.add(edgeAtom);				
-								
-								ImmutableList<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList());
-								edgeDP.put(edgeAtom, edgeAtoms);
-							}
-							
+
+					ImmutableList<Function> edgeAtoms = edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(ImmutableCollectors.toList());
+
+					ImmutableList<TreeWitness> twCover = tws.getTWs().stream()
+							.filter(edge::isCoveredBy)
+							.collect(ImmutableCollectors.toList());
+
+                    if (twCover.isEmpty()) {
+						mainbody.addAll(edgeAtoms);
+					}
+                    else {
+						Function edgeAtom = getHeadAtom(prefix, "_EDGE_" + (edgeDP.size() + 1), cc.getVariables());
+						mainbody.add(edgeAtom);
+
+						edgeDP.put(edgeAtom, edgeAtoms);
+						for (TreeWitness tw : twCover)
 							for (ImmutableList<Function> twfa : treeWitnessFormulas.get(tw.getTerms()))
 								edgeDP.put(edgeAtom, twfa);
-						}
-					
-					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
-						mainbody.addAll(edge.getAtoms().stream().map(a -> immutabilityTools.convertToMutableFunction(a)).collect(Collectors.toList()));
+					}
 				}
 				bodies.add(ImmutableList.copyOf(mainbody));
 			}
