@@ -187,6 +187,77 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                 .anyMatch(v -> areDisjointWhenNonNull(extractDefs(possibleDefs1, v), extractDefs(possibleDefs2, v), variableNullability1));
     }
 
+    @Override
+    public IQTree makeDistinct(ImmutableList<IQTree> children) {
+        ImmutableMap<IQTree, ImmutableSet<IQTree>> compatibilityMap = extractCompatibilityMap(children);
+
+        if (areGroupDisjoint(compatibilityMap)) {
+            // NB: multiple occurrences of the same child are automatically eliminated
+            return makeDistinctDisjointGroups(ImmutableSet.copyOf(compatibilityMap.values()));
+        }
+        /*
+         * Fail-back: in the presence of non-disjoint groups of children,
+         * puts the DISTINCT above.
+         *
+         * TODO: could be improved
+         */
+        else {
+            return makeDistinctGroup(ImmutableSet.copyOf(children));
+        }
+    }
+
+    private ImmutableMap<IQTree, ImmutableSet<IQTree>> extractCompatibilityMap(ImmutableList<IQTree> children) {
+        return IntStream.range(0, children.size())
+                .boxed()
+                // Compare to itself
+                .flatMap(i -> IntStream.range(i, children.size())
+                        .boxed()
+                        .flatMap(j -> (i.equals(j) || (!areDisjoint(children.get(i), children.get(j))))
+                                ? Stream.of(
+                                Maps.immutableEntry(children.get(i), children.get(j)),
+                                Maps.immutableEntry(children.get(j), children.get(i)))
+                                : Stream.empty()))
+                .collect(ImmutableCollectors.toMultimap())
+                .asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> ImmutableSet.copyOf(e.getValue())));
+    }
+
+    private IQTree makeDistinctDisjointGroups(ImmutableSet<ImmutableSet<IQTree>> disjointGroups) {
+        ImmutableList<IQTree> newChildren = disjointGroups.stream()
+                .map(this::makeDistinctGroup)
+                .collect(ImmutableCollectors.toList());
+
+        switch (newChildren.size()) {
+            case 0:
+                throw new MinorOntopInternalBugException("Was expecting to have at least one group of Union children");
+            case 1:
+                return newChildren.get(0);
+            default:
+                return iqFactory.createNaryIQTree(this, newChildren);
+        }
+    }
+
+    private IQTree makeDistinctGroup(ImmutableSet<IQTree> childGroup) {
+        switch (childGroup.size()) {
+            case 0:
+                throw new MinorOntopInternalBugException("Unexpected empty child group");
+            case 1:
+                return iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), childGroup.iterator().next());
+            default:
+                return iqFactory.createUnaryIQTree(
+                        iqFactory.createDistinctNode(),
+                        iqFactory.createNaryIQTree(this, ImmutableList.copyOf(childGroup)));
+        }
+    }
+
+    private boolean areGroupDisjoint(ImmutableMap<IQTree, ImmutableSet<IQTree>> compatibilityMap) {
+        return compatibilityMap.values().stream()
+                .allMatch(g -> g.stream()
+                        .allMatch(t -> compatibilityMap.get(t).equals(g)));
+    }
+
     private static ImmutableSet<ImmutableTerm> extractDefs(ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleDefs,
                                                            Variable v) {
         if (possibleDefs.isEmpty())

@@ -25,4 +25,9 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
      * To be called on already lifted tree.
      */
     boolean hasAChildWithLiftableDefinition(Variable variable, ImmutableList<IQTree> children);
+
+    /**
+     * Makes the tree be distinct
+     */
+    IQTree makeDistinct(ImmutableList<IQTree> children);
 }
