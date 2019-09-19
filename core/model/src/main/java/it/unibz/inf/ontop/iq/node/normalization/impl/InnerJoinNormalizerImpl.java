@@ -57,18 +57,38 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         State state = new State(children, innerJoinNode.getOptionalFilterCondition(), variableGenerator);
 
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-            State newState = state
-                    .propagateDownCondition()
-                    // Lifts bindings but children still project away irrelevant variables
-                    // (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
-                    // NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
-                    .liftBindings()
-                    .liftDistincts()
+            State newState = liftBindingsAndDistincts(state)
+                    // Removes the child construction nodes that were just projecting away irrelevant variables
                     .liftChildProjectingAwayConstructionNodes()
                     .liftConditionAndMergeJoins();
 
             if (newState.equals(state))
                 return newState.createNormalizedTree(currentIQProperties);
+            state = newState;
+        }
+
+        throw new MinorOntopInternalBugException("InnerJoin.liftBinding() did not converge after " + MAX_ITERATIONS);
+    }
+
+    /**
+     * Lifts bindings but children still project away irrelevant variables
+     * (needed for limiting as much as possible the number of variables on which DISTINCT is applied)
+     *
+     * NB: Note that this number is not guaranteed to be minimal. However, it is guaranteed to be sound.
+     */
+    private State liftBindingsAndDistincts(State initialState) {
+
+        // Non-final
+        State state = initialState;
+
+        for (int i = 0; i < MAX_ITERATIONS; i++) {
+            State newState = state
+                    .propagateDownCondition()
+                    .liftBindings()
+                    .liftDistincts();
+
+            if (newState.equals(state))
+                return newState;
             state = newState;
         }
 
@@ -198,6 +218,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
             OptionalInt optionalSelectedLiftedChildPosition = IntStream.range(0, liftedChildren.size())
                     .filter(i -> liftedChildren.get(i).getRootNode() instanceof ConstructionNode)
+                    .filter(i -> !((ConstructionNode) liftedChildren.get(i).getRootNode()).getSubstitution().isEmpty())
                     .findFirst();
 
             /*
