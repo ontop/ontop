@@ -164,35 +164,38 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	}
 	
 	private class CQ {
-		private final ImmutableSet<ImmutableSet<VariableOrGroundTerm>> equalities;
+		private final ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities;
 		private final ImmutableSet<DataAtom<RDFAtomPredicate>> atoms;
 
-		CQ(ImmutableSet<ImmutableSet<VariableOrGroundTerm>> equalities, ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
+		CQ(ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities, ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
 		    this.equalities = equalities;
 		    this.atoms = atoms;
         }
 
+        CQ reduce() {
+		    return new CQ(equalities, atoms.stream()
+                    .map(a -> atomFactory.getDataAtom(a.getPredicate(),
+                            a.getArguments().stream()
+                                    .map(t -> equalities.getOrDefault(t, t))
+                                    .collect(ImmutableCollectors.toList())))
+                    .collect(ImmutableCollectors.toSet()));
+        }
+
         CQ join(CQ cq) {
             return new CQ(
-                    Sets.union(equalities, cq.equalities).immutableCopy(),
+                    Stream.concat(equalities.entrySet().stream(), cq.equalities.entrySet().stream())
+                            .distinct()
+                            .collect(ImmutableCollectors.toMap()),
                     Sets.union(atoms, cq.atoms).immutableCopy());
         }
 
         ImmutableList<Function> as() {
-		    ImmutableList.Builder<Function> b = ImmutableList.builder();
-
-            // equality atoms
-            for (ImmutableSet<VariableOrGroundTerm> eq : equalities) {
-                Iterator<VariableOrGroundTerm> i = eq.iterator();
-                VariableOrGroundTerm r0 = i.next();
-                while (i.hasNext())
-                    b.add(termFactory.getFunctionEQ(immutabilityTools.convertToMutableTerm(i.next()), immutabilityTools.convertToMutableTerm(r0)));
-            }
-            // root atoms
-            for (DataAtom<RDFAtomPredicate> a : atoms) {
-                b.add(immutabilityTools.convertToMutableFunction(a));
-            }
-            return b.build();
+		    return Stream.concat(
+		            equalities.entrySet().stream()
+                            .filter(e -> e.getKey() != e.getValue())
+                            .map(e -> termFactory.getFunctionEQ(immutabilityTools.convertToMutableTerm(e.getKey()), immutabilityTools.convertToMutableTerm(e.getValue()))),
+                    atoms.stream()
+                            .map(a -> immutabilityTools.convertToMutableFunction(a))).collect(ImmutableCollectors.toList());
         }
 	}
 
@@ -203,7 +206,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         UnionOfCQs join(CQ cq) {
             return new UnionOfCQs(cqs.stream()
-                    .map(c -> c.join(cq))
+                    .map(c -> c.join(cq).reduce())
                     .collect(ImmutableCollectors.toList()));
         }
 
@@ -214,13 +217,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         }
     }
 
-    DataAtom<RDFAtomPredicate> getRootedAtom(DataAtom<RDFAtomPredicate> atom, VariableOrGroundTerm root) {
-        if (!(atom.getPredicate() instanceof TriplePredicate))
-            throw new MinorOntopInternalBugException("A triple atom was expected: " + atom);
-
-        return (atom.getPredicate().getClassIRI(atom.getArguments()).isPresent())
-            ? atomFactory.getDataAtom(atom.getPredicate(), root, atom.getTerm(1), atom.getTerm(2))
-            : atomFactory.getDataAtom(atom.getPredicate(), root, atom.getTerm(1), root);
+    private ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> getReps(ImmutableSet<VariableOrGroundTerm> equalities) {
+//        ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> reps = equalities.stream()
+//                .map(s -> new AbstractMap.SimpleEntry<>(s, s.iterator().next()))
+//                .flatMap(e -> e.getKey().stream().map(s -> new AbstractMap.SimpleEntry<>(s, e.getValue())))
+//                .collect(ImmutableCollectors.toMap());
+        VariableOrGroundTerm rep = equalities.iterator().next();
+        return equalities.stream()
+                .map(s -> new AbstractMap.SimpleEntry<>(s, rep))
+                .collect(ImmutableCollectors.toMap());
     }
 
 	/*
@@ -247,15 +252,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		// COMPUTE AND STORE TREE WITNESS FORMULAS
 		for (TreeWitness tw : tws.getTWs()) {
 			log.debug("TREE WITNESS: {}", tw);
-            VariableOrGroundTerm root = tw.getRoots().iterator().next();
-			CQ twf = new CQ(ImmutableSet.of(tw.getRoots()),
-                    tw.getRootAtoms().stream()
-                            .map(a -> getRootedAtom(a, root))
-                            .collect(ImmutableCollectors.toSet()));
+			ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities = getReps(tw.getRoots());
+			CQ twf = new CQ(equalities, tw.getRootAtoms());
 
 			UnionOfCQs gens = new UnionOfCQs(
-			        getAtomsForGenerators(tw.getGenerators(), root).stream()
-                        .map(a -> new CQ(ImmutableSet.of(), ImmutableSet.of(a)))
+			        getAtomsForGenerators(tw.getGenerators(), equalities.entrySet().iterator().next().getValue()).stream()
+                        .map(a -> new CQ(equalities, ImmutableSet.of(a)))
                         .collect(ImmutableCollectors.toList()));
 
 			treeWitnessFormulas.put(tw.getTerms(), gens.join(twf).as());
