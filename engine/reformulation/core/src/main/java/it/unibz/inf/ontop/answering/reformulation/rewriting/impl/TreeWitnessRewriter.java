@@ -183,6 +183,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
         CQ join(CQ cq) {
             return new CQ(
+                    // TODO: merge equivalence classes
                     Stream.concat(equalities.entrySet().stream(), cq.equalities.entrySet().stream())
                             .distinct()
                             .collect(ImmutableCollectors.toMap()),
@@ -222,7 +223,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 //                .map(s -> new AbstractMap.SimpleEntry<>(s, s.iterator().next()))
 //                .flatMap(e -> e.getKey().stream().map(s -> new AbstractMap.SimpleEntry<>(s, e.getValue())))
 //                .collect(ImmutableCollectors.toMap());
-        VariableOrGroundTerm rep = equalities.iterator().next();
+        // get canonical representative
+        ArrayList<VariableOrGroundTerm> list = new ArrayList<>(equalities);
+        list.sort(Comparator.comparing(Object::toString));
+        VariableOrGroundTerm rep = list.get(0);
         return equalities.stream()
                 .map(s -> new AbstractMap.SimpleEntry<>(s, rep))
                 .collect(ImmutableCollectors.toMap());
