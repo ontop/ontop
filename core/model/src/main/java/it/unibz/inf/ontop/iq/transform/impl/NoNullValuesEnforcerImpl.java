@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.iq.transform.impl;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 
@@ -28,27 +25,19 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     @Override
     public IQ transform(IQ originalQuery) {
         IQTree tree = originalQuery.getTree();
-        ImmutableSet<ImmutableSet<Variable>> nullableGroups = tree.getVariableNullability().getNullableGroups();
 
-        return nullableGroups.isEmpty() ?
-                originalQuery :
-                insertFilter(originalQuery, nullableGroups);
-    }
+        Optional<ImmutableExpression> condition = termFactory.getConjunction(
+                tree.getVariables().stream()
+                        .map(termFactory::getDBIsNotNull));
 
+        IQTree newTree = condition
+                .map(iQFactory::createFilterNode)
+                .map(n -> iQFactory.createUnaryIQTree(n, tree))
+                .map(t -> t.normalizeForOptimization(originalQuery.getVariableGenerator()))
+                .orElse(tree);
 
-    private ImmutableExpression computeFilterExpression(ImmutableSet<ImmutableSet<Variable>> nullableGroups) {
-        return nullableGroups.stream()
-                .map(g -> g.stream().findFirst())
-                .map(Optional::get)
-                .map(termFactory::getDBIsNotNull)
-                .reduce(null, (a, b) -> (a == null) ? b : termFactory.getConjunction(a, b));
-    }
-
-    private IQ insertFilter(IQ originalQuery, ImmutableSet<ImmutableSet<Variable>> nullableVariables) {
-        FilterNode filterNode = iQFactory.createFilterNode(computeFilterExpression(nullableVariables));
-        UnaryIQTree newTree = iQFactory.createUnaryIQTree(filterNode, originalQuery.getTree());
-
-        // TODO: normalize it
-        return iQFactory.createIQ(originalQuery.getProjectionAtom(), newTree);
+        return newTree.equals(tree)
+                ? originalQuery
+                : iQFactory.createIQ(originalQuery.getProjectionAtom(), newTree);
     }
 }
