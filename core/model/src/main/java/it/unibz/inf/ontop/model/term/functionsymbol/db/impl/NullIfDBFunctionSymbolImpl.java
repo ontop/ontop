@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -93,5 +92,20 @@ public class NullIfDBFunctionSymbolImpl extends AbstractArgDependentTypedDBFunct
                         termFactory.getDBIsNull(term2),
                         termFactory.getDBNot(termFactory.getDBNonStrictDefaultEquality(term1, term2))))
                 .evaluate(variableNullability, true);
+    }
+
+    /**
+     * If guaranteed to be non-null, only considers the first term.
+     */
+    @Override
+    public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        TermFactory termFactory) {
+        ImmutableTerm firstTerm = terms.get(0);
+        if (firstTerm instanceof Variable)
+            return FunctionalTermSimplification.create(firstTerm, ImmutableSet.of((Variable)firstTerm));
+        else if (firstTerm instanceof ImmutableFunctionalTerm)
+            return ((ImmutableFunctionalTerm) firstTerm).simplifyAsGuaranteedToBeNonNull();
+        else
+            return FunctionalTermSimplification.create(firstTerm, ImmutableSet.of());
     }
 }

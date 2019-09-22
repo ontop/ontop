@@ -36,6 +36,12 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         this.expectedBaseTypes = expectedBaseTypes;
     }
 
+    /**
+     * When the function symbol is, in the absence of non-injective functional sub-terms, sometimes but not always injective,
+     * please override isInjective(...)
+     */
+    protected abstract boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
+
     @Override
     public FunctionalTermNullability evaluateNullability(ImmutableList<? extends NonFunctionalTerm> arguments,
                                                          VariableNullability childNullability, TermFactory termFactory) {
@@ -227,6 +233,48 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                         : ((ImmutableFunctionalTerm)t).proposeProvenanceVariables());
         // By default
         return Stream.empty();
+    }
+
+    /**
+     * By default, only handles the case of function symbols that do not tolerate nulls
+     *  and never return nulls in the absence of nulls as input.
+     *
+     */
+    @Override
+    public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        TermFactory termFactory) {
+        if (!mayReturnNullWithoutNullArguments() && (!tolerateNulls())) {
+            ImmutableMap<Integer, FunctionalTermSimplification> subTermSimplifications = IntStream.range(0, terms.size())
+                    .boxed()
+                    .filter(i -> terms.get(i) instanceof ImmutableFunctionalTerm)
+                    .collect(ImmutableCollectors.toMap(
+                            i -> i,
+                            // Recursive
+                            i -> ((ImmutableFunctionalTerm) terms.get(i)).simplifyAsGuaranteedToBeNonNull()));
+
+            ImmutableList<ImmutableTerm> newSubTerms = IntStream.range(0, terms.size())
+                    .boxed()
+                    .map(i -> Optional.ofNullable(subTermSimplifications.get(i))
+                            .map(FunctionalTermSimplification::getSimplifiedTerm)
+                            .orElseGet(() -> terms.get(i)))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableFunctionalTerm simplifiedTerm = termFactory.getImmutableFunctionalTerm(this, newSubTerms);
+
+            ImmutableSet<Variable> simplifiableVariables = Stream.concat(
+                    subTermSimplifications.values().stream()
+                            .flatMap(s -> s.getSimplifiableVariables().stream()),
+                    terms.stream()
+                            .filter(t -> t instanceof Variable)
+                            .map(v -> (Variable) v))
+                    .collect(ImmutableCollectors.toSet());
+
+            return FunctionalTermSimplification.create(simplifiedTerm, simplifiableVariables);
+        }
+        else
+            return FunctionalTermSimplification.create(
+                    termFactory.getImmutableFunctionalTerm(this, terms),
+                    ImmutableSet.of());
     }
 
     /**

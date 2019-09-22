@@ -58,6 +58,17 @@ public interface ImmutableFunctionalTerm extends NonVariableTerm, NonConstantTer
      */
     Stream<Variable> proposeProvenanceVariables();
 
+    /**
+     * In some occasions, we now that a functional term will never produce a NULL in a given context
+     * (e.g. after applying a filter). This method propagates this information to the functional term
+     * as to let it simplify itself.
+     *
+     * Very useful for NULLIF. For instance "NULLIF(NULLIF(a, 0), 1)" would simplify to "a" as "a" is in the
+     * current context guaranteed to be non-null and different from 0 and 1.
+     *
+     */
+    FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull();
+
     interface FunctionalTermDecomposition {
 
         /**
