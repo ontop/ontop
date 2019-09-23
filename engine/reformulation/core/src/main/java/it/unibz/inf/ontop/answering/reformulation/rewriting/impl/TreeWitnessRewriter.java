@@ -244,11 +244,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		if (cc.hasNoFreeTerms()) {  
 			if (!cc.isDegenerate() || cc.getLoop().isPresent())
-				for (Function a : getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable()).stream()
+				getAtomsForGenerators(ImmutableList.copyOf(tws.getGeneratorsOfDetachedCC()), getFreshVariable()).stream()
 						.map(a -> immutabilityTools.convertToMutableFunction(a))
-						.collect(ImmutableCollectors.toList())) {
-					bodies.add(ImmutableList.of(a));
-				}
+                        .map(a -> ImmutableList.of(a))
+                        .forEach(l -> bodies.add(l));
 		}
 
 		Map<TreeWitness.TermCover, ImmutableList<ImmutableList<Function>>> treeWitnessFormulas = new HashMap<>();
