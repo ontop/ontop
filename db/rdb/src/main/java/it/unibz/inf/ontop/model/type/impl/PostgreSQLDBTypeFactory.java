@@ -27,6 +27,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMESTAMPTZ_STR = "TIMESTAMPTZ";
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
+    public static final String UUID_STR = "UUID";
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -73,6 +74,8 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // TODO: check if lexical values can be considered as unique
         DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean, false);
 
+        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(), true);
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
         map.put(INT2_STR, int2Type);
@@ -88,6 +91,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
         map.put(BOOL_STR, boolType);
+        map.put(UUID_STR, uuidType);
         return map;
     }
 

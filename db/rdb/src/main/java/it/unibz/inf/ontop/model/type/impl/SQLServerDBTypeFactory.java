@@ -17,6 +17,7 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String DATETIME_STR = "DATETIME";
     public static final String DATETIME2_STR = "DATETIME2";
     public static final String DATETIMEOFFSET_STR = "DATETIMEOFFSET";
+    public static final String UNIQUEIDENTIFIER_STR = "UNIQUEIDENTIFIER";
 
 
     @AssistedInject
@@ -45,12 +46,15 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         DatetimeDBTermType dateTimeOffset = new DatetimeDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype(), false);
 
+        DBTermType uniqueIdType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UNIQUEIDENTIFIER_STR, rootTermType.getAncestry(), true);
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NVARCHAR_STR, nvarcharType);
         map.put(BIT_STR, bitType);
         map.put(DATETIME_STR, datetimeType);
         map.put(DATETIME2_STR, datetime2Type);
         map.put(DATETIMEOFFSET_STR, dateTimeOffset);
+        map.put(UNIQUEIDENTIFIER_STR, uniqueIdType);
         return map;
     }
 
