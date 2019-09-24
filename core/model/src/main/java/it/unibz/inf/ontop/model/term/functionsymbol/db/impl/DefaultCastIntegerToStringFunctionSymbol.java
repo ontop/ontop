@@ -24,7 +24,7 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
         this.inputType = inputType;
         if (inputType.isAbstract())
             throw new IllegalArgumentException("Was expecting a concrete input type");
-        this.pattern = Pattern.compile("^[0+]\\d+");
+        this.pattern = Pattern.compile("^([0+]|-0)\\d+");
     }
 
     /**
@@ -41,7 +41,7 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
 
         ImmutableExpression newEquality = termFactory.getStrictEquality(
                 terms.get(0),
-                termFactory.getDBConstant(otherTerm.getValue(), inputType));
+                termFactory.getDBConstant(otherValue, inputType));
 
         return newEquality.evaluate(variableNullability, true);
     }

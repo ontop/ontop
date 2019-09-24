@@ -32,15 +32,18 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdStringDatatype());
 
         // Non-standard (not part of the R2RML standard).
+        // TODO: check if lexical values can be considered as unique
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype());
+                typeFactory.getXsdBooleanDatatype(), false);
         // Name for TIMESTAMP
+        // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
+                typeFactory.getXsdDatetimeDatatype(), false);
         DatetimeDBTermType datetime2Type = new DatetimeDBTermType(DATETIME2_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
+                typeFactory.getXsdDatetimeDatatype(), false);
+        // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType dateTimeOffset = new DatetimeDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
+                typeFactory.getXsdDatetimeDatatype(), false);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NVARCHAR_STR, nvarcharType);
