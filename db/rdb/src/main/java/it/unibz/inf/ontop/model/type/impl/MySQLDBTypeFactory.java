@@ -72,18 +72,20 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
 
         // NB: TIMESTAMP also exists
+        // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
+                typeFactory.getXsdDatetimeDatatype(), false);
 
         // TODO: shall we treat BIT as a number? Then, we would have to serialize it differently (e.g. b'011111')
-        DBTermType defaultBitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry);
+        // TODO: check if lexical values can be considered as unique
+        DBTermType defaultBitType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BIT_STR, rootAncestry, false);
 
         // Special cases that are interpreted as booleans
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-        BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean);
+        BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean, true);
 
         DBTermType yearType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(YEAR_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.GYEAR));
+                typeFactory.getDatatype(XSD.GYEAR), true);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_ONE_STR, bitOneType);

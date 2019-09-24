@@ -5,7 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.IncrementalEvaluation;
+import it.unibz.inf.ontop.model.term.NonNullConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -275,6 +278,14 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
                     @Override
                     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
                         return false;
+                    }
+
+                    /**
+                     * TEXT and NTEXT cannot be compared to constants...
+                     */
+                    @Override
+                    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms, NonNullConstant otherTerm, TermFactory termFactory, VariableNullability variableNullability) {
+                        return IncrementalEvaluation.declareSameExpression();
                     }
                 };
             default:
