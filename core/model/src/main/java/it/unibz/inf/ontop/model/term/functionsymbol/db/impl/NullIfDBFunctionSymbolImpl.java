@@ -2,12 +2,18 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class NullIfDBFunctionSymbolImpl extends AbstractArgDependentTypedDBFunctionSymbol {
@@ -83,15 +89,41 @@ public class NullIfDBFunctionSymbolImpl extends AbstractArgDependentTypedDBFunct
     @Override
     public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
                                                    VariableNullability variableNullability) {
+        Map.Entry<ImmutableTerm, Stream<ImmutableTerm>> decomposition = decomposeNullIfHierarchy(terms);
+
+        ImmutableTerm firstTerm = decomposition.getKey();
+        Stream<ImmutableTerm> secondTerms = decomposition.getValue();
+
+        ImmutableExpression conjunction = termFactory.getConjunction(
+                Stream.concat(
+                        Stream.of(termFactory.getDBIsNotNull(firstTerm)),
+                        secondTerms
+                                .map(term2 -> termFactory.getDisjunction(
+                                        termFactory.getDBIsNull(term2),
+                                        termFactory.getDBNot(termFactory.getDBNonStrictDefaultEquality(firstTerm, term2))))))
+                .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting to have at least one second term"));
+
+        return conjunction.evaluate(variableNullability, true);
+    }
+
+    /**
+     * Decomposes hierarchies like NULLIF(NULLIF(x,1),0) into pairs like (x, [0,1])
+     */
+    protected Map.Entry<ImmutableTerm, Stream<ImmutableTerm>> decomposeNullIfHierarchy(
+            ImmutableList<? extends ImmutableTerm> terms) {
         ImmutableTerm term1 = terms.get(0);
         ImmutableTerm term2 = terms.get(1);
 
-        return termFactory.getConjunction(
-                termFactory.getDBIsNotNull(term1),
-                termFactory.getDisjunction(
-                        termFactory.getDBIsNull(term2),
-                        termFactory.getDBNot(termFactory.getDBNonStrictDefaultEquality(term1, term2))))
-                .evaluate(variableNullability, true);
+        if ((term1 instanceof ImmutableFunctionalTerm) &&
+                ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof NullIfDBFunctionSymbolImpl) {
+            // Recursive
+            Map.Entry<ImmutableTerm, Stream<ImmutableTerm>> subDecomposition =
+                    decomposeNullIfHierarchy(((ImmutableFunctionalTerm) term1).getTerms());
+
+            return Maps.immutableEntry(subDecomposition.getKey(), Stream.concat(Stream.of(term2), subDecomposition.getValue()));
+        }
+        else
+            return Maps.immutableEntry(term1, Stream.of(term2));
     }
 
     /**
