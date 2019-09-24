@@ -13,13 +13,12 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.slf4j.Logger;
@@ -45,6 +44,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
+	private final QueryPlanner queryPlanner;
 
 	@AssistedInject
 	private QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -54,10 +54,11 @@ public class QuestQueryProcessor implements QueryReformulator {
 								QueryRewriter queryRewriter,
 								InputQueryFactory inputQueryFactory,
 								InputQueryTranslator inputQueryTranslator,
-								GeneralStructuralAndSemanticIQOptimizer generalOptimizer) {
+								GeneralStructuralAndSemanticIQOptimizer generalOptimizer, QueryPlanner queryPlanner) {
 		this.inputQueryFactory = inputQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
+		this.queryPlanner = queryPlanner;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 
@@ -107,7 +108,7 @@ public class QuestQueryProcessor implements QueryReformulator {
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
-				IQ plannedQuery = generalOptimizer.optimize(optimizedQuery, executorRegistry);
+				IQ plannedQuery = queryPlanner.optimize(optimizedQuery, executorRegistry);
 				log.debug("Planned query: \n" + plannedQuery);
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
