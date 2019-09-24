@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -10,9 +11,11 @@ import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermFunctionSymbol {
@@ -159,5 +162,39 @@ public class RDFTermFunctionSymbolImpl extends FunctionSymbolImpl implements RDF
                                                            VariableNullability variableNullability,
                                                            ImmutableList<? extends ImmutableTerm> otherTerms) {
         return true;
+    }
+
+    /**
+     * Overridden because RDF(...) officially "tolerates" NULLs
+     * (so as to complain when only one argument is NULL, which should never happen)
+     */
+    @Override
+    public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory) {
+        ImmutableMap<Integer, FunctionalTermSimplification> subTermSimplifications = IntStream.range(0, terms.size())
+                .boxed()
+                .filter(i -> terms.get(i) instanceof ImmutableFunctionalTerm)
+                .collect(ImmutableCollectors.toMap(
+                        i -> i,
+                        // Recursive
+                        i -> ((ImmutableFunctionalTerm) terms.get(i)).simplifyAsGuaranteedToBeNonNull()));
+
+        ImmutableList<ImmutableTerm> newSubTerms = IntStream.range(0, terms.size())
+                .boxed()
+                .map(i -> Optional.ofNullable(subTermSimplifications.get(i))
+                        .map(FunctionalTermSimplification::getSimplifiedTerm)
+                        .orElseGet(() -> terms.get(i)))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableFunctionalTerm simplifiedTerm = termFactory.getImmutableFunctionalTerm(this, newSubTerms);
+
+        ImmutableSet<Variable> simplifiableVariables = Stream.concat(
+                subTermSimplifications.values().stream()
+                        .flatMap(s -> s.getSimplifiableVariables().stream()),
+                terms.stream()
+                        .filter(t -> t instanceof Variable)
+                        .map(v -> (Variable) v))
+                .collect(ImmutableCollectors.toSet());
+
+        return FunctionalTermSimplification.create(simplifiedTerm, simplifiableVariables);
     }
 }
