@@ -69,6 +69,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PostProcessableFunctionLifter.class);
         bindFromSettings(InnerJoinIQOptimizer.class);
         bindFromSettings(LeftJoinIQOptimizer.class);
+        bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
