@@ -103,7 +103,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty())
-                    throw new EmptyQueryException();
+                    return unfoldedIQ;
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
@@ -132,6 +132,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private IQ generateExecutableQuery(IQ iq)
 			throws OntopReformulationException {
+
 		log.debug("Producing the native query string...");
 
 		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq, executorRegistry);
