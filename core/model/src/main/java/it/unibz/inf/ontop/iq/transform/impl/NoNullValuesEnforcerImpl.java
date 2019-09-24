@@ -130,6 +130,9 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
                     ? child
                     : (new NotNullTopVariablePropagator(iqFactory, substitutionFactory, simplifiableChildVariables)).transform(child);
 
+            if (newConstructionNode == rootNode && newChild == child)
+                return tree;
+
             return iqFactory.createUnaryIQTree(newConstructionNode, newChild);
         }
 
