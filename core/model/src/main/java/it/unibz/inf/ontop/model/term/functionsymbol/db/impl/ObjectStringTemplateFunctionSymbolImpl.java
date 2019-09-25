@@ -47,9 +47,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
-        // TODO: forbid safe separators (e.g. /)
-        // TODO: make it safe!
-        this.pattern = Pattern.compile(template.replace(PLACE_HOLDER, "(.+)"));
+        this.pattern = extractPattern(template);
 
         this.isInjective = isInjective(arity, template);
     }
