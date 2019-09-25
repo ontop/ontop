@@ -76,27 +76,27 @@ public class PostProcessableFunctionLifterImpl implements PostProcessableFunctio
         }
 
         @Override
-        protected IQTree transformUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-            return super.transformUnaryNode(rootNode, child)
+        protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
+            return super.transformUnaryNode(tree, rootNode, child)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(rootNode, children)
+        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
+            return super.transformNaryCommutativeNode(tree, rootNode, children)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeOperatorNode rootNode,
+        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode,
                                                            IQTree leftChild, IQTree rightChild) {
-            return super.transformBinaryNonCommutativeNode(rootNode, leftChild, rightChild)
+            return super.transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild)
                     .normalizeForOptimization(variableGenerator);
         }
 
         @Override
         public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            IQTree normalizedTree = transformNaryCommutativeNode(rootNode, children);
+            IQTree normalizedTree = transformNaryCommutativeNode(tree, rootNode, children);
 
             // Fix-point before pursing (recursive, potentially dangerous!)
             if (!normalizedTree.isEquivalentTo(tree)) {

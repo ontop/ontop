@@ -13,7 +13,8 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @AssistedInject
     private MockupDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
-        rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType("AbstractDBType", rootTermType.getAncestry(), true);
+        rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType("AbstractDBType",
+                rootTermType.getAncestry(), true, false);
         rootAncestry = rootDBType.getAncestry();
     }
 
@@ -69,12 +70,12 @@ public class MockupDBTypeFactory implements DBTypeFactory {
 
     @Override
     public DBTermType getDBTermType(String typeName) {
-        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false, false);
     }
 
     @Override
     public DBTermType getDBTermType(String typeName, int columnSize) {
-        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false);
+        return new NonStringNonNumberNonBooleanNonDatetimeDBTermType(typeName, rootAncestry, false, false);
     }
 
     @Override

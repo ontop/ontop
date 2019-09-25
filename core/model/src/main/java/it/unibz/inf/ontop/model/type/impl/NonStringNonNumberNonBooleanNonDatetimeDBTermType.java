@@ -11,18 +11,21 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
     @Nullable
     private final RDFDatatype rdfDatatype;
 
-    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
-        super(name, parentAncestry, isAbstract);
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
+                                                                boolean isAbstract, boolean areLexicalTermsUnique) {
+        super(name, parentAncestry, isAbstract, areLexicalTermsUnique);
         rdfDatatype = null;
     }
 
-    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
-        super(name, parentAncestry, false);
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
+                                                                RDFDatatype rdfDatatype, boolean areLexicalTermsUnique) {
+        super(name, parentAncestry, false, areLexicalTermsUnique);
         this.rdfDatatype = rdfDatatype;
     }
 
-    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry) {
-        super(name, parentAncestry, false);
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
+                                                                boolean areLexicalTermsUnique) {
+        super(name, parentAncestry, false, areLexicalTermsUnique);
         this.rdfDatatype = null;
     }
 

@@ -157,6 +157,11 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
+    public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull() {
+        return functionSymbol.simplifyAsGuaranteedToBeNonNull(getTerms(), termFactory);
+    }
+
+    @Override
     public boolean canBePostProcessed() {
         return functionSymbol.canBePostProcessed(terms);
     }

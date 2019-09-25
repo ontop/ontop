@@ -55,6 +55,9 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
         } else if (focusNode instanceof ExtendedProjectionNode) {
             retainedVariables = updateRetainedVariables((ExtendedProjectionNode) focusNode);
         }
+        else if (focusNode instanceof OrderByNode) {
+            retainedVariables = updateRetainedVariables((OrderByNode) focusNode, retainedVariables);
+        }
 
         if (optionalProposal.isPresent()) {
             NodeCentricOptimizationResults<ExplicitVariableProjectionNode> optimizationResults;
@@ -71,6 +74,10 @@ public class ProjectionShrinkingOptimizer implements IntermediateQueryOptimizer 
             query = optimizeSubtree(childNode, query, retainedVariables);
         }
         return query;
+    }
+
+    private ImmutableSet<Variable> updateRetainedVariables(OrderByNode focusNode, ImmutableSet<Variable> retainedVariables) {
+        return Sets.union(retainedVariables, focusNode.getLocalVariables()).immutableCopy();
     }
 
     private Optional<ProjectionShrinkingProposal> makeProposal(ExplicitVariableProjectionNode node, ImmutableSet<Variable> retainedVariables) {

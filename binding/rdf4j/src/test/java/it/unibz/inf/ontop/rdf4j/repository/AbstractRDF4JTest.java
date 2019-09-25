@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 public class AbstractRDF4JTest {
 
@@ -118,6 +120,24 @@ public class AbstractRDF4JTest {
         }
         result.close();
         return count;
+    }
+
+    protected void runQueryAndCompare(String queryString, ImmutableList<String> expectedVValues) {
+        TupleQuery query = REPO_CONNECTION.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
+
+        TupleQueryResult result = query.evaluate();
+        ImmutableList.Builder<String> vValueBuilder = ImmutableList.builder();
+        while (result.hasNext()) {
+            BindingSet bindingSet = result.next();
+            Optional.ofNullable(bindingSet.getValue("v"))
+                    .map(Value::stringValue)
+                    .ifPresent(vValueBuilder::add);
+
+            LOGGER.debug(bindingSet + "\n");
+        }
+        result.close();
+
+        assertEquals(expectedVValues, vValueBuilder.build());
     }
 
     protected TupleQueryResult evaluate(String queryString) {

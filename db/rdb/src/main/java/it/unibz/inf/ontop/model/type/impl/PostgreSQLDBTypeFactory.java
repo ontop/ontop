@@ -27,6 +27,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
     public static final String TIMESTAMPTZ_STR = "TIMESTAMPTZ";
     public static final String TIMETZ_STR = "TIMETZ";
     public static final String BOOL_STR = "BOOL";
+    public static final String UUID_STR = "UUID";
 
     @AssistedInject
     protected PostgreSQLDBTypeFactory(@Assisted TermType rootTermType, @Assisted TypeFactory typeFactory) {
@@ -41,12 +42,14 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         // TODO: treat it as a proper binary type
+        // TODO: check if lexical values can be considered as unique
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype());
+                typeFactory.getXsdBooleanDatatype(), false);
 
         // TODO: treat it as a proper binary type
-        BooleanDBTermType varBitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype());
+        // TODO: check if lexical values can be considered as unique
+        BooleanDBTermType varBitType = new BooleanDBTermType(VARBIT_STR, rootAncestry,
+                typeFactory.getXsdBooleanDatatype(), false);
 
         NumberDBTermType int2Type = new NumberDBTermType(INT2_STR, rootAncestry, xsdInteger, INTEGER);
         NumberDBTermType int4Type = new NumberDBTermType(INT4_STR, rootAncestry, xsdInteger, INTEGER);
@@ -63,12 +66,15 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
         DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype());
+                typeFactory.getXsdDatetimeDatatype(), false);
 
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.TIME));
+                typeFactory.getDatatype(XSD.TIME), false);
 
-        DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean);
+        // TODO: check if lexical values can be considered as unique
+        DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean, false);
+
+        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(), true);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);
@@ -85,6 +91,7 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         map.put(TIMESTAMPTZ_STR, timestampTz);
         map.put(TIMETZ_STR, timeTzType);
         map.put(BOOL_STR, boolType);
+        map.put(UUID_STR, uuidType);
         return map;
     }
 

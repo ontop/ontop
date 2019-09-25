@@ -11,14 +11,14 @@ public class StringDBTermType extends DBTermTypeImpl {
     private final RDFDatatype xsdStringDatatype;
 
     protected StringDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, true);
         this.xsdStringDatatype = xsdStringDatatype;
         this.castName = name;
     }
 
     protected StringDBTermType(String name, String castName,
                                TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false);
+        super(name, parentAncestry, false, true);
         this.castName = castName;
         this.xsdStringDatatype = xsdStringDatatype;
     }
