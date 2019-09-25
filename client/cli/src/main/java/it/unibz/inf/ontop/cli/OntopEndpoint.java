@@ -42,6 +42,7 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
         String[] args = new String[argList.size()];
         argList.toArray(args);
 
-        SpringApplication.run(OntopEndpointApplication.class, args);
+        OntopEndpointApplication.main(args);
+        //SpringApplication.run(OntopEndpointApplication.class, args);
     }
 }

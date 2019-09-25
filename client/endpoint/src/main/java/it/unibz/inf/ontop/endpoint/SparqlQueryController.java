@@ -35,6 +35,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,6 +57,7 @@ public class SparqlQueryController {
                                  @Value("${lazy:false}") boolean lazy,
                                  @Value("${ontology:#{null}}") String owlFile) {
         this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
+        registerFileWatcher(mappingFile, owlFile, propertiesFile);
     }
 
     private Repository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
@@ -244,4 +248,39 @@ public class SparqlQueryController {
         return new ResponseEntity<>(message, headers, status);
     }
 
+    @PostMapping("/restart")
+    public void restart() {
+        OntopEndpointApplication.restart();
+    }
+
+    private void registerFileWatcher(String mappingFile, String owlFile, String propertiesFile) {
+        final Path path = FileSystems.getDefault().getPath(new File(mappingFile).getAbsolutePath()).getParent();
+        System.out.println(path);
+        new Thread(() -> {
+            try {
+                final WatchService watchService = FileSystems.getDefault().newWatchService();
+                final WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+                while (true) {
+                    final WatchKey wk = watchService.take();
+                    for (WatchEvent<?> event : wk.pollEvents()) {
+                        //we only register "ENTRY_MODIFY" so the context is always a Path.
+                        final Path changed = (Path) event.context();
+                        System.out.println(changed);
+                        if(changed.endsWith(mappingFile)){
+                            System.out.println("File change detected. RESTARTING Ontop!");
+                            OntopEndpointApplication.restart();
+                        }
+                    }
+                    // reset the key
+                    boolean valid = wk.reset();
+                    if (!valid) {
+                        System.out.println("Key has been unregisterede");
+                    }
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
 }
