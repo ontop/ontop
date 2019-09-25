@@ -47,7 +47,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
-        this.pattern = extractPattern(template);
+        this.pattern = extractPattern(template, true);
 
         this.isInjective = isInjective(arity, template);
     }
@@ -240,11 +240,11 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         String remainingTemplate = template.substring(minLength);
         String otherRemainingTemplate = otherTemplate.substring(minLength);
 
-        Pattern subPattern = extractPattern(remainingTemplate);
+        Pattern subPattern = extractPattern(remainingTemplate, false);
         return subPattern.matcher(otherRemainingTemplate).find();
     }
 
-    protected static Pattern extractPattern(String template) {
+    protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
         String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
         String safeTemplate = makeRegexSafe(template
                 .replace(PLACE_HOLDER, tmpPlaceholder));
@@ -254,9 +254,10 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
                 .map(ObjectStringTemplateFunctionSymbolImpl::makeRegexSafe)
                 .reduce("[^", (c1, c2) -> c1 + c2, (c1, c2) -> c1 + c2) + "]*";
 
+        String replacement = surroundWithParentheses ? "(" + notSeparator + ")" : notSeparator;
+
         String patternString = "^" + safeTemplate
-                .replace(tmpPlaceholder, notSeparator)
-                .replace("\\", "\\\\")
+                .replace(tmpPlaceholder, replacement)
                 + "$";
 
         return Pattern.compile(patternString);
