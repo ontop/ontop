@@ -10,7 +10,7 @@ pVersion="5.5.0"
 version=`grep -m 1 'version' < pom.xml | sed -r 's/.*<version>(.*)<\/version>.*/\1/' | tr -d '\n'`
 wd=`pwd`
 
-# Build ontop bundles
+# Build ontop
 cd "${wd}/../.."
 mvn clean install -DskipTests
 
