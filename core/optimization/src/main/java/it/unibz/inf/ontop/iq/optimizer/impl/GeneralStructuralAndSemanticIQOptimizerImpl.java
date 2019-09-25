@@ -26,14 +26,16 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final IntermediateQueryFactory iqFactory;
+    private final ProjectionShrinkingOptimizer projectionShrinker;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
-                                                       JoinLikeOptimizer joinLikeOptimizer,
-                                                       FlattenUnionOptimizer flattenUnionOptimizer,
-                                                       PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
-                                                       IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
-                                                       AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory) {
+                                                        JoinLikeOptimizer joinLikeOptimizer,
+                                                        FlattenUnionOptimizer flattenUnionOptimizer,
+                                                        PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
+                                                        IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
+                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory,
+                                                        ProjectionShrinkingOptimizer projectionShrinker) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.flattenUnionOptimizer = flattenUnionOptimizer;
@@ -42,6 +44,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.iqFactory = iqFactory;
+        this.projectionShrinker = projectionShrinker;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
             IntermediateQuery intermediateQuery = pullUpExpressionOptimizer.optimize(iqConverter.convert(liftedQuery, executorRegistry));
             LOGGER.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
 
-            intermediateQuery = new ProjectionShrinkingOptimizer().optimize(intermediateQuery);
+            intermediateQuery = projectionShrinker.optimize(intermediateQuery);
 
             LOGGER.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
