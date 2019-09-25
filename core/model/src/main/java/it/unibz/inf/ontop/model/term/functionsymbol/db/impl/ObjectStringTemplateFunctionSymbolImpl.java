@@ -266,7 +266,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
 
     private static String makeRegexSafe(String s) {
         return s.replaceAll(
-                "[\\<\\(\\[\\{\\\\\\^\\-\\=\\$\\!\\|\\]\\}\\)\\?\\*\\+\\.\\>]", "\\\\$0");
+                "[\\<\\(\\[\\{\\\\\\^\\=\\$\\!\\|\\]\\}\\)\\?\\*\\+\\.\\>]", "\\\\$0");
     }
 
 
