@@ -12,7 +12,7 @@ wd=`pwd`
 
 # Build ontop bundles
 cd "${wd}/../.."
-#mvn clean install -DskipTests
+mvn clean install -DskipTests
 
 # Compile ontop-protege plugin jar file
 cd $wd
