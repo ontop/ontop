@@ -248,21 +248,10 @@ public class TargetQueryRenderer {
     }
 
     private static String displayURITemplate(ImmutableFunctionalTerm function, PrefixManager prefixManager) {
-        if (function.getArity() == 1)
-            return displayIRI(
-                    displayTerm(
-                            function.getTerms().get(0),
-                            prefixManager
-                    ),
-                    prefixManager
-            );
-        if (function.getFunctionSymbol() instanceof IRIStringTemplateFunctionSymbol) {
             String templateWithVars = instantiateTemplate(function, prefixManager);
             if (templateWithVars.equals(RDF.TYPE.getIRIString()))
                 return "a";
             return displayIRI(templateWithVars, prefixManager);
-        }
-        throw new UnexpectedTermException(function);
     }
 
     private static String displayIRI(String s, PrefixManager prefixManager) {
