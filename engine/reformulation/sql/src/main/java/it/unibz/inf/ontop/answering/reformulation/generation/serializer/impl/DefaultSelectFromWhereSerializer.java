@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectA
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -162,7 +161,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return String.format("GROUP BY %s\n", variableString);
         }
 
-        protected String serializeOrderBy(ImmutableList<OrderByNode.OrderComparator> sortConditions,
+        protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
                                         ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             if (sortConditions.isEmpty())
                 return "";

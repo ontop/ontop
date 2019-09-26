@@ -33,7 +33,7 @@ public interface SelectFromWhereWithModifiers extends SQLExpression {
     Optional<Long> getLimit();
     Optional<Long> getOffset();
 
-    ImmutableList<OrderByNode.OrderComparator> getSortConditions();
+    ImmutableList<SQLOrderComparator> getSortConditions();
 
     default boolean hasOrder() {
         return !getSortConditions().isEmpty();
