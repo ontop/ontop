@@ -9,10 +9,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonGroundTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -115,7 +112,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(n -> (InnerJoinNode) n)
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
-        ImmutableList<OrderByNode.OrderComparator> comparators = extractComparators(orderByNode, aggregationNode);
+        ImmutableList<SQLOrderComparator> comparators = extractComparators(orderByNode, aggregationNode);
 
         return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromExpression, whereExpression,
                 aggregationNode
@@ -130,21 +127,20 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                 comparators);
     }
 
-    private ImmutableList<OrderByNode.OrderComparator> extractComparators(Optional<OrderByNode> orderByNode,
-                                                                          Optional<AggregationNode> aggregationNode) {
+    private ImmutableList<SQLOrderComparator> extractComparators(Optional<OrderByNode> orderByNode,
+                                                                 Optional<AggregationNode> aggregationNode) {
         return orderByNode
                 .map(OrderByNode::getComparators)
                 .map(cs -> aggregationNode
                         .map(AggregationNode::getSubstitution)
                         .map(s -> cs.stream()
-                                .map(c -> Optional.of(s.apply(c.getTerm()))
-                                                .filter(t -> !t.isGround())
-                                                .map(t -> (NonGroundTerm)t)
-                                                .map(t -> iqFactory.createOrderComparator(t, c.isAscending())))
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
+                                .map(c -> sqlAlgebraFactory.createSQLOrderComparator(
+                                        (NonConstantTerm) s.apply(c.getTerm()),
+                                        c.isAscending()))
                                 .collect(ImmutableCollectors.toList()))
-                        .orElse(cs))
+                        .orElseGet(() -> cs.stream()
+                                .map(c -> sqlAlgebraFactory.createSQLOrderComparator(c.getTerm(), c.isAscending()))
+                                .collect(ImmutableCollectors.toList())))
                 .orElseGet(ImmutableList::of);
     }
 

@@ -39,7 +39,9 @@ public class OntopReformulationSQLModule extends OntopAbstractModule {
                         SQLLeftJoinExpression.class,
                         SQLNaryJoinExpression.class,
                         SQLUnionExpression.class,
-                        SQLOneTupleDummyQueryExpression.class),
+                        SQLOneTupleDummyQueryExpression.class,
+                        SQLOrderComparator.class
+                ),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
     }

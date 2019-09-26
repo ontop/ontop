@@ -5,11 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.NonConstantTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
@@ -29,7 +29,7 @@ public interface SQLAlgebraFactory {
                                                        boolean isDistinct,
                                                        @Assisted("limit") Optional<Long> limit,
                                                        @Assisted("offset") Optional<Long> offset,
-                                                       @Assisted("sortConditions") ImmutableList<OrderByNode.OrderComparator> sortConditions);
+                                                       @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions);
 
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
 
@@ -44,4 +44,6 @@ public interface SQLAlgebraFactory {
     SQLUnionExpression createSQLUnionExpression(ImmutableList<SQLExpression> subExpressions, ImmutableSet<Variable> projectedVariables);
 
     SQLOneTupleDummyQueryExpression createSQLOneTupleDummyQueryExpression();
+
+    SQLOrderComparator createSQLOrderComparator(NonConstantTerm term, boolean isAscending);
 }
