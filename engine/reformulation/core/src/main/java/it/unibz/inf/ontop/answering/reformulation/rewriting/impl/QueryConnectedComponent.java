@@ -54,8 +54,6 @@ public class QueryConnectedComponent {
 	private final ImmutableList<Edge> edges;  // a connected component contains a list of edges
 	private final Optional<Loop> loop;  //                   or a loop if it is degenerate
 	
-	private final ImmutableList<Function> nonDLAtoms;
-	
 	private final boolean noFreeTerms; // no free variables and no constants
 	                             // if true the component can be mapped onto the anonymous part of the canonical model
 
@@ -63,13 +61,11 @@ public class QueryConnectedComponent {
 	 * constructor is private as instances created only by the static method getConnectedComponents
 	 * 
 	 * @param edges: a list of edges in the connected component
-	 * @param nonDLAtoms: a list of non-DL atoms in the connected component
 	 * @param terms: terms that are covered by the edges
 	 */
 	
-	private QueryConnectedComponent(ImmutableList<Edge> edges, ImmutableList<Function> nonDLAtoms, ImmutableList<Loop> terms) {
+	private QueryConnectedComponent(ImmutableList<Edge> edges, ImmutableList<Loop> terms) {
 		this.edges = edges;
-		this.nonDLAtoms = nonDLAtoms;
 
 		this.loop = isDegenerate() && !terms.isEmpty() ? Optional.of(terms.get(0)) : Optional.empty();
 
@@ -89,17 +85,17 @@ public class QueryConnectedComponent {
 		this.noFreeTerms = (terms.size() == variables.size()) && freeVariables.isEmpty();
 	}
 
-	private static QueryConnectedComponent getConnectedComponent(List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, List<Function> nonDLAtoms, Set<VariableOrGroundTerm> ccTerms, ImmutableSet<Variable> headVariables) {
+	private static QueryConnectedComponent getConnectedComponent(List<Entry<ImmutableSet<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs, Map<VariableOrGroundTerm, Loop> allLoops, ImmutableSet<VariableOrGroundTerm> seed, ImmutableSet<Variable> headVariables) {
 
 		ImmutableList.Builder<Edge> ccEdges = ImmutableList.builder();
-		ImmutableList.Builder<Function> ccNonDLAtoms = ImmutableList.builder();
+		Set<VariableOrGroundTerm> ccTerms = new HashSet<>(seed);
 
 		// expand the current CC by adding all edges that are have at least one of the terms in them
 		boolean expanded;
 		do {
 			expanded = false;
-			for (Iterator<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext(); ) {
-				Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
+			for (Iterator<Entry<ImmutableSet<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> i = pairs.iterator(); i.hasNext(); ) {
+				Entry<ImmutableSet<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>> e = i.next();
 				Iterator<VariableOrGroundTerm> iterator = e.getKey().iterator();
 				VariableOrGroundTerm t0 = iterator.next();
 				VariableOrGroundTerm t1 = iterator.next();
@@ -116,17 +112,6 @@ public class QueryConnectedComponent {
 				expanded = true;
 				i.remove();
 			}
-			
-			for (Iterator<Function> i = nonDLAtoms.iterator(); i.hasNext(); ) {
-				Function atom = i.next();
-				Set<Variable> atomVars = atom.getVariables();
-				if (atomVars.stream().anyMatch(ccTerms::contains)) {
-					ccTerms.addAll(atomVars);
-					ccNonDLAtoms.add(atom);
-					expanded = true;
-					i.remove();
-				}
-			}
 		} while (expanded);
 
 		ImmutableList.Builder<Loop> ccLoops = ImmutableList.builder();
@@ -136,53 +121,32 @@ public class QueryConnectedComponent {
 				ccLoops.add(l);
 		}
 
-		return new QueryConnectedComponent(ccEdges.build(), ccNonDLAtoms.build(), ccLoops.build());
+		return new QueryConnectedComponent(ccEdges.build(), ccLoops.build());
 	}
-	
+
+
 	/**
 	 * getConnectedComponents creates a list of connected components of a given CQ
 	 * 
-	 * @param cqie : CQ to be split into connected components
-	 * @param atomFactory
 	 * @return list of connected components
 	 */
 	
-	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(TreeWitnessRewriterReasoner reasoner, CQIE cqie,
-																	   AtomFactory atomFactory) {
+	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(List<DataAtom<RDFAtomPredicate>> atoms, ImmutableSet<Variable> headVariables) {
 
-		ImmutableSet<Variable> headVariables = ImmutableSet.copyOf(cqie.getHead().getVariables());
-
-		// collect all edges and loops 
+		// collect all edges and loops
 		//      an edge is a binary predicate P(t, t') with t \ne t'
 		// 		a loop is either a unary predicate A(t) or a binary predicate P(t,t)
-		//      a nonDL atom is an atom with a non-data predicate 
-		ImmutableMultimap.Builder<Set<VariableOrGroundTerm>, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
+		ImmutableMultimap.Builder<ImmutableSet<VariableOrGroundTerm>, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
 		ImmutableMultimap.Builder<VariableOrGroundTerm, DataAtom<RDFAtomPredicate>> lz = ImmutableMultimap.builder();
-		List<Function> nonDLAtoms = new LinkedList<>();
 
-		for (Function atom : cqie.getBody()) {
-			// TODO: support quads
-			if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-				TriplePredicate triplePredicate = (TriplePredicate) atom.getFunctionSymbol();
-
-				ImmutableList<VariableOrGroundTerm> arguments = atom.getTerms().stream()
-						.map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
-						.collect(ImmutableCollectors.toList());
-
-				DataAtom<RDFAtomPredicate> a = getCanonicalForm(reasoner, triplePredicate, arguments, atomFactory);
-
-				boolean isClass = a.getPredicate().getClassIRI(a.getArguments()).isPresent();
-
-				// proper DL edge between two distinct terms
-				if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
-					// the index is an *unordered* pair
-					pz.put(ImmutableSet.of(a.getTerm(0), a.getTerm(2)), a);
-				else
-					lz.put(a.getTerm(0), a);
-			}
-			else {
-				nonDLAtoms.add(atom);
-			}
+		for (DataAtom<RDFAtomPredicate> a : atoms) {
+			boolean isClass = a.getPredicate().getClassIRI(a.getArguments()).isPresent();
+			// proper DL edge between two distinct terms
+			if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
+				// the index is an *unordered* pair
+				pz.put(ImmutableSet.of(a.getTerm(0), a.getTerm(2)), a);
+			else
+				lz.put(a.getTerm(0), a);
 		}
 
 		Map<VariableOrGroundTerm, Loop> allLoops = new HashMap<>();
@@ -190,27 +154,18 @@ public class QueryConnectedComponent {
 			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
-		List<Entry<Set<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
+		List<Entry<ImmutableSet<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
 
 		ImmutableList.Builder<QueryConnectedComponent> ccs = ImmutableList.builder();
 		
 		// form the list of connected components from the list of edges
-		while (!pairs.isEmpty()) {
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, new HashSet<>(pairs.iterator().next().getKey()), headVariables));
-		}
-		
-		while (!nonDLAtoms.isEmpty()) {
-			Function atom = nonDLAtoms.iterator().next();
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, new HashSet<>(atom.getVariables()), headVariables));
-		}
+		while (!pairs.isEmpty())
+			ccs.add(getConnectedComponent(pairs, allLoops, pairs.iterator().next().getKey(), headVariables));
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
-		while (!allLoops.isEmpty()) {
-			HashSet<VariableOrGroundTerm> ccTerms = new HashSet<>();
-			ccTerms.add(allLoops.keySet().iterator().next());
-			ccs.add(getConnectedComponent(pairs, allLoops, nonDLAtoms, ccTerms, headVariables));
-		}
-				
+		while (!allLoops.isEmpty())
+			ccs.add(getConnectedComponent(pairs, allLoops, ImmutableSet.of(allLoops.keySet().iterator().next()), headVariables));
+
 		return ccs.build();
 	}
 	
@@ -278,10 +233,6 @@ public class QueryConnectedComponent {
 		return freeVariables;
 	}
 
-	public ImmutableList<Function> getNonDLAtoms() {
-		return nonDLAtoms;
-	}
-	
 	/**
 	 * Loop: class representing loops of connected components
 	 * 
@@ -387,7 +338,7 @@ public class QueryConnectedComponent {
 	}
 	
 
-	private static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, TriplePredicate triplePredicate, ImmutableList<VariableOrGroundTerm> arguments,
+	public static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, TriplePredicate triplePredicate, ImmutableList<VariableOrGroundTerm> arguments,
 															AtomFactory atomFactory) {
 		ClassifiedTBox reasoner = r.getClassifiedTBox();
 

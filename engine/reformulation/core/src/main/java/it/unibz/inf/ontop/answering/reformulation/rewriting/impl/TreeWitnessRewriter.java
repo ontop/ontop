@@ -32,15 +32,11 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
 
 import java.util.*;
 import java.util.stream.Collector;
@@ -338,7 +334,24 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		List<CQIE> outputRules = new LinkedList<>();
 		for (CQIE cqie : program.getRules()) {
-			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie, atomFactory);
+
+		    List<DataAtom<RDFAtomPredicate>> atoms = new LinkedList<>();
+
+            for (Function atom : cqie.getBody()) {
+                // TODO: support quads
+                if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
+                    TriplePredicate triplePredicate = (TriplePredicate) atom.getFunctionSymbol();
+
+                    ImmutableList<VariableOrGroundTerm> arguments = atom.getTerms().stream()
+                            .map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
+                            .collect(ImmutableCollectors.toList());
+
+                    DataAtom<RDFAtomPredicate> a = QueryConnectedComponent.getCanonicalForm(reasoner, triplePredicate, arguments, atomFactory);
+                    atoms.add(a);
+                }
+            }
+
+            List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(atoms, ImmutableSet.copyOf(cqie.getHead().getVariables()));
 
 			ImmutableList<CQ> cqs = ccs.stream()
                     .map(cc -> rewriteCC(cc).stream())
@@ -347,7 +360,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             for (CQ b : cqs) {
                 CQIE cq = datalogFactory.getCQIE((Function) cqie.getHead().clone(),
                         Stream.concat(b.as().stream(),
-                                ccs.stream().flatMap(cc -> cc.getNonDLAtoms().stream()))
+                                // non-DL atoms
+                                cqie.getBody().stream()
+                                    .filter(a -> !a.isDataFunction() || !(a.getFunctionSymbol() instanceof TriplePredicate)))
                                 .collect(ImmutableCollectors.toList()));
                 eqNormalizer.enforceEqualities(cq);
                 outputRules.add(cq);
