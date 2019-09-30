@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewr
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -47,6 +48,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +68,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 	private final DatalogFactory datalogFactory;
     private final EQNormalizer eqNormalizer;
-	private final UnifierUtilities unifierUtilities;
 	private final ImmutabilityTools immutabilityTools;
     private final IQ2DatalogTranslator iqConverter;
     private final DatalogProgram2QueryConverter datalogConverter;
@@ -86,7 +87,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 		this.datalogFactory = datalogFactory;
         this.eqNormalizer = eqNormalizer;
-		this.unifierUtilities = unifierUtilities;
 		this.immutabilityTools = immutabilityTools;
         this.iqConverter = iqConverter;
         this.datalogConverter = datalogConverter;
@@ -324,13 +324,60 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	}
 	
 	private double time = 0;
-	
+
+	private IQ getCanonicalForm(IQ query) {
+        ClassifiedTBox tbox = reasoner.getClassifiedTBox();
+
+        IQTree canonicalTree = query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+            @Override
+            public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
+                // TODO: support quads
+                DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
+                TriplePredicate triplePredicate = (TriplePredicate) atom.getPredicate();
+                ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
+
+                // the contains tests are inefficient, but tests fails without them
+                // p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+
+                Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
+                if (classIRI.isPresent()) {
+                    if (tbox.classes().contains(classIRI.get())) {
+                        OClass c = tbox.classes().get(classIRI.get());
+                        OClass equivalent = (OClass) tbox.classesDAG().getCanonicalForm(c);
+                        return dataNode.newAtom(atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI()));
+                    }
+                    return  dataNode;
+                }
+
+                Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
+                if (propertyIRI.isPresent()) {
+                    if (tbox.objectProperties().contains(propertyIRI.get())) {
+                        ObjectPropertyExpression ope = tbox.objectProperties().get(propertyIRI.get());
+                        ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
+                        return dataNode.newAtom((!equivalent.isInverse())
+                                ? atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2))
+                                : atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0)));
+                    }
+                    else if (tbox.dataProperties().contains(propertyIRI.get())) {
+                        DataPropertyExpression dpe = tbox.dataProperties().get(propertyIRI.get());
+                        DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
+                        return dataNode.newAtom(atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2)));
+                    }
+                    return  dataNode;
+                }
+                throw new MinorOntopInternalBugException("Unknown type of triple atoms");
+            }
+        });
+
+        return iqFactory.createIQ(query.getProjectionAtom(), canonicalTree);
+    }
+
 	@Override
     public IQ rewrite(IQ query) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
 
-		DatalogProgram program = iqConverter.translate(query);
+        DatalogProgram program = iqConverter.translate(getCanonicalForm(query));
 
 		List<CQIE> outputRules = new LinkedList<>();
 		for (CQIE cqie : program.getRules()) {
@@ -338,15 +385,12 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		    List<DataAtom<RDFAtomPredicate>> atoms = new LinkedList<>();
 
             for (Function atom : cqie.getBody()) {
-                // TODO: support quads
                 if (atom.isDataFunction() && (atom.getFunctionSymbol() instanceof TriplePredicate)) { // if DL predicates
-                    TriplePredicate triplePredicate = (TriplePredicate) atom.getFunctionSymbol();
-
                     ImmutableList<VariableOrGroundTerm> arguments = atom.getTerms().stream()
                             .map(ImmutabilityTools::convertIntoVariableOrGroundTerm)
                             .collect(ImmutableCollectors.toList());
 
-                    DataAtom<RDFAtomPredicate> a = QueryConnectedComponent.getCanonicalForm(reasoner, triplePredicate, arguments, atomFactory);
+                    DataAtom<RDFAtomPredicate> a = (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), arguments.get(1), arguments.get(2));
                     atoms.add(a);
                 }
             }

@@ -21,14 +21,9 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.datalog.CQIE;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -336,43 +331,4 @@ public class QueryConnectedComponent {
 			return "edge: {" + l0.term + ", " + l1.term + "}" + bAtoms + l0.atoms + l1.atoms;
 		}
 	}
-	
-
-	public static DataAtom<RDFAtomPredicate> getCanonicalForm(TreeWitnessRewriterReasoner r, TriplePredicate triplePredicate, ImmutableList<VariableOrGroundTerm> arguments,
-															AtomFactory atomFactory) {
-		ClassifiedTBox reasoner = r.getClassifiedTBox();
-
-		Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
-		Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
-
-		// the contains tests are inefficient, but tests fails without them
-		// p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
-
-		if (classIRI.isPresent()) {
-			if (reasoner.classes().contains(classIRI.get())) {
-				OClass c = reasoner.classes().get(classIRI.get());
-				OClass equivalent = (OClass) reasoner.classesDAG().getCanonicalForm(c);
-				return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI());
-			}
-			return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), classIRI.get());
-		}
-		else if (propertyIRI.isPresent()) {
-			if (reasoner.objectProperties().contains(propertyIRI.get())) {
-				ObjectPropertyExpression ope = reasoner.objectProperties().get(propertyIRI.get());
-				ObjectPropertyExpression equivalent = reasoner.objectPropertiesDAG().getCanonicalForm(ope);
-				if (!equivalent.isInverse())
-					return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
-				else
-					return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0));
-			}
-			else if (reasoner.dataProperties().contains(propertyIRI.get())) {
-				DataPropertyExpression dpe = reasoner.dataProperties().get(propertyIRI.get());
-				DataPropertyExpression equivalent = reasoner.dataPropertiesDAG().getCanonicalForm(dpe);
-				return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2));
-			}
-			return (DataAtom)atomFactory.getIntensionalTripleAtom(arguments.get(0), propertyIRI.get(), arguments.get(2));
-		}
-		throw new MinorOntopInternalBugException("Unknown type of triple atoms");
-	}
-
 }
