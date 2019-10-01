@@ -301,10 +301,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	
 	private double time = 0;
 
-	private IQ getCanonicalForm(IQ query) {
+	private IQTree getCanonicalForm(IQTree tree) {
         ClassifiedTBox tbox = reasoner.getClassifiedTBox();
 
-        IQTree canonicalTree = query.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        return tree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
             public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
                 // TODO: support quads
@@ -344,8 +344,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 throw new MinorOntopInternalBugException("Unknown type of triple atoms");
             }
         });
-
-        return iqFactory.createIQ(query.getProjectionAtom(), canonicalTree);
     }
 
     private IQTree convertCQ(CQ cq, Optional<ImmutableExpression> filter) {
@@ -380,9 +378,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		
 		double startime = System.currentTimeMillis();
 
-		IQ canonicalQuery = getCanonicalForm(query);
+		IQTree canonicalTree = getCanonicalForm(query.getTree());
 
-        IQTree rewriting = canonicalQuery.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        IQTree rewritingTree = canonicalTree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
             public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
@@ -407,7 +405,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                     return super.transformConstruction(tree, rootNode, child);
                 }
 
-                List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(bgp, ImmutableSet.copyOf(avs1));
+                List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs1, bgp));
 
                 ImmutableList<CQ> ucq = ccs.stream()
                         .map(cc -> rewriteCC(cc).stream())
@@ -423,9 +421,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             }
         });
 
-        IQ convertedIQ = iqFactory.createIQ(canonicalQuery.getProjectionAtom(), rewriting);
-
-        IQTree optimisedTree = convertedIQ.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        IQTree optimisedTree = rewritingTree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
             public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
                 Map<ImmutableCQ, IQTree> map = new HashMap<>();
@@ -482,15 +478,14 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             }
         });
 
-        IQ result = iqFactory.createIQ(convertedIQ.getProjectionAtom(), optimisedTree);
-
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", result);
+		log.debug("Final rewriting:\n{}", optimisedTree);
 
-		return super.rewrite(result);
+        IQ result = iqFactory.createIQ(query.getProjectionAtom(), optimisedTree);
+        return super.rewrite(result);
 	}
 
 }

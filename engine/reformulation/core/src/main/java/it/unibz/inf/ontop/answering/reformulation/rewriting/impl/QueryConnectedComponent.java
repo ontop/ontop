@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  */
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -126,7 +127,9 @@ public class QueryConnectedComponent {
 	 * @return list of connected components
 	 */
 	
-	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(List<DataAtom<RDFAtomPredicate>> atoms, ImmutableSet<Variable> headVariables) {
+	public static ImmutableList<QueryConnectedComponent> getConnectedComponents(ImmutableCQ<RDFAtomPredicate> cq) {
+
+		ImmutableSet<Variable> answerVariables = ImmutableSet.copyOf(cq.getAnswerVariables());
 
 		// collect all edges and loops
 		//      an edge is a binary predicate P(t, t') with t \ne t'
@@ -134,7 +137,7 @@ public class QueryConnectedComponent {
 		ImmutableMultimap.Builder<ImmutableSet<VariableOrGroundTerm>, DataAtom<RDFAtomPredicate>> pz = ImmutableMultimap.builder();
 		ImmutableMultimap.Builder<VariableOrGroundTerm, DataAtom<RDFAtomPredicate>> lz = ImmutableMultimap.builder();
 
-		for (DataAtom<RDFAtomPredicate> a : atoms) {
+		for (DataAtom<RDFAtomPredicate> a : cq.getAtoms()) {
 			boolean isClass = a.getPredicate().getClassIRI(a.getArguments()).isPresent();
 			// proper DL edge between two distinct terms
 			if (!isClass && !a.getTerm(0).equals(a.getTerm(2)))
@@ -146,7 +149,7 @@ public class QueryConnectedComponent {
 
 		Map<VariableOrGroundTerm, Loop> allLoops = new HashMap<>();
 		for (Entry<VariableOrGroundTerm, Collection<DataAtom<RDFAtomPredicate>>> e : lz.build().asMap().entrySet()) {
-			allLoops.put(e.getKey(), new Loop(e.getKey(), headVariables, ImmutableList.copyOf(e.getValue())));
+			allLoops.put(e.getKey(), new Loop(e.getKey(), answerVariables, ImmutableList.copyOf(e.getValue())));
 		}
 
 		List<Entry<ImmutableSet<VariableOrGroundTerm>, Collection<DataAtom<RDFAtomPredicate>>>> pairs = new ArrayList<>(pz.build().asMap().entrySet());
@@ -155,11 +158,11 @@ public class QueryConnectedComponent {
 		
 		// form the list of connected components from the list of edges
 		while (!pairs.isEmpty())
-			ccs.add(getConnectedComponent(pairs, allLoops, pairs.iterator().next().getKey(), headVariables));
+			ccs.add(getConnectedComponent(pairs, allLoops, pairs.iterator().next().getKey(), answerVariables));
 
 		// create degenerate connected components for all remaining loops (which are disconnected from anything else)
 		while (!allLoops.isEmpty())
-			ccs.add(getConnectedComponent(pairs, allLoops, ImmutableSet.of(allLoops.keySet().iterator().next()), headVariables));
+			ccs.add(getConnectedComponent(pairs, allLoops, ImmutableSet.of(allLoops.keySet().iterator().next()), answerVariables));
 
 		return ccs.build();
 	}
