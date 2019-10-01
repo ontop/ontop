@@ -46,8 +46,8 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
     }
 
-    public static Builder builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
-        return new Builder(coreUtilsFactory, atomFactory);
+    public static <P extends AtomPredicate> Builder<P> builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+        return new Builder<>(coreUtilsFactory, atomFactory);
     }
 
     /**
@@ -116,9 +116,6 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         return builder.build();
     }
 
-
-
-
     @Override
     public String toString() {
         return dependencies.toString();
@@ -138,12 +135,12 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
         }
 
         public Builder add(DataAtom<P> head, DataAtom<P> body) {
-            builder.add(new LinearInclusionDependency(head, body));
+            builder.add(new LinearInclusionDependency<>(head, body));
             return this;
         }
 
         public LinearInclusionDependencies<P> build() {
-            return new LinearInclusionDependencies(coreUtilsFactory, atomFactory, builder.build());
+            return new LinearInclusionDependencies<>(coreUtilsFactory, atomFactory, builder.build());
         }
     }
 }
