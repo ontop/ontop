@@ -346,9 +346,20 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         });
     }
 
-    private IQTree convertCQ(CQ cq, Optional<ImmutableExpression> filter) {
 
-        ImmutableList<IQTree> body = cq.atoms.stream()
+    ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
+        ImmutableMap<Variable, VariableOrGroundTerm> equalities = cq.equalities.entrySet().stream()
+                .filter(e -> e.getKey() != e.getValue())
+                .collect(ImmutableCollectors.toMap(e -> (Variable)e.getKey(), Map.Entry::getValue));
+
+        ImmutableSubstitution s = substitutionFactory.getSubstitution(equalities);
+
+	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
+    }
+
+    private IQTree convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars, Optional<ImmutableExpression> filter) {
+
+        ImmutableList<IQTree> body = cq.getAtoms().stream()
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
@@ -358,14 +369,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                     : body.get(0))
                 : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), body);
 
-        ImmutableMap<Variable, VariableOrGroundTerm> equalities = cq.equalities.entrySet().stream()
-                .filter(e -> e.getKey() != e.getValue())
-                .collect(ImmutableCollectors.toMap(e -> (Variable)e.getKey(), Map.Entry::getValue));
+        ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
+        for (int i = 0; i < vars.size(); i++) {
+            Variable v1 = vars.get(i);
+            Variable v2 = cq.getAnswerVariables().get(i);
+            if (!v1.equals(v2))
+                map.put(v1, v2);
+        }
 
-        if (equalities.isEmpty())
+        ImmutableSubstitution substitution = substitutionFactory.getSubstitution(map.build());
+
+        if (substitution.isEmpty())
             return result;
         else {
-            ImmutableSubstitution substitution = substitutionFactory.getSubstitution(equalities);
             return iqFactory.createUnaryIQTree(
                     iqFactory.createConstructionNode(
                             Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
@@ -373,7 +389,8 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         }
     }
 
-	@Override
+
+    @Override
     public IQ rewrite(IQ query) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
@@ -385,8 +402,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
-                ImmutableSubstitution<ImmutableTerm> substitution = rootNode.getSubstitution();
-                ImmutableList<Variable> avs1 = (ImmutableList<Variable>) substitution.apply(avs);
                 ImmutableList<DataAtom<RDFAtomPredicate>> bgp;
                 Optional<ImmutableExpression> filter;
                 if ((child.getRootNode() instanceof InnerJoinNode)
@@ -405,86 +420,35 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                     return super.transformConstruction(tree, rootNode, child);
                 }
 
-                List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs1, bgp));
+                List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs, bgp));
 
                 ImmutableList<CQ> ucq = ccs.stream()
                         .map(cc -> rewriteCC(cc).stream())
                         .collect(toUCQ());
 
-                IQTree result = (ucq.size() == 1)
-                        ? convertCQ(ucq.get(0), filter)
+                List<ImmutableCQ<RDFAtomPredicate>> ucq2 = ucq.stream()
+                        .map(cq -> convert(cq, avs))
+                        .collect(Collectors.toList());
+                containmentCheckUnderLIDs.removeContainedQueries(ucq2);
+
+                IQTree result = (ucq2.size() == 1)
+                        ? convertCQ(ucq2.get(0), avs,  filter)
                         : iqFactory.createNaryIQTree(
                                 iqFactory.createUnionNode(rootNode.getVariables()),
-                                ucq.stream().map(cq -> convertCQ(cq, filter)).collect(ImmutableCollectors.toList()));
+                                ucq2.stream().map(cq -> convertCQ(cq, avs, filter)).collect(ImmutableCollectors.toList()));
 
                 return iqFactory.createUnaryIQTree(rootNode, result);
             }
         });
 
-        IQTree optimisedTree = rewritingTree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
-            @Override
-            public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-                Map<ImmutableCQ, IQTree> map = new HashMap<>();
-                // fix some order on variables
-                ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
-                for (IQTree child : children) {
-                    ImmutableCQ cq;
-                    if (child.getRootNode() instanceof InnerJoinNode
-                            && !child.getChildren().stream()
-                                .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
-                        cq = new ImmutableCQ(avs, child.getChildren().stream()
-                                .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
-                                .collect(ImmutableCollectors.toList()));
-                    }
-                    else if (child.getRootNode() instanceof IntensionalDataNode) {
-                        cq = new ImmutableCQ(avs, ImmutableList.of(
-                                ((IntensionalDataNode)child.getRootNode()).getProjectionAtom()));
-                    }
-                    else if (child.getRootNode() instanceof ConstructionNode) {
-                        ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode)child.getRootNode()).getSubstitution();
-                        ImmutableList<Variable> avs1 = (ImmutableList<Variable>) substitution.apply(avs);
-                        IQTree subtree = child.getChildren().get(0);
-                        if ((subtree.getRootNode() instanceof InnerJoinNode)
-                                && !subtree.getChildren().stream()
-                                    .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
-                            cq = new ImmutableCQ(avs1,
-                                        subtree.getChildren().stream()
-                                            .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
-                                            .collect(ImmutableCollectors.toList()));
-                        }
-                        else if (subtree.getRootNode() instanceof IntensionalDataNode) {
-                            cq = new ImmutableCQ(avs1, ImmutableList.of(
-                                        ((IntensionalDataNode)subtree.getRootNode()).getProjectionAtom()));
-                        }
-                        else {
-                            return transformNaryCommutativeNode(rootNode, children); // straight away
-                        }
-                    }
-                    else {
-                        return transformNaryCommutativeNode(rootNode, children);  // straight away
-                    }
-                    // .put returns the previous value
-                    if (map.put(cq, child) != null)
-                        return tree;
-                }
-
-                List<ImmutableCQ> ucq = new LinkedList<>(map.keySet());
-                containmentCheckUnderLIDs.removeContainedQueries(ucq);
-                if (ucq.size() == 1)
-                    return map.get(ucq.get(0));
-                else
-                    return iqFactory.createNaryIQTree(rootNode, ucq.stream().map(cq -> map.get(cq))
-                                .collect(ImmutableCollectors.toList()));
-            }
-        });
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", optimisedTree);
+		log.debug("Final rewriting:\n{}", rewritingTree);
 
-        IQ result = iqFactory.createIQ(query.getProjectionAtom(), optimisedTree);
+        IQ result = iqFactory.createIQ(query.getProjectionAtom(), rewritingTree);
         return super.rewrite(result);
 	}
 
