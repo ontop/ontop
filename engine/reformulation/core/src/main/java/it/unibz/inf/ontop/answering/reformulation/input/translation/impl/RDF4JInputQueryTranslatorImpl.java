@@ -165,6 +165,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         if (node instanceof SingletonSet)
             return translateSingletonSet();
 
+        if (node instanceof Group)
+            return translateAggregate((Group) node);
+
         if (node instanceof Extension)
             return translateExtension((Extension) node);
 
@@ -837,12 +840,6 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
     }
 
     private TranslationResult translateExtension(Extension node) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
-        return (node.getArg() instanceof Group) ?
-                translateAggregate((Group) node.getArg()) :
-                translateAggregationFreeExtension(node);
-    }
-
-    private TranslationResult translateAggregationFreeExtension(Extension node) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         TranslationResult childTranslation = translate(node.getArg());
         IQTree childQuery = childTranslation.iqTree;
 
