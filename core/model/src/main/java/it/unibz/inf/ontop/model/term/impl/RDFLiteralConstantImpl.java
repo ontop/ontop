@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import javax.annotation.Nonnull;
 import java.util.stream.Stream;
@@ -47,7 +48,8 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull RDFDatatype type) {
 		this.value = value;
 		this.termType = type;
-		this.string = "\"" + value + "\"";
+		String suffix = type.getIRI().equals(XSD.STRING) ? "" : "^^" + type.toString();
+		this.string = "\"" + value + "\"" + suffix;
 	}
 
 	protected RDFLiteralConstantImpl(@Nonnull String value, @Nonnull String language, TypeFactory typeFactory) {

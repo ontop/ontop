@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.type.impl.BlankNodeTermType;
@@ -103,7 +104,7 @@ public class TargetQueryRenderer {
         if (term instanceof IRIConstant)
             return displayIRIConstant((IRIConstant) term, prefixManager);
         if (term instanceof RDFLiteralConstant)
-            return displayValueConstant((RDFLiteralConstant) term);
+            return displayLiteralConstant((RDFLiteralConstant) term);
         if (term instanceof BNode)
             return displayConstantBnode((BNode) term);
         throw new UnexpectedTermException(term);
@@ -113,8 +114,12 @@ public class TargetQueryRenderer {
         return ((BNode) term).getName();
     }
 
-    private static String displayValueConstant(Term term) {
-        return "\"" + ((RDFLiteralConstant) term).getValue() + "\"";
+    private static String displayLiteralConstant(Term term) {
+        return term.toString();
+    }
+
+    private static String displayConstantLexicalValue(DBConstant term) {
+        return "\"" + term.getValue() + "\"";
     }
 
     private static String displayIRIConstant(IRIConstant iri, PrefixManager prefixManager) {
@@ -236,7 +241,10 @@ public class TargetQueryRenderer {
     }
 
     private static String displayDatatypeFunction(ImmutableTerm lexicalTerm, RDFDatatype datatype, PrefixManager prefixManager) {
-        final String lexicalString = displayTerm(lexicalTerm, prefixManager);
+        final String lexicalString = (lexicalTerm instanceof DBConstant)
+                // Happens when abstract datatypes are used
+                ? displayConstantLexicalValue((DBConstant) lexicalTerm)
+                : displayTerm(lexicalTerm, prefixManager);
 
         return datatype.getLanguageTag()
                 .map(tag -> lexicalString + "@" + tag.getFullString())
