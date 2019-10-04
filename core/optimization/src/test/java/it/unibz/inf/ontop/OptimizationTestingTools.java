@@ -30,7 +30,7 @@ import java.util.Properties;
 
 public class OptimizationTestingTools {
 
-    private static final ExecutorRegistry EXECUTOR_REGISTRY;
+    public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
     public static final DBMetadata EMPTY_METADATA;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
