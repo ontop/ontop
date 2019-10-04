@@ -1,8 +1,15 @@
 package it.unibz.inf.ontop.endpoint;
 
+import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
+import it.unibz.inf.ontop.exception.OntopConnectionException;
+import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
+import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.utils.VersionInfo;
+
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -24,6 +31,8 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -48,7 +57,9 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VAL
 @RestController
 public class SparqlQueryController {
 
-    private final Repository repository;
+    private static final Logger log = LoggerFactory.getLogger(SparqlQueryController.class);
+
+    private final OntopVirtualRepository repository;
     private volatile boolean initialized = false;
 
     @Autowired
@@ -56,11 +67,11 @@ public class SparqlQueryController {
                                  @Value("${properties}") String propertiesFile,
                                  @Value("${lazy:false}") boolean lazy,
                                  @Value("${ontology:#{null}}") String owlFile) {
-        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
         registerFileWatcher(mappingFile, owlFile, propertiesFile);
+        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
     }
 
-    private Repository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
+    private OntopVirtualRepository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(properties);
 
@@ -73,7 +84,7 @@ public class SparqlQueryController {
             builder.ontologyFile(ontology);
 
         OntopSQLOWLAPIConfiguration configuration = builder.build();
-        OntopRepository repository = OntopRepository.defaultRepository(configuration);
+        OntopVirtualRepository repository = OntopRepository.defaultRepository(configuration);
 
         if (!lazy) {
             repository.initialize();
@@ -248,12 +259,13 @@ public class SparqlQueryController {
         return new ResponseEntity<>(message, headers, status);
     }
 
-    @PostMapping("/restart")
+    @PostMapping("/ontop/restart")
     public void restart() {
         OntopEndpointApplication.restart();
     }
 
     private void registerFileWatcher(String mappingFile, String owlFile, String propertiesFile) {
+        // this code assumes that the input files are under the same directory
         final Path path = FileSystems.getDefault().getPath(new File(mappingFile).getAbsolutePath()).getParent();
         System.out.println(path);
         new Thread(() -> {
@@ -266,8 +278,8 @@ public class SparqlQueryController {
                         //we only register "ENTRY_MODIFY" so the context is always a Path.
                         final Path changed = (Path) event.context();
                         System.out.println(changed);
-                        if(changed.endsWith(mappingFile)){
-                            System.out.println("File change detected. RESTARTING Ontop!");
+                        if (changed.endsWith(mappingFile) || changed.endsWith(owlFile) || changed.endsWith(propertiesFile)) {
+                            log.info("File change detected. RESTARTING Ontop!");
                             OntopEndpointApplication.restart();
                         }
                     }
@@ -282,5 +294,17 @@ public class SparqlQueryController {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    @RequestMapping(value = "/ontop/reformulate")
+    @ResponseBody
+    public ResponseEntity<String> reformulate(@RequestParam(value = "query") String query)
+            throws OntopConnectionException, OntopInvalidInputQueryException, OntopReformulationException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
+
+        try (OntopRepositoryConnection connection = repository.getConnection()) {
+            return new ResponseEntity<>(connection.reformulate(query), headers, HttpStatus.OK);
+        }
     }
 }

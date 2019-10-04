@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
  */
 public interface OntopRepository extends org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
-    static OntopRepository defaultRepository(OntopSystemConfiguration configuration) {
+    static OntopVirtualRepository defaultRepository(OntopSystemConfiguration configuration) {
         return new OntopVirtualRepository(configuration);
     }
 }
