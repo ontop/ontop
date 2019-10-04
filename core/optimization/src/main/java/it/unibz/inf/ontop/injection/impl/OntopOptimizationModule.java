@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.iq.executor.substitution.SubstitutionPropagationExecut
 import it.unibz.inf.ontop.iq.executor.union.FlattenUnionExecutor;
 import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
@@ -69,6 +70,8 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PostProcessableFunctionLifter.class);
         bindFromSettings(InnerJoinIQOptimizer.class);
         bindFromSettings(LeftJoinIQOptimizer.class);
+        bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
+        bindFromSettings(QueryPlanner.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.utils.Templates;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +35,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
      * TODO: enrich this list (incomplete)
      */
     protected static final ImmutableList<Character> SOME_SAFE_SEPARATORS = ImmutableList.of(
-        '/','!','$','&','\'', '(', ')','*','+',',',';', '=');
+        '/','!','$','&','\'', '(', ')','*','+',',',';', '=', '#');
     protected static final String PLACE_HOLDER = "{}";
 
     // Lazy
@@ -46,8 +47,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         this.template = template;
         this.lexicalType = typeFactory.getDBTypeFactory().getDBStringType();
         this.templateConstants = null;
-        // TODO: forbid safe separators (e.g. /)
-        this.pattern = Pattern.compile(template.replace(PLACE_HOLDER, "(.+)"));
+        this.pattern = extractPattern(template, true);
 
         this.isInjective = isInjective(arity, template);
     }
@@ -207,10 +207,8 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         FunctionSymbol otherFunctionSymbol = otherTerm.getFunctionSymbol();
         if (otherFunctionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
             String otherTemplate = ((ObjectStringTemplateFunctionSymbol) otherFunctionSymbol).getTemplate();
-            /*
-             * TODO: go beyond prefix comparison
-             */
-            if (!arePrefixesCompatible(otherTemplate))
+
+            if (!areCompatible(otherTemplate))
                 return IncrementalEvaluation.declareIsFalse();
         }
 
@@ -218,17 +216,58 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
         return super.evaluateStrictEqWithFunctionalTerm(terms, otherTerm, termFactory, variableNullability);
     }
 
-    protected boolean arePrefixesCompatible(String otherTemplate) {
+    /**
+     * Is guaranteed not to return false negative.
+     */
+    protected boolean areCompatible(String otherTemplate) {
+        if (template.equals(otherTemplate))
+            return true;
+
         String prefix = extractPrefix(template);
         String otherPrefix = extractPrefix(otherTemplate);
 
         int prefixLength = prefix.length();
         int otherPrefixLength = otherPrefix.length();
 
-        int minLength = prefixLength < otherPrefixLength ? prefixLength : otherPrefixLength;
+        int minLength = Math.min(prefixLength, otherPrefixLength);
 
-        return prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength));
+        /*
+         * Prefix comparison
+         */
+        if (!prefix.substring(0, minLength).equals(otherPrefix.substring(0, minLength)))
+            return false;
+
+        String remainingTemplate = template.substring(minLength);
+        String otherRemainingTemplate = otherTemplate.substring(minLength);
+
+        Pattern subPattern = extractPattern(remainingTemplate, false);
+        return subPattern.matcher(otherRemainingTemplate).find();
     }
+
+    protected static Pattern extractPattern(String template, boolean surroundWithParentheses) {
+        String tmpPlaceholder = UUID.randomUUID().toString().replace("-", "");
+        String safeTemplate = makeRegexSafe(template
+                .replace(PLACE_HOLDER, tmpPlaceholder));
+
+        String notSeparator = SOME_SAFE_SEPARATORS.stream()
+                .map(Object::toString)
+                .map(ObjectStringTemplateFunctionSymbolImpl::makeRegexSafe)
+                .reduce("[^", (c1, c2) -> c1 + c2, (c1, c2) -> c1 + c2) + "]*";
+
+        String replacement = surroundWithParentheses ? "(" + notSeparator + ")" : notSeparator;
+
+        String patternString = "^" + safeTemplate
+                .replace(tmpPlaceholder, replacement)
+                + "$";
+
+        return Pattern.compile(patternString);
+    }
+
+    private static String makeRegexSafe(String s) {
+        return s.replaceAll(
+                "[\\<\\(\\[\\{\\\\\\^\\=\\$\\!\\|\\]\\}\\)\\?\\*\\+\\.\\>]", "\\\\$0");
+    }
+
 
     private static String extractPrefix(String template) {
         int index = template.indexOf("{");
@@ -263,7 +302,7 @@ public abstract class ObjectStringTemplateFunctionSymbolImpl extends FunctionSym
             else
                 return IncrementalEvaluation.declareIsFalse();
         }
-        else if (!arePrefixesCompatible(otherValue))
+        else if (!areCompatible(otherValue))
             return IncrementalEvaluation.declareIsFalse();
 
         return super.evaluateStrictEqWithNonNullConstant(terms, otherTerm, termFactory, variableNullability);

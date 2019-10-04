@@ -58,8 +58,8 @@ public class OracleDBTypeFactory extends DefaultSQLDBTypeFactory {
         NumberDBTermType binaryDoubleType = new NumberDBTermType(BINARY_DOUBLE_STR, rootTermType.getAncestry(), xsdDouble, FLOAT_DOUBLE);
 
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        DatetimeDBTermType timestampLTZType = new DatetimeDBTermType(TIMESTAMP_LOCAL_TZ_STR, rootAncestry, xsdDatetime);
-        DatetimeDBTermType timestampTZType = new DatetimeDBTermType(TIMESTAMP_TZ_STR, rootAncestry, xsdDatetime);
+        DatetimeDBTermType timestampLTZType = new DatetimeDBTermType(TIMESTAMP_LOCAL_TZ_STR, rootAncestry, xsdDatetime, false);
+        DatetimeDBTermType timestampTZType = new DatetimeDBTermType(TIMESTAMP_TZ_STR, rootAncestry, xsdDatetime, false);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NUMBER_STR, numberType);

@@ -43,6 +43,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     protected static final String CURRENT_TIMESTAMP_STR = "CURRENT_TIMESTAMP";
     protected static final String COALESCE_STR = "COALESCE";
     protected static final String CONCAT_OP_STR = "||";
+    protected static final String NULLIF_STR = "NULLIF";
 
 
     protected DBTypeFactory dbTypeFactory;
@@ -196,6 +197,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         DBBooleanFunctionSymbol regexpLike3 = new RegexpLike3FunctionSymbol(dbBooleanType, abstractRootDBType);
         builder.put(REGEXP_LIKE_STR, 3, regexpLike3);
 
+        DBFunctionSymbol nullIfFunctionSymbol = new NullIfDBFunctionSymbolImpl(abstractRootDBType);
+        builder.put(NULLIF_STR, 2, nullIfFunctionSymbol);
 
         return builder.build();
     }

@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -94,5 +91,23 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     public String getNativeDBString(ImmutableList<? extends ImmutableTerm> terms,
                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return serializer.getNativeDBString(terms, termConverter, termFactory);
+    }
+
+    /**
+     * Gets rid of the cast and simplifies the strict equality
+     */
+    @Override
+    protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
+                                                                        NonNullConstant otherTerm, TermFactory termFactory,
+                                                                        VariableNullability variableNullability) {
+        if ((inputType != null) && inputType.areLexicalTermsUnique()) {
+            ImmutableExpression newEquality = termFactory.getStrictEquality(
+                    terms.get(0),
+                    termFactory.getDBConstant(otherTerm.getValue(), inputType));
+
+            return newEquality.evaluate(variableNullability, true);
+        }
+        else
+            return IncrementalEvaluation.declareSameExpression();
     }
 }

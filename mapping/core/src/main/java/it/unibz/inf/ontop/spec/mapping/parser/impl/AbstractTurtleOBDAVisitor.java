@@ -68,8 +68,7 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     private ImmutableTerm typeTerm(String text, IRI datatype) {
-        DBConstant lexicalTerm = termFactory.getDBStringConstant(text);
-        return termFactory.getRDFLiteralFunctionalTerm(lexicalTerm, datatype);
+        return termFactory.getRDFLiteralConstant(text, datatype);
     }
 
     protected ImmutableTerm constructIRI(String text) {
@@ -424,7 +423,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
         if (lc != null) {
             return termFactory.getRDFLiteralFunctionalTerm(literal, visitLanguageTag(lc));
         }
-        return termFactory.getRDFLiteralFunctionalTerm(literal, XSD.STRING);
+        return termFactory.getRDFLiteralFunctionalTerm(literal, XSD.STRING)
+                .simplify();
     }
 
     @Override
@@ -440,7 +440,8 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     public ImmutableTerm visitTypedLiteral(TypedLiteralContext ctx) {
         ImmutableTerm stringValue = visitLitString(ctx.litString());
         IRI iriRef = visitIri(ctx.iri());
-        return termFactory.getRDFLiteralFunctionalTerm(stringValue, iriRef);
+        return termFactory.getRDFLiteralFunctionalTerm(stringValue, iriRef)
+                .simplify();
     }
 
     @Override

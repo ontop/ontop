@@ -89,6 +89,9 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     public IQ generateSourceQuery(IQ query, ExecutorRegistry executorRegistry)
             throws OntopReformulationException {
 
+        if (query.getTree().isDeclaredAsEmpty())
+            return query;
+
         IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
         log.debug("After lifting the RDF types:\n" + rdfTypeLiftedIQ);
 

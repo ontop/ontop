@@ -16,12 +16,6 @@ import java.util.stream.Stream;
  */
 public interface FunctionSymbol extends Predicate {
 
-    /**
-     * When the function symbol is, in the absence of non-injective functional sub-terms, sometimes but not always injective,
-     * please override isInjective(...)
-     */
-    boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms();
-
     Optional<ImmutableFunctionalTerm.FunctionalTermDecomposition> analyzeInjectivity(
             ImmutableList<? extends ImmutableTerm> arguments,
             ImmutableSet<Variable> nonFreeVariables,
@@ -76,6 +70,13 @@ public interface FunctionSymbol extends Predicate {
      * TODO: find a better name
      */
     Stream<Variable> proposeProvenanceVariables(ImmutableList<? extends ImmutableTerm> terms);
+
+    /**
+     * See ImmutableFunctionalTerm.simplifyAsGuaranteedToBeNonNull() for an explanation
+     *
+     */
+    FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull(ImmutableList<? extends ImmutableTerm> terms,
+                                                                 TermFactory termFactory);
 
     interface FunctionalTermNullability {
 

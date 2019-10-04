@@ -417,11 +417,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                         ((IntensionalDataNode)subtree.getRootNode()).getProjectionAtom()));
                         }
                         else {
-                            return transformNaryCommutativeNode(rootNode, children); // straight away
+                            return transformNaryCommutativeNode(tree, rootNode, children); // straight away
                         }
                     }
                     else {
-                        return transformNaryCommutativeNode(rootNode, children);  // straight away
+                        return transformNaryCommutativeNode(tree, rootNode, children);  // straight away
                     }
                     // .put returns the previous value
                     if (map.put(cq, child) != null)

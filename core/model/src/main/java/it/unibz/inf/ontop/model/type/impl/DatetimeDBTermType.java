@@ -8,8 +8,9 @@ import java.util.Optional;
 public class DatetimeDBTermType extends DBTermTypeImpl {
     private final RDFDatatype rdfDatatype;
 
-    protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype) {
-        super(name, parentAncestry, false);
+    protected DatetimeDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
+                                 boolean areLexicalTermsUnique) {
+        super(name, parentAncestry, false, areLexicalTermsUnique);
         this.rdfDatatype = rdfDatatype;
     }
 

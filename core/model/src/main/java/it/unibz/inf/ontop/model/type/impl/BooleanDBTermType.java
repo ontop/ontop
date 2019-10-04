@@ -10,8 +10,9 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
 
     private final RDFDatatype xsdBooleanDatatype;
 
-    public BooleanDBTermType(String booleanStr, TermTypeAncestry ancestry, RDFDatatype xsdBooleanDatatype) {
-        super(booleanStr, ancestry, false);
+    public BooleanDBTermType(String booleanStr, TermTypeAncestry ancestry, RDFDatatype xsdBooleanDatatype,
+                             boolean areLexicalTermsUnique) {
+        super(booleanStr, ancestry, false, false);
         this.xsdBooleanDatatype = xsdBooleanDatatype;
     }
 

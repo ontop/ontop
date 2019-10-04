@@ -590,6 +590,64 @@ public class LeftJoinProfTest {
     }
 
     @Test
+    public void testSumStudents4() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?s) (CONCAT(?fName, \": \", str(?s)) AS ?v) \n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c ; :firstName ?fName .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p ?fName \n" +
+                "ORDER BY ?s";
+
+        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testSumStudents5() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?s) (CONCAT(?fName, \": \", str(SUM(?nb))) AS ?v) \n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c ; :firstName ?fName .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "}\n" +
+                "GROUP BY ?p ?fName \n" +
+                "ORDER BY ?s";
+
+        List<String> expectedValues = ImmutableList.of("John: 12", "Mary: 13", "Roger: 21");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testDistinctAsGroupBy1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "\n" +
+                "SELECT (CONCAT(?fName, \".\") AS ?v) ((1+1) AS ?y) \n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?fName .\n" +
+                "}\n" +
+                "GROUP BY ?p ?fName \n" +
+                "ORDER BY ?fName";
+
+        List<String> expectedValues = ImmutableList.of("Barbara.", "Diego.", "Frank.", "Johann.", "John.", "Mary.",
+                "Michael.", "Roger.");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
     public void testAvgStudents1() throws Exception {
 
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +

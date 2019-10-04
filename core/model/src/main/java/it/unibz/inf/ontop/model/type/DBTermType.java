@@ -20,6 +20,16 @@ public interface DBTermType extends TermType {
      */
     boolean isNeedingIRISafeEncoding();
 
+    /**
+     * Returns true if the mapping VALUE -> LEXICAL TERM is unique.
+     *
+     * Not the case for instance for floating numbers, timestamp with timezone, etc.
+     *
+     * Useful for decomposing constant IRIs
+     *
+     */
+    boolean areLexicalTermsUnique();
+
     enum Category {
         STRING,
         INTEGER,

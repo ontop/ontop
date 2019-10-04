@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -30,7 +30,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     private final boolean isDistinct;
     private final Optional<Long> limit;
     private final Optional<Long> offset;
-    private final ImmutableList<OrderByNode.OrderComparator> sortConditions;
+    private final ImmutableList<SQLOrderComparator> sortConditions;
 
     @AssistedInject
     private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSortedSet<Variable> projectedVariables,
@@ -41,7 +41,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
                                              @Assisted boolean isDistinct,
                                              @Assisted("limit") Optional<Long> limit,
                                              @Assisted("offset") Optional<Long> offset,
-                                             @Assisted("sortConditions") ImmutableList<OrderByNode.OrderComparator> sortConditions) {
+                                             @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions) {
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.fromExpression = fromExpression;
@@ -90,7 +90,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     }
 
     @Override
-    public ImmutableList<OrderByNode.OrderComparator> getSortConditions() {
+    public ImmutableList<SQLOrderComparator> getSortConditions() {
         return sortConditions;
     }
 
