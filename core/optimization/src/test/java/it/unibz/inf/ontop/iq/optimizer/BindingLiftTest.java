@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -11,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -2226,6 +2229,224 @@ public class BindingLiftTest {
         IQ expectedQuery = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode3, newTable));
 
         optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
+    @Test
+    public void testRightFunctionalTerm1() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
+
+        UnaryIQTree leftChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(A)))),
+                dataNode1);
+
+        ImmutableFunctionalTerm concatFunctionalTerm = TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(
+                ImmutableList.of(C, D));
+
+        UnaryIQTree rightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(
+                                        URI_TEMPLATE_STR_1, ImmutableList.of(concatFunctionalTerm)),
+                                Y, TERM_FACTORY.getRDFLiteralFunctionalTerm(D, XSD.STRING))),
+                dataNode2);
+
+        BinaryNonCommutativeIQTree initialLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                leftChild, rightChild);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ANS1_ARITY_2_PREDICATE, ImmutableList.of(X, Y));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialLeftJoinTree);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(
+                initialLeftJoinTree.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                URI_TEMPLATE_STR_1, ImmutableList.of(A)),
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(D,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(D),
+                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdStringDatatype())))));
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(A, concatFunctionalTerm)),
+                dataNode1, dataNode2);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(topConstructionNode, newLeftJoinTree));
+
+        assertEquals(expectedIQ, initialIQ.normalizeForOptimization());
+    }
+
+    @Test
+    public void testRightFunctionalTerm2() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, E, F));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, C, D));
+
+        ImmutableFunctionalTerm iriFunctionalTerm1 = TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(A));
+        ImmutableFunctionalTerm iriFunctionalTerm2 = TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_2, ImmutableList.of(E));
+
+        UnaryIQTree leftChild1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, iriFunctionalTerm1)),
+                dataNode1);
+
+        UnaryIQTree leftChild2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(X, iriFunctionalTerm2)),
+                dataNode2);
+
+        NaryIQTree leftUnionTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(X)),
+                ImmutableList.of(leftChild1, leftChild2));
+
+        ImmutableFunctionalTerm concatFunctionalTerm = TERM_FACTORY.getNullRejectingDBConcatFunctionalTerm(
+                ImmutableList.of(C, D));
+
+        ImmutableFunctionalTerm iriFunctionalTerm3 = TERM_FACTORY.getIRIFunctionalTerm(
+                URI_TEMPLATE_STR_1, ImmutableList.of(concatFunctionalTerm));
+
+        UnaryIQTree rightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, iriFunctionalTerm3,
+                                Y, TERM_FACTORY.getRDFFunctionalTerm(D,
+                                        TERM_FACTORY.getIfElseNull(
+                                                TERM_FACTORY.getDBIsNotNull(D),
+                                                TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdStringDatatype()))))),
+                dataNode3);
+
+        BinaryNonCommutativeIQTree initialLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                leftUnionTree, rightChild);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ANS1_ARITY_2_PREDICATE, ImmutableList.of(X, Y));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialLeftJoinTree);
+
+
+        UnaryIQTree newLeftChild1 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(F0),
+                        SUBSTITUTION_FACTORY.getSubstitution(F0, iriFunctionalTerm1.getTerm(0))),
+                dataNode1);
+
+        UnaryIQTree newLeftChild2 = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(F0),
+                        SUBSTITUTION_FACTORY.getSubstitution(F0, iriFunctionalTerm2.getTerm(0))),
+                dataNode2);
+
+        NaryIQTree newLeftUnionTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createUnionNode(ImmutableSet.of(F0)),
+                ImmutableList.of(newLeftChild1, newLeftChild2));
+
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(
+                        TERM_FACTORY.getStrictEquality(F0, iriFunctionalTerm3.getTerm(0))),
+                newLeftUnionTree, dataNode3);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(
+                initialLeftJoinTree.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(D,
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(D),
+                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdStringDatatype()))))
+                        );
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(topConstructionNode, newLeftJoinTree));
+
+        assertEquals(expectedIQ, initialIQ.normalizeForOptimization());
+    }
+
+    @Test
+    public void testProvenanceVariableAndProjection1() {
+
+        BasicDBMetadata dbMetadata = createDummyMetadata();
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+
+        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+
+        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 2, true);
+        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 2, 2, true);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table1Ar2, A, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table2Ar2, C, D));
+
+        Variable f1 = TERM_FACTORY.getVariable("f1");
+
+        UnaryIQTree leftChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_STR_1, ImmutableList.of(A)))),
+                dataNode1);
+
+        UnaryIQTree rightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(X, Y),
+                        SUBSTITUTION_FACTORY.getSubstitution(
+                                X, TERM_FACTORY.getIRIFunctionalTerm(
+                                        URI_TEMPLATE_STR_1, ImmutableList.of(C)),
+                                Y, TERM_FACTORY.getRDFLiteralConstant("Hi", XSD.STRING))),
+                dataNode2);
+
+        BinaryNonCommutativeIQTree initialLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                leftChild, rightChild);
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ANS1_ARITY_2_PREDICATE, ImmutableList.of(X, Y));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialLeftJoinTree);
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table2Ar2, A, D));
+
+        UnaryIQTree newRightChild = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createConstructionNode(
+                        ImmutableSet.of(A, f1),
+                        SUBSTITUTION_FACTORY.getSubstitution(f1, TERM_FACTORY.getProvenanceSpecialConstant())),
+                newDataNode2);
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1, newRightChild);
+
+        ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(
+                initialLeftJoinTree.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(
+                        X, TERM_FACTORY.getIRIFunctionalTerm(
+                                URI_TEMPLATE_STR_1, ImmutableList.of(A)),
+                        Y, TERM_FACTORY.getRDFFunctionalTerm(
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(f1),
+                                        TERM_FACTORY.getDBStringConstant("Hi")),
+                                TERM_FACTORY.getIfElseNull(
+                                        TERM_FACTORY.getDBIsNotNull(f1),
+                                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdStringDatatype())))));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(topConstructionNode, newLeftJoinTree));
+
+        assertEquals(expectedIQ, initialIQ.normalizeForOptimization());
     }
 
     private static ImmutableFunctionalTerm generateIfIsNotNullElseNull(Variable rightSpecificVariable,
