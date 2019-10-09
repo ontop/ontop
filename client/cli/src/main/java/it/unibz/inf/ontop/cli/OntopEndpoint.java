@@ -26,6 +26,10 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
             description = "lazy initialization")
     private boolean lazy = false;
 
+    @Option(type = OptionType.COMMAND, name = {"--dev"}, title = "dev",
+            description = "Dev mode")
+    private boolean dev = false;
+
     @Override
     public void run() {
 
@@ -34,7 +38,8 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
                 "--properties=" + this.propertiesFile,
                 "--port=" + this.port,
                 "--cors-allowed-origins=" + this.corsAllowedOrigins,
-                "--lazy=" + this.lazy);
+                "--lazy=" + this.lazy,
+                "--dev=" + this.dev);
 
         if (this.owlFile != null)
             argList.add("--ontology=" + this.owlFile);

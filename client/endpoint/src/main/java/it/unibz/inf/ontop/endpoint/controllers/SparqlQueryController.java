@@ -1,12 +1,5 @@
-package it.unibz.inf.ontop.endpoint;
+package it.unibz.inf.ontop.endpoint.controllers;
 
-import it.unibz.inf.ontop.answering.reformulation.impl.QuestQueryProcessor;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
-import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
-import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.utils.VersionInfo;
 
@@ -25,16 +18,15 @@ import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
 import org.eclipse.rdf4j.query.resultio.text.BooleanTextWriter;
 import org.eclipse.rdf4j.query.resultio.text.csv.SPARQLResultsCSVWriter;
 import org.eclipse.rdf4j.query.resultio.text.tsv.SPARQLResultsTSVWriter;
-import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,9 +36,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,38 +49,10 @@ public class SparqlQueryController {
     private static final Logger log = LoggerFactory.getLogger(SparqlQueryController.class);
 
     private final OntopVirtualRepository repository;
-    private volatile boolean initialized = false;
 
     @Autowired
-    public SparqlQueryController(@Value("${mapping}") String mappingFile,
-                                 @Value("${properties}") String propertiesFile,
-                                 @Value("${lazy:false}") boolean lazy,
-                                 @Value("${ontology:#{null}}") String owlFile) {
-        registerFileWatcher(mappingFile, owlFile, propertiesFile);
-        this.repository = setupVirtualRepository(mappingFile, owlFile, propertiesFile, lazy);
-    }
-
-    private OntopVirtualRepository setupVirtualRepository(String mappings, String ontology, String properties, boolean lazy) throws RepositoryException {
-        OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .propertyFile(properties);
-
-        if (mappings.endsWith(".obda"))
-            builder.nativeOntopMappingFile(mappings);
-        else
-            builder.r2rmlMappingFile(mappings);
-
-        if ((ontology != null) && (!ontology.isEmpty()))
-            builder.ontologyFile(ontology);
-
-        OntopSQLOWLAPIConfiguration configuration = builder.build();
-        OntopVirtualRepository repository = OntopRepository.defaultRepository(configuration);
-
-        if (!lazy) {
-            repository.initialize();
-            this.initialized = true;
-        }
-
-        return repository;
+    public SparqlQueryController(OntopVirtualRepository repository) {
+        this.repository = repository;
     }
 
     @GetMapping(value = "/")
@@ -141,14 +102,14 @@ public class SparqlQueryController {
 
     private ResponseEntity<String> execQuery(String accept,
                                              String query, String[] defaultGraphUri, String[] namedGraphUri) {
-        if (!initialized) {
-            synchronized (this) {
-                if (!initialized) {
-                    repository.initialize();
-                    initialized = true;
-                }
-            }
-        }
+//        if (!initialized) {
+//            synchronized (this) {
+//                if (!initialized) {
+//                    repository.initialize();
+//                    initialized = true;
+//                }
+//            }
+//        }
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.OK;
@@ -215,7 +176,7 @@ public class SparqlQueryController {
                     result = bao.toString();
                 } else if (accept.contains("json")) {
                     headers.set(HttpHeaders.CONTENT_TYPE, "application/json");
-                    graphQuery.evaluate(new org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter(bao, RDFFormat.JSONLD));
+                    graphQuery.evaluate(new RDFJSONWriter(bao, RDFFormat.JSONLD));
                     result = bao.toString();
                 } else if (accept.contains("xml")) {
                     headers.set(HttpHeaders.CONTENT_TYPE, "application/rdf+xml");
@@ -259,52 +220,4 @@ public class SparqlQueryController {
         return new ResponseEntity<>(message, headers, status);
     }
 
-    @PostMapping("/ontop/restart")
-    public void restart() {
-        OntopEndpointApplication.restart();
-    }
-
-    private void registerFileWatcher(String mappingFile, String owlFile, String propertiesFile) {
-        // this code assumes that the input files are under the same directory
-        final Path path = FileSystems.getDefault().getPath(new File(mappingFile).getAbsolutePath()).getParent();
-        System.out.println(path);
-        new Thread(() -> {
-            try {
-                final WatchService watchService = FileSystems.getDefault().newWatchService();
-                final WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
-                while (true) {
-                    final WatchKey wk = watchService.take();
-                    for (WatchEvent<?> event : wk.pollEvents()) {
-                        //we only register "ENTRY_MODIFY" so the context is always a Path.
-                        final Path changed = (Path) event.context();
-                        System.out.println(changed);
-                        if (changed.endsWith(mappingFile) || changed.endsWith(owlFile) || changed.endsWith(propertiesFile)) {
-                            log.info("File change detected. RESTARTING Ontop!");
-                            OntopEndpointApplication.restart();
-                        }
-                    }
-                    // reset the key
-                    boolean valid = wk.reset();
-                    if (!valid) {
-                        System.out.println("Key has been unregisterede");
-                    }
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException | IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    @RequestMapping(value = "/ontop/reformulate")
-    @ResponseBody
-    public ResponseEntity<String> reformulate(@RequestParam(value = "query") String query)
-            throws OntopConnectionException, OntopInvalidInputQueryException, OntopReformulationException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
-
-        try (OntopRepositoryConnection connection = repository.getConnection()) {
-            return new ResponseEntity<>(connection.reformulate(query), headers, HttpStatus.OK);
-        }
-    }
 }
