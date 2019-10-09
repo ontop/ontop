@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.rdf4j.repository.impl.OntopRepositoryConnection;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,7 @@ public class ReformulateController {
     @RequestMapping(value = "/ontop/reformulate")
     @ResponseBody
     public ResponseEntity<String> reformulate(@RequestParam(value = "query") String query)
-            throws OntopConnectionException, OntopInvalidInputQueryException, OntopReformulationException {
+            throws OntopConnectionException, OntopReformulationException {
         HttpHeaders headers = new HttpHeaders();
         headers.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
 

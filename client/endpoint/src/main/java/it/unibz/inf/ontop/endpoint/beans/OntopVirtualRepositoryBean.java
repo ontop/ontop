@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.endpoint;
+package it.unibz.inf.ontop.endpoint.beans;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class OntopVirtualRepositoryBean {
 
-    private volatile boolean initialized = false;
-//
     @Bean
     private OntopVirtualRepository setupVirtualRepository(@Value("${mapping}") String mappings,
                                                           @Value("${ontology:#{null}}") String ontology,
@@ -33,8 +31,7 @@ public class OntopVirtualRepositoryBean {
         OntopVirtualRepository repository = OntopRepository.defaultRepository(configuration);
 
         if (!lazy) {
-            repository.initialize();
-            this.initialized = true;
+            repository.init();
         }
 
         return repository;
