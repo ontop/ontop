@@ -169,6 +169,14 @@ public class PushUpBooleanExpressionOptimizerImpl implements PushUpBooleanExpres
             if (currentParentNode instanceof AggregationNode) {
                 break;
             }
+            if (currentParentNode instanceof SliceNode) {
+                break;
+            }
+            // In theory, could go through, but for the sake of simplicity we stop it there
+            if (currentParentNode instanceof OrderByNode) {
+                break;
+            }
+
             if (currentParentNode instanceof ConstructionNode) {
                 /* keep track of Construction nodes on the path between provider and recipient */
                 inbetweenProjectorsBuilder.add((ConstructionNode) currentParentNode);
