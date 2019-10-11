@@ -21,7 +21,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
     private final FlattenUnionOptimizer flattenUnionOptimizer;
-    private final PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer;
     private final IQConverter iqConverter;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
@@ -32,14 +31,12 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         FlattenUnionOptimizer flattenUnionOptimizer,
-                                                        PushUpBooleanExpressionOptimizer pullUpExpressionOptimizer,
                                                         IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory,
                                                         ProjectionShrinkingOptimizer projectionShrinker) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.flattenUnionOptimizer = flattenUnionOptimizer;
-        this.pullUpExpressionOptimizer = pullUpExpressionOptimizer;
         this.iqConverter = iqConverter;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
@@ -55,8 +52,7 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
         try {
             // Non-final
-            IntermediateQuery intermediateQuery = pullUpExpressionOptimizer.optimize(iqConverter.convert(liftedQuery, executorRegistry));
-            LOGGER.debug("After pushing up boolean expressions: \n" + intermediateQuery.toString());
+            IntermediateQuery intermediateQuery = iqConverter.convert(liftedQuery, executorRegistry);
 
             intermediateQuery = projectionShrinker.optimize(intermediateQuery);
 
