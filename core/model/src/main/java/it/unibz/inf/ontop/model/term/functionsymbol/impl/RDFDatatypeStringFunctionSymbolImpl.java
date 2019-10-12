@@ -56,8 +56,8 @@ public class RDFDatatypeStringFunctionSymbolImpl extends FunctionSymbolImpl {
                     .map(s -> (Constant) termFactory.getDBStringConstant(s))
                     .orElseGet(termFactory::getNullConstant);
         }
-        // TODO: simplify in the presence of magic numbers
-        return super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+        return tryToLiftMagicNumbers(newTerms, termFactory, variableNullability, false)
+                .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
     }
 
     @Override

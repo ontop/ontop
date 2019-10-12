@@ -60,33 +60,7 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
     protected Optional<ImmutableTerm> tryToLiftMagicNumbers(ImmutableList<ImmutableTerm> newTerms,
                                                           TermFactory termFactory,
                                                           VariableNullability variableNullability) {
-        Optional<ImmutableFunctionalTerm> optionalTermTypeFunctionalTerm = newTerms.stream()
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .map(t -> (ImmutableFunctionalTerm) t)
-                .filter(t -> t.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)
-                .findFirst();
-
-        if (optionalTermTypeFunctionalTerm.isPresent()) {
-            ImmutableFunctionalTerm firstTermTypeFunctionalTerm = optionalTermTypeFunctionalTerm.get();
-            int index = newTerms.indexOf(firstTermTypeFunctionalTerm);
-
-            ImmutableTerm newTerm = ((RDFTermTypeFunctionSymbol) firstTermTypeFunctionalTerm.getFunctionSymbol())
-                    .liftExpression(
-                            firstTermTypeFunctionalTerm.getTerms(),
-                            c -> termFactory.getImmutableExpression(
-                                    this,
-                                    IntStream.range(0, newTerms.size())
-                                            .boxed()
-                                            .map(i -> i == index ? c : newTerms.get(i))
-                                            .collect(ImmutableCollectors.toList())),
-                            termFactory)
-                    // Recursive
-                    .simplify(variableNullability);
-
-            return Optional.of(newTerm);
-        }
-        else
-            return Optional.empty();
+        return tryToLiftMagicNumbers(newTerms, termFactory, variableNullability, true);
     }
 
     @Override
