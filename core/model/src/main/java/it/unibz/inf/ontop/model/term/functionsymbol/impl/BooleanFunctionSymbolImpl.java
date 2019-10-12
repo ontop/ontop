@@ -7,13 +7,16 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl implements BooleanFunctionSymbol {
 
@@ -52,6 +55,38 @@ public abstract class BooleanFunctionSymbolImpl extends FunctionSymbolImpl imple
                             termFactory.getImmutableExpression(this, newTerms), index, termFactory)
                             .simplify(variableNullability);
                 });
+    }
+
+    protected Optional<ImmutableTerm> tryToLiftMagicNumbers(ImmutableList<ImmutableTerm> newTerms,
+                                                          TermFactory termFactory,
+                                                          VariableNullability variableNullability) {
+        Optional<ImmutableFunctionalTerm> optionalTermTypeFunctionalTerm = newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)
+                .findFirst();
+
+        if (optionalTermTypeFunctionalTerm.isPresent()) {
+            ImmutableFunctionalTerm firstTermTypeFunctionalTerm = optionalTermTypeFunctionalTerm.get();
+            int index = newTerms.indexOf(firstTermTypeFunctionalTerm);
+
+            ImmutableTerm newTerm = ((RDFTermTypeFunctionSymbol) firstTermTypeFunctionalTerm.getFunctionSymbol())
+                    .liftExpression(
+                            firstTermTypeFunctionalTerm.getTerms(),
+                            c -> termFactory.getImmutableExpression(
+                                    this,
+                                    IntStream.range(0, newTerms.size())
+                                            .boxed()
+                                            .map(i -> i == index ? c : newTerms.get(i))
+                                            .collect(ImmutableCollectors.toList())),
+                            termFactory)
+                    // Recursive
+                    .simplify(variableNullability);
+
+            return Optional.of(newTerm);
+        }
+        else
+            return Optional.empty();
     }
 
     @Override
