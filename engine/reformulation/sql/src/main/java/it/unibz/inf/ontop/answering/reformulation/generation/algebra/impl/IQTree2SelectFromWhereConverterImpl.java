@@ -231,9 +231,9 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     firstExp = convertIntoOrdinaryExpression(child);
                 } else {
                     secondExp = convertIntoOrdinaryExpression(child);
-                    firstExp = sqlAlgebraFactory.createSQLInnerJoinExpression(firstExp, secondExp);
+                    firstExp = sqlAlgebraFactory.createSQLInnerJoinExpression(firstExp, secondExp,
+                            ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition());
                 }
-
             }
             return firstExp;
         }

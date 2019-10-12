@@ -35,7 +35,7 @@ public interface SQLAlgebraFactory {
 
     SQLTable createSQLTable(DataAtom<RelationPredicate> atom);
 
-    SQLInnerJoinExpression createSQLInnerJoinExpression(@Assisted("leftExpression") SQLExpression left, @Assisted("rightExpression") SQLExpression right);
+    SQLInnerJoinExpression createSQLInnerJoinExpression(@Assisted("leftExpression") SQLExpression left, @Assisted("rightExpression") SQLExpression right, Optional<ImmutableExpression> joinCondition);
 
     SQLLeftJoinExpression createSQLLeftJoinExpression(@Assisted("leftExpression") SQLExpression leftExpression, @Assisted("rightExpression") SQLExpression rightExpression, Optional<ImmutableExpression> joinCondition);
 

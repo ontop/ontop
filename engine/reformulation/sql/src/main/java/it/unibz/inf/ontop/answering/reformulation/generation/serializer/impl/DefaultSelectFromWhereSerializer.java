@@ -281,37 +281,28 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLInnerJoinExpression sqlInnerJoinExpression) {
-            QuerySerialization left = getSQLSerializationForChild(sqlInnerJoinExpression.getLeft());
-            QuerySerialization right = getSQLSerializationForChild(sqlInnerJoinExpression.getRight());
-
-            String sqlSubString = left.getString() + "\n JOIN \n" + right.getString() + " ON 1 = 1";
-
-            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
-
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
-                    .copyOf(querySerializationList.stream()
-                            .flatMap(m -> m.getColumnIDs().entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-           return new QuerySerializationImpl(sqlSubString, columnIDs);
+            return visit(sqlInnerJoinExpression, "JOIN");
         }
 
         @Override
         public QuerySerialization visit(SQLLeftJoinExpression sqlLeftJoinExpression) {
-            QuerySerialization left = getSQLSerializationForChild(sqlLeftJoinExpression.getLeft());
-            QuerySerialization right = getSQLSerializationForChild(sqlLeftJoinExpression.getRight());
+            return visit(sqlLeftJoinExpression, "LEFT OUTER JOIN");
+        }
 
-            String sqlSubString = left.getString() + "\n LEFT OUTER JOIN \n" + right.getString() + "\n";
+        protected QuerySerialization visit(BinaryJoinExpression binaryJoinExpression, String operatorString) {
+            QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
+            QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
+
+            String sqlSubString = String.format("%s\n %s \n%s ",left.getString(), operatorString, right.getString());
 
             ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
-                    .copyOf(querySerializationList.stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = querySerializationList.stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                            .collect(ImmutableCollectors.toMap());
 
 
-            String onString = sqlLeftJoinExpression.getFilterCondition()
+            String onString = binaryJoinExpression.getFilterCondition()
                     .map(e -> sqlTermSerializer.serialize(e, columnIDs))
                     .map(s -> String.format("ON %s\n", s))
                     .orElse("ON 1 = 1 \n");
