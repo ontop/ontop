@@ -229,16 +229,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
             Optional<ImmutableExpression> filterCondition = ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition();
 
-            if (arity == 2) {
-                return sqlAlgebraFactory.createSQLInnerJoinExpression(
-                        convertIntoOrdinaryExpression(children.get(0)),
-                        convertIntoOrdinaryExpression(children.get(1)),
-                        filterCondition);
-            }
-
-            /*
-             * Arity > 2: the filter condition is only put at the end
-             */
             return IntStream.range(0, arity - 1)
                     // Reversed order
                     .map(i -> arity - i - 2)

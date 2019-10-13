@@ -15,9 +15,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
 
-/**
- * TODO: complete
- */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface SQLAlgebraFactory {
 

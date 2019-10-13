@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.iq.executor.union.UnionLiftExecutor;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.transformer.TermTypeTermLiftTransformer;
@@ -70,6 +71,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(PostProcessableFunctionLifter.class);
         bindFromSettings(InnerJoinIQOptimizer.class);
         bindFromSettings(LeftJoinIQOptimizer.class);
+        bindFromSettings(BooleanExpressionPushDownTransformer.class);
         bindFromSettings(GeneralStructuralAndSemanticIQOptimizer.class);
         bindFromSettings(QueryPlanner.class);
 

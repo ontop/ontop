@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
+import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final PostProcessableFunctionLifter functionLifter;
     private final IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator;
     private final DialectExtraNormalizer extraNormalizer;
+    private final BooleanExpressionPushDownTransformer pushDownTransformer;
 
     @AssistedInject
     private SQLGeneratorImpl(@Assisted DBMetadata metadata,
@@ -48,10 +50,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                              PostProcessingProjectionSplitter projectionSplitter,
                              TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
-                             DialectExtraNormalizer extraNormalizer)
+                             DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
+        this.pushDownTransformer = pushDownTransformer;
         if (!(metadata instanceof RDBMetadata)) {
             throw new IllegalArgumentException("Not a DBMetadata!");
         }
@@ -99,7 +102,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         IQTree flattenSubTree = unionFlattener.optimize(sliceLiftedTree, variableGenerator);
         log.debug("New query after flattening the union: \n" + flattenSubTree);
 
-        IQTree treeAfterPullOut = optimizerFactory.createEETransformer(variableGenerator).transform(flattenSubTree);
+        IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
+        log.debug("New query after pushing down: \n" + pushedDownSubTree);
+
+        IQTree treeAfterPullOut = optimizerFactory.createEETransformer(variableGenerator).transform(pushedDownSubTree);
         log.debug("Query tree after pulling out equalities: \n" + treeAfterPullOut);
 
         // Dialect specific
