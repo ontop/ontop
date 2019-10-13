@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
@@ -222,20 +224,33 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
     private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree){
         if (tree.getRootNode() instanceof InnerJoinNode){
-            ImmutableList<IQTree> childrenList = tree.getChildren();
+            ImmutableList<IQTree> children = tree.getChildren();
+            int arity = children.size();
 
-            SQLExpression firstExp = null;
-            SQLExpression secondExp = null;
-            for(IQTree child:childrenList.reverse()){
-                if (firstExp == null){
-                    firstExp = convertIntoOrdinaryExpression(child);
-                } else {
-                    secondExp = convertIntoOrdinaryExpression(child);
-                    firstExp = sqlAlgebraFactory.createSQLInnerJoinExpression(firstExp, secondExp,
-                            ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition());
-                }
+            Optional<ImmutableExpression> filterCondition = ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition();
+
+            if (arity == 2) {
+                return sqlAlgebraFactory.createSQLInnerJoinExpression(
+                        convertIntoOrdinaryExpression(children.get(0)),
+                        convertIntoOrdinaryExpression(children.get(1)),
+                        filterCondition);
             }
-            return firstExp;
+
+            /*
+             * Arity > 2: the filter condition is only put at the end
+             */
+            return IntStream.range(0, arity - 1)
+                    // Reversed order
+                    .map(i -> arity - i - 2)
+                    .boxed()
+                    .reduce(convertIntoOrdinaryExpression(children.get(arity - 1)),
+                            (e, i) -> sqlAlgebraFactory.createSQLInnerJoinExpression(
+                                    convertIntoOrdinaryExpression(children.get(i)),
+                                    e,
+                                    filterCondition
+                                            // We only consider the joining condition when reaching the ultimate child
+                                            .filter(c -> i == 0)),
+                            (e1, e2) -> { throw new MinorOntopInternalBugException("Unexpected");});
         }
         return convertIntoOrdinaryExpression(tree);
     }
