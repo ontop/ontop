@@ -27,7 +27,7 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
     private boolean lazy = false;
 
     @Option(type = OptionType.COMMAND, name = {"--dev"}, title = "dev",
-            description = "Dev mode")
+            description = "development mode")
     private boolean dev = false;
 
     @Override
@@ -43,6 +43,9 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
         if (this.owlFile != null)
             argList.add("--ontology=" + this.owlFile);
+
+        if (this.constraintFile != null)
+            argList.add("--constraint=" + this.constraintFile);
 
         String[] args = new String[argList.size()];
         argList.toArray(args);

@@ -15,6 +15,7 @@ public class OntopVirtualRepositoryBean {
     private OntopVirtualRepository setupVirtualRepository(@Value("${mapping}") String mappings,
                                                           @Value("${ontology:#{null}}") String ontology,
                                                           @Value("${properties}") String properties,
+                                                          @Value("${constraint:#{null}}") String constraint,
                                                           @Value("${lazy:false}") boolean lazy) throws RepositoryException {
         OntopSQLOWLAPIConfiguration.Builder<? extends OntopSQLOWLAPIConfiguration.Builder> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .propertyFile(properties);
@@ -26,6 +27,9 @@ public class OntopVirtualRepositoryBean {
 
         if ((ontology != null) && (!ontology.isEmpty()))
             builder.ontologyFile(ontology);
+
+        if (constraint !=null && !constraint.isEmpty())
+            builder.basicImplicitConstraintFile(constraint);
 
         OntopSQLOWLAPIConfiguration configuration = builder.build();
         OntopVirtualRepository repository = OntopRepository.defaultRepository(configuration);
