@@ -44,6 +44,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -107,15 +108,15 @@ public class TMappingProcessor {
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
-                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, p -> !p.isInverse()),
+                        this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, (r, p) -> !p.isInverse() || p.getInverse() != r),
 
                 saturate(reasoner.dataPropertiesDAG(),
                         p -> !excludeFromTMappings.contains(p), source,
-                        this::indexOf, p -> getNewHeadP(false), cqContainmentCheck, p -> true)),
+                        this::indexOf, p -> getNewHeadP(false), cqContainmentCheck, (r, p) -> true)),
 
                 saturate(reasoner.classesDAG(),
                         s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), source,
-                        this::indexOf, this::getNewHeadC, cqContainmentCheck, c -> c instanceof OClass))
+                        this::indexOf, this::getNewHeadC, cqContainmentCheck, (r, c) -> c instanceof OClass))
 
                 .collect(ImmutableCollectors.toMap());
 
@@ -154,7 +155,7 @@ public class TMappingProcessor {
                                                                                          java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
                                                                                          java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
                                                                                          ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
-                                                                                         Predicate<T> populationFilter) {
+                                                                                         BiPredicate<T, T> populationFilter) {
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
@@ -172,7 +173,7 @@ public class TMappingProcessor {
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
-                    .filter(populationFilter)
+                    .filter(d -> populationFilter.test(s.getRepresentative(), d))
                     .collect(ImmutableCollectors.toMap(
                             d -> indexOf.apply(d),
                             d -> representatives.get(indexOf.apply(s.getRepresentative()))
