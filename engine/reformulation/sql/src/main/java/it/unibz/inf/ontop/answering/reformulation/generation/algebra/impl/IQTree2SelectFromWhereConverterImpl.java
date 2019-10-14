@@ -229,17 +229,16 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
             Optional<ImmutableExpression> filterCondition = ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition();
 
-            return IntStream.range(0, arity - 1)
-                    // Reversed order
-                    .map(i -> arity - i - 2)
+            return IntStream.range(1, arity)
                     .boxed()
-                    .reduce(convertIntoOrdinaryExpression(children.get(arity - 1)),
+                    .reduce(convertIntoOrdinaryExpression(children.get(0)),
                             (e, i) -> sqlAlgebraFactory.createSQLInnerJoinExpression(
-                                    convertIntoOrdinaryExpression(children.get(i)),
+                                    // NB: composite inner join should appear so as to avoid putting parentheses
                                     e,
+                                    convertIntoOrdinaryExpression(children.get(i)),
                                     filterCondition
                                             // We only consider the joining condition when reaching the ultimate child
-                                            .filter(c -> i == 0)),
+                                            .filter(c -> i == (arity - 1))),
                             (e1, e2) -> { throw new MinorOntopInternalBugException("Unexpected");});
         }
         return convertIntoOrdinaryExpression(tree);
