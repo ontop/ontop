@@ -152,7 +152,7 @@ public class MappingSaturationTest {
         System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_IS_TAUGHT_BY));
 
         assertTrue(saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES));
+        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES) + "\nvs\n" + maTeaches);
     }
 
 

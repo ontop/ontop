@@ -170,6 +170,9 @@ public class TMappingProcessor {
                                         .map(headReplacer.apply(d, s.getRepresentative())))
                                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
 
+        java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
+
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
@@ -177,7 +180,7 @@ public class TMappingProcessor {
                     .collect(ImmutableCollectors.toMap(
                             d -> indexOf.apply(d),
                             d -> representatives.get(indexOf.apply(s.getRepresentative()))
-                                    .createCopy(headReplacer.apply(s.getRepresentative(), d))))
+                                    .createCopy(headReplacer2.apply(s.getRepresentative(), d))))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
