@@ -289,6 +289,18 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return visit(sqlLeftJoinExpression, "LEFT OUTER JOIN");
         }
 
+        /**
+         * NB: the systematic use of ON conditions for inner and left joins saves us from putting parentheses.
+         *
+         * Indeed since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
+         * the decomposition is unambiguous just following this pattern.
+         *
+         * For instance, "T1 LEFT JOIN T2 INNER JOIN T3 ON 1=1 ON 2=2"
+         * is clearly equivalent to "T1 LEFT JOIN (T2 INNER JOIN T3)"
+         * as the latest ON condition ("ON 2=2") can only be attached to the left join, which means that "T2 INNER JOIN T3 ON 1=1"
+         * is the right child of the left join.
+         *
+         */
         protected QuerySerialization visit(BinaryJoinExpression binaryJoinExpression, String operatorString) {
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
@@ -304,8 +316,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String onString = binaryJoinExpression.getFilterCondition()
                     .map(e -> sqlTermSerializer.serialize(e, columnIDs))
-                    .map(s -> String.format("ON %s\n", s))
-                    .orElse("ON 1 = 1 \n");
+                    .map(s -> String.format("ON %s ", s))
+                    .orElse("ON 1 = 1 ");
 
 
             sqlSubString = sqlSubString + onString;

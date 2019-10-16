@@ -233,7 +233,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                     .boxed()
                     .reduce(convertIntoOrdinaryExpression(children.get(0)),
                             (e, i) -> sqlAlgebraFactory.createSQLInnerJoinExpression(
-                                    // NB: composite inner join should appear so as to avoid putting parentheses
                                     e,
                                     convertIntoOrdinaryExpression(children.get(i)),
                                     filterCondition
