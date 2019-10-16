@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
-import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
@@ -46,7 +45,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         // Executors
         bindFromSettings(InnerJoinExecutor.class);
         bindFromSettings(SubstitutionPropagationExecutor.class);
-        bindFromSettings(PushDownBooleanExpressionExecutor.class);
         bindFromSettings(PushUpBooleanExpressionExecutor.class);
         bindFromSettings(UnionBasedQueryMerger.class);
         bindFromSettings(UnionLiftExecutor.class);
@@ -63,7 +61,6 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
-        bindFromSettings(PushDownBooleanExpressionOptimizer.class);
         bindFromSettings(PushUpBooleanExpressionOptimizer.class);
         bindFromSettings(TermTypeTermLifter.class);
         bindFromSettings(OrderBySimplifier.class);

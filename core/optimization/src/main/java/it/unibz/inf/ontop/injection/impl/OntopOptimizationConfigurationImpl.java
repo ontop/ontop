@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.executor.ProposalExecutor;
 import it.unibz.inf.ontop.iq.executor.construction.ConstructionNodeCleaningExecutor;
-import it.unibz.inf.ontop.iq.executor.expression.PushDownBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.expression.PushUpBooleanExpressionExecutor;
 import it.unibz.inf.ontop.iq.executor.join.InnerJoinExecutor;
 import it.unibz.inf.ontop.iq.executor.leftjoin.LeftJoinExecutor;
@@ -65,10 +64,8 @@ public class OntopOptimizationConfigurationImpl extends OntopModelConfigurationI
         ImmutableMap.Builder<Class<? extends QueryOptimizationProposal>, Class<? extends ProposalExecutor>>
                 internalExecutorMapBuilder = ImmutableMap.builder();
         internalExecutorMapBuilder.putAll(super.generateOptimizationConfigurationMap());
-
         internalExecutorMapBuilder.put(InnerJoinOptimizationProposal.class, InnerJoinExecutor.class);
         internalExecutorMapBuilder.put(SubstitutionPropagationProposal.class, SubstitutionPropagationExecutor.class);
-        internalExecutorMapBuilder.put(PushDownBooleanExpressionProposal.class, PushDownBooleanExpressionExecutor.class);
         internalExecutorMapBuilder.put(PushUpBooleanExpressionProposal.class, PushUpBooleanExpressionExecutor.class);
         internalExecutorMapBuilder.put(UnionLiftProposal.class, UnionLiftExecutor.class);
         internalExecutorMapBuilder.put(LeftJoinOptimizationProposal.class, LeftJoinExecutor.class);

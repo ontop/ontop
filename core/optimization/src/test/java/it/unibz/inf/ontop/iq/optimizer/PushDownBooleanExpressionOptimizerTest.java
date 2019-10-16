@@ -62,7 +62,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -116,7 +116,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -172,7 +172,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -208,7 +208,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -216,20 +216,17 @@ public class PushDownBooleanExpressionOptimizerTest {
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE3, X, Y, Z, W, A);
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode3 = IQ_FACTORY.createLeftJoinNode();
         LeftJoinNode leftJoinNode4 = IQ_FACTORY.createLeftJoinNode();
-        FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION1);
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, joinNode2);
-        queryBuilder2.addChild(joinNode2, dataNode1);
-        queryBuilder2.addChild(joinNode2, leftJoinNode3);
+        queryBuilder2.addChild(constructionNode2, joinNode1);
+        queryBuilder2.addChild(joinNode1, dataNode1);
+        queryBuilder2.addChild(joinNode1, leftJoinNode3);
         queryBuilder2.addChild(leftJoinNode3, leftJoinNode4, LEFT);
         queryBuilder2.addChild(leftJoinNode3, dataNode4, RIGHT);
-        queryBuilder2.addChild(leftJoinNode4, filterNode1, LEFT);
+        queryBuilder2.addChild(leftJoinNode4, dataNode2, LEFT);
         queryBuilder2.addChild(leftJoinNode4, dataNode3, RIGHT);
-        queryBuilder2.addChild(filterNode1, dataNode2);
 
         IntermediateQuery query2 = queryBuilder2.build();
 
@@ -262,7 +259,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -294,7 +291,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -345,7 +342,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -398,7 +395,7 @@ public class PushDownBooleanExpressionOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery =optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -452,12 +449,20 @@ public class PushDownBooleanExpressionOptimizerTest {
         System.out.println("\nBefore optimization: \n" +  query1);
 
         IntermediateQuery initialQuery = query1.createSnapshot();
-        IntermediateQuery optimizedQuery = PUSH_DOWN_BOOLEAN_EXPRESSION_OPTIMIZER.optimize(query1);
+        IntermediateQuery optimizedQuery = optimizeQuery(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         System.out.println("\nExpected: \n" +  initialQuery);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, initialQuery));
+    }
+
+    private IntermediateQuery optimizeQuery(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ = IQ_CONVERTER.convert(query);
+        IQTree newTree = PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER.transform(initialIQ.getTree());
+        IQ newIQ = IQ_FACTORY.createIQ(initialIQ.getProjectionAtom(), newTree);
+
+        return IQ_CONVERTER.convert(newIQ, query.getExecutorRegistry());
     }
 }
