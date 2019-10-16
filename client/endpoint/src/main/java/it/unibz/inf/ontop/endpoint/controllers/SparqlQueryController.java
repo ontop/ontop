@@ -56,11 +56,9 @@ public class SparqlQueryController {
     }
 
     @GetMapping(value = "/")
-    public ModelAndView home(HttpServletRequest request) {
+    public ModelAndView home() {
         Map<String, String> model = new HashMap<>();
         model.put("version", VersionInfo.getVersionInfo().getVersion());
-        model.put("endpointUrl", request.getRequestURL().toString() + "sparql");
-        model.put("yasguiUrl", request.getRequestURL().toString() + "yasgui");
         return new ModelAndView("index", model);
     }
 
@@ -102,14 +100,6 @@ public class SparqlQueryController {
 
     private ResponseEntity<String> execQuery(String accept,
                                              String query, String[] defaultGraphUri, String[] namedGraphUri) {
-//        if (!initialized) {
-//            synchronized (this) {
-//                if (!initialized) {
-//                    repository.initialize();
-//                    initialized = true;
-//                }
-//            }
-//        }
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.OK;
