@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.generation;
 
-import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 
 /**
  * Generates an IQ containing a source query in a given native query language.
@@ -12,6 +10,5 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
  */
 public interface NativeQueryGenerator {
 
-	IQ generateSourceQuery(IQ query, ExecutorRegistry executorRegistry)
-			throws OntopReformulationException;
+	IQ generateSourceQuery(IQ query);
 }

@@ -10,8 +10,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
@@ -469,5 +469,37 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public TermType getExpectedBaseType(int index) {
         return expectedBaseTypes.get(index);
+    }
+
+    protected Optional<ImmutableTerm> tryToLiftMagicNumbers(ImmutableList<ImmutableTerm> newTerms,
+                                                            TermFactory termFactory,
+                                                            VariableNullability variableNullability, boolean isBoolean) {
+        Optional<ImmutableFunctionalTerm> optionalTermTypeFunctionalTerm = newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)
+                .findFirst();
+
+        if (optionalTermTypeFunctionalTerm.isPresent()) {
+            ImmutableFunctionalTerm firstTermTypeFunctionalTerm = optionalTermTypeFunctionalTerm.get();
+            int index = newTerms.indexOf(firstTermTypeFunctionalTerm);
+
+            ImmutableTerm newTerm = ((RDFTermTypeFunctionSymbol) firstTermTypeFunctionalTerm.getFunctionSymbol())
+                    .lift(
+                            firstTermTypeFunctionalTerm.getTerms(),
+                            c -> termFactory.getImmutableFunctionalTerm(
+                                    this,
+                                    IntStream.range(0, newTerms.size())
+                                            .boxed()
+                                            .map(i -> i == index ? c : newTerms.get(i))
+                                            .collect(ImmutableCollectors.toList())),
+                            termFactory, isBoolean)
+                    // Recursive
+                    .simplify(variableNullability);
+
+            return Optional.of(newTerm);
+        }
+        else
+            return Optional.empty();
     }
 }

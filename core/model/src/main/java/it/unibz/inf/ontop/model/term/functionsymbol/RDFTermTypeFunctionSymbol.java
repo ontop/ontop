@@ -20,7 +20,7 @@ public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
      * Builds a DB CASE functional term with an "entry" for possible DBConstant value.
      * Returns NULL in the default case
      */
-    ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+    ImmutableFunctionalTerm lift(ImmutableList<? extends ImmutableTerm> terms,
                        Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
                        TermFactory termFactory);
 
@@ -31,4 +31,12 @@ public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
     ImmutableExpression liftExpression(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<RDFTermTypeConstant, ImmutableExpression> caseExpressionFct,
                                        TermFactory termFactory);
+
+    default ImmutableFunctionalTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+                                         Function<RDFTermTypeConstant, ? extends ImmutableTerm> caseTermFct,
+                                         TermFactory termFactory, boolean isBoolean) {
+        return isBoolean
+                ? liftExpression(terms, (Function<RDFTermTypeConstant, ImmutableExpression>) caseTermFct, termFactory)
+                : lift(terms, (Function<RDFTermTypeConstant, ImmutableTerm>) caseTermFct, termFactory);
+    }
 }
