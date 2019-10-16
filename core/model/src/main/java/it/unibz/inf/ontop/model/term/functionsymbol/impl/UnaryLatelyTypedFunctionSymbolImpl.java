@@ -6,15 +6,18 @@ import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.MetaRDFTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 
 /**
@@ -98,7 +101,9 @@ public class UnaryLatelyTypedFunctionSymbolImpl extends FunctionSymbolImpl {
                                     newTerms.indexOf(t),
                                     termFactory))
                     .map(t -> t.simplify(variableNullability))
-                    .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability));
+                    // Tries to lift magic numbers
+                    .orElseGet(() -> tryToLiftMagicNumbers(newTerms, termFactory, variableNullability, false)
+                            .orElseGet(() -> super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability)));
     }
 
     /**

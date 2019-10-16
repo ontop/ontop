@@ -281,40 +281,43 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLInnerJoinExpression sqlInnerJoinExpression) {
-            QuerySerialization left = getSQLSerializationForChild(sqlInnerJoinExpression.getLeft());
-            QuerySerialization right = getSQLSerializationForChild(sqlInnerJoinExpression.getRight());
-
-            String sqlSubString = left.getString() + "\n JOIN \n" + right.getString() + " ON 1 = 1";
-
-            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
-
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
-                    .copyOf(querySerializationList.stream()
-                            .flatMap(m -> m.getColumnIDs().entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-           return new QuerySerializationImpl(sqlSubString, columnIDs);
+            return visit(sqlInnerJoinExpression, "JOIN");
         }
 
         @Override
         public QuerySerialization visit(SQLLeftJoinExpression sqlLeftJoinExpression) {
-            QuerySerialization left = getSQLSerializationForChild(sqlLeftJoinExpression.getLeft());
-            QuerySerialization right = getSQLSerializationForChild(sqlLeftJoinExpression.getRight());
+            return visit(sqlLeftJoinExpression, "LEFT OUTER JOIN");
+        }
 
-            String sqlSubString = left.getString() + "\n LEFT OUTER JOIN \n" + right.getString() + "\n";
+        /**
+         * NB: the systematic use of ON conditions for inner and left joins saves us from putting parentheses.
+         *
+         * Indeed since a join expression with a ON is always "CHILD_1 SOME_JOIN CHILD_2 ON COND",
+         * the decomposition is unambiguous just following this pattern.
+         *
+         * For instance, "T1 LEFT JOIN T2 INNER JOIN T3 ON 1=1 ON 2=2"
+         * is clearly equivalent to "T1 LEFT JOIN (T2 INNER JOIN T3)"
+         * as the latest ON condition ("ON 2=2") can only be attached to the left join, which means that "T2 INNER JOIN T3 ON 1=1"
+         * is the right child of the left join.
+         *
+         */
+        protected QuerySerialization visit(BinaryJoinExpression binaryJoinExpression, String operatorString) {
+            QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
+            QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
+
+            String sqlSubString = String.format("%s\n %s \n%s ",left.getString(), operatorString, right.getString());
 
             ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
-                    .copyOf(querySerializationList.stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = querySerializationList.stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                            .collect(ImmutableCollectors.toMap());
 
 
-            String onString = sqlLeftJoinExpression.getFilterCondition()
+            String onString = binaryJoinExpression.getFilterCondition()
                     .map(e -> sqlTermSerializer.serialize(e, columnIDs))
-                    .map(s -> String.format("ON %s\n", s))
-                    .orElse("ON 1 = 1 \n");
+                    .map(s -> String.format("ON %s ", s))
+                    .orElse("ON 1 = 1 ");
 
 
             sqlSubString = sqlSubString + onString;
