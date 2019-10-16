@@ -12,6 +12,7 @@ cd target
 rm -rf ontop
 unzip -o ontop-cli*.zip -d ontop
 cd ontop
-rm -r ontop.bat ontop-completion.sh jdbc
+rm -r ontop.bat ontop ontop-completion.sh jdbc
+cp ${ONTOP_HOME}/client/docker/ontop.sh .
 docker build -t ontop/ontop-endpoint -f ${ONTOP_HOME}/client/docker/Dockerfile .
 cd ${CURRENT_DIR}
