@@ -329,7 +329,6 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 
-    @Ignore("Support preferences")
     @Test
     public void testPreferences() throws Exception {
 
@@ -347,14 +346,13 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY ?v";
 
-        String [] expectedValues = {
-                "Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop", "Poppins", "Rog"
-        };
-        String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
+        List<String> expectedValues = ImmutableList.of(
+                "Dodero", "Frankie", "Gamper", "Helmer", "Johnny", "King of Pop", "Poppins", "Rog");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
 
-        assertTrue(sql.toUpperCase().contains("LEFT"));
+        assertFalse(sql.toUpperCase().contains("LEFT"));
     }
 
     @Test
