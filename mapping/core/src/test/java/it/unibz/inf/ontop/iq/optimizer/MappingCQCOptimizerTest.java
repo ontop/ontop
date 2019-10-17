@@ -90,4 +90,10 @@ public class MappingCQCOptimizerTest {
         assertEquals(companyReservesNode, r.getTree().getChildren().get(0));
     }
 
+
+    @Test
+    public void test_optimisation_order() {
+        // TODO: code a test for film_category -> film -> language
+        //                       film_category -> casting
+    }
 }
