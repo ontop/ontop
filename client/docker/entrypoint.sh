@@ -7,7 +7,7 @@ args_array=()
 if [ "${ONTOP_MAPPING_FILE+x}" ]; then
   args_array+=("--mapping=${ONTOP_MAPPING_FILE}")
 else
-  echo "ERROR: environment varialbe ONTOP_MAPPING_FILE is not set" && exit 1
+  echo "ERROR: environment variable ONTOP_MAPPING_FILE is not set" && exit 1
 fi
 
 if [ "${ONTOP_ONTOLOGY_FILE+x}" ]; then
@@ -17,7 +17,7 @@ fi
 if [ "${ONTOP_PROPERTIES_FILE+x}" ]; then
   args_array+=("--properties=${ONTOP_PROPERTIES_FILE}")
 else
-  echo "ERROR: environment varialbe ONTOP_PROPERTIES_FILE is not set" && exit 1
+  echo "ERROR: environment variable ONTOP_PROPERTIES_FILE is not set" && exit 1
 fi
 
 if [ "${ONTOP_CONSTRAINT_FILE+x}" ]; then
