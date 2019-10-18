@@ -21,7 +21,7 @@ else
 fi
 
 if [ "${ONTOP_CONSTRAINT_FILE+x}" ]; then
-  args_array+=("--constratin=${ONTOP_CONSTRAINT_FILE}")
+  args_array+=("--constraint=${ONTOP_CONSTRAINT_FILE}")
 fi
 
 if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
