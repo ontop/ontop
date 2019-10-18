@@ -63,8 +63,9 @@ public abstract class BasicGraphPatternTransformer2 extends DefaultRecursiveIQTr
         if (ucq.size() == 1)
             return ucq.get(0);
 
-        ImmutableSet<Variable> vars = ucq.stream()
-                .flatMap(a -> a.getVariables().stream())
+        // intersection
+        ImmutableSet<Variable> vars = ucq.get(0).getVariables().stream()
+                .filter(v -> ucq.stream().allMatch(cq -> cq.getVariables().contains(v)))
                 .collect(ImmutableCollectors.toSet());
 
         return iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), ucq);
