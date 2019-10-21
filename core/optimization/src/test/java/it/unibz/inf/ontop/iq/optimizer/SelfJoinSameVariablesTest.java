@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -160,6 +161,89 @@ public class SelfJoinSameVariablesTest {
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
+    @Test
+    public void testSelfJoinElimination4() throws EmptyQueryException {
+
+        DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, A, constant, C));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, D, constant, C));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, E, constant, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        UnaryIQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
+
+        IQ expectedQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C)),
+                                        dataNode1
+                                ))));
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
+    @Test
+    public void testSelfJoinElimination5() throws EmptyQueryException {
+
+        DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, A, constant, C));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, D, constant, C));
+
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, E, B, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2, dataNode3));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        UnaryIQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
+
+        IQ expectedQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C)),
+                                        dataNode1
+                                ))));
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
 
     @Test
     public void testSelfJoinNonElimination1() throws EmptyQueryException {
