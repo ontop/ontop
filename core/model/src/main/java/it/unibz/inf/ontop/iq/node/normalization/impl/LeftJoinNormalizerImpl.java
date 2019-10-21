@@ -294,7 +294,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             // Creates a right provenance if needed for lifting the substitution
             Optional<RightProvenance> rightProvenance = createProvenanceElements(rightSubTree,
-                    naiveAscendingSubstitution, leftVariables, variableGenerator);
+                    naiveAscendingSubstitution, leftVariables, rightSubTree.getVariables(), variableGenerator);
 
             ImmutableSubstitution<ImmutableTerm> ascendingSubstitution =
                     makeRightSpecificDefsProvenanceDependent(naiveAscendingSubstitution,
@@ -362,7 +362,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         simplificationResults.getOptionalExpression());
 
                 Optional<RightProvenance> rightProvenance = createProvenanceElements(updatedRightChild, downSubstitution,
-                        leftVariables, variableGenerator);
+                        leftVariables, updatedRightChild.getVariables(), variableGenerator);
 
                 IQTree newRightChild = rightProvenance
                         .flatMap(p -> p.constructionNode)
@@ -397,7 +397,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 IQTree rightGrandChild = ((UnaryIQTree) liftedRightChild).getChild();
 
                 ImmutableSubstitution<ImmutableTerm> rightSubstitution = rightConstructionNode.getSubstitution();
-                return liftRightConstruction(rightGrandChild, rightSubstitution, variableGenerator);
+                return liftRightConstruction(rightConstructionNode.getChildVariables(), rightGrandChild, rightSubstitution, variableGenerator);
             }
             else if (rightRootNode instanceof DistinctNode) {
                 return liftRightDistinct((UnaryIQTree) liftedRightChild);
@@ -414,7 +414,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         liftedRightChild);
         }
 
-        private LJNormalizationState liftRightConstruction(IQTree rightGrandChild,
+        private LJNormalizationState liftRightConstruction(ImmutableSet<Variable> rightChildRequiredVariables, IQTree rightGrandChild,
                                                            ImmutableSubstitution<ImmutableTerm> rightSubstitution,
                                                            VariableGenerator variableGenerator) {
 
@@ -442,9 +442,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             // TODO: only create a right provenance when really needed
             Optional<RightProvenance> rightProvenance = excludedEntry
-                    .map(e -> createProvenanceElements(e, rightGrandChild))
+                    .map(e -> createProvenanceElements(e, rightGrandChild, rightChildRequiredVariables))
                     .orElseGet(() -> createProvenanceElements(rightGrandChild, selectedSubstitution,
-                            leftVariables, variableGenerator));
+                            leftVariables, rightChildRequiredVariables, variableGenerator));
 
             IQTree newRightChild = rightProvenance
                     .flatMap(p -> p.constructionNode)
@@ -562,12 +562,12 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         }
 
         private Optional<RightProvenance> createProvenanceElements(Map.Entry<Variable, Constant> provenanceVariableDefinition,
-                                                                   IQTree rightTree) {
+                                                                   IQTree rightTree, ImmutableSet<Variable> rightRequiredVariables) {
             Variable rightProvenanceVariable = provenanceVariableDefinition.getKey();
 
             ImmutableSet<Variable> newRightProjectedVariables =
                     Stream.concat(Stream.of(rightProvenanceVariable),
-                            rightTree.getVariables().stream())
+                            rightRequiredVariables.stream())
                             .collect(ImmutableCollectors.toSet());
 
             ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
@@ -584,6 +584,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
         private Optional<RightProvenance> createProvenanceElements(IQTree rightTree,
                                                                    ImmutableSubstitution<? extends ImmutableTerm> selectedSubstitution,
                                                                    ImmutableSet<Variable> leftVariables,
+                                                                   ImmutableSet<Variable> rightRequiredVariables,
                                                                    VariableGenerator variableGenerator) {
 
             if (selectedSubstitution.getImmutableMap().entrySet().stream()
@@ -610,7 +611,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     ImmutableSet<Variable> newRightProjectedVariables =
                             Stream.concat(
                                     Stream.of(provenanceVariable),
-                                    rightTree.getVariables().stream())
+                                    rightRequiredVariables.stream())
                                     .collect(ImmutableCollectors.toSet());
 
                     ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(

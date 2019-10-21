@@ -82,7 +82,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
-    public ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+    public ImmutableFunctionalTerm lift(ImmutableList<? extends ImmutableTerm> terms,
                               Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
                               TermFactory termFactory) {
         return termFactory.getDBCase(

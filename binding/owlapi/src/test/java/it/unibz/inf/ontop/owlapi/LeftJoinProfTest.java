@@ -909,6 +909,136 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    /**
+     * Tests that the FILTER is not lifted above the query modifiers
+     */
+    @Test
+    public void testLimitSubQuery1() throws Exception {
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?v {\n" +
+                "  ?p a :Professor; :lastName ?v .\n" +
+                "  {\n" +
+                "   SELECT ?p {\n" +
+                "     ?p :teaches [ :duration ?d ]\n" +
+                "     FILTER ((?d < 21) && (?d > 19))\n" +
+                "    }\n" +
+                "   ORDER BY ?d\n" +
+                "   LIMIT 1\n" +
+                "  }\n" +
+                "}";
+
+        List<String> expectedValues = ImmutableList.of("Depp");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testSumOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testAvgOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (AVG(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testCountOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (COUNT(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testMinOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MIN(?nb) AS ?m) (0 AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testMaxOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MAX(?nb) AS ?m) (0 AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

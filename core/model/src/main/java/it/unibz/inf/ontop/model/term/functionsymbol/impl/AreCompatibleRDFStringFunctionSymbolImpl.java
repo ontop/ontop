@@ -54,28 +54,6 @@ public class AreCompatibleRDFStringFunctionSymbolImpl extends BooleanFunctionSym
         }
     }
 
-    private Optional<ImmutableTerm> tryToLiftMagicNumbers(ImmutableList<ImmutableTerm> newTerms,
-                                                                TermFactory termFactory,
-                                                                VariableNullability variableNullability) {
-        Optional<ImmutableFunctionalTerm> optionalTermTypeFunctionalTerm = newTerms.stream()
-                .filter(t -> t instanceof ImmutableFunctionalTerm)
-                .map(t -> (ImmutableFunctionalTerm) t)
-                .filter(t -> t.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)
-                .findAny();
-
-        Optional<ImmutableTerm> optionalOtherTerm = optionalTermTypeFunctionalTerm
-                .map(t -> newTerms.indexOf(t) == 0 ? newTerms.get(1) : newTerms.get(0));
-
-
-        return optionalTermTypeFunctionalTerm
-                .map(t -> ((RDFTermTypeFunctionSymbol) t.getFunctionSymbol())
-                        .liftExpression(
-                                t.getTerms(),
-                                c -> termFactory.getImmutableExpression(this, c, optionalOtherTerm.get()),
-                                termFactory))
-                .map(t -> t.simplify(variableNullability));
-    }
-
     private boolean areCompatible(RDFDatatype firstType, RDFDatatype secondType) {
         return firstType.isA(secondType)
                 && (

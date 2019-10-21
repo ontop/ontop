@@ -34,7 +34,7 @@
 <header>
     <div id="title">Ontop SPARQL endpoint</div>
     <div id="info">
-        endpoint address: <span class="yasgui" style="text-decoration: underline;" th:text="${endpointUrl}"></span>
+        endpoint address: <span class="yasgui" style="text-decoration: underline;" id="endpoint"></span>
         <small>|</small>
         <span th:text="'v'+${version}"></span>
     </div>
@@ -43,13 +43,9 @@
 <div id='yasgui'></div>
 <script src='./yasgui/yasgui.min.js'></script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var endpointUrl = /*[[${endpointUrl}]]*/ 'endpoint';
-    /*]]>*/
-</script>
-
 <script type="text/javascript">
+    var endpointUrl = new Request('sparql').url;
+    document.getElementById('endpoint').innerText = endpointUrl;
     var yasgui = YASGUI(document.getElementById("yasgui"), {
         //Uncomment below to change the default endpoint
         //Note: If you've already opened the YASGUI page before, you should first clear your
@@ -57,6 +53,8 @@
         yasqe: {sparql: {endpoint: endpointUrl}}
     });
 </script>
+
+
 </body>
 </html>
 
