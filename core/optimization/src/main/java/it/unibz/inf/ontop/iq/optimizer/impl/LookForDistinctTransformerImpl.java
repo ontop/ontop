@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -13,13 +14,13 @@ import it.unibz.inf.ontop.model.term.Variable;
  */
 class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer {
 
-    protected final CoreSingletons coreSingletons;
+    protected final OptimizationSingletons optimizationSingletons;
     private final CardinalityFreeTransformerConstructor transformerConstructor;
 
     public LookForDistinctTransformerImpl(CardinalityFreeTransformerConstructor transformerConstructor,
-                                          CoreSingletons coreSingletons) {
-        super(coreSingletons);
-        this.coreSingletons = coreSingletons;
+                                          OptimizationSingletons optimizationSingletons) {
+        super(optimizationSingletons.getCoreSingletons());
+        this.optimizationSingletons = optimizationSingletons;
         this.transformerConstructor = transformerConstructor;
     }
 
@@ -28,7 +29,7 @@ class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisitingTrans
         IQTreeTransformer newTransformer = transformerConstructor.create(
                 ImmutableSet.of(),
                 this,
-                coreSingletons);
+                optimizationSingletons);
 
         IQTree newChild = newTransformer.transform(child);
         return (newChild.equals(child))
@@ -39,6 +40,6 @@ class LookForDistinctTransformerImpl extends DefaultRecursiveIQTreeVisitingTrans
     @FunctionalInterface
     interface CardinalityFreeTransformerConstructor {
         IQTreeTransformer create(ImmutableSet<Variable> discardedVariables,
-                                 IQTreeTransformer parentTransformer, CoreSingletons coreSingletons);
+                                 IQTreeTransformer parentTransformer, OptimizationSingletons optimizationSingletons);
     }
 }

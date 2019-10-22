@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.DataNode;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.visitor.RequiredDataAtomExtractor;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -36,11 +38,11 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected SelfJoinSameTermIQOptimizerImpl(CoreSingletons coreSingletons, IntermediateQueryFactory iqFactory) {
+    protected SelfJoinSameTermIQOptimizerImpl(OptimizationSingletons optimizationSingletons, IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
         this.lookForDistinctTransformer = new LookForDistinctTransformerImpl(
                 SameTermSelfJoinTransformer::new,
-                coreSingletons);
+                optimizationSingletons);
     }
 
     @Override
@@ -49,7 +51,8 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
         IQTree newTree = lookForDistinctTransformer.transform(initialTree);
         return (newTree.equals(initialTree))
                 ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
+                    .normalizeForOptimization();
     }
 
     /**
@@ -58,21 +61,26 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
     protected static class SameTermSelfJoinTransformer extends AbstractDiscardedVariablesTransformer {
 
         private final IQTreeTransformer lookForDistinctTransformer;
+        private final OptimizationSingletons optimizationSingletons;
         private final IntermediateQueryFactory iqFactory;
         private final TermFactory termFactory;
+        private final RequiredDataAtomExtractor requiredDataAtomExtractor;
 
         protected SameTermSelfJoinTransformer(ImmutableSet<Variable> discardedVariables,
                                               IQTreeTransformer lookForDistinctTransformer,
-                                              CoreSingletons coreSingletons) {
-            super(discardedVariables, lookForDistinctTransformer, coreSingletons);
+                                              OptimizationSingletons optimizationSingletons) {
+            super(discardedVariables, lookForDistinctTransformer, optimizationSingletons.getCoreSingletons());
             this.lookForDistinctTransformer = lookForDistinctTransformer;
+            this.optimizationSingletons = optimizationSingletons;
+            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             iqFactory = coreSingletons.getIQFactory();
             termFactory = coreSingletons.getTermFactory();
+            requiredDataAtomExtractor = optimizationSingletons.getRequiredDataAtomExtractor();
         }
 
         @Override
         protected AbstractDiscardedVariablesTransformer update(ImmutableSet<Variable> newDiscardedVariables) {
-            return new SameTermSelfJoinTransformer(newDiscardedVariables, lookForDistinctTransformer, coreSingletons);
+            return new SameTermSelfJoinTransformer(newDiscardedVariables, lookForDistinctTransformer, optimizationSingletons);
         }
 
         /**
@@ -129,7 +137,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
                     .map(c -> (ExtensionalDataNode) c)
                     .map(DataNode::getProjectionAtom)
                     .filter(a1 -> otherChildren
-                            .flatMap(this::extractRequiredDataAtoms)
+                            .flatMap(t -> t.acceptVisitor(requiredDataAtomExtractor))
                             .anyMatch(a2 -> isDetectedAsRedundant(a1, a2, discardedVariables)))
                     .isPresent();
         }
@@ -156,15 +164,6 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
              * All the non-matching arguments of the atom must be discarded variables
              */
             return discardedVariables.containsAll(differentArguments);
-        }
-
-
-        /**
-         * All data atoms that are required to provide tuples.
-         * For instance, excludes data atoms only appearing on the right of a LJ.
-         */
-        private Stream<DataAtom<RelationPredicate>> extractRequiredDataAtoms(IQTree tree) {
-            throw new RuntimeException("TODO: implement as a visitor");
         }
     }
 }
