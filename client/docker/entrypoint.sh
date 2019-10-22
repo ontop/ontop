@@ -46,5 +46,8 @@ else
   LOGBACK_CONFIG_FILE=${ONTOP_HOME}/log/logback.xml
 fi
 
+echo java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dlogback.configurationFile="${LOGBACK_CONFIG_FILE}" \
+ it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
+
 java ${ONTOP_JAVA_ARGS} -cp "${ONTOP_HOME}/lib/*:${ONTOP_HOME}/jdbc/*" -Dlogback.configurationFile="${LOGBACK_CONFIG_FILE}" \
  it.unibz.inf.ontop.cli.Ontop endpoint "${args_array[@]}"
