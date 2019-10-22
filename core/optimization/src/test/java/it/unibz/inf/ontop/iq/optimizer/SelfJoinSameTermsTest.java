@@ -334,7 +334,7 @@ public class SelfJoinSameTermsTest {
      * No distinct, no optimization
      */
     @Test
-    public void testSelfJoinNonElimination3() throws EmptyQueryException {
+    public void testSelfJoinNonElimination1() throws EmptyQueryException {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -353,6 +353,88 @@ public class SelfJoinSameTermsTest {
         IQ initialQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 constructionTree);
+
+        optimizeAndCompare(initialQuery, initialQuery);
+    }
+
+    @Test
+    public void testSelfJoinNonElimination2() throws EmptyQueryException {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, D));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, E, F, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        UnaryIQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        UnaryIQTree distinctTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                distinctTree);
+
+
+        optimizeAndCompare(initialQuery, initialQuery);
+    }
+
+    @Test
+    public void testSelfJoinNonElimination3() throws EmptyQueryException {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, D));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, A, F, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        UnaryIQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
+
+        UnaryIQTree distinctTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), constructionTree);
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                distinctTree);
+
+
+        optimizeAndCompare(initialQuery, initialQuery);
+    }
+
+    @Test
+    public void testSelfJoinNonElimination4() throws EmptyQueryException {
+
+        DBConstant constant1 = TERM_FACTORY.getDBStringConstant("cst1");
+        DBConstant constant2 = TERM_FACTORY.getDBStringConstant("cst2");
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, constant1, B, C));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(T1_AR3, constant2, B, C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
+
+        UnaryIQTree distinctTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), joinTree);
+
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                distinctTree);
+
 
         optimizeAndCompare(initialQuery, initialQuery);
     }
