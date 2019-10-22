@@ -94,7 +94,7 @@ public class QuestImplicitDBConstraintsTest {
 	}
 
 	@Test
-	public void testNoSelfJoinElim() throws Exception {
+	public void testSelfJoinElimSameVariables() throws Exception {
 		this.prepareDB(uc_create);
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -117,13 +117,13 @@ public class QuestImplicitDBConstraintsTest {
 		
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
-		assertTrue(m);
+		assertFalse(m);
 		
 		
 	}
 
 	@Test
-	public void testForeignKeysNoSelfJoinElim() throws Exception {
+	public void testForeignKeysSelfJoinElimSameVar() throws Exception {
 		this.prepareDB(uc_create);
 		
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
@@ -149,7 +149,7 @@ public class QuestImplicitDBConstraintsTest {
 
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
-		assertTrue(m);
+		assertFalse(m);
 		
 		
 	}
@@ -208,7 +208,7 @@ public class QuestImplicitDBConstraintsTest {
 
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
-		assertTrue(m);
+		assertFalse(m);
 		
 		
 	}
