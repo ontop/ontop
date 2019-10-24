@@ -35,6 +35,9 @@ public class NoDependencyTestDBMetadata {
 
     public static final RelationPredicate INT_TABLE1_AR2;
     public static final RelationPredicate INT_TABLE2_AR2;
+    public static final RelationPredicate INT_TABLE1_NULL_AR2;
+    public static final RelationPredicate INT_TABLE2_NULL_AR2;
+    public static final RelationPredicate INT_TABLE1_NULL_AR3;
 
     public static final BasicDBMetadata DB_METADATA;
 
@@ -51,8 +54,13 @@ public class NoDependencyTestDBMetadata {
     }
 
     public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, QuotedIDFactory idFactory,
+                                                               int tableNumber, int arity, boolean canBeNull) {
+        return createRelationPredicate(dbMetadata, idFactory, tableNumber, arity, dbTypeFactory.getDBLargeIntegerType(), "INT_", canBeNull);
+    }
+
+    public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, QuotedIDFactory idFactory,
                                                                 int tableNumber, int arity) {
-        return createRelationPredicate(dbMetadata, idFactory, tableNumber, arity, dbTypeFactory.getDBLargeIntegerType(), "INT_", false);
+        return createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, tableNumber, arity, false);
     }
 
     public static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
@@ -98,6 +106,10 @@ public class NoDependencyTestDBMetadata {
 
         INT_TABLE1_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 2);
         INT_TABLE2_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 2, 2);
+
+        INT_TABLE1_NULL_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 2, true);
+        INT_TABLE2_NULL_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 2, 2, true);
+        INT_TABLE1_NULL_AR3 = createIntRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 3, true);
 
         dbMetadata.freeze();
         DB_METADATA = dbMetadata;
