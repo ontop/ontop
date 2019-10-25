@@ -328,7 +328,7 @@ public class ExpressionParser {
                         .map(item -> {
                             ImmutableTerm t1 = termVisitor.getTerm(expression.getLeftExpression());
                             ImmutableTerm t2 = termVisitor.getTerm(item);
-                            return termFactory.getStrictEquality(t1, t2);
+                            return termFactory.getNotYetTypedEquality(t1, t2);
                         });
             }
             else {
