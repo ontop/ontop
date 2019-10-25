@@ -89,7 +89,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
 
-        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer2(iqFactory) {
+        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
             protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
@@ -116,11 +116,8 @@ public class DummyRewriter implements QueryRewriter {
                         }
                     }
                 }
-                IQTree result = (list.size() == 1)
-                    ? list.get(0)
-                    : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), ImmutableList.copyOf(list));
 
-                return ImmutableList.of(result);
+                return ImmutableList.copyOf(list);
             }
         }));
 	}

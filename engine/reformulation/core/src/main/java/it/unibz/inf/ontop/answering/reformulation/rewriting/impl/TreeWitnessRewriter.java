@@ -352,17 +352,15 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
     }
 
-    private IQTree convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars, Optional<ImmutableExpression> filter) {
+    private IQTree convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
 
         ImmutableList<IQTree> body = cq.getAtoms().stream()
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
 
         IQTree result = (body.size() == 1)
-                ? ((filter.isPresent())
-                    ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filter.get()), body.get(0))
-                    : body.get(0))
-                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), body);
+                ? body.get(0)
+                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), body);
 
         ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
         for (int i = 0; i < vars.size(); i++) {
@@ -397,7 +395,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
-                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer2(iqFactory) {
+                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
                     @Override
                     protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
@@ -415,9 +413,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 .collect(Collectors.toList());
                         containmentCheckUnderLIDs.removeContainedQueries(ucq2);
 
-                        return ucq2.stream()
-                                .map(cq -> convertCQ(cq, avs, Optional.empty()))
-                                .collect(ImmutableCollectors.toList());
+                        return convertUCQ(ucq2.stream()
+                                .map(cq -> convertCQ(cq, avs))
+                                .collect(ImmutableCollectors.toList()));
                     }
                 }));
             }
@@ -432,5 +430,23 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         IQ result = iqFactory.createIQ(query.getProjectionAtom(), rewritingTree);
         return super.rewrite(result);
 	}
+
+    private ImmutableList<IQTree> convertUCQ(ImmutableList<IQTree> ucq) {
+        if (ucq.size() == 1) {
+            IQTree cq = ucq.get(0);
+            // flatten out trivial CQs (without any projection)
+            if (cq.getRootNode() instanceof InnerJoinNode && !((InnerJoinNode)cq.getRootNode()).getOptionalFilterCondition().isPresent())
+                return cq.getChildren();
+
+            return ImmutableList.of(cq);
+        }
+        // intersection
+        ImmutableSet<Variable> vars = ucq.get(0).getVariables().stream()
+                .filter(v -> ucq.stream().allMatch(cq -> cq.getVariables().contains(v)))
+                .collect(ImmutableCollectors.toSet());
+
+        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), ucq));
+    }
+
 
 }
