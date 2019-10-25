@@ -143,7 +143,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(query.getKnownVariables());
 
         // Variable nullability at the level of the left-join sub-tree
-        VariableNullability variableNullability = iqConverter.convertTree(query, leftJoinNode).getVariableNullability();
+        VariableNullability variableNullability = extractVariableNullability(query, leftJoinNode);
 
         LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftVariables, leftChildren,
                 rightComponent.dataNode, variableGenerator, variableNullability);
@@ -208,6 +208,30 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(innerJoinNode));
 
     }
+
+    private VariableNullability extractVariableNullability(IntermediateQuery query, LeftJoinNode leftJoinNode) {
+        return iqConverter.convertTree(query, findAncestorForVariableNullability(query, leftJoinNode))
+                .getVariableNullability();
+    }
+
+    /**
+     * Recursive
+     *
+     * TODO: consider more cases? (Such as going beyond UNIONs when possible)
+     */
+    private QueryNode findAncestorForVariableNullability(IntermediateQuery query, QueryNode queryNode) {
+
+        return query.getParent(queryNode)
+                .filter(p -> ((p instanceof LeftJoinNode) && query.getOptionalPosition(p, queryNode)
+                        .filter(pos -> pos.equals(LEFT))
+                        .isPresent())
+                        || (p instanceof InnerJoinNode)
+                        || (p instanceof FilterNode))
+                // Recursive
+                .map(p -> findAncestorForVariableNullability(query, p))
+                .orElse(queryNode);
+    }
+
 
     /**
      * Extracts equalities involving a left variable from the substitution
