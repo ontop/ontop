@@ -399,7 +399,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
                 return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer2(iqFactory) {
                     @Override
-                    protected ImmutableList<IQTree> transformBGP(ImmutableList<DataNode<RDFAtomPredicate>> triplePatterns) {
+                    protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
                                 .map(c -> (DataAtom<RDFAtomPredicate>)(DataAtom)((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());

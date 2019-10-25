@@ -5,11 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -22,22 +20,18 @@ public abstract class BasicGraphPatternTransformer2 extends DefaultRecursiveIQTr
 
     @Override
     public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList.Builder<DataNode<RDFAtomPredicate>> builderBGP = ImmutableList.builder();
+        ImmutableList.Builder<IntensionalDataNode> builderBGP = ImmutableList.builder();
         ImmutableList.Builder<IQTree> builderChildren = ImmutableList.builder();
         for (IQTree child : children) {
             if (child.getRootNode() instanceof IntensionalDataNode) {
-                builderBGP.add((DataNode<RDFAtomPredicate>)child);
+                builderBGP.add((IntensionalDataNode)child);
             }
             else {
-                ImmutableList<DataNode<RDFAtomPredicate>> currentBGP = builderBGP.build();
-                if (!currentBGP.isEmpty())
-                    builderChildren.add(convertUCQ(transformBGP(currentBGP)));
+                add(builderChildren, builderBGP);
                 builderChildren.add(child.acceptTransformer(this));
             }
         }
-        ImmutableList<DataNode<RDFAtomPredicate>> currentBGP = builderBGP.build();
-        if (!currentBGP.isEmpty())
-            builderChildren.add(convertUCQ(transformBGP(currentBGP)));
+        add(builderChildren, builderBGP);
 
         ImmutableList<IQTree> result = builderChildren.build();
         switch (result.size()) {
@@ -54,9 +48,24 @@ public abstract class BasicGraphPatternTransformer2 extends DefaultRecursiveIQTr
         }
     }
 
+    private void add(ImmutableList.Builder<IQTree> builderChildren, ImmutableList.Builder<IntensionalDataNode> builderBGP) {
+        ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
+        if (currentBGP.isEmpty())
+            return;
+
+        IQTree result = convertUCQ(transformBGP(currentBGP));
+        if (result.getRootNode() instanceof InnerJoinNode &&
+                !((InnerJoinNode)result.getRootNode()).getOptionalFilterCondition().isPresent()) {
+                // flatten the join out - needed in sparql-compliance
+                builderChildren.addAll(result.getChildren());
+        }
+        else
+            builderChildren.add(result);
+    }
+
     @Override
     public IQTree transformIntensionalData(IntensionalDataNode intensionalDataNode) {
-        return convertUCQ(transformBGP(ImmutableList.of((DataNode)intensionalDataNode)));
+        return convertUCQ(transformBGP(ImmutableList.of(intensionalDataNode)));
     }
 
     private IQTree convertUCQ(ImmutableList<IQTree> ucq) {
@@ -71,6 +80,6 @@ public abstract class BasicGraphPatternTransformer2 extends DefaultRecursiveIQTr
         return iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), ucq);
     }
 
-    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<DataNode<RDFAtomPredicate>> triplePatterns);
+    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);
 }
 

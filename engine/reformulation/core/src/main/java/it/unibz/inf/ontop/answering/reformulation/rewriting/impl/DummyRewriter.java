@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -88,9 +89,9 @@ public class DummyRewriter implements QueryRewriter {
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
 
-        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer2(iqFactory) {
             @Override
-            protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
+            protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
 
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
                 // this loop has to remain sequential (no streams)
@@ -115,7 +116,11 @@ public class DummyRewriter implements QueryRewriter {
                         }
                     }
                 }
-                return ImmutableList.copyOf(list);
+                IQTree result = (list.size() == 1)
+                    ? list.get(0)
+                    : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), ImmutableList.copyOf(list));
+
+                return ImmutableList.of(result);
             }
         }));
 	}
