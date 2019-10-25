@@ -127,8 +127,7 @@ public class LeftJoinNullableUniqueConstraintTest {
 
         ImmutableExpression bEquality = TERM_FACTORY.getStrictEquality(B, TWO);
 
-        ImmutableFunctionalTerm newHDefinition = TERM_FACTORY.getIfElseNull(
-                TERM_FACTORY.getConjunction(bEquality, TERM_FACTORY.getDBIsNotNull(B)), ONE);
+        ImmutableFunctionalTerm newHDefinition = TERM_FACTORY.getIfElseNull(bEquality, ONE);
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
