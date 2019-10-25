@@ -29,6 +29,13 @@ public interface FunctionSymbolFactory {
     BooleanFunctionSymbol getAreCompatibleRDFStringFunctionSymbol();
 
     BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol();
+
+    /**
+     * To be used when parsing the mapping and when an equality is found.
+     * Is expected to replaced later by a proper equality (may be strict or not)
+     */
+    NotYetTypedEqualityFunctionSymbol getNotYetTypedEquality();
+
     BooleanFunctionSymbol getLexicalInequalityFunctionSymbol(InequalityLabel inequalityLabel);
 
     BooleanFunctionSymbol getLexicalEBVFunctionSymbol();
@@ -111,4 +118,5 @@ public interface FunctionSymbolFactory {
                                                      DBTermType targetType);
 
     FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
+
 }

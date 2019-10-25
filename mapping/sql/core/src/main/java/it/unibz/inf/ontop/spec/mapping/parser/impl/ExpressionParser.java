@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -15,7 +14,6 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
@@ -190,7 +188,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(EqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getStrictEquality(t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getNotYetTypedEquality(t1, t2));
         }
 
         @Override
@@ -215,8 +213,8 @@ public class ExpressionParser {
 
         @Override
         public void visit(NotEqualsTo expression) {
-            processOJ(expression, (t1, t2) -> termFactory.getImmutableExpression(
-                    dbFunctionSymbolFactory.getDBStrictNEquality(2), t1, t2));
+            processOJ(expression, (t1, t2) -> termFactory.getDBNot(
+                    termFactory.getNotYetTypedEquality(t1, t2)));
         }
 
 

@@ -23,6 +23,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -51,6 +52,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final TypeFactory typeFactory;
     private final RDF rdfFactory;
     private final MappingCaster mappingCaster;
+    private final MappingEqualityTransformer mappingEqualityTransformer;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
@@ -58,7 +60,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
                                 SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory,
-                                MappingCaster mappingCaster) {
+                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer) {
 
         super(ontologyComplianceValidator, mappingParser);
         this.ppMappingConverter = ppMappingConverter;
@@ -71,6 +73,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
         this.mappingCaster = mappingCaster;
+        this.mappingEqualityTransformer = mappingEqualityTransformer;
     }
 
     /**
@@ -99,7 +102,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         MappingWithProvenance provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
         dbMetadata.freeze();
 
-        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.transform(provMapping);
+        MappingWithProvenance eqMapping = mappingEqualityTransformer.transform(provMapping);
+        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
         MappingWithProvenance castMapping = mappingCaster.transform(filledProvMapping);
         MappingWithProvenance canonizedMapping = canonicalTransformer.transform(castMapping);
 

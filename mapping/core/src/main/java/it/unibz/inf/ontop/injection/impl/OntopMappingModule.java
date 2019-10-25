@@ -40,6 +40,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(QueryUnionSplitter.class);
         bindFromSettings(MappingCaster.class);
         bindFromSettings(MappingDistinctTransformer.class);
+        bindFromSettings(MappingEqualityTransformer.class);
 
         bind(MappingCoreSingletons.class).to(MappingCoreSingletonsImpl.class);
 

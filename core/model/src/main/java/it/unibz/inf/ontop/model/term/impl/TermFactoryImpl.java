@@ -632,7 +632,12 @@ public class TermFactoryImpl implements TermFactory {
 		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
 	}
 
-	@Override
+    @Override
+    public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
+		return getImmutableExpression(functionSymbolFactory.getNotYetTypedEquality(), t1, t2);
+    }
+
+    @Override
 	public ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
 														   ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalNonStrictEqualityFunctionSymbol(),

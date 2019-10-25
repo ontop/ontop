@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.MultitypedInputUnarySPARQLFunctionSymbolImpl.TriFunction;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
@@ -28,6 +27,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final RDFTermFunctionSymbol rdfTermFunctionSymbol;
     private final BooleanFunctionSymbol areCompatibleRDFStringFunctionSymbol;
     private final BooleanFunctionSymbol lexicalNonStrictEqualityFunctionSymbol;
+    private final NotYetTypedEqualityFunctionSymbol notYetTypedEqualityFunctionSymbol;
     private final BooleanFunctionSymbol lexicalEBVFunctionSymbol;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
@@ -88,6 +88,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonNumericTypeFunctionSymbol = new CommonPropagatedOrSubstitutedNumericTypeFunctionSymbolImpl(metaRDFType);
         this.EBVSPARQLLikeFunctionSymbol = new EBVSPARQLLikeFunctionSymbolImpl(typeFactory.getAbstractRDFSLiteral(), typeFactory.getXsdBooleanDatatype());
         this.lexicalEBVFunctionSymbol = new LexicalEBVFunctionSymbolImpl(dbStringType, metaRDFType, dbBooleanType);
+        this.notYetTypedEqualityFunctionSymbol = new NotYetTypedEqualityFunctionSymbolImpl(
+                dbTypeFactory.getAbstractRootDBType(), dbBooleanType);
     }
 
     @Inject
@@ -280,6 +282,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public BooleanFunctionSymbol getLexicalNonStrictEqualityFunctionSymbol() {
         return lexicalNonStrictEqualityFunctionSymbol;
+    }
+
+    @Override
+    public NotYetTypedEqualityFunctionSymbol getNotYetTypedEquality() {
+        return notYetTypedEqualityFunctionSymbol;
     }
 
     @Override
