@@ -281,16 +281,13 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
             DBTermType.Category category1 = type1.getCategory();
             DBTermType.Category category2 = type2.getCategory();
 
+            if (category1.equals(category2) && category1.isTreatingSameCategoryTypesAsEquivalentInStrictEq())
+                return termFactory.getStrictEquality(term1, term2);
+
             switch (category1) {
                 case STRING:
-                    if (category2 == DBTermType.Category.STRING) {
-                        return transformStringEquality(term1, term2, type1, type2);
-                    }
-                    break;
                 case INTEGER:
                     switch (category2) {
-                        case INTEGER:
-                            return transformIntegerEquality(term1, term2, type1, type2);
                         case DECIMAL:
                         case FLOAT_DOUBLE:
                             return termFactory.getDBNonStrictNumericEquality(term1, term2);
@@ -314,7 +311,6 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
                         return termFactory.getDBNonStrictDatetimeEquality(term1, term2);
                     }
                     break;
-                // TODO: try to simplify booleans
                 case BOOLEAN:
                 case OTHER:
                 default:
@@ -322,40 +318,6 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
             }
             // By default
             return termFactory.getDBNonStrictDefaultEquality(term1, term2);
-        }
-
-        protected ImmutableExpression transformStringEquality(ImmutableTerm term1, ImmutableTerm term2,
-                                                            DBTermType type1, DBTermType type2) {
-            return tryToMakeTheEqualityStrict(term1, term2, type1, type2);
-        }
-
-        protected ImmutableExpression tryToMakeTheEqualityStrict(ImmutableTerm term1, ImmutableTerm term2,
-                                                                 DBTermType type1, DBTermType type2) {
-            if (type1.equals(type2))
-                return termFactory.getStrictEquality(term1, term2);
-
-            // Change the datatype of the first found constant
-            if (term1 instanceof DBConstant)
-                return termFactory.getStrictEquality(
-                        termFactory.getDBConstant(((DBConstant) term1).getValue(), type2),
-                        term2);
-            if (term2 instanceof DBConstant)
-                return termFactory.getStrictEquality(
-                        term1,
-                        termFactory.getDBConstant(((DBConstant) term2).getValue(), type1));
-            else
-                // Fall-back case
-                return termFactory.getDBNonStrictDefaultEquality(term1, term2);
-        }
-
-
-        /**
-         * Assumes that the integer values are normalized, that is they don't contain a "+"
-         * TODO: clean the potential "+" from constants?
-         */
-        protected ImmutableExpression transformIntegerEquality(ImmutableTerm term1, ImmutableTerm term2,
-                                                             DBTermType type1, DBTermType type2) {
-            return tryToMakeTheEqualityStrict(term1, term2, type1, type2);
         }
     }
 

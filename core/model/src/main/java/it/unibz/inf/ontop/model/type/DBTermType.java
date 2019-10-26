@@ -37,12 +37,25 @@ public interface DBTermType extends TermType {
     boolean areEqualitiesStrict();
 
     enum Category {
-        STRING,
-        INTEGER,
-        DECIMAL,
-        FLOAT_DOUBLE,
-        BOOLEAN,
-        DATETIME,
-        OTHER
+        STRING(true),
+        INTEGER(true),
+        DECIMAL(false),
+        FLOAT_DOUBLE(false),
+        BOOLEAN(false),
+        DATETIME(false),
+        OTHER(false);
+
+        private final boolean treatSameCategoryTypesAsEquivalentInStrictEq;
+
+        Category(boolean treatSameCategoryTypesAsEquivalentInStrictEq) {
+            this.treatSameCategoryTypesAsEquivalentInStrictEq = treatSameCategoryTypesAsEquivalentInStrictEq;
+        }
+
+        /**
+         * For instance, STRICT_EQ("ab"^^TEXT, "ab"^^VARCHAR) evaluates as true
+         */
+        public boolean isTreatingSameCategoryTypesAsEquivalentInStrictEq() {
+            return treatSameCategoryTypesAsEquivalentInStrictEq;
+        }
     }
 }
