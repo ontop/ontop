@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -37,6 +38,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -70,12 +72,15 @@ public class DummyRewriter implements QueryRewriter {
 
         FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
-        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
+        Variable x = termFactory.getVariable("x");
+        Variable y = termFactory.getVariable("y");
 
-        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, this::translate, builder);
+        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), ope -> getAtom(x, ope, y), builder);
+
+        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, dpe -> getAtom(x, dpe, y), builder);
 
         // the head will have no existential variables
-        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), this::translate, builder);
+        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), c -> getAtom(c, x, () -> y), builder);
 
         sigma = builder.build();
     }
@@ -138,37 +143,30 @@ public class DummyRewriter implements QueryRewriter {
                         }
     }
 
-    private DataAtom<RDFAtomPredicate> translate(ObjectPropertyExpression property) {
-        return property.isInverse()
-                ? (DataAtom)atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("y"),
-                    property.getIRI(),
-                    termFactory.getVariable("x"))
-                : (DataAtom)atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("x"),
-                    property.getIRI(),
-                    termFactory.getVariable("y"));
-    }
 
-    private DataAtom<RDFAtomPredicate> translate(DataPropertyExpression property) {
-        return (DataAtom)atomFactory.getIntensionalTripleAtom(
-                termFactory.getVariable("x"),
-                property.getIRI(),
-                termFactory.getVariable("y"));
-    }
-
-    private DataAtom<RDFAtomPredicate> translate(ClassExpression description) {
-        if (description instanceof OClass) {
-            return (DataAtom)atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("x"),
-                    ((OClass) description).getIRI());
+    protected DataAtom<RDFAtomPredicate> getAtom(ClassExpression ce, VariableOrGroundTerm x, Provider<VariableOrGroundTerm> y) {
+        if (ce instanceof OClass) {
+            return getAtom(x, (OClass) ce);
         }
-        else if (description instanceof ObjectSomeValuesFrom) {
-            return translate(((ObjectSomeValuesFrom) description).getProperty());
+        else if (ce instanceof ObjectSomeValuesFrom) {
+            return getAtom(x, ((ObjectSomeValuesFrom) ce).getProperty(), y.get());
         }
         else {
-            return translate(((DataSomeValuesFrom) description).getProperty());
+            return getAtom(x, ((DataSomeValuesFrom) ce).getProperty(), y.get());
         }
     }
 
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t1, ObjectPropertyExpression property, VariableOrGroundTerm t2) {
+        return property.isInverse()
+                ? (DataAtom)atomFactory.getIntensionalTripleAtom(t2, property.getIRI(), t1)
+                : (DataAtom)atomFactory.getIntensionalTripleAtom(t1, property.getIRI(), t2);
+    }
+
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t1, DataPropertyExpression property, VariableOrGroundTerm t2) {
+        return (DataAtom)atomFactory.getIntensionalTripleAtom(t1, property.getIRI(), t2);
+    }
+
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t, OClass oc) {
+        return (DataAtom)atomFactory.getIntensionalTripleAtom(t, oc.getIRI());
+    }
 }
