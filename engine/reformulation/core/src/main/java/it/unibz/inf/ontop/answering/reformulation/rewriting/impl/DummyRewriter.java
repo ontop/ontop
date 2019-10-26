@@ -50,7 +50,7 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependencies<AtomPredicate> sigma;
+    private FullLinearInclusionDependencies<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
@@ -68,7 +68,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
         traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
 
@@ -80,7 +80,7 @@ public class DummyRewriter implements QueryRewriter {
         sigma = builder.build();
     }
 
-    protected FullLinearInclusionDependencies<AtomPredicate> getSigma() {
+    protected FullLinearInclusionDependencies<RDFAtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -97,8 +97,8 @@ public class DummyRewriter implements QueryRewriter {
                 ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
                 // this loop has to remain sequential (no streams)
                 for (int i = 0; i < list.size(); i++) {
-                    DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
-                    ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
+                    DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
+                    ImmutableSet<DataAtom<RDFAtomPredicate>> derived = sigma.chaseAtom(atom);
                     for (int j = 0; j < list.size(); j++) {
                         DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
                         if (j != i && derived.contains(curr)) {
@@ -125,41 +125,41 @@ public class DummyRewriter implements QueryRewriter {
 
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
-                                        Function<T, DataAtom<AtomPredicate>> translate,
-                                        FullLinearInclusionDependencies.Builder<AtomPredicate> builder) {
+                                        Function<T, DataAtom<RDFAtomPredicate>> translate,
+                                        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)
                     for (T e : node)
                         if (e != sub && filter.test(e)) {
-                            DataAtom<AtomPredicate> head = translate.apply(e);
-                            DataAtom<AtomPredicate> body = translate.apply(sub);
+                            DataAtom<RDFAtomPredicate> head = translate.apply(e);
+                            DataAtom<RDFAtomPredicate> body = translate.apply(sub);
                             builder.add(head, body);
                         }
     }
 
-    private DataAtom<AtomPredicate> translate(ObjectPropertyExpression property) {
+    private DataAtom<RDFAtomPredicate> translate(ObjectPropertyExpression property) {
         return property.isInverse()
-                ? atomFactory.getIntensionalTripleAtom(
+                ? (DataAtom)atomFactory.getIntensionalTripleAtom(
                     termFactory.getVariable("y"),
                     property.getIRI(),
                     termFactory.getVariable("x"))
-                : atomFactory.getIntensionalTripleAtom(
+                : (DataAtom)atomFactory.getIntensionalTripleAtom(
                     termFactory.getVariable("x"),
                     property.getIRI(),
                     termFactory.getVariable("y"));
     }
 
-    private DataAtom<AtomPredicate> translate(DataPropertyExpression property) {
-        return atomFactory.getIntensionalTripleAtom(
+    private DataAtom<RDFAtomPredicate> translate(DataPropertyExpression property) {
+        return (DataAtom)atomFactory.getIntensionalTripleAtom(
                 termFactory.getVariable("x"),
                 property.getIRI(),
                 termFactory.getVariable("y"));
     }
 
-    private DataAtom<AtomPredicate> translate(ClassExpression description) {
+    private DataAtom<RDFAtomPredicate> translate(ClassExpression description) {
         if (description instanceof OClass) {
-            return atomFactory.getIntensionalTripleAtom(
+            return (DataAtom)atomFactory.getIntensionalTripleAtom(
                     termFactory.getVariable("x"),
                     ((OClass) description).getIRI());
         }

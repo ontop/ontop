@@ -62,8 +62,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessRewriterReasoner reasoner;
-	// TODO: fix the typing
-	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
+	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
 
