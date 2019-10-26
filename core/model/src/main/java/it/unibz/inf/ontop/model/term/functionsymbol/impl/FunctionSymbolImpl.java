@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbo
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -157,7 +158,7 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
                         .flatMap(TermTypeInference::getTermType)
-                        .map(t2 -> !t1.equals(t2))
+                        .map(t2 -> !areEquivalentForStrictEq(t1,t2))
                         .orElse(false))
                 .orElse(false);
 
@@ -173,6 +174,21 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
         return IncrementalEvaluation.declareSameExpression();
+    }
+
+    private boolean areEquivalentForStrictEq(TermType type1, TermType type2) {
+        if (type1.equals(type2))
+            return true;
+        if (!((type1 instanceof DBTermType) && (type2 instanceof DBTermType)))
+            return false;
+
+        DBTermType dbType1 = (DBTermType) type1;
+        DBTermType dbType2 = (DBTermType) type2;
+        DBTermType.Category category1 = dbType1.getCategory();
+
+        return (category1 == dbType2.getCategory())
+                && category1.isTreatingSameCategoryTypesAsEquivalentInStrictEq();
+
     }
 
     /**
