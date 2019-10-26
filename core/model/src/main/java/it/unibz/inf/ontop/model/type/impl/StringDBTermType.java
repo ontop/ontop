@@ -42,4 +42,9 @@ public class StringDBTermType extends DBTermTypeImpl {
     public boolean isNeedingIRISafeEncoding() {
         return true;
     }
+
+    @Override
+    public boolean areEqualitiesStrict() {
+        return true;
+    }
 }

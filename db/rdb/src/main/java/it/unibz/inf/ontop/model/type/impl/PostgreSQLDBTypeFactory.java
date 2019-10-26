@@ -69,12 +69,13 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDatetimeDatatype(), false);
 
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.TIME), false);
+                typeFactory.getDatatype(XSD.TIME), false, false);
 
         // TODO: check if lexical values can be considered as unique
         DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean, false);
 
-        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(), true);
+        DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(),
+                true, true);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);

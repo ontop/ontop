@@ -57,6 +57,7 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     protected static final String VARBINARY_STR = "VARBINARY";
     protected static final String BINARY_LARGE_STR = "BINARY LARGE OBJECT";
     protected static final String BLOB_STR = "BLOB";
+    protected static final boolean ARE_SAME_TYPE_EQUALITIES_STRICT_BY_DEFAULT = true;
 
     protected enum DefaultTypeCode {
         STRING,
@@ -89,7 +90,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
      * Returns a mutable map so that it can be modified by sub-classes
      */
     protected static Map<String, DBTermType> createDefaultSQLTypeMap(TermType rootTermType, TypeFactory typeFactory) {
-        DBTermType rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(ABSTRACT_DB_TYPE_STR, rootTermType.getAncestry(), true, false);
+        DBTermType rootDBType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(ABSTRACT_DB_TYPE_STR,
+                rootTermType.getAncestry(), true, false, false);
 
         TermTypeAncestry rootAncestry = rootDBType.getAncestry();
 
@@ -117,11 +119,11 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new StringDBTermType(NATIONAL_CHAR_VAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NVARCHAR_STR, rootAncestry, xsdString),
                     new StringDBTermType(NATIONAL_CHAR_LARGE_STR, rootAncestry, xsdString),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary, true),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary, true),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(VARBINARY_STR, rootAncestry, hexBinary, true),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary, true),
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BLOB_STR, rootAncestry, hexBinary, true),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_STR, rootAncestry, hexBinary, true, true),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_VAR_STR, rootAncestry, hexBinary, true, true),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(VARBINARY_STR, rootAncestry, hexBinary, true, true),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BINARY_LARGE_STR, rootAncestry, hexBinary, true, true),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(BLOB_STR, rootAncestry, hexBinary, true, true),
                     new NumberDBTermType(INTEGER_STR, rootAncestry, xsdInteger, INTEGER),
                     new NumberDBTermType(INT_STR, rootAncestry, xsdInteger, INTEGER),
                     // Non-standard (not part of the R2RML standard). Range changing from a DB engine to the otherk
@@ -137,9 +139,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     // Lex are non-unique in case true, false, 0 and 1 are all valid values. TODO: double-check
                     new BooleanDBTermType(BOOLEAN_STR, rootTermType.getAncestry(), xsdBoolean, false),
                     // TODO: check if lexical values can be considered as unique
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE), false),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(DATE_STR, rootAncestry, typeFactory.getDatatype(XSD.DATE), false, false),
                 // TODO: check if lexical values can be considered as unique
-                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME), false),
+                    new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME), false, false),
                 // TODO: check if lexical values can be considered as unique
                     new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype(), false))
                 .collect(Collectors.toMap(
@@ -175,7 +177,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
          * Creates a new term type if not known
          */
         return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false, false));
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false, false,
+                        ARE_SAME_TYPE_EQUALITIES_STRICT_BY_DEFAULT));
     }
 
     @Override
@@ -186,7 +189,8 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
          * Creates a new term type if not known
          */
         return sqlTypeMap.computeIfAbsent(typeString,
-                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(), false, false));
+                s -> new NonStringNonNumberNonBooleanNonDatetimeDBTermType(s, sqlTypeMap.get(ABSTRACT_DB_TYPE_STR).getAncestry(),
+                        false, false, ARE_SAME_TYPE_EQUALITIES_STRICT_BY_DEFAULT));
     }
 
     @Override

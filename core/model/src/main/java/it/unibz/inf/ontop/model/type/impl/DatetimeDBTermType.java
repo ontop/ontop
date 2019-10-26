@@ -31,4 +31,9 @@ public class DatetimeDBTermType extends DBTermTypeImpl {
     public boolean isNeedingIRISafeEncoding() {
         return true;
     }
+
+    @Override
+    public boolean areEqualitiesStrict() {
+        return false;
+    }
 }

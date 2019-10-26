@@ -247,50 +247,80 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
                 DBTermType type1 = types.get(0);
                 DBTermType type2 = types.get(1);
 
-                DBTermType.Category category1 = type1.getCategory();
-                DBTermType.Category category2 = type2.getCategory();
-
-                switch (category1) {
-                    case STRING:
-                        if (category2 == DBTermType.Category.STRING) {
-                            return transformStringEquality(term1, term2, type1, type2);
-                        }
-                        break;
-                    case INTEGER:
-                        switch (category2) {
-                            case INTEGER:
-                                return transformIntegerEquality(term1, term2, type1, type2);
-                            case DECIMAL:
-                            case FLOAT_DOUBLE:
-                                return termFactory.getDBNonStrictNumericEquality(term1, term2);
-                            default:
-                                break;
-                        }
-                        break;
-                    case DECIMAL:
-                    case FLOAT_DOUBLE:
-                        switch (category2) {
-                            case INTEGER:
-                            case DECIMAL:
-                            case FLOAT_DOUBLE:
-                                return termFactory.getDBNonStrictNumericEquality(term1, term2);
-                            default:
-                                break;
-                        }
-                        break;
-                    case DATETIME:
-                        if (category2 == DBTermType.Category.DATETIME) {
-                            return termFactory.getDBNonStrictDatetimeEquality(term1, term2);
-                        }
-                        break;
-                    // TODO: try to simplify booleans
-                    case BOOLEAN:
-                    case OTHER:
-                    default:
-                        break;
-                }
+                return type1.equals(type2)
+                        ? transformSameTypeEquality(type1, term1, term2)
+                        : transformDifferentTypesEquality(type1, type2, term1, term2);
             }
-            // Default case
+            else
+                return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+        }
+
+        private ImmutableExpression transformSameTypeEquality(DBTermType type, ImmutableTerm term1, ImmutableTerm term2) {
+            if (type.areLexicalTermsUnique())
+                return termFactory.getStrictEquality(term1, term2);
+
+            /*
+             * Tries to reuse an existing typed non-strict equality
+             */
+            switch (type.getCategory()) {
+                case DECIMAL:
+                case FLOAT_DOUBLE:
+                    return termFactory.getDBNonStrictNumericEquality(term1, term2);
+                case DATETIME:
+                    return termFactory.getDBNonStrictDatetimeEquality(term1, term2);
+                default:
+                    return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+            }
+        }
+
+        /**
+         * TODO: see how to make it extensible so that types in the OTHER category can simplify equalities with constants
+         */
+        protected ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
+                                                                    ImmutableTerm term1, ImmutableTerm term2) {
+            DBTermType.Category category1 = type1.getCategory();
+            DBTermType.Category category2 = type2.getCategory();
+
+            switch (category1) {
+                case STRING:
+                    if (category2 == DBTermType.Category.STRING) {
+                        return transformStringEquality(term1, term2, type1, type2);
+                    }
+                    break;
+                case INTEGER:
+                    switch (category2) {
+                        case INTEGER:
+                            return transformIntegerEquality(term1, term2, type1, type2);
+                        case DECIMAL:
+                        case FLOAT_DOUBLE:
+                            return termFactory.getDBNonStrictNumericEquality(term1, term2);
+                        default:
+                            break;
+                    }
+                    break;
+                case DECIMAL:
+                case FLOAT_DOUBLE:
+                    switch (category2) {
+                        case INTEGER:
+                        case DECIMAL:
+                        case FLOAT_DOUBLE:
+                            return termFactory.getDBNonStrictNumericEquality(term1, term2);
+                        default:
+                            break;
+                    }
+                    break;
+                case DATETIME:
+                    if (category2 == DBTermType.Category.DATETIME) {
+                        return termFactory.getDBNonStrictDatetimeEquality(term1, term2);
+                    }
+                    break;
+                // TODO: try to simplify booleans
+                case BOOLEAN:
+                case OTHER:
+                default:
+                    break;
+            }
+            // By default
             return termFactory.getDBNonStrictDefaultEquality(term1, term2);
         }
 

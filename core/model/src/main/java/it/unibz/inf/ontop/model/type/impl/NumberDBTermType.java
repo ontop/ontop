@@ -48,6 +48,11 @@ public class NumberDBTermType extends DBTermTypeImpl {
     }
 
     @Override
+    public boolean areEqualitiesStrict() {
+        return category == Category.INTEGER;
+    }
+
+    @Override
     public String getCastName() {
         return castName;
     }

@@ -30,6 +30,12 @@ public interface DBTermType extends TermType {
      */
     boolean areLexicalTermsUnique();
 
+    /**
+     * Returns true if the non-strict equality between two terms of this type
+     * is equivalent to a strict equality
+     */
+    boolean areEqualitiesStrict();
+
     enum Category {
         STRING,
         INTEGER,

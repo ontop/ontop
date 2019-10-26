@@ -10,22 +10,28 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
 
     @Nullable
     private final RDFDatatype rdfDatatype;
+    private final boolean areEqualitiesStrict;
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                boolean isAbstract, boolean areLexicalTermsUnique) {
+                                                                boolean isAbstract, boolean areLexicalTermsUnique,
+                                                                boolean areEqualitiesStrict) {
         super(name, parentAncestry, isAbstract, areLexicalTermsUnique);
+        this.areEqualitiesStrict = areEqualitiesStrict;
         rdfDatatype = null;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                RDFDatatype rdfDatatype, boolean areLexicalTermsUnique) {
+                                                                RDFDatatype rdfDatatype, boolean areLexicalTermsUnique,
+                                                                boolean areEqualitiesStrict) {
         super(name, parentAncestry, false, areLexicalTermsUnique);
         this.rdfDatatype = rdfDatatype;
+        this.areEqualitiesStrict = areEqualitiesStrict;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                boolean areLexicalTermsUnique) {
+                                                                boolean areLexicalTermsUnique, boolean areEqualitiesStrict) {
         super(name, parentAncestry, false, areLexicalTermsUnique);
+        this.areEqualitiesStrict = areEqualitiesStrict;
         this.rdfDatatype = null;
     }
 
@@ -45,5 +51,10 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
     @Override
     public boolean isNeedingIRISafeEncoding() {
         return true;
+    }
+
+    @Override
+    public boolean areEqualitiesStrict() {
+        return areEqualitiesStrict;
     }
 }

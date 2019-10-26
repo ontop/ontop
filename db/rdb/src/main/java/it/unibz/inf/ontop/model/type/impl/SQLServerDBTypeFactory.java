@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -46,7 +45,8 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
         DatetimeDBTermType dateTimeOffset = new DatetimeDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
                 typeFactory.getXsdDatetimeDatatype(), false);
 
-        DBTermType uniqueIdType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UNIQUEIDENTIFIER_STR, rootTermType.getAncestry(), true);
+        DBTermType uniqueIdType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UNIQUEIDENTIFIER_STR,
+                rootTermType.getAncestry(), true, true);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NVARCHAR_STR, nvarcharType);

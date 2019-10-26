@@ -30,4 +30,12 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
     public boolean isNeedingIRISafeEncoding() {
         return false;
     }
+
+    /**
+     * TODO: look at it seriously
+     */
+    @Override
+    public boolean areEqualitiesStrict() {
+        return false;
+    }
 }
