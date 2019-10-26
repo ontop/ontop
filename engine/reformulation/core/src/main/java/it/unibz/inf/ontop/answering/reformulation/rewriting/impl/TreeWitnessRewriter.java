@@ -62,6 +62,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessRewriterReasoner reasoner;
+	// TODO: fix the typing
 	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
@@ -84,7 +85,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = new TreeWitnessRewriterReasoner(classifiedTBox);
 		super.setTBox(classifiedTBox);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs<>(getSigma());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
@@ -352,15 +353,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
     }
 
-    private IQTree convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
+    private ImmutableList<IQTree> convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
 
         ImmutableList<IQTree> body = cq.getAtoms().stream()
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
-
-        IQTree result = (body.size() == 1)
-                ? body.get(0)
-                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), body);
 
         ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
         for (int i = 0; i < vars.size(); i++) {
@@ -371,17 +368,22 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         }
 
         ImmutableSubstitution substitution = substitutionFactory.getSubstitution(map.build());
-
         if (substitution.isEmpty())
-            return result;
-        else {
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
-                            substitution), result);
-        }
+            return body;
+
+        IQTree result = join(body);
+
+        return ImmutableList.of(iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(
+                        Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
+                        substitution), result));
     }
 
+    private IQTree join(ImmutableList<IQTree> atoms) {
+        return (atoms.size() == 1)
+                ? atoms.get(0)
+                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), atoms);
+    }
 
     @Override
     public IQ rewrite(IQ query) throws EmptyQueryException {
@@ -431,22 +433,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         return super.rewrite(result);
 	}
 
-    private ImmutableList<IQTree> convertUCQ(ImmutableList<IQTree> ucq) {
-        if (ucq.size() == 1) {
-            IQTree cq = ucq.get(0);
-            // flatten out trivial CQs (without any projection)
-            if (cq.getRootNode() instanceof InnerJoinNode && !((InnerJoinNode)cq.getRootNode()).getOptionalFilterCondition().isPresent())
-                return cq.getChildren();
+    private ImmutableList<IQTree> convertUCQ(ImmutableList<ImmutableList<IQTree>> ucq) {
+        if (ucq.size() == 1)
+            return ucq.get(0);
 
-            return ImmutableList.of(cq);
-        }
+        ImmutableList<IQTree> joined = ucq.stream()
+                .map(cq -> join(cq))
+                .collect(ImmutableCollectors.toList());
+
         // intersection
-        ImmutableSet<Variable> vars = ucq.get(0).getVariables().stream()
-                .filter(v -> ucq.stream().allMatch(cq -> cq.getVariables().contains(v)))
+        ImmutableSet<Variable> vars = joined.get(0).getVariables().stream()
+                .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
                 .collect(ImmutableCollectors.toSet());
 
-        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), ucq));
+        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), joined));
     }
-
-
 }

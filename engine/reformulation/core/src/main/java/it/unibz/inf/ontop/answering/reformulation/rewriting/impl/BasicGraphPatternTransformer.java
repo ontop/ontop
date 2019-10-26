@@ -27,12 +27,12 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
                 builderBGP.add((IntensionalDataNode)child);
             }
             else {
-                addTransformedBGP(builderChildren, builderBGP);
+                addTransformedBGP(builderChildren, builderBGP.build());
                 builderBGP = ImmutableList.builder();
                 builderChildren.add(child.acceptTransformer(this));
             }
         }
-        addTransformedBGP(builderChildren, builderBGP);
+        addTransformedBGP(builderChildren, builderBGP.build());
 
         return formInnerJoin(builderChildren.build(), rootNode.getOptionalFilterCondition());
     }
@@ -57,12 +57,9 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
         }
     }
 
-    private void addTransformedBGP(ImmutableList.Builder<IQTree> builderChildren, ImmutableList.Builder<IntensionalDataNode> builderBGP) {
-        ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
-        if (currentBGP.isEmpty())
-            return;
-
-        builderChildren.addAll(transformBGP(currentBGP));
+    private void addTransformedBGP(ImmutableList.Builder<IQTree> builderChildren, ImmutableList<IntensionalDataNode> currentBGP) {
+        if (!currentBGP.isEmpty())
+            builderChildren.addAll(transformBGP(currentBGP));
     }
 
     protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);
