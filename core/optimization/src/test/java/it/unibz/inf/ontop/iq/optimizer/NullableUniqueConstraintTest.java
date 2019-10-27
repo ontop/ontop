@@ -23,7 +23,7 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
-public class LeftJoinNullableUniqueConstraintTest {
+public class NullableUniqueConstraintTest {
 
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
@@ -196,6 +196,36 @@ public class LeftJoinNullableUniqueConstraintTest {
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
+
+    @Test
+    public void testSimpleJoin1() throws EmptyQueryException {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, D, E));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, E);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(dataNode1, dataNode2)));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        FilterNode newFilterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                newFilterNode,
+                                dataNode2)));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
 
     private void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) throws EmptyQueryException {
         IntermediateQuery newIntermediateQuery = JOIN_LIKE_OPTIMIZER.optimize(
