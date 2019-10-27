@@ -51,12 +51,11 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     }
 
     /**
-     * This method is used to chase foreign key constraint rule in which the rule
-     * has only one atom in the body.
+     * Chases a given atom with the linear inclusions dependencies
      *
-     * IMPORTANT: each rule is applied only ONCE to the atom
+     * IMPORTANT: each dependency is applied only ONCE to the atom
      *
-     * @param atom
+     * @param atom to be chased
      * @return set of atoms
      */
 
@@ -70,6 +69,15 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
                         .map(Optional::get))
                 .collect(ImmutableCollectors.toSet());
     }
+
+    /**
+     * Chases given atoms with the linear inclusions dependencies
+     *
+     * IMPORTANT: each dependency is applied only ONCE to each atom
+     *
+     * @param atoms to be chased
+     * @return set of atoms
+     */
 
     public ImmutableSet<DataAtom<P>> chaseAllAtoms(ImmutableCollection<DataAtom<P>> atoms) {
         registerVariables(atoms);
@@ -93,7 +101,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
 
         ImmutableHomomorphism h = extendWithLabelledNulls(id, builder.build());
         ImmutableList<VariableOrGroundTerm> newArguments = id.getHead().getArguments().stream()
-                .map(t -> h.apply(t))
+                .map(h::apply)
                 .collect(ImmutableCollectors.toList());
 
         return Optional.of(atomFactory.getDataAtom(id.getHead().getPredicate(), newArguments));
