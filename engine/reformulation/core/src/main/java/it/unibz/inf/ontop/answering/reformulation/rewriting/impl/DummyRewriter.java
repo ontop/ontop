@@ -94,39 +94,41 @@ public class DummyRewriter implements QueryRewriter {
      */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
-
-        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+        return iqFactory.createIQ(query.getProjectionAtom(),
+                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
-            protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
-
-                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
-                // this loop has to remain sequential (no streams)
-                for (int i = 0; i < list.size(); i++) {
-                    DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
-                    ImmutableSet<DataAtom<RDFAtomPredicate>> derived = sigma.chaseAtom(atom);
-                    for (int j = 0; j < list.size(); j++) {
-                        DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
-                        if (j != i && derived.contains(curr)) {
-                            ImmutableSet<Variable> variables = list.stream()
-                                    .map(DataNode::getProjectionAtom)
-                                    .filter(a -> (a != curr))
-                                    .flatMap(a -> a.getVariables().stream())
-                                    .collect(ImmutableCollectors.toSet());
-                            // atom to be removed cannot contain a variable occurring nowhere else
-                            if (variables.containsAll(curr.getVariables())) {
-                                list.remove(j);
-                                j--;
-                                if (j < i) // removing in front of the atom
-                                    i--; // shift the atom position too
-                            }
-                        }
-                    }
-                }
-
-                return ImmutableList.copyOf(list);
+            protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
+                return removeRedundantAtoms(bgp);
             }
         }));
 	}
+
+	private <T extends DataNode<AtomPredicate>> ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<T> bgp) {
+        ArrayList<T> list = new ArrayList<>(bgp); // mutable copy
+        // this loop has to remain sequential (no streams)
+        for (int i = 0; i < list.size(); i++) {
+            DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
+            ImmutableSet<DataAtom<RDFAtomPredicate>> derived = sigma.chaseAtom(atom);
+            for (int j = 0; j < list.size(); j++) {
+                DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
+                if (j != i && derived.contains(curr)) {
+                    ImmutableSet<Variable> variables = list.stream()
+                            .map(DataNode::getProjectionAtom)
+                            .filter(a -> (a != curr))
+                            .flatMap(a -> a.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet());
+                    // atom to be removed cannot contain a variable occurring nowhere else
+                    if (variables.containsAll(curr.getVariables())) {
+                        list.remove(j);
+                        j--;
+                        if (j < i) // removing in front of the atom
+                            i--; // shift the atom position too
+                    }
+                }
+            }
+        }
+        return ImmutableList.copyOf(list);
+    }
 
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,

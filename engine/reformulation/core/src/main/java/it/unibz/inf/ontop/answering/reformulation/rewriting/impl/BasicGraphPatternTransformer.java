@@ -62,6 +62,6 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
             builderChildren.addAll(transformBGP(currentBGP));
     }
 
-    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);
+    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp);
 }
 
