@@ -1,11 +1,11 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.*;
@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 
 public class SelfJoinLikeExecutor {
-
-
 
     /**
      * TODO: explain
@@ -53,15 +51,18 @@ public class SelfJoinLikeExecutor {
     /**
      * TODO: explain
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static class PredicateLevelProposal {
 
         private final ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions;
         private final ImmutableCollection<ExtensionalDataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> isNotNullConjunction;
 
         public PredicateLevelProposal(ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                      ImmutableCollection<ExtensionalDataNode> removedDataNodes) {
+                                      ImmutableCollection<ExtensionalDataNode> removedDataNodes, Optional<ImmutableExpression> isNotNullConjunction) {
             this.substitutions = substitutions;
             this.removedDataNodes = removedDataNodes;
+            this.isNotNullConjunction = isNotNullConjunction;
         }
 
         public ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutions() {
@@ -74,6 +75,10 @@ public class SelfJoinLikeExecutor {
         public ImmutableCollection<ExtensionalDataNode> getRemovedDataNodes() {
             return removedDataNodes;
         }
+
+        public Optional<ImmutableExpression> getIsNotNullConjunction() {
+            return isNotNullConjunction;
+        }
     }
 
 
@@ -84,11 +89,14 @@ public class SelfJoinLikeExecutor {
 
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
         private final ImmutableCollection<DataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> optionalIsNotNullExpression;
 
         public ConcreteProposal(Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-                                ImmutableCollection<DataNode> removedDataNodes) {
+                                ImmutableCollection<DataNode> removedDataNodes,
+                                Optional<ImmutableExpression> optionalIsNotNullExpression) {
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
+            this.optionalIsNotNullExpression = optionalIsNotNullExpression;
         }
 
         public ImmutableCollection<DataNode> getDataNodesToRemove() {
@@ -104,6 +112,9 @@ public class SelfJoinLikeExecutor {
         }
 
 
+        public Optional<ImmutableExpression> getOptionalIsNotNullExpression() {
+            return optionalIsNotNullExpression;
+        }
     }
 
     /**
@@ -160,10 +171,13 @@ public class SelfJoinLikeExecutor {
 
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
+    private final TermFactory termFactory;
 
-    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools) {
+    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools,
+                                   TermFactory termFactory) {
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
+        this.termFactory = termFactory;
     }
 
 
@@ -220,7 +234,12 @@ public class SelfJoinLikeExecutor {
                             })
                     .getRemovalNodes());
 
-            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes);
+            // NB: IS_NOT_NULL simplification is delegated to the method IQTree.normalizeForOptimization(...)
+            Optional<ImmutableExpression> isNotNullConjunction = termFactory.getConjunction(groupingMap.keys().stream()
+                    .flatMap(Collection::stream)
+                    .map(termFactory::getDBIsNotNull));
+
+            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes, isNotNullConjunction);
 
             /*
              * Trick: rethrow the exception
@@ -248,7 +267,14 @@ public class SelfJoinLikeExecutor {
                 && (! optionalMergedSubstitution.isPresent()))
             return Optional.empty();
 
-        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes));
+        Optional<ImmutableExpression> isNotConjunction = termFactory.getConjunction(predicateProposals.stream()
+                .map(PredicateLevelProposal::getIsNotNullConjunction)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(ImmutableExpression::flattenAND)
+                .distinct());
+
+        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes, isNotConjunction));
     }
 
 
@@ -382,6 +408,14 @@ public class SelfJoinLikeExecutor {
             QueryTreeComponent treeComponent,
             N joinNode,
             ConcreteProposal proposal) throws EmptyQueryException {
+
+        Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition()
+                .map(f -> proposal.getOptionalIsNotNullExpression()
+                        .map(f2 -> termFactory.getConjunction(f, f2))
+                        .orElse(f))
+                .map(Optional::of)
+                .orElseGet(proposal::getOptionalIsNotNullExpression);
+
         switch(treeComponent.getChildren(joinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
@@ -393,7 +427,6 @@ public class SelfJoinLikeExecutor {
                  */
             case 1:
                 QueryNode uniqueChild = treeComponent.getFirstChild(joinNode).get();
-                Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition();
 
                 if (optionalFilter.isPresent()) {
                     QueryNode filterNode = query.getFactory().createFilterNode(optionalFilter.get());
@@ -419,7 +452,7 @@ public class SelfJoinLikeExecutor {
              * Multiple children, keep a join node BUT MOVES ITS CONDITION ABOVE (in a filter)
              */
             default:
-                N newJoinNode = joinNode.getOptionalFilterCondition()
+                N newJoinNode = optionalFilter
                         .map(cond -> {
                             FilterNode parentFilter = query.getFactory().createFilterNode(cond);
                             treeComponent.insertParent(joinNode, parentFilter);
