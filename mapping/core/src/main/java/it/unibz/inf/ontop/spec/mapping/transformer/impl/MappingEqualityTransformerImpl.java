@@ -221,8 +221,9 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         }
 
         /**
-         * NB: It tries to reduce string and integer equalities into strict equalities as these kinds
-         * types are often used to build IRIs.
+         * NB: It tries to reduce equalities into strict equalities.
+         * 
+         * Essential for integers and strings as these kinds types are often used to build IRIs.
          */
         protected ImmutableExpression transformEquality(ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (newTerms.size() != 2)
@@ -273,9 +274,6 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
             }
         }
 
-        /**
-         * TODO: see how to make it extensible so that types in the OTHER category can simplify equalities with constants
-         */
         protected ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
                                                                     ImmutableTerm term1, ImmutableTerm term2) {
             DBTermType.Category category1 = type1.getCategory();
