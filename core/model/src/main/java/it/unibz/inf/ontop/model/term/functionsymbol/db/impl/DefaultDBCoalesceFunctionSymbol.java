@@ -66,7 +66,16 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableList<ImmutableTerm> remainingTerms = newTerms.stream()
+
+        ImmutableList<ImmutableTerm> flattenedTerms = newTerms.stream()
+                // TODO: consider using an interface
+                .flatMap(t -> ((t instanceof ImmutableFunctionalTerm)
+                        && (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DefaultDBCoalesceFunctionSymbol))
+                        ? ((ImmutableFunctionalTerm) t).getTerms().stream()
+                        : Stream.of(t))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<ImmutableTerm> remainingTerms = flattenedTerms.stream()
                 .filter(t -> !t.isNull())
                 .collect(ImmutableCollectors.toList());
 
