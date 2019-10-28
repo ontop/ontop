@@ -321,7 +321,7 @@ public class LeftJoinProfTest {
                 "   OPTIONAL {\n" +
                 "     ?p :nickname ?v\n" +
                 "  }\n" +
-                "}";
+                "ORDER BY DESC(?v)\n";
 
         List<String> expectedValues = ImmutableList.of(
                 "Rog", "Rog", "Johnny"

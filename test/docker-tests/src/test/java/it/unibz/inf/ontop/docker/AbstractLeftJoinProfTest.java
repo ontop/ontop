@@ -246,8 +246,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "      :teaches ?c .\n" +
                 "   OPTIONAL {\n" +
                 "     ?p :nickname ?v\n" +
-                "  }\n" +
-                "}";
+                "    }\n" +
+                " }\n" +
+                "ORDER BY DESC(?v)";
 
         String [] expectedValues = {
                 "Rog", "Rog", "Johnny"
@@ -300,11 +301,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}\n" +
                 "ORDER BY DESC(?v)";
 
-        String [] expectedValues = {
+        List<String> expectedValues = ImmutableList.of(
                 "Smith", "Poppins", "Depp"
-        };
-        String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
-
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -734,10 +734,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
+        List<String> expectedValues = getExpectedValuesDuration1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesDuration1() {
+        return ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
     }
 
     @Test
@@ -755,10 +759,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("31", "32", "75.5");
+        List<String> expectedValues = getExpectedValuesMultitypedSum1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
+        return ImmutableList.of("31", "32", "75.5");
     }
 
     @Test
