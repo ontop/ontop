@@ -336,8 +336,10 @@ public interface TermFactory {
 	public Variable getVariable(String name);
 
 	RDFTermTypeConstant getRDFTermTypeConstant(RDFTermType type);
+
 	ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
-														 ImmutableSet<RDFTermTypeConstant> possibleConstants);
+														 ImmutableSet<RDFTermTypeConstant> possibleConstants,
+														 boolean isSimplifiable);
 
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
@@ -601,5 +603,4 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
-
 }

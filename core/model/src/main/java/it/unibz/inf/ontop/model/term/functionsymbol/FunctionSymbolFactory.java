@@ -41,7 +41,8 @@ public interface FunctionSymbolFactory {
     BooleanFunctionSymbol getRDF2DBBooleanFunctionSymbol();
 
     RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
-            ImmutableSet<RDFTermTypeConstant> possibleConstants);
+                                                           ImmutableSet<RDFTermTypeConstant> possibleConstants,
+                                                           boolean isSimplifiable);
 
     // SPARQL functions
 
