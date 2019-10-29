@@ -28,9 +28,10 @@ import java.util.stream.Stream;
 
 
 /**
- * Meta term type definitions are blocked by unions
+ * Lifts meta term type definitions are blocked by unions.
  *
- * TODO: explain it further
+ * Also makes sure that type terms are lifted above AggregationNode-s and DistinctNode-s.
+ *
  */
 public class DefaultTermTypeTermVisitingTreeTransformer
         extends DefaultRecursiveIQTreeVisitingTransformer implements TermTypeTermLiftTransformer {
@@ -229,6 +230,30 @@ public class DefaultTermTypeTermVisitingTreeTransformer
         throw new MinorOntopInternalBugException(
                 String.format("Was expecting a functional term with a RDFTermTypeFunctionSymbol, not %s.\n" +
                         "Some simplifications might be missing", definition));
+    }
+
+    @Override
+    public IQTree transformDistinct(IQTree tree, DistinctNode rootNode, IQTree child) {
+        return transformNodeBlockingNonInjectiveBindings(rootNode, child);
+    }
+
+    @Override
+    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        return transformNodeBlockingNonInjectiveBindings(rootNode, child);
+    }
+
+    /**
+     * Makes sure the child does not project a type term anymore.
+     *
+     * Useful for dealing with COALESCE and CASEs
+     *
+     */
+    private IQTree transformNodeBlockingNonInjectiveBindings(UnaryOperatorNode rootNode, IQTree child) {
+        IQTree normalizedChild = replaceTypeTermConstants(
+                child.acceptTransformer(this));
+
+        return iqFactory.createUnaryIQTree(rootNode, normalizedChild)
+                .normalizeForOptimization(variableGenerator);
     }
 
     protected IQTree transformLeaf(LeafIQTree leaf){
