@@ -15,14 +15,14 @@ public class NumberDBTermType extends DBTermTypeImpl {
 
     protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
                                Category category) {
-        super(name, parentAncestry, false, false);
+        super(name, parentAncestry, false, category == Category.INTEGER);
         this.castName = castName;
         this.rdfDatatype = rdfDatatype;
         this.category = category;
     }
 
     protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype, Category category) {
-        super(name, parentAncestry, false, false);
+        super(name, parentAncestry, false, category == Category.INTEGER);
         this.rdfDatatype = rdfDatatype;
         castName = name;
         this.category = category;
