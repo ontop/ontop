@@ -314,9 +314,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
-                                                                  ImmutableSet<RDFTermTypeConstant> possibleConstants) {
+                                                                  ImmutableSet<RDFTermTypeConstant> possibleConstants,
+                                                                  boolean isSimplifiable) {
         ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap = dictionary.createConversionMap(possibleConstants);
-        return new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap);
+        return new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap, isSimplifiable);
     }
 
     @Override

@@ -7,7 +7,9 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -74,12 +76,21 @@ public class DefaultDBIfElseNullFunctionSymbol extends AbstractDBIfThenFunctionS
 
         if (newThenValue instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) newThenValue;
-            if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+            FunctionSymbol functionSymbol = functionalTerm.getFunctionSymbol();
+            if (functionSymbol instanceof RDFTermFunctionSymbol) {
 
                 return termFactory.getRDFFunctionalTerm(
                         termFactory.getIfElseNull(newCondition, functionalTerm.getTerm(0)),
                         termFactory.getIfElseNull(newCondition, functionalTerm.getTerm(1)))
                         .simplify(variableNullability);
+            }
+            /*
+             * Lifts the RDFTermTypeFunctionSymbol above
+             */
+            else if (functionSymbol instanceof RDFTermTypeFunctionSymbol) {
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbol,
+                        termFactory.getImmutableFunctionalTerm(this, newCondition, functionalTerm.getTerm(0)));
             }
         }
         else if (newThenValue instanceof RDFConstant) {

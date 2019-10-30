@@ -187,8 +187,10 @@ public class TermFactoryImpl implements TermFactory {
 
 	@Override
 	public ImmutableFunctionalTerm getRDFTermTypeFunctionalTerm(ImmutableTerm term, TypeConstantDictionary dictionary,
-			ImmutableSet<RDFTermTypeConstant> possibleConstants) {
-		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermTypeFunctionSymbol(dictionary, possibleConstants), term);
+																ImmutableSet<RDFTermTypeConstant> possibleConstants,
+																boolean isSimplifiable) {
+		return getImmutableFunctionalTerm(
+				functionSymbolFactory.getRDFTermTypeFunctionSymbol(dictionary, possibleConstants, isSimplifiable), term);
 	}
 
 	@Override
