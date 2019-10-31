@@ -1,14 +1,11 @@
 package it.unibz.inf.ontop.iq.executor;
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
-import it.unibz.inf.ontop.datalog.impl.ImmutableQueryModifiersImpl;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -66,8 +63,6 @@ public class FunctionalDependencyTest {
     private final static DBConstant ONE = TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
-
-    private final static ImmutableQueryModifiers DISTINCT_MODIFIER = new ImmutableQueryModifiersImpl(true, -1, -1, ImmutableList.of()) ;
 
     private static final DBMetadata METADATA;
 
