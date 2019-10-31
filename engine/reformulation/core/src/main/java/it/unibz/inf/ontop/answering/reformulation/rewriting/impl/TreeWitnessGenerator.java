@@ -20,187 +20,46 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.spec.ontology.*;
-import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TreeWitnessGenerator {
 	private final ObjectPropertyExpression property;
 //	private final OClass filler;
 
-	private final Set<ClassExpression> concepts = new HashSet<ClassExpression>();
-	private Set<ClassExpression> subconcepts;
-	private ObjectSomeValuesFrom existsRinv;
+	private final DownwardSaturatedImmutableSet<ClassExpression> concepts;
+	private final ImmutableSet<ClassExpression> maximalRepresentatives;
 
-	private final ClassifiedTBox reasoner;
 
-	private static final Logger log = LoggerFactory.getLogger(TreeWitnessGenerator.class);	
-//	private static final OntologyFactory ontFactory = OntologyFactoryImpl.getInstance();
-	
-	public TreeWitnessGenerator(ClassifiedTBox reasoner, ObjectPropertyExpression property/*, OClass filler*/) {
-		this.reasoner = reasoner;
+	public TreeWitnessGenerator(ObjectPropertyExpression property/*, OClass filler*/, DownwardSaturatedImmutableSet<ClassExpression> concepts, ImmutableSet<ClassExpression> maximalRepresentatives) {
 		this.property = property;
 //		this.filler = filler;
+		this.concepts = concepts;
+		this.maximalRepresentatives = maximalRepresentatives;
 	}
 
-	// tree witness generators of the ontology (i.e., positive occurrences of \exists R.B)
 
-	public static Collection<TreeWitnessGenerator> getTreeWitnessGenerators(ClassifiedTBox reasoner) {
-		
-		Map<ClassExpression, TreeWitnessGenerator> gens = new HashMap<>();
-
-		// COLLECT GENERATING CONCEPTS (together with their declared subclasses)
-		// TODO: improve the algorithm
-		for (Equivalences<ClassExpression> set : reasoner.classesDAG()) {
-			Set<Equivalences<ClassExpression>> subClasses = reasoner.classesDAG().getSub(set);
-			boolean couldBeGenerating = set.size() > 1 || subClasses.size() > 1; 
-			for (ClassExpression concept : set) {
-				if (concept instanceof ObjectSomeValuesFrom && couldBeGenerating) {
-					ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)concept;
-					TreeWitnessGenerator twg = gens.get(some);
-					if (twg == null) {
-						twg = new TreeWitnessGenerator(reasoner, some.getProperty());			
-						gens.put(concept, twg);
-					}
-					for (Equivalences<ClassExpression> subClassSet : subClasses) {
-						for (ClassExpression subConcept : subClassSet) {
-							if (!subConcept.equals(concept)) {
-								twg.concepts.add(subConcept);
-								log.debug("GENERATING CI: {} <= {}", subConcept, some);
-							}
-						}
-					}
-				}				
-			}
-		}
-
-		return gens.values();
-		
-	}
-	
-	
-	public static Set<ClassExpression> getMaximalBasicConcepts(Collection<TreeWitnessGenerator> gens, ClassifiedTBox reasoner) {
-		Set<ClassExpression> concepts = new HashSet<>();
-		for (TreeWitnessGenerator twg : gens) 
-			concepts.addAll(twg.concepts);
-
-		if (concepts.isEmpty())
-			return concepts;
-		
-		if (concepts.size() == 1 && concepts.iterator().next() instanceof OClass)
-			return concepts;
-		
-		log.debug("MORE THAN ONE GENERATING CONCEPT: {}", concepts);
-		// add all sub-concepts of all \exists R
-		Set<ClassExpression> extension = new HashSet<ClassExpression>();
-		for (ClassExpression b : concepts) 
-			if (b instanceof ObjectSomeValuesFrom)
-				extension.addAll(reasoner.classesDAG().getSubRepresentatives(b));
-		concepts.addAll(extension);
-		
-		// use all concept names to subsume their sub-concepts
-		{
-			boolean modified = true; 
-			while (modified) {
-				modified = false;
-				for (ClassExpression b : concepts) 
-					if (b instanceof OClass) {
-						Set<ClassExpression> bsubconcepts = reasoner.classesDAG().getSubRepresentatives(b);
-						Iterator<ClassExpression> i = concepts.iterator();
-						while (i.hasNext()) {
-							ClassExpression bp = i.next();
-							if ((b != bp) && bsubconcepts.contains(bp)) { 
-								i.remove();
-								modified = true;
-							}
-						}
-						if (modified)
-							break;
-					}
-			}
-		}
-		
-		// use all \exists R to subsume their sub-concepts of the form \exists R
-		{
-			boolean modified = true;
-			while (modified) {
-				modified = false;
-				for (ClassExpression b : concepts) 
-					if (b instanceof ObjectSomeValuesFrom) {
-						ObjectSomeValuesFrom some = (ObjectSomeValuesFrom)b;
-						ObjectPropertyExpression prop = some.getProperty();
-						Set<ObjectPropertyExpression> bsubproperties = reasoner.objectPropertiesDAG().getSubRepresentatives(prop);
-						Iterator<ClassExpression> i = concepts.iterator();
-						while (i.hasNext()) {
-							ClassExpression bp = i.next();
-							if ((b != bp) && (bp instanceof ObjectSomeValuesFrom)) {
-								ObjectSomeValuesFrom somep = (ObjectSomeValuesFrom)bp;
-								ObjectPropertyExpression propp = somep.getProperty();
-								
-								if (bsubproperties.contains(propp)) {
-									i.remove();
-									modified = true;
-								}
-							}
-						}
-						if (modified)
-							break;
-					}
-			}
-		}
-		
+	public DownwardSaturatedImmutableSet<ClassExpression> getGeneratorConcepts() {
 		return concepts;
 	}
-	
-	
-	public Set<ClassExpression> getSubConcepts() {
-		if (subconcepts == null) {
-			subconcepts = new HashSet<>();
-			for (ClassExpression con : concepts)
-				subconcepts.addAll(reasoner.classesDAG().getSubRepresentatives(con));
-		}
-		return subconcepts;
+
+	public ImmutableSet<ClassExpression> getMaximalGeneratorRepresentatives() {
+		return maximalRepresentatives;
 	}
-	
-	
+
 	public ObjectPropertyExpression getProperty() {
 		return property;
 	}
-	
-	private void ensureExistsRinv() {
-		if (existsRinv == null) {
-			if (property instanceof ObjectPropertyExpression) {
-				ObjectPropertyExpression inv = ((ObjectPropertyExpression)property).getInverse();			
-				existsRinv = inv.getDomain();	
-			}
-//			else {
-//				DataPropertyExpression inv = ((DataPropertyExpression)property).getInverse();			
-//				existsRinv = ontFactory.createPropertySomeRestriction(inv);					
-//			}
-		}		
+
+	public boolean endPointEntailsAny(Collection<TreeWitnessGenerator> twgs) {
+		return twgs.stream().anyMatch(twg -> this.endPointEntails(twg.getGeneratorConcepts()));
 	}
 
-	public boolean endPointEntailsAnyOf(Set<ClassExpression> subc) {
-		ensureExistsRinv();
-		return subc.contains(existsRinv); // || subc.contains(filler);
-	}
-	
-	public boolean endPointEntailsAnyOf(Intersection<ClassExpression> subc) {
-		if (subc.isTop())
-			return true;
-		
-		ensureExistsRinv();
-		
-		return subc.subsumes(existsRinv); // || subc.subsumes(filler);
+	public boolean endPointEntails(DownwardSaturatedImmutableSet<ClassExpression> s) {
+		return s.subsumes(property.getRange()); // || s.subsumes(filler);
 	}
 	
 	@Override 

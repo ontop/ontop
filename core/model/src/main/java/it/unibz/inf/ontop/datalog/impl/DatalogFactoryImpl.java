@@ -59,13 +59,6 @@ public class DatalogFactoryImpl implements DatalogFactory {
     }
 
     @Override
-    public DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers, Collection<CQIE> rules) {
-        DatalogProgram p = new DatalogProgramImpl(modifiers);
-        p.appendRule(rules);
-        return p;
-    }
-
-    @Override
     public Function getSPARQLJoin(Function t1, Function t2) {
         return termFactory.getFunction(sparqlJoinPredicate, t1, t2);
     }
