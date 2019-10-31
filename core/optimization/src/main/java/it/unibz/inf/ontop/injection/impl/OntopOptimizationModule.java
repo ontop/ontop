@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.datalog.DatalogProgram2QueryConverter;
-import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
@@ -51,12 +49,10 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(ProjectionShrinkingExecutor.class);
         bindFromSettings(FlattenUnionExecutor.class);
         bindFromSettings(ConstructionNodeCleaningExecutor.class);
-        bindFromSettings(DatalogProgram2QueryConverter.class);
         bindFromSettings(InnerJoinMutableOptimizer.class);
         bindFromSettings(JoinLikeOptimizer.class);
         bindFromSettings(LeftJoinMutableOptimizer.class);
         bindFromSettings(BindingLiftOptimizer.class);
-        bindFromSettings(IQ2DatalogTranslator.class);
         bindFromSettings(LeftJoinRightChildNormalizationAnalyzer.class);
         bindFromSettings(UnionAndBindingLiftOptimizer.class);
         bindFromSettings(UnionFlattener.class);
