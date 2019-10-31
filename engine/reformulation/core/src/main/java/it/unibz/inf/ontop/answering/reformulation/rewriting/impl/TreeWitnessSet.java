@@ -263,7 +263,6 @@ public class TreeWitnessSet implements Iterable<ImmutableCollection<TreeWitness>
 		Set<TreeWitnessGenerator> generators = new HashSet<>();
 
 		if (cc.isDegenerate()) { // do not remove the curly brackets -- dangling else otherwise
-			System.out.println("LOOPY: " + cc.getLoop() + cc.isDegenerate() + " " + cc.getEdges());
 			DownwardSaturatedImmutableSet<ClassExpression> subc = cache.getLoopConcepts(cc.getLoop().get());
 			log.debug("DEGENERATE DETACHED COMPONENT: {}", cc);
 			if (!subc.isBottom()) // (subc == null) || 

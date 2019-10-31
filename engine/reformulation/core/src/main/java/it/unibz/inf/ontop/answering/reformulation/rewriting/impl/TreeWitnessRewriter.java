@@ -62,7 +62,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
 	private TreeWitnessRewriterReasoner reasoner;
-	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
+	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
 
     private final SubstitutionFactory substitutionFactory;
 
@@ -84,7 +84,7 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		this.reasoner = new TreeWitnessRewriterReasoner(classifiedTBox);
 		super.setTBox(classifiedTBox);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs<>(getSigma());
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
@@ -109,27 +109,10 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 		return gens
 				.flatMap(g -> g.getMaximalGeneratorRepresentatives().stream())
 				.distinct()
-				.map(ce -> getAtomForGenerator(ce, r0))
+				.map(ce -> getAtom(ce, r0, this::getFreshVariable))
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private DataAtom<RDFAtomPredicate> getAtomForGenerator(ClassExpression con, VariableOrGroundTerm r0) {
-		log.debug("  BASIC CONCEPT: {}", con);
-		if (con instanceof OClass) {
-			return (DataAtom)atomFactory.getIntensionalTripleAtom(r0, ((OClass) con).getIRI());
-		}
-		else if (con instanceof ObjectSomeValuesFrom) {
-			ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
-			return !ope.isInverse()
-					? (DataAtom)atomFactory.getIntensionalTripleAtom(r0, ope.getIRI(), getFreshVariable())
-					: (DataAtom)atomFactory.getIntensionalTripleAtom(getFreshVariable(), ope.getIRI(), r0);
-		}
-		else {
-			DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
-			return (DataAtom)atomFactory.getIntensionalTripleAtom(r0, dpe.getIRI(), getFreshVariable());
-		}
-	}
-	
 	private class CQ {
 		private final ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities;
 		private final ImmutableSet<DataAtom<RDFAtomPredicate>> atoms;
@@ -312,27 +295,27 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
                 Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
                 if (classIRI.isPresent()) {
-                    if (tbox.classes().contains(classIRI.get())) {
-                        OClass c = tbox.classes().get(classIRI.get());
+                    IRI iri = classIRI.get();
+                    if (tbox.classes().contains(iri)) {
+                        OClass c = tbox.classes().get(iri);
                         OClass equivalent = (OClass) tbox.classesDAG().getCanonicalForm(c);
-                        return dataNode.newAtom(atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI()));
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent));
                     }
                     return  dataNode;
                 }
 
                 Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
                 if (propertyIRI.isPresent()) {
-                    if (tbox.objectProperties().contains(propertyIRI.get())) {
-                        ObjectPropertyExpression ope = tbox.objectProperties().get(propertyIRI.get());
+                    IRI iri = propertyIRI.get();
+                    if (tbox.objectProperties().contains(iri)) {
+                        ObjectPropertyExpression ope = tbox.objectProperties().get(iri);
                         ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
-                        return dataNode.newAtom((!equivalent.isInverse())
-                                ? atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2))
-                                : atomFactory.getIntensionalTripleAtom(arguments.get(2), equivalent.getIRI(), arguments.get(0)));
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
                     }
-                    else if (tbox.dataProperties().contains(propertyIRI.get())) {
-                        DataPropertyExpression dpe = tbox.dataProperties().get(propertyIRI.get());
+                    else if (tbox.dataProperties().contains(iri)) {
+                        DataPropertyExpression dpe = tbox.dataProperties().get(iri);
                         DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
-                        return dataNode.newAtom(atomFactory.getIntensionalTripleAtom(arguments.get(0), equivalent.getIRI(), arguments.get(2)));
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
                     }
                     return  dataNode;
                 }
@@ -352,17 +335,11 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
     }
 
-    private IQTree convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars, Optional<ImmutableExpression> filter) {
+    private ImmutableList<IQTree> convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
 
         ImmutableList<IQTree> body = cq.getAtoms().stream()
                 .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
                 .collect(ImmutableCollectors.toList());
-
-        IQTree result = (body.size() == 1)
-                ? ((filter.isPresent())
-                    ? iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filter.get()), body.get(0))
-                    : body.get(0))
-                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), body);
 
         ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
         for (int i = 0; i < vars.size(); i++) {
@@ -373,17 +350,22 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         }
 
         ImmutableSubstitution substitution = substitutionFactory.getSubstitution(map.build());
-
         if (substitution.isEmpty())
-            return result;
-        else {
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(
-                            Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
-                            substitution), result);
-        }
+            return body;
+
+        IQTree result = join(body);
+
+        return ImmutableList.of(iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(
+                        Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
+                        substitution), result));
     }
 
+    private IQTree join(ImmutableList<IQTree> atoms) {
+        return (atoms.size() == 1)
+                ? atoms.get(0)
+                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), atoms);
+    }
 
     @Override
     public IQ rewrite(IQ query) throws EmptyQueryException {
@@ -397,9 +379,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
             public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
-                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer2(iqFactory) {
+                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
                     @Override
-                    protected ImmutableList<IQTree> transformBGP(ImmutableList<DataNode<RDFAtomPredicate>> triplePatterns) {
+                    protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
                         ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
                                 .map(c -> (DataAtom<RDFAtomPredicate>)(DataAtom)((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
                                 .collect(ImmutableCollectors.toList());
@@ -415,9 +397,9 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                                 .collect(Collectors.toList());
                         containmentCheckUnderLIDs.removeContainedQueries(ucq2);
 
-                        return ucq2.stream()
-                                .map(cq -> convertCQ(cq, avs, Optional.empty()))
-                                .collect(ImmutableCollectors.toList());
+                        return convertUCQ(ucq2.stream()
+                                .map(cq -> convertCQ(cq, avs))
+                                .collect(ImmutableCollectors.toList()));
                     }
                 }));
             }
@@ -433,4 +415,19 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
         return super.rewrite(result);
 	}
 
+    private ImmutableList<IQTree> convertUCQ(ImmutableList<ImmutableList<IQTree>> ucq) {
+        if (ucq.size() == 1)
+            return ucq.get(0);
+
+        ImmutableList<IQTree> joined = ucq.stream()
+                .map(this::join)
+                .collect(ImmutableCollectors.toList());
+
+        // intersection
+        ImmutableSet<Variable> vars = joined.get(0).getVariables().stream()
+                .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
+                .collect(ImmutableCollectors.toSet());
+
+        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), joined));
+    }
 }

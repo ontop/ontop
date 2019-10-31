@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 /**
- *    these dependencies are full (that is, contain no existentially quantified variables)
+ * Full linear inclusion dependencies, which contain no existentially quantified variables
  * @param <P>
  */
 
