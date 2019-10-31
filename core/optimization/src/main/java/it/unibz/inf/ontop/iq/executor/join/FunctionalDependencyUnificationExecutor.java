@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopOptimizationSettings;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -14,42 +13,35 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.injection.OntopModelSettings.CardinalityPreservationMode.LOOSE;
 
 /**
  * Focuses on functional dependencies that are not unique constraints.
  *
- * Uses them to:
- *   (1) unify some terms (a functional dependency is generating equalities)
- *   (2) detect and remove redundant self inner joins.
+ * Uses them to unify some terms (a functional dependency is generating equalities)
  *
+ * Self-join elimination is done LATER by the SelfJoinSameTermIQOptimizer, by taking advantage of the unified variables.
  *
- * Does not remove any self-join if the CardinalityPreservationMode is not LOOSE (it does not guarantee its preservation).
+ * NB: Was having before some logic for removing some redundant join, but was not safe to apply when cardinality matters.
+ * The code has only been superficially simplified so some logic that is not needed anymore may still remain.
  *
  */
 @Singleton
-public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
+public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinExecutor {
 
-    private final OntopOptimizationSettings settings;
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
 
     @Inject
-    private LooseFDRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory, OntopOptimizationSettings settings,
-                                             SubstitutionFactory substitutionFactory,
-                                             ImmutableUnificationTools unificationTools) {
+    private FunctionalDependencyUnificationExecutor(IntermediateQueryFactory iqFactory,
+                                                    SubstitutionFactory substitutionFactory,
+                                                    ImmutableUnificationTools unificationTools) {
         super(iqFactory,substitutionFactory, unificationTools);
-        this.settings = settings;
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
     }
@@ -78,17 +70,12 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
                         c -> c,
                         c -> groupDataNodesPerConstraint(c, initialNodes)));
 
-        ImmutableSet<Variable> requiredAndCooccuringVariables = extractRequiredAndCooccuringVariables(query, joinNode);
-
-        ImmutableSet<ExtensionalDataNode> nodesToRemove = selectNodesToRemove(requiredAndCooccuringVariables,
-                constraintNodeMap, predicate);
-
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = extractDependentUnifiers(
-                relation, constraintNodeMap, nodesToRemove);
+                relation, constraintNodeMap);
 
-        return (dependentUnifiers.isEmpty() && nodesToRemove.isEmpty())
+        return (dependentUnifiers.isEmpty())
                 ? Optional.empty()
-                : Optional.of(new PredicateLevelProposal(dependentUnifiers, nodesToRemove));
+                : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableSet.of()));
     }
 
     /**
@@ -98,8 +85,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
      */
     private ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
             RelationDefinition databaseRelation, ImmutableMap<FunctionalDependency,
-            ImmutableCollection<Collection<ExtensionalDataNode>>> constraintNodeMap,
-            ImmutableSet<ExtensionalDataNode> nodesToRemove) throws AtomUnificationException {
+            ImmutableCollection<Collection<ExtensionalDataNode>>> constraintNodeMap) throws AtomUnificationException {
 
         ImmutableSet<Integer> nullableIndexes = databaseRelation.getAttributes().stream()
                 .filter(Attribute::canNull)
@@ -109,7 +95,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifierBuilder = ImmutableList.builder();
         for (Map.Entry<FunctionalDependency, ImmutableCollection<Collection<ExtensionalDataNode>>> constraintEntry : constraintNodeMap.entrySet()) {
             dependentUnifierBuilder.addAll(extractDependentUnifiers(constraintEntry.getKey(), constraintEntry.getValue(),
-                    nodesToRemove, nullableIndexes));
+                    nullableIndexes));
         }
 
         return dependentUnifierBuilder.build();
@@ -140,7 +126,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
 
     private ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiers(
             FunctionalDependency constraint, ImmutableCollection<Collection<ExtensionalDataNode>> dataNodeClusters,
-            ImmutableSet<ExtensionalDataNode> nodesToRemove, ImmutableSet<Integer> nullableIndexes)
+            ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
         ImmutableList<Integer> dependentIndexes = constraint.getDependents().stream()
                 .map(d -> d.getIndex() - 1)
@@ -149,21 +135,19 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> substitutionCollectionBuilder = ImmutableList.builder();
         for (Collection<ExtensionalDataNode> cluster : dataNodeClusters) {
             substitutionCollectionBuilder.addAll(extractDependentUnifiersFromCluster(dependentIndexes, cluster,
-                    nodesToRemove, nullableIndexes));
+                    nullableIndexes));
         }
         return substitutionCollectionBuilder.build();
     }
 
     private Collection<ImmutableSubstitution<VariableOrGroundTerm>> extractDependentUnifiersFromCluster(
             ImmutableList<Integer> dependentIndexes, Collection<ExtensionalDataNode> cluster,
-            ImmutableSet<ExtensionalDataNode> nodesToRemove, ImmutableSet<Integer> nullableIndexes)
+            ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
         if (cluster.size() < 2)
             return ImmutableList.of();
 
         ExtensionalDataNode referenceDataNode = cluster.stream()
-                // Try to get the first kept data node
-                .filter(n -> !nodesToRemove.contains(n))
                 .findFirst()
                 // Otherwise if all the nodes will be removed, take the first one
                 .orElseGet(() -> cluster.iterator().next());
@@ -178,10 +162,8 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
             if (currentDataNode == referenceDataNode)
                 continue;
 
-            boolean willBeRemoved = nodesToRemove.contains(currentDataNode);
-
             unifyDependentTerms(referenceDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(),
-                    dependentIndexes, willBeRemoved, nullableIndexes)
+                    dependentIndexes, nullableIndexes)
                     .ifPresent(substitutionCollection::add);
         }
 
@@ -196,7 +178,7 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
      */
     private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifyDependentTerms(
             DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes,
-            boolean willRightAtomBeRemoved, ImmutableSet<Integer> nullableIndexes)
+            ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
 
         // Non-final
@@ -233,107 +215,14 @@ public class LooseFDRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor 
              *   TODO: consider the case where nullable variables will be FILTERED OUT (improvement)
              *
              */
-            currentUnifier = (willRightAtomBeRemoved || (!nullableIndexes.contains(dependentIndex)))
+            currentUnifier = (!nullableIndexes.contains(dependentIndex))
                     ? Optional.of(candidateUnifier)
                     : currentUnifier ;
         }
         return currentUnifier.filter(s -> !s.isEmpty());
     }
 
-    /**
-     * Does not look for redundant joins if not in the LOOSE preservation mode
-     *
-     * TODO: consider the case of predicates with multiple non-unique functional dependencies
-     */
-    private ImmutableSet<ExtensionalDataNode> selectNodesToRemove(
 
-            ImmutableSet<Variable> requiredAndCooccuringVariables, ImmutableMap<FunctionalDependency,
-            ImmutableCollection<Collection<ExtensionalDataNode>>> constraintNodeMap, AtomPredicate predicate) {
-
-        if (settings.getCardinalityPreservationMode() != LOOSE) {
-            return ImmutableSet.of();
-        }
-
-        /*
-         * Expects that different unique constraints can only remove independent data nodes (-> no conflict)
-         *
-         * TODO: show why this works
-         */
-        return constraintNodeMap.entrySet().stream()
-                .flatMap(e -> selectNodesToRemovePerConstraint(requiredAndCooccuringVariables, e.getKey(), e.getValue(),
-                        predicate))
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    private ImmutableSet<Variable> extractRequiredAndCooccuringVariables(IntermediateQuery query, InnerJoinNode joinNode) {
-        Stream<Variable> requiredVariablesByAncestorStream = Stream.concat(
-                query.getVariablesRequiredByAncestors(joinNode).stream(),
-                joinNode.getRequiredVariables(query).stream());
-
-        /*
-         * NB: looks fro into multiple occurrences of a variable within the same data node
-         */
-        Stream<Variable> innerCooccuringVariableStream = query.getChildren(joinNode).stream()
-                .filter(c -> c instanceof ExtensionalDataNode)
-                .map(c -> (ExtensionalDataNode) c)
-                .flatMap(c ->
-                        // Multiset
-                        c.getProjectionAtom().getArguments().stream()
-                        .filter(t -> t instanceof Variable)
-                        .map(v -> (Variable) v)
-                        .collect(ImmutableCollectors.toMultiset())
-                        .entrySet().stream()
-                                .filter(e -> e.getCount() > 1)
-                                .map(Multiset.Entry::getElement));
-
-        return Stream.concat(requiredVariablesByAncestorStream, innerCooccuringVariableStream)
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    private Stream<ExtensionalDataNode> selectNodesToRemovePerConstraint(ImmutableSet<Variable> requiredAndCooccuringVariables,
-                                                              FunctionalDependency constraint,
-                                                              ImmutableCollection<Collection<ExtensionalDataNode>> clusters,
-                                                              AtomPredicate predicate) {
-        ImmutableList<Integer> determinantIndexes = constraint.getDeterminants().stream()
-                .map(Attribute::getIndex)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<Integer> dependentIndexes = constraint.getDependents().stream()
-                .map(Attribute::getIndex)
-                .collect(ImmutableCollectors.toList());
-
-
-        ImmutableSet<Integer> independentIndexes = IntStream.range(1, predicate.getArity() + 1)
-                .filter(i -> !dependentIndexes.contains(i))
-                .filter(i -> !determinantIndexes.contains(i))
-                .boxed()
-                .collect(ImmutableCollectors.toSet());
-
-        return clusters.stream()
-                .flatMap(cluster -> selectNodesToRemovePerCluster(cluster, requiredAndCooccuringVariables,
-                        independentIndexes));
-
-    }
-
-    private Stream<ExtensionalDataNode> selectNodesToRemovePerCluster(Collection<ExtensionalDataNode> cluster,
-                                                           ImmutableSet<Variable> requiredAndCooccuringVariables,
-                                                           ImmutableSet<Integer> independentIndexes) {
-        int clusterSize = cluster.size();
-
-        if (clusterSize < 2)
-            return Stream.empty();
-
-        ImmutableSet<ExtensionalDataNode> removableDataNodes = cluster.stream()
-                .filter(n -> isRemovable(n, independentIndexes, requiredAndCooccuringVariables))
-                .collect(ImmutableCollectors.toSet());
-
-        /*
-         * One node must be kept
-         */
-        return removableDataNodes.size() < clusterSize
-                ? removableDataNodes.stream()
-                : removableDataNodes.stream().skip(1);
-    }
 
     /**
      * TODO: explain

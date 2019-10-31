@@ -56,7 +56,8 @@ public class MySQLSelectFromWhereSerializer implements SelectFromWhereSerializer
                 return "";
 
             String conditionString = sortConditions.stream()
-                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap))
+                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap) +
+                            (c.isAscending() ? "" : " DESC"))
                     .collect(Collectors.joining(", "));
 
             return String.format("ORDER BY %s\n", conditionString);

@@ -39,8 +39,8 @@ public class NoDependencyTestDBMetadata {
     public static final BasicDBMetadata DB_METADATA;
 
     public static RelationPredicate createStringRelationPredicate(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory,
-                                                                  QuotedIDFactory idFactory,
-                                                                  int tableNumber, int arity, boolean canBeNull) {
+                                                                   QuotedIDFactory idFactory,
+                                                                   int tableNumber, int arity, boolean canBeNull) {
         return createRelationPredicate(dbMetadata, idFactory, tableNumber, arity, dbTypeFactory.getDBStringType(), "STR_", canBeNull);
     }
 
@@ -51,12 +51,12 @@ public class NoDependencyTestDBMetadata {
     }
 
     public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, QuotedIDFactory idFactory,
-                                                               int tableNumber, int arity) {
+                                                                int tableNumber, int arity) {
         return createRelationPredicate(dbMetadata, idFactory, tableNumber, arity, dbTypeFactory.getDBLargeIntegerType(), "INT_", false);
     }
 
     public static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
-                                                            int tableNumber, int arity, DBTermType termType, String prefix,
+                                                                   int tableNumber, int arity, DBTermType termType, String prefix,
                                                             boolean canBeNull) {
         DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
                 prefix + "TABLE" + tableNumber + "AR" + arity));
@@ -67,7 +67,6 @@ public class NoDependencyTestDBMetadata {
         }
         return tableDef.getAtomPredicate();
     }
-
 
     static {
         BasicDBMetadata dbMetadata = createDummyMetadata();

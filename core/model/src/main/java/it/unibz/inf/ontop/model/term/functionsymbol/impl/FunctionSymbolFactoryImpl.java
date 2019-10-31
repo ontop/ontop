@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.impl.MultitypedInputUnarySPARQLFunctionSymbolImpl.TriFunction;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XPathFunction;
@@ -307,9 +306,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     @Override
     public RDFTermTypeFunctionSymbol getRDFTermTypeFunctionSymbol(TypeConstantDictionary dictionary,
-                                                                  ImmutableSet<RDFTermTypeConstant> possibleConstants) {
+                                                                  ImmutableSet<RDFTermTypeConstant> possibleConstants,
+                                                                  boolean isSimplifiable) {
         ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap = dictionary.createConversionMap(possibleConstants);
-        return new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap);
+        return new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap, isSimplifiable);
     }
 
     @Override
