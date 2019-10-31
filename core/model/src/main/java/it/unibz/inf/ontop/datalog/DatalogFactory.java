@@ -20,8 +20,6 @@ public interface DatalogFactory {
 
     DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers);
 
-    DatalogProgram getDatalogProgram(MutableQueryModifiers modifiers, Collection<CQIE> rules);
-
     	/* SPARQL meta-predicates */
 
     Function getSPARQLJoin(Function t1, Function t2);

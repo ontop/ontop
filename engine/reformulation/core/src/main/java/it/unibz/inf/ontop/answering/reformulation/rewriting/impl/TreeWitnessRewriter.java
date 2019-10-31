@@ -20,16 +20,11 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.datalog.exception.UnsupportedFeatureForDatalogConversionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -37,28 +32,25 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.TriplePredicate;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.model.term.impl.TermUtils;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Edge;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.QueryConnectedComponent.Loop;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.TreeWitnessSet.CompatibleTreeWitnessSetIterator;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
-import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.function.Function.identity;
 
 
 /**
@@ -69,64 +61,37 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 
 	private static final Logger log = LoggerFactory.getLogger(TreeWitnessRewriter.class);
 
-	private ClassifiedTBox reasoner;
-	private Collection<TreeWitnessGenerator> generators;
-	private ImmutableCQContainmentCheckUnderLIDs containmentCheckUnderLIDs;
+	private TreeWitnessRewriterReasoner reasoner;
+	private ImmutableCQContainmentCheckUnderLIDs<RDFAtomPredicate> containmentCheckUnderLIDs;
 
-	private final DatalogFactory datalogFactory;
-    private final EQNormalizer eqNormalizer;
-	private final UnifierUtilities unifierUtilities;
-	private final ImmutabilityTools immutabilityTools;
-    private final IQ2DatalogTranslator iqConverter;
-    private final DatalogProgram2QueryConverter datalogConverter;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
 	private TreeWitnessRewriter(AtomFactory atomFactory,
 								TermFactory termFactory,
-								DatalogFactory datalogFactory,
-                                EQNormalizer eqNormalizer,
-								UnifierUtilities unifierUtilities,
-                                ImmutabilityTools immutabilityTools,
-                                DatalogProgram2QueryConverter datalogConverter,
                                 IntermediateQueryFactory iqFactory,
-                                IQ2DatalogTranslator iqConverter,
-								CoreUtilsFactory coreUtilsFactory) {
+								CoreUtilsFactory coreUtilsFactory,
+                                SubstitutionFactory substitutionFactory) {
         super(iqFactory, atomFactory, termFactory, coreUtilsFactory);
 
-		this.datalogFactory = datalogFactory;
-        this.eqNormalizer = eqNormalizer;
-		this.unifierUtilities = unifierUtilities;
-		this.immutabilityTools = immutabilityTools;
-        this.iqConverter = iqConverter;
-        this.datalogConverter = datalogConverter;
+        this.substitutionFactory = substitutionFactory;
     }
 
 	@Override
-	public void setTBox(ClassifiedTBox reasoner) {
+	public void setTBox(ClassifiedTBox classifiedTBox) {
 		double startime = System.currentTimeMillis();
 
-		this.reasoner = reasoner;
-		super.setTBox(reasoner);
+		this.reasoner = new TreeWitnessRewriterReasoner(classifiedTBox);
+		super.setTBox(classifiedTBox);
 
-        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs(getSigma());
+        containmentCheckUnderLIDs = new ImmutableCQContainmentCheckUnderLIDs<>(getSigma());
 
-		generators = TreeWitnessGenerator.getTreeWitnessGenerators(reasoner);
-		
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("setTBox time: %.3f s (total %.3f s)", tm, time));		
 	}
 	
-	
-	/*
-	 * returns an atom with given arguments and the predicate name formed by the given URI basis and string fragment
-	 */
-	
-	private Function getHeadAtom(String base, String suffix, ImmutableList<Variable> arguments) {
-		Predicate predicate = datalogFactory.getSubqueryPredicate(base + suffix, arguments.size());
-		return termFactory.getFunction(predicate, new ArrayList(arguments));
-	}
 	
 	private int freshVarIndex = 0;
 	
@@ -140,446 +105,329 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
 	 * the `free' variable of the generators is replaced by the term r0;
 	 */
 
-	private ImmutableList<Function> getAtomsForGenerators(Collection<TreeWitnessGenerator> gens, Term r0)  {
-		return TreeWitnessGenerator.getMaximalBasicConcepts(gens, reasoner).stream()
-				.map(con -> {
-					log.debug("  BASIC CONCEPT: {}", con);
-					if (con instanceof OClass) {
-						return atomFactory.getMutableTripleBodyAtom(r0, ((OClass) con).getIRI());
-					}
-					else if (con instanceof ObjectSomeValuesFrom) {
-						ObjectPropertyExpression ope = ((ObjectSomeValuesFrom)con).getProperty();
-						return (!ope.isInverse())
-								? atomFactory.getMutableTripleBodyAtom(r0, ope.getIRI(), getFreshVariable())
-								: atomFactory.getMutableTripleBodyAtom(getFreshVariable(), ope.getIRI(), r0);
-					}
-					else {
-						DataPropertyExpression dpe = ((DataSomeValuesFrom)con).getProperty();
-						return atomFactory.getMutableTripleBodyAtom(r0, dpe.getIRI(), getFreshVariable());
-					}
-				})
+	private ImmutableList<DataAtom<RDFAtomPredicate>> getAtomsForGenerators(Stream<TreeWitnessGenerator> gens, VariableOrGroundTerm r0)  {
+		return gens
+				.flatMap(g -> g.getMaximalGeneratorRepresentatives().stream())
+				.distinct()
+				.map(ce -> getAtom(ce, r0, this::getFreshVariable))
 				.collect(ImmutableCollectors.toList());
 	}
-	
-	
-	
+
+	private class CQ {
+		private final ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities;
+		private final ImmutableSet<DataAtom<RDFAtomPredicate>> atoms;
+
+		CQ(ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities, ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
+		    this.equalities = equalities;
+		    this.atoms = atoms;
+        }
+
+        CQ(ImmutableSet<DataAtom<RDFAtomPredicate>> atoms) {
+            this.equalities = ImmutableMap.of();
+            this.atoms = atoms;
+        }
+
+        CQ join(CQ cq) {
+		    ImmutableMultimap<VariableOrGroundTerm, VariableOrGroundTerm> mm =
+                        Stream.concat(equalities.entrySet().stream(), cq.equalities.entrySet().stream())
+                            .distinct()
+                            .collect(ImmutableCollectors.toMultimap());
+		    Optional<Map.Entry<VariableOrGroundTerm, Collection<VariableOrGroundTerm>>> dk;
+		    // merge equivalence classes: e.g., x = y and y = z are merged into x = y = z
+		    while ((dk = mm.asMap().entrySet().stream().filter(e -> e.getValue().size() > 1).findFirst()).isPresent()) {
+		        Collection<VariableOrGroundTerm> c = dk.get().getValue();
+                VariableOrGroundTerm r = c.iterator().next();
+                mm = mm.entries().stream()
+                        .distinct()
+                        .collect(ImmutableCollectors.toMultimap(Map.Entry::getKey, e -> c.contains(e.getValue()) ? r : e.getValue()));
+            }
+            ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> eqs = mm.entries().stream().collect(ImmutableCollectors.toMap());
+
+            return new CQ(eqs,
+                    // reduce
+                    Sets.union(atoms, cq.atoms).stream()
+                            .map(a -> atomFactory.getDataAtom(a.getPredicate(),
+                                    a.getArguments().stream()
+                                            .map(t -> eqs.getOrDefault(t, t))
+                                            .collect(ImmutableCollectors.toList())))
+                            .collect(ImmutableCollectors.toSet()));
+        }
+
+        @Override
+        public String toString() {
+		    return equalities + " AND " + atoms;
+        }
+	}
+
+    class UCQBuilder {
+	    private List<CQ> list;
+
+        UCQBuilder(CQ cq) {
+	        list = ImmutableList.of(cq);
+        }
+
+        UCQBuilder join(Stream<CQ> cqs) {
+            list = cqs
+                    .flatMap(cq2 -> list.stream().map(cq1 -> cq1.join(cq2)))
+                    .collect(Collectors.toList());
+
+            for (int i = 0; i < list.size(); i++) {
+                CQ cq = list.get(i);
+                for (int j = i + 1; j < list.size(); j++) {
+                    CQ cqp = list.get(j);
+                    if (cqp.atoms.containsAll(cq.atoms)) {
+                        list.remove(j);
+                        j--;
+                    }
+                    else if (cq.atoms.containsAll(cqp.atoms)) {
+                        list.remove(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+
+	        return this;
+        }
+
+        ImmutableList<CQ> build() { return ImmutableList.copyOf(list); }
+    }
+
+    public Collector<Stream<CQ>, UCQBuilder, ImmutableList<CQ>> toUCQ(CQ cq) {
+        return Collector.of(
+                () -> new UCQBuilder(cq), // Supplier
+                UCQBuilder::join, // Accumulator
+                (b1, b2) -> b1.join(b2.build().stream()), // Merger
+                UCQBuilder::build, // Finisher
+                Collector.Characteristics.UNORDERED);
+    }
+
+    public Collector<Stream<CQ>, UCQBuilder, ImmutableList<CQ>> toUCQ() {
+        return toUCQ(new CQ(ImmutableSet.of()));
+    }
+
+
+    ImmutableList<CQ> getTreeWitnessFormula(TreeWitness tw) {
+        // get canonical representative
+        List<VariableOrGroundTerm> list = new ArrayList<>(tw.getRoots());
+        list.sort(Comparator.comparing(Object::toString));
+        VariableOrGroundTerm rep = list.get(0);
+        ImmutableMap<VariableOrGroundTerm, VariableOrGroundTerm> equalities = list.stream()
+                .collect(ImmutableCollectors.toMap(identity(), s -> rep));
+
+        UCQBuilder ucq = new UCQBuilder(new CQ(equalities, tw.getRootAtoms()));
+        return ucq.join(getAtomsForGenerators(tw.getGenerators().stream(), rep).stream()
+                        .map(a -> new CQ(ImmutableSet.of(a))))
+                .build();
+    }
+
 	/*
 	 * rewrites a given connected CQ with the rules put into output
 	 */
 	
-	private Collection<CQIE> rewriteCC(QueryConnectedComponent cc, Function headAtom,  Multimap<Predicate, CQIE> edgeDP) {
-		
-		List<CQIE> outputRules = new LinkedList<>();	
+	private ImmutableList<CQ> rewriteCC(QueryConnectedComponent cc) {
 
-		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner, generators, immutabilityTools);
+		TreeWitnessSet tws = TreeWitnessSet.getTreeWitnesses(cc, reasoner);
 
-		if (cc.hasNoFreeTerms()) {  
-			if (!cc.isDegenerate() || cc.getLoop() != null) 
-				for (Function a : getAtomsForGenerators(tws.getGeneratorsOfDetachedCC(), getFreshVariable())) {
-					outputRules.add(datalogFactory.getCQIE(headAtom, a));
-				}
+		ImmutableList.Builder<CQ> builder = ImmutableList.builder();
+		if (cc.hasNoFreeTerms() && (!cc.isDegenerate() || cc.getLoop().isPresent())) {
+            builder.addAll(getAtomsForGenerators(tws.getGeneratorsOfDetachedCC().stream(), getFreshVariable()).stream()
+                        .map(a -> new CQ(ImmutableSet.of(a)))
+                        .collect(ImmutableCollectors.toList()));
 		}
 
-		// COMPUTE AND STORE TREE WITNESS FORMULAS
-		for (TreeWitness tw : tws.getTWs()) {
-			log.debug("TREE WITNESS: {}", tw);		
-			List<Function> twf = new LinkedList<>();
-			
-			// equality atoms
-			Iterator<Term> i = tw.getRoots().iterator();
-			Term r0 = i.next();
-			while (i.hasNext()) 
-				twf.add(termFactory.getFunctionEQ(i.next(), r0));
-			
-			// root atoms
-			for (Function a : tw.getRootAtoms()) {
-				if (!(a.getFunctionSymbol() instanceof TriplePredicate))
-					throw new MinorOntopInternalBugException("A triple atom was expected: " + a);
-
-				boolean isClass = ((TriplePredicate) a.getFunctionSymbol()).getClassIRI(
-						a.getTerms().stream()
-								.map(immutabilityTools::convertIntoImmutableTerm)
-								.collect(ImmutableCollectors.toList()))
-						.isPresent();
-
-				twf.add(isClass
-						? atomFactory.getMutableTripleAtom(r0, a.getTerm(1), a.getTerm(2))
-						: atomFactory.getMutableTripleAtom(r0, a.getTerm(1), r0));
-			}
-			
-			List<Function> genAtoms = getAtomsForGenerators(tw.getGenerators(), r0);			
-			boolean subsumes = false;
-//			for (Function a : genAtoms) 				
-//				if (twf.subsumes(a)) {
-//					subsumes = true;
-//					log.debug("TWF {} SUBSUMES {}", twf.getAllAtoms(), a);
-//					break;
-//				}
-
-			List<List<Function>> twfs = new ArrayList<>(subsumes ? 1 : genAtoms.size());
-//			if (!subsumes) {
-				for (Function a : genAtoms) {				
-					LinkedList<Function> twfa = new LinkedList<>(twf);
-					twfa.add(a); // 
-					twfs.add(twfa);
-				}
-//			}
-//			else
-//				twfs.add(twf.getAllAtoms());
-			
-			tw.setFormula(twfs);
-		}
-
-		final String headURI = headAtom.getFunctionSymbol().getName();
 		if (!cc.isDegenerate()) {
-			if (tws.hasConflicts()) { 
+			if (!TreeWitness.isCompatible(tws.getTWs())) {
 				// there are conflicting tree witnesses
 				// use compact exponential rewriting by enumerating all compatible subsets of tree witnesses
-				CompatibleTreeWitnessSetIterator iterator = tws.getIterator();
-				while (iterator.hasNext()) {
-					Collection<TreeWitness> compatibleTWs = iterator.next();
+				for (ImmutableCollection<TreeWitness> compatibleTWs: tws) {
 					log.debug("COMPATIBLE: {}", compatibleTWs);
-					LinkedList<Function> mainbody = new LinkedList<Function>(); 
-					
-					for (Edge edge : cc.getEdges()) {
-						boolean contained = false;
-						for (TreeWitness tw : compatibleTWs)
-							if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
-								contained = true;
-								log.debug("EDGE {} COVERED BY {}", edge, tw);
-								break;
-							}
-						if (!contained) {
-							log.debug("EDGE {} NOT COVERED BY ANY TW",  edge);
-							mainbody.addAll(edge.getAtoms());
-						}
-					}
-					for (TreeWitness tw : compatibleTWs) {
-						Function twAtom = getHeadAtom(headURI, "_TW_" + (edgeDP.size() + 1), cc.getVariables());
-						mainbody.add(twAtom);				
-						for (List<Function> twfa : tw.getFormula())
-							edgeDP.put(twAtom.getFunctionSymbol(), datalogFactory.getCQIE(twAtom, twfa));
-					}	
-					mainbody.addAll(cc.getNonDLAtoms());					
-					outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
+
+					CQ edges = new CQ(cc.getEdges().stream()
+                            .filter(edge -> compatibleTWs.stream().noneMatch(edge::isCoveredBy))
+                            .flatMap(edge -> edge.getAtoms().stream())
+                            .collect(ImmutableCollectors.toSet()));
+
+					builder.addAll(
+					        compatibleTWs.stream()
+                                .map(tw -> getTreeWitnessFormula(tw).stream())
+                                .collect(toUCQ(edges)));
 				}
 			}
 			else {
 				// no conflicting tree witnesses
-				// use polynomial tree witness rewriting by treating each edge independently 
-				LinkedList<Function> mainbody = new LinkedList<>();
-				for (Edge edge : cc.getEdges()) {
-					log.debug("EDGE {}", edge);
-					
-					Function edgeAtom = null;
-					for (TreeWitness tw : tws.getTWs())
-						if (tw.getDomain().contains(edge.getTerm0()) && tw.getDomain().contains(edge.getTerm1())) {
-							if (edgeAtom == null) {
-								//IRI atomURI = edge.getBAtoms().iterator().next().getIRI().getName();
-								edgeAtom = getHeadAtom(headURI, 
-										"_EDGE_" + (edgeDP.size() + 1) /*+ "_" + atomURI.getRawFragment()*/, cc.getVariables());
-								mainbody.add(edgeAtom);				
-								
-								LinkedList<Function> edgeAtoms = new LinkedList<>();
-								edgeAtoms.addAll(edge.getAtoms());
-								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, edgeAtoms));
-							}
-							
-							for (List<Function> twfa : tw.getFormula())
-								edgeDP.put(edgeAtom.getFunctionSymbol(), datalogFactory.getCQIE(edgeAtom, twfa));
-						}
-					
-					if (edgeAtom == null) // no tree witnesses -- direct insertion into the main body
-						mainbody.addAll(edge.getAtoms());
-				}
-				mainbody.addAll(cc.getNonDLAtoms());
-				outputRules.add(datalogFactory.getCQIE(headAtom, mainbody));
-			}
+				// use polynomial tree witness rewriting by treating each edge independently
+				builder.addAll(
+				        cc.getEdges().stream()
+                            .map(edge -> Stream.concat(
+                                Stream.of(new CQ(ImmutableSet.copyOf(edge.getAtoms()))),
+                                tws.getTWs().stream()
+                                        .filter(edge::isCoveredBy)
+                                        .flatMap(tw -> getTreeWitnessFormula(tw).stream())))
+                            .collect(toUCQ()));
+            }
 		}
 		else {
 			// degenerate connected component
-			LinkedList<Function> loopbody = new LinkedList<>();
-			Loop loop = cc.getLoop();
-			log.debug("LOOP {}", loop);
-			if (loop != null)
-				loopbody.addAll(loop.getAtoms());
-			loopbody.addAll(cc.getNonDLAtoms());
-			outputRules.add(datalogFactory.getCQIE(headAtom, loopbody));
+			log.debug("LOOP {}", cc.getLoop());
+			builder.add(new CQ(cc.getLoop()
+                    .map(l -> ImmutableSet.copyOf(l.getAtoms()))
+                    .orElse(ImmutableSet.of())));
 		}
-		return outputRules;
+		return builder.build();
 	}
 	
 	private double time = 0;
-	
-	@Override
+
+	private IQTree getCanonicalForm(IQTree tree) {
+        ClassifiedTBox tbox = reasoner.getClassifiedTBox();
+
+        return tree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+            @Override
+            public IQTree transformIntensionalData(IntensionalDataNode dataNode) {
+                // TODO: support quads
+                DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
+                TriplePredicate triplePredicate = (TriplePredicate) atom.getPredicate();
+                ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
+
+                // the contains tests are inefficient, but tests fails without them
+                // p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
+
+                Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
+                if (classIRI.isPresent()) {
+                    IRI iri = classIRI.get();
+                    if (tbox.classes().contains(iri)) {
+                        OClass c = tbox.classes().get(iri);
+                        OClass equivalent = (OClass) tbox.classesDAG().getCanonicalForm(c);
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent));
+                    }
+                    return  dataNode;
+                }
+
+                Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
+                if (propertyIRI.isPresent()) {
+                    IRI iri = propertyIRI.get();
+                    if (tbox.objectProperties().contains(iri)) {
+                        ObjectPropertyExpression ope = tbox.objectProperties().get(iri);
+                        ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                    }
+                    else if (tbox.dataProperties().contains(iri)) {
+                        DataPropertyExpression dpe = tbox.dataProperties().get(iri);
+                        DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
+                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                    }
+                    return  dataNode;
+                }
+                throw new MinorOntopInternalBugException("Unknown type of triple atoms");
+            }
+        });
+    }
+
+
+    ImmutableCQ<RDFAtomPredicate> convert(CQ cq, ImmutableList<Variable> vars) {
+        ImmutableMap<Variable, VariableOrGroundTerm> equalities = cq.equalities.entrySet().stream()
+                .filter(e -> e.getKey() != e.getValue())
+                .collect(ImmutableCollectors.toMap(e -> (Variable)e.getKey(), Map.Entry::getValue));
+
+        ImmutableSubstitution s = substitutionFactory.getSubstitution(equalities);
+
+	    return new ImmutableCQ<RDFAtomPredicate>(s.apply(vars), ImmutableList.copyOf(cq.atoms));
+    }
+
+    private ImmutableList<IQTree> convertCQ(ImmutableCQ<RDFAtomPredicate> cq, ImmutableList<Variable> vars) {
+
+        ImmutableList<IQTree> body = cq.getAtoms().stream()
+                .map(a -> iqFactory.createIntensionalDataNode((DataAtom<AtomPredicate>)(DataAtom)a))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableMap.Builder<Variable, Variable> map = ImmutableMap.builder();
+        for (int i = 0; i < vars.size(); i++) {
+            Variable v1 = vars.get(i);
+            Variable v2 = cq.getAnswerVariables().get(i);
+            if (!v1.equals(v2))
+                map.put(v1, v2);
+        }
+
+        ImmutableSubstitution substitution = substitutionFactory.getSubstitution(map.build());
+        if (substitution.isEmpty())
+            return body;
+
+        IQTree result = join(body);
+
+        return ImmutableList.of(iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(
+                        Sets.union(result.getVariables(), substitution.getDomain()).immutableCopy(),
+                        substitution), result));
+    }
+
+    private IQTree join(ImmutableList<IQTree> atoms) {
+        return (atoms.size() == 1)
+                ? atoms.get(0)
+                : iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(), atoms);
+    }
+
+    @Override
     public IQ rewrite(IQ query) throws EmptyQueryException {
 		
 		double startime = System.currentTimeMillis();
 
-		DatalogProgram program = null;
-		try {
-			program = iqConverter.translate(query);
-		} catch (UnsupportedFeatureForDatalogConversionException e) {
-			throw new RuntimeException("Some features of the input query are not compatible with existential reasoning",e);
-		}
+		IQTree canonicalTree = getCanonicalForm(query.getTree());
 
-		log.debug("Input Datalog program:\n{}",program);
-
-		List<CQIE> outputRules = new LinkedList<>();
-		Multimap<Predicate, CQIE> ccDP = null;
-		Multimap<Predicate, CQIE> edgeDP = ArrayListMultimap.create();
-
-		for (CQIE cqie : program.getRules()) {
-			List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(reasoner, cqie,
-					atomFactory, immutabilityTools);
-			Function cqieAtom = cqie.getHead();
-		
-			if (ccs.size() == 1) {
-				QueryConnectedComponent cc = ccs.iterator().next();
-				log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
-				log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
-				log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-				outputRules.addAll(rewriteCC(cc, cqieAtom, edgeDP)); 				
-			}
-			else {
-				if (ccDP == null)
-					ccDP = ArrayListMultimap.create();
-				String cqieURI = cqieAtom.getFunctionSymbol().getName();
-				List<Function> ccBody = new ArrayList<>(ccs.size());
-				for (QueryConnectedComponent cc : ccs) {
-					log.debug("CONNECTED COMPONENT ({}) EXISTS {}", cc.getFreeVariables(), cc.getQuantifiedVariables());
-					log.debug("     WITH EDGES {} AND LOOP {}", cc.getEdges(), cc.getLoop());
-					log.debug("     NON-DL ATOMS {}", cc.getNonDLAtoms());
-					Function ccAtom = getHeadAtom(cqieURI, "_CC_" + (ccDP.size() + 1), cc.getFreeVariables());
-					for (CQIE cq : rewriteCC(cc, ccAtom, edgeDP))
-					    ccDP.put(cq.getHead().getFunctionSymbol(), cq);
-					ccBody.add(ccAtom);
-				}
-				outputRules.add(datalogFactory.getCQIE(cqieAtom, ccBody));
-			}
-		}
-		
-		log.debug("REWRITTEN PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
-		if (!edgeDP.isEmpty()) {
-			log.debug("EDGE DEFS\n{}", edgeDP);			
-			outputRules = plugInDefinitions(outputRules, edgeDP);
-			if (ccDP != null) {
-			    Multimap<Predicate, CQIE> ccDP2 = ArrayListMultimap.create();
-			    for (Predicate p : ccDP.keys())
-			        for (CQIE cq : plugInDefinitions(ccDP.get(p), edgeDP))
-                        ccDP2.put(p, cq);
-			    ccDP = ccDP2;
-            }
-			log.debug("INLINE EDGE PROGRAM\n{}CC DEFS\n{}", outputRules, ccDP);
-		}
-		if (ccDP != null) {
-			outputRules = plugInDefinitions(outputRules, ccDP);
-			log.debug("INLINE CONNECTED COMPONENTS PROGRAM\n{}", outputRules);
-		}
-
-        DatalogProgram programAfterRewriting = datalogFactory.getDatalogProgram(program.getQueryModifiers(), outputRules);
-        IQ convertedIQ =  datalogConverter.convertDatalogProgram(programAfterRewriting,
-				query.getProjectionAtom().getArguments());
-
-        IQTree optimisedTree = convertedIQ.getTree().acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
+        IQTree rewritingTree = canonicalTree.acceptTransformer(new DefaultRecursiveIQTreeVisitingTransformer(iqFactory) {
             @Override
-            public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-                Map<ImmutableCQ, IQTree> map = new HashMap<>();
+            public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
                 // fix some order on variables
                 ImmutableList<Variable> avs = ImmutableList.copyOf(rootNode.getVariables());
-                for (IQTree child : children) {
-                    ImmutableCQ cq;
-                    if (child.getRootNode() instanceof InnerJoinNode
-                            && !child.getChildren().stream()
-                                .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
-                        cq = new ImmutableCQ(avs, child.getChildren().stream()
-                                .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
-                                .collect(ImmutableCollectors.toList()));
-                    }
-                    else if (child.getRootNode() instanceof IntensionalDataNode) {
-                        cq = new ImmutableCQ(avs, ImmutableList.of(
-                                ((IntensionalDataNode)child.getRootNode()).getProjectionAtom()));
-                    }
-                    else if (child.getRootNode() instanceof ConstructionNode) {
-                        ImmutableSubstitution<ImmutableTerm> substitution = ((ConstructionNode)child.getRootNode()).getSubstitution();
-                        ImmutableList<Variable> avs1 = (ImmutableList<Variable>) substitution.apply(avs);
-                        IQTree subtree = child.getChildren().get(0);
-                        if ((subtree.getRootNode() instanceof InnerJoinNode)
-                                && !subtree.getChildren().stream()
-                                    .anyMatch(c -> !(c.getRootNode() instanceof IntensionalDataNode))) {
-                            cq = new ImmutableCQ(avs1,
-                                        subtree.getChildren().stream()
-                                            .map(c -> ((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
-                                            .collect(ImmutableCollectors.toList()));
-                        }
-                        else if (subtree.getRootNode() instanceof IntensionalDataNode) {
-                            cq = new ImmutableCQ(avs1, ImmutableList.of(
-                                        ((IntensionalDataNode)subtree.getRootNode()).getProjectionAtom()));
-                        }
-                        else {
-                            return transformNaryCommutativeNode(tree, rootNode, children); // straight away
-                        }
-                    }
-                    else {
-                        return transformNaryCommutativeNode(tree, rootNode, children);  // straight away
-                    }
-                    // .put returns the previous value
-                    if (map.put(cq, child) != null)
-                        return tree;
-                }
+                return iqFactory.createUnaryIQTree(rootNode, child.acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+                    @Override
+                    protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
+                        ImmutableList<DataAtom<RDFAtomPredicate>> bgp = triplePatterns.stream()
+                                .map(c -> (DataAtom<RDFAtomPredicate>)(DataAtom)((IntensionalDataNode)c.getRootNode()).getProjectionAtom())
+                                .collect(ImmutableCollectors.toList());
 
-                List<ImmutableCQ> ucq = new LinkedList<>(map.keySet());
-                containmentCheckUnderLIDs.removeContainedQueries(ucq);
-                if (ucq.size() == 1)
-                    return map.get(ucq.get(0));
-                else
-                    return iqFactory.createNaryIQTree(rootNode, ucq.stream().map(cq -> map.get(cq))
+                        List<QueryConnectedComponent> ccs = QueryConnectedComponent.getConnectedComponents(new ImmutableCQ<>(avs, bgp));
+
+                        ImmutableList<CQ> ucq = ccs.stream()
+                                .map(cc -> rewriteCC(cc).stream())
+                                .collect(toUCQ());
+
+                        List<ImmutableCQ<RDFAtomPredicate>> ucq2 = ucq.stream()
+                                .map(cq -> convert(cq, avs))
+                                .collect(Collectors.toList());
+                        containmentCheckUnderLIDs.removeContainedQueries(ucq2);
+
+                        return convertUCQ(ucq2.stream()
+                                .map(cq -> convertCQ(cq, avs))
                                 .collect(ImmutableCollectors.toList()));
+                    }
+                }));
             }
         });
-
-        IQ result = iqFactory.createIQ(convertedIQ.getProjectionAtom(), optimisedTree);
 
 		double endtime = System.currentTimeMillis();
 		double tm = (endtime - startime) / 1000;
 		time += tm;
 		log.debug(String.format("Rewriting time: %.3f s (total %.3f s)", tm, time));
-		log.debug("Final rewriting:\n{}", result);
+		log.debug("Final rewriting:\n{}", rewritingTree);
 
-		return super.rewrite(result);
+        IQ result = iqFactory.createIQ(query.getProjectionAtom(), rewritingTree);
+        return super.rewrite(result);
 	}
 
+    private ImmutableList<IQTree> convertUCQ(ImmutableList<ImmutableList<IQTree>> ucq) {
+        if (ucq.size() == 1)
+            return ucq.get(0);
 
-    private List<CQIE> plugInDefinitions(Collection<CQIE> rules, Multimap<Predicate, CQIE> defs) {
+        ImmutableList<IQTree> joined = ucq.stream()
+                .map(this::join)
+                .collect(ImmutableCollectors.toList());
 
-        PriorityQueue<CQIE> queue = new PriorityQueue<>(rules.size(),
-                Comparator.comparingInt(cq -> cq.getBody().size()));
+        // intersection
+        ImmutableSet<Variable> vars = joined.get(0).getVariables().stream()
+                .filter(v -> joined.stream().allMatch(j -> j.getVariables().contains(v)))
+                .collect(ImmutableCollectors.toSet());
 
-        queue.addAll(rules);
-
-        List<CQIE> output = new LinkedList<>();
-
-        while (!queue.isEmpty()) {
-            CQIE query = queue.poll();
-
-            List<Function> body = query.getBody();
-            int chosenAtomIdx = 0;
-            Collection<CQIE> chosenDefinitions = null;
-            ListIterator<Function> bodyIterator = body.listIterator();
-            while (bodyIterator.hasNext()) {
-                Function currentAtom = bodyIterator.next();
-                Collection<CQIE> definitions = defs.get(currentAtom.getFunctionSymbol());
-                if (!definitions.isEmpty()) {
-                    if ((chosenDefinitions == null) || (chosenDefinitions.size() < definitions.size())) {
-                        chosenDefinitions = definitions;
-                        chosenAtomIdx = bodyIterator.previousIndex();
-                    }
-                }
-            }
-
-            boolean replaced = false;
-            if (chosenDefinitions != null) {
-                Collection<Variable> vars = new ArrayList<>();
-                for (Function atom : body)
-                    TermUtils.addReferencedVariablesTo(vars, atom);
-                int maxlen = vars.stream()
-                        .map(v -> v.getName().length())
-                        .max(Integer::compareTo)
-                        .orElse(0);
-                String suffix = Strings.repeat("t", maxlen);
-
-                for (CQIE rule : chosenDefinitions) {
-                    Substitution mgu = unifierUtilities.getMGU(getFreshAtom(rule.getHead(), suffix),
-                            query.getBody().get(chosenAtomIdx));
-                    if (mgu != null) {
-                        CQIE newquery = query.clone();
-                        List<Function> newbody = newquery.getBody();
-                        newbody.remove(chosenAtomIdx);
-                        for (Function a : rule.getBody())
-                            newbody.add(getFreshAtom(a, suffix));
-
-						// apply substitutions in-place
-						Function head = newquery.getHead();
-						SubstitutionUtilities.applySubstitution(head, mgu);
-						for (Function bodyatom : newquery.getBody())
-							SubstitutionUtilities.applySubstitution(bodyatom, mgu);
-
-                        // REDUCE
-                        eqNormalizer.enforceEqualities(newquery);
-                        removeRundantAtoms(newquery);
-
-                        queue.add(newquery);
-                        replaced = true;
-                    }
-
-                }
-            }
-            if (!replaced) {
-                boolean found = false;
-                ListIterator<CQIE> i = output.listIterator();
-                while (i.hasNext()) {
-                    CQIE q2 = i.next();
-                    if (isContainedIn(query, q2)) {
-                        found = true;
-                        break;
-                    }
-                    else if (isContainedIn(q2, query)) {
-                        i.remove();
-                        log.debug("   PRUNED {} BY {}", q2, query);
-                    }
-                }
-
-                if (!found) {
-                    log.debug("ADDING TO THE RESULT {}", query);
-                    output.add(query.clone());
-                    Collections.sort(output, Comparator.comparingInt(cq -> cq.getBody().size()));
-                }
-            }
-        }
-
-        return output;
+        return ImmutableList.of(iqFactory.createNaryIQTree(iqFactory.createUnionNode(vars), joined));
     }
-
-    private void removeRundantAtoms(CQIE q) {
-	    // TODO: use sets instead
-	    for (int i = 0; i < q.getBody().size(); i++)
-	        for (int j = i + 1; j < q.getBody().size(); j++) {
-	            if (q.getBody().get(i).equals(q.getBody().get(j))) {
-                    q.getBody().remove(j);
-                    j--;
-                }
-            }
-    }
-
-    private Function getFreshAtom(Function a, String suffix) {
-        List<Term> termscopy = new ArrayList<>(a.getArity());
-
-        for (Term t : a.getTerms()) {
-            if (t instanceof Variable) {
-                Variable v = (Variable)t;
-                termscopy.add(termFactory.getVariable(v.getName() + suffix));
-            }
-            else
-                termscopy.add(t.clone());
-        }
-        return termFactory.getFunction(a.getFunctionSymbol(), termscopy);
-    }
-
-    /**
-     * Check if query cq1 is contained in cq2, syntactically. That is, if the
-     * head of cq1 and cq2 are equal according to toString().equals and each
-     * atom in cq2 is also in the body of cq1 (also by means of toString().equals().
-     */
-
-    private static boolean isContainedIn(CQIE cq1, CQIE cq2) {
-        if (!cq2.getHead().equals(cq1.getHead()))
-            return false;
-
-        for (Function atom : cq2.getBody())
-            if (!cq1.getBody().contains(atom))
-                return false;
-
-        return true;
-    }
-
 }

@@ -23,18 +23,22 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -48,7 +52,7 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependencies<AtomPredicate> sigma;
+    private FullLinearInclusionDependencies<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
@@ -66,19 +70,22 @@ public class DummyRewriter implements QueryRewriter {
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<AtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
-        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), this::translate, builder);
+        Variable x = termFactory.getVariable("x");
+        Variable y = termFactory.getVariable("y");
 
-        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, this::translate, builder);
+        traverseDAG(reasoner.objectPropertiesDAG(), p -> !p.isInverse(), ope -> getAtom(x, ope, y), builder);
+
+        traverseDAG(reasoner.dataPropertiesDAG(), p -> true, dpe -> getAtom(x, dpe, y), builder);
 
         // the head will have no existential variables
-        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), this::translate, builder);
+        traverseDAG(reasoner.classesDAG(), c -> (c instanceof OClass), c -> getAtom(c, x, () -> y), builder);
 
         sigma = builder.build();
     }
 
-    protected FullLinearInclusionDependencies<AtomPredicate> getSigma() {
+    protected FullLinearInclusionDependencies<RDFAtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -87,85 +94,81 @@ public class DummyRewriter implements QueryRewriter {
      */
     @Override
 	public IQ rewrite(IQ query) throws EmptyQueryException {
-
-        return iqFactory.createIQ(query.getProjectionAtom(), query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
+        return iqFactory.createIQ(query.getProjectionAtom(),
+                query.getTree().acceptTransformer(new BasicGraphPatternTransformer(iqFactory) {
             @Override
-            protected ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns) {
-
-                ArrayList<IntensionalDataNode> list = new ArrayList<>(triplePatterns); // mutable copy
-                // this loop has to remain sequential (no streams)
-                for (int i = 0; i < list.size(); i++) {
-                    DataAtom<AtomPredicate> atom = list.get(i).getProjectionAtom();
-                    ImmutableSet<DataAtom<AtomPredicate>> derived = sigma.chaseAtom(atom);
-                    for (int j = 0; j < list.size(); j++) {
-                        DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
-                        if (j != i && derived.contains(curr)) {
-                            ImmutableSet<Variable> variables = list.stream()
-                                    .map(DataNode::getProjectionAtom)
-                                    .filter(a -> (a != curr))
-                                    .flatMap(a -> a.getVariables().stream())
-                                    .collect(ImmutableCollectors.toSet());
-                            // atom to be removed cannot contain a variable occurring nowhere else
-                            if (variables.containsAll(curr.getVariables())) {
-                                list.remove(j);
-                                j--;
-                                if (j < i) // removing in front of the atom
-                                    i--; // shift the atom position too
-                            }
-                        }
-                    }
-                }
-                return ImmutableList.copyOf(list);
+            protected ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp) {
+                return removeRedundantAtoms(bgp);
             }
         }));
 	}
 
+	private <T extends DataNode<AtomPredicate>> ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<T> bgp) {
+        ArrayList<T> list = new ArrayList<>(bgp); // mutable copy
+        // this loop has to remain sequential (no streams)
+        for (int i = 0; i < list.size(); i++) {
+            DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
+            ImmutableSet<DataAtom<RDFAtomPredicate>> derived = sigma.chaseAtom(atom);
+            for (int j = 0; j < list.size(); j++) {
+                DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
+                if (j != i && derived.contains(curr)) {
+                    ImmutableSet<Variable> variables = list.stream()
+                            .map(DataNode::getProjectionAtom)
+                            .filter(a -> (a != curr))
+                            .flatMap(a -> a.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet());
+                    // atom to be removed cannot contain a variable occurring nowhere else
+                    if (variables.containsAll(curr.getVariables())) {
+                        list.remove(j);
+                        j--;
+                        if (j < i) // removing in front of the atom
+                            i--; // shift the atom position too
+                    }
+                }
+            }
+        }
+        return ImmutableList.copyOf(list);
+    }
+
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
-                                        Function<T, DataAtom<AtomPredicate>> translate,
-                                        FullLinearInclusionDependencies.Builder<AtomPredicate> builder) {
+                                        Function<T, DataAtom<RDFAtomPredicate>> translate,
+                                        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)
                     for (T e : node)
                         if (e != sub && filter.test(e)) {
-                            DataAtom<AtomPredicate> head = translate.apply(e);
-                            DataAtom<AtomPredicate> body = translate.apply(sub);
+                            DataAtom<RDFAtomPredicate> head = translate.apply(e);
+                            DataAtom<RDFAtomPredicate> body = translate.apply(sub);
                             builder.add(head, body);
                         }
     }
 
-    private DataAtom<AtomPredicate> translate(ObjectPropertyExpression property) {
-        return property.isInverse()
-                ? atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("y"),
-                    property.getIRI(),
-                    termFactory.getVariable("x"))
-                : atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("x"),
-                    property.getIRI(),
-                    termFactory.getVariable("y"));
-    }
 
-    private DataAtom<AtomPredicate> translate(DataPropertyExpression property) {
-        return atomFactory.getIntensionalTripleAtom(
-                termFactory.getVariable("x"),
-                property.getIRI(),
-                termFactory.getVariable("y"));
-    }
-
-    private DataAtom<AtomPredicate> translate(ClassExpression description) {
-        if (description instanceof OClass) {
-            return atomFactory.getIntensionalTripleAtom(
-                    termFactory.getVariable("x"),
-                    ((OClass) description).getIRI());
+    protected DataAtom<RDFAtomPredicate> getAtom(ClassExpression ce, VariableOrGroundTerm x, Provider<VariableOrGroundTerm> y) {
+        if (ce instanceof OClass) {
+            return getAtom(x, (OClass) ce);
         }
-        else if (description instanceof ObjectSomeValuesFrom) {
-            return translate(((ObjectSomeValuesFrom) description).getProperty());
+        else if (ce instanceof ObjectSomeValuesFrom) {
+            return getAtom(x, ((ObjectSomeValuesFrom) ce).getProperty(), y.get());
         }
         else {
-            return translate(((DataSomeValuesFrom) description).getProperty());
+            return getAtom(x, ((DataSomeValuesFrom) ce).getProperty(), y.get());
         }
     }
 
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t1, ObjectPropertyExpression property, VariableOrGroundTerm t2) {
+        return property.isInverse()
+                ? (DataAtom)atomFactory.getIntensionalTripleAtom(t2, property.getIRI(), t1)
+                : (DataAtom)atomFactory.getIntensionalTripleAtom(t1, property.getIRI(), t2);
+    }
+
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t1, DataPropertyExpression property, VariableOrGroundTerm t2) {
+        return (DataAtom)atomFactory.getIntensionalTripleAtom(t1, property.getIRI(), t2);
+    }
+
+    protected <T extends AtomPredicate> DataAtom<T> getAtom(VariableOrGroundTerm t, OClass oc) {
+        return (DataAtom)atomFactory.getIntensionalTripleAtom(t, oc.getIRI());
+    }
 }
