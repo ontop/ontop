@@ -26,7 +26,7 @@ You can start an Ontop SPARQL endpoint by using the `ontop/ontop-endpoint` image
 
 #### Linux/Mac
 ```console
-docker run --rm \
+docker run --rm -it \
 -v $PWD/input:/opt/ontop/input \
 -v $PWD/jdbc:/opt/ontop/jdbc \
 -e ONTOP_ONTOLOGY_FILE=/opt/ontop/input/university-complete.ttl \
@@ -37,7 +37,7 @@ docker run --rm \
 
 #### Windows
 ```console
-docker run --rm ^
+docker run --rm -it ^
 -v %CD%/input:/opt/ontop/input ^
 -v %CD%/jdbc:/opt/ontop/jdbc ^
 -e ONTOP_ONTOLOGY_FILE=/opt/ontop/input/university-complete.ttl ^
