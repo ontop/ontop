@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.model.term.impl.BNodeConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.impl.IRIConstantImpl;
 import it.unibz.inf.ontop.model.term.impl.ValueConstantImpl;
-import it.unibz.inf.ontop.substitution.AppendableSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
@@ -38,25 +37,20 @@ import java.util.*;
 /**
  * Mutable reference implementation of a Substitution.
  *
- * TODO: rename it AppendableSubstitutionImpl
- *
  */
-public class SubstitutionImpl implements AppendableSubstitution {
+public class SubstitutionImpl implements Substitution {
 
     private final Map<Variable, Term> map;
-    private final SubstitutionUtilities substitutionUtilities;
     private final TermFactory termFactory;
 
     public SubstitutionImpl(TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
     public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = substitutionMap;
-        this.substitutionUtilities = new SubstitutionUtilities(termFactory);
     }
 
     @Override
@@ -74,12 +68,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return map.isEmpty();
     }
 
-    @Override
-    @Deprecated
-    public void put(Variable var, Term term) {
-        map.put(var, term);
-    }
-
     @Deprecated
     public Set<Variable> keySet() {
         return map.keySet();
@@ -90,17 +78,6 @@ public class SubstitutionImpl implements AppendableSubstitution {
         return Joiner.on(", ").withKeyValueSeparator("/").join(map);
     }
 
-    /**
-     * Composes the current substitution with another substitution function.
-     *
-     * Remind that composition is not commutative.
-     *
-     * TODO: implement it
-     */
-    @Override
-    public boolean compose(Substitution otherSubstitution) {
-        throw new UnsupportedOperationException("Not implemented yet! But looks interesting.");
-    }
 
     /***
      * Creates a unifier (singleton substitution) out of term1 and term2.
@@ -225,8 +202,8 @@ public class SubstitutionImpl implements AppendableSubstitution {
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            substitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
-            substitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
+            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
         }
 
         return true;
