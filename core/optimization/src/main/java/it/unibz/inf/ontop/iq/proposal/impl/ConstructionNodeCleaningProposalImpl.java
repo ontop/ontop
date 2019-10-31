@@ -1,11 +1,8 @@
 package it.unibz.inf.ontop.iq.proposal.impl;
 
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.datalog.ImmutableQueryModifiers;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.proposal.ConstructionNodeCleaningProposal;
-
-import java.util.Optional;
 
 public class ConstructionNodeCleaningProposalImpl implements ConstructionNodeCleaningProposal {
 

@@ -162,13 +162,6 @@ public interface TermFactory {
 	 * Boolean function terms
 	 */
 
-	// TODO: distinguish the strict and non-strict equalities
-	default Expression getFunctionEQ(Term firstTerm, Term secondTerm) {
-		return getFunctionStrictEQ(firstTerm, secondTerm);
-	}
-
-	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm);
-
 	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
 													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
 
@@ -203,12 +196,6 @@ public interface TermFactory {
 
 	ImmutableExpression getDBDefaultInequality(InequalityLabel inequalityLabel, ImmutableTerm dbTerm1,
 											   ImmutableTerm dbTerm2);
-
-	public Expression getFunctionNOT(Term term);
-
-	public Expression getFunctionAND(Term term1, Term term2);
-
-	public Expression getFunctionOR(Term term1, Term term2);
 
 	/**
 	 * Construct a {@link IRIConstant} object. This type of term is written as a
@@ -309,9 +296,7 @@ public interface TermFactory {
 
 	RDFConstant getRDFConstant(String lexicalValue, RDFTermType termType);
 
-	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language);
 	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type);
-	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, IRI datatype);
 
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language);
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type);

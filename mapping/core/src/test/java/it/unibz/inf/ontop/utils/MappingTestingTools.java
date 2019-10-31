@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
-import it.unibz.inf.ontop.datalog.IQ2DatalogTranslator;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
@@ -52,7 +50,6 @@ public class MappingTestingTools {
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
     public static final MappingMerger MAPPING_MERGER;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
-    public static final IQ2DatalogTranslator INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR;
     public static final MappingSaturator MAPPING_SATURATOR;
 
     public static final PrefixManager EMPTY_PREFIX_MANAGER;
@@ -91,7 +88,6 @@ public class MappingTestingTools {
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         MAPPING_MERGER = injector.getInstance(MappingMerger.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
-        INTERMEDIATE_QUERY_2_DATALOG_TRANSLATOR = injector.getInstance(IQ2DatalogTranslator.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
         SPECIFICATION_FACTORY = injector.getInstance(SpecificationFactory.class);

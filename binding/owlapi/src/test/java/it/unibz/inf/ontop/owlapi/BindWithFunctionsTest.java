@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -31,7 +30,6 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -52,7 +50,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
- * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  * It expands the tests from {@link BindTest}.
  */

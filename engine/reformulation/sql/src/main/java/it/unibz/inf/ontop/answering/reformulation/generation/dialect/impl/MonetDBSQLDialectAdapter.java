@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 
-import it.unibz.inf.ontop.datalog.OrderCondition;
-
 import java.sql.Types;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
