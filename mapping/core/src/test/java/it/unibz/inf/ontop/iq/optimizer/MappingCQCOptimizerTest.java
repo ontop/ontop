@@ -95,7 +95,8 @@ public class MappingCQCOptimizerTest {
 
     @Test
     public void test_foreign_keys() {
-        // store -> address, staff -> address
+        // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
+        // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
 
         BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
@@ -108,36 +109,48 @@ public class MappingCQCOptimizerTest {
         DatabaseRelationDefinition storeTable = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "store"));
         storeTable.addAttribute(idFactory.createAttributeID("store_id"), Types.INTEGER, null, false);
         storeTable.addAttribute(idFactory.createAttributeID("address_id"), Types.INTEGER, null, false);
+        storeTable.addAttribute(idFactory.createAttributeID("manager_staff_id"), Types.INTEGER, null, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
         DatabaseRelationDefinition staffTable = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "staff"));
         staffTable.addAttribute(idFactory.createAttributeID("staff_id"), Types.INTEGER, null, false);
         staffTable.addAttribute(idFactory.createAttributeID("address_id"), Types.INTEGER, null, false);
+        staffTable.addAttribute(idFactory.createAttributeID("store_id"), Types.INTEGER, null, false);
         RelationPredicate staff = staffTable.getAtomPredicate();
 
         storeTable.addForeignKeyConstraint(
                 ForeignKeyConstraint.builder(storeTable, addressTable)
                         .add(storeTable.getAttribute(2), addressTable.getAttribute(1))
                         .build("FK"));
+        storeTable.addForeignKeyConstraint(
+                ForeignKeyConstraint.builder(storeTable, staffTable)
+                        .add(storeTable.getAttribute(3), staffTable.getAttribute(1))
+                        .build("FK"));
 
         staffTable.addForeignKeyConstraint(
                 ForeignKeyConstraint.builder(staffTable, addressTable)
                         .add(staffTable.getAttribute(2), addressTable.getAttribute(1))
                         .build("FK"));
+        staffTable.addForeignKeyConstraint(
+                ForeignKeyConstraint.builder(staffTable, storeTable)
+                        .add(staffTable.getAttribute(3), storeTable.getAttribute(1))
+                        .build("FK"));
         dbMetadata.freeze();
 
         final Variable staffId1 = TERM_FACTORY.getVariable("staff_id2");
         final Variable addressId1 = TERM_FACTORY.getVariable("address_id2");
+        final Variable storeId1 = TERM_FACTORY.getVariable("store_id2");
         final Variable addressId2 = TERM_FACTORY.getVariable("address_id5");
         final Variable address2 = TERM_FACTORY.getVariable("address7");
-        final Variable addressId3 = TERM_FACTORY.getVariable("address_id4");
         final Variable storeId3 = TERM_FACTORY.getVariable("store_id1");
+        final Variable addressId3 = TERM_FACTORY.getVariable("address_id4");
+        final Variable managerStaffId3 = TERM_FACTORY.getVariable("manager_staff_id1");
 
-        DataAtom<RelationPredicate> staffAtom = ATOM_FACTORY.getDataAtom(staff, staffId1, addressId1);
+        DataAtom<RelationPredicate> staffAtom = ATOM_FACTORY.getDataAtom(staff, staffId1, addressId1, storeId1);
         DataAtom<RelationPredicate> addressAtom1 = ATOM_FACTORY.getDataAtom(address, addressId2, address2);
         ImmutableList<DataAtom<RelationPredicate>> one = ImmutableList.of(addressAtom1, staffAtom);
 
-        DataAtom<RelationPredicate> storeAtom = ATOM_FACTORY.getDataAtom(store, storeId3, addressId3);
+        DataAtom<RelationPredicate> storeAtom = ATOM_FACTORY.getDataAtom(store, storeId3, addressId3, managerStaffId3);
         DataAtom<RelationPredicate> addressAtom2 = ATOM_FACTORY.getDataAtom(address, addressId2, address2);
         ImmutableList<DataAtom<RelationPredicate>> two = ImmutableList.of(storeAtom, addressAtom2);
 
@@ -146,15 +159,23 @@ public class MappingCQCOptimizerTest {
         LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
 
         final Variable addressIdM = TERM_FACTORY.getVariable("address_id_m");
+        final Variable addressIdM2 = TERM_FACTORY.getVariable("address_id_m2");
         final Variable addressM = TERM_FACTORY.getVariable("address_m");
         final Variable storeIdM = TERM_FACTORY.getVariable("store_id_m");
+        final Variable storeIdM2 = TERM_FACTORY.getVariable("store_id_m2");
         final Variable staffIdM = TERM_FACTORY.getVariable("staff_id_m");
+        final Variable staffIdM2 = TERM_FACTORY.getVariable("staff_id_m2");
+        final Variable staffManagerIdM = TERM_FACTORY.getVariable("staff_manager_id_m");
 
         b.add(ATOM_FACTORY.getDataAtom(address, addressIdM, addressM),
-                ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM));
+                ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM, staffManagerIdM));
+        b.add(ATOM_FACTORY.getDataAtom(staff, staffManagerIdM, addressIdM, storeIdM2),
+                ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM2, staffManagerIdM));
 
         b.add(ATOM_FACTORY.getDataAtom(address, addressIdM, addressM),
-                ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM));
+                ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM, storeIdM));
+        b.add(ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM2, staffIdM2),
+                ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM, storeIdM));
 
         LinearInclusionDependencies<RelationPredicate> lids = b.build();
         System.out.println("LIDS: " + lids);
@@ -166,7 +187,14 @@ public class MappingCQCOptimizerTest {
                         .map(h -> foreignKeyCQC.homomorphismIterator(h, one, two))
                         .filter(ImmutableHomomorphismIterator::hasNext)
                         .map(ImmutableHomomorphismIterator::next);
+        System.out.println(to.get());
 
-//        System.out.println(to.get());
+        Optional<ImmutableHomomorphism> from =
+                Optional.of(ImmutableHomomorphism.builder().extend(address2, address2).extend(addressId2, addressId2).build())
+                        .map(h -> foreignKeyCQC.homomorphismIterator(h, two, one))
+                        .filter(ImmutableHomomorphismIterator::hasNext)
+                        .map(ImmutableHomomorphismIterator::next);
+        System.out.println(from.get());
+
     }
 }
