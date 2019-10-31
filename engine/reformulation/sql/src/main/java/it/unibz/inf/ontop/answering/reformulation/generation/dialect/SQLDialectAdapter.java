@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
  */
 
 
-import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -91,9 +90,6 @@ public interface SQLDialectAdapter {
 
 	public String sqlSlice(long limit, long offset);
 
-	public String sqlOrderBy(List<OrderCondition> conditions, String viewname);
-
-	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset);
 
 	/***
 	 * Returns the expression that cast's the given column into a particular SQL

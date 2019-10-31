@@ -122,11 +122,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, IRI datatypeIRI) {
-		return getRDFLiteralMutableFunctionalTerm(lexicalTerm, typeFactory.getDatatype(datatypeIRI));
-	}
-
-	@Override
 	public RDFLiteralConstant getRDFLiteralConstant(String value, String language) {
 		return new RDFLiteralConstantImpl(value, language.toLowerCase(), typeFactory);
 	}
@@ -142,11 +137,6 @@ public class TermFactoryImpl implements TermFactory {
 		else if (termType.equals(typeFactory.getBlankNodeType()))
 			return getConstantBNode(lexicalValue);
 		throw new MinorOntopInternalBugException("Unexpected RDF term type: " + termType);
-	}
-
-	@Override
-	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, String language) {
-		return getRDFLiteralMutableFunctionalTerm(lexicalTerm, typeFactory.getLangTermType(language));
 	}
 
 	@Override
@@ -630,11 +620,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
-	public Expression getFunctionStrictEQ(Term firstTerm, Term secondTerm) {
-		return getExpression(dbFunctionSymbolFactory.getDBStrictEquality(2), firstTerm, secondTerm);
-	}
-
-    @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
 		return getImmutableExpression(functionSymbolFactory.getNotYetTypedEquality(), t1, t2);
     }
@@ -718,21 +703,6 @@ public class TermFactoryImpl implements TermFactory {
 													  ImmutableTerm dbTerm2) {
 		return getImmutableExpression(dbFunctionSymbolFactory.getDBDefaultInequality(inequalityLabel),
 				dbTerm1, dbTerm2);
-	}
-
-	@Override
-	public Expression getFunctionNOT(Term term) {
-		return getExpression(dbFunctionSymbolFactory.getDBNot(), term);
-	}
-
-	@Override
-	public Expression getFunctionAND(Term term1, Term term2) {
-		return getExpression(dbFunctionSymbolFactory.getDBAnd(2), term1, term2);
-	}
-
-	@Override
-	public Expression getFunctionOR(Term term1, Term term2) {
-		return getExpression(dbFunctionSymbolFactory.getDBOr(2), term1, term2);
 	}
 	
 	@Override

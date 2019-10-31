@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.answering.reformulation.input.translation.impl.SparqlAlgebraToDatalogTranslator;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
@@ -56,9 +55,8 @@ import static org.junit.Assert.assertTrue;
  * 
  * We are going to create an H2 DB, the .sql file is fixed. We will map directly
  * there and then query on top.
-/**
+ *
  * Class to test if bind in SPARQL is working properly.
- * Refer in particular to the class {@link SparqlAlgebraToDatalogTranslator}
  *
  * It uses the test from http://www.w3.org/TR/sparql11-query/#bind
  */

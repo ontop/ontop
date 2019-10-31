@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.answering.reformulation.rewriting.impl.DummyRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.ExistentialQueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
-import it.unibz.inf.ontop.answering.reformulation.rewriting.SameAsRewriter;
 
 /**
  * POST-module: to be loaded after that all the dependencies of concrete implementations have been defined
@@ -44,8 +43,7 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
         Module reformulationFactoryModule = buildFactory(
                 ImmutableList.of(
                         QueryUnfolder.class,
-                        NativeQueryGenerator.class,
-                        SameAsRewriter.class),
+                        NativeQueryGenerator.class),
                 TranslationFactory.class);
         install(reformulationFactoryModule);
 
