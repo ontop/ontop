@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -292,29 +291,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
     @Override
-    public String sqlOrderBy(List<OrderCondition> conditions, String viewname) {
-        String sql = "";
-        if (!conditions.isEmpty()) {
-            sql = "ORDER BY ";
-            boolean needComma = false;
-            for (OrderCondition c : conditions) {
-                if (needComma) {
-                    sql += ", ";
-                }
-                sql += sqlQualifiedColumn(viewname, c.getVariable().getName());
-                if (c.getDirection() == OrderCondition.ORDER_DESCENDING) {
-                    sql += " DESC NULLS LAST";
-                }
-                else {
-                    sql += " NULLS FIRST";
-                }
-                needComma = true;
-            }
-        }
-        return sql;
-    }
-
-    @Override
     public String sqlGroupBy(List<Variable> groupby, String viewname) {
         String sql = "GROUP BY ";
         boolean needComma = false;
@@ -327,15 +303,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
             needComma = true;
         }
         return sql;
-    }
-
-    @Override
-    public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
-        String sql = sqlOrderBy(conditions, viewname);
-        if (!sql.equals(""))
-            sql += "\n";
-        return sql + sqlSlice(limit, offset);
-
     }
 
     @Override

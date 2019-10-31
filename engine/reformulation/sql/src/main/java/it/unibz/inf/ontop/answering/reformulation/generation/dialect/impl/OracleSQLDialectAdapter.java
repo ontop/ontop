@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  */
 
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.datalog.OrderCondition;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -128,13 +127,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		else {
 			return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
 		}
-	}
-
-	@Override
-	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
-
-		return  sqlSlice(limit, offset)  + "\n" + sqlOrderBy(conditions,viewname);
-
 	}
 
 	@Override
