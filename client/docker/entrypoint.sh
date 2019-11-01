@@ -4,14 +4,29 @@ ONTOP_HOME=/opt/ontop
 
 args_array=()
 
+if [ "${MAPPING_FILE+x}" ]; then
+  ONTOP_MAPPING_FILE=${MAPPING_FILE}
+  echo "WARNING: environment variable MAPPING_FILE is deprecated. Please use ONTOP_MAPPING_FILE instead"
+fi
+
 if [ "${ONTOP_MAPPING_FILE+x}" ]; then
   args_array+=("--mapping=${ONTOP_MAPPING_FILE}")
 else
   echo "ERROR: environment variable ONTOP_MAPPING_FILE is not set" && exit 1
 fi
 
+if [ "${ONTOLOGY_FILE+x}" ]; then
+  ONTOP_ONTOLOGY_FILE=${ONTOLOGY_FILE}
+  echo "WARNING: environment variable ONTOLOGY_FILE is deprecated. Please use ONTOP_ONTOLOGY_FILE instead"
+fi
+
 if [ "${ONTOP_ONTOLOGY_FILE+x}" ]; then
   args_array+=("--ontology=${ONTOP_ONTOLOGY_FILE}")
+fi
+
+if [ "${PROPERTIES_FILE+x}" ]; then
+  ONTOP_PROPERTIES_FILE=${PROPERTIES_FILE}
+  echo "WARNING: environment variable PROPERTIES_FILE is deprecated. Please use ONTOP_PROPERTIES_FILE instead"
 fi
 
 if [ "${ONTOP_PROPERTIES_FILE+x}" ]; then
