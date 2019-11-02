@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 
@@ -10,29 +11,37 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
 
     @Nullable
     private final RDFDatatype rdfDatatype;
-    private final boolean areEqualitiesStrict;
+    private final StrictEqSupport support;
+
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                boolean isAbstract, boolean areLexicalTermsUnique,
-                                                                boolean areEqualitiesStrict) {
-        super(name, parentAncestry, isAbstract, areLexicalTermsUnique);
-        this.areEqualitiesStrict = areEqualitiesStrict;
+                                                                boolean isAbstract) {
+        super(name, parentAncestry, isAbstract);
         rdfDatatype = null;
+        this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
     }
 
     protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                RDFDatatype rdfDatatype, boolean areLexicalTermsUnique,
-                                                                boolean areEqualitiesStrict) {
-        super(name, parentAncestry, false, areLexicalTermsUnique);
+                                                                RDFDatatype rdfDatatype) {
+        super(name, parentAncestry, false);
         this.rdfDatatype = rdfDatatype;
-        this.areEqualitiesStrict = areEqualitiesStrict;
+        this.support = StrictEqSupport.SAME_TYPE_NO_CONSTANT;
     }
 
-    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(String name, TermTypeAncestry parentAncestry,
-                                                                boolean areLexicalTermsUnique, boolean areEqualitiesStrict) {
-        super(name, parentAncestry, false, areLexicalTermsUnique);
-        this.areEqualitiesStrict = areEqualitiesStrict;
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
+            String name, TermTypeAncestry parentAncestry,
+            StrictEqSupport support) {
+        super(name, parentAncestry, false);
+        this.support = support;
         this.rdfDatatype = null;
+    }
+
+    protected NonStringNonNumberNonBooleanNonDatetimeDBTermType(
+            String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
+            StrictEqSupport support) {
+        super(name, parentAncestry, false);
+        this.support = support;
+        this.rdfDatatype = rdfDatatype;
     }
 
     @Override
@@ -55,6 +64,46 @@ public class NonStringNonNumberNonBooleanNonDatetimeDBTermType extends DBTermTyp
 
     @Override
     public boolean areEqualitiesStrict() {
-        return areEqualitiesStrict;
+        switch (support) {
+            case WITH_ALL:
+            case SAME_TYPE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public Optional<Boolean> areEqualitiesStrict(DBTermType otherType) {
+        switch (support) {
+            case WITH_ALL:
+                return Optional.of(true);
+            case SAME_TYPE:
+                return Optional.of(equals(otherType));
+            case SAME_TYPE_NO_CONSTANT:
+            case NOTHING:
+            default:
+                return Optional.of(false);
+        }
+    }
+
+    @Override
+    public boolean areEqualitiesBetweenTwoDBAttributesStrict() {
+        switch (support) {
+            case WITH_ALL:
+            case SAME_TYPE:
+            case SAME_TYPE_NO_CONSTANT:
+                return true;
+            case NOTHING:
+            default:
+                return false;
+        }
+    }
+
+    protected enum StrictEqSupport {
+        WITH_ALL,
+        SAME_TYPE,
+        SAME_TYPE_NO_CONSTANT,
+        NOTHING
     }
 }

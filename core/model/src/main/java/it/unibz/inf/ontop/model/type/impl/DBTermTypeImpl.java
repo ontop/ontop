@@ -6,12 +6,10 @@ import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 public abstract class DBTermTypeImpl extends TermTypeImpl implements DBTermType {
 
     private final String name;
-    private final boolean areLexicalTermsUnique;
 
-    protected DBTermTypeImpl(String name, TermTypeAncestry parentAncestry, boolean isAbstract, boolean areLexicalTermsUnique) {
+    protected DBTermTypeImpl(String name, TermTypeAncestry parentAncestry, boolean isAbstract) {
         super(name, parentAncestry, isAbstract);
         this.name = name;
-        this.areLexicalTermsUnique = areLexicalTermsUnique;
     }
 
     @Override
@@ -25,10 +23,5 @@ public abstract class DBTermTypeImpl extends TermTypeImpl implements DBTermType 
     @Override
     public String getCastName() {
         return name;
-    }
-
-    @Override
-    public boolean areLexicalTermsUnique() {
-        return areLexicalTermsUnique;
     }
 }

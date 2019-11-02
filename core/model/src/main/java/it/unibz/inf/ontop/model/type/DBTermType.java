@@ -21,41 +21,37 @@ public interface DBTermType extends TermType {
     boolean isNeedingIRISafeEncoding();
 
     /**
-     * Returns true if the mapping VALUE -> LEXICAL TERM is unique.
-     *
-     * Not the case for instance for floating numbers, timestamp with timezone, etc.
-     *
-     * Useful for decomposing constant IRIs
-     *
-     */
-    boolean areLexicalTermsUnique();
-
-    /**
      * Returns true if the non-strict equality between two terms of this type
      * is equivalent to a strict equality
      */
     boolean areEqualitiesStrict();
 
+    /**
+     * Returns true if the non-strict equality between terms of these two types
+     * are equivalent to a strict equality
+     */
+    Optional<Boolean> areEqualitiesStrict(DBTermType otherType);
+
+    /**
+     * Returns true if the non-strict equality between two attributes of the same database
+     * of this type is equivalent to a strict equality.
+     *
+     * Useful for floating numbers.
+     *
+     * Note that we are NOT considering here equalities with constants coming from source part
+     * of the mapping assertion.
+     *
+     */
+    boolean areEqualitiesBetweenTwoDBAttributesStrict();
+
+
     enum Category {
-        STRING(true),
-        INTEGER(true),
-        DECIMAL(false),
-        FLOAT_DOUBLE(false),
-        BOOLEAN(false),
-        DATETIME(false),
-        OTHER(false);
-
-        private final boolean treatSameCategoryTypesAsEquivalentInStrictEq;
-
-        Category(boolean treatSameCategoryTypesAsEquivalentInStrictEq) {
-            this.treatSameCategoryTypesAsEquivalentInStrictEq = treatSameCategoryTypesAsEquivalentInStrictEq;
-        }
-
-        /**
-         * For instance, STRICT_EQ("ab"^^TEXT, "ab"^^VARCHAR) evaluates as true
-         */
-        public boolean isTreatingSameCategoryTypesAsEquivalentInStrictEq() {
-            return treatSameCategoryTypesAsEquivalentInStrictEq;
-        }
+        STRING,
+        INTEGER,
+        DECIMAL,
+        FLOAT_DOUBLE,
+        BOOLEAN,
+        DATETIME,
+        OTHER
     }
 }

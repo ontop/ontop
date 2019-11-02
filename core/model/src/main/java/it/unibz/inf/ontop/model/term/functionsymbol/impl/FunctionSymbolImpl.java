@@ -154,15 +154,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                                   TermFactory termFactory, VariableNullability variableNullability) {
-        boolean differentTypeDetected = inferType(terms)
+        boolean incompatibleTypesDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
                         .flatMap(TermTypeInference::getTermType)
-                        .map(t2 -> !areEquivalentForStrictEq(t1,t2))
+                        .map(t2 -> areIncompatibleForStrictEq(t1,t2))
                         .orElse(false))
                 .orElse(false);
 
-        if (differentTypeDetected)
+        if (incompatibleTypesDetected)
             return IncrementalEvaluation.declareIsFalse();
 
         if ((otherTerm instanceof ImmutableFunctionalTerm))
@@ -176,19 +176,13 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
         return IncrementalEvaluation.declareSameExpression();
     }
 
-    private boolean areEquivalentForStrictEq(TermType type1, TermType type2) {
+    /**
+     * Different types are only tolerated for DB term types
+     */
+    private boolean areIncompatibleForStrictEq(TermType type1, TermType type2) {
         if (type1.equals(type2))
-            return true;
-        if (!((type1 instanceof DBTermType) && (type2 instanceof DBTermType)))
             return false;
-
-        DBTermType dbType1 = (DBTermType) type1;
-        DBTermType dbType2 = (DBTermType) type2;
-        DBTermType.Category category1 = dbType1.getCategory();
-
-        return (category1 == dbType2.getCategory())
-                && category1.isTreatingSameCategoryTypesAsEquivalentInStrictEq();
-
+        return !((type1 instanceof DBTermType) && (type2 instanceof DBTermType));
     }
 
     /**

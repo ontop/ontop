@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
 
@@ -249,16 +250,21 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
                 DBTermType type2 = types.get(1);
 
                 return type1.equals(type2)
-                        ? transformSameTypeEquality(type1, term1, term2)
+                        ? transformSameTypeEquality(type1, term1, term2, tree)
                         : transformDifferentTypesEquality(type1, type2, term1, term2);
             }
             else
                 return termFactory.getDBNonStrictDefaultEquality(term1, term2);
         }
 
-        private ImmutableExpression transformSameTypeEquality(DBTermType type, ImmutableTerm term1, ImmutableTerm term2) {
-            if (type.areLexicalTermsUnique())
+        private ImmutableExpression transformSameTypeEquality(DBTermType type, ImmutableTerm term1, ImmutableTerm term2,
+                                                              IQTree tree) {
+            if (type.areEqualitiesStrict())
                 return termFactory.getStrictEquality(term1, term2);
+
+            if (areIndependentFromConstants(term1, term2, tree) && type.areEqualitiesBetweenTwoDBAttributesStrict()) {
+                return termFactory.getStrictEquality(term1, term2);
+            }
 
             /*
              * Tries to reuse an existing typed non-strict equality
@@ -275,12 +281,19 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         }
 
         protected ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
-                                                                    ImmutableTerm term1, ImmutableTerm term2) {
+                                                                      ImmutableTerm term1, ImmutableTerm term2) {
+            /*
+             * If not type declares that the equality cannot be reduced to a strict equality
+             */
+            if (areCompatibleForStrictEq(type1, type2)) {
+                return termFactory.getStrictEquality(term1, term2);
+            }
+
+            /*
+             * Tries to reuse an existing typed non-strict equality
+             */
             DBTermType.Category category1 = type1.getCategory();
             DBTermType.Category category2 = type2.getCategory();
-
-            if (category1.equals(category2) && category1.isTreatingSameCategoryTypesAsEquivalentInStrictEq())
-                return termFactory.getStrictEquality(term1, term2);
 
             switch (category1) {
                 case STRING:
@@ -316,6 +329,25 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
             }
             // By default
             return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+        }
+
+
+        /*
+         * TODO: make it robust so make sure the term does not depend on a constant introduced in the mapping.
+         *
+         * Constants in the mapping are indeed uncontrolled and may have a different lexical value
+         * that the ones returned by the DB, which would make the test fail.
+         */
+        protected boolean areIndependentFromConstants(ImmutableTerm term1, ImmutableTerm term2, IQTree tree) {
+            return !((term1 instanceof DBConstant) || (term2 instanceof DBConstant));
+        }
+
+        private boolean areCompatibleForStrictEq(DBTermType type1, DBTermType type2) {
+            return Stream.of(type1.areEqualitiesStrict(type2), type2.areEqualitiesStrict(type1))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .reduce((b1, b2) -> b1 && b2)
+                    .orElse(false);
         }
     }
 

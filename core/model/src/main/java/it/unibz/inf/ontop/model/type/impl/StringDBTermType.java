@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 
@@ -11,14 +12,14 @@ public class StringDBTermType extends DBTermTypeImpl {
     private final RDFDatatype xsdStringDatatype;
 
     protected StringDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false, true);
+        super(name, parentAncestry, false);
         this.xsdStringDatatype = xsdStringDatatype;
         this.castName = name;
     }
 
     protected StringDBTermType(String name, String castName,
                                TermTypeAncestry parentAncestry, RDFDatatype xsdStringDatatype) {
-        super(name, parentAncestry, false, true);
+        super(name, parentAncestry, false);
         this.castName = castName;
         this.xsdStringDatatype = xsdStringDatatype;
     }
@@ -45,6 +46,27 @@ public class StringDBTermType extends DBTermTypeImpl {
 
     @Override
     public boolean areEqualitiesStrict() {
+        return true;
+    }
+
+    @Override
+    public Optional<Boolean> areEqualitiesStrict(DBTermType otherType) {
+        switch (otherType.getCategory()) {
+            case STRING:
+                return Optional.of(true);
+            case INTEGER:
+            case DECIMAL:
+            case FLOAT_DOUBLE:
+            case DATETIME:
+                return Optional.of(false);
+            case OTHER:
+            default:
+                return Optional.empty();
+        }
+    }
+
+    @Override
+    public boolean areEqualitiesBetweenTwoDBAttributesStrict() {
         return true;
     }
 }

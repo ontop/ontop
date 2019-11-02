@@ -10,6 +10,8 @@ import java.util.Map;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.FLOAT_DOUBLE;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.NOTHING;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
 
 public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -42,14 +44,12 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
 
         // TODO: treat it as a proper binary type
-        // TODO: check if lexical values can be considered as unique
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype(), false);
+                typeFactory.getXsdBooleanDatatype());
 
         // TODO: treat it as a proper binary type
-        // TODO: check if lexical values can be considered as unique
         BooleanDBTermType varBitType = new BooleanDBTermType(VARBIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype(), false);
+                typeFactory.getXsdBooleanDatatype());
 
         NumberDBTermType int2Type = new NumberDBTermType(INT2_STR, rootAncestry, xsdInteger, INTEGER);
         NumberDBTermType int4Type = new NumberDBTermType(INT4_STR, rootAncestry, xsdInteger, INTEGER);
@@ -66,16 +66,16 @@ public class PostgreSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
         DatetimeDBTermType timestampTz = new DatetimeDBTermType(TIMESTAMPTZ_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype(), false);
+                typeFactory.getXsdDatetimeDatatype());
 
         DBTermType timeTzType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIMETZ_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.TIME), false, false);
+                typeFactory.getDatatype(XSD.TIME), NOTHING);
 
         // TODO: check if lexical values can be considered as unique
-        DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean, false);
+        DBTermType boolType = new BooleanDBTermType(BOOL_STR, rootTermType.getAncestry(), xsdBoolean);
 
         DBTermType uuidType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UUID_STR, rootTermType.getAncestry(),
-                true, true);
+                WITH_ALL);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_STR, bitType);

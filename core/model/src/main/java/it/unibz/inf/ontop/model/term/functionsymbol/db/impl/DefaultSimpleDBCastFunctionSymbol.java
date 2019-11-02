@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl {
 
@@ -100,7 +101,9 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,
                                                                         NonNullConstant otherTerm, TermFactory termFactory,
                                                                         VariableNullability variableNullability) {
-        if ((inputType != null) && inputType.areLexicalTermsUnique()) {
+        if ((inputType != null)
+                && (otherTerm.getType() instanceof DBTermType)
+                && areCompatibleForStrictEq(inputType, (DBTermType) otherTerm.getType())) {
             ImmutableExpression newEquality = termFactory.getStrictEquality(
                     terms.get(0),
                     termFactory.getDBConstant(otherTerm.getValue(), inputType));
@@ -110,4 +113,14 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
         else
             return IncrementalEvaluation.declareSameExpression();
     }
+
+    private boolean areCompatibleForStrictEq(DBTermType type1, DBTermType type2) {
+        return Stream.of(type1.areEqualitiesStrict(type2), type2.areEqualitiesStrict(type1))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce((b1, b2) -> b1 && b2)
+                .orElse(false);
+    }
+
+
 }

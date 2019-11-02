@@ -52,10 +52,9 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
      * This method directly refers to the notion of strict-equality.
      * Is under 2VL and treats the NULLs of strict-equalities as false.
      *
-     * For DBConstants, different types belonging to the same category may be considered as
-     * equivalent by strict-equalities and may therefore not prevent this test from passing.
+     * For DBConstants, term types are NOT CONSIDERED for this test. Only the lexical string matters.
      *
-     * This tolerance comes from the fact that DBs like PostgreSQL offer almost-identical datatypes
+     * This tolerance initially comes from the fact that DBs like PostgreSQL offer almost-identical datatypes
      * such as SERIAL and INT4 over which one would like to join and over which foreign keys may hold.
      * For the sake of simplicity, Ontop treats these types as equivalent in strict-equality,
      * which enables FK-based optimization to be applied. Observes that the tiny technical difference between
@@ -72,20 +71,10 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
     public boolean equals(Object other) {
         if (other instanceof DBConstant) {
             DBConstant otherConstant = (DBConstant) other;
-            return otherConstant.getValue().equals(value)
-                    && isOtherTypeEquivalentForStrictEquality(otherConstant.getType());
+            return otherConstant.getValue().equals(value);
         }
         else
             return false;
-    }
-
-    private boolean isOtherTypeEquivalentForStrictEquality(DBTermType otherConstantType) {
-        if (termType.equals(otherConstantType))
-            return true;
-
-        DBTermType.Category otherCategory = otherConstantType.getCategory();
-        return (otherCategory == termType.getCategory())
-                && otherCategory.isTreatingSameCategoryTypesAsEquivalentInStrictEq();
     }
 
     @Override

@@ -10,6 +10,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Map;
 
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.WITH_ALL;
+
 public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String BIT_STR = "BIT";
@@ -32,21 +34,18 @@ public class SQLServerDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdStringDatatype());
 
         // Non-standard (not part of the R2RML standard).
-        // TODO: check if lexical values can be considered as unique
         BooleanDBTermType bitType = new BooleanDBTermType(BIT_STR, rootAncestry,
-                typeFactory.getXsdBooleanDatatype(), false);
+                typeFactory.getXsdBooleanDatatype());
         // Name for TIMESTAMP
-        // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype(), false);
+                typeFactory.getXsdDatetimeDatatype());
         DatetimeDBTermType datetime2Type = new DatetimeDBTermType(DATETIME2_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype(), false);
-        // TODO: check if lexical values can be considered as unique
+                typeFactory.getXsdDatetimeDatatype());
         DatetimeDBTermType dateTimeOffset = new DatetimeDBTermType(DATETIMEOFFSET_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype(), false);
+                typeFactory.getXsdDatetimeDatatype());
 
         DBTermType uniqueIdType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(UNIQUEIDENTIFIER_STR,
-                rootTermType.getAncestry(), true, true);
+                rootTermType.getAncestry(), WITH_ALL);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(NVARCHAR_STR, nvarcharType);
