@@ -48,12 +48,30 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
         return toString().hashCode();
     }
 
+    /**
+     * This method directly refers to the notion of strict-equality.
+     * Is under 2VL and treats the NULLs of strict-equalities as false.
+     *
+     * For DBConstants, term types are NOT CONSIDERED for this test. Only the lexical string matters.
+     *
+     * This tolerance initially comes from the fact that DBs like PostgreSQL offer almost-identical datatypes
+     * such as SERIAL and INT4 over which one would like to join and over which foreign keys may hold.
+     * For the sake of simplicity, Ontop treats these types as equivalent in strict-equality,
+     * which enables FK-based optimization to be applied. Observes that the tiny technical difference between
+     * SERIAL and INT4 is irrelevant for the scope of Ontop.
+     *
+     * Also observe that users CANNOT specify directly a strict-equality over DB terms.
+     * Equalities in the user-provided mapping are first treated as "not yet typed" and are later transformed based
+     * on their types. And for what regards SPARQL, it deals with RDF terms, not DB terms. This means
+     * that strict-equalities between DB terms are produced internally, in situations where Ontop should be able to use
+     * them in a meaningful manner.
+     *
+     */
     @Override
     public boolean equals(Object other) {
         if (other instanceof DBConstant) {
             DBConstant otherConstant = (DBConstant) other;
-            return otherConstant.getType().equals(termType)
-                    && otherConstant.getValue().equals(value);
+            return otherConstant.getValue().equals(value);
         }
         else
             return false;
@@ -62,7 +80,7 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
     @Override
     public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         if (otherTerm instanceof Constant) {
-            return ((Constant) otherTerm).isNull()
+            return otherTerm.isNull()
                     ? IncrementalEvaluation.declareIsNull()
                     : equals(otherTerm)
                         ? IncrementalEvaluation.declareIsTrue()

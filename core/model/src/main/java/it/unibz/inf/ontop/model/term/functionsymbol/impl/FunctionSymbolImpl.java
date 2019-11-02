@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbo
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -153,15 +154,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                                   TermFactory termFactory, VariableNullability variableNullability) {
-        boolean differentTypeDetected = inferType(terms)
+        boolean incompatibleTypesDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
                         .flatMap(TermTypeInference::getTermType)
-                        .map(t2 -> !t1.equals(t2))
+                        .map(t2 -> areIncompatibleForStrictEq(t1,t2))
                         .orElse(false))
                 .orElse(false);
 
-        if (differentTypeDetected)
+        if (incompatibleTypesDetected)
             return IncrementalEvaluation.declareIsFalse();
 
         if ((otherTerm instanceof ImmutableFunctionalTerm))
@@ -173,6 +174,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
         return IncrementalEvaluation.declareSameExpression();
+    }
+
+    /**
+     * Different types are only tolerated for DB term types
+     */
+    private boolean areIncompatibleForStrictEq(TermType type1, TermType type2) {
+        if (type1.equals(type2))
+            return false;
+        return !((type1 instanceof DBTermType) && (type2 instanceof DBTermType));
     }
 
     /**

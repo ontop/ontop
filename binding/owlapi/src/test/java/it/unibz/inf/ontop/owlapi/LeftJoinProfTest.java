@@ -1039,6 +1039,97 @@ public class LeftJoinProfTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    @Test
+    public void testSumPreferences1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?s) ?v\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :nickname \"Rog\". \n" +
+                "       BIND (\"A\" AS ?v)\n" +
+                "   }\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :firstName \"Mary\". \n" +
+                "       BIND (\"B\" AS ?v)\n" +
+                "   }\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :firstName \"John\". \n" +
+                "       BIND (\"C\" AS ?v)\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p ?v\n" +
+                "ORDER BY ?s";
+
+        List<String> expectedValues = ImmutableList.of("C", "B", "A");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testSumPreferences2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?s) ?v\n" +
+                "WHERE {\n" +
+                "   ?p :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :nickname \"Rog\". \n" +
+                "       BIND (\"A\"@en AS ?v)\n" +
+                "   }\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :firstName \"Mary\". \n" +
+                "       BIND (\"B\" AS ?v)\n" +
+                "   }\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :firstName \"John\". \n" +
+                "       BIND (\"C\" AS ?v)\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p ?v\n" +
+                "ORDER BY ?s";
+
+        List<String> expectedValues = ImmutableList.of("C", "B", "A");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testSumPreferences3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?s) ?v\n" +
+                "WHERE {\n" +
+                "   ?p :firstName ?fn ; :teaches ?c .\n" +
+                "   ?c :nbStudents ?nb .\n" +
+                "   FILTER (?fn != \"John\")\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :nickname \"Rog\". \n" +
+                "       BIND (\"A\"@en AS ?v)\n" +
+                "   }\n" +
+                "   OPTIONAL { \n" +
+                "       ?p :firstName \"Mary\". \n" +
+                "       BIND (\"B\" AS ?v)\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p ?v\n" +
+                "ORDER BY ?s";
+
+        List<String> expectedValues = ImmutableList.of("B", "A");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues).get();
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {

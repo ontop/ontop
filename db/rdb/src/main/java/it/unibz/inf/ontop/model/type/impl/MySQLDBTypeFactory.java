@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.DECIMAL;
 import static it.unibz.inf.ontop.model.type.DBTermType.Category.INTEGER;
+import static it.unibz.inf.ontop.model.type.impl.NonStringNonNumberNonBooleanNonDatetimeDBTermType.StrictEqSupport.SAME_TYPE;
 
 public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
@@ -74,7 +75,7 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         // NB: TIMESTAMP also exists
         // TODO: check if lexical values can be considered as unique
         DatetimeDBTermType datetimeType = new DatetimeDBTermType(DATETIME_STR, rootTermType.getAncestry(),
-                typeFactory.getXsdDatetimeDatatype(), false);
+                typeFactory.getXsdDatetimeDatatype());
 
         // TODO: shall we treat BIT as a number? Then, we would have to serialize it differently (e.g. b'011111')
         // TODO: check if lexical values can be considered as unique
@@ -82,10 +83,11 @@ public class MySQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
         // Special cases that are interpreted as booleans
         RDFDatatype xsdBoolean = typeFactory.getXsdBooleanDatatype();
-        BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean, true);
+        BooleanDBTermType bitOneType = new BooleanDBTermType(BIT_ONE_STR, rootTermType.getAncestry(), xsdBoolean);
 
+        // TODO: check the strict eq support level
         DBTermType yearType = new NonStringNonNumberNonBooleanNonDatetimeDBTermType(YEAR_STR, rootAncestry,
-                typeFactory.getDatatype(XSD.GYEAR), true);
+                typeFactory.getDatatype(XSD.GYEAR), SAME_TYPE);
 
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(BIT_ONE_STR, bitOneType);

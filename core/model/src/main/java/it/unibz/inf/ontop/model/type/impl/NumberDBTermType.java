@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.type.impl;
 
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermTypeAncestry;
 
@@ -15,14 +16,14 @@ public class NumberDBTermType extends DBTermTypeImpl {
 
     protected NumberDBTermType(String name, String castName, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype,
                                Category category) {
-        super(name, parentAncestry, false, false);
+        super(name, parentAncestry, false);
         this.castName = castName;
         this.rdfDatatype = rdfDatatype;
         this.category = category;
     }
 
     protected NumberDBTermType(String name, TermTypeAncestry parentAncestry, RDFDatatype rdfDatatype, Category category) {
-        super(name, parentAncestry, false, false);
+        super(name, parentAncestry, false);
         this.rdfDatatype = rdfDatatype;
         castName = name;
         this.category = category;
@@ -45,6 +46,21 @@ public class NumberDBTermType extends DBTermTypeImpl {
     @Override
     public boolean isNeedingIRISafeEncoding() {
         return false;
+    }
+
+    @Override
+    public boolean areEqualitiesStrict() {
+        return category == Category.INTEGER;
+    }
+
+    @Override
+    public Optional<Boolean> areEqualitiesStrict(DBTermType otherType) {
+        return Optional.of(otherType.getCategory() == Category.INTEGER);
+    }
+
+    @Override
+    public boolean areEqualitiesBetweenTwoDBAttributesStrict() {
+        return true;
     }
 
     @Override

@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -40,8 +42,9 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
     @Inject
     private FunctionalDependencyUnificationExecutor(IntermediateQueryFactory iqFactory,
                                                     SubstitutionFactory substitutionFactory,
-                                                    ImmutableUnificationTools unificationTools) {
-        super(iqFactory,substitutionFactory, unificationTools);
+                                                    ImmutableUnificationTools unificationTools,
+                                                    TermFactory termFactory) {
+        super(iqFactory,substitutionFactory, unificationTools, termFactory);
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
     }
@@ -73,9 +76,12 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> dependentUnifiers = extractDependentUnifiers(
                 relation, constraintNodeMap);
 
+        // Here no data node will be removed, so this expression can be ignored
+        Optional<ImmutableExpression> isNotNullConjunction = Optional.empty();
+
         return (dependentUnifiers.isEmpty())
                 ? Optional.empty()
-                : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableSet.of()));
+                : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableSet.of(), isNotNullConjunction));
     }
 
     /**

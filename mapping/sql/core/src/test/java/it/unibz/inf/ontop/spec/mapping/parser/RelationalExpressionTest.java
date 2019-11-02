@@ -121,7 +121,7 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3));
 
-        eq = TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBStrictEquality(2), ImmutableList.of(x, u));
+        eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
         onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table("P"), "A"));

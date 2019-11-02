@@ -162,6 +162,12 @@ public interface TermFactory {
 	 * Boolean function terms
 	 */
 
+	/**
+	 * To be used when parsing the mapping and when an equality is found.
+	 * Is expected to replaced later by a proper equality (may be strict or not)
+	 */
+	ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2);
+
 	ImmutableExpression getLexicalNonStrictEquality(ImmutableTerm lexicalTerm1, ImmutableTerm typeTerm1,
 													ImmutableTerm lexicalTerm2, ImmutableTerm typeTerm2);
 
@@ -173,8 +179,6 @@ public interface TermFactory {
 	ImmutableExpression getDBNonStrictStringEquality(ImmutableTerm dbStringTerm1, ImmutableTerm dbStringTerm2);
 	ImmutableExpression getDBNonStrictDatetimeEquality(ImmutableTerm dbDatetimeTerm1, ImmutableTerm dbDatetimeTerm2);
 	ImmutableExpression getDBNonStrictDateEquality(ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
-
-
 
 	/**
 	 * Cannot be simplified --> has to be evaluated by the DB engine

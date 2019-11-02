@@ -24,6 +24,13 @@ public class DefaultDBOrFunctionSymbol extends AbstractDBBooleanConnectorFunctio
     }
 
     @Override
+    protected ImmutableList<ImmutableTerm> simplify2VLInteractions(ImmutableList<ImmutableTerm> newTerms,
+                                                                   TermFactory termFactory,
+                                                                   VariableNullability variableNullability) {
+        return newTerms;
+    }
+
+    @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
         return false;
     }
