@@ -103,6 +103,7 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
                                                                         VariableNullability variableNullability) {
         if ((inputType != null)
                 && (otherTerm.getType() instanceof DBTermType)
+                // TODO: remove this test once strict equalities will be enforced in SQL queries
                 && areCompatibleForStrictEq(inputType, (DBTermType) otherTerm.getType())) {
             ImmutableExpression newEquality = termFactory.getStrictEquality(
                     terms.get(0),
@@ -114,6 +115,11 @@ public class DefaultSimpleDBCastFunctionSymbol extends AbstractDBTypeConversionF
             return IncrementalEvaluation.declareSameExpression();
     }
 
+    /**
+     * TEMPORARY: only returns true when we are sure that SQL equalities are strict for these types.
+     *
+     * TODO: remove it once strict equalities will be enforced in SQL queries
+     */
     private boolean areCompatibleForStrictEq(DBTermType type1, DBTermType type2) {
         return Stream.of(type1.areEqualitiesStrict(type2), type2.areEqualitiesStrict(type1))
                 .filter(Optional::isPresent)
