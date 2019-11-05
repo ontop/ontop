@@ -115,6 +115,19 @@
             </properties>
         </profile>
         <profile>
+            <id>set-docker-jdbc-passwords</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <docker.db2.password>obda-pwd</docker.db2.password>
+                <docker.mssql.password>Mssql1.0</docker.mssql.password>
+                <docker.mysql.password>mysql</docker.mysql.password>
+                <docker.oracle.password>oracle</docker.oracle.password>
+                <docker.pgsql.password>postgres2</docker.pgsql.password>
+            </properties>
+        </profile>
+        <profile>
             <id>doclint-java8-disable</id>
             <activation>
                 <jdk>[1.8,</jdk>
