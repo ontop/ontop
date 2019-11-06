@@ -3,11 +3,13 @@ package it.unibz.inf.ontop.iq.executor.join;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
+import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -15,10 +17,14 @@ import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -37,12 +43,14 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
      */
     private static final int MAX_ITERATIONS = 100;
     private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
 
     protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
                                         SubstitutionFactory substitutionFactory,
                                         ImmutableUnificationTools unificationTools, TermFactory termFactory) {
         super(substitutionFactory, unificationTools, termFactory);
         this.iqFactory = iqFactory;
+        this.termFactory = termFactory;
     }
 
 
@@ -137,7 +145,38 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
             predicateProposal.ifPresent(proposalListBuilder::add);
         }
 
-        return createConcreteProposal(proposalListBuilder.build(), priorityVariables);
+        return createConcreteProposal(proposalListBuilder.build(), initialDataNodeMap, priorityVariables);
+    }
+
+    protected Optional<ConcreteProposal> createConcreteProposal(
+            ImmutableList<PredicateLevelProposal> predicateProposals,
+            ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap, ImmutableList<Variable> priorityVariables) {
+
+
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
+        try {
+            optionalMergedSubstitution = mergeSubstitutions(extractSubstitutions(predicateProposals), initialDataNodeMap, priorityVariables);
+        } catch (AtomUnificationException e) {
+            return Optional.empty();
+        }
+
+        ImmutableSet<DataNode> removedDataNodes =predicateProposals.stream()
+                .flatMap(p -> p.getRemovedDataNodes().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        if (removedDataNodes.isEmpty()
+                && (! optionalMergedSubstitution.isPresent()))
+            return Optional.empty();
+
+        Optional<ImmutableExpression> isNotConjunction = termFactory.getConjunction(predicateProposals.stream()
+                .map(PredicateLevelProposal::getIsNotNullConjunction)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .flatMap(ImmutableExpression::flattenAND)
+                .distinct());
+
+        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes, isNotConjunction));
     }
 
     protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
