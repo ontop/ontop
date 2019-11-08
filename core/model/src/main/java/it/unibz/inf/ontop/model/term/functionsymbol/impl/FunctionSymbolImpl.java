@@ -10,11 +10,12 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm.FunctionalTermDecomposition;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.NonDeterministicDBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermNullabilityImpl;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -153,15 +154,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public IncrementalEvaluation evaluateStrictEq(ImmutableList<? extends ImmutableTerm> terms, ImmutableTerm otherTerm,
                                                   TermFactory termFactory, VariableNullability variableNullability) {
-        boolean differentTypeDetected = inferType(terms)
+        boolean incompatibleTypesDetected = inferType(terms)
                 .flatMap(TermTypeInference::getTermType)
                 .map(t1 -> otherTerm.inferType()
                         .flatMap(TermTypeInference::getTermType)
-                        .map(t2 -> !t1.equals(t2))
+                        .map(t2 -> areIncompatibleForStrictEq(t1,t2))
                         .orElse(false))
                 .orElse(false);
 
-        if (differentTypeDetected)
+        if (incompatibleTypesDetected)
             return IncrementalEvaluation.declareIsFalse();
 
         if ((otherTerm instanceof ImmutableFunctionalTerm))
@@ -173,6 +174,15 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
             return evaluateStrictEqWithNonNullConstant(terms, (NonNullConstant) otherTerm, termFactory, variableNullability);
         }
         return IncrementalEvaluation.declareSameExpression();
+    }
+
+    /**
+     * Different types are only tolerated for DB term types
+     */
+    private boolean areIncompatibleForStrictEq(TermType type1, TermType type2) {
+        if (type1.equals(type2))
+            return false;
+        return !((type1 instanceof DBTermType) && (type2 instanceof DBTermType));
     }
 
     /**
@@ -469,5 +479,37 @@ public abstract class FunctionSymbolImpl extends PredicateImpl implements Functi
     @Override
     public TermType getExpectedBaseType(int index) {
         return expectedBaseTypes.get(index);
+    }
+
+    protected Optional<ImmutableTerm> tryToLiftMagicNumbers(ImmutableList<ImmutableTerm> newTerms,
+                                                            TermFactory termFactory,
+                                                            VariableNullability variableNullability, boolean isBoolean) {
+        Optional<ImmutableFunctionalTerm> optionalTermTypeFunctionalTerm = newTerms.stream()
+                .filter(t -> t instanceof ImmutableFunctionalTerm)
+                .map(t -> (ImmutableFunctionalTerm) t)
+                .filter(t -> t.getFunctionSymbol() instanceof RDFTermTypeFunctionSymbol)
+                .findFirst();
+
+        if (optionalTermTypeFunctionalTerm.isPresent()) {
+            ImmutableFunctionalTerm firstTermTypeFunctionalTerm = optionalTermTypeFunctionalTerm.get();
+            int index = newTerms.indexOf(firstTermTypeFunctionalTerm);
+
+            ImmutableTerm newTerm = ((RDFTermTypeFunctionSymbol) firstTermTypeFunctionalTerm.getFunctionSymbol())
+                    .lift(
+                            firstTermTypeFunctionalTerm.getTerms(),
+                            c -> termFactory.getImmutableFunctionalTerm(
+                                    this,
+                                    IntStream.range(0, newTerms.size())
+                                            .boxed()
+                                            .map(i -> i == index ? c : newTerms.get(i))
+                                            .collect(ImmutableCollectors.toList())),
+                            termFactory, isBoolean)
+                    // Recursive
+                    .simplify(variableNullability);
+
+            return Optional.of(newTerm);
+        }
+        else
+            return Optional.empty();
     }
 }

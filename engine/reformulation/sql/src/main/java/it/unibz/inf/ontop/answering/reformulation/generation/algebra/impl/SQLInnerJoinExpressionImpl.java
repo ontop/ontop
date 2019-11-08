@@ -10,15 +10,20 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SQLInnerJoinExpressionImpl implements SQLInnerJoinExpression {
 
     private final SQLExpression leftExpression;
     private final SQLExpression rightExpression;
+    private final Optional<ImmutableExpression> optionalFilter;
 
     @AssistedInject
-    private SQLInnerJoinExpressionImpl(@Assisted("leftExpression") SQLExpression leftExpression, @Assisted("rightExpression") SQLExpression rightExpression) {
+    private SQLInnerJoinExpressionImpl(@Assisted("leftExpression") SQLExpression leftExpression,
+                                       @Assisted("rightExpression") SQLExpression rightExpression,
+                                       @Assisted Optional<ImmutableExpression> optionalFilter) {
         this.leftExpression = leftExpression;
         this.rightExpression = rightExpression;
+        this.optionalFilter = optionalFilter;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class SQLInnerJoinExpressionImpl implements SQLInnerJoinExpression {
 
     @Override
     public Optional<ImmutableExpression> getFilterCondition() {
-        return Optional.empty();
+        return optionalFilter;
     }
 
     @Override

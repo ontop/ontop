@@ -415,8 +415,7 @@ public class SelectQueryParserTest {
     // END SUB SELECT TESTS
 
     private ImmutableExpression eqOf(String var1, String var2) {
-        return TERM_FACTORY.getStrictEquality(
-                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
+        return TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2));
     }
 
     private DataAtom<RelationPredicate> dataAtomOf(DBMetadata m, String predicateName, String var1, String var2) {

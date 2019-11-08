@@ -20,11 +20,8 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.datalog.OrderCondition;
-
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -214,19 +211,6 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
-	@Override
-	public String sqlOrderByAndSlice(List<OrderCondition> conditions, String viewname, long limit, long offset) {
-
-		//BUGFIX LIMIT 0 is not supported in sql server
-		if(limit == 0){
-			return "WHERE 1 = 0";
-		}
-		String sql=sqlOrderBy(conditions,viewname);
-		if (!sql.equals(""))
-			sql+="\n";
-		return sql + sqlSlice(limit, offset);
-
-	}
 	@Override
 	public String sqlCast(String value, int type) {
 

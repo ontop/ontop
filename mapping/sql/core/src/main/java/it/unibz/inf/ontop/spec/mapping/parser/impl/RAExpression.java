@@ -157,7 +157,7 @@ public class RAExpression {
                     ImmutableTerm v2 = re2.getAttributes().get(id);
                     if (v2 == null)
                         throw new IllegalArgumentException("Term " + id + " not found in " + re2);
-                    return termFactory.getStrictEquality(v1, v2);
+                    return termFactory.getNotYetTypedEquality(v1, v2);
                 })
                 .collect(ImmutableCollectors.toList());
     }

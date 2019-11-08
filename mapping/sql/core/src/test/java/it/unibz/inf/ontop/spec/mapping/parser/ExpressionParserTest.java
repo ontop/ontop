@@ -34,7 +34,6 @@ import static org.junit.Assert.assertEquals;
 public class ExpressionParserTest {
 
 
-    private static final DBBooleanFunctionSymbol NEQ = DB_FS_FACTORY.getDBStrictNEquality(2);
     private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
     private static final DBBooleanFunctionSymbol IS_NULL = DB_FS_FACTORY.getDBIsNull();
 
@@ -295,7 +294,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getStrictEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
@@ -312,10 +311,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                NEQ,
+        assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
-                TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
 
     @Test
@@ -330,10 +328,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
-                NEQ,
+        assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
-                TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
 
     @Test
@@ -420,7 +417,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getStrictEquality(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
@@ -437,10 +434,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
-                NEQ,
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
-                TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
 
     @Test
@@ -455,10 +451,9 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
-                NEQ,
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
-                TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
+                TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
 
     @Test
@@ -546,10 +541,10 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
-                TERM_FACTORY.getStrictEquality(
+                TERM_FACTORY.getNotYetTypedEquality(
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
-                TERM_FACTORY.getStrictEquality(
+                TERM_FACTORY.getNotYetTypedEquality(
                         v,
                         TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
     }
@@ -568,10 +563,10 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
-                        TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getNotYetTypedEquality(
                                 v,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
-                        TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getNotYetTypedEquality(
                                 v,
                                 TERM_FACTORY.getDBConstant("3", dbLongType)))), translation.get(0));
     }
@@ -593,16 +588,16 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getConjunction(
-                        TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getNotYetTypedEquality(
                                 v1,
                                 TERM_FACTORY.getDBConstant("1", dbLongType)),
-                        TERM_FACTORY.getStrictEquality(
+                        TERM_FACTORY.getNotYetTypedEquality(
                                 v2,
                                 TERM_FACTORY.getDBConstant("3", dbLongType))),
-                TERM_FACTORY.getStrictEquality(
+                TERM_FACTORY.getNotYetTypedEquality(
                         v1,
                         TERM_FACTORY.getDBConstant("2", dbLongType)),
-                TERM_FACTORY.getStrictEquality(
+                TERM_FACTORY.getNotYetTypedEquality(
                         v2,
                         TERM_FACTORY.getDBConstant("4", dbLongType))), translation.get(0));
     }
@@ -1249,7 +1244,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getStrictEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(true)), translation.get(0));
     }
@@ -1267,7 +1262,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getStrictEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(false)), translation.get(0));
     }

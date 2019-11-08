@@ -3,11 +3,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol extends BooleanFunctionSymbolImpl {
@@ -70,10 +73,13 @@ public abstract class AbstractLexicalNonStrictEqOrInequalityFunctionSymbol exten
                     (RDFTermTypeConstant) typeTerm1, (RDFTermTypeConstant) typeTerm2);
         }
 
-        return liftFirstIfThen(lexicalTerm1, lexicalTerm2, typeTerm1, typeTerm2, termFactory)
+        // Looks first for magic numbers
+        return tryToLiftMagicNumbers(newTerms, termFactory, variableNullability)
+                // Otherwise try to lift the first ifThen
+                .orElseGet(() -> liftFirstIfThen(lexicalTerm1, lexicalTerm2, typeTerm1, typeTerm2, termFactory)
                 .map(t -> t.simplify(variableNullability))
-                .orElseGet(() -> termFactory.getImmutableExpression(this, lexicalTerm1, typeTerm1,
-                        lexicalTerm2, typeTerm2));
+                        .orElseGet(() -> termFactory.getImmutableExpression(this, lexicalTerm1, typeTerm1,
+                                lexicalTerm2, typeTerm2)));
     }
 
     /**

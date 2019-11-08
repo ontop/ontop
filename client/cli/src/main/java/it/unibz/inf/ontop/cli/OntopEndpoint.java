@@ -5,7 +5,6 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import it.unibz.inf.ontop.endpoint.OntopEndpointApplication;
-import org.springframework.boot.SpringApplication;
 
 import java.util.ArrayList;
 
@@ -20,11 +19,15 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--cors-allowed-origins"}, title = "origins",
             description = "CORS allowed origins")
-    private String corsAllowedOrigins = ",";
+    private String corsAllowedOrigins;
 
     @Option(type = OptionType.COMMAND, name = {"--lazy"}, title = "lazy",
             description = "lazy initialization")
     private boolean lazy = false;
+
+    @Option(type = OptionType.COMMAND, name = {"--dev"}, title = "dev",
+            description = "development mode")
+    private boolean dev = false;
 
     @Override
     public void run() {
@@ -33,15 +36,21 @@ public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
                 "--mapping=" + this.mappingFile,
                 "--properties=" + this.propertiesFile,
                 "--port=" + this.port,
-                "--cors-allowed-origins=" + this.corsAllowedOrigins,
-                "--lazy=" + this.lazy);
+                "--lazy=" + this.lazy,
+                "--dev=" + this.dev);
+
+        if (this.corsAllowedOrigins != null)
+            argList.add("--cors-allowed-origins=" + this.corsAllowedOrigins);
 
         if (this.owlFile != null)
             argList.add("--ontology=" + this.owlFile);
 
+        if (this.constraintFile != null)
+            argList.add("--constraint=" + this.constraintFile);
+
         String[] args = new String[argList.size()];
         argList.toArray(args);
 
-        SpringApplication.run(OntopEndpointApplication.class, args);
+        OntopEndpointApplication.main(args);
     }
 }

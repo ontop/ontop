@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -39,8 +40,8 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
     protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
                                         SubstitutionFactory substitutionFactory,
-                                        ImmutableUnificationTools unificationTools) {
-        super(substitutionFactory, unificationTools);
+                                        ImmutableUnificationTools unificationTools, TermFactory termFactory) {
+        super(substitutionFactory, unificationTools, termFactory);
         this.iqFactory = iqFactory;
     }
 

@@ -20,7 +20,7 @@ public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
      * Builds a DB CASE functional term with an "entry" for possible DBConstant value.
      * Returns NULL in the default case
      */
-    ImmutableTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+    ImmutableFunctionalTerm lift(ImmutableList<? extends ImmutableTerm> terms,
                        Function<RDFTermTypeConstant, ImmutableTerm> caseTermFct,
                        TermFactory termFactory);
 
@@ -31,4 +31,26 @@ public interface RDFTermTypeFunctionSymbol extends FunctionSymbol {
     ImmutableExpression liftExpression(ImmutableList<? extends ImmutableTerm> terms,
                                        Function<RDFTermTypeConstant, ImmutableExpression> caseExpressionFct,
                                        TermFactory termFactory);
+
+    default ImmutableFunctionalTerm lift(ImmutableList<? extends ImmutableTerm> terms,
+                                         Function<RDFTermTypeConstant, ? extends ImmutableTerm> caseTermFct,
+                                         TermFactory termFactory, boolean isBoolean) {
+        return isBoolean
+                ? liftExpression(terms, (Function<RDFTermTypeConstant, ImmutableExpression>) caseTermFct, termFactory)
+                : lift(terms, (Function<RDFTermTypeConstant, ImmutableTerm>) caseTermFct, termFactory);
+    }
+
+    /**
+     * By default, RDFTermTypeFunctionSymbol cannot be simplified and are therefore not post-processable.
+     * This is needed for lifting them above UNIONs using the standard binding lifting mechanisms.
+     *
+     * However, RDFTermTypeFunctionSymbol that arrive to the top construction node needs to replaced
+     * by "simplifiable" versions so as to be post-processed.
+     *
+     * Observe that we expect RDFTermTypeFunctionSymbol to either reach the top construction node or to
+     * be eliminated, as they cannot be delegated to the DB engine.
+     */
+    RDFTermTypeFunctionSymbol getSimplifiableVariant();
+
+
 }

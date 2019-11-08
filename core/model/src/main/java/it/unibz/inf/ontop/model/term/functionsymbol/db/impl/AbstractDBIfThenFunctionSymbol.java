@@ -1,12 +1,15 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -86,7 +89,8 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
                         if (newWhenPairs.isEmpty())
                             return possibleValue;
                         else
-                            return termFactory.getDBCase(newWhenPairs.stream(), possibleValue, doOrderingMatter);
+                            return termFactory.getDBCase(newWhenPairs.stream(), possibleValue, doOrderingMatter)
+                                    .simplify(variableNullability);
                     default:
                         // Discard the case entry
                 }
@@ -101,6 +105,13 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
         }
 
         ImmutableTerm defaultValue = simplifyValue(extractDefaultValue(terms, termFactory), variableNullability, termFactory);
+
+        Optional<ImmutableFunctionalTerm> optionalLiftedOptionalTerm = tryToLiftRDFTermTypeFunctions(newWhenPairs,
+                defaultValue, termFactory);
+        if (optionalLiftedOptionalTerm.isPresent())
+            return optionalLiftedOptionalTerm.get()
+                    .simplify(variableNullability);
+
 
         ImmutableList<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> shrunkWhenPairs =
                 shrinkWhenPairs(newWhenPairs, defaultValue);
@@ -123,6 +134,52 @@ public abstract class AbstractDBIfThenFunctionSymbol extends AbstractArgDependen
     protected ImmutableTerm simplifyValue(ImmutableTerm immutableTerm, VariableNullability variableNullability, TermFactory termFactory) {
         return immutableTerm.simplify(variableNullability);
     }
+
+    private Optional<ImmutableFunctionalTerm> tryToLiftRDFTermTypeFunctions(
+            List<Map.Entry<ImmutableExpression, ? extends ImmutableTerm>> whenPairs,
+            ImmutableTerm defaultValue, TermFactory termFactory) {
+
+        ImmutableList<? extends ImmutableTerm> possibleTerms = Stream.concat(
+                whenPairs.stream().map(Map.Entry::getValue),
+                Stream.of(defaultValue))
+                .collect(ImmutableCollectors.toList());
+
+        if (possibleTerms.stream().allMatch(t -> (t instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) t).getFunctionSymbol())instanceof RDFTermTypeFunctionSymbol)) {
+
+            Stream<Map.Entry<ImmutableExpression, ImmutableTerm>> newWhenPairs = whenPairs.stream()
+                    .map(e -> Maps.immutableEntry(
+                            e.getKey(),
+                            // Unwraps the RDF type functional term
+                            ((ImmutableFunctionalTerm) e.getValue()).getTerm(0)));
+            ImmutableTerm newDefaultValue = ((ImmutableFunctionalTerm) defaultValue).getTerm(0);
+
+            ImmutableFunctionalTerm newCase = termFactory.getDBCase(newWhenPairs, newDefaultValue, doOrderingMatter);
+
+            ImmutableSet<RDFTermTypeFunctionSymbol> functionSymbols = possibleTerms.stream()
+                    .map(t -> (ImmutableFunctionalTerm) t)
+                    .map(t -> (RDFTermTypeFunctionSymbol) t.getFunctionSymbol())
+                    .collect(ImmutableCollectors.toSet());
+
+            ImmutableSet<TypeConstantDictionary> dictionaries = functionSymbols.stream()
+                    .map(RDFTermTypeFunctionSymbol::getDictionary)
+                    .collect(ImmutableCollectors.toSet());
+            if (dictionaries.size() != 1)
+                throw new MinorOntopInternalBugException(
+                        "All the RDFTermTypeFunctionSymbol were expected to use the same dictionary");
+            TypeConstantDictionary dictionary = dictionaries.stream().findAny().get();
+
+            ImmutableSet<RDFTermTypeConstant> possibleConstants = functionSymbols.stream()
+                    .flatMap(f -> f.getConversionMap().values().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            return Optional.of(termFactory.getRDFTermTypeFunctionalTerm(
+                    newCase, dictionary, possibleConstants, false));
+        }
+        else
+            return Optional.empty();
+    }
+
 
     /**
      * Can be overridden

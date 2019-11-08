@@ -136,7 +136,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		log.debug("Producing the native query string...");
 
-		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq, executorRegistry);
+		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
 
 		log.debug("Resulting native query: \n{}", executableQuery);
 

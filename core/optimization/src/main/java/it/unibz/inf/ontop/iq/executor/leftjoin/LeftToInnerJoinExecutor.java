@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.SubstitutionPropagationProposal;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.iq.proposal.impl.SubstitutionPropagationProposalImpl;
+import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -51,25 +52,27 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private final SubstitutionFactory substitutionFactory;
     private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final IQConverter iqConverter;
 
     @Inject
     private LeftToInnerJoinExecutor(LeftJoinRightChildNormalizationAnalyzer normalizer,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory, SubstitutionFactory substitutionFactory,
                                     DBFunctionSymbolFactory dbFunctionSymbolFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
+                                    CoreUtilsFactory coreUtilsFactory, IQConverter iqConverter) {
         this.normalizer = normalizer;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.iqConverter = iqConverter;
     }
 
     @Override
     public NodeCentricOptimizationResults<LeftJoinNode> apply(LeftJoinOptimizationProposal proposal,
                                                               IntermediateQuery query, QueryTreeComponent treeComponent)
-            throws InvalidQueryOptimizationProposalException, EmptyQueryException {
+            throws InvalidQueryOptimizationProposalException {
         LeftJoinNode leftJoinNode = proposal.getFocusNode();
 
         QueryNode leftChild = query.getChild(leftJoinNode, LEFT)
@@ -139,8 +142,11 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
 
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(query.getKnownVariables());
 
+        // Variable nullability at the level of the left-join sub-tree
+        VariableNullability variableNullability = extractVariableNullability(query, leftJoinNode);
+
         LeftJoinRightChildNormalizationAnalysis analysis = normalizer.analyze(leftVariables, leftChildren,
-                rightComponent.dataNode, variableGenerator);
+                rightComponent.dataNode, variableGenerator, variableNullability);
 
         if (!analysis.isMatchingAConstraint())
             // No normalization
@@ -202,6 +208,30 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         return new NodeCentricOptimizationResultsImpl<>(query, Optional.of(innerJoinNode));
 
     }
+
+    private VariableNullability extractVariableNullability(IntermediateQuery query, LeftJoinNode leftJoinNode) {
+        return iqConverter.convertTree(query, findAncestorForVariableNullability(query, leftJoinNode))
+                .getVariableNullability();
+    }
+
+    /**
+     * Recursive
+     *
+     * TODO: consider more cases? (Such as going beyond UNIONs when possible)
+     */
+    private QueryNode findAncestorForVariableNullability(IntermediateQuery query, QueryNode queryNode) {
+
+        return query.getParent(queryNode)
+                .filter(p -> ((p instanceof LeftJoinNode) && query.getOptionalPosition(p, queryNode)
+                        .filter(pos -> pos.equals(LEFT))
+                        .isPresent())
+                        || (p instanceof InnerJoinNode)
+                        || (p instanceof FilterNode))
+                // Recursive
+                .map(p -> findAncestorForVariableNullability(query, p))
+                .orElse(queryNode);
+    }
+
 
     /**
      * Extracts equalities involving a left variable from the substitution

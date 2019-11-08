@@ -20,10 +20,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.datalog.OrderCondition;
-
 import java.sql.Types;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class HSQLDBDialectAdapter extends SQL99DialectAdapter {
