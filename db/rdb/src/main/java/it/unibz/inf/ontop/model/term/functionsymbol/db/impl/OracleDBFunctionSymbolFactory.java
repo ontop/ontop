@@ -300,11 +300,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         }
         // Timezone support
         else if (dbDateTimestampType.equals(dbTypeFactory.getDBTermType(DATE_STR))) {
-            return String.format("REPLACE(REGEXP_REPLACE(TO_CHAR(CAST (%s AS TIMESTAMP WITH TIME ZONE),'YYYY-MM-DD HH24:MI:SSxFF TZH:TZM'),' ','T',1,1),',','.')", termConverter.apply(terms.get(0)));
+            return String.format("REPLACE(REGEXP_REPLACE(TO_CHAR(CAST (%s AS TIMESTAMP WITH TIME ZONE),'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),',','.')", termConverter.apply(terms.get(0)));
         }
     	else
             return String.format(
-                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF TZH:TZM'),' ','T',1,1),' ',''),',','.')",
+                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
                     termConverter.apply(terms.get(0)));
     }
 
