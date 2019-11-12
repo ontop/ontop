@@ -189,7 +189,7 @@ public class ImmutableUnificationTools {
      * Computes one Most General Unifier (MGU) of (two) substitutions.
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
-                                                                             ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
+                                                                      ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
@@ -214,13 +214,8 @@ public class ImmutableUnificationTools {
             ImmutableSubstitution<VariableOrGroundTerm> substitution1,
             ImmutableSubstitution<VariableOrGroundTerm> substitution2) {
         Optional<ImmutableSubstitution<ImmutableTerm>> optionalMGUS = computeMGUS(substitution1, substitution2);
-        if (optionalMGUS.isPresent()) {
-            return Optional.of(substitutionTools.convertIntoVariableOrGroundTermSubstitution(
-                    optionalMGUS.get()));
-        }
-        else {
-            return Optional.empty();
-        }
+        return optionalMGUS
+                .map(substitutionTools::convertIntoVariableOrGroundTermSubstitution);
     }
 
 
