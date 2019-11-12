@@ -94,7 +94,10 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         table.put(timestampType, xsdDatetime, datetimeNormFunctionSymbol);
         // No TZ for TIMESTAMP --> incompatible with XSD.DATETIMESTAMP
 
+        // Date column in Oracle does include time information, too
         DBTermType dbDateType = dbTypeFactory.getDBTermType(DATE_STR);
+        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbolWoTz = createDateTimeNormFunctionSymbol(dbDateType);
+        table.put(dbDateType, xsdDatetime, datetimeNormFunctionSymbolWoTz);
         DBTypeConversionFunctionSymbol dateNormFunctionSymbol = new OracleDateNormFunctionSymbol(dbDateType, dbStringType);
         table.put(dbDateType, typeFactory.getDatatype(XSD.DATE), dateNormFunctionSymbol);
 
@@ -292,13 +295,16 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         /*
          * TIMESTAMP by default does not support time zones
          */
-        if (dbDateTimestampType.equals(dbTypeFactory.getDBTermType(TIMESTAMP_STR))) {
+    	if (dbDateTimestampType.equals(dbTypeFactory.getDBTermType(TIMESTAMP_STR))) {
             return String.format("REPLACE(REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF'),' ','T'),',','.')", termConverter.apply(terms.get(0)));
         }
         // Timezone support
-        else
+        else if (dbDateTimestampType.equals(dbTypeFactory.getDBTermType(DATE_STR))) {
+            return String.format("REPLACE(REGEXP_REPLACE(TO_CHAR(CAST (%s AS TIMESTAMP WITH TIME ZONE),'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),',','.')", termConverter.apply(terms.get(0)));
+        }
+    	else
             return String.format(
-                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFF TZH:TZM'),' ','T',1,1),' ',''),',','.')",
+                    "REPLACE(REPLACE(REGEXP_REPLACE(TO_CHAR(%s,'YYYY-MM-DD HH24:MI:SSxFFTZH:TZM'),' ','T',1,1),' ',''),',','.')",
                     termConverter.apply(terms.get(0)));
     }
 
