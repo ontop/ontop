@@ -118,7 +118,7 @@ public abstract class AbstractCommonDenominatorFunctionSymbol extends FunctionSy
                 false);
 
         return termFactory.getRDFTermTypeFunctionalTerm(caseTerm, dictionary,
-                ImmutableSet.copyOf(validCombinations.values()));
+                ImmutableSet.copyOf(validCombinations.values()), true);
     }
 
     /**

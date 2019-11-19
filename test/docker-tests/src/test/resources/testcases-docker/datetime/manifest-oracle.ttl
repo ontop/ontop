@@ -10,7 +10,7 @@
     mf:entries
     ( 
       :date :date-bgp
-      :date-str :date-str-bgp
+      :date-str2-oracle
       :timestamp
 	  :timestamp-str
 	  :timestamptz
@@ -40,6 +40,17 @@
     mf:knowledgebase <datatypes.owl> ;
     mf:mappings <datatypes-oracle.obda> ;
     mf:parameters <datatypes-oracle.properties> .
+
+:date-str2-oracle rdf:type mf:DatatypeEvaluationTest ;
+    mf:name    "Type: DATE - cast to xsd:dateTime" ;
+    obdat:approval obdat:Approved ;
+    obdat:approvedBy <-ontop-Team> ;
+    mf:action
+            [ qt:query <date-datetime-oracle.rq> ] ;
+    mf:result <date-datetime-oracle.ttl> ;
+    mf:knowledgebase <datatypes.owl> ;
+    mf:mappings <datatypes-oracle.obda> ;
+	mf:parameters <datatypes-oracle.properties> .
     
 :timestamp rdf:type mf:DatatypeEvaluationTest ;
     mf:name    "Type: TIMESTAMP" ;

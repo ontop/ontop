@@ -1,0 +1,7 @@
+PREFIX : <http://ontop.inf.unibz.it/test/datatypes#>
+
+SELECT ?x (str(?y) AS ?z)
+WHERE {
+   ?x a :Row; :hasDateDatetime ?y
+   FILTER (strStarts(str(?y), "2013-03-18T00:00:00")) .
+}

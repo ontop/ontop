@@ -21,14 +21,29 @@ public interface DBTermType extends TermType {
     boolean isNeedingIRISafeEncoding();
 
     /**
-     * Returns true if the mapping VALUE -> LEXICAL TERM is unique.
+     * Returns true if the non-strict equality between two terms of this type
+     * is equivalent to a strict equality
+     */
+    boolean areEqualitiesStrict();
+
+    /**
+     * Returns true if the non-strict equality between terms of these two types
+     * are equivalent to a strict equality
+     */
+    Optional<Boolean> areEqualitiesStrict(DBTermType otherType);
+
+    /**
+     * Returns true if the non-strict equality between two attributes of the same database
+     * of this type is equivalent to a strict equality.
      *
-     * Not the case for instance for floating numbers, timestamp with timezone, etc.
+     * Useful for floating numbers.
      *
-     * Useful for decomposing constant IRIs
+     * Note that we are NOT considering here equalities with constants coming from source part
+     * of the mapping assertion.
      *
      */
-    boolean areLexicalTermsUnique();
+    boolean areEqualitiesBetweenTwoDBAttributesStrict();
+
 
     enum Category {
         STRING,

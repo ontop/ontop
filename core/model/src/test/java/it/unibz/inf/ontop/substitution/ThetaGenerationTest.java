@@ -20,26 +20,34 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
 
 
 public class ThetaGenerationTest extends TestCase {
+
+	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
 	private Vector<SingletonSubstitution> getMGUAsVector(Substitution mgu) {
 		Vector<SingletonSubstitution> computedmgu = new Vector<>();
@@ -113,7 +121,27 @@ public class ThetaGenerationTest extends TestCase {
 	}
 
 	private static AtomPredicate createClassLikePredicate(String name) {
-		return DATALOG_FACTORY.getSubqueryPredicate(name, 1);
+		return new DatalogAtomPredicate(SUBQUERY_PRED_PREFIX + name, 1, TYPE_FACTORY);
+	}
+
+
+
+	/**
+	 * Used for intermediate datalog rules
+	 */
+	private static class DatalogAtomPredicate extends AtomPredicateImpl {
+
+		private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
+			super(name, createExpectedBaseTypes(arity, typeFactory));
+		}
+
+		private static ImmutableList<TermType> createExpectedBaseTypes(int arity, TypeFactory typeFactory) {
+			TermType rootType = typeFactory.getAbstractAtomicTermType();
+			return IntStream.range(0, arity)
+					.boxed()
+					.map(i -> rootType)
+					.collect(ImmutableCollectors.toList());
+		}
 	}
 
 	//A(x),A('y')

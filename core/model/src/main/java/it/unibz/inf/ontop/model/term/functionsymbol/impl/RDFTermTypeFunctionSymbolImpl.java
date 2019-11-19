@@ -16,24 +16,30 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermTypeFunctionSymbol {
+public  class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements RDFTermTypeFunctionSymbol {
 
 
     private final MetaRDFTermType metaType;
     private final TypeConstantDictionary dictionary;
     private final ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap;
+    private final boolean isSimplifiable;
+    private final RDFTermTypeFunctionSymbol simplifiableVariant;
 
     protected RDFTermTypeFunctionSymbolImpl(TypeFactory typeFactory,
                                             TypeConstantDictionary dictionary,
-                                            ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap) {
+                                            ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap,
+                                            boolean isSimplifiable) {
         super("RDF_TYPE" + extractConversionMapString(conversionMap),
                 ImmutableList.of(typeFactory.getDBTypeFactory().getDBBooleanType()));
         metaType = typeFactory.getMetaRDFTermType();
         this.dictionary = dictionary;
         this.conversionMap = conversionMap;
+        this.isSimplifiable = isSimplifiable;
+        this.simplifiableVariant = isSimplifiable
+                ? this
+                : new RDFTermTypeFunctionSymbolImpl(typeFactory, dictionary, conversionMap, true);
     }
 
     private static String extractConversionMapString(ImmutableBiMap<DBConstant, RDFTermTypeConstant> conversionMap) {
@@ -59,7 +65,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms,
                                                      TermFactory termFactory, VariableNullability variableNullability) {
         ImmutableTerm term = newTerms.get(0);
-        if (term instanceof DBConstant) {
+        if (isSimplifiable && (term instanceof DBConstant)) {
             return conversionMap.get(term);
         }
         else
@@ -68,7 +74,7 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
 
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return true;
+        return isSimplifiable;
     }
 
     @Override
@@ -114,6 +120,11 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
     }
 
     @Override
+    public RDFTermTypeFunctionSymbol getSimplifiableVariant() {
+        return simplifiableVariant;
+    }
+
+    @Override
     protected boolean mayReturnNullWithoutNullArguments() {
         return false;
     }
@@ -132,8 +143,11 @@ public class RDFTermTypeFunctionSymbolImpl extends FunctionSymbolImpl implements
                 .orElseGet(IncrementalEvaluation::declareIsFalse);
     }
 
+    /**
+     * NB: to prevent some optimization
+     */
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return !isSimplifiable;
     }
 }

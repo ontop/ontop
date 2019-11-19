@@ -20,13 +20,15 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 
 /**
@@ -41,8 +43,6 @@ import it.unibz.inf.ontop.spec.ontology.ClassExpression;
  *                       
  *     each instance also stores those atoms of the query with all terms among the tw roots
  *      
- *     this information is enough to produce the tree witness formula tw_f 
- *     
  * @author Roman Kontchakov
  *
  */
@@ -50,32 +50,21 @@ import it.unibz.inf.ontop.spec.ontology.ClassExpression;
 public class TreeWitness {
 	private final TermCover terms;
 	
-	private final Set<Function> rootAtoms; // atoms of the query that contain only the roots of the tree witness
+	private final ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms; // atoms of the query that contain only the roots of the tree witness
 	                            // these atoms must hold true for this tree witness to be realised
-	private final Collection<TreeWitnessGenerator> gens; // the \exists R.B concepts that realise the tree witness 
+	private final ImmutableList<TreeWitnessGenerator> generators; // the \exists R.B concepts that realise the tree witness
 	                                          // in the canonical model of the TBox
 	
-	private final Intersection<ClassExpression> rootConcepts; // store concept for merging tree witnesses
+	private final DownwardSaturatedImmutableSet<ClassExpression> rootConcepts; // store concept for merging tree witnesses
 	
-	private List<List<Function>> twfs;  // tw-formula: disjunction of conjunctions of atoms
-
-	public TreeWitness(Collection<TreeWitnessGenerator> gens, TermCover terms, Set<Function> rootAtoms, Intersection<ClassExpression> rootConcepts) {
-		this.gens = gens;
+	public TreeWitness(ImmutableList<TreeWitnessGenerator> generators, TermCover terms, ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms, DownwardSaturatedImmutableSet<ClassExpression> rootConcepts) {
+		this.generators = generators;
 		this.terms = terms;
 		this.rootAtoms = rootAtoms;
 		this.rootConcepts = rootConcepts;
-		//this.domain = domain; // new HashSet<term>(roots); domain.addAll(nonroots);
 	}
-	
-	void setFormula(List<List<Function>> twfs) {
-		this.twfs = twfs;
-	}
-	
-	public List<List<Function>> getFormula() {
-		return twfs;
-	}
-	
-	public Intersection<ClassExpression> getRootConcepts() {
+
+	public DownwardSaturatedImmutableSet<ClassExpression> getRootConcepts() {
 		return rootConcepts;
 	}
 	
@@ -84,93 +73,85 @@ public class TreeWitness {
 	 * 
 	 * @return set of roots of the tree witness
 	 */
-	public Set<Term> getRoots() {
+	public ImmutableSet<VariableOrGroundTerm> getRoots() {
 		return terms.roots;
 	}
 	
 	/**
 	 * boolean isMergeable()
-	 * 
-	 * @return true if all root terms are quantified variables and there is the intersection of root concepts is non-empty
+	 * @return true if all root terms are quantified variables
+	 *                  (otherwise, the constructing code sets the rootConcepts to BOT)
+	 *                 and the intersection of root concepts is non-empty
 	 */
 	public boolean isMergeable() {
 		return !rootConcepts.isBottom();
 	}
 	
 	/**
-	 * Set<Term> getDomain()
+	 * ImmutableSet<Term> getDomain()
 	 * 
 	 * @return the domain (set of terms) of the tree witness
 	 */
 	
-	public Set<Term> getDomain() {
+	public ImmutableSet<VariableOrGroundTerm> getDomain() {
 		return terms.domain;
 	}
-	
-	public TermCover getTerms() {
-		return terms;
-	}
+
+	public TermCover getTerms() { return terms; }
 	
 	/**
-	 * Set<TreeWitnessGenerator> getGenerator()
+	 * ImmutableList<TreeWitnessGenerator> getGenerator()
 	 * 
 	 * @return the tree witness generators \exists R.B
 	 */
 	
-	public Collection<TreeWitnessGenerator> getGenerators() {
-		return gens;
+	public ImmutableList<TreeWitnessGenerator> getGenerators() {
+		return generators;
 	}
 
-	/**
-	 * getGeneratorSubConcepts
-	 * 
-	 * @return the set of all sub-concepts for all of the tree witness generators
-	 */
-	
-	
-	public Set<ClassExpression> getGeneratorSubConcepts() {
-		if (gens.size() == 1)
-			return gens.iterator().next().getSubConcepts();
-		
-		Set<ClassExpression> all = new HashSet<ClassExpression>();		
-		for (TreeWitnessGenerator twg : gens) 
-			all.addAll(twg.getSubConcepts());
-		return all;
-	}
-	
 	
 	/**
-	 * Set<Function> getRootAtoms()
+	 * ImmutableSet<DataAtom<RDFAtomPredicate>> getRootAtoms()
 	 * 
 	 * @return query atoms with all terms among the roots of tree witness
 	 */
 	
-	public Set<Function> getRootAtoms() {
+	public ImmutableSet<DataAtom<RDFAtomPredicate>> getRootAtoms() {
 		return rootAtoms;
 	}
 
 	/**
-	 * boolean isCompatibleWith(TreeWitness tw1, TreeWitness tw2)
+	 * boolean isCompatible(TreeWitness tw1, TreeWitness tw2)
 	 * 
-	 * tree witnesses are consistent iff their domains intersect on their **common** roots
+	 * distinct tree witnesses are compatible iff their domains intersect on their **common** roots
 	 * 
 	 * @param tw1: a tree witness
-	 * @return true if tw1 is compatible with the given tree witness
+	 * @param tw2: a tree witness
+	 * @return true if tw1 is compatible with tw2
 	 */
 	
-	public static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
-		Set<Term> commonTerms = new HashSet<>(tw1.getDomain());
+	private static boolean isCompatible(TreeWitness tw1, TreeWitness tw2) {
+		Set<VariableOrGroundTerm> commonTerms = new HashSet<>(tw1.getDomain());
 		commonTerms.retainAll(tw2.getDomain());
-		if (!commonTerms.isEmpty()) {
-			if (!tw1.getRoots().containsAll(commonTerms) || !tw2.getRoots().containsAll(commonTerms))
-				return false;
+		return commonTerms.isEmpty() /* an optimisation - not necessary */ ||
+				(tw1.getRoots().containsAll(commonTerms) && tw2.getRoots().containsAll(commonTerms));
+	}
+
+	public static boolean isCompatible(ImmutableList<TreeWitness> tws) {
+		for (ListIterator<TreeWitness> i = tws.listIterator(tws.size()); i.hasPrevious(); ) {
+			TreeWitness tw0 = i.previous();
+			for (ListIterator<TreeWitness> j = tws.listIterator(); j.nextIndex() <= i.previousIndex(); )
+				if (!isCompatible(tw0, j.next()))
+					return false;
 		}
 		return true;
 	}
-	
+
+
+
 	@Override
 	public String toString() {
-		return "tree witness generated by " + gens + "\n    with domain " + terms + " and root atoms " + rootAtoms;
+		return "tree witness generated by " + generators + "\n    with domain " + terms + " and root atoms " + rootAtoms;
 	}
 
 	/**
@@ -182,20 +163,20 @@ public class TreeWitness {
 	 *
 	 */
 	
-	public static class TermCover {
-		private final Set<Term> domain; // terms that are covered by the tree witness
-		private final Set<Term> roots;   // terms that are mapped onto the root of the tree witness
+	public static final class TermCover {
+		private final ImmutableSet<VariableOrGroundTerm> domain; // terms that are covered by the tree witness
+		private final ImmutableSet<VariableOrGroundTerm> roots;  // terms that are mapped onto the root of the tree witness
 		
-		public TermCover(Set<Term> domain, Set<Term> roots) {
+		public TermCover(ImmutableSet<VariableOrGroundTerm> domain, ImmutableSet<VariableOrGroundTerm> roots) {
 			this.domain = domain;
 			this.roots = roots;
 		}
 		
-		public Set<Term> getDomain() {
+		public ImmutableSet<VariableOrGroundTerm> getDomain() {
 			return domain;
 		}
 		
-		public Set<Term> getRoots() {
+		public ImmutableSet<VariableOrGroundTerm> getRoots() {
 			return roots;
 		}
 		
@@ -208,8 +189,7 @@ public class TreeWitness {
 		public boolean equals(Object obj) {
 			if (obj instanceof TermCover) {
 				TermCover other = (TermCover)obj;
-				return this.roots.equals(other.roots) && 
-					   this.domain.equals(other.domain);			
+				return this.roots.equals(other.roots) && this.domain.equals(other.domain);
 			}
 			return false;
 		}

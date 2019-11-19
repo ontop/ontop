@@ -1,9 +1,12 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermTypeFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsNullOrNotFunctionSymbol;
@@ -66,7 +69,16 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
     @Override
     protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
                                                      VariableNullability variableNullability) {
-        ImmutableList<ImmutableTerm> remainingTerms = newTerms.stream()
+
+        ImmutableList<ImmutableTerm> flattenedTerms = newTerms.stream()
+                // TODO: consider using an interface
+                .flatMap(t -> ((t instanceof ImmutableFunctionalTerm)
+                        && (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DefaultDBCoalesceFunctionSymbol))
+                        ? ((ImmutableFunctionalTerm) t).getTerms().stream()
+                        : Stream.of(t))
+                .collect(ImmutableCollectors.toList());
+
+        ImmutableList<ImmutableTerm> remainingTerms = flattenedTerms.stream()
                 .filter(t -> !t.isNull())
                 .collect(ImmutableCollectors.toList());
 
@@ -77,6 +89,12 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
                 return remainingTerms.get(0);
             default:
         }
+
+        Optional<ImmutableFunctionalTerm> optionalLiftedOptionalTerm = tryToLiftRDFTermTypeFunctions(remainingTerms,
+                termFactory);
+        if (optionalLiftedOptionalTerm.isPresent())
+            return optionalLiftedOptionalTerm.get()
+                    .simplify(variableNullability);
 
         ImmutableTerm firstRemainingTerm = remainingTerms.get(0);
 
@@ -95,6 +113,40 @@ public class DefaultDBCoalesceFunctionSymbol extends AbstractArgDependentTypedDB
             default:
                 return termFactory.getDBCoalesce(simplifiedTerms);
         }
+    }
+
+    private Optional<ImmutableFunctionalTerm> tryToLiftRDFTermTypeFunctions(ImmutableList<ImmutableTerm> terms,
+                                                                            TermFactory termFactory) {
+        if (terms.stream().allMatch(t -> (t instanceof ImmutableFunctionalTerm)
+                && (((ImmutableFunctionalTerm) t).getFunctionSymbol())instanceof RDFTermTypeFunctionSymbol)) {
+            ImmutableSet<RDFTermTypeFunctionSymbol> functionSymbols = terms.stream()
+                    .map(t -> (ImmutableFunctionalTerm) t)
+                    .map(t -> (RDFTermTypeFunctionSymbol) t.getFunctionSymbol())
+                    .collect(ImmutableCollectors.toSet());
+
+            ImmutableSet<TypeConstantDictionary> dictionaries = functionSymbols.stream()
+                    .map(RDFTermTypeFunctionSymbol::getDictionary)
+                    .collect(ImmutableCollectors.toSet());
+            if (dictionaries.size() != 1)
+                throw new MinorOntopInternalBugException(
+                        "All the RDFTermTypeFunctionSymbol were expected to use the same dictionary");
+            TypeConstantDictionary dictionary = dictionaries.stream().findAny().get();
+
+            ImmutableSet<RDFTermTypeConstant> possibleConstants = functionSymbols.stream()
+                    .flatMap(f -> f.getConversionMap().values().stream())
+                    .collect(ImmutableCollectors.toSet());
+
+            ImmutableFunctionalTerm newCoalesce = termFactory.getDBCoalesce(terms.stream()
+                    .map(t -> (ImmutableFunctionalTerm) t)
+                    // Unwraps the RDF type term functional term
+                    .map(t -> t.getTerm(0))
+                    .collect(ImmutableCollectors.toList()));
+
+            return Optional.of(termFactory.getRDFTermTypeFunctionalTerm(
+                    newCoalesce, dictionary, possibleConstants, false));
+        }
+        else
+            return Optional.empty();
     }
 
     /**

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 
 import javax.inject.Inject;
 
@@ -13,9 +14,9 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
     private final ImmutableList<IQOptimizer> optimizers;
 
     @Inject
-    private DefaultCompositeInnerJoinIQOptimizer() {
+    private DefaultCompositeInnerJoinIQOptimizer(SelfJoinSameTermIQOptimizer selfJoinSameTermIQOptimizer) {
         // TODO: enrich
-        this.optimizers = ImmutableList.of();
+        this.optimizers = ImmutableList.of(selfJoinSameTermIQOptimizer);
     }
 
     @Override

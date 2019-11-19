@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import it.unibz.inf.ontop.datalog.AlgebraOperatorPredicate;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -99,17 +98,12 @@ public abstract class AbstractFunctionalTerm implements Function {
 
     @Override
     public boolean isDataFunction() {
-        return (!(isOperation() || isAlgebraFunction() || isDataTypeFunction()));
+        return (!(isOperation() || isDataTypeFunction()));
     }
 
     @Override
     public boolean isOperation() {
         return functor instanceof FunctionSymbol;
-    }
-
-    @Override
-    public boolean isAlgebraFunction() {
-        return functor instanceof AlgebraOperatorPredicate;
     }
 
     @Deprecated

@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -31,8 +32,8 @@ public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
     @Inject
     private UCRedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
                                         SubstitutionFactory substitutionFactory,
-                                        ImmutableUnificationTools unificationTools) {
-        super(iqFactory, substitutionFactory, unificationTools);
+                                        ImmutableUnificationTools unificationTools, TermFactory termFactory) {
+        super(iqFactory, substitutionFactory, unificationTools, termFactory);
     }
 
 

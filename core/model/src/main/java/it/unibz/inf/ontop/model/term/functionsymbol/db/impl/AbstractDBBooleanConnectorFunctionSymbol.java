@@ -48,8 +48,14 @@ public abstract class AbstractDBBooleanConnectorFunctionSymbol extends DBBoolean
                         : t)
                 .collect(ImmutableCollectors.toList());
 
-        return buildTermAfterEvaluation(newSubTerms, termFactory, variableNullability);
+        ImmutableList<ImmutableTerm> termsAfterInteraction = simplify2VLInteractions(newSubTerms, termFactory,
+                variableNullability);
+
+        return buildTermAfterEvaluation(termsAfterInteraction, termFactory, variableNullability);
     }
+
+    protected abstract ImmutableList<ImmutableTerm> simplify2VLInteractions(
+            ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory, VariableNullability variableNullability);
 
     /**
      * Requires its arguments to be expressions

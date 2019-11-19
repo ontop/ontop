@@ -50,7 +50,7 @@ public class MinOrMaxSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl
 
     @Override
     protected boolean tolerateNulls() {
-        return true;
+        return false;
     }
 
     @Override

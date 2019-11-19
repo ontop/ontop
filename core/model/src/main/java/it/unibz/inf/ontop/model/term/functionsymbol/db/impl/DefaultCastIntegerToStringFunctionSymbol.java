@@ -28,7 +28,12 @@ public class DefaultCastIntegerToStringFunctionSymbol extends DefaultSimpleDBCas
     }
 
     /**
-     * Gets rid of the cast and simplifies the strict equality
+     * Gets rid of the cast and simplifies the strict equality.
+     *
+     * Is a trick.
+     *
+     * TODO: remove this method once strict equalities will be enforced to the DB engine
+     *
      */
     @Override
     protected IncrementalEvaluation evaluateStrictEqWithNonNullConstant(ImmutableList<? extends ImmutableTerm> terms,

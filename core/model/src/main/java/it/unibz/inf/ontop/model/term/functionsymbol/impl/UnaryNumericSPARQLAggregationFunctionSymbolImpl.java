@@ -68,6 +68,15 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
     }
 
     @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        ImmutableTerm newTerm = newTerms.get(0);
+        return newTerm.isNull()
+                ? evaluateEmptyBag(termFactory)
+                : super.buildTermAfterEvaluation(newTerms, termFactory, variableNullability);
+    }
+
+    @Override
     public Optional<AggregationSimplification> decomposeIntoDBAggregation(
             ImmutableList<? extends ImmutableTerm> subTerms, ImmutableList<ImmutableSet<RDFTermType>> possibleRDFTypes,
             boolean hasGroupBy, VariableNullability variableNullability, VariableGenerator variableGenerator, TermFactory termFactory) {

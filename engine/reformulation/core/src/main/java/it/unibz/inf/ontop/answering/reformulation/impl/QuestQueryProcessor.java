@@ -85,6 +85,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	public IQ reformulateIntoNativeQuery(InputQuery inputQuery)
 			throws OntopReformulationException {
 
+		long beginning = System.currentTimeMillis();
+
 		IQ cachedQuery = queryCache.get(inputQuery);
 		if (cachedQuery != null)
 			return cachedQuery;
@@ -103,8 +105,10 @@ public class QuestQueryProcessor implements QueryReformulator {
                 log.debug("Start the unfolding...");
 
                 IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
-                if (unfoldedIQ.getTree().isDeclaredAsEmpty())
-                    return unfoldedIQ;
+                if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
+                	log.info(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
+					return unfoldedIQ;
+				}
                 log.debug("Unfolded query: \n" + unfoldedIQ.toString());
 
                 IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, executorRegistry);
@@ -113,6 +117,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				IQ executableQuery = generateExecutableQuery(plannedQuery);
 				queryCache.put(inputQuery, executableQuery);
+				log.info(String.format("Reformulation time: %d ms", System.currentTimeMillis() - beginning));
 				return executableQuery;
 
 			}

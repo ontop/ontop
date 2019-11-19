@@ -10,9 +10,8 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
 
     private final RDFDatatype xsdBooleanDatatype;
 
-    public BooleanDBTermType(String booleanStr, TermTypeAncestry ancestry, RDFDatatype xsdBooleanDatatype,
-                             boolean areLexicalTermsUnique) {
-        super(booleanStr, ancestry, false, false);
+    public BooleanDBTermType(String booleanStr, TermTypeAncestry ancestry, RDFDatatype xsdBooleanDatatype) {
+        super(booleanStr, ancestry, false);
         this.xsdBooleanDatatype = xsdBooleanDatatype;
     }
 
@@ -29,5 +28,24 @@ public class BooleanDBTermType extends DBTermTypeImpl implements DBTermType {
     @Override
     public boolean isNeedingIRISafeEncoding() {
         return false;
+    }
+
+    /**
+     * Constants often can have different values (true, false, 0, 1).
+     * TODO: double-check
+     */
+    @Override
+    public boolean areEqualitiesStrict() {
+        return false;
+    }
+
+    @Override
+    public Optional<Boolean> areEqualitiesStrict(DBTermType otherType) {
+        return Optional.of(false);
+    }
+
+    @Override
+    public boolean areEqualitiesBetweenTwoDBAttributesStrict() {
+        return true;
     }
 }
