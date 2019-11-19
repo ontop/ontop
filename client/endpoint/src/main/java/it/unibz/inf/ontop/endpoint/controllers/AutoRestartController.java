@@ -43,9 +43,9 @@ public class AutoRestartController {
                     for (WatchEvent<?> event : wk.pollEvents()) {
                         //we only register "ENTRY_MODIFY" so the context is always a Path.
                         final Path changed = (Path) event.context();
-                        System.out.println(changed);
+                        System.out.println(changed + " changed detected!");
                         if (changed.endsWith(mappingFile) || changed.endsWith(owlFile) || changed.endsWith(propertiesFile)) {
-                            log.info("File change detected. RESTARTING Ontop!");
+                            log.info("RESTARTING Ontop!");
                             OntopEndpointApplication.restart();
                         }
                     }
