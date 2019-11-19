@@ -243,8 +243,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "      :teaches ?c .\n" +
                 "   OPTIONAL {\n" +
                 "     ?p :nickname ?v\n" +
-                "  }\n" +
-                "}";
+                "    }\n" +
+                " }\n" +
+                "ORDER BY DESC(?v)";
 
         String [] expectedValues = {
                 "Rog", "Rog", "Johnny"
@@ -267,7 +268,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?v\n" +
                 "  }\n" +
-                "}";
+                "}\n" +
+                "ORDER BY DESC(?v)";
 
         String [] expectedValues = {
                 "Smith", "Poppins", "Depp"
@@ -292,14 +294,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?v\n" +
                 "  }\n" +
-                "FILTER (bound(?f))" +
-                "}";
+                "FILTER (bound(?f))\n" +
+                "}\n" +
+                "ORDER BY DESC(?v)";
 
-        String [] expectedValues = {
+        List<String> expectedValues = ImmutableList.of(
                 "Smith", "Poppins", "Depp"
-        };
-        String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
-
+        );
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
 
@@ -318,7 +320,8 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?v\n" +
                 "  }\n" +
-                "}";
+                "}\n" +
+                "ORDER BY ?v";
 
         String [] expectedValues = {
                 "John", "Mary", "Roger"
@@ -579,10 +582,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "        :nbStudents ?nb .\n" +
                 "}\n";
 
-        List<String> expectedValues = ImmutableList.of("11.5");
+        List<String> expectedValues = getExpectedValuesAvgStudents1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesAvgStudents1() {
+        return  ImmutableList.of("11.5");
     }
 
     @Test
@@ -598,11 +605,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p \n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("10.5","12", "13");
+        List<String> expectedValues = getExpectedValuesAvgStudents2();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
     }
+
+    protected ImmutableList<String> getExpectedValuesAvgStudents2() {
+        return   ImmutableList.of("10.5","12", "13");
+    }
+
 
     @Test
     public void testAvgStudents3() throws Exception {
@@ -620,10 +632,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "10.5", "12", "13");
+        List<String> expectedValues = getExpectedValuesAvgStudents3();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesAvgStudents3() {
+        return ImmutableList.of("0", "0", "0", "0", "0", "10.5", "12", "13");
     }
 
     @Test
@@ -714,10 +730,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
+        List<String> expectedValues = getExpectedValuesDuration1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesDuration1() {
+        return ImmutableList.of("0", "0", "0", "0", "0", "18", "20", "54.5");
     }
 
     @Test
@@ -735,10 +755,14 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("31", "32", "75.5");
+        List<String> expectedValues = getExpectedValuesMultitypedSum1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
+    }
+
+    protected ImmutableList<String> getExpectedValuesMultitypedSum1(){
+        return ImmutableList.of("31", "32", "75.5");
     }
 
     @Test
@@ -756,11 +780,16 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?v";
 
-        List<String> expectedValues = ImmutableList.of("15.5", "16", "18.875");
+        List<String> expectedValues = getExpectedValuesMultitypedAvg1();
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);
     }
+
+    protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
+        return ImmutableList.of("15.5", "16", "18.875");
+    }
+
 
     @Test
     public void testMinusMultitypedSum() throws Exception {
@@ -793,6 +822,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    /**
+     * Checks that the type error is detected
+     */
     @Test
     public void testMinusMultitypedAvg() throws Exception {
 
@@ -824,6 +856,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    /**
+     * Tests that the FILTER is not lifted above the query modifiers
+     */
     @Test
     public void testLimitSubQuery1() throws Exception {
         String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
@@ -841,6 +876,111 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "}";
 
         List<String> expectedValues = ImmutableList.of("Depp");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testSumOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (SUM(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testAvgOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (AVG(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testCountOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (COUNT(?nb) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testMinOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MIN(?nb) AS ?m) (0 AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
+        String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
+
+        System.out.println("SQL Query: \n" + sql);
+    }
+
+    @Test
+    public void testMaxOverNull1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (MAX(?nb) AS ?m) (0 AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor .\n" +
+                "   OPTIONAL {" +
+                "      ?p :nonExistingProperty ?nb\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?v";
+
+        List<String> expectedValues = ImmutableList.of("0", "0", "0", "0", "0", "0", "0", "0");
         String sql = checkReturnedValuesAndReturnSql(query, expectedValues);
 
         System.out.println("SQL Query: \n" + sql);

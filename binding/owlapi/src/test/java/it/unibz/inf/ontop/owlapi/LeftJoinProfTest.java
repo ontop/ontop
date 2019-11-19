@@ -321,7 +321,7 @@ public class LeftJoinProfTest {
                 "   OPTIONAL {\n" +
                 "     ?p :nickname ?v\n" +
                 "  }\n" +
-                "}";
+                "ORDER BY DESC(?v)\n";
 
         List<String> expectedValues = ImmutableList.of(
                 "Rog", "Rog", "Johnny"
@@ -395,7 +395,8 @@ public class LeftJoinProfTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?v\n" +
                 "  }\n" +
-                "}";
+                "}\n" +
+                "ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of(
                 "John", "Mary", "Roger"
