@@ -101,41 +101,6 @@
             </build>
         </profile>
         <profile>
-            <id>set-docker-jdbc-url</id>
-            <activation>
-                <!--<property>-->
-                <!--<name>setDockerUrl</name>-->
-                <!--<value>true</value>-->
-                <!--</property>-->
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <docker.url>localhost</docker.url>
-<!--                <docker.url>tom.inf.unibz.it</docker.url>-->
-            </properties>
-        </profile>
-        <profile>
-            <id>set-docker-jdbc-passwords</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <docker.db2.password>obda-pwd</docker.db2.password>
-                <docker.mssql.password>Mssql1.0</docker.mssql.password>
-                <docker.mysql.password>mysql</docker.mysql.password>
-                <docker.pgsql.password>postgres2</docker.pgsql.password>
-            </properties>
-        </profile>
-        <profile>
-            <id>set-docker-jdbc-oracle-password</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <docker.oracle.password>oracle</docker.oracle.password>
-            </properties>
-        </profile>
-        <profile>
             <id>doclint-java8-disable</id>
             <activation>
                 <jdk>[1.8,</jdk>
@@ -177,6 +142,12 @@
         <jackson.version>2.9.7</jackson.version>
         <jena.version>3.9.0</jena.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
+        <docker.url>localhost</docker.url>
+        <docker.db2.password>obda-pwd</docker.db2.password>
+        <docker.mssql.password>Mssql1.0</docker.mssql.password>
+        <docker.mysql.password>mysql</docker.mysql.password>
+        <docker.oracle.password>oracle</docker.oracle.password>
+        <docker.pgsql.password>postgres2</docker.pgsql.password>
     </properties>
 
     <build>
