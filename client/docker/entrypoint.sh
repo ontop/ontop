@@ -43,6 +43,10 @@ if [ "${ONTOP_CORS_ALLOWED_ORIGINS+x}" ]; then
   args_array+=("--cors-allowed-origins=${ONTOP_CORS_ALLOWED_ORIGINS}")
 fi
 
+if [ "${ONTOP_PORTAL_FILE+x}" ]; then
+  args_array+=("--portal=${ONTOP_PORTAL_FILE}")
+fi
+
 if [ "${ONTOP_DEV_MODE+x}" ]; then
   args_array+=("--dev")
 fi
