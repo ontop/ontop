@@ -142,6 +142,7 @@
         <jackson.version>2.9.7</jackson.version>
         <jena.version>3.9.0</jena.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
+
         <docker.url>localhost</docker.url>
         <docker.db2.password>obda-pwd</docker.db2.password>
         <docker.mssql.password>Mssql1.0</docker.mssql.password>
