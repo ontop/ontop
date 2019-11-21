@@ -14,11 +14,6 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
     private static final String NO_SELF_LJ_OPTIMIZATION_MSG = "The table professors should be used only once";
     private static final String LEFT_JOIN_NOT_OPTIMIZED_MSG = "The left join is still present in the output query";
 
-
-    public AbstractLeftJoinProfTest(String owlFile, String obdaFile, String propertyFile) {
-        super(owlFile, obdaFile, propertyFile);
-    }
-
     @Test
     public void testMinusNickname() throws Exception {
 
@@ -84,7 +79,7 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "} ORDER BY ?v";
 
         List<String> expectedValues = ImmutableList.of();
-        checkReturnedValues(query, expectedValues);
+        checkReturnedValues(expectedValues, query);
     }
 
 
