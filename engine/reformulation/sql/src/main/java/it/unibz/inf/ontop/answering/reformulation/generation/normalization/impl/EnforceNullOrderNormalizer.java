@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -16,6 +17,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.model.term.ImmutableExpression.Evaluation.BooleanValue.TRUE;
 
 public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
@@ -56,12 +59,16 @@ public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 
         /**
          * Tries to append a IS_NOT_NULL order condition before so as to enforce NULL as the smallest value
+         *
+         * NB: we don't simplify the expression in case a DISTINCT is present.
+         *
          */
         private Stream<OrderByNode.OrderComparator> extendCondition(OrderByNode.OrderComparator condition,
                                                                     VariableNullability variableNullability) {
-            Optional<OrderByNode.OrderComparator> additionalCondition = termFactory.getDBIsNotNull(condition.getTerm())
-                    .evaluate(variableNullability)
-                    .getExpression()
+            ImmutableExpression isNotNullCondition = termFactory.getDBIsNotNull(condition.getTerm());
+
+            Optional<OrderByNode.OrderComparator> additionalCondition = Optional.of(isNotNullCondition)
+                    .filter(e -> e.evaluate(variableNullability).getExpression().isPresent())
                     .map(e -> iqFactory.createOrderComparator((NonGroundTerm) e, condition.isAscending()));
 
             return additionalCondition

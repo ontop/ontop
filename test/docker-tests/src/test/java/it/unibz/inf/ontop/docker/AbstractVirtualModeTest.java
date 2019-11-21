@@ -223,9 +223,6 @@ public abstract class AbstractVirtualModeTest {
             st.close();
         }
 
-        Collections.sort(returnedValues);
-        Collections.sort(expectedValues);
-
         assertEquals(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),expectedValues, returnedValues);
 //        assertTrue(String.format("%s instead of \n %s", returnedValues.toString(), expectedValues.toString()),
 //                returnedValues.equals(expectedValues));
