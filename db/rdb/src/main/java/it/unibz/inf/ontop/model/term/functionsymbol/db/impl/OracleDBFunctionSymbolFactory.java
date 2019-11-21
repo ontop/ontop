@@ -275,6 +275,11 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 Serializers.getRegularSerializer(TO_CHAR_STR));
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
+
     /**
      * Overrides
      */

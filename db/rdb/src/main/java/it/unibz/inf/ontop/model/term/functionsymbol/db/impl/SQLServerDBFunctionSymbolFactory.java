@@ -353,6 +353,11 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return super.createDBAvg(inputType, isDistinct);
     }
 
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
+
     protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,
                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
