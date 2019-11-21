@@ -1,27 +1,14 @@
 package it.unibz.inf.ontop.docker.mysql;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Class to check the translation of the combination of Optional/Union in SPARQL into Datalog, and finally 
@@ -35,9 +22,25 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	private static final String obdafile = "/mysql/person/person1.obda";
 	private static final String propertyfile = "/mysql/person/person1.properties";
 
-    public LeftJoin1VirtualTest() {
-        super(owlfile, obdafile, propertyfile);
-    }
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlfile, obdafile, propertyfile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
+	}
 
     @Test
 	public void testLeftJoin1() throws Exception {
@@ -47,7 +50,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "WHERE {?p a :Person . ?p :name ?name . "
 				+ "  OPTIONAL {?p :nick11 ?nick1} "
 				+ "  OPTIONAL {?p :nick22 ?nick2} }";
-		countResults(query2, 4);
+		countResults(4, query2);
 	}
 	
 	@Test
@@ -62,7 +65,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "   OPTIONAL {"
 				+ "     {?p :nick2 ?nick2 } UNION {?p :nick22 ?nick22} } } }";
 
-		countResults(query6, 4);
+		countResults(4, query6);
 	}
 
 	@Test
@@ -75,7 +78,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "  ?p :name ?name ."
 				+ "    OPTIONAL {?p :age ?age} }";
 
-		countResults(query5,4);
+		countResults(4, query5);
 	}
 	@Test
 	public void testLeftJoin4() throws Exception {
@@ -89,7 +92,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 	
 		
 
-		countResults(query4,4);
+		countResults(4, query4);
 	}	
 	
 	
@@ -103,7 +106,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 		
 		
 
-		countResults(query3, 4);
+		countResults(4, query3);
 	}	
 	
 	@Test
@@ -118,7 +121,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "    ?p :nick11 ?nick11 "
 				+ "    OPTIONAL { {?p :nick33 ?nick33 } UNION {?p :nick22 ?nick22} } } }";
 
-		countResults(query7, 4);
+		countResults(4, query7);
 	}	
 	
 	@Test
@@ -128,7 +131,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . ?p :name ?name . ?p :age ?age }";
 
-		countResults(query1,3);
+		countResults(3, query1);
 	}	
 
 
@@ -146,7 +149,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "      ?p :nick1 ?nick1 "
 				+ "      OPTIONAL {?p :nick2 ?nick2. FILTER (?nick2 = 'alice2')} } } }";
 
-		countResults(query_multi7,4);
+		countResults(4, query_multi7);
 	}	
 
 	@Test
@@ -163,7 +166,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 				+ "      OPTIONAL {?p :nick2 ?nick2} } } }";
 		
 
-		countResults(query_multi6,4);
+		countResults(4, query_multi6);
 	}	
 
 
@@ -175,7 +178,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 		String query_multi = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE "
 				+ "{?p a :Person . OPTIONAL {{?p :salary ?salary .} UNION   {?p :name ?name .}}}";
 
-		countResults(query_multi,4);
+		countResults(4, query_multi);
 	}	
 	
 	@Test
@@ -183,7 +186,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 		
 		String query_multi1 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . ?p :name ?name }";
 
-		countResults(query_multi1,4);
+		countResults(4, query_multi1);
 	}		
 	
 	@Test
@@ -191,7 +194,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 		
 		String query_multi2 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name} }";
 
-		countResults(query_multi2,4);
+		countResults(4, query_multi2);
 	}		
 	
 	@Test
@@ -199,7 +202,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 		
 		String query_multi3 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} }";
 
-		countResults(query_multi3,4);
+		countResults(4, query_multi3);
 	}		
 	
 	@Test
@@ -208,7 +211,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi4 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} } }";
 
-		countResults(query_multi4,4);
+		countResults(4, query_multi4);
 	}		
 	
 	@Test
@@ -217,7 +220,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi5 = "PREFIX : <http://www.example.org/test#> SELECT DISTINCT * WHERE {?p a :Person . OPTIONAL {?p :name ?name . OPTIONAL {?p :nick1 ?nick1} OPTIONAL {?p :nick2 ?nick2} } }";
 
-		countResults(query_multi5,4);
+		countResults(4, query_multi5);
 	}	
 	
 	@Test
@@ -226,7 +229,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 
-		countResults(query_multi7,4);
+		countResults(4, query_multi7);
 	}
 	
 	@Test
@@ -235,7 +238,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) } }";
 
-		countResults(query_multi7,4);
+		countResults(4, query_multi7);
 	}
 
 	@Test
@@ -244,7 +247,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } FILTER ( bound( ?nick1 ) ) }";
 
-		countResults(query_multi7,2);
+		countResults(2, query_multi7);
 	}
 
 	@Test
@@ -253,7 +256,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?nick1 ?nick2 WHERE{ { ?person :nick1 ?nick1 } UNION { ?person :nick2 ?nick2 } }";
 
-		countResults(query_multi7,4);
+		countResults(4, query_multi7);
 	}
 
 	@Test
@@ -262,7 +265,7 @@ public class LeftJoin1VirtualTest extends AbstractVirtualModeTest {
 
 		String query_multi7 = "PREFIX : <http://www.example.org/test#> SELECT ?person ?name ?nick1 ?nick2 WHERE{ ?person :name ?name . OPTIONAL { ?person :nick1 ?nick1 . ?person :nick2 ?nick2 . FILTER ( bound( ?nick1 ) && bound( ?nick2) ) } }";
 
-		countResults(query_multi7,4);
+		countResults(4, query_multi7);
 	}
 
 }

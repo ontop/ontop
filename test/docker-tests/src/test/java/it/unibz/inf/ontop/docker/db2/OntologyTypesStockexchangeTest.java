@@ -1,28 +1,16 @@
 package it.unibz.inf.ontop.docker.db2;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * Test if the datatypes are assigned correctly.
@@ -37,8 +25,24 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 	static final String obdaFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.obda";
     static final String propertyFile = "/testcases-docker/virtual-mode/stockexchange/simplecq/stockexchange-db2.properties";
 
-    public OntologyTypesStockexchangeTest() {
-        super(owlFile, obdaFile, propertyFile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
 
@@ -47,14 +51,14 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 	public void testQuotedLiteral() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\".}";
 
-		countResults(query1, 2 );
+		countResults(2, query1);
 	}
 
     @Test
     public void testDatatypeString() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?street WHERE {?x a :Address; :inStreet ?street; :inCity \"Bolzano\"^^xsd:string .}";
 
-        countResults(query1, 2 );
+        countResults(2, query1);
     }
 
     //we need xsd:string to work correctly
@@ -71,7 +75,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
                 "\t\t$x :hasNumber $number.\n" +
                 "}";
 
-        countResults(query1, 1 );
+        countResults(1, query1);
     }
 
     //in db2 there is no boolean type we refer to it in the database with a smallint 1 for true and a smallint 0 for false
@@ -79,14 +83,14 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     public void testBooleanDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:integer . }";
 
-        countResults(query1, 5 );
+        countResults(5, query1);
     }
 
     @Test
     public void testBooleanInteger() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares 1 . }";
 
-        countResults(query1, 5 );
+        countResults(5, query1);
     }
 
     //in db2 there is no boolean datatype, it is substitute with smallint
@@ -94,7 +98,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     public void testBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares TRUE . }";
 
-        countResults(query1, 0 );
+        countResults(0, query1);
     }
 
     //in db2 there is no boolean datatype, it is substitute with smallint
@@ -102,21 +106,21 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     public void testBooleanTrueDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\"^^xsd:boolean . }";
 
-        countResults(query1, 0 );
+        countResults(0, query1);
     }
 
     @Test
     public void testFilterBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type = 1 ). }";
 
-        countResults(query1, 5 );
+        countResults(5, query1);
     }
 
     @Test
     public void testNotFilterBoolean() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x ?amount WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares ?type. FILTER ( ?type != 1 ). }";
 
-        countResults(query1, 5 );
+        countResults(5, query1);
     }
     
     //a quoted integer is treated as a literal
@@ -125,7 +129,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
 
           String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Stock; :amountOfShares ?amount; :typeOfShares \"1\" . }";
 
-          countResults(query1, 0 );
+          countResults(0, query1);
     }
 
 
@@ -140,7 +144,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
                 "  FILTER(?d = \"2008-04-02T00:00:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>)" +
                 "}";
 
-        countResults(query1, 1 );
+        countResults(1, query1);
     }
 
     //a quoted datatype is treated as a literal
@@ -148,7 +152,7 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
     public void testQuotedDatatype() throws Exception {
         String query1 = "PREFIX : <http://www.owl-ontologies.com/Ontology1207768242.owl#>\n SELECT DISTINCT ?x WHERE { ?x a :Transaction; :transactionID ?id; :transactionDate \"2008-04-02T00:00:00\" . }";
 
-        countResults(query1, 0 );
+        countResults(0, query1);
     }
 
     @Ignore("Consider updating the DB2 instance as its TZ behavior does not seem to be compliant with the docs")
@@ -161,6 +165,6 @@ public class OntologyTypesStockexchangeTest extends AbstractVirtualModeTest {
                 "  FILTER (?d = \"2008-04-02T00:00:00+06:00\"^^<http://www.w3.org/2001/XMLSchema#dateTime>) \n" +
                 "}";
 
-        countResults(query1, 1 );
+        countResults(1, query1);
     }
 }
