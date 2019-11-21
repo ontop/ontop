@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
-import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.BooleanOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -18,7 +17,6 @@ import it.unibz.inf.ontop.utils.querymanager.QueryController;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerGroup;
 import it.unibz.inf.ontop.utils.querymanager.QueryControllerQuery;
 import it.unibz.inf.ontop.utils.querymanager.QueryIOManager;
-import org.junit.Before;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
@@ -34,43 +32,27 @@ import static org.junit.Assert.*;
 public abstract class AbstractVirtualModeTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private final String owlFileName;
-    private final String obdaFileName;
-    private final String propertyFileName;
 
-    protected OntopOWLReasoner reasoner;
-    protected OntopOWLConnection conn;
+    protected abstract OntopOWLStatement createStatement() throws OWLException;
 
-    public AbstractVirtualModeTest(String owlFile, String obdaFile, String propertyFile) {
-        this.owlFileName = this.getClass().getResource(owlFile).toString();
-        this.obdaFileName = this.getClass().getResource(obdaFile).toString();
-        this.propertyFileName = this.getClass().getResource(propertyFile).toString();
-    }
+    protected static OntopOWLReasoner createReasoner(String owlFile, String obdaFile, String propertiesFile) throws OWLOntologyCreationException {
+        owlFile = AbstractBindTestWithFunctions.class.getResource(owlFile).toString();
+        obdaFile =  AbstractBindTestWithFunctions.class.getResource(obdaFile).toString();
+        propertiesFile =  AbstractBindTestWithFunctions.class.getResource(propertiesFile).toString();
 
-    @Before
-    public void setUp() throws Exception {
-        // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .enableFullMetadataExtraction(false)
-                .ontologyFile(owlFileName)
-                .nativeOntopMappingFile(obdaFileName)
-                .propertyFile(propertyFileName)
+                .nativeOntopMappingFile(obdaFile)
+                .ontologyFile(owlFile)
+                .propertyFile(propertiesFile)
                 .enableTestMode()
                 .build();
-        reasoner = factory.createReasoner(config);
-
-        // Now we are ready for querying
-        conn = reasoner.getConnection();
-    }
-
-    public void tearDown() throws Exception {
-        conn.close();
-        reasoner.dispose();
+        return factory.createReasoner(config);
     }
 
     protected String runQueryAndReturnStringOfIndividualX(String query) throws Exception {
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
         String retval;
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
@@ -83,14 +65,13 @@ public abstract class AbstractVirtualModeTest {
         } catch (Exception e) {
             throw e;
         } finally {
-            conn.close();
-            reasoner.dispose();
+            st.close();
         }
         return retval;
     }
 
     protected String runQueryAndReturnStringOfLiteralX(String query) throws Exception {
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
         String retval;
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
@@ -104,25 +85,21 @@ public abstract class AbstractVirtualModeTest {
         } catch (Exception e) {
             throw e;
         } finally {
-            conn.close();
-            reasoner.dispose();
+            st.close();
         }
         return retval;
     }
 
     protected boolean runQueryAndReturnBooleanX(String query) throws Exception {
-        try (OWLStatement st = conn.createStatement()) {
+        try (OWLStatement st = createStatement()) {
             BooleanOWLResultSet rs = st.executeAskQuery(query);
             return rs.getValue();
-        } finally {
-            conn.close();
-            reasoner.dispose();
         }
     }
 
-    protected void countResults(String query, int expectedCount) throws OWLException {
+    protected void countResults(int expectedCount, String query) throws OWLException {
 
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
         TupleOWLResultSet results = st.executeSelectQuery(query);
         int count = 0;
         while (results.hasNext()) {
@@ -132,11 +109,11 @@ public abstract class AbstractVirtualModeTest {
         assertEquals(expectedCount, count);
     }
 
-    protected boolean checkContainsTuplesSetSemantics(String query, ImmutableSet<ImmutableMap<String, String>> expectedTuples)
+    protected boolean checkContainsTuplesSetSemantics(String query,
+                                                      ImmutableSet<ImmutableMap<String, String>> expectedTuples)
             throws Exception {
         HashSet<ImmutableMap<String, String>> mutableCopy = new HashSet<>(expectedTuples);
-        OWLStatement st = conn.createStatement();
-        try {
+        try (OWLStatement st = createStatement()) {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             while (rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -147,9 +124,6 @@ public abstract class AbstractVirtualModeTest {
             }
         } catch (Exception e) {
             throw e;
-        } finally {
-            conn.close();
-            reasoner.dispose();
         }
         return mutableCopy.isEmpty();
     }
@@ -162,8 +136,8 @@ public abstract class AbstractVirtualModeTest {
         return tuple.build();
     }
 
-    protected void checkReturnedUris(String query, List<String> expectedUris) throws Exception {
-        OWLStatement st = conn.createStatement();
+    protected void checkReturnedUris(List<String> expectedUris, String query) throws Exception {
+        OWLStatement st = createStatement();
         int i = 0;
         List<String> returnedUris = new ArrayList<>();
         try {
@@ -179,8 +153,7 @@ public abstract class AbstractVirtualModeTest {
         } catch (Exception e) {
             throw e;
         } finally {
-            conn.close();
-            reasoner.dispose();
+            st.close();
         }
         assertTrue(String.format("%s instead of \n %s", returnedUris.toString(), expectedUris.toString()),
                 returnedUris.equals(expectedUris));
@@ -188,7 +161,7 @@ public abstract class AbstractVirtualModeTest {
     }
 
     protected void checkThereIsAtLeastOneResult(String query) throws Exception {
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
         try {
             TupleOWLResultSet rs = st.executeSelectQuery(query);
             assertTrue(rs.hasNext());
@@ -202,23 +175,22 @@ public abstract class AbstractVirtualModeTest {
                 st.close();
                 assertTrue(false);
             }
-            conn.close();
-            reasoner.dispose();
+            st.close();
         }
     }
 
     protected String checkReturnedValuesAndReturnSql(String query, List<String> expectedValues) throws Exception {
-        return checkReturnedValuesAndMayReturnSql(query, expectedValues, true);
+        return checkReturnedValuesAndMayReturnSql(query, true, expectedValues);
     }
-    protected void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
-        checkReturnedValuesAndMayReturnSql(query, expectedValues, false);
+    protected void checkReturnedValues(List<String> expectedValues, String query) throws Exception {
+        checkReturnedValuesAndMayReturnSql(query, false, expectedValues);
     }
 
 
-    private String checkReturnedValuesAndMayReturnSql(String query, List<String> expectedValues, boolean returnSQL)
+    private String checkReturnedValuesAndMayReturnSql(String query, boolean returnSQL, List<String> expectedValues)
             throws Exception {
 
-        OntopOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = createStatement();
         // Non-final
         String sql = null;
 
@@ -248,8 +220,7 @@ public abstract class AbstractVirtualModeTest {
         } catch (Exception e) {
             throw e;
         } finally {
-            conn.close();
-            reasoner.dispose();
+            st.close();
         }
 
         Collections.sort(returnedValues);
@@ -267,7 +238,7 @@ public abstract class AbstractVirtualModeTest {
 
     protected void runQueries(String queryFileName) throws Exception {
 
-        OWLStatement st = conn.createStatement();
+        OWLStatement st = createStatement();
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);
@@ -299,7 +270,7 @@ public abstract class AbstractVirtualModeTest {
     protected void runQuery(String query) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        OntopOWLStatement st = conn.createStatement();
+        OntopOWLStatement st = createStatement();
         TupleOWLResultSet rs = st.executeSelectQuery(query);
 
         while (rs.hasNext()) {

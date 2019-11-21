@@ -1,28 +1,15 @@
 package it.unibz.inf.ontop.docker.db2;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -40,8 +27,24 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 	static final String obdafile = "/db2/schema/multischemadb2.obda";
 	static final String propertiesfile = "/db2/db2-stock.properties";
 
-	public MultiSchemaDB2Test() {
-		super(owlfile, obdafile, propertiesfile);
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
 	}
 
 	/**
