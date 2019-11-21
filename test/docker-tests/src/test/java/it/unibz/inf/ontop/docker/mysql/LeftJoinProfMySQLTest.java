@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -55,6 +57,22 @@ public class LeftJoinProfMySQLTest extends AbstractLeftJoinProfTest {
     @Override
     protected ImmutableList<String> getExpectedValuesMultitypedAvg1() {
         return ImmutableList.of("15.500000000000000000000000000000", "16.000000000000000000000000000000", "18.875000000000000000000000000000");
+    }
+
+    // TODO: investigate with a more recent version of MySQL
+    @Test
+    @Ignore("MySQL 5.7 seems to have issues with the encoding of MINUS as a LJ and FILTER IS NULL")
+    @Override
+    public void testMinusMultitypedSum() throws Exception {
+        super.testMinusMultitypedSum();
+    }
+
+    // TODO: investigate with a more recent version of MySQL
+    @Test
+    @Ignore("MySQL 5.7 seems to have issues with the encoding of MINUS as a LJ and FILTER IS NULL")
+    @Override
+    public void testMinusMultitypedAvg() throws Exception {
+        super.testMinusMultitypedAvg();
     }
 
     @Override
