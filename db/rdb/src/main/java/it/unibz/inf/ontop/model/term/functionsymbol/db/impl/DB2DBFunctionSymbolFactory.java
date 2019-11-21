@@ -224,4 +224,13 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
         return new DefaultSimpleDBCastFunctionSymbol(inputType, dbStringType,
                 Serializers.getRegularSerializer(CHAR_STR));
     }
+
+    @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
+        // To make sure the AVG does not return an integer but a decimal
+        if (inputType.equals(dbIntegerType))
+            return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
+
+        return super.createDBAvg(inputType, isDistinct);
+    }
 }

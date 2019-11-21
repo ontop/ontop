@@ -344,6 +344,15 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return substr2FunctionSymbol;
     }
 
+    @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
+        // To make sure the AVG does not return an integer but a decimal
+        if (inputType.equals(dbIntegerType))
+            return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
+
+        return super.createDBAvg(inputType, isDistinct);
+    }
+
     protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,
                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
