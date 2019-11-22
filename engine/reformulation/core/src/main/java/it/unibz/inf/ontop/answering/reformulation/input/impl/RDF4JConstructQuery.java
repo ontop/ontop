@@ -28,27 +28,9 @@ class RDF4JConstructQuery extends RDF4JInputQuery<SimpleGraphResultSet> implemen
         }
     }
 
-
     @Override
     public ConstructTemplate getConstructTemplate() {
         return template;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        RDF4JConstructQuery that = (RDF4JConstructQuery) o;
-
-        if (!template.equals(that.template)) return false;
-        return getParsedQuery().equals(that.getParsedQuery());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = template.hashCode();
-        result = 31 * result + getParsedQuery().hashCode();
-        return result;
-    }
 }
