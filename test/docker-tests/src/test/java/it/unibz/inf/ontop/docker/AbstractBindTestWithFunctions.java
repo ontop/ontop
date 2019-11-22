@@ -91,6 +91,27 @@ public abstract class AbstractBindTestWithFunctions {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
+                + "}\n" +
+                "ORDER BY ?w";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testAndBindDistinct() throws Exception {
+
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT DISTINCT ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
