@@ -108,6 +108,11 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
     /**
      * TODO: find a way to use the stored TZ instead of the local one
      */
@@ -116,6 +121,11 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
         // Enforces ISO 8601: https://stackoverflow.com/questions/38834022/turn-postgres-date-representation-into-iso-8601-string
         // However, use the local TZ instead of the stored TZ
         return String.format("TO_JSON(%s)#>>'{}'", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
     }
 
     @Override

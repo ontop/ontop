@@ -280,6 +280,16 @@ public class OracleDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
     }
 
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new ExpressionSensitiveSQLDBIsNullOrNotFunctionSymbolImpl(true, dbBooleanType, rootDBTermType);
+    }
+
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new ExpressionSensitiveSQLDBIsNullOrNotFunctionSymbolImpl(false, dbBooleanType, rootDBTermType);
+    }
+
     /**
      * Overrides
      */

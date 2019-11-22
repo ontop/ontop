@@ -7,10 +7,7 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolSerializer;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -86,6 +83,12 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
+    @Override
+    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+        return new OneDigitDBIsTrueFunctionSymbolImpl(dbBooleanType);
+    }
+
+
     /**
      * TODO: handle the timezone!
      */
@@ -94,6 +97,11 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("REPLACE(VARCHAR_FORMAT(%s,'YYYY-MM-DD HH24:MI:SS.FF'),' ','T')",
                 termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+        return new OneDigitBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
     }
 
     @Override
