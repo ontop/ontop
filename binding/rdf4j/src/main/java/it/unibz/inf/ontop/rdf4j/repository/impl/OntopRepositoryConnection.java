@@ -1,24 +1,5 @@
 package it.unibz.inf.ontop.rdf4j.repository.impl;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
@@ -44,6 +25,8 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +38,7 @@ import java.util.*;
 public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.RepositoryConnection {
 
     private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
+    private static Logger LOGGER = LoggerFactory.getLogger(OntopRepositoryConnection.class);
     private OntopRepository repository;
     private OntopConnection ontopConnection;
     private final RDF4JInputQueryFactory inputQueryFactory;
@@ -401,7 +385,9 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected! ");
 
+        long beforeParsing = System.currentTimeMillis();
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
+        LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
         if (q instanceof ParsedTupleQuery)
             return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
