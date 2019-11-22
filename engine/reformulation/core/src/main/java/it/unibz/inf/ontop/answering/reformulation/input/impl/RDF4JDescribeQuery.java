@@ -9,19 +9,4 @@ class RDF4JDescribeQuery extends RDF4JInputQuery<SimpleGraphResultSet> implement
     RDF4JDescribeQuery(ParsedQuery parsedQuery, String queryString) {
         super(parsedQuery, queryString);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        RDF4JDescribeQuery that = (RDF4JDescribeQuery) o;
-
-        return getParsedQuery().equals(that.getParsedQuery());
-    }
-
-    @Override
-    public int hashCode() {
-        return getParsedQuery().hashCode();
-    }
 }
