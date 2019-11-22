@@ -514,18 +514,19 @@ public class BindWithFunctionsTest {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+                + "SELECT DISTINCT ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND((CONTAINS(?title,\"Semantic\") && CONTAINS(?title,\"Web\")) AS ?w)\n"
-                + "}";
+                + "}\n" +
+                "ORDER BY ?w";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -534,17 +535,18 @@ public class BindWithFunctionsTest {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+                + "SELECT DISTINCT ?title ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND((CONTAINS(?title,\"Semantic\") || CONTAINS(?title,\"Book\")) AS ?w)\n"
-                + "}";
+                + "}\n" +
+                "ORDER BY ?w";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         checkReturnedValues(queryBind, expectedValues);
     }
