@@ -59,11 +59,15 @@ public class DefaultDBIsTrueFunctionSymbol extends DBBooleanFunctionSymbolImpl i
         ImmutableTerm newTerm = newTerms.get(0);
         if (newTerm instanceof DBConstant) {
             return termFactory.getDBBooleanConstant(
-                    newTerm.equals(termFactory.getDBBooleanConstant(true)));
+                    evaluateDBConstant((DBConstant) newTerm, termFactory));
         }
         else if (newTerm instanceof ImmutableExpression)
             return newTerm;
         else
             return termFactory.getImmutableExpression(this, newTerm);
+    }
+
+    protected boolean evaluateDBConstant(DBConstant constant, TermFactory termFactory) {
+        return constant.equals(termFactory.getDBBooleanConstant(true));
     }
 }
