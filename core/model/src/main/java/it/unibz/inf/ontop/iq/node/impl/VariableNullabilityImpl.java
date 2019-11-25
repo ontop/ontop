@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -140,6 +141,18 @@ public class VariableNullabilityImpl implements VariableNullability {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(substitution.getDomain(), getNullableVariables()).immutableCopy());
         return update(substitution, newScope, variableGenerator);
+    }
+
+    /**
+     * TODO: this method might be optimized
+     */
+    @Override
+    public VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        ImmutableSet<Variable> newScope = scope.stream()
+                .map(freshRenamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toSet());
+
+        return update(freshRenamingSubstitution, newScope);
     }
 
     private VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,

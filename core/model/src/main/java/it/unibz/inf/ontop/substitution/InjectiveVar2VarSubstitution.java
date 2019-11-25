@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.substitution;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 
@@ -29,4 +30,7 @@ public interface InjectiveVar2VarSubstitution extends Var2VarSubstitution {
      */
     Optional<InjectiveVar2VarSubstitution> composeWithAndPreserveInjectivity(InjectiveVar2VarSubstitution otherSubstitution,
                                                                              Set<Variable> variablesToExcludeFromTheDomain);
+
+    @Override
+    InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain);
 }

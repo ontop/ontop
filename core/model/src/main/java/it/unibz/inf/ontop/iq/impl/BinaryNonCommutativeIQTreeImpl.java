@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -131,6 +132,14 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }
+    }
+
+    /**
+     * TODO: implement seriously!!
+     */
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        return applyDescendingSubstitution(freshRenamingSubstitution, Optional.empty());
     }
 
     @Override

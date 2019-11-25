@@ -51,6 +51,7 @@ public interface IntermediateQueryFactory {
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
+    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> newDataAtom, VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -72,6 +73,11 @@ public class DummyVariableNullabilityImpl implements DummyVariableNullability {
     @Override
     public VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                       ImmutableSet<Variable> projectedVariables) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         throw new UnsupportedOperationException();
     }
 }

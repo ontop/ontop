@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 import java.util.Optional;
 
@@ -133,6 +134,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitNative(this);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        throw new UnsupportedOperationException("NativeNode does not support renaming (too late)");
     }
 
     @Override

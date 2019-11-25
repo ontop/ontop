@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -102,6 +103,16 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
         return iqFactory.createUnaryIQTree(this,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
+                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+        return currentVariableNullability
+                .map(v -> v.update(renamingSubstitution))
+                .map(v -> iqFactory.createUnaryIQTree(this, newChild, v, iqProperties))
+                .orElseGet(() -> iqFactory.createUnaryIQTree(this, newChild, iqProperties));
     }
 
     @Override
