@@ -334,6 +334,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
                 case NTRIPLES:
                     NTriplesWriter btw  = new NTriplesWriter(writer);
                     btw.set(BasicWriterSettings.PRETTY_PRINT, false);
+                    return btw;
                 default:
                     throw new RuntimeException("Unknown output format: " + format);
             }
