@@ -85,6 +85,16 @@ public class OntopMaterializeTest {
     }
 
     @Test
+    public void testOntopMaterializeNTriples (){
+        String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
+                "-t", "src/test/resources/books/exampleBooks.owl",
+                "-p", "src/test/resources/books/exampleBooks.properties",
+                "-f", "ntriples", "-o", "src/test/resources/output/exampleBooks.materialized.nt",
+        };
+        Ontop.main(argv);
+    }
+
+    @Test
     public void testOntopMaterializeSeparatefiles (){
         String[] argv = {"materialize", "-m", "src/test/resources/books/exampleBooks.obda",
                 "-t", "src/test/resources/books/exampleBooks.owl",
