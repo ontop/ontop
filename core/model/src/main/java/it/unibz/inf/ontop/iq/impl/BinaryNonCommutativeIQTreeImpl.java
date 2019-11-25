@@ -58,6 +58,23 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
+                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
+                                           @Assisted VariableNullability variableNullability,
+                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.variableNullability = variableNullability;
+        this.possibleVariableDefinitions = null;
+        this.isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+    @AssistedInject
+    private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild,
                                            @Assisted("right") IQTree rightChild,
                                            IQTreeTools iqTreeTools,

@@ -51,6 +51,23 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
+                           @Assisted VariableNullability variableNullability,
+                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+        super(rootNode, children, iqProperties, iqTreeTools, iqFactory);
+        if (children.size() < 2)
+            throw new IllegalArgumentException("At least two children are required for a n-ary node");
+        this.variableNullability = variableNullability;
+        variableDefinition = null;
+        isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+
+    @AssistedInject
+    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
     }

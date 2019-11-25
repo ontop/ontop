@@ -36,6 +36,20 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     private Boolean isDistinct;
     private VariableNullability variableNullability;
 
+    @AssistedInject
+    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
+                            @Assisted VariableNullability variableNullability,
+                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+        possibleVariableDefinitions = null;
+        this.variableNullability = variableNullability;
+        isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
