@@ -134,12 +134,20 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         }
     }
 
-    /**
-     * TODO: implement seriously!!
-     */
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyDescendingSubstitution(freshRenamingSubstitution, Optional.empty());
+        return applyFreshRenaming(freshRenamingSubstitution, false);
+    }
+
+    private IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+                ? renamingSubstitution
+                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
+
+        return selectedSubstitution.isEmpty()
+                ? this
+                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getProperties(),
+                Optional.ofNullable(variableNullability));
     }
 
     @Override
