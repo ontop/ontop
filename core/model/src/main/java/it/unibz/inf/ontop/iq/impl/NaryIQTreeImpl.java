@@ -120,12 +120,20 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         }
     }
 
-    /**
-     * TODO: implement seriously!!
-     */
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
-        return applyDescendingSubstitution(freshRenamingSubstitution, Optional.empty());
+        return applyFreshRenaming(freshRenamingSubstitution, false);
+    }
+
+    private IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+                ? renamingSubstitution
+                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
+
+        return selectedSubstitution.isEmpty()
+                ? this
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getProperties(),
+                Optional.ofNullable(variableNullability));
     }
 
     @Override
