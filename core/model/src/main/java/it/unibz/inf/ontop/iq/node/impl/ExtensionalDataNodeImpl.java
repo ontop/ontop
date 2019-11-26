@@ -127,7 +127,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
         DataAtom<RelationPredicate> newDataAtom = freshRenamingSubstitution.applyToDataAtom(getProjectionAtom());
         return (variableNullability == null)
                 ? newAtom(newDataAtom)
-                : iqFactory.createExtensionalDataNode(newDataAtom, variableNullability);
+                : iqFactory.createExtensionalDataNode(newDataAtom,
+                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
     }
 
     @Override
