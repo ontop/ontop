@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -39,12 +40,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     protected final IQTreeTools iqTreeTools;
     protected final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
 
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                      IntermediateQueryFactory iqFactory) {
+                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqTreeTools = iqTreeTools;
         this.iqFactory = iqFactory;
+        this.termFactory = termFactory;
         if (children.isEmpty())
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
@@ -143,21 +146,32 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
 
-            // TODO: simplify the constraint
+            Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint);
 
             return normalizedSubstitution
-                    .filter(s -> !constraint.isPresent())
+                    .filter(s -> !newConstraint.isPresent())
                     .flatMap(this::extractFreshRenaming)
                     .map(s -> applyFreshRenaming(s, true))
                     .orElseGet(() -> normalizedSubstitution
-                            .map(s -> applyRegularDescendingSubstitution(s, constraint))
-                            .orElseGet(() -> constraint
+                            .map(s -> applyRegularDescendingSubstitution(s, newConstraint))
+                            .orElseGet(() -> newConstraint
                                     .map(this::propagateDownConstraint)
                                     .orElse(this)));
 
         } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
             return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
         }
+    }
+
+    private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint) {
+        if (!constraint.isPresent())
+            return constraint;
+
+        ImmutableSet<Variable> projectedVariables = getVariables();
+
+        return termFactory.getConjunction(constraint.get().flattenAND()
+                .filter(e -> e.getVariableStream()
+                        .anyMatch(projectedVariables::contains)));
     }
 
     protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);

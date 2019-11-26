@@ -14,10 +14,7 @@ import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -45,8 +42,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
+                                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
         this.variableNullability = null;
@@ -62,8 +59,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted VariableNullability variableNullability,
                                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
+                                           IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                           OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
         this.variableNullability = variableNullability;
@@ -80,8 +78,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("right") IQTree rightChild,
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
+                                           TermFactory termFactory,
                                            OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override

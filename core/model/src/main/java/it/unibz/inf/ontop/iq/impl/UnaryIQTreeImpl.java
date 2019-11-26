@@ -15,10 +15,7 @@ import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -41,8 +38,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted VariableNullability variableNullability,
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
         this.variableNullability = variableNullability;
         isDistinct = null;
@@ -55,8 +52,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
         variableNullability = null;
         isDistinct = null;
@@ -67,8 +64,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
