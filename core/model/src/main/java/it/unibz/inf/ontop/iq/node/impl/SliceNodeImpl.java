@@ -110,7 +110,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                                      IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
         return currentVariableNullability
-                .map(v -> v.update(renamingSubstitution))
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
                 .map(v -> iqFactory.createUnaryIQTree(this, newChild, v, iqProperties))
                 .orElseGet(() -> iqFactory.createUnaryIQTree(this, newChild, iqProperties));
     }

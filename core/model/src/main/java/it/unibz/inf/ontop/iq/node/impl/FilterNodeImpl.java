@@ -305,7 +305,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 : iqFactory.createFilterNode(newCondition);
 
         return currentVariableNullability
-                .map(v -> v.update(renamingSubstitution))
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
                 .map(v -> iqFactory.createUnaryIQTree(newFilterNode, newChild, v, iqProperties))
                 .orElseGet(() -> iqFactory.createUnaryIQTree(newFilterNode, newChild, iqProperties));
     }

@@ -14,6 +14,9 @@ import java.util.Collection;
  * TODO: find a better name
  *
  * IMMUTABLE
+ *
+ * See CoreUtilsFactory for creating new instances
+ *
  */
 public interface VariableNullability {
 
@@ -42,7 +45,7 @@ public interface VariableNullability {
     VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                ImmutableSet<Variable> projectedVariables);
 
-    VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+    VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     default ImmutableSet<Variable> getNullableVariables() {
         return getNullableGroups().stream()

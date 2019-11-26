@@ -77,7 +77,7 @@ public class DummyVariableNullabilityImpl implements DummyVariableNullability {
     }
 
     @Override
-    public VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         throw new UnsupportedOperationException();
     }
 }

@@ -143,16 +143,19 @@ public class VariableNullabilityImpl implements VariableNullability {
         return update(substitution, newScope, variableGenerator);
     }
 
-    /**
-     * TODO: this method might be optimized
-     */
     @Override
-    public VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+    public VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         ImmutableSet<Variable> newScope = scope.stream()
                 .map(freshRenamingSubstitution::applyToVariable)
                 .collect(ImmutableCollectors.toSet());
 
-        return update(freshRenamingSubstitution, newScope);
+        ImmutableSet<ImmutableSet<Variable>> newNullableGroups = nullableGroups.stream()
+                .map(g -> g.stream()
+                        .map(freshRenamingSubstitution::applyToVariable)
+                        .collect(ImmutableCollectors.toSet()))
+                .collect(ImmutableCollectors.toSet());
+
+        return coreUtilsFactory.createVariableNullability(newNullableGroups, newScope);
     }
 
     private VariableNullability update(ImmutableSubstitution<? extends ImmutableTerm> substitution,

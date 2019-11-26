@@ -15,5 +15,5 @@ public interface DummyVariableNullability extends VariableNullability {
 
     @Override
     @Deprecated
-    VariableNullability update(InjectiveVar2VarSubstitution freshRenamingSubstitution);
+    VariableNullability applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 }

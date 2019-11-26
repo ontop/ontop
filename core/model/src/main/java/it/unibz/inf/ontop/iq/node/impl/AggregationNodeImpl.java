@@ -96,7 +96,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 renamingSubstitution.applyRenaming(substitution));
 
         return currentVariableNullability
-                .map(v -> v.update(renamingSubstitution))
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
                 .map(v -> iqFactory.createUnaryIQTree(newNode, newChild, v, iqProperties))
                 .orElseGet(() -> iqFactory.createUnaryIQTree(newNode, newChild, iqProperties));
     }

@@ -102,7 +102,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
                 .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
 
         return currentVariableNullability
-                .map(v -> v.update(renamingSubstitution))
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
                 .map(v -> iqFactory.createUnaryIQTree(newOrderByNode, newChild, v, iqProperties))
                 .orElseGet(() -> iqFactory.createUnaryIQTree(newOrderByNode, newChild, iqProperties));
     }

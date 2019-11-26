@@ -407,7 +407,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 renamingSubstitution.applyRenaming(substitution));
 
         return currentVariableNullability
-                .map(v -> v.update(renamingSubstitution))
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
                 .map(v -> iqFactory.createUnaryIQTree(newConstructionNode, newChild, v, iqProperties))
                 .orElseGet(() -> iqFactory.createUnaryIQTree(newConstructionNode, newChild, iqProperties));
     }
