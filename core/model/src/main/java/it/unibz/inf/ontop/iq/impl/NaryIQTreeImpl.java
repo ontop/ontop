@@ -104,28 +104,12 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
-
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChildren()))
-                    .orElseGet(() -> constraint
-                            .map(this::propagateDownConstraint)
-                            .orElse(this));
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
-    }
-
-    @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         return applyFreshRenaming(freshRenamingSubstitution, false);
     }
 
-    private IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+    @Override
+    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
                 : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
@@ -134,6 +118,12 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
                 ? this
                 : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getProperties(),
                 Optional.ofNullable(variableNullability));
+    }
+
+    @Override
+    protected IQTree applyRegularDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
     }
 
     @Override

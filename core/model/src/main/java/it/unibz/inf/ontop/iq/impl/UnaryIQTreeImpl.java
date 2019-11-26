@@ -85,41 +85,12 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
-        try {
-            Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
-                    normalizeDescendingSubstitution(descendingSubstitution);
-
-            // TODO: simplify the constraint
-
-            return normalizedSubstitution
-                    .filter(s -> !constraint.isPresent())
-                    .flatMap(this::extractFreshRenaming)
-                    .map(s -> applyFreshRenaming(s, true))
-                    .orElseGet(() -> normalizedSubstitution
-                            .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChild()))
-                            .orElseGet(() -> constraint
-                                    .map(this::propagateDownConstraint)
-                                    .orElse(this)));
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
-    }
-
-    @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         return applyFreshRenaming(freshRenamingSubstitution, false);
     }
 
-    private Optional<InjectiveVar2VarSubstitution> extractFreshRenaming(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqTreeTools.extractFreshRenaming(descendingSubstitution, getVariables());
-    }
-
-    private IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+    @Override
+    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
         InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
                 ? renamingSubstitution
                 : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
@@ -128,6 +99,12 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                 ? this
                 : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getProperties(),
                 Optional.ofNullable(variableNullability));
+    }
+
+    @Override
+    protected IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                        Optional<ImmutableExpression> constraint) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
     }
 
     @Override
