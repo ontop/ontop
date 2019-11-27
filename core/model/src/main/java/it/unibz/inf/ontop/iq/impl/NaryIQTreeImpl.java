@@ -25,9 +25,6 @@ import java.util.Optional;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
 
-    // Lazy
-    @Nullable
-    private VariableNullability variableNullability;
     @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
     @Nullable
@@ -42,7 +39,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        variableNullability = null;
         variableDefinition = null;
         isDistinct = null;
 
@@ -58,7 +54,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        this.variableNullability = variableNullability;
+        this.treeCache.setVariableNullability(variableNullability);
         variableDefinition = null;
         isDistinct = null;
 
@@ -77,6 +73,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(getChildren());
+    }
+
+    @Override
+    protected VariableNullability computeVariableNullability() {
+        return getRootNode().getVariableNullability(getChildren());
     }
 
     @Override
@@ -113,7 +114,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         return selectedSubstitution.isEmpty()
                 ? this
                 : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getProperties(),
-                Optional.ofNullable(variableNullability));
+                treeCache.getVariableNullability());
     }
 
     @Override
@@ -152,13 +153,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;
-    }
-
-    @Override
-    public VariableNullability getVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = getRootNode().getVariableNullability(getChildren());
-        return variableNullability;
     }
 
     @Override

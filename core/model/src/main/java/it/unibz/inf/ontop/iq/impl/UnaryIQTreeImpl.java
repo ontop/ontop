@@ -32,7 +32,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
     @Nullable
     private Boolean isDistinct;
-    private VariableNullability variableNullability;
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
@@ -41,7 +40,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
-        this.variableNullability = variableNullability;
+        this.treeCache.setVariableNullability(variableNullability);
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -55,7 +54,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
-        variableNullability = null;
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -90,7 +88,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return selectedSubstitution.isEmpty()
                 ? this
                 : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getProperties(),
-                Optional.ofNullable(variableNullability));
+                treeCache.getVariableNullability());
     }
 
     @Override
@@ -129,13 +127,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     public boolean isDeclaredAsEmpty() {
         return false;
-    }
-
-    @Override
-    public VariableNullability getVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = getRootNode().getVariableNullability(getChild());
-        return variableNullability;
     }
 
     @Override
@@ -188,6 +179,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(getChild());
+    }
+
+    @Override
+    protected VariableNullability computeVariableNullability() {
+        return getRootNode().getVariableNullability(getChild());
     }
 
     @Override

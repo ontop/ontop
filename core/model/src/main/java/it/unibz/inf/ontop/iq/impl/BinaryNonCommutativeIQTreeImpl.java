@@ -28,9 +28,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     private final IQTree leftChild;
     private final IQTree rightChild;
-    // LAZY
-    @Nullable
-    private VariableNullability variableNullability;
     @Nullable
     private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
     @Nullable
@@ -46,7 +43,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.variableNullability = null;
         this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
@@ -64,7 +60,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.variableNullability = variableNullability;
+        this.treeCache.setVariableNullability(variableNullability);
         this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
@@ -125,7 +121,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         return selectedSubstitution.isEmpty()
                 ? this
                 : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getProperties(),
-                Optional.ofNullable(variableNullability));
+                treeCache.getVariableNullability());
     }
 
     @Override
@@ -165,10 +161,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public VariableNullability getVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = getRootNode().getVariableNullability(leftChild, rightChild);
-        return variableNullability;
+    protected VariableNullability computeVariableNullability() {
+        return getRootNode().getVariableNullability(leftChild, rightChild);
     }
 
     @Override

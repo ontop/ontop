@@ -1,29 +1,38 @@
 package it.unibz.inf.ontop.iq.impl;
 
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTreeCache;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Optional;
 
 public class IQTreeCacheImpl implements IQTreeCache {
 
-    @Nonnull
-    private boolean isNormalizedForOptimization;
-    @Nonnull
-    private boolean areDistinctAlreadyRemoved;
+    private final boolean isNormalizedForOptimization;
+    private final boolean areDistinctAlreadyRemoved;
+    private final CoreSingletons coreSingletons;
+
+    @Nullable
+    private VariableNullability variableNullability;
 
     /**
      * Initial constructor
      */
     @Inject
-    protected IQTreeCacheImpl() {
+    protected IQTreeCacheImpl(CoreSingletons coreSingletons) {
+        this.coreSingletons = coreSingletons;
         this.isNormalizedForOptimization = false;
         this.areDistinctAlreadyRemoved = false;
     }
 
-    protected IQTreeCacheImpl(boolean isNormalizedForOptimization, boolean areDistinctAlreadyRemoved) {
+    protected IQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
+                              boolean areDistinctAlreadyRemoved) {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -37,8 +46,13 @@ public class IQTreeCacheImpl implements IQTreeCache {
     }
 
     @Override
-    public void declareAsNormalizedForOptimizationWithoutEffect() {
-        this.isNormalizedForOptimization = true;
+    public Optional<VariableNullability> getVariableNullability() {
+        return Optional.ofNullable(variableNullability);
+    }
+
+    @Override
+    public IQTreeCache declareAsNormalizedForOptimizationWithoutEffect() {
+        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved);
     }
 
     /**
@@ -46,7 +60,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
-        return new IQTreeCacheImpl(true, areDistinctAlreadyRemoved);
+        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved);
     }
 
     /**
@@ -54,12 +68,12 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareConstraintPushedDownWithEffect() {
-        return new IQTreeCacheImpl(false, areDistinctAlreadyRemoved);
+        return new IQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved);
     }
 
     @Override
-    public void declareDistinctRemovalWithoutEffect() {
-        this.areDistinctAlreadyRemoved = true;
+    public IQTreeCache declareDistinctRemovalWithoutEffect() {
+        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true);
     }
 
     /**
@@ -67,6 +81,25 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareDistinctRemovalWithEffect() {
-        return new IQTreeCacheImpl(false, true);
+        return new IQTreeCacheImpl(coreSingletons, false, true);
+    }
+
+    @Override
+    public  synchronized void setVariableNullability(VariableNullability variableNullability) {
+        if (this.variableNullability != null)
+            throw new IllegalStateException("Variable nullability already present. Only call this method once");
+        this.variableNullability = variableNullability;
+    }
+
+    @Override
+    public IQProperties convertIntoIQProperties() {
+        // Non-final
+        IQProperties properties = coreSingletons.getIQFactory().createIQProperties();
+        if (areDistinctAlreadyRemoved)
+            properties = properties.declareDistinctRemovalWithoutEffect();
+        if (isNormalizedForOptimization)
+            properties = properties.declareNormalizedForOptimization();
+
+        return properties;
     }
 }

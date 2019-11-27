@@ -6,9 +6,11 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.CompositeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -26,7 +28,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
-    private final IQProperties iqProperties;
+    protected final IQTreeCache treeCache;
     private static final String TAB_STR = "   ";
 
     /**
@@ -45,6 +47,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQProperties iqProperties, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+        this(rootNode, children, convertIQProperties(iqProperties), iqTreeTools, iqFactory, termFactory);
+    }
+
+    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
+                                      IQTreeCache treeCache, IQTreeTools iqTreeTools,
+                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqTreeTools = iqTreeTools;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
@@ -52,10 +60,14 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
         this.children = children;
-        this.iqProperties = iqProperties;
+        this.treeCache = treeCache;
         // To be computed on-demand
         knownVariables = null;
         hasBeenSuccessfullyValidate = false;
+    }
+
+    private static IQTreeCache convertIQProperties(IQProperties iqProperties) {
+        return iqProperties.convertIQTreeCache();
     }
 
     @Override
@@ -129,7 +141,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     protected IQProperties getProperties() {
-        return iqProperties;
+        return treeCache.convertIntoIQProperties();
     }
 
     protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
@@ -209,4 +221,18 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
      * Only validates the node, not its children
      */
     protected abstract void validateNode() throws InvalidIntermediateQueryException;
+
+    @Override
+    public synchronized VariableNullability getVariableNullability() {
+        Optional<VariableNullability> optionalVariableNullability = treeCache.getVariableNullability();
+        if (optionalVariableNullability.isPresent())
+            return optionalVariableNullability.get();
+        VariableNullability variableNullability = computeVariableNullability();
+        treeCache.setVariableNullability(variableNullability);
+        return variableNullability;
+    }
+
+    protected abstract VariableNullability computeVariableNullability();
+
+
 }

@@ -26,4 +26,6 @@ public interface IQProperties {
     IQProperties declareDistinctRemovalWithoutEffect();
 
     IQProperties declareDistinctRemovalWithEffect();
+
+    IQTreeCache convertIQTreeCache();
 }
