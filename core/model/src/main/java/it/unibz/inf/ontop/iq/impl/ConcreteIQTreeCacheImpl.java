@@ -72,7 +72,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
     @Override
     public void setVariables(@Nonnull ImmutableSet<Variable> variables) {
-
+        this.variables = variables;
     }
 
     @Override
