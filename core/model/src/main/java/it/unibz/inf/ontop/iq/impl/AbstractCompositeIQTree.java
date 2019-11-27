@@ -146,7 +146,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizedSubstitution =
                     normalizeDescendingSubstitution(descendingSubstitution);
 
-            Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint);
+            Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
                     .filter(s -> !newConstraint.isPresent())
@@ -163,15 +163,20 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         }
     }
 
-    private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint) {
+    private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
+                                                              ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         if (!constraint.isPresent())
             return constraint;
 
-        ImmutableSet<Variable> projectedVariables = getVariables();
+        ImmutableSet<Variable> newVariables = getVariables().stream()
+                .map(descendingSubstitution::apply)
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toSet());
 
         return termFactory.getConjunction(constraint.get().flattenAND()
                 .filter(e -> e.getVariableStream()
-                        .anyMatch(projectedVariables::contains)));
+                        .anyMatch(newVariables::contains)));
     }
 
     protected abstract IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution, boolean alreadyNormalized);
