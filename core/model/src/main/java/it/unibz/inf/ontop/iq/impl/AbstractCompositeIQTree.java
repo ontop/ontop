@@ -163,6 +163,11 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         }
     }
 
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        return applyFreshRenaming(freshRenamingSubstitution, false);
+    }
+
     private Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> constraint,
                                                               ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         if (!constraint.isPresent())

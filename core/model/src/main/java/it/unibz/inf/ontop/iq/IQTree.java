@@ -56,6 +56,13 @@ public interface IQTree {
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint);
 
+    /**
+     * Particular type of descending substitution: only renaming some variables by external ones.
+     *
+     * Isolated from regular descending substitutions as it preserves the properties of the tree
+     * (e.g. it remains normalized if it was already)
+     *
+     */
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     /**
