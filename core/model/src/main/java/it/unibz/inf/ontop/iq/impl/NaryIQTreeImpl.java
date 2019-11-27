@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.NaryOperatorNode;
@@ -48,13 +49,12 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           @Assisted VariableNullability variableNullability,
-                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                           @Assisted IQTreeCache treeCache,
+                           IQTreeTools iqTreeTools,
                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
+        super(rootNode, children, treeCache, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        this.treeCache.setVariableNullability(variableNullability);
         variableDefinition = null;
         isDistinct = null;
 
@@ -66,8 +66,9 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                           OntopModelSettings settings) {
-        this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
+                           OntopModelSettings settings,
+                           IQTreeCache freshTreeCache) {
+        this(rootNode, children, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -113,8 +114,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getProperties(),
-                treeCache.getVariableNullability());
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), treeCache);
     }
 
     @Override

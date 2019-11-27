@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.AbstractCollection;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -253,9 +252,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution,
-                                     ImmutableList<IQTree> children, IQProperties iqProperties,
-                                     Optional<VariableNullability> currentVariableNullability) {
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
+                                     IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
@@ -267,10 +265,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 ? this
                 : iqFactory.createInnerJoinNode(newCondition);
 
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createNaryIQTree(newJoinNode, newChildren, v, iqProperties))
-                .orElseGet(() -> iqFactory.createNaryIQTree(newJoinNode, newChildren, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
     }
 
     private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq;
 
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 import java.util.Optional;
 
@@ -41,4 +42,5 @@ public interface IQTreeCache {
     @Deprecated
     IQProperties convertIntoIQProperties();
 
+    IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution);
 }

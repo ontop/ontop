@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -91,9 +90,8 @@ public interface IntermediateQueryFactory {
                                                                 IQProperties properties);
 
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
+    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQTreeCache treeCache);
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
-    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children,
-                                VariableNullability variableNullability, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 

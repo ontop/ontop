@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -29,10 +30,11 @@ public class IQTreeCacheImpl implements IQTreeCache {
     }
 
     protected IQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
-                              boolean areDistinctAlreadyRemoved) {
+                              boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability) {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
         this.coreSingletons = coreSingletons;
+        this.variableNullability = variableNullability;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
 
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithoutEffect() {
-        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved);
+        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
     }
 
     /**
@@ -60,7 +62,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved);
+        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
     }
 
     /**
@@ -68,12 +70,12 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareConstraintPushedDownWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved);
+        return new IQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved, variableNullability);
     }
 
     @Override
     public IQTreeCache declareDistinctRemovalWithoutEffect() {
-        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true);
+        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true, variableNullability);
     }
 
     /**
@@ -81,7 +83,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareDistinctRemovalWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, false, true);
+        return new IQTreeCacheImpl(coreSingletons, false, true, variableNullability);
     }
 
     @Override
@@ -101,5 +103,13 @@ public class IQTreeCacheImpl implements IQTreeCache {
             properties = properties.declareNormalizedForOptimization();
 
         return properties;
+    }
+
+    @Override
+    public IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution) {
+        VariableNullability newVariableNullability = variableNullability == null
+                ? null
+                : variableNullability.applyFreshRenaming(renamingSubstitution);
+        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved, newVariableNullability);
     }
 }

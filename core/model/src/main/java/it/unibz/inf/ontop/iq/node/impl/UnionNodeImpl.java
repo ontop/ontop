@@ -477,8 +477,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution,
-                                     ImmutableList<IQTree> children, IQProperties iqProperties,
-                                     Optional<VariableNullability> currentVariableNullability) {
+                                     ImmutableList<IQTree> children, IQTreeCache treeCache) {
         ImmutableList<IQTree> newChildren = children.stream()
                 .map(c -> c.applyFreshRenaming(renamingSubstitution))
                 .collect(ImmutableCollectors.toList());
@@ -488,10 +487,9 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .map(renamingSubstitution::applyToVariable)
                         .collect(ImmutableCollectors.toSet()));
 
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createNaryIQTree(newUnionNode, newChildren, v, iqProperties))
-                .orElseGet(() -> iqFactory.createNaryIQTree(newUnionNode, newChildren, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+
+        return iqFactory.createNaryIQTree(newUnionNode, newChildren, newTreeCache);
     }
 
 
