@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -290,5 +291,22 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
         return iqFactory.createUnaryIQTree(newFilterNode,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
+                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+
+        ImmutableExpression newCondition = renamingSubstitution.applyToBooleanExpression(getFilterCondition());
+
+        FilterNode newFilterNode = newCondition.equals(getFilterCondition())
+                ? this
+                : iqFactory.createFilterNode(newCondition);
+
+        return currentVariableNullability
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
+                .map(v -> iqFactory.createUnaryIQTree(newFilterNode, newChild, v, iqProperties))
+                .orElseGet(() -> iqFactory.createUnaryIQTree(newFilterNode, newChild, iqProperties));
     }
 }

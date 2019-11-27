@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -37,8 +38,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, children, iqProperties, iqTreeTools, iqFactory);
+                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
         variableNullability = null;
@@ -51,8 +52,26 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
-                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+                           @Assisted VariableNullability variableNullability,
+                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
+        if (children.size() < 2)
+            throw new IllegalArgumentException("At least two children are required for a n-ary node");
+        this.variableNullability = variableNullability;
+        variableDefinition = null;
+        isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+
+    @AssistedInject
+    private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
+                           IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                           OntopModelSettings settings) {
+        this(rootNode, children, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -86,20 +105,21 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
+    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+                ? renamingSubstitution
+                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
 
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChildren()))
-                    .orElseGet(() -> constraint
-                            .map(this::propagateDownConstraint)
-                            .orElse(this));
+        return selectedSubstitution.isEmpty()
+                ? this
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getProperties(),
+                Optional.ofNullable(variableNullability));
+    }
 
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
+    @Override
+    protected IQTree applyRegularDescendingSubstitution(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, Optional<ImmutableExpression> constraint) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChildren());
     }
 
     @Override

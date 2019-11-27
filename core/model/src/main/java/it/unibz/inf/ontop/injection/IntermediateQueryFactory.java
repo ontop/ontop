@@ -51,6 +51,7 @@ public interface IntermediateQueryFactory {
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
+    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> newDataAtom, VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
@@ -73,6 +74,8 @@ public interface IntermediateQueryFactory {
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
+    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, VariableNullability variableNullability,
+                                  IQProperties properties);
 
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
@@ -81,9 +84,16 @@ public interface IntermediateQueryFactory {
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild,
                                                                 IQProperties properties);
+    BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
+                                                                @Assisted("left") IQTree leftChild,
+                                                                @Assisted("right") IQTree rightChild,
+                                                                VariableNullability variableNullability,
+                                                                IQProperties properties);
 
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQProperties properties);
+    NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children,
+                                VariableNullability variableNullability, IQProperties properties);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
 

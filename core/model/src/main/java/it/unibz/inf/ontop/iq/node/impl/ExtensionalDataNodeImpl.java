@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -49,6 +50,16 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                                     CoreUtilsFactory coreUtilsFactory) {
         super(atom, iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
+    }
+
+    @AssistedInject
+    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
+                                    @Assisted VariableNullability variableNullability,
+                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
+                                    CoreUtilsFactory coreUtilsFactory) {
+        super(atom, iqTreeTools, iqFactory);
+        this.coreUtilsFactory = coreUtilsFactory;
+        this.variableNullability = variableNullability;
     }
 
     @Override
@@ -105,6 +116,19 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitExtensionalData(this);
+    }
+
+    /**
+     * Optimized to re-use the variable nullability.
+     * Useful the data node has a lot of columns.
+     */
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        DataAtom<RelationPredicate> newDataAtom = freshRenamingSubstitution.applyToDataAtom(getProjectionAtom());
+        return (variableNullability == null)
+                ? newAtom(newDataAtom)
+                : iqFactory.createExtensionalDataNode(newDataAtom,
+                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
     }
 
     @Override

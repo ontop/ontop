@@ -14,11 +14,9 @@ import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -44,11 +42,29 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
                                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                                           IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory);
+                                           IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
         this.variableNullability = null;
+        this.possibleVariableDefinitions = null;
+        this.isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
+    @AssistedInject
+    private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
+                                           @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
+                                           @Assisted VariableNullability variableNullability,
+                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                           IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                           OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.variableNullability = variableNullability;
         this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
@@ -62,8 +78,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
                                            @Assisted("right") IQTree rightChild,
                                            IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory,
+                                           TermFactory termFactory,
                                            OntopModelSettings settings) {
-        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+        this(rootNode, leftChild, rightChild, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -100,20 +117,22 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
+    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+                ? renamingSubstitution
+                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
+
+        return selectedSubstitution.isEmpty()
+                ? this
+                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getProperties(),
+                Optional.ofNullable(variableNullability));
+    }
+
+    @Override
+    protected IQTree applyRegularDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint) {
-
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, leftChild, rightChild))
-                    .orElseGet(() -> constraint
-                            .map(this::propagateDownConstraint)
-                            .orElse(this));
-
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, leftChild, rightChild);
     }
 
     @Override

@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -50,6 +51,9 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
     IQTree applyDescendingSubstitutionWithoutOptimizing(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             IQTree leftChild, IQTree rightChild);
+
+    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild,
+                              IQProperties properties, Optional<VariableNullability> variableNullability);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 

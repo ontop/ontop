@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 
@@ -101,6 +102,11 @@ public class TrueNodeImpl extends LeafIQTreeImpl implements TrueNode {
     @Override
     public <T> T acceptVisitor(IQVisitor<T> visitor) {
         return visitor.visitTrue(this);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
+        return this;
     }
 
     @Override

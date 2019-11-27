@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -89,6 +91,20 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         return newOrderByNode
                 .map(o -> (IQTree) iqFactory.createUnaryIQTree(o, newChild))
                 .orElse(newChild);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
+                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+
+        OrderByNode newOrderByNode = applySubstitution(renamingSubstitution)
+                .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
+
+        return currentVariableNullability
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
+                .map(v -> iqFactory.createUnaryIQTree(newOrderByNode, newChild, v, iqProperties))
+                .orElseGet(() -> iqFactory.createUnaryIQTree(newOrderByNode, newChild, iqProperties));
     }
 
     @Override

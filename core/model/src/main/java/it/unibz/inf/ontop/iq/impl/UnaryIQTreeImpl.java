@@ -15,11 +15,9 @@ import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
@@ -36,12 +34,26 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     private Boolean isDistinct;
     private VariableNullability variableNullability;
 
+    @AssistedInject
+    private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
+                            @Assisted VariableNullability variableNullability,
+                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
+        possibleVariableDefinitions = null;
+        this.variableNullability = variableNullability;
+        isDistinct = null;
+
+        if (settings.isTestModeEnabled())
+            validate();
+    }
+
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
         variableNullability = null;
         isDistinct = null;
@@ -52,8 +64,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
-        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, settings);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
+        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -70,19 +82,21 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint) {
-        try {
-            return normalizeDescendingSubstitution(descendingSubstitution)
-                    .map(s -> getRootNode().applyDescendingSubstitution(s, constraint, getChild()))
-                    .orElseGet(() -> constraint
-                            .map(this::propagateDownConstraint)
-                            .orElse(this));
+    protected IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, boolean alreadyNormalized) {
+        InjectiveVar2VarSubstitution selectedSubstitution = alreadyNormalized
+                ? renamingSubstitution
+                : renamingSubstitution.reduceDomainToIntersectionWith(getVariables());
 
-        } catch (IQTreeTools.UnsatisfiableDescendingSubstitutionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables()));
-        }
+        return selectedSubstitution.isEmpty()
+                ? this
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getProperties(),
+                Optional.ofNullable(variableNullability));
+    }
+
+    @Override
+    protected IQTree applyRegularDescendingSubstitution(ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
+                                                        Optional<ImmutableExpression> constraint) {
+        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild());
     }
 
     @Override

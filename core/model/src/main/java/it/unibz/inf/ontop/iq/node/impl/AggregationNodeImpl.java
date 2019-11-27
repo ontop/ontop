@@ -19,6 +19,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -80,6 +81,24 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         return aggregationNormalizer.normalizeForOptimization(this, child, variableGenerator,
                 currentIQProperties);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
+                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+
+        ImmutableSet<Variable> newGroupingVariables = groupingVariables.stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toSet());
+
+        AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
+                renamingSubstitution.applyRenaming(substitution));
+
+        return currentVariableNullability
+                .map(v -> v.applyFreshRenaming(renamingSubstitution))
+                .map(v -> iqFactory.createUnaryIQTree(newNode, newChild, v, iqProperties))
+                .orElseGet(() -> iqFactory.createUnaryIQTree(newNode, newChild, iqProperties));
     }
 
 

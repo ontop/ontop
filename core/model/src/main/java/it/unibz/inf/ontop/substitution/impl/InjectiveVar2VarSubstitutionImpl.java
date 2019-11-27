@@ -75,6 +75,16 @@ public class InjectiveVar2VarSubstitutionImpl extends Var2VarSubstitutionImpl im
                 .map(substitutionFactory::getInjectiveVar2VarSubstitution);
     }
 
+    @Override
+    public InjectiveVar2VarSubstitution reduceDomainToIntersectionWith(ImmutableSet<Variable> restrictingDomain) {
+        if (restrictingDomain.containsAll(getDomain()))
+            return this;
+        return substitutionFactory.getInjectiveVar2VarSubstitution(
+                this.getImmutableMap().entrySet().stream()
+                        .filter(e -> restrictingDomain.contains(e.getKey()))
+                        .collect(ImmutableCollectors.toMap()));
+    }
+
 
 
     /**
