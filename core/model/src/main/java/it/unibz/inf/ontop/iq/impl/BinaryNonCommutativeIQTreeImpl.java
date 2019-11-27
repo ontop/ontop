@@ -119,7 +119,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, treeCache);
+                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getTreeCache());
     }
 
     @Override

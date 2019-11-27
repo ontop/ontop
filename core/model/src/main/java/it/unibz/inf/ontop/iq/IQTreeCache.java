@@ -1,24 +1,19 @@
 package it.unibz.inf.ontop.iq;
 
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-
-import java.util.Optional;
 
 /**
  * TODO: explain
  *
  *
- * IMPORTANT: An IQTreeCache instance CAN ONLY be attached to a SINGLE IQTree!
+ * WARNING: An IQTreeCache instance can cache additional data structures (e.g. variable nullability, projected variables).
+ * It is therefore recommended to avoid to re-use it for another tree, as one would need to be very careful.
  */
 public interface IQTreeCache {
 
     boolean isNormalizedForOptimization();
 
     boolean areDistinctAlreadyRemoved();
-
-    Optional<VariableNullability> getVariableNullability();
-
 
     IQTreeCache declareAsNormalizedForOptimizationWithoutEffect();
     IQTreeCache declareAsNormalizedForOptimizationWithEffect();
@@ -30,17 +25,6 @@ public interface IQTreeCache {
 
     IQTreeCache declareDistinctRemovalWithoutEffect();
     IQTreeCache declareDistinctRemovalWithEffect();
-
-    /**
-     * Can only be set ONCE!
-     */
-    void setVariableNullability(VariableNullability variableNullability);
-
-    /**
-     * Temporary
-     */
-    @Deprecated
-    IQProperties convertIntoIQProperties();
 
     IQTreeCache applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution);
 }

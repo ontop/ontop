@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.CompositeIQTree;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IQTreeCache;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
@@ -28,7 +25,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
-    protected final IQTreeCache treeCache;
+    private final ConcreteIQTreeCache treeCache;
     private static final String TAB_STR = "   ";
 
     /**
@@ -60,7 +57,9 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
         this.children = children;
-        this.treeCache = treeCache;
+        if (!(treeCache instanceof ConcreteIQTreeCache))
+            throw new IllegalArgumentException("Was expecting the tree cache to be instance of ConcreteIQTreeCache");
+        this.treeCache = (ConcreteIQTreeCache) treeCache;
         // To be computed on-demand
         knownVariables = null;
         hasBeenSuccessfullyValidate = false;
@@ -233,6 +232,10 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     protected abstract VariableNullability computeVariableNullability();
+
+    protected IQTreeCache getTreeCache() {
+        return treeCache;
+    }
 
 
 }

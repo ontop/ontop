@@ -114,7 +114,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), treeCache);
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChildren(), getTreeCache());
     }
 
     @Override

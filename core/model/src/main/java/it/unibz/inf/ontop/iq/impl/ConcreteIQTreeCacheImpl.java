@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.ConcreteIQTreeCache;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -10,7 +11,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Optional;
 
-public class IQTreeCacheImpl implements IQTreeCache {
+public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
 
     private final boolean isNormalizedForOptimization;
     private final boolean areDistinctAlreadyRemoved;
@@ -23,14 +24,14 @@ public class IQTreeCacheImpl implements IQTreeCache {
      * Initial constructor
      */
     @Inject
-    protected IQTreeCacheImpl(CoreSingletons coreSingletons) {
+    protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons) {
         this.coreSingletons = coreSingletons;
         this.isNormalizedForOptimization = false;
         this.areDistinctAlreadyRemoved = false;
     }
 
-    protected IQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
-                              boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability) {
+    protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
+                                      boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability) {
         this.isNormalizedForOptimization = isNormalizedForOptimization;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
         this.coreSingletons = coreSingletons;
@@ -54,7 +55,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
 
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithoutEffect() {
-        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
     }
 
     /**
@@ -62,7 +63,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved, variableNullability);
     }
 
     /**
@@ -70,12 +71,12 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareConstraintPushedDownWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved, variableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved, variableNullability);
     }
 
     @Override
     public IQTreeCache declareDistinctRemovalWithoutEffect() {
-        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true, variableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true, variableNullability);
     }
 
     /**
@@ -83,7 +84,7 @@ public class IQTreeCacheImpl implements IQTreeCache {
      */
     @Override
     public IQTreeCache declareDistinctRemovalWithEffect() {
-        return new IQTreeCacheImpl(coreSingletons, false, true, variableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, false, true, variableNullability);
     }
 
     @Override
@@ -110,6 +111,6 @@ public class IQTreeCacheImpl implements IQTreeCache {
         VariableNullability newVariableNullability = variableNullability == null
                 ? null
                 : variableNullability.applyFreshRenaming(renamingSubstitution);
-        return new IQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved, newVariableNullability);
+        return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved, newVariableNullability);
     }
 }
