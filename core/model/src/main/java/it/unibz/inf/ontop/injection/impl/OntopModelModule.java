@@ -68,6 +68,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
+        bindFromSettings(IQTreeCache.class);
 
         bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
 

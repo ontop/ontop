@@ -11,6 +11,7 @@ package it.unibz.inf.ontop.iq;
  *
  * See IntermediateQueryFactory for creating a new instance.
  */
+@Deprecated
 public interface IQProperties {
 
     boolean isNormalizedForOptimization();
