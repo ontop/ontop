@@ -72,9 +72,8 @@ public interface IntermediateQueryFactory {
                                           ImmutableSubstitution<ImmutableFunctionalTerm> substitution);
 
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child);
+    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQTreeCache treeCache);
     UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, IQProperties properties);
-    UnaryIQTree createUnaryIQTree(UnaryOperatorNode rootNode, IQTree child, VariableNullability variableNullability,
-                                  IQProperties properties);
 
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
@@ -82,11 +81,10 @@ public interface IntermediateQueryFactory {
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild,
-                                                                IQProperties properties);
+                                                                IQTreeCache treeCache);
     BinaryNonCommutativeIQTree createBinaryNonCommutativeIQTree(BinaryNonCommutativeOperatorNode rootNode,
                                                                 @Assisted("left") IQTree leftChild,
                                                                 @Assisted("right") IQTree rightChild,
-                                                                VariableNullability variableNullability,
                                                                 IQProperties properties);
 
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children);

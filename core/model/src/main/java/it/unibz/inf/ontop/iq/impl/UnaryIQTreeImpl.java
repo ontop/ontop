@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -35,12 +36,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
-                            @Assisted VariableNullability variableNullability,
-                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                            @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
+        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
         possibleVariableDefinitions = null;
-        this.treeCache.setVariableNullability(variableNullability);
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -62,8 +61,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings,
+                            IQTreeCache freshTreeCache) {
+        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -87,8 +87,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getProperties(),
-                treeCache.getVariableNullability());
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), treeCache);
     }
 
     @Override

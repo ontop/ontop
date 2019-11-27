@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -53,14 +54,12 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted VariableNullability variableNullability,
-                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                           @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                            OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
+        super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.treeCache.setVariableNullability(variableNullability);
         this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
@@ -120,8 +119,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getProperties(),
-                treeCache.getVariableNullability());
+                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, treeCache);
     }
 
     @Override
