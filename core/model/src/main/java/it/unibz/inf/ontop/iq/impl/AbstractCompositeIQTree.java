@@ -80,7 +80,17 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public synchronized ImmutableSet<Variable> getVariables() {
+        // Non-final
+        ImmutableSet<Variable> variables = treeCache.getVariables();
+        if (variables != null)
+            return variables;
+        variables = computeVariables();
+        treeCache.setVariables(variables);
+        return variables;
+    }
+
+    protected ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         else
@@ -223,10 +233,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public synchronized VariableNullability getVariableNullability() {
-        Optional<VariableNullability> optionalVariableNullability = treeCache.getVariableNullability();
-        if (optionalVariableNullability.isPresent())
-            return optionalVariableNullability.get();
-        VariableNullability variableNullability = computeVariableNullability();
+        // Non-final
+        VariableNullability variableNullability = treeCache.getVariableNullability();
+        if (variableNullability != null)
+            return variableNullability;
+
+        variableNullability = computeVariableNullability();
         treeCache.setVariableNullability(variableNullability);
         return variableNullability;
     }
