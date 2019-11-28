@@ -170,9 +170,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
-                    .filter(s -> !newConstraint.isPresent())
                     .flatMap(this::extractFreshRenaming)
+                    // Fresh renaming
                     .map(s -> applyFreshRenaming(s, true))
+                    .map(t -> newConstraint
+                            .map(t::propagateDownConstraint)
+                            .orElse(t))
+                    // Regular substitution
                     .orElseGet(() -> normalizedSubstitution
                             .map(s -> applyRegularDescendingSubstitution(s, newConstraint))
                             .orElseGet(() -> newConstraint

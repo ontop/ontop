@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
  *
  * WARNING: An IQTreeCache instance can cache additional data structures (e.g. variable nullability, projected variables).
  * It is therefore recommended to avoid to re-use it for another tree, as one would need to be very careful.
+ *
+ * See ConcreteIQTreeCache for more details on which data is stored.
  */
 public interface IQTreeCache {
 
