@@ -165,7 +165,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
-        return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+        IQTree newTree = getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+        return newTree.equals(this) ? this : newTree;
     }
 
     @Override

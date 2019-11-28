@@ -129,8 +129,8 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof CompositeIQTree)
-                && isEquivalentTo((CompositeIQTree) o);
+        return (this == o) || ((o instanceof CompositeIQTree)
+                && isEquivalentTo((CompositeIQTree) o));
     }
 
     @Override
