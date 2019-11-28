@@ -21,20 +21,15 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
-
-    @Nullable
-    private Boolean isDistinct;
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
                             @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
-        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -46,7 +41,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
-        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -108,12 +102,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = getRootNode().isDistinct(getChild());
-
-        return isDistinct;
-
+    protected boolean computeIsDistinct() {
+        return getRootNode().isDistinct(getChild());
     }
 
     @Override

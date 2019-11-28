@@ -21,13 +21,9 @@ import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
-
-    @Nullable
-    private Boolean isDistinct;
 
     @AssistedInject
     private NaryIQTreeImpl(@Assisted NaryOperatorNode rootNode, @Assisted ImmutableList<IQTree> children,
@@ -36,7 +32,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -50,7 +45,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, treeCache, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -138,10 +132,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = getRootNode().isDistinct(getChildren());
-        return isDistinct;
+    protected boolean computeIsDistinct() {
+        return getRootNode().isDistinct(getChildren());
     }
 
     @Override

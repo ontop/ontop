@@ -276,4 +276,16 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
+    @Override
+    public boolean isDistinct() {
+        // Non-final
+        Boolean isDistinct = treeCache.isDistinct();
+        if (isDistinct == null) {
+            isDistinct = computeIsDistinct();
+            treeCache.setIsDistinct(isDistinct);
+        }
+        return isDistinct;
+    }
+
+    protected abstract boolean computeIsDistinct();
 }

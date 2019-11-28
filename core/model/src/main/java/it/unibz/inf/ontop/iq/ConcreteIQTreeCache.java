@@ -29,6 +29,9 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     @Nullable
     ImmutableSet<ImmutableSet<Variable>> getUniqueConstraints();
 
+    @Nullable
+    Boolean isDistinct();
+
     /**
      * Can only be set ONCE!
      */
@@ -47,12 +50,16 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     /**
      * Can only be set ONCE!
      */
-    void setUniqueConstraints(ImmutableSet<ImmutableSet<Variable>> uniqueConstraints);
+    void setUniqueConstraints(@Nonnull ImmutableSet<ImmutableSet<Variable>> uniqueConstraints);
+
+    /**
+     * Can only be set ONCE!
+     */
+    void setIsDistinct(@Nonnull Boolean isDistinct);
 
     /**
      * Temporary
      */
     @Deprecated
     IQProperties convertIntoIQProperties();
-
 }

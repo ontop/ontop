@@ -20,7 +20,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 
@@ -30,9 +29,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     private final IQTree leftChild;
     private final IQTree rightChild;
 
-    @Nullable
-    private Boolean isDistinct;
-
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
@@ -41,7 +37,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -56,7 +51,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -142,10 +136,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = getRootNode().isDistinct(leftChild, rightChild);
-        return isDistinct;
+    protected boolean computeIsDistinct() {
+        return getRootNode().isDistinct(leftChild, rightChild);
     }
 
     @Override
