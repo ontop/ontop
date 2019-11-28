@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
@@ -32,7 +33,7 @@ public interface NaryOperatorNode extends QueryNode {
             ImmutableList<IQTree> children);
 
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
-                              IQProperties properties, Optional<VariableNullability> variableNullability);
+                             IQTreeCache treeCache);
 
     VariableNullability getVariableNullability(ImmutableList<IQTree> children);
 

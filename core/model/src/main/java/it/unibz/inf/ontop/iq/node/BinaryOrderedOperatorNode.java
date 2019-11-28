@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
@@ -53,7 +54,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
             IQTree leftChild, IQTree rightChild);
 
     IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild,
-                              IQProperties properties, Optional<VariableNullability> variableNullability);
+                              IQTreeCache treeCache);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 

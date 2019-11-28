@@ -358,9 +358,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild,
-                                     IQTree rightChild, IQProperties iqProperties,
-                                     Optional<VariableNullability> currentVariableNullability) {
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
         IQTree newLeftChild = leftChild.applyFreshRenaming(renamingSubstitution);
         IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
 
@@ -371,10 +369,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ? this
                 : iqFactory.createLeftJoinNode(newCondition);
 
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild, v, iqProperties))
-                .orElseGet(() -> iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild, newTreeCache);
     }
 
     @Override

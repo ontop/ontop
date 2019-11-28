@@ -294,8 +294,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
-                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
         ImmutableExpression newCondition = renamingSubstitution.applyToBooleanExpression(getFilterCondition());
@@ -304,9 +303,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
                 ? this
                 : iqFactory.createFilterNode(newCondition);
 
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createUnaryIQTree(newFilterNode, newChild, v, iqProperties))
-                .orElseGet(() -> iqFactory.createUnaryIQTree(newFilterNode, newChild, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createUnaryIQTree(newFilterNode, newChild, newTreeCache);
     }
 }

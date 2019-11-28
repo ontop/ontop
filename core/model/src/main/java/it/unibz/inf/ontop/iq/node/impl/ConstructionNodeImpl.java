@@ -6,10 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -394,8 +391,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
-                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
 
         ImmutableSet<Variable> newVariables = projectedVariables.stream()
@@ -406,10 +402,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 newVariables,
                 renamingSubstitution.applyRenaming(substitution));
 
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createUnaryIQTree(newConstructionNode, newChild, v, iqProperties))
-                .orElseGet(() -> iqFactory.createUnaryIQTree(newConstructionNode, newChild, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createUnaryIQTree(newConstructionNode, newChild, newTreeCache);
     }
 
     @Override
