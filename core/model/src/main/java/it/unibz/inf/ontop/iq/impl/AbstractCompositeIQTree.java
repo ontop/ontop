@@ -8,10 +8,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -253,5 +250,30 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
         return treeCache;
     }
 
+    @Override
+    public synchronized ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        // Non-final
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
+        if (possibleVariableDefinitions == null) {
+            possibleVariableDefinitions = computePossibleVariableDefinitions();
+            treeCache.setPossibleVariableDefinitions(possibleVariableDefinitions);
+        }
+        return possibleVariableDefinitions;
+    }
+
+    protected abstract ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions();
+
+    @Override
+    public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        // Non-final
+        ImmutableSet<ImmutableSet<Variable>> uniqueConstraints = treeCache.getUniqueConstraints();
+        if (uniqueConstraints == null) {
+            uniqueConstraints = computeUniqueConstraints();
+            treeCache.setUniqueConstraints(uniqueConstraints);
+        }
+        return uniqueConstraints;
+    }
+
+    protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
 }

@@ -27,10 +27,6 @@ import java.util.Optional;
 public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> implements NaryIQTree {
 
     @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> variableDefinition;
-    @Nullable
-    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
-    @Nullable
     private Boolean isDistinct;
 
     @AssistedInject
@@ -40,7 +36,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, iqProperties, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        variableDefinition = null;
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -55,7 +50,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
         super(rootNode, children, treeCache, iqTreeTools, iqFactory, termFactory);
         if (children.size() < 2)
             throw new IllegalArgumentException("At least two children are required for a n-ary node");
-        variableDefinition = null;
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -174,10 +168,8 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (variableDefinition == null)
-            variableDefinition = getRootNode().getPossibleVariableDefinitions(getChildren());
-        return variableDefinition;
+    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+        return getRootNode().getPossibleVariableDefinitions(getChildren());
     }
 
     @Override
@@ -189,10 +181,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = getRootNode().inferUniqueConstraints(getChildren());
-        }
-        return uniqueConstraints;
+    protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return getRootNode().inferUniqueConstraints(getChildren());
     }
 }

@@ -26,11 +26,6 @@ import java.util.Optional;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
-    // Lazy
-    @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
-    @Nullable
-    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
     @Nullable
     private Boolean isDistinct;
 
@@ -39,7 +34,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
-        possibleVariableDefinitions = null;
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -52,7 +46,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
-        possibleVariableDefinitions = null;
         isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -144,18 +137,13 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (possibleVariableDefinitions == null)
-            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
-        return possibleVariableDefinitions;
+    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+            return getRootNode().getPossibleVariableDefinitions(getChild());
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = getRootNode().inferUniqueConstraints(getChild());
-        }
-        return uniqueConstraints;
+    protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return getRootNode().inferUniqueConstraints(getChild());
     }
 
     @Override

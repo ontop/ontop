@@ -29,12 +29,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     private final IQTree leftChild;
     private final IQTree rightChild;
-    @Nullable
-    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+
     @Nullable
     private Boolean isDistinct;
-    @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
@@ -44,7 +41,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -60,7 +56,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.possibleVariableDefinitions = null;
         this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
@@ -188,10 +183,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (possibleVariableDefinitions == null)
-            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
-        return possibleVariableDefinitions;
+    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+        return getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
     }
 
     @Override
@@ -200,10 +193,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = getRootNode().inferUniqueConstraints(leftChild, rightChild);
-        }
-        return uniqueConstraints;
+    protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return getRootNode().inferUniqueConstraints(leftChild, rightChild);
     }
 }
