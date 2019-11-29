@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -63,13 +64,10 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child,
-                                     IQProperties iqProperties, Optional<VariableNullability> currentVariableNullability) {
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
         IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-        return currentVariableNullability
-                .map(v -> v.applyFreshRenaming(renamingSubstitution))
-                .map(v -> iqFactory.createUnaryIQTree(this, newChild, v, iqProperties))
-                .orElseGet(() -> iqFactory.createUnaryIQTree(this, newChild, iqProperties));
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override

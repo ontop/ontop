@@ -3,16 +3,12 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.CompositeIQTree;
-import it.unibz.inf.ontop.iq.IQProperties;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -26,7 +22,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     private final N rootNode;
     private final ImmutableList<IQTree> children;
-    private final IQProperties iqProperties;
+    private final ConcreteIQTreeCache treeCache;
     private static final String TAB_STR = "   ";
 
     /**
@@ -45,6 +41,12 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
                                       IQProperties iqProperties, IQTreeTools iqTreeTools,
                                       IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+        this(rootNode, children, convertIQProperties(iqProperties), iqTreeTools, iqFactory, termFactory);
+    }
+
+    protected AbstractCompositeIQTree(N rootNode, ImmutableList<IQTree> children,
+                                      IQTreeCache treeCache, IQTreeTools iqTreeTools,
+                                      IntermediateQueryFactory iqFactory, TermFactory termFactory) {
         this.iqTreeTools = iqTreeTools;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
@@ -52,10 +54,16 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             throw new IllegalArgumentException("A composite IQ must have at least one child");
         this.rootNode = rootNode;
         this.children = children;
-        this.iqProperties = iqProperties;
+        if (!(treeCache instanceof ConcreteIQTreeCache))
+            throw new IllegalArgumentException("Was expecting the tree cache to be instance of ConcreteIQTreeCache");
+        this.treeCache = (ConcreteIQTreeCache) treeCache;
         // To be computed on-demand
         knownVariables = null;
         hasBeenSuccessfullyValidate = false;
+    }
+
+    private static IQTreeCache convertIQProperties(IQProperties iqProperties) {
+        return iqProperties.convertIQTreeCache();
     }
 
     @Override
@@ -69,7 +77,17 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    public synchronized ImmutableSet<Variable> getVariables() {
+        // Non-final
+        ImmutableSet<Variable> variables = treeCache.getVariables();
+        if (variables != null)
+            return variables;
+        variables = computeVariables();
+        treeCache.setVariables(variables);
+        return variables;
+    }
+
+    protected ImmutableSet<Variable> computeVariables() {
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
         else
@@ -108,8 +126,8 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
 
     @Override
     public boolean equals(Object o) {
-        return (o instanceof CompositeIQTree)
-                && isEquivalentTo((CompositeIQTree) o);
+        return (this == o) || ((o instanceof CompositeIQTree)
+                && isEquivalentTo((CompositeIQTree) o));
     }
 
     @Override
@@ -129,7 +147,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     }
 
     protected IQProperties getProperties() {
-        return iqProperties;
+        return treeCache.convertIntoIQProperties();
     }
 
     protected Optional<ImmutableSubstitution<? extends VariableOrGroundTerm>> normalizeDescendingSubstitution(
@@ -149,9 +167,13 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
             Optional<ImmutableExpression> newConstraint = normalizeConstraint(constraint, descendingSubstitution);
 
             return normalizedSubstitution
-                    .filter(s -> !newConstraint.isPresent())
                     .flatMap(this::extractFreshRenaming)
+                    // Fresh renaming
                     .map(s -> applyFreshRenaming(s, true))
+                    .map(t -> newConstraint
+                            .map(t::propagateDownConstraint)
+                            .orElse(t))
+                    // Regular substitution
                     .orElseGet(() -> normalizedSubstitution
                             .map(s -> applyRegularDescendingSubstitution(s, newConstraint))
                             .orElseGet(() -> newConstraint
@@ -209,4 +231,61 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
      * Only validates the node, not its children
      */
     protected abstract void validateNode() throws InvalidIntermediateQueryException;
+
+    @Override
+    public synchronized VariableNullability getVariableNullability() {
+        // Non-final
+        VariableNullability variableNullability = treeCache.getVariableNullability();
+        if (variableNullability != null)
+            return variableNullability;
+
+        variableNullability = computeVariableNullability();
+        treeCache.setVariableNullability(variableNullability);
+        return variableNullability;
+    }
+
+    protected abstract VariableNullability computeVariableNullability();
+
+    protected IQTreeCache getTreeCache() {
+        return treeCache;
+    }
+
+    @Override
+    public synchronized ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
+        // Non-final
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions = treeCache.getPossibleVariableDefinitions();
+        if (possibleVariableDefinitions == null) {
+            possibleVariableDefinitions = computePossibleVariableDefinitions();
+            treeCache.setPossibleVariableDefinitions(possibleVariableDefinitions);
+        }
+        return possibleVariableDefinitions;
+    }
+
+    protected abstract ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions();
+
+    @Override
+    public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+        // Non-final
+        ImmutableSet<ImmutableSet<Variable>> uniqueConstraints = treeCache.getUniqueConstraints();
+        if (uniqueConstraints == null) {
+            uniqueConstraints = computeUniqueConstraints();
+            treeCache.setUniqueConstraints(uniqueConstraints);
+        }
+        return uniqueConstraints;
+    }
+
+    protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
+
+    @Override
+    public boolean isDistinct() {
+        // Non-final
+        Boolean isDistinct = treeCache.isDistinct();
+        if (isDistinct == null) {
+            isDistinct = computeIsDistinct();
+            treeCache.setIsDistinct(isDistinct);
+        }
+        return isDistinct;
+    }
+
+    protected abstract boolean computeIsDistinct();
 }
