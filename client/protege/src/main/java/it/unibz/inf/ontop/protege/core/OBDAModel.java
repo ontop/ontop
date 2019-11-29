@@ -512,4 +512,8 @@ public class OBDAModel {
     public RDF getRdfFactory() {
         return rdfFactory;
     }
+
+    public boolean hasTripleMaps(){
+        return !triplesMapMap.isEmpty();
+    }
 }
