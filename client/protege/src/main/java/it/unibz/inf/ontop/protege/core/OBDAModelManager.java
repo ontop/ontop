@@ -4,10 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
-import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.injection.TargetQueryParserFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
@@ -608,13 +605,14 @@ public class OBDAModelManager implements Disposable {
 				String obdaDocumentIri = owlName + OBDA_EXT;
 				String queryDocumentIri = owlName + QUERY_EXT;
 
-				// Save the OBDA model
-				File obdaFile = new File(URI.create(obdaDocumentIri));
-				SQLPPMapping ppMapping = obdaModel.generatePPMapping();
-				OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
-				writer.save(obdaFile);
-
-				log.info("mapping file saved to {}", obdaFile);
+				// Save the mapping
+				if(obdaModel.hasTripleMaps()) {
+					File obdaFile = new File(URI.create(obdaDocumentIri));
+					SQLPPMapping ppMapping = obdaModel.generatePPMapping();
+					OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
+					writer.save(obdaFile);
+					log.info("mapping file saved to {}", obdaFile);
+				}
 
 				if (!queryController.getElements().isEmpty()) {
 					// Save the queries
@@ -624,9 +622,13 @@ public class OBDAModelManager implements Disposable {
 					log.info("query file saved to {}", queryFile);
 				}
 
-
 				Properties properties = configurationManager.snapshotUserProperties();
-				if (!properties.isEmpty()) {
+				// Generate a property file iff there is at least one property that is not "jdbc.name"
+				if (properties.entrySet().stream()
+						.anyMatch(
+								e -> !e.getKey().equals(OntopSQLCoreSettings.JDBC_NAME) &&
+										!e.getValue().equals(""))
+				){
 					String propertyFilePath = owlName + PROPERTY_EXT;
 					File propertyFile = new File(URI.create(propertyFilePath));
 					FileOutputStream outputStream = new FileOutputStream(propertyFile);
