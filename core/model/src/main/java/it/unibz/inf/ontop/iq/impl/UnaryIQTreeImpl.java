@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
@@ -20,29 +21,15 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> implements UnaryIQTree {
 
-    // Lazy
-    @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
-    @Nullable
-    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
-    @Nullable
-    private Boolean isDistinct;
-    private VariableNullability variableNullability;
-
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child,
-                            @Assisted VariableNullability variableNullability,
-                            @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                            @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
-        possibleVariableDefinitions = null;
-        this.variableNullability = variableNullability;
-        isDistinct = null;
+        super(rootNode, ImmutableList.of(child), treeCache, iqTreeTools, iqFactory, termFactory);
 
         if (settings.isTestModeEnabled())
             validate();
@@ -54,9 +41,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
                             @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
                             IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
         super(rootNode, ImmutableList.of(child), iqProperties, iqTreeTools, iqFactory, termFactory);
-        possibleVariableDefinitions = null;
-        variableNullability = null;
-        isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -64,8 +48,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @AssistedInject
     private UnaryIQTreeImpl(@Assisted UnaryOperatorNode rootNode, @Assisted IQTree child, IQTreeTools iqTreeTools,
-                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings) {
-        this(rootNode, child, iqFactory.createIQProperties(), iqTreeTools, iqFactory, termFactory, settings);
+                            IntermediateQueryFactory iqFactory, TermFactory termFactory, OntopModelSettings settings,
+                            IQTreeCache freshTreeCache) {
+        this(rootNode, child, freshTreeCache, iqTreeTools, iqFactory, termFactory, settings);
     }
 
     @Override
@@ -89,8 +74,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getProperties(),
-                Optional.ofNullable(variableNullability));
+                : getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getTreeCache());
     }
 
     @Override
@@ -118,12 +102,8 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = getRootNode().isDistinct(getChild());
-
-        return isDistinct;
-
+    protected boolean computeIsDistinct() {
+        return getRootNode().isDistinct(getChild());
     }
 
     @Override
@@ -132,15 +112,9 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public VariableNullability getVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = getRootNode().getVariableNullability(getChild());
-        return variableNullability;
-    }
-
-    @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
-        return getRootNode().propagateDownConstraint(constraint, getChild());
+        IQTree newTree = getRootNode().propagateDownConstraint(constraint, getChild());
+        return newTree.equals(this) ? this : newTree;
     }
 
     @Override
@@ -153,18 +127,13 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (possibleVariableDefinitions == null)
-            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(getChild());
-        return possibleVariableDefinitions;
+    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+            return getRootNode().getPossibleVariableDefinitions(getChild());
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = getRootNode().inferUniqueConstraints(getChild());
-        }
-        return uniqueConstraints;
+    protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return getRootNode().inferUniqueConstraints(getChild());
     }
 
     @Override
@@ -177,7 +146,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
+    protected ImmutableSet<Variable> computeVariables() {
         UnaryOperatorNode rootNode = getRootNode();
         if (rootNode instanceof ExplicitVariableProjectionNode)
             return ((ExplicitVariableProjectionNode) rootNode).getVariables();
@@ -188,6 +157,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     protected void validateNode() throws InvalidIntermediateQueryException {
         getRootNode().validateNode(getChild());
+    }
+
+    @Override
+    protected VariableNullability computeVariableNullability() {
+        return getRootNode().getVariableNullability(getChild());
     }
 
     @Override

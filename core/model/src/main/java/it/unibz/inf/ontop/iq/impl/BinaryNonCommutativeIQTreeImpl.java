@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.node.BinaryNonCommutativeOperatorNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
@@ -19,7 +20,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 
@@ -28,15 +28,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     private final IQTree leftChild;
     private final IQTree rightChild;
-    // LAZY
-    @Nullable
-    private VariableNullability variableNullability;
-    @Nullable
-    private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
-    @Nullable
-    private Boolean isDistinct;
-    @Nullable
-    private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
@@ -46,9 +37,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.variableNullability = null;
-        this.possibleVariableDefinitions = null;
-        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -57,16 +45,12 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @AssistedInject
     private BinaryNonCommutativeIQTreeImpl(@Assisted BinaryNonCommutativeOperatorNode rootNode,
                                            @Assisted("left") IQTree leftChild, @Assisted("right") IQTree rightChild,
-                                           @Assisted VariableNullability variableNullability,
-                                           @Assisted IQProperties iqProperties, IQTreeTools iqTreeTools,
+                                           @Assisted IQTreeCache treeCache, IQTreeTools iqTreeTools,
                                            IntermediateQueryFactory iqFactory, TermFactory termFactory,
                                            OntopModelSettings settings) {
-        super(rootNode, ImmutableList.of(leftChild, rightChild), iqProperties, iqTreeTools, iqFactory, termFactory);
+        super(rootNode, ImmutableList.of(leftChild, rightChild), treeCache, iqTreeTools, iqFactory, termFactory);
         this.leftChild = leftChild;
         this.rightChild = rightChild;
-        this.variableNullability = variableNullability;
-        this.possibleVariableDefinitions = null;
-        this.isDistinct = null;
 
         if (settings.isTestModeEnabled())
             validate();
@@ -124,8 +108,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
         return selectedSubstitution.isEmpty()
                 ? this
-                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getProperties(),
-                Optional.ofNullable(variableNullability));
+                : getRootNode().applyFreshRenaming(renamingSubstitution, leftChild, rightChild, getTreeCache());
     }
 
     @Override
@@ -153,10 +136,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = getRootNode().isDistinct(leftChild, rightChild);
-        return isDistinct;
+    protected boolean computeIsDistinct() {
+        return getRootNode().isDistinct(leftChild, rightChild);
     }
 
     @Override
@@ -165,15 +146,14 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public VariableNullability getVariableNullability() {
-        if (variableNullability == null)
-            variableNullability = getRootNode().getVariableNullability(leftChild, rightChild);
-        return variableNullability;
+    protected VariableNullability computeVariableNullability() {
+        return getRootNode().getVariableNullability(leftChild, rightChild);
     }
 
     @Override
     public IQTree propagateDownConstraint(ImmutableExpression constraint) {
-        return getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+        IQTree newTree = getRootNode().propagateDownConstraint(constraint, leftChild, rightChild);
+        return newTree.equals(this) ? this : newTree;
     }
 
     @Override
@@ -195,10 +175,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public ImmutableSet<ImmutableSubstitution<NonVariableTerm>> getPossibleVariableDefinitions() {
-        if (possibleVariableDefinitions == null)
-            possibleVariableDefinitions = getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
-        return possibleVariableDefinitions;
+    protected ImmutableSet<ImmutableSubstitution<NonVariableTerm>> computePossibleVariableDefinitions() {
+        return getRootNode().getPossibleVariableDefinitions(leftChild, rightChild);
     }
 
     @Override
@@ -207,10 +185,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = getRootNode().inferUniqueConstraints(leftChild, rightChild);
-        }
-        return uniqueConstraints;
+    protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return getRootNode().inferUniqueConstraints(leftChild, rightChild);
     }
 }

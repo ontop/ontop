@@ -2,18 +2,22 @@ package it.unibz.inf.ontop.iq.impl;
 
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.iq.IQProperties;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 
 public class IQPropertiesImpl implements IQProperties {
 
     private final boolean isNormalized, areDistinctAlreadyRemoved;
+    private final IQTreeCache emptyTreeCache;
 
     @AssistedInject
-    private IQPropertiesImpl() {
+    private IQPropertiesImpl(IQTreeCache emptyTreeCache) {
+        this.emptyTreeCache = emptyTreeCache;
         this.isNormalized = false;
         this.areDistinctAlreadyRemoved = false;
     }
 
-    private IQPropertiesImpl(boolean isNormalized, boolean areDistinctAlreadyRemoved) {
+    private IQPropertiesImpl(IQTreeCache emptyTreeCache, boolean isNormalized, boolean areDistinctAlreadyRemoved) {
+        this.emptyTreeCache = emptyTreeCache;
         this.isNormalized = isNormalized;
         this.areDistinctAlreadyRemoved = areDistinctAlreadyRemoved;
     }
@@ -30,16 +34,27 @@ public class IQPropertiesImpl implements IQProperties {
 
     @Override
     public IQProperties declareNormalizedForOptimization() {
-        return new IQPropertiesImpl(true, areDistinctAlreadyRemoved);
+        return new IQPropertiesImpl(emptyTreeCache, true, areDistinctAlreadyRemoved);
     }
 
     @Override
     public IQProperties declareDistinctRemovalWithoutEffect() {
-        return new IQPropertiesImpl(isNormalized, true);
+        return new IQPropertiesImpl(emptyTreeCache, isNormalized, true);
     }
 
     @Override
     public IQProperties declareDistinctRemovalWithEffect() {
-        return new IQPropertiesImpl(false, true);
+        return new IQPropertiesImpl(emptyTreeCache, false, true);
+    }
+
+    @Override
+    public IQTreeCache convertIQTreeCache() {
+        //Non-final
+        IQTreeCache treeCache = emptyTreeCache;
+        if (isNormalized)
+            treeCache = treeCache.declareAsNormalizedForOptimizationWithoutEffect();
+        if (areDistinctAlreadyRemoved)
+            treeCache = treeCache.declareDistinctRemovalWithoutEffect();
+        return treeCache;
     }
 }
