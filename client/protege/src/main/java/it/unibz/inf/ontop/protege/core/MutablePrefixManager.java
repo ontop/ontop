@@ -22,12 +22,18 @@ package it.unibz.inf.ontop.protege.core;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.spec.mapping.impl.AbstractPrefixManager;
+import org.protege.editor.owl.model.entity.EntityCreationPreferences;
+import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
+import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 
 /**
@@ -93,5 +99,42 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	public void addPrefixes(ImmutableMap<String, String> prefixMap) {
 		prefixMap.entrySet()
 				.forEach(e -> owlmapper.setPrefix(e.getKey(), e.getValue()));
+	}
+
+	/**
+	 *  Returns the namespace declared in the ontology for the default prefix.
+	*/
+	 protected static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
+		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
+				ontology,
+				ontology.getOWLOntologyManager().getOntologyFormat(ontology)
+		);
+		if(StreamSupport.stream(nsm.getPrefixes().spliterator(), false)
+			.anyMatch(p ->  p.equals(""))){
+			return Optional.of(nsm.getNamespaceForPrefix(""));
+		}
+		return Optional.empty();
+	}
+
+	protected static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
+		com.google.common.base.Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
+		return ontologyIRI.isPresent()?
+				Optional.of(getProperPrefixURI(ontologyIRI.get().toString())):
+				Optional.empty();
+	}
+
+	/**
+	 * A utility method to ensure a proper naming for prefix URIs
+	 */
+	private static String getProperPrefixURI(String prefixUri) {
+		if (!prefixUri.endsWith("#")) {
+			if (!prefixUri.endsWith("/")) {
+				String defaultSeparator = EntityCreationPreferences.getDefaultSeparator();
+				if (!prefixUri.endsWith(defaultSeparator))  {
+					prefixUri += defaultSeparator;
+				}
+			}
+		}
+		return prefixUri;
 	}
 }
