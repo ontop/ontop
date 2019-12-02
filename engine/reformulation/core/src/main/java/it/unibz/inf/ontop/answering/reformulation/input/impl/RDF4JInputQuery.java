@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
+import java.util.Objects;
+
 
 class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
 
@@ -37,7 +39,16 @@ class RDF4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
         return ((RDF4JInputQueryTranslator) translator).translate(parsedQuery);
     }
 
-    protected ParsedQuery getParsedQuery() {
-        return parsedQuery;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RDF4JInputQuery<?> that = (RDF4JInputQuery<?>) o;
+        return inputQueryString.equals(that.inputQueryString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inputQueryString);
     }
 }

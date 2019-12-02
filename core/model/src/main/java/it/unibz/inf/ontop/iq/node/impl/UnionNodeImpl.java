@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -472,6 +473,23 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         UnionNode newRootNode = iqFactory.createUnionNode(updatedProjectedVariables);
         return iqFactory.createNaryIQTree(newRootNode, updatedChildren);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution,
+                                     ImmutableList<IQTree> children, IQTreeCache treeCache) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(c -> c.applyFreshRenaming(renamingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        UnionNode newUnionNode = iqFactory.createUnionNode(
+                getVariables().stream()
+                        .map(renamingSubstitution::applyToVariable)
+                        .collect(ImmutableCollectors.toSet()));
+
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+
+        return iqFactory.createNaryIQTree(newUnionNode, newChildren, newTreeCache);
     }
 
 

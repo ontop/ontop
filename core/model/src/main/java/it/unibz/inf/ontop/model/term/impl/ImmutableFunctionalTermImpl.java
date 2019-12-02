@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +23,10 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     private final FunctionSymbol functionSymbol;
     private final ImmutableList<? extends ImmutableTerm> terms;
     private final TermFactory termFactory;
+
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> variables;
 
     /**
      * Lazy cache for toString()
@@ -39,6 +44,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         this.terms = terms;
         this.termFactory = termFactory;
         string = null;
+        variables = null;
 
         if (functionSymbol.getArity() != terms.size()) {
             throw new IllegalArgumentException("Arity violation: " + functionSymbol + " was expecting " + functionSymbol.getArity()
@@ -67,15 +73,20 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
-        return getVariableStream()
-                .collect(ImmutableCollectors.toSet());
+    public synchronized ImmutableSet<Variable> getVariables() {
+        if (variables == null) {
+            variables = getVariableStream()
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return variables;
     }
 
     @Override
     public Stream<Variable> getVariableStream() {
-        return terms.stream()
-                .flatMap(ImmutableTerm::getVariableStream);
+        return variables == null
+                ? terms.stream()
+                .flatMap(ImmutableTerm::getVariableStream)
+                : variables.stream();
     }
 
     @Override

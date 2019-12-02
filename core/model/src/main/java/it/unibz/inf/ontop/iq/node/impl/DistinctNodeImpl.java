@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQProperties;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -59,6 +61,13 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child) {
         return iqFactory.createUnaryIQTree(this,
                 child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution));
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree child, IQTreeCache treeCache) {
+        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
     }
 
     @Override
