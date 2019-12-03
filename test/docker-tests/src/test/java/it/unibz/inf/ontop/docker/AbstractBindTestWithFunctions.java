@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
@@ -260,7 +261,7 @@ public abstract class AbstractBindTestWithFunctions {
 	 */
 
     @Test
-    public void testHash() throws Exception {
+    public void testHashSHA256() throws Exception {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
@@ -292,6 +293,29 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
+    @Ignore
+    @Test
+    public void testHashMd5() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA1() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA384() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testHashSHA512() throws Exception {
+
+    }
 
 	/*
 	 * Tests for functions on strings.
@@ -901,6 +925,84 @@ public abstract class AbstractBindTestWithFunctions {
         expectedValues.add("\"01:00\"^^xsd:string");
 
         return expectedValues;
+    }
+
+    @Ignore
+    @Test
+    public void testBound() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testRDFTermEqual() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testSameTerm() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testIsIRI() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testIsBlank() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testIsLiteral() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testIsNumeric() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testStr() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testLang() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testDatatype() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testConcat() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testLangMatches() throws Exception {
+
+    }
+
+    @Ignore
+    @Test
+    public void testREPLACE() throws Exception {
+
     }
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
