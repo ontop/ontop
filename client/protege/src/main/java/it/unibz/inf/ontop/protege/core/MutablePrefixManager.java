@@ -29,10 +29,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyID;
 import org.semanticweb.owlapi.rdf.rdfxml.renderer.OWLOntologyXMLNamespaceManager;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.StreamSupport;
 
 
@@ -54,13 +51,11 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	public String getPrefix(String uri) {
-		for (String prefix : owlmapper.getPrefixName2PrefixMap().keySet()) {
-			if (owlmapper.getPrefixName2PrefixMap().get(prefix).startsWith(uri)) {
-				return prefix;
-			}
-		}
-		return null;
+	public Optional<String> getPrefix(String uri) {
+		return owlmapper.getPrefixName2PrefixMap().entrySet().stream()
+				.filter(e -> e.getValue().equals(uri))
+				.map(Map.Entry::getKey)
+				.findFirst();
 	}
 
 	@Override
@@ -87,7 +82,7 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	public List<String> getNamespaceList() {
+	public List<String> getOrderedNamespaces() {
 		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
 		namespaceList.sort(Collections.reverseOrder());
 		return namespaceList;
