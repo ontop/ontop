@@ -34,7 +34,6 @@ import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -178,11 +177,11 @@ public class OBDAModelManager implements Disposable {
 	public class OntologyRefactoringListener implements OWLOntologyChangeListener {
 
 		@Override
-		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) throws OWLException {
-			Map<OWLEntity, OWLEntity> renamings = new HashMap<OWLEntity, OWLEntity>();
-			Set<OWLEntity> removals = new HashSet<OWLEntity>();
+		public void ontologiesChanged(@Nonnull List<? extends OWLOntologyChange> changes) {
+			Map<OWLEntity, OWLEntity> renamings = new HashMap<>();
+			Set<OWLEntity> removals = new HashSet<>();
 
-			for (int idx = 0; idx < changes.size(); idx++) {
+			for (int idx = 0; changes.size() > idx; idx++) {
 				OWLOntologyChange change = changes.get(idx);
 				if (change instanceof SetOntologyID) {
 					log.debug("Ontology ID changed");
@@ -327,12 +326,11 @@ public class OBDAModelManager implements Disposable {
 			// Applying the renaming to the OBDA model
 			OBDAModel obdamodel = getActiveOBDAModel();
 			for (OWLEntity olde : renamings.keySet()) {
-				OWLEntity removedEntity = olde;
-				OWLEntity newEntity = renamings.get(removedEntity);
+				OWLEntity newEntity = renamings.get(olde);
 
 				// This set of changes appears to be a "renaming" operation,
 				// hence we will modify the OBDA model accordingly
-				org.apache.commons.rdf.api.IRI removedIRI = getIRI(removedEntity);
+				org.apache.commons.rdf.api.IRI removedIRI = getIRI(olde);
 				org.apache.commons.rdf.api.IRI newIRI = getIRI(newEntity);
 
 				obdamodel.changePredicateIri(removedIRI, newIRI);

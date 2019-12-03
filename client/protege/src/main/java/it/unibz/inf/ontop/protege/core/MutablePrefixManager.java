@@ -42,9 +42,9 @@ import java.util.stream.StreamSupport;
  */
 public class MutablePrefixManager extends AbstractPrefixManager {
 
-    PrefixDocumentFormat owlmapper;
+    private PrefixDocumentFormat owlmapper;
 
-	public MutablePrefixManager(PrefixDocumentFormat owlmapper) {
+	MutablePrefixManager(PrefixDocumentFormat owlmapper) {
 		this.owlmapper = owlmapper;
 	}
 	
@@ -78,7 +78,7 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 		return owlmapper.containsPrefixMapping(prefix);
 	}
 
-	public void addPrefix(String name, String uri) {
+	void addPrefix(String name, String uri) {
 		owlmapper.setPrefix(name, uri);
 	}
 
@@ -88,23 +88,19 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 
 	@Override
 	public List<String> getNamespaceList() {
-		ArrayList<String> namespaceList = new ArrayList<String>();
-		for (String uri : getPrefixMap().values()) {
-			namespaceList.add(uri);
-		}
+		ArrayList<String> namespaceList = new ArrayList<>(getPrefixMap().values());
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}
 
-	public void addPrefixes(ImmutableMap<String, String> prefixMap) {
-		prefixMap.entrySet()
-				.forEach(e -> owlmapper.setPrefix(e.getKey(), e.getValue()));
+	void addPrefixes(ImmutableMap<String, String> prefixMap) {
+		prefixMap.forEach((key, value) -> owlmapper.setPrefix(key, value));
 	}
 
 	/**
 	 *  Returns the namespace declared in the ontology for the default prefix.
 	*/
-	 protected static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
+	 static Optional<String> getDeclaredDefaultPrefixNamespace(OWLOntology ontology){
 		OWLOntologyXMLNamespaceManager nsm = new OWLOntologyXMLNamespaceManager(
 				ontology,
 				ontology.getOWLOntologyManager().getOntologyFormat(ontology)
@@ -116,7 +112,7 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 		return Optional.empty();
 	}
 
-	protected static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
+	static Optional<String> generateDefaultPrefixNamespaceFromID(OWLOntologyID ontologyID) {
 		com.google.common.base.Optional<IRI> ontologyIRI = ontologyID.getOntologyIRI();
 		return ontologyIRI.isPresent()?
 				Optional.of(getProperPrefixURI(ontologyIRI.get().toString())):

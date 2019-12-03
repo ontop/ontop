@@ -29,7 +29,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
-import org.semanticweb.owlapi.model.OWLOntologyID;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -77,7 +76,7 @@ public class OBDAModel {
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
     // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
-    public Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
+    private Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
@@ -139,7 +138,7 @@ public class OBDAModel {
 
 
     public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
-            InvalidMappingException, IOException, MappingIOException {
+            InvalidMappingException, MappingIOException {
 
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -273,16 +272,10 @@ public class OBDAModel {
 
         ImmutableList<TargetAtom> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicateIRI, counter);
 
-        if (counter.get() > initialCount) {
-            if (newTargetAtoms.isEmpty()) {
-                return false;
-            }
-            else {
-                return true;
-            }
+        if (counter.get() > initialCount && newTargetAtoms.isEmpty()) {
+            return false;
         }
-        else
-            return true;
+        return true;
     }
 
     private ImmutableList<TargetAtom> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI, AtomicInteger counter) {
@@ -389,7 +382,7 @@ public class OBDAModel {
 
     public void removeTriplesMap(URI dataSourceURI, String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)
-            fireMappingDeleted(dataSourceURI, mappingId);
+            fireMappingDeleted(dataSourceURI);
     }
 
     public void updateMappingsSourceQuery(String triplesMapId, OBDASQLQuery sourceQuery) {
@@ -429,7 +422,7 @@ public class OBDAModel {
         }
     }
 
-    public int indexOf(URI currentSource, String mappingId) {
+    public int indexOf(String mappingId) {
         ImmutableList<SQLPPTriplesMap> sourceMappings = ImmutableList.copyOf(triplesMapMap.values());
         if (sourceMappings == null) {
             return -1;
@@ -445,7 +438,7 @@ public class OBDAModel {
     /**
      * Announces to the listeners that a mapping was deleted.
      */
-    private void fireMappingDeleted(URI srcuri, String mapping_id) {
+    private void fireMappingDeleted(URI srcuri) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingDeleted(srcuri);
         }
@@ -505,15 +498,15 @@ public class OBDAModel {
         return targetQueryParserFactory.createParser(prefixMap);
     }
 
-    public boolean hasTripleMaps(){
+    boolean hasTripleMaps(){
         return !triplesMapMap.isEmpty();
     }
 
-    public Optional<String> getExplicitDefaultPrefixNamespace() {
+    Optional<String> getExplicitDefaultPrefixNamespace() {
         return explicitDefaultPrefixNamespace;
     }
 
-    public void setExplicitDefaultPrefixNamespace(String ns) {
+    void setExplicitDefaultPrefixNamespace(String ns) {
         this.explicitDefaultPrefixNamespace = Optional.of(ns);
         addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
