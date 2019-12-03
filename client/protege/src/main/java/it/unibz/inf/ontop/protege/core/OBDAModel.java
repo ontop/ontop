@@ -500,4 +500,8 @@ public class OBDAModel {
     public TargetQueryParser createTargetQueryParser(ImmutableMap<String, String> prefixMap) {
         return targetQueryParserFactory.createParser(prefixMap);
     }
+
+    public boolean hasTripleMaps(){
+        return !triplesMapMap.isEmpty();
+    }
 }
