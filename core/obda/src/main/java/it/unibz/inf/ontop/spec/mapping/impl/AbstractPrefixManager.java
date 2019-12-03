@@ -21,13 +21,14 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  */
 
 import it.unibz.inf.ontop.exception.InvalidPrefixWritingException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 
 import java.util.List;
 
 public abstract class AbstractPrefixManager implements PrefixManager {
 
-	public abstract List<String> getNamespaceList();
+	public abstract List<String> getOrderedNamespaces();
 	
 	@Override
 	public String getShortForm(String uri) {
@@ -36,7 +37,7 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 	
 	@Override
 	public String getShortForm(String originalUri, boolean insideQuotes) {
-		final List<String> namespaceList = getNamespaceList();
+		final List<String> namespaceList = getOrderedNamespaces();
 		
 		/* Clean the URI string from <...> signs, if they exist.
 		 * <http://www.example.org/library#Book> --> http://www.example.org/library#Book
@@ -49,7 +50,8 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 		// Check if the URI string has a matched prefix
 		for (String prefixUriDefinition : namespaceList) {
 			if (cleanUri.startsWith(prefixUriDefinition)) {
-				String prefix = getPrefix(prefixUriDefinition);
+				String prefix = getPrefix(prefixUriDefinition)
+						.orElseThrow(() -> new PrefixManagerException("A prefix is expected"));
 				if (insideQuotes) {
 					prefix = String.format("&%s;", removeColon(prefix));
 				}
@@ -122,5 +124,11 @@ public abstract class AbstractPrefixManager implements PrefixManager {
 			return prefix; // TODO Remove this code in the future.
 		}
 		return prefix.replace(":", "");
+	}
+
+	private static class PrefixManagerException extends OntopInternalBugException {
+		private PrefixManagerException(String msg) {
+			super(msg);
+		}
 	}
 }
