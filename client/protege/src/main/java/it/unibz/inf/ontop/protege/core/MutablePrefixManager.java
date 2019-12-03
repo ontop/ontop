@@ -56,7 +56,7 @@ public class MutablePrefixManager extends AbstractPrefixManager {
 	@Override
 	public String getPrefix(String uri) {
 		for (String prefix : owlmapper.getPrefixName2PrefixMap().keySet()) {
-			if (owlmapper.getPrefixName2PrefixMap().get(prefix).contains(uri)) {
+			if (owlmapper.getPrefixName2PrefixMap().get(prefix).startsWith(uri)) {
 				return prefix;
 			}
 		}
