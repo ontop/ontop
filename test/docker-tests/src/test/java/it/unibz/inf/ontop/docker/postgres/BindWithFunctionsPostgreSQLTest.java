@@ -76,8 +76,8 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
-    public void testHash() throws Exception {
-        super.testHash();
+    public void testHashSHA256() throws Exception {
+        super.testHashSHA256();
     }
 
     @Override
