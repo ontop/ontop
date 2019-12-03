@@ -23,14 +23,17 @@ package it.unibz.inf.ontop.utils;
 import java.util.Arrays;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class URITemplatesTest {
 
@@ -94,5 +97,20 @@ public class URITemplatesTest {
     private ImmutableFunctionalTerm createIRITemplateFunctionalTerm(String iriTemplate,
                                                                     ImmutableList<? extends ImmutableTerm> arguments) {
         return (ImmutableFunctionalTerm) TERM_FACTORY.getIRIFunctionalTerm(iriTemplate, arguments).getTerm(0);
+    }
+
+    /**
+     * Ensures that the longest matching prefix namespace is used when shortening IRIs.
+     * See Gitlab issue #83
+     */
+    @Test
+    public void checkGreedyPrefixMatcher(){
+        assertTrue(new SimplePrefixManager(
+                ImmutableMap.of(
+                        ":", "http://example.org/",
+                        "ex:", "http://example.org/voc/#"
+                ))
+                .getShortForm("http://example.org/voc/#person/{ssn}")
+                .startsWith("ex:"));
     }
 }
