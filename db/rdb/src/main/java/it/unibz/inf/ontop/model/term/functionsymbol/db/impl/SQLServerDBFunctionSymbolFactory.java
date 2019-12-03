@@ -57,6 +57,16 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
     }
 
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new ExpressionSensitiveSQLDBIsNullOrNotFunctionSymbolImpl(true, dbBooleanType, rootDBTermType);
+    }
+
+    @Override
+    protected DBIsNullOrNotFunctionSymbol createDBIsNotNull(DBTermType dbBooleanType, DBTermType rootDBTermType) {
+        return new ExpressionSensitiveSQLDBIsNullOrNotFunctionSymbolImpl(false, dbBooleanType, rootDBTermType);
+    }
+
     /**
      * Uses the operator +
      *
@@ -342,6 +352,20 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     public DBFunctionSymbol getDBSubString2() {
         return substr2FunctionSymbol;
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBAvg(DBTermType inputType, boolean isDistinct) {
+        // To make sure the AVG does not return an integer but a decimal
+        if (inputType.equals(dbIntegerType))
+            return new ForcingFloatingDBAvgFunctionSymbolImpl(inputType, dbDecimalType, isDistinct);
+
+        return super.createDBAvg(inputType, isDistinct);
+    }
+
+    @Override
+    protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
+        return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
     }
 
     protected String serializeSubString2(ImmutableList<? extends ImmutableTerm> terms,

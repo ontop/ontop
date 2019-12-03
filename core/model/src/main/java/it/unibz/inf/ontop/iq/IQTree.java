@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -54,6 +55,15 @@ public interface IQTree {
     IQTree applyDescendingSubstitution(
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution,
             Optional<ImmutableExpression> constraint);
+
+    /**
+     * Particular type of descending substitution: only renaming some variables by external ones.
+     *
+     * Isolated from regular descending substitutions as it preserves the properties of the tree
+     * (e.g. it remains normalized if it was already)
+     *
+     */
+    IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution);
 
     /**
      * Applies the descending substitution WITHOUT applying any additional optimization.
@@ -132,4 +142,5 @@ public interface IQTree {
      * Set of sets of determinants
      */
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
+
 }

@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 /**
- *    these dependencies are full (that is, contain no existentially quantified variables)
+ * Full linear inclusion dependencies, which contain no existentially quantified variables
  * @param <P>
  */
 
@@ -20,8 +20,8 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
         super(coreUtilsFactory, atomFactory, dependencies);
     }
 
-    public static Builder builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
-        return new Builder(coreUtilsFactory, atomFactory);
+    public static <P extends AtomPredicate> Builder<P> builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+        return new Builder<>(coreUtilsFactory, atomFactory);
     }
 
     @Override
@@ -42,8 +42,7 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
 
     public static class Builder<P extends AtomPredicate> extends LinearInclusionDependencies.Builder<P> {
 
-        protected Builder(CoreUtilsFactory coreUtilsFactory,
-                          AtomFactory atomFactory) {
+        protected Builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
             super(coreUtilsFactory, atomFactory);
         }
 
@@ -54,8 +53,8 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
             return this;
         }
 
-        public FullLinearInclusionDependencies build() {
-            return new FullLinearInclusionDependencies(coreUtilsFactory, atomFactory, builder.build());
+        public FullLinearInclusionDependencies<P> build() {
+            return new FullLinearInclusionDependencies<>(coreUtilsFactory, atomFactory, builder.build());
         }
     }
 }

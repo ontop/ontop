@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -42,7 +43,8 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     public LeftJoinRightChildNormalizationAnalysis analyze(ImmutableSet<Variable> leftVariables,
                                                            ImmutableList<ExtensionalDataNode> leftDataNodes,
                                                            ExtensionalDataNode rightDataNode,
-                                                           VariableGenerator variableGenerator) {
+                                                           VariableGenerator variableGenerator,
+                                                           VariableNullability variableNullability) {
 
         ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap
                 = leftDataNodes.stream()
@@ -65,9 +67,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
          * Matched UCs and FKs
          */
         ImmutableSet<UniqueConstraint> matchedUCs = extractMatchedUCs(leftRelationArgumentMultimap, rightArguments,
-                rightRelation);
+                rightRelation, variableNullability);
         ImmutableSet<ForeignKeyConstraint> matchedFKs = extractMatchedFKs(leftRelationArgumentMultimap, rightArguments,
-                rightRelation);
+                rightRelation, variableNullability);
 
         if (matchedUCs.isEmpty() && matchedFKs.isEmpty()) {
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
@@ -95,33 +97,34 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     private ImmutableSet<UniqueConstraint> extractMatchedUCs(
             ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            RelationDefinition rightRelation) {
+            RelationDefinition rightRelation, VariableNullability variableNullability) {
         /*
          * When the left and right relations are the same
          */
         return leftRelationArgumentMultimap.get(rightRelation).stream()
                 .flatMap(leftArguments -> rightRelation.getUniqueConstraints().stream()
-                        .filter(uc -> isUcMatching(uc, leftArguments, rightArguments)))
+                        .filter(uc -> isUcMatching(uc, leftArguments, rightArguments, variableNullability)))
                 .collect(ImmutableCollectors.toSet());
     }
 
     private boolean isUcMatching(UniqueConstraint uniqueConstraint,
                                  ImmutableList<? extends VariableOrGroundTerm> leftArguments,
-                                 ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
+                                 ImmutableList<? extends VariableOrGroundTerm> rightArguments, VariableNullability variableNullability) {
         return uniqueConstraint.getAttributes().stream()
                 .allMatch(a -> leftArguments.get(a.getIndex() -1)
                         .equals(rightArguments.get(a.getIndex() - 1))
-                        // Excludes nullable attributes for the moment. TODO: reconsider it
-                        && !a.canNull());
+                        // Non-null term (at the level of the LJ tree)
+                       && (!leftArguments.get(a.getIndex() - 1)
+                        .isNullable(variableNullability.getNullableVariables())));
     }
 
     private ImmutableSet<ForeignKeyConstraint> extractMatchedFKs(
             ImmutableMultimap<RelationDefinition, ImmutableList<? extends VariableOrGroundTerm>> leftRelationArgumentMultimap,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            RelationDefinition rightRelation) {
+            RelationDefinition rightRelation, VariableNullability variableNullability) {
 
         return leftRelationArgumentMultimap.asMap().entrySet().stream()
-                .flatMap(e -> extractMatchedFKsForARelation(e.getKey(), e.getValue(), rightArguments, rightRelation))
+                .flatMap(e -> extractMatchedFKsForARelation(e.getKey(), e.getValue(), rightArguments, rightRelation, variableNullability))
                 .collect(ImmutableCollectors.toSet());
     }
 
@@ -129,24 +132,27 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
             RelationDefinition leftRelation,
             Collection<ImmutableList<? extends VariableOrGroundTerm>> leftArgumentLists,
             ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-            RelationDefinition rightRelation) {
+            RelationDefinition rightRelation, VariableNullability variableNullability) {
 
         return leftRelation.getForeignKeys().stream()
              .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
              .filter(fk -> leftArgumentLists.stream()
-                     .anyMatch(leftArguments -> isFkMatching(fk, leftArguments, rightArguments)));
+                     .anyMatch(leftArguments -> isFkMatching(fk, leftArguments, rightArguments, variableNullability)));
     }
 
 
     private boolean isFkMatching(ForeignKeyConstraint foreignKey,
                                  ImmutableList<? extends VariableOrGroundTerm> leftArguments,
-                                 ImmutableList<? extends VariableOrGroundTerm> rightArguments) {
+                                 ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+                                 VariableNullability variableNullability) {
         return foreignKey.getComponents().stream()
                 .allMatch(c -> leftArguments.get(c.getAttribute().getIndex() - 1)
                         .equals(rightArguments.get(c.getReference().getIndex() - 1))
-                        // Excludes nullable attributes for the moment. TODO: reconsider it
-                        &&  (!c.getAttribute().canNull()));
+                        // Non-nullable term
+                        &&  (!leftArguments.get(c.getAttribute().getIndex() - 1)
+                        .isNullable(variableNullability.getNullableVariables())));
     }
+
 
     private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableCollection<UniqueConstraint> matchedUCs,
                                                                           ImmutableCollection<ForeignKeyConstraint> matchedFKs,

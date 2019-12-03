@@ -4,7 +4,14 @@ package it.unibz.inf.ontop.docker.postgres;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -17,8 +24,24 @@ public class PrefixSourceTest extends AbstractVirtualModeTest {
     static final String obdafile = "/pgsql/imdb/newPrefixMovieOntology.obda";
     static final String propertiesfile = "/pgsql/imdb/movieontology.properties";
 
-    public PrefixSourceTest() {
-        super(owlfile, obdafile, propertiesfile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlfile, obdafile, propertiesfile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Test

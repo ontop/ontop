@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -30,7 +28,6 @@ public class ReformulationTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final FunctionSymbolFactory FS_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final DatalogFactory DATALOG_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
@@ -54,7 +51,6 @@ public class ReformulationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         FS_FACTORY = injector.getInstance(FunctionSymbolFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        DATALOG_FACTORY = injector.getInstance(DatalogFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
 
         SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);

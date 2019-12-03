@@ -2,7 +2,14 @@ package it.unibz.inf.ontop.docker.postgres;
 
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +25,24 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
     final static String obdaFile = "/pgsql/annotation/newSyntaxMovieontology.obda";
     final static String propertyFile = "/pgsql/annotation/newSyntaxMovieontology.properties";
 
-    public AnnotationMovieTest() {
-        super(owlFile, obdaFile, propertyFile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
 
@@ -35,7 +58,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
 
-        countResults(queryBind, 4);
+        countResults(4, queryBind);
 
     }
 
@@ -56,7 +79,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
 
-        countResults(queryBind, 444090);
+        countResults(444090, queryBind);
 
     }
 
@@ -76,7 +99,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
 
-        countResults(queryBind, 443300);
+        countResults(443300, queryBind);
 
     }
 
@@ -96,7 +119,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
 
-        countResults(queryBind, 112576);
+        countResults(112576, queryBind);
 
     }
 
@@ -117,7 +140,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
         // TODO: double-check this number (obtained after inserting DISTINCT)
-        countResults(queryBind, 546032);
+        countResults(546032, queryBind);
 
     }
 
@@ -139,7 +162,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
         // value without LIMIT
         // countResults(queryBind, 7530011);
-        countResults(queryBind, 100000);
+        countResults(100000, queryBind);
 
     }
 
@@ -158,7 +181,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
         // value without LIMIT
         // countResults(queryBind, 7530011);
-        countResults(queryBind, 100000);
+        countResults(100000, queryBind);
     }
 
     @Test //no dataproperty in the ontology
@@ -175,7 +198,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
                 "}";
 
         // TODO: double-check this number (obtained after inserting DISTINCT)
-        countResults(queryBind, 131645);
+        countResults(131645, queryBind);
 //        countResults(queryBind, 10000);
 
     }
@@ -195,7 +218,7 @@ public class AnnotationMovieTest extends AbstractVirtualModeTest{
 
 
 
-        countResults(queryBind, 444090);
+        countResults(444090, queryBind);
 //        countResults(queryBind, 10000);
 
 

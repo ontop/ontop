@@ -58,9 +58,12 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
 
             LOGGER.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
-
+            long beginningJoinLike = System.currentTimeMillis();
             intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
-            LOGGER.debug("New query after fixed point join optimization: \n" + intermediateQuery.toString());
+            LOGGER.debug(String.format(
+                    "New query after fixed point join optimization (%d ms): \n%s",
+                    System.currentTimeMillis() - beginningJoinLike,
+                    intermediateQuery.toString()));
 
             intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
             LOGGER.debug("New query after flattening Unions: \n" + intermediateQuery.toString());

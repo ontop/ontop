@@ -17,21 +17,6 @@ class RDF4JAskQuery extends RDF4JInputQuery<BooleanResultSet> implements AskQuer
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        RDF4JAskQuery that = (RDF4JAskQuery) o;
-
-        return getParsedQuery().equals(that.getParsedQuery());
-    }
-
-    @Override
-    public int hashCode() {
-        return getParsedQuery().hashCode();
-    }
-
-    @Override
     public IQ translate(InputQueryTranslator translator) throws OntopUnsupportedInputQueryException, OntopInvalidInputQueryException {
         if (!(translator instanceof RDF4JInputQueryTranslator)) {
             throw new IllegalArgumentException("RDF4JInputQueryImpl requires an RDF4JInputQueryTranslator");

@@ -43,16 +43,16 @@ public class AutoRestartController {
                     for (WatchEvent<?> event : wk.pollEvents()) {
                         //we only register "ENTRY_MODIFY" so the context is always a Path.
                         final Path changed = (Path) event.context();
-                        System.out.println(changed);
+                        System.out.println(changed + " changed detected!");
                         if (changed.endsWith(mappingFile) || changed.endsWith(owlFile) || changed.endsWith(propertiesFile)) {
-                            log.info("File change detected. RESTARTING Ontop!");
+                            log.info("RESTARTING Ontop!");
                             OntopEndpointApplication.restart();
                         }
                     }
                     // reset the key
                     boolean valid = wk.reset();
                     if (!valid) {
-                        System.out.println("Key has been unregisterede");
+                        System.out.println("Key has been unregistered");
                     }
                     Thread.sleep(1000);
                 }

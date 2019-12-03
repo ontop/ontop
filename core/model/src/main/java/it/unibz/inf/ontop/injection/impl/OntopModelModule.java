@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.datalog.DatalogFactory;
 import it.unibz.inf.ontop.evaluator.ExpressionNormalizer;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -49,7 +48,6 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(TermFactory.class);
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
-        bindFromSettings(DatalogFactory.class);
         bindFromSettings(TargetAtomFactory.class);
 
         bindFromSettings(IntermediateQueryValidator.class);
@@ -70,6 +68,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);
         bindFromSettings(TypeConstantDictionary.class);
+        bindFromSettings(IQTreeCache.class);
 
         bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
 

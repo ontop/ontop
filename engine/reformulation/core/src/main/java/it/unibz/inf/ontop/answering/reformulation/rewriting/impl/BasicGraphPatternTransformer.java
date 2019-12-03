@@ -7,6 +7,9 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+
+import java.util.Optional;
 
 public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
@@ -24,30 +27,41 @@ public abstract class BasicGraphPatternTransformer extends DefaultRecursiveIQTre
                 builderBGP.add((IntensionalDataNode)child);
             }
             else {
-                ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
-                if (!currentBGP.isEmpty())
-                    builderChildren.addAll(transformBGP(currentBGP));
+                addTransformedBGP(builderChildren, builderBGP.build());
+                builderBGP = ImmutableList.builder();
                 builderChildren.add(child.acceptTransformer(this));
             }
         }
-        ImmutableList<IntensionalDataNode> currentBGP = builderBGP.build();
-        if (!currentBGP.isEmpty())
-            builderChildren.addAll(transformBGP(currentBGP));
+        addTransformedBGP(builderChildren, builderBGP.build());
 
-        ImmutableList<IQTree> result = builderChildren.build();
-        switch (result.size()) {
+        return formInnerJoin(builderChildren.build(), rootNode.getOptionalFilterCondition());
+    }
+
+    @Override
+    public IQTree transformIntensionalData(IntensionalDataNode intensionalDataNode) {
+        return formInnerJoin(transformBGP(ImmutableList.of(intensionalDataNode)), Optional.empty());
+    }
+
+    private IQTree formInnerJoin(ImmutableList<IQTree> list, Optional<ImmutableExpression> filter) {
+        switch (list.size()) {
             case 0:
-                throw new IllegalStateException("All triple patterns of BGP have been eliminated by Sigma-LIDs");
+                throw new IllegalStateException("All triple patterns of BGP have been eliminated by the transformation");
             case 1:
-                if (rootNode.getOptionalFilterCondition().isPresent())
+                if (filter.isPresent())
                     return iqFactory.createUnaryIQTree(
-                            iqFactory.createFilterNode(rootNode.getOptionalFilterCondition().get()),
-                            result.get(0));
-                else return result.get(0);
+                            iqFactory.createFilterNode(filter.get()),
+                            list.get(0));
+                else return list.get(0);
             default:
-                return iqFactory.createNaryIQTree(rootNode, result);
+                return iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(filter), list);
         }
     }
 
-    protected abstract ImmutableList<IntensionalDataNode> transformBGP(ImmutableList<IntensionalDataNode> triplePatterns);
+    private void addTransformedBGP(ImmutableList.Builder<IQTree> builderChildren, ImmutableList<IntensionalDataNode> currentBGP) {
+        if (!currentBGP.isEmpty())
+            builderChildren.addAll(transformBGP(currentBGP));
+    }
+
+    protected abstract ImmutableList<IQTree> transformBGP(ImmutableList<IntensionalDataNode> bgp);
 }
+

@@ -32,6 +32,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public long getQueryCacheMaxSize() {
+        return getRequiredLong(QUERY_CACHE_MAX_SIZE);
+    }
+
+    @Override
     public boolean isKeepAliveEnabled() {
         return systemSettings.isKeepAliveEnabled();
     }

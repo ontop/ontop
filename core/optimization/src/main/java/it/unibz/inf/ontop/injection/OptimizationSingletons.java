@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.visitor.RequiredDataAtomExtractor;
 
 /**
  * Helper for the ontop-optimization module
@@ -18,6 +19,8 @@ public interface OptimizationSingletons {
     OptimizerFactory getOptimizerFactory();
 
     UnionBasedQueryMerger getUnionBasedQueryMerger();
+
+    RequiredDataAtomExtractor getRequiredDataAtomExtractor();
 
     OntopOptimizationSettings getSettings();
 

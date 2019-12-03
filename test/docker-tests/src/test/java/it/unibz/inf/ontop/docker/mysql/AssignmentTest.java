@@ -1,7 +1,14 @@
 package it.unibz.inf.ontop.docker.mysql;
 
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 
 /**
@@ -15,8 +22,24 @@ public class AssignmentTest extends AbstractVirtualModeTest {
     private static final String obdaFile = "/mysql/bindTest/mappingsOdbs.obda";
     private static final String propertyFile = "/mysql/bindTest/mappingsOdbs.properties";
 
-    public AssignmentTest() {
-        super(owlFile, obdaFile, propertyFile);
+    private static OntopOWLReasoner REASONER;
+    private static OntopOWLConnection CONNECTION;
+
+    @BeforeClass
+    public static void before() throws OWLOntologyCreationException {
+        REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+        CONNECTION = REASONER.getConnection();
+    }
+
+    @Override
+    protected OntopOWLStatement createStatement() throws OWLException {
+        return CONNECTION.createStatement();
+    }
+
+    @AfterClass
+    public static void after() throws OWLException {
+        CONNECTION.close();
+        REASONER.dispose();
     }
 
     @Test
@@ -29,7 +52,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
                 "BIND (\"123\" AS ?price) \n" +
                 "}";
 
-        countResults(queryBind, 500);
+        countResults(500, queryBind);
     }
 
     @Test
@@ -59,7 +82,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
 //                "FILTER (REGEX(?price, 6, \"i\"))   " +
 //                "}";
 
-        countResults(queryConcat2, 500);
+        countResults(500, queryConcat2);
     }
 
     @Test
@@ -70,7 +93,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
                 "WHERE {?f a :Film; :hasDirector ?d .  \n" +
                 "}";
 
-        countResults(querySelect, 500);
+        countResults(500, querySelect);
     }
 
     @Test
@@ -83,7 +106,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
 
 
 
-        countResults(querySelConcat, 500);
+        countResults(500, querySelConcat);
     }
 
     @Test
@@ -95,7 +118,7 @@ public class AssignmentTest extends AbstractVirtualModeTest {
                 "WHERE {?f a :Film; :hasDirector ?d .  \n" +
                 "}";
 
-        countResults(querySelConcat, 500);
+        countResults(500, querySelConcat);
     }
 
 }

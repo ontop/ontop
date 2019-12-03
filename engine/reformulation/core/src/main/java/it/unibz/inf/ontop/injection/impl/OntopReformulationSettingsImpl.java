@@ -36,4 +36,9 @@ public class OntopReformulationSettingsImpl extends OntopOBDASettingsImpl implem
     public boolean isDistinctPostProcessingEnabled() {
         return getRequiredBoolean(DISTINCT_RESULTSET);
     }
+
+    @Override
+    public long getQueryCacheMaxSize() {
+        return getRequiredLong(QUERY_CACHE_MAX_SIZE);
+    }
 }

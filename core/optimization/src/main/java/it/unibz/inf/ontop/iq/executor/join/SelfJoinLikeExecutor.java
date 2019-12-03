@@ -1,11 +1,12 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.*;
@@ -20,6 +21,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -28,7 +31,7 @@ import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosit
 
 public class SelfJoinLikeExecutor {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelfJoinLikeExecutor.class);
 
     /**
      * TODO: explain
@@ -53,15 +56,18 @@ public class SelfJoinLikeExecutor {
     /**
      * TODO: explain
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected static class PredicateLevelProposal {
 
         private final ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions;
         private final ImmutableCollection<ExtensionalDataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> isNotNullConjunction;
 
         public PredicateLevelProposal(ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-                                      ImmutableCollection<ExtensionalDataNode> removedDataNodes) {
+                                      ImmutableCollection<ExtensionalDataNode> removedDataNodes, Optional<ImmutableExpression> isNotNullConjunction) {
             this.substitutions = substitutions;
             this.removedDataNodes = removedDataNodes;
+            this.isNotNullConjunction = isNotNullConjunction;
         }
 
         public ImmutableCollection<ImmutableSubstitution<VariableOrGroundTerm>> getSubstitutions() {
@@ -74,6 +80,10 @@ public class SelfJoinLikeExecutor {
         public ImmutableCollection<ExtensionalDataNode> getRemovedDataNodes() {
             return removedDataNodes;
         }
+
+        public Optional<ImmutableExpression> getIsNotNullConjunction() {
+            return isNotNullConjunction;
+        }
     }
 
 
@@ -84,11 +94,14 @@ public class SelfJoinLikeExecutor {
 
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
         private final ImmutableCollection<DataNode> removedDataNodes;
+        private final Optional<ImmutableExpression> optionalIsNotNullExpression;
 
         public ConcreteProposal(Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-                                ImmutableCollection<DataNode> removedDataNodes) {
+                                ImmutableCollection<DataNode> removedDataNodes,
+                                Optional<ImmutableExpression> optionalIsNotNullExpression) {
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
+            this.optionalIsNotNullExpression = optionalIsNotNullExpression;
         }
 
         public ImmutableCollection<DataNode> getDataNodesToRemove() {
@@ -104,6 +117,9 @@ public class SelfJoinLikeExecutor {
         }
 
 
+        public Optional<ImmutableExpression> getOptionalIsNotNullExpression() {
+            return optionalIsNotNullExpression;
+        }
     }
 
     /**
@@ -160,10 +176,13 @@ public class SelfJoinLikeExecutor {
 
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
+    private final TermFactory termFactory;
 
-    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools) {
+    protected SelfJoinLikeExecutor(SubstitutionFactory substitutionFactory, ImmutableUnificationTools unificationTools,
+                                   TermFactory termFactory) {
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
+        this.termFactory = termFactory;
     }
 
 
@@ -205,6 +224,7 @@ public class SelfJoinLikeExecutor {
                             })
                             .filter(s -> !s.isEmpty())
                             .collect(ImmutableCollectors.toSet());
+
             /*
              * All the nodes that have been at least once dominated (--> could thus be removed).
              *
@@ -220,7 +240,12 @@ public class SelfJoinLikeExecutor {
                             })
                     .getRemovalNodes());
 
-            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes);
+            // NB: IS_NOT_NULL simplification is delegated to the method IQTree.normalizeForOptimization(...)
+            Optional<ImmutableExpression> isNotNullConjunction = termFactory.getConjunction(groupingMap.keys().stream()
+                    .flatMap(Collection::stream)
+                    .map(termFactory::getDBIsNotNull));
+
+            return new PredicateLevelProposal(unifyingSubstitutions, removableNodes, isNotNullConjunction);
 
             /*
              * Trick: rethrow the exception
@@ -228,27 +253,6 @@ public class SelfJoinLikeExecutor {
         } catch (AtomUnificationRuntimeException e) {
             throw e.checkedException;
         }
-    }
-
-    protected Optional<ConcreteProposal> createConcreteProposal(
-            ImmutableList<PredicateLevelProposal> predicateProposals,
-            ImmutableList<Variable> priorityVariables) {
-        Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMergedSubstitution;
-        try {
-            optionalMergedSubstitution = mergeSubstitutions(extractSubstitutions(predicateProposals), priorityVariables);
-        } catch (AtomUnificationException e) {
-            return Optional.empty();
-        }
-
-        ImmutableSet<DataNode> removedDataNodes =predicateProposals.stream()
-                .flatMap(p -> p.getRemovedDataNodes().stream())
-                .collect(ImmutableCollectors.toSet());
-
-        if (removedDataNodes.isEmpty()
-                && (! optionalMergedSubstitution.isPresent()))
-            return Optional.empty();
-
-        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes));
     }
 
 
@@ -265,22 +269,83 @@ public class SelfJoinLikeExecutor {
             return accumulatedSubstitution;
         }
 
+        ImmutableMap<Variable, Collection<ExtensionalDataNode>> occurrenceVariableMap = redundantNodes.stream()
+                .flatMap(n -> n.getVariables().stream()
+                        .map(v -> Maps.immutableEntry(v, n)))
+                .collect(ImmutableCollectors.toMultimap()).asMap();
+
+        // Variables used in more than one data node
+        ImmutableSet<Variable> sharedVariables = occurrenceVariableMap.entrySet().stream()
+                .filter(e -> ImmutableSet.copyOf(e.getValue()).size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> nonSharedVariables = Sets.difference(occurrenceVariableMap.keySet(), sharedVariables)
+                .immutableCopy();
+
         Iterator<ExtensionalDataNode> nodeIterator = redundantNodes.iterator();
+
+        /*
+         * For performance purposes, we can detach some fragments from the substitution to be "unified" with the following atom.
+         */
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> nonSharedSubstitutionListBuilder = ImmutableList.builder();
 
         // Non-final
         DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
+
         while (nodeIterator.hasNext()) {
             DataAtom newAtom = nodeIterator.next().getProjectionAtom();
+
+            /*
+             * Before the following unification, we detach a fragment about non-shared variables from the accumulated substitution
+             *
+             * Particularly useful when dealing with tables with a large number of columns (e.g. views after collapsing some JSON objects)
+             *
+             */
+            ImmutableSubstitution<VariableOrGroundTerm> nonSharedSubstitution = accumulatedSubstitution.reduceDomainToIntersectionWith(nonSharedVariables);
+            if (!nonSharedSubstitution.isEmpty())
+                nonSharedSubstitutionListBuilder.add(nonSharedSubstitution);
+
+            ImmutableSubstitution<VariableOrGroundTerm> substitutionToUnify = nonSharedSubstitution.isEmpty()
+                    ? accumulatedSubstitution
+                    : accumulatedSubstitution.reduceDomainToIntersectionWith(sharedVariables);
+
             // May throw an exception
-            accumulatedSubstitution = updateSubstitution(accumulatedSubstitution, accumulatedAtom, newAtom);
+            accumulatedSubstitution = updateSubstitution(substitutionToUnify, accumulatedAtom, newAtom);
+
             accumulatedAtom = accumulatedSubstitution.applyToDataAtom(accumulatedAtom);
         }
-        return accumulatedSubstitution;
+
+        return Stream.concat(
+                    nonSharedSubstitutionListBuilder.build().stream(),
+                    Stream.of(accumulatedSubstitution))
+                .reduce((v1, v2) -> v2.composeWith2(v1))
+                .orElseThrow(() -> new MinorOntopInternalBugException("At least one substitution was expected"));
     }
 
     protected Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
-            ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions, ImmutableList<Variable> priorityVariables)
+            ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
+            ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap,
+            ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
+
+        ImmutableMap<Variable, Collection<RelationPredicate>> occurrenceVariableMap = initialDataNodeMap.asMap().entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .flatMap(n -> n.getVariables().stream())
+                        .map(v -> Maps.immutableEntry(v, e.getKey())))
+                .collect(ImmutableCollectors.toMultimap()).asMap();
+
+        // Variables appearing for for more one relation predicate
+        ImmutableSet<Variable> sharedVariables = occurrenceVariableMap.entrySet().stream()
+                .filter(e -> ImmutableSet.copyOf(e.getValue()).size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<Variable> nonSharedVariables = Sets.difference(occurrenceVariableMap.keySet(), sharedVariables)
+                .immutableCopy();
+
+        /*
+         * For performance purposes, we can detach some fragments from the substitution to be "unified" with the following atom.
+         */
+        ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> nonSharedSubstitutionListBuilder = ImmutableList.builder();
 
         // Non-final
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalAccumulatedSubstitution = Optional.empty();
@@ -288,8 +353,25 @@ public class SelfJoinLikeExecutor {
         for (ImmutableSubstitution<VariableOrGroundTerm> substitution : substitutions) {
             if (!substitution.isEmpty()) {
                 if (optionalAccumulatedSubstitution.isPresent()) {
+
+                    ImmutableSubstitution<VariableOrGroundTerm> accumulatedSubstitution = optionalAccumulatedSubstitution.get();
+
+                    /*
+                     * Before the following unification, we detach a fragment about non-shared variables from the accumulated substitution
+                     *
+                     * Particularly useful when dealing with tables with a large number of columns (e.g. views after collapsing some JSON objects)
+                     *
+                     */
+                    ImmutableSubstitution<VariableOrGroundTerm> nonSharedSubstitution = accumulatedSubstitution.reduceDomainToIntersectionWith(nonSharedVariables);
+                    if (!nonSharedSubstitution.isEmpty())
+                        nonSharedSubstitutionListBuilder.add(nonSharedSubstitution);
+
+                    ImmutableSubstitution<VariableOrGroundTerm> substitutionToUnify = nonSharedSubstitution.isEmpty()
+                            ? accumulatedSubstitution
+                            : accumulatedSubstitution.reduceDomainToIntersectionWith(sharedVariables);
+
                     Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalMGUS = unificationTools.computeAtomMGUS(
-                            optionalAccumulatedSubstitution.get(), substitution);
+                            substitutionToUnify, substitution);
                     if (optionalMGUS.isPresent()) {
                         optionalAccumulatedSubstitution = optionalMGUS;
                     }
@@ -305,6 +387,11 @@ public class SelfJoinLikeExecutor {
         }
 
         return optionalAccumulatedSubstitution
+                .map(s -> Stream.concat(
+                            nonSharedSubstitutionListBuilder.build().stream(),
+                            Stream.of(s))
+                        .reduce((v1, v2) -> v2.composeWith2(v1))
+                        .orElseThrow(() -> new MinorOntopInternalBugException("At least one substitution was expected")))
                 .map(s -> s.orientate(priorityVariables));
     }
 
@@ -382,6 +469,14 @@ public class SelfJoinLikeExecutor {
             QueryTreeComponent treeComponent,
             N joinNode,
             ConcreteProposal proposal) throws EmptyQueryException {
+
+        Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition()
+                .map(f -> proposal.getOptionalIsNotNullExpression()
+                        .map(f2 -> termFactory.getConjunction(f, f2))
+                        .orElse(f))
+                .map(Optional::of)
+                .orElseGet(proposal::getOptionalIsNotNullExpression);
+
         switch(treeComponent.getChildren(joinNode).size()) {
             case 0:
                 throw new IllegalStateException("Self-join elimination MUST not eliminate ALL the nodes");
@@ -393,7 +488,6 @@ public class SelfJoinLikeExecutor {
                  */
             case 1:
                 QueryNode uniqueChild = treeComponent.getFirstChild(joinNode).get();
-                Optional<ImmutableExpression> optionalFilter = joinNode.getOptionalFilterCondition();
 
                 if (optionalFilter.isPresent()) {
                     QueryNode filterNode = query.getFactory().createFilterNode(optionalFilter.get());
@@ -419,7 +513,7 @@ public class SelfJoinLikeExecutor {
              * Multiple children, keep a join node BUT MOVES ITS CONDITION ABOVE (in a filter)
              */
             default:
-                N newJoinNode = joinNode.getOptionalFilterCondition()
+                N newJoinNode = optionalFilter
                         .map(cond -> {
                             FilterNode parentFilter = query.getFactory().createFilterNode(cond);
                             treeComponent.insertParent(joinNode, parentFilter);

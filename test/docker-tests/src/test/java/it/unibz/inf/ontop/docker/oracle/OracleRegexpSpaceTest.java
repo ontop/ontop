@@ -1,31 +1,18 @@
 package it.unibz.inf.ontop.docker.oracle;
 
-/*
- * #%L
- * ontop-test
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.docker.AbstractVirtualModeTest;
+import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
+import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import static org.junit.Assert.*;
 
@@ -40,8 +27,24 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	static final String obdaFile = "/oracle/regex/oracle-regexp.obda";
 	static final String propertyFile = "/oracle/regex/oracle-regexp.properties";
 
-	public OracleRegexpSpaceTest() {
-		super(owlFile, obdaFile, propertyFile);
+	private static OntopOWLReasoner REASONER;
+	private static OntopOWLConnection CONNECTION;
+
+	@BeforeClass
+	public static void before() throws OWLOntologyCreationException {
+		REASONER = createReasoner(owlFile, obdaFile, propertyFile);
+		CONNECTION = REASONER.getConnection();
+	}
+
+	@Override
+	protected OntopOWLStatement createStatement() throws OWLException {
+		return CONNECTION.createStatement();
+	}
+
+	@AfterClass
+	public static void after() throws OWLException {
+		CONNECTION.close();
+		REASONER.dispose();
 	}
 
 
@@ -69,7 +72,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	public void testSparql2OracleRegexWhere() throws Exception {
 		OWLStatement st = null;
 		try {
-			st = conn.createStatement();
+			st = createStatement();
 
 			
 			
@@ -97,7 +100,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	public void testSparql2OracleRegexNoWhere() throws Exception {
 		OWLStatement st = null;
 		try {
-			st = conn.createStatement();
+			st = createStatement();
 
 			
 			
@@ -129,7 +132,7 @@ public class OracleRegexpSpaceTest extends AbstractVirtualModeTest {
 	public void testSparql2OracleRegexNoWhereNoSubquery() throws Exception {
 		OWLStatement st = null;
 		try {
-			st = conn.createStatement();
+			st = createStatement();
 			
 			String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> " +
 					"SELECT ?country ?pos WHERE {" +

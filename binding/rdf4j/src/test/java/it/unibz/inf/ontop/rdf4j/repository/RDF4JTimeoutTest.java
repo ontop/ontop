@@ -105,7 +105,7 @@ public class RDF4JTimeoutTest {
 
 	@Test
 	public void testTimeout() throws Exception {
-		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal1 ?v1; :hasVal2 ?v2.}";
+		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal2 ?v1; :hasVal2 ?v2.}";
         
         // execute query
         Query query = conn.prepareQuery(QueryLanguage.SPARQL, queryString);

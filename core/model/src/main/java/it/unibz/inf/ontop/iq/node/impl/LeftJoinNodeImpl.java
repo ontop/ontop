@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -354,6 +355,22 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .orElse(this);
 
         return iqFactory.createBinaryNonCommutativeIQTree(newLJNode, newLeftChild, newRightChild);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, IQTree leftChild, IQTree rightChild, IQTreeCache treeCache) {
+        IQTree newLeftChild = leftChild.applyFreshRenaming(renamingSubstitution);
+        IQTree newRightChild = rightChild.applyFreshRenaming(renamingSubstitution);
+
+        Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
+                .map(renamingSubstitution::applyToBooleanExpression);
+
+        LeftJoinNode newLeftJoinNode = newCondition.equals(getOptionalFilterCondition())
+                ? this
+                : iqFactory.createLeftJoinNode(newCondition);
+
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, newRightChild, newTreeCache);
     }
 
     @Override

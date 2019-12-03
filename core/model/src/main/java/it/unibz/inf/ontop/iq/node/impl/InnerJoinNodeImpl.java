@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -25,7 +26,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.AbstractCollection;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -249,6 +249,24 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createNaryIQTree(newJoinNode, newChildren);
+    }
+
+    @Override
+    public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution renamingSubstitution, ImmutableList<IQTree> children,
+                                     IQTreeCache treeCache) {
+        ImmutableList<IQTree> newChildren = children.stream()
+                .map(c -> c.applyFreshRenaming(renamingSubstitution))
+                .collect(ImmutableCollectors.toList());
+
+        Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
+                .map(renamingSubstitution::applyToBooleanExpression);
+
+        InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
+                ? this
+                : iqFactory.createInnerJoinNode(newCondition);
+
+        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
+        return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
     }
 
     private ImmutableSet<Variable> getProjectedVariables(ImmutableList<IQTree> children) {
