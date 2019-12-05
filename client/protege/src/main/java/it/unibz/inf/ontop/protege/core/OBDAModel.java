@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -75,7 +76,8 @@ public class OBDAModel {
     private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
-
+    // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
+    public Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
@@ -366,6 +368,7 @@ public class OBDAModel {
         triplesMapMap.clear();
         prefixManager = new MutablePrefixManager(owlPrefixMapper);
         currentMutableVocabulary = new MutableOntologyVocabularyImpl();
+        explicitDefaultPrefixNamespace = Optional.empty();
     }
 
 
@@ -511,5 +514,18 @@ public class OBDAModel {
 
     public RDF getRdfFactory() {
         return rdfFactory;
+    }
+
+    public boolean hasTripleMaps(){
+        return !triplesMapMap.isEmpty();
+    }
+
+    public Optional<String> getExplicitDefaultPrefixNamespace() {
+        return explicitDefaultPrefixNamespace;
+    }
+
+    public void setExplicitDefaultPrefixNamespace(String ns) {
+        this.explicitDefaultPrefixNamespace = Optional.of(ns);
+        addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
 }
