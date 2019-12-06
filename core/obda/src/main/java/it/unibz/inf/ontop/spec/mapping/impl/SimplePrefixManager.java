@@ -108,8 +108,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	 * @return the corresponding prefix or null if the URI is not registered
 	 */
     @Override
-	public String getPrefix(String uri) {
-		return uriToPrefixMap.get(uri);
+	public Optional<String> getPrefix(String uri) {
+		return Optional.ofNullable(uriToPrefixMap.get(uri));
 	}
 
 	/**
@@ -135,11 +135,8 @@ public class SimplePrefixManager extends AbstractPrefixManager {
 	}
 
 	@Override
-	public List<String> getNamespaceList() {
-		List<String> namespaceList = new ArrayList<>();
-		for (String uri : getPrefixMap().values()) {
-			namespaceList.add(uri);
-		}
+	public List<String> getOrderedNamespaces() {
+		List<String> namespaceList = new ArrayList<>(getPrefixMap().values());
 		Collections.sort(namespaceList, Collections.reverseOrder());
 		return namespaceList;
 	}

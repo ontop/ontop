@@ -606,7 +606,7 @@ public class MappingManagerPanel extends JPanel implements DatasourceSelectorLis
 			// Computing the next available ID
 			int new_index = -1;
 			for (int index = 0; index < 999999999; index++) {
-				if (controller.indexOf(current_srcuri, id + "(" + index + ")") == -1) {
+				if (controller.indexOf(id + "(" + index + ")") == -1) {
 					new_index = index;
 					break;
 				}

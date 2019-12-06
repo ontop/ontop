@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -74,7 +75,8 @@ public class OBDAModel {
     private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
-
+    // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
+    private Optional<String> explicitDefaultPrefixNamespace = Optional.empty();
 
     private final List<OBDAModelListener> sourceListeners;
     private final List<OBDAMappingListener> mappingListeners;
@@ -136,7 +138,7 @@ public class OBDAModel {
 
 
     public void parseMapping(Reader mappingReader, Properties properties) throws DuplicateMappingException,
-            InvalidMappingException, IOException, MappingIOException {
+            InvalidMappingException, MappingIOException {
 
 
         OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
@@ -270,16 +272,10 @@ public class OBDAModel {
 
         ImmutableList<TargetAtom> newTargetAtoms = getNewTargetAtoms(formerTriplesMap, removedPredicateIRI, counter);
 
-        if (counter.get() > initialCount) {
-            if (newTargetAtoms.isEmpty()) {
-                return false;
-            }
-            else {
-                return true;
-            }
+        if (counter.get() > initialCount && newTargetAtoms.isEmpty()) {
+            return false;
         }
-        else
-            return true;
+        return true;
     }
 
     private ImmutableList<TargetAtom> getNewTargetAtoms(SQLPPTriplesMap formerTriplesMap, IRI removedPredicateIRI, AtomicInteger counter) {
@@ -354,6 +350,7 @@ public class OBDAModel {
         triplesMapMap.clear();
         prefixManager = new MutablePrefixManager(owlPrefixMapper);
         currentMutableVocabulary = new MutableOntologyVocabularyImpl();
+        explicitDefaultPrefixNamespace = Optional.empty();
     }
 
 
@@ -385,7 +382,7 @@ public class OBDAModel {
 
     public void removeTriplesMap(URI dataSourceURI, String mappingId) {
         if (triplesMapMap.remove(mappingId) != null)
-            fireMappingDeleted(dataSourceURI, mappingId);
+            fireMappingDeleted(dataSourceURI);
     }
 
     public void updateMappingsSourceQuery(String triplesMapId, OBDASQLQuery sourceQuery) {
@@ -425,7 +422,7 @@ public class OBDAModel {
         }
     }
 
-    public int indexOf(URI currentSource, String mappingId) {
+    public int indexOf(String mappingId) {
         ImmutableList<SQLPPTriplesMap> sourceMappings = ImmutableList.copyOf(triplesMapMap.values());
         if (sourceMappings == null) {
             return -1;
@@ -441,7 +438,7 @@ public class OBDAModel {
     /**
      * Announces to the listeners that a mapping was deleted.
      */
-    private void fireMappingDeleted(URI srcuri, String mapping_id) {
+    private void fireMappingDeleted(URI srcuri) {
         for (OBDAMappingListener listener : mappingListeners) {
             listener.mappingDeleted(srcuri);
         }
@@ -499,5 +496,18 @@ public class OBDAModel {
 
     public TargetQueryParser createTargetQueryParser(ImmutableMap<String, String> prefixMap) {
         return targetQueryParserFactory.createParser(prefixMap);
+    }
+
+    boolean hasTripleMaps(){
+        return !triplesMapMap.isEmpty();
+    }
+
+    Optional<String> getExplicitDefaultPrefixNamespace() {
+        return explicitDefaultPrefixNamespace;
+    }
+
+    void setExplicitDefaultPrefixNamespace(String ns) {
+        this.explicitDefaultPrefixNamespace = Optional.of(ns);
+        addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
 }

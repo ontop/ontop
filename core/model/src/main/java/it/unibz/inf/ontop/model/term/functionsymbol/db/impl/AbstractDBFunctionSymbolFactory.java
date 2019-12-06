@@ -894,12 +894,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     protected DBBooleanFunctionSymbol createStrStartsFunctionSymbol() {
-        return new DefaultDBStrStartsWithFunctionSymbol(rootDBType, dbStringType);
+        return new DefaultDBStrStartsWithFunctionSymbol(rootDBType, dbBooleanType);
     }
 
     protected DBBooleanFunctionSymbol createStrEndsFunctionSymbol() {
         return new DefaultDBStrEndsWithFunctionSymbol(
-                rootDBType, dbStringType);
+                rootDBType, dbBooleanType);
     }
 
     /**
