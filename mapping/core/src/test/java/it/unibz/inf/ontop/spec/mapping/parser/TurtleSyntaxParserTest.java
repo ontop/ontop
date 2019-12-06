@@ -319,6 +319,13 @@ public class TurtleSyntaxParserTest {
 		TestCase.assertTrue(result);
 	}
 
+	// Reproduces Issue #319
+	@Test
+	public void test_BNODE_function(){
+		final boolean result = parse("<http://esricanada.com/gfx_ontology_prototype/{feature_hash}> a <http://ontology.eil.utoronto.ca/icity/LandUse/Parcel> ; <http://ontology.eil.utoronto.ca/icity/LandUse/hasLandUse> _:landuse{feature_hash} .");
+		TestCase.assertTrue(result);
+	}
+
 
 	private boolean compareCQIE(String input, int countBody) {
 		TargetQueryParser parser = new TurtleOBDASQLParser(getPrefixManager().getPrefixMap(),
