@@ -927,82 +927,326 @@ public abstract class AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
-    @Ignore
+
     @Test
     public void testBound() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (BOUND(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   OPTIONAL{ \n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER (STRSTARTS(?title, \"T\"))\n"
+                + "   } \n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+
     }
 
-    @Ignore
+
+    /**
+     * Currently equalities between lang strings are treated as RDFTermEqual.
+     *
+     * Therefore != is always false or null (which corresponds to false under 2VL)
+     *
+     */
     @Test
     public void testRDFTermEqual() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER (?discount = ?discount2 && ?title != ?title2)\n"
+                + "   } ORDER BY ?title";
 
+        List<String> expectedValues = new ArrayList<>();
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+    @Test
+    public void testStrEqual() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER (?discount = ?discount2 && str(?title) != str(?title2))\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+
     @Test
     public void testSameTerm() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER(sameTerm(?discount, ?discount2) && !sameTerm(?title, ?title2))\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | SPARQL Tutorial\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | Crime and Punishment\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testIsIRI() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isIRI(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testIsBlank() throws Exception {
-
+            //no example data
     }
 
-    @Ignore
     @Test
     public void testIsLiteral() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isLiteral(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testIsNumeric() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (isNumeric(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testStr() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (str(?year) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   } ORDER BY ?year ";
+
+        checkReturnedValues(queryBind, getStrExpectedValues());
+
     }
 
-    @Ignore
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1970-11-05T07:50:00.000000\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00.000000\"^^xsd:string");
+        expectedValues.add("\"2014-06-05T18:47:52.000000\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T09:23:06.000000\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+
     @Test
     public void testLang() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (lang(?title) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   }  ";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        expectedValues.add("\"en\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+    //In SPARQL 1.0, the DATATYPE function was not defined for literals with a language tag
     @Test
     public void testDatatype() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (?discount AS ?w) WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   FILTER ( datatype(?discount) = xsd:decimal)\n"
+                + "   }  ";
+
+        checkReturnedValues(queryBind, getDatatypeExpectedValues());
     }
 
-    @Ignore
+    protected List<String> getDatatypeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.20\"^^xsd:decimal");
+        expectedValues.add("\"0.25\"^^xsd:decimal");
+        expectedValues.add("\"0.20\"^^xsd:decimal");
+        expectedValues.add("\"0.15\"^^xsd:decimal");
+
+        return expectedValues;
+    }
+
+
+
     @Test
     public void testConcat() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \", ?description) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x dc:description ?description .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment | good\"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial | good\"^^xsd:string");
+        expectedValues.add("\"The Logic Book: Introduction, Second Edition | good\"^^xsd:string");
+        expectedValues.add("\"The Semantic Web | bad\"^^xsd:string");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testLangMatches() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(langMatches( lang(?title), \"EN\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
+    @Test
+    public void testREGEX() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(REGEX( ?title, \"Semantic\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
     @Test
     public void testREPLACE() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?w WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?x dc:description ?description .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   BIND(REPLACE(?title, \"Second\", \"First\") AS ?w) .\n"
+                + "   } ORDER BY ?title";
 
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"Crime and Punishment\"@en");
+        expectedValues.add("\"SPARQL Tutorial\"@en");
+        expectedValues.add("\"The Logic Book: Introduction, First Edition\"@en");
+        expectedValues.add("\"The Semantic Web\"@en");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     private void checkReturnedValues(String query, List<String> expectedValues) throws Exception {
