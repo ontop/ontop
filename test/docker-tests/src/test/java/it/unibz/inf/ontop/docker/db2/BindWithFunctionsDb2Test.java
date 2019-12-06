@@ -112,4 +112,7 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
 
         return expectedValues;
     }
+
+
+
 }

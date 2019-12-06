@@ -86,4 +86,21 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    @Override
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1970-11-05T06:50:00+00:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T11:30:00+00:00\"^^xsd:string");
+        expectedValues.add("\"2014-06-05T16:47:52+00:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T07:23:06+00:00\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+    @Ignore("not supported")
+    @Test
+    public void testREPLACE() throws Exception {
+        super.testREPLACE();
+    }
+
 }
