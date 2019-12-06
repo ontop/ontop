@@ -242,7 +242,7 @@ PREFIXED_NAME_EXT
 
 // specific syntax for blank nodes with variables
 BLANK_NODE_FUNCTION
-  : '_:' STRING_WITH_CURLY_BRACKET ('_' STRING_WITH_CURLY_BRACKET )*
+  : '_:'  PN_LOCAL_EXT
   ;
 
 BLANK_NODE_LABEL
