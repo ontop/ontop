@@ -242,7 +242,8 @@ PREFIXED_NAME_EXT
 
 // specific syntax for blank nodes with variables
 BLANK_NODE_FUNCTION
-  : '_:'  IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+
+  : '_:'  PN_LOCAL_EXT
+  //IRIREF_INNER_CHAR_EXT* '{' IRIREF_INNER_CHAR_EXT+
   ;
 
 BLANK_NODE_LABEL
