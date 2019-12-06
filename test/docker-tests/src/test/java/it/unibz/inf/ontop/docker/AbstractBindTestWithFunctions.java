@@ -953,11 +953,14 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
 
-
+    /**
+     * Currently equalities between lang strings are treated as RDFTermEqual.
+     *
+     * Therefore != is always false or null (which corresponds to false under 2VL)
+     *
+     */
     @Test
     public void testRDFTermEqual() throws Exception {
-
-        //?title != ?title2 not supported ??
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
@@ -967,6 +970,23 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?y ns:discount ?discount2 .\n"
                 + "   ?y dc:title ?title2 .\n"
                 + "   FILTER (?discount = ?discount2 && ?title != ?title2)\n"
+                + "   } ORDER BY ?title";
+
+        List<String> expectedValues = new ArrayList<>();
+        checkReturnedValues(queryBind, expectedValues);
+    }
+
+    @Test
+    public void testStrEqual() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x dc:title ?title .\n"
+                + "   ?y ns:discount ?discount2 .\n"
+                + "   ?y dc:title ?title2 .\n"
+                + "   FILTER (?discount = ?discount2 && str(?title) != str(?title2))\n"
                 + "   } ORDER BY ?title";
 
         List<String> expectedValues = new ArrayList<>();
