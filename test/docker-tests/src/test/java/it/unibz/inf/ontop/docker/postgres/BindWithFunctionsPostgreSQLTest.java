@@ -52,8 +52,8 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
     @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
-    public void testHash() throws Exception {
-        super.testHash();
+    public void testHashSHA256() throws Exception {
+        super.testHashSHA256();
     }
 
     @Override
@@ -118,6 +118,28 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         expectedValues.add("\"01:00\"^^xsd:string");
         expectedValues.add("\"02:00\"^^xsd:string");
         expectedValues.add("\"01:00\"^^xsd:string");
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1967-11-05T07:50:00+01:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00+01:00\"^^xsd:string");
+        expectedValues.add("\"2014-07-14T12:47:52+02:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T11:23:06+02:00\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getDatatypeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.25\"^^xsd:decimal");
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.15\"^^xsd:decimal");
+
         return expectedValues;
     }
 

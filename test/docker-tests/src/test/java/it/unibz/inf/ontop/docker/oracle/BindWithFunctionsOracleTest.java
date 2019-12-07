@@ -55,8 +55,8 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     @Ignore("Require DBMS CRYPTO to be enabled")
     @Test
     @Override
-    public void testHash() throws Exception {
-        super.testHash();
+    public void testHashSHA256() throws Exception {
+        super.testHashSHA256();
     }
 
     @Ignore("Find a way to distinguish empty strings and NULLs")
@@ -136,6 +136,28 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         expectedValues.add("\"1:0\"^^xsd:string");
         expectedValues.add("\"0:0\"^^xsd:string");
         expectedValues.add("\"1:0\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getStrExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"1967-11-05T07:50:00.000000+01:00\"^^xsd:string");
+        expectedValues.add("\"2011-12-08T12:30:00.000000+01:00\"^^xsd:string");
+        expectedValues.add("\"2014-06-05T18:47:52.000000+08:00\"^^xsd:string");
+        expectedValues.add("\"2015-09-21T09:23:06.000000+00:00\"^^xsd:string");
+
+        return expectedValues;
+    }
+
+    @Override
+    protected List<String> getDatatypeExpectedValues() {
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.25\"^^xsd:decimal");
+        expectedValues.add("\"0.2\"^^xsd:decimal");
+        expectedValues.add("\"0.15\"^^xsd:decimal");
 
         return expectedValues;
     }
