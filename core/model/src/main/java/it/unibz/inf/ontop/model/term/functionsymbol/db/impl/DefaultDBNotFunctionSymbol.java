@@ -110,7 +110,7 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
                         .filter(t -> t instanceof ImmutableExpression)
                         .map(t -> (ImmutableExpression) t)
                         // Makes sure the 2VL is evaluated for the simplified expression
-                        .map(t -> (ImmutableTerm) t.evaluate2VL(variableNullability))
+                        .map(t -> t.evaluate2VL(variableNullability).getTerm())
                         .orElse(simplifedTerm));
     }
 }
