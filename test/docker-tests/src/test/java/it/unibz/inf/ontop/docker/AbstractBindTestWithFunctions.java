@@ -958,9 +958,11 @@ public abstract class AbstractBindTestWithFunctions {
      *
      * Therefore != is always false or null (which corresponds to false under 2VL)
      *
+     * THIS COULD CHANGE IN THE FUTURE as we could extend the SPARQL spec
+     * (TODO: see how other systems behave)
      */
     @Test
-    public void testRDFTermEqual() throws Exception {
+    public void testRDFTermEqual1() throws Exception {
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
@@ -977,7 +979,7 @@ public abstract class AbstractBindTestWithFunctions {
     }
 
     @Test
-    public void testStrEqual() throws Exception {
+    public void testRDFTermEqual2() throws Exception {
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
                 + "SELECT  (CONCAT(?title,\" | \",?title2) AS ?w) WHERE \n"
