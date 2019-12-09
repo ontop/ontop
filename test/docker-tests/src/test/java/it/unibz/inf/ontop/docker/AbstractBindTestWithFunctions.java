@@ -293,28 +293,134 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
-    @Ignore
     @Test
     public void testHashMd5() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (Md5(str(?title)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("Md5");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
     @Test
     public void testHashSHA1() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA1(str(?title)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testHashSHA384() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA384(str(?title)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-384");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testHashSHA512() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA512(str(?title)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
 	/*
@@ -1017,7 +1123,7 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-
+    @Ignore
     @Test
     public void testIsBlank() throws Exception {
             //no example data
