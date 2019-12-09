@@ -5,10 +5,12 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBNotFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.TrueOrNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl implements DBNotFunctionSymbol {
@@ -81,4 +83,34 @@ public class DefaultDBNotFunctionSymbol extends DBBooleanFunctionSymbolImpl impl
                 .collect(ImmutableCollectors.toList());
     }
 
+    @Override
+    public ImmutableTerm simplify2VL(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                     VariableNullability variableNullability) {
+        ImmutableTerm simplifedTerm = simplify(terms, termFactory, variableNullability);
+
+        if (simplifedTerm.isNull())
+            return termFactory.getDBBooleanConstant(false);
+
+        Optional<ImmutableExpression> optionalNewNotExpression = Optional.of(simplifedTerm)
+                .filter(t -> t instanceof ImmutableExpression)
+                .map(e -> (ImmutableExpression) e)
+                .filter(e -> e.getFunctionSymbol().equals(this));
+
+        return optionalNewNotExpression
+                .map(n -> Optional.of(n)
+                        .map(e -> e.getTerm(0))
+                        .filter(t -> t instanceof ImmutableExpression)
+                        /*
+                         * NOT(TRUE_OR_NULL(...)) is false under 2VL.
+                         */
+                        .filter(t -> ((ImmutableExpression) t).getFunctionSymbol() instanceof TrueOrNullFunctionSymbol)
+                        .map(t -> (ImmutableTerm) termFactory.getDBBooleanConstant(false))
+                        .orElse(simplifedTerm))
+                .orElseGet(() -> Optional.of(simplifedTerm)
+                        .filter(t -> t instanceof ImmutableExpression)
+                        .map(t -> (ImmutableExpression) t)
+                        // Makes sure the 2VL is evaluated for the simplified expression
+                        .map(t -> t.evaluate2VL(variableNullability).getTerm())
+                        .orElse(simplifedTerm));
+    }
 }

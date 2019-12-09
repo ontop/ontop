@@ -20,15 +20,14 @@ package it.unibz.inf.ontop.utils;
  * #L%
  */
 
-import java.util.Arrays;
-
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 

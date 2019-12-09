@@ -47,8 +47,6 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
                 CURRENT_TIMESTAMP_SPACE_STR,
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_SPACE_STR, 0, nowFunctionSymbol);
-        table.remove(REGEXP_LIKE_STR, 2);
-        table.remove(REGEXP_LIKE_STR, 3);
 
         return ImmutableTable.copyOf(table);
     }
