@@ -1145,10 +1145,23 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
     @Test
     public void testIsBlank() throws Exception {
-            //no example data
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (IsBlank(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test

@@ -59,6 +59,31 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         super.testHashSHA256();
     }
 
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashMd5() throws Exception {
+        super.testHashMd5();
+    }
+
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA1() throws Exception {
+    }
+
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA384() throws Exception {
+    }
+
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA512() throws Exception {
+    }
+
     @Ignore("Find a way to distinguish empty strings and NULLs")
     @Test
     @Override

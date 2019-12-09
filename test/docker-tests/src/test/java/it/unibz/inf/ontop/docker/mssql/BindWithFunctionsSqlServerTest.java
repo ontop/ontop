@@ -84,4 +84,10 @@ public class BindWithFunctionsSqlServerTest extends AbstractBindTestWithFunction
     public void testREPLACE() throws Exception {
         super.testREPLACE();
     }
+
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA384() throws Exception {
+    }
 }
