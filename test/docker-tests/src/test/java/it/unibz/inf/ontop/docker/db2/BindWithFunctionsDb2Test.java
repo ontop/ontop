@@ -39,7 +39,8 @@ public class BindWithFunctionsDb2Test extends AbstractBindTestWithFunctions {
     @Ignore("Not yet supported")
     @Test
     @Override
-    public void testHashSHA256() {
+    public void testHashSHA256() throws Exception {
+        super.testHashSHA256();
     }
 
     @Ignore("not yet supported")

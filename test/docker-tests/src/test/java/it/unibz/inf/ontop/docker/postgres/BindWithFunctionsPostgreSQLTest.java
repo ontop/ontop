@@ -49,29 +49,32 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
+    //@Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
     @Test
     @Override
     public void testHashSHA256() throws Exception {
         super.testHashSHA256();
     }
 
-    @Ignore("not yet supported")
+    //@Ignore("not yet supported")
     @Test
     @Override
     public void testHashSHA1() throws Exception {
+        super.testHashSHA1();
     }
 
     @Ignore("not yet supported")
     @Test
     @Override
     public void testHashSHA384() throws Exception {
+        super.testHashSHA384();
     }
 
-    @Ignore("not yet supported")
+    //@Ignore("not yet supported")
     @Test
     @Override
     public void testHashSHA512() throws Exception {
+        super.testHashSHA512();
     }
 
     @Override

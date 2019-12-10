@@ -330,11 +330,11 @@ public abstract class AbstractBindTestWithFunctions {
 
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+                + "SELECT ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   FILTER (STRSTARTS(str(?title), \"The S\"))\n"
                 + "   BIND (SHA1(str(?title)) AS ?w)\n"
                 + "}";
 

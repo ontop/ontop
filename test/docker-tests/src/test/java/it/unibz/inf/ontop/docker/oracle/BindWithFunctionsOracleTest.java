@@ -52,7 +52,7 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
     /*
 	 * Tests for hash functions. Oracle does not support any hash functions if DBMS CRYPTO is not enabled
 	 */
-    @Ignore("Require DBMS CRYPTO to be enabled")
+   // @Ignore("Require DBMS CRYPTO to be enabled")
     @Test
     @Override
     public void testHashSHA256() throws Exception {
