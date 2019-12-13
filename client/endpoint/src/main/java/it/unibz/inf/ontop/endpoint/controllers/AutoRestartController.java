@@ -37,23 +37,31 @@ public class AutoRestartController {
     }
 
     private void registerFileWatcher(String mappingFile, @Nullable String owlFile, String propertiesFile, @Nullable String portalFile) {
-        // this code assumes that the input files are under the same directory
-        final Path path = FileSystems.getDefault().getPath(new File(mappingFile).getAbsolutePath()).getParent();
+        FileSystem fileSystem = FileSystems.getDefault();
 
-        ImmutableList<String> filesToWatch = Stream.of(mappingFile, owlFile, propertiesFile, portalFile)
+        ImmutableList<Path> filesToWatch = Stream.of(mappingFile, owlFile, propertiesFile, portalFile)
                 .filter(Objects::nonNull)
+                .map(f -> new File(f).getAbsolutePath())
+                .map(s -> fileSystem.getPath(s))
                 .collect(ImmutableCollectors.toList());
 
-        //System.out.println(path);
+        // this code assumes that the input files are under the same directory
+        final Path parentDirectoryPath = filesToWatch.get(0).getParent();
+        System.out.println(parentDirectoryPath);
+
         new Thread(() -> {
             try {
                 final WatchService watchService = FileSystems.getDefault().newWatchService();
-                final WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+                final WatchKey watchKey = parentDirectoryPath.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
                 while (true) {
                     final WatchKey wk = watchService.take();
                     for (WatchEvent<?> event : wk.pollEvents()) {
                         //we only register "ENTRY_MODIFY" so the context is always a Path.
-                        final Path changed = (Path) event.context();
+                        final Path localChanged = ((Path) event.context());
+
+                        // NB: the path returned by the event is sometimes wrong about its absolute path
+                        // so we build it in another way...
+                        final Path changed = Paths.get(parentDirectoryPath.toString(), localChanged.toString()).toAbsolutePath();
                         System.out.println(changed + " changed detected!");
                         if (filesToWatch.stream().anyMatch(changed::endsWith)) {
                             log.info("RESTARTING Ontop!");
