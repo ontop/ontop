@@ -5,80 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="'Ontop SPARQL endpoint v' + ${version}"></title>
     <link href='./yasgui/yasgui.min.css' rel='stylesheet' type='text/css'/>
+    <link href='./index.css' rel='stylesheet' type='text/css'/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
-    <style>
-        header {
-            display: flex;
-            flex-grow: 1;
-            justify-content: space-between;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            font-size: 20px;
-            line-height: 1.42857;
-            color: #333;
-            background-color: #fff;
-            padding: 6px;
-        }
-
-        #title {
-            font-weight: bold;
-            order: 0;
-        }
-
-        #info {
-            font-size: 14px;
-            order: 1;
-        }
-
-        #switcher {
-            padding: 6px;
-        }
-
-        .yasgui .controlbar {
-            display: none !important;
-        }
-
-        .yasgui .endpointText {
-            display: none !important;
-        }
-
-        #yasguis .predefined .close {
-            display: none !important;
-        }
-
-        #yasguis .predefined a[role="addTab"] {
-            display: none !important;
-        }
-
-        /*#yasgui2 .close {*/
-        /*    display: none !important;*/
-        /*}*/
-
-        /*#yasgui2 a[role="addTab"] {*/
-        /*    display: none !important;*/
-        /*}*/
-    </style>
 </head>
 <body>
-<header>
-    <div id="title">Ontop SPARQL endpoint</div>
-    <div id="info">
-        endpoint address: <span class="yasgui" style="text-decoration: underline;" id="endpoint"></span>
-        <small>|</small>
-        <span th:text="'ontop v'+${version}"></span>
+    <div id="spinner"></div>
+    <div id="main">
+        <header>
+            <div id="title">Ontop SPARQL endpoint</div>
+            <div id="info">
+                endpoint address: <span class="yasgui" style="text-decoration: underline;" id="endpoint"></span>
+                <small>|</small>
+                <span th:text="'ontop v'+${version}"></span>
+            </div>
+        </header>
+
+        <div class="choice-bar" id="switcher">
+
+        </div>
+        
+        <div id="yasguis">
+            <div id='yasgui0'></div>
+        </div>
     </div>
-</header>
-
-<div id="switcher">
-
-</div>
-<div id="yasguis">
-    <div id='yasgui0'></div>
-</div>
-<script src='./yasgui/yasgui.min.js'></script>
-<script src="./index.js"></script>
-
-
+    <script src='./yasgui/yasgui.min.js'></script>
+    <script src="./index.js"></script>
 </body>
 </html>
-
