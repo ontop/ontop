@@ -1,29 +1,10 @@
 package it.unibz.inf.ontop.rdf4j.repository.impl;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -38,6 +19,7 @@ import java.io.File;
 public class OntopVirtualRepository extends AbstractRepository implements OntopRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(OntopVirtualRepository.class);
+    private final OntopSystemSettings settings;
 
     // Temporary (dropped after initialization)
     @Nullable
@@ -50,6 +32,7 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
     public OntopVirtualRepository(OntopSystemConfiguration configuration) {
         this.configuration = configuration;
         inputQueryFactory = configuration.getInjector().getInstance(RDF4JInputQueryFactory.class);
+        settings = configuration.getSettings();
     }
 
     /**
@@ -65,7 +48,7 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
         }
 
         try {
-            return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory);
+            return new OntopRepositoryConnection(this, getOntopConnection(), inputQueryFactory, settings);
         } catch (Exception e) {
             logger.error("Error creating repo connection: " + e.getMessage());
             throw new RepositoryException(e);

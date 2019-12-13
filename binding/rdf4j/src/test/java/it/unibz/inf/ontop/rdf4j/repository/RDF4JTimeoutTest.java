@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
@@ -14,8 +11,10 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Scanner;
 
+import static it.unibz.inf.ontop.injection.OntopSystemSettings.DEFAULT_QUERY_TIMEOUT;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -68,6 +67,9 @@ public class RDF4JTimeoutTest {
 
 		s.close();
 
+		Properties properties = new Properties();
+		properties.setProperty(DEFAULT_QUERY_TIMEOUT, "1");
+
 		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.r2rmlMappingFile(r2rmlfile)
 				.ontologyFile(owlfile)
@@ -75,10 +77,11 @@ public class RDF4JTimeoutTest {
 				.jdbcUser(USER)
 				.jdbcPassword(PASSWORD)
 				.enableTestMode()
+				.properties(properties)
 				.build();
 
 		OntopRepository repo = OntopRepository.defaultRepository(configuration);
-		repo.initialize();
+		repo.init();
 		/*
 		 * Prepare the data connection for querying.
 		 */
@@ -104,27 +107,36 @@ public class RDF4JTimeoutTest {
 
 
 	@Test
-	public void testTimeout() throws Exception {
-		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal2 ?v1; :hasVal2 ?v2.}";
-        
-        // execute query
-        Query query = conn.prepareQuery(QueryLanguage.SPARQL, queryString);
+	public void testTimeout1() throws Exception {
+		testTimeout(false);
+	}
 
-        TupleQuery tq = (TupleQuery) query;
-        tq.setMaxQueryTime(1);
-        boolean exceptionThrown = false;
-        long start = System.currentTimeMillis();
-        try {
-        	TupleQueryResult result = tq.evaluate();
-        	result.close();
-        } catch (Exception e) {
-        	long end = System.currentTimeMillis();
-        	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
-        	assertTrue(end - start >= 1000);
-        	exceptionThrown = true;
-        } 
+	@Test
+	public void testTimeout2() throws Exception {
+		testTimeout(true);
+	}
+
+	private void testTimeout(boolean useDefault) throws Exception {
+		String queryString = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal2 ?v1; :hasVal2 ?v2.}";
+
+		// execute query
+		Query query = conn.prepareQuery(QueryLanguage.SPARQL, queryString);
+
+		TupleQuery tq = (TupleQuery) query;
+		if (!useDefault)
+			tq.setMaxExecutionTime(1);
+		boolean exceptionThrown = false;
+		long start = System.currentTimeMillis();
+		try {
+			TupleQueryResult result = tq.evaluate();
+			result.close();
+		} catch (QueryEvaluationException e) {
+			long end = System.currentTimeMillis();
+			assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
+			assertTrue(end - start >= 1000);
+			exceptionThrown = true;
+		}
 		assertTrue(exceptionThrown);
-		
 	}
 	
 	@Test
@@ -135,6 +147,8 @@ public class RDF4JTimeoutTest {
         Query query = conn.prepareQuery(QueryLanguage.SPARQL, queryString);
 
         TupleQuery tq = (TupleQuery) query;
+        // Negative values disable the test
+		tq.setMaxExecutionTime(-1);
         TupleQueryResult result = tq.evaluate();
 		assertTrue(result.hasNext());
 		result.close();

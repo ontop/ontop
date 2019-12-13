@@ -139,7 +139,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
      */
     Optional<Integer> getInteger(String key) {
         String value = (String) get(key);
-        return Optional.ofNullable(Integer.parseInt(value));
+        return Optional.ofNullable((value == null) ? null : Integer.parseInt(value));
     }
 
     /**
@@ -147,7 +147,7 @@ public class OntopModelSettingsImpl implements OntopModelSettings {
      */
     Optional<Long> getLong(String key) {
         String value = (String) get(key);
-        return Optional.ofNullable(Long.parseLong(value));
+        return Optional.ofNullable((value == null) ? null : Long.parseLong(value));
     }
 
     int getRequiredInteger(String key) {

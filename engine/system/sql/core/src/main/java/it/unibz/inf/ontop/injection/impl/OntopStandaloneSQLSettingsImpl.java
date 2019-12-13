@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -59,6 +60,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     @Override
     public int getConnectionPoolMaxSize() {
         return systemSettings.getConnectionPoolMaxSize();
+    }
+
+    @Override
+    public Optional<Integer> getDefaultQueryTimeout() {
+        return getInteger(DEFAULT_QUERY_TIMEOUT);
     }
 
     @Override

@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.reformulation.input.SPARQLQuery;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
@@ -42,6 +43,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     private OntopRepository repository;
     private OntopConnection ontopConnection;
     private final RDF4JInputQueryFactory inputQueryFactory;
+    private final OntopSystemSettings settings;
     private boolean isOpen;
     private boolean isActive;
     private RDFParser rdfParser;
@@ -49,10 +51,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
 
 
     OntopRepositoryConnection(OntopRepository rep, OntopConnection connection,
-                              RDF4JInputQueryFactory inputQueryFactory) {
+                              RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
         this.repository = rep;
         this.ontopConnection = connection;
         this.inputQueryFactory = inputQueryFactory;
+        this.settings = settings;
         this.isOpen = true;
         this.isActive = false;
         this.rdfParser = Rio.createParser(RDFFormat.RDFXML, this.repository.getValueFactory());
@@ -342,7 +345,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-        return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
+        return new OntopBooleanQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
     }
 
     @Override
@@ -366,7 +369,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
 
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
-        return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
+        return new OntopGraphQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
 
     }
 
@@ -390,11 +393,11 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
         LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
         if (q instanceof ParsedTupleQuery)
-            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
+            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else if (q instanceof ParsedBooleanQuery)
-            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
+            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else if (q instanceof ParsedGraphQuery)
-            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory);
+            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else
             throw new MalformedQueryException("Unrecognized query type. " + queryString);
     }
@@ -421,7 +424,7 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
                 : baseIRI.isEmpty() ? null : baseIRI;
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, safeBaseIRI);
 
-        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory);
+        return new OntopTupleQuery(queryString, q, safeBaseIRI, ontopConnection, inputQueryFactory, settings);
     }
 
     @Override
