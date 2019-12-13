@@ -109,6 +109,16 @@ public abstract class AbstractOntopQuery implements Query {
         this.queryTimeout = maxQueryTime;
     }
 
+    @Override
+    public void setMaxExecutionTime(int maxExecTime) {
+        setMaxQueryTime(maxExecTime);
+    }
+
+    @Override
+    public int getMaxExecutionTime() {
+        return getMaxQueryTime();
+    }
+
     //all code below is copy-pasted from org.eclipse.rdf4j.repository.sparql.query.SPARQLOperation
     protected String getQueryString() {
         if (bindings.size() == 0)

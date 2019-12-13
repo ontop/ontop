@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import org.eclipse.rdf4j.query.Query;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.After;
 import org.junit.Before;
@@ -78,7 +75,7 @@ public class RDF4JTimeoutTest {
 				.build();
 
 		OntopRepository repo = OntopRepository.defaultRepository(configuration);
-		repo.initialize();
+		repo.init();
 		/*
 		 * Prepare the data connection for querying.
 		 */
@@ -111,13 +108,13 @@ public class RDF4JTimeoutTest {
         Query query = conn.prepareQuery(QueryLanguage.SPARQL, queryString);
 
         TupleQuery tq = (TupleQuery) query;
-        tq.setMaxQueryTime(1);
+        tq.setMaxExecutionTime(1);
         boolean exceptionThrown = false;
         long start = System.currentTimeMillis();
         try {
         	TupleQueryResult result = tq.evaluate();
         	result.close();
-        } catch (Exception e) {
+        } catch (QueryEvaluationException e) {
         	long end = System.currentTimeMillis();
         	assertTrue(e.toString().indexOf("OntopTupleQuery timed out. More than 1 seconds passed") >= 0);
         	assertTrue(end - start >= 1000);
