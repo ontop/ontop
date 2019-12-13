@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.answering.resultset.BooleanResultSet;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 
@@ -18,8 +19,8 @@ public class OntopBooleanQuery extends AbstractOntopQuery implements BooleanQuer
 	private final RDF4JInputQueryFactory factory;
 
 	public OntopBooleanQuery(String queryString, ParsedQuery q, String baseIRI, OntopConnection ontopConnection,
-							 RDF4JInputQueryFactory inputQueryFactory) {
-        super(queryString, baseIRI, q, ontopConnection);
+							 RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+        super(queryString, baseIRI, q, ontopConnection, settings);
 		this.factory = inputQueryFactory;
     }
 

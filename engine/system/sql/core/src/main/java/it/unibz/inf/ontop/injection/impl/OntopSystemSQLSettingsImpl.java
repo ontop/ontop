@@ -4,6 +4,7 @@ import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
 
+import java.util.Optional;
 import java.util.Properties;
 
 
@@ -59,6 +60,11 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     @Override
     public int getConnectionPoolMaxSize() {
         return getRequiredInteger(MAX_POOL_SIZE);
+    }
+
+    @Override
+    public Optional<Integer> getDefaultQueryTimeout() {
+        return getInteger(DEFAULT_QUERY_TIMEOUT);
     }
 
     @Override

@@ -20,6 +20,7 @@
 package it.unibz.inf.ontop.rdf4j.query.impl;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
@@ -47,11 +48,13 @@ public abstract class AbstractOntopQuery implements Query {
     protected MapBindingSet bindings = new MapBindingSet();
 
     protected AbstractOntopQuery(String queryString, String baseIRI,
-                                 ParsedQuery initialParsedQuery, OntopConnection conn) {
+                                 ParsedQuery initialParsedQuery, OntopConnection conn,
+                                 OntopSystemSettings settings) {
         this.queryString = queryString;
         this.baseIRI = baseIRI;
         this.conn = conn;
-        this.queryTimeout = 0;
+        this.queryTimeout = settings.getDefaultQueryTimeout()
+                .orElse(0);
         this.initialParsedQuery = initialParsedQuery;
     }
 

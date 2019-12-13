@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.rdf4j.query.impl;
 import it.unibz.inf.ontop.answering.reformulation.input.GraphSPARQLQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.RDF4JInputQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.SimpleGraphResultSet;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
 
 import java.util.HashMap;
@@ -31,8 +32,8 @@ public class OntopGraphQuery extends AbstractOntopQuery implements GraphQuery {
 	private final boolean isConstruct;
 
 	public OntopGraphQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection ontopConnection,
-						   RDF4JInputQueryFactory inputQueryFactory) {
-		super(queryString, baseIRI, parsedQuery, ontopConnection);
+						   RDF4JInputQueryFactory inputQueryFactory, OntopSystemSettings settings) {
+		super(queryString, baseIRI, parsedQuery, ontopConnection, settings);
 		// TODO: replace by something stronger (based on the parsed query)
 		this.isConstruct = SPARQLQueryUtility.isConstructQuery(queryString);
 

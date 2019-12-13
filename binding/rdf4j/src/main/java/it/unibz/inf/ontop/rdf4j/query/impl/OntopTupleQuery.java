@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.answering.resultset.TupleResultSet;
 
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
@@ -22,8 +23,8 @@ public class OntopTupleQuery extends AbstractOntopQuery implements TupleQuery {
 	private final RDF4JInputQueryFactory factory;
 
 	public OntopTupleQuery(String queryString, ParsedQuery parsedQuery, String baseIRI, OntopConnection conn,
-						   RDF4JInputQueryFactory factory) {
-		super(queryString, baseIRI, parsedQuery, conn);
+						   RDF4JInputQueryFactory factory, OntopSystemSettings settings) {
+		super(queryString, baseIRI, parsedQuery, conn, settings);
 		this.factory = factory;
 	}
 
