@@ -21,21 +21,23 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 public class PortalConfigController {
 
     private final Optional<String> portalConfigFile;
+    // LAZY
+    private String json;
 
     @Autowired
     public PortalConfigController(@Value("${portal:#{null}}") Optional<String> portalConfigFile) {
         this.portalConfigFile = portalConfigFile;
+        this.json = null;
     }
 
     @RequestMapping(value = "/ontop/portalConfig")
     @ResponseBody
     public ResponseEntity<String> reformulate() throws FileNotFoundException {
-        String json;
-        if (portalConfigFile.isPresent()) {
+        if ((json == null) && portalConfigFile.isPresent()) {
             Toml toml = new Toml().read(new FileReader(portalConfigFile.get()));
             Gson gson = new Gson();
             json = gson.toJson(toml.toMap());
-        } else {
+        } else if (json == null) {
             json = "{}";
         }
         HttpHeaders headers = new HttpHeaders();
