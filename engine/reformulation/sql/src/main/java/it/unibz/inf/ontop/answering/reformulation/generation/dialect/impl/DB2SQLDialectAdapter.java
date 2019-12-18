@@ -1,48 +1,12 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
-	private static Map<Integer, String> SqlDatatypes;
-	static {
-		SqlDatatypes = new HashMap<Integer, String>();
-		SqlDatatypes.put(Types.INTEGER, "INTEGER");
-		SqlDatatypes.put(Types.DECIMAL, "DECFLOAT");
-		SqlDatatypes.put(Types.REAL, "REAL");
-		SqlDatatypes.put(Types.FLOAT, "DOUBLE");
-		SqlDatatypes.put(Types.DOUBLE, "DOUBLE");
-//		SqlDatatypes.put(Types.DOUBLE, "DECIMAL"); // it fails aggregate test with double
-		SqlDatatypes.put(Types.CHAR, "CHAR");
-		SqlDatatypes.put(Types.VARCHAR, "VARCHAR(100)");  // for korean, chinese, etc characters we need to use utf8
-		SqlDatatypes.put(Types.DATE, "TIMESTAMP");
-		SqlDatatypes.put(Types.TIME, "TIME");
-		SqlDatatypes.put(Types.TIMESTAMP, "TIMESTAMP");
-		SqlDatatypes.put(Types.BOOLEAN, "BOOLEAN");
-		SqlDatatypes.put(Types.BIGINT, "BIGINT");
-	}
+
 	@Override
 	public String strConcat(String[] strings) {
 		if (strings.length == 0)
@@ -79,73 +43,6 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
-	@Override
-	public String strStartsOperator(){
-		return "LEFT(%1$s, LENGTH(%2$s)) LIKE %2$s";
-	}
-
-	@Override
-	public String strContainsOperator(){
-		return "LOCATE(%2$s , %1$s) > 0";
-	}
-
-	@Override
-	public String strBefore(String str, String before) {
-		return String.format("LEFT(%s,SIGN(LOCATE(%s,%s)) * (LOCATE(%s,%s)-1))", str,   before, str, before, str);
-	}
-
-	@Override
-	public String strAfter(String str, String after) {
-		//rtrim is needed to remove the space in
-		return String.format("RTRIM(SUBSTR(%s,LOCATE(%s,%s)+LENGTH(%s), SIGN(LOCATE(%s,%s))*LENGTH(%s)))",
-				str, after, str , after, after, str, str);
-	}
-
-	@Override
-	public String dateNow() {
-		return "CURRENT TIMESTAMP";
-
-	}
-
-//	@Override
-//	public String strUuid() {
-//		return "TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
-//	}
-//
-//	@Override
-//	//similar to UUID
-//	public String uuid() {
-//		return "'urn:uuid:'|| TRIM(CHAR(HEX(GENERATE_UNIQUE())))";
-//	}
-
-	@Override //maybe support from version 10 up
-	public String dateTZ(String str) {
-		return strConcat(new String[] {String.format("EXTRACT(TIMEZONE_HOUR FROM %s)",str),":", String.format("EXTRACT(TIMEZONE_MINUTE FROM %s)",str)  });
-	}
-
-	@Override
-	public String sqlCast(String value, int type) {
-		String strType = SqlDatatypes.get(type);
-
-		if (strType == null) {
-			throw new RuntimeException("Unsupported SQL type (not recognized)");
-		}
-
-		boolean noCast = strType.equals("BOOLEAN");
-
-		if (strType != null && !noCast ) {	
-			return "CAST(" + value + " AS " + strType + ")";
-		} else	if (noCast){
-				return value;
-			
-		}
-		throw new RuntimeException("Unsupported SQL type");
-	}
-	
-	@Override
-	public String getDummyTable() {
-		return "SELECT 1 from sysibm.sysdummy1";
-	}
 
 	@Override
 	public Optional<String> getTrueTable() {
@@ -205,6 +102,5 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 		
 		return bf.toString();
 	}
-
 	
 }

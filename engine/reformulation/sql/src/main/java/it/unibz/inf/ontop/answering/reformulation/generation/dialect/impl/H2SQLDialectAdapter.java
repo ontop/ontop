@@ -1,45 +1,7 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import java.util.Set;
-import java.util.regex.Pattern;
-
 public class H2SQLDialectAdapter extends SQL99DialectAdapter {
-
-	@Override
-	public String strUuid(){
-		return "RANDOM_UUID()";
-	}
-
-	@Override
-	public String uuid(){
-		return strConcat(new String[]{"'urn:uuid:'","RANDOM_UUID()"});
-	}
-
-	@Override
-	public String SHA256(String str){
-		return String.format("HASH('SHA256', STRINGTOUTF8(%s),1)", str);
-	}
 
 	@Override
 	public String sqlSlice(long limit, long offset) {
@@ -62,38 +24,6 @@ public class H2SQLDialectAdapter extends SQL99DialectAdapter {
 				return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
 			}
 		}
-	}
-	
-	@Override
-	public String sqlRegex(String columnname, String pattern, boolean caseinSensitive, boolean multiLine, boolean dotAllMode) {
-        Pattern quotes = Pattern.compile("[\"`\\['].*[\"`\\]']");
-        if(quotes.matcher(pattern).matches() ) {
-            pattern = pattern.substring(1, pattern.length() - 1); // remove the
-            // enclosing
-            // quotes
-        }
-		// embedded options: 
-		
-		String pflags = "(?";
-		if (multiLine)
-			pflags += "m"; // equivalent of Pattern.MULTILINE
-		if (dotAllMode)
-			pflags += "s"; // equivalent of Pattern.DOTALL
-		pflags +=")";
-		return columnname + " ~" + ((caseinSensitive) ? "* " : " ") + "'"+ ((multiLine || dotAllMode) ? pflags : "") + pattern + "'";
-	}
-
-    @Override
-    public String strReplace(String str, String oldstr, String newstr) {
-        oldstr = oldstr.substring(1, oldstr.length() - 1); // remove the enclosing quotes
-
-        newstr = newstr.substring(1, newstr.length() - 1);
-        return String.format("REGEXP_REPLACE(%s, '%s', '%s')", str, oldstr, newstr);
-    }
-
-	@Override
-	public String getDummyTable() {
-		return "SELECT 1";
 	}
 
 	@Override 
