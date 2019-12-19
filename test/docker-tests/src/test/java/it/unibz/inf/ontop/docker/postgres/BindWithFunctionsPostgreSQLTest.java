@@ -49,11 +49,29 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
-    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto")
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto) or use docker-compose.local.yml")
     @Test
     @Override
     public void testHashSHA256() throws Exception {
         super.testHashSHA256();
+    }
+
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto) or use docker-compose.local.yml")
+    @Test
+    public void testHashMd5() throws Exception {
+        super.testHashMd5();
+    }
+
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto) or use docker-compose.local.yml")
+    @Test
+    public void testHashSHA1() throws Exception {
+        super.testHashSHA1();
+    }
+
+    @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto) or use docker-compose.local.yml")
+    @Test
+    public void testHashSHA512() throws Exception {
+        super.testHashSHA512();
     }
 
     @Override
