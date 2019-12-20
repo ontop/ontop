@@ -843,7 +843,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
                 + "   BIND (DAY(?year) AS ?w)\n"
-                + "}";
+                + "} ORDER BY (?w)";
 
         checkReturnedValues(queryBind, getDayExpectedValues());
     }
@@ -851,9 +851,9 @@ public abstract class AbstractBindTestWithFunctions {
     protected List<String> getDayExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
+        expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"21\"^^xsd:integer");
-        expectedValues.add("\"5\"^^xsd:integer");
 
         return expectedValues;
     }
