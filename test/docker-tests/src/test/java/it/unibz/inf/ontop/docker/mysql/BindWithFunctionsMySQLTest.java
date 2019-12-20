@@ -103,4 +103,10 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
         super.testREPLACE();
     }
 
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA384() throws Exception {
+    }
+
 }

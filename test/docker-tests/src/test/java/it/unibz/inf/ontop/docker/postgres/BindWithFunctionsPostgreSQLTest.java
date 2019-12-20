@@ -49,6 +49,7 @@ public class BindWithFunctionsPostgreSQLTest extends AbstractBindTestWithFunctio
         return expectedValues;
     }
 
+
     @Ignore("Please enable pgcrypto (CREATE EXTENSION pgcrypto) or use docker-compose.local.yml")
     @Test
     @Override

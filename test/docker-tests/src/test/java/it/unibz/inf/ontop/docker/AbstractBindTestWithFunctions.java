@@ -293,7 +293,6 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
-
     @Test
     public void testHashMd5() throws Exception {
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
@@ -325,16 +324,16 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-
     @Test
     public void testHashSHA1() throws Exception {
+
         String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "PREFIX  ns:  <http://example.org/ns#>\n"
-                + "SELECT  ?title ?w WHERE \n"
+                + "SELECT ?w WHERE \n"
                 + "{  ?x ns:price ?p .\n"
                 + "   ?x ns:discount ?discount.\n"
                 + "   ?x dc:title ?title .\n"
-                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   FILTER (STRSTARTS(str(?title), \"The S\"))\n"
                 + "   BIND (SHA1(str(?title)) AS ?w)\n"
                 + "}";
 
@@ -1160,10 +1159,23 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-
     @Test
     public void testIsBlank() throws Exception {
-            //no example data
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (IsBlank(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test
