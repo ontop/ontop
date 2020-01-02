@@ -9,12 +9,12 @@ import org.junit.BeforeClass;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+public class LeftJoinProfDremioOracleTest extends AbstractLeftJoinProfTest {
 
-public class LeftJoinProfDremioTest extends AbstractLeftJoinProfTest {
-    private static final String owlFileName = "/redundant_join/provaDremio.owl";
-    private static final String obdaFileName = "/redundant_join/provaDremio.obda";
+
+    private static final String owlFileName = "/redundant_join/redundant_join_fk_test.owl";
+    private static final String obdaFileName = "/redundant_join/dremio/redundant_join_fk_test_oracle.obda";
     private static final String propertyFileName = "/dremio/redundant_join_fk_test.properties";
-
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;

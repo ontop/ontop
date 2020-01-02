@@ -58,9 +58,9 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Override
     protected List<String> getYearExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"2014\"^^xsd:integer");
         expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"1970\"^^xsd:integer");
 
         return expectedValues;
@@ -101,6 +101,12 @@ public class BindWithFunctionsMySQLTest extends AbstractBindTestWithFunctions {
     @Test
     public void testREPLACE() throws Exception {
         super.testREPLACE();
+    }
+
+    @Ignore("not yet supported")
+    @Test
+    @Override
+    public void testHashSHA384() throws Exception {
     }
 
 }

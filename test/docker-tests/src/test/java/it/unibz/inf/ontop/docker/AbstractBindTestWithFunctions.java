@@ -293,28 +293,132 @@ public abstract class AbstractBindTestWithFunctions {
 
     }
 
-    @Ignore
     @Test
     public void testHashMd5() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (Md5(str(?title)) AS ?w)\n"
+                + "}";
 
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("Md5");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
     @Test
     public void testHashSHA1() throws Exception {
 
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(str(?title), \"The S\"))\n"
+                + "   BIND (SHA1(str(?title)) AS ?w)\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
+    @Ignore("Not yet supported")
     @Test
     public void testHashSHA384() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA384(str(?title)) AS ?w)\n"
+                + "}";
 
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-384");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
-    @Ignore
+
     @Test
     public void testHashSHA512() throws Exception {
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  ?title ?w WHERE \n"
+                + "{  ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount.\n"
+                + "   ?x dc:title ?title .\n"
+                + "   FILTER (STRSTARTS(?title, \"The S\"))\n"
+                + "   BIND (SHA512(str(?title)) AS ?w)\n"
+                + "}";
 
+        List<String> expectedValues = new ArrayList<>();
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] hash = digest.digest("The Semantic Web".getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            expectedValues.add(String.format("\"%s\"^^xsd:string",hexString.toString()));
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+        checkReturnedValues(queryBind, expectedValues);
     }
 
 	/*
@@ -331,7 +435,8 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (STRLEN(?title) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY (?w) ";
 
 
         List<String> expectedValues = new ArrayList<>();
@@ -353,14 +458,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (SUBSTR(?title, 3) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY (?w) ";
 
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"ARQL Tutorial\"@en");  // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
         expectedValues.add("\"e Semantic Web\"@en");
         expectedValues.add("\"ime and Punishment\"@en");
-        expectedValues.add("\"e Logic Book: Introduction, Second Edition\"@en");
+
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -375,14 +482,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (SUBSTR(?title, 3, 6) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY (?w)";
 
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"ARQL T\"@en");   // ROMAN (23 Dec 2015): now the language tag is handled correctly
+        expectedValues.add("\"e Logi\"@en");
         expectedValues.add("\"e Sema\"@en");
         expectedValues.add("\"ime an\"@en");
-        expectedValues.add("\"e Logi\"@en");
+
         checkReturnedValues(queryBind, expectedValues);
     }
     @Test
@@ -397,7 +506,8 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:pubYear ?year .\n"
                 + "   FILTER (STRSTARTS(?title,\"The\"))\n"
                 + "   BIND (ENCODE_FOR_URI(?title) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "  ORDER BY DESC(?w)";
 
 
         List<String> expectedValues = new ArrayList<>();
@@ -437,7 +547,8 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(?title AS ?w)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY DESC(?title)";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en");
@@ -457,7 +568,8 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(SUBSTR(?title,1,STRLEN(?title)) AS ?w)\n"
                 + "   FILTER(STRSTARTS(?title,\"The\"))\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY DESC(?title)";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"The Semantic Web\"@en"); // ROMAN (23 Dec 2015): now the language tag is handled correctly
@@ -476,13 +588,14 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x ns:discount ?discount .\n"
                 + "   ?x dc:title ?title .\n"
                 + "   BIND(CONTAINS(?title,\"Semantic\") AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "  ORDER BY (?title)";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"false\"^^xsd:boolean");
         checkReturnedValues(queryBind, expectedValues);
     }
 
@@ -516,15 +629,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (UCASE(?title) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY DESC(?title)";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string");
         expectedValues.add("\"The Semantic Web THE SEMANTIC WEB\"^^xsd:string");
-        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
                 "The Logic Book: Introduction, Second Edition\"".toUpperCase()+"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial SPARQL TUTORIAL\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment CRIME AND PUNISHMENT\"^^xsd:string");
+
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -540,15 +655,16 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   BIND (LCASE(?title) AS ?v)\n"
                 + "   BIND (CONCAT(?title, \" \", ?v) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "  ORDER BY DESC(?title) ";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"^^xsd:string");
         expectedValues.add("\"The Semantic Web the semantic web\"^^xsd:string");
-        expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
         expectedValues.add("\"The Logic Book: Introduction, Second Edition " +
                 "The Logic Book: Introduction, Second Edition\"".toLowerCase()+"^^xsd:string");
+        expectedValues.add("\"SPARQL Tutorial sparql tutorial\"^^xsd:string");
+        expectedValues.add("\"Crime and Punishment crime and punishment\"^^xsd:string");
         checkReturnedValues(queryBind, expectedValues);
 
     }
@@ -700,16 +816,17 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
                 + "   BIND (YEAR(?year) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + " ORDER BY DESC (?w) ";
 
         checkReturnedValues(queryBind, getYearExpectedValues());
     }
 
     protected List<String> getYearExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"2014\"^^xsd:integer");
         expectedValues.add("\"2011\"^^xsd:integer");
-        expectedValues.add("\"2015\"^^xsd:integer");
         expectedValues.add("\"1967\"^^xsd:integer");
 
         return expectedValues;
@@ -726,7 +843,7 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
                 + "   BIND (DAY(?year) AS ?w)\n"
-                + "}";
+                + "} ORDER BY (?w)";
 
         checkReturnedValues(queryBind, getDayExpectedValues());
     }
@@ -734,9 +851,9 @@ public abstract class AbstractBindTestWithFunctions {
     protected List<String> getDayExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"5\"^^xsd:integer");
+        expectedValues.add("\"5\"^^xsd:integer");
         expectedValues.add("\"8\"^^xsd:integer");
         expectedValues.add("\"21\"^^xsd:integer");
-        expectedValues.add("\"5\"^^xsd:integer");
 
         return expectedValues;
     }
@@ -754,13 +871,14 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
                 + "   BIND (MINUTES(?year) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "  ORDER BY (?w)";
 
 
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"47\"^^xsd:integer");
-        expectedValues.add("\"30\"^^xsd:integer");
         expectedValues.add("\"23\"^^xsd:integer");
+        expectedValues.add("\"30\"^^xsd:integer");
+        expectedValues.add("\"47\"^^xsd:integer");
         expectedValues.add("\"50\"^^xsd:integer");
         checkReturnedValues(queryBind, expectedValues);
     }
@@ -804,17 +922,18 @@ public abstract class AbstractBindTestWithFunctions {
                 + "   ?x dc:title ?title .\n"
                 + "   ?x ns:pubYear ?year .\n"
                 + "   BIND (SECONDS(?year) AS ?w)\n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY (?w) ";
 
         checkReturnedValues(queryBind, getSecondsExpectedValues());
     }
 
     protected List<String> getSecondsExpectedValues() {
         List<String> expectedValues = new ArrayList<>();
-        expectedValues.add("\"52\"^^xsd:decimal");
+        expectedValues.add("\"0\"^^xsd:decimal");
         expectedValues.add("\"0\"^^xsd:decimal");
         expectedValues.add("\"6\"^^xsd:decimal");
-        expectedValues.add("\"0\"^^xsd:decimal");
+        expectedValues.add("\"52\"^^xsd:decimal");
 
         return expectedValues;
     }
@@ -941,12 +1060,13 @@ public abstract class AbstractBindTestWithFunctions {
                 + "     ?x dc:title ?title .\n"
                 + "     FILTER (STRSTARTS(?title, \"T\"))\n"
                 + "   } \n"
-                + "}";
+                + "}\n"
+                + "   ORDER BY (?title)";
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("\"false\"^^xsd:boolean");
-        expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"true\"^^xsd:boolean");
         expectedValues.add("\"true\"^^xsd:boolean");
         checkReturnedValues(queryBind, expectedValues);
 
@@ -1039,10 +1159,23 @@ public abstract class AbstractBindTestWithFunctions {
         checkReturnedValues(queryBind, expectedValues);
     }
 
-
     @Test
     public void testIsBlank() throws Exception {
-            //no example data
+        String queryBind = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT (IsBlank(?discount) AS ?w) WHERE \n"
+                + "{  ?x ns:price ?price .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   ?x ns:pubYear ?year .\n"
+                + "   ?x dc:title ?title .\n"
+                + "}";
+
+        List<String> expectedValues = new ArrayList<>();
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        expectedValues.add("\"false\"^^xsd:boolean");
+        checkReturnedValues(queryBind, expectedValues);
     }
 
     @Test

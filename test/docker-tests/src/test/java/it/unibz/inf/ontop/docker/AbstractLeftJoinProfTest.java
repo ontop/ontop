@@ -94,10 +94,11 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :firstName ?v\n" +
                 "  }\n" +
-                "}";
+                "}\n" +
+                " ORDER BY (?v)";
 
 
-        String [] expectedValues = {"Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"};
+        String [] expectedValues = {"Barbara", "Diego", "Frank", "Johann", "John", "Mary", "Michael", "Roger"};
         String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
 
         System.out.println("SQL Query: \n" + sql);
@@ -168,9 +169,9 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :lastName ?lastName .\n" +
                 "   }\n" +
-                "}";
+                "} ORDER BY (?v)";
 
-        String [] expectedValues = {"Roger", "Frank", "John", "Michael", "Diego", "Johann", "Barbara", "Mary"};
+        String [] expectedValues = {"Barbara", "Diego", "Frank", "Johann", "John", "Mary", "Michael", "Roger"};
         String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
 
         System.out.println("SQL Query: \n" + sql);
@@ -213,10 +214,10 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
                 "   OPTIONAL {\n" +
                 "     ?p :nickname ?v\n" +
                 "  }\n" +
-                "}";
+                "} ORDER BY (?v)";
 
         String [] expectedValues = {
-                "Rog", "Frankie", "Johnny", "King of Pop"
+                "Frankie", "Johnny", "King of Pop", "Rog"
         };
         String sql = checkReturnedValuesAndReturnSql(query, Arrays.asList(expectedValues));
 
