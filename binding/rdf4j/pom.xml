@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>ontop-binding</artifactId>
 		<groupId>it.unibz.inf.ontop</groupId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0-beta-2-SNAPSHOT</version>
 	</parent>
 	<artifactId>ontop-rdf4j</artifactId>
 	<name>ontop-rdf4j</name>
