@@ -1,7 +1,7 @@
 <!--
 Do you want to ask a question? Are you looking for support? We have also a mailing list https://groups.google.com/d/forum/ontop4obda
 
-Have a look at our guidelines on how to submit a bug report https://github.com/ontop/ontop/wiki/BugReport
+Have a look at our guidelines on how to submit a bug report https://ontop-vkg.org/community/contributing/bug-report
 -->
 
 ### Description
