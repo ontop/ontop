@@ -30,7 +30,7 @@ project.
 Links
 --------------------
 
-- [Official Website](http://ontop.inf.unibz.it/)
+- [Official Website](https://ontop-vkg.org)
 - [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
 - [Docker Hub](https://hub.docker.com/r/ontop/ontop-endpoint)
 - [GitHub](https://github.com/ontop/ontop/)
