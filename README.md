@@ -30,11 +30,10 @@ project.
 Links
 --------------------
 
-- [Official Website](https://ontop-vkg.org)
+- [Official Website and Documentation](https://ontop-vkg.org)
 - [SourceForge Download](http://sourceforge.net/projects/ontop4obda/files/)
 - [Docker Hub](https://hub.docker.com/r/ontop/ontop-endpoint)
 - [GitHub](https://github.com/ontop/ontop/)
-- [GitHub Wiki](https://github.com/ontop/ontop/wiki)
 - [GitHub Issues](https://github.com/ontop/ontop/issues)
 - [Google Group](https://groups.google.com/forum/#!forum/ontop4obda)
 - [Facebook](https://www.facebook.com/obdaontop/)
