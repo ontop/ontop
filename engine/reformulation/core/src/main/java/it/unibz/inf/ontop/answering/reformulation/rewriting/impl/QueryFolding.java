@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.answering.reformulation.rewriting.impl;
  * #L%
  */
 
-import com.github.jsonldjava.shaded.com.google.common.collect.Streams;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -192,7 +191,7 @@ public class QueryFolding {
 				.filter(edge -> roots.contains(edge.getLoop0()) && roots.contains(edge.getLoop1()))
 				.collect(ImmutableCollectors.toList());
 
-		ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms = Streams.concat(
+		ImmutableSet<DataAtom<RDFAtomPredicate>> rootAtoms = Stream.concat(
 					roots.stream().flatMap(root -> root.getAtoms().stream()),
 					edgesInRoots.stream().flatMap(edge -> edge.getBAtoms().stream()))
 				.collect(ImmutableCollectors.toSet());

@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.si.dag;
  */
 
 
-import com.github.jsonldjava.shaded.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.spec.ontology.Equivalences;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;

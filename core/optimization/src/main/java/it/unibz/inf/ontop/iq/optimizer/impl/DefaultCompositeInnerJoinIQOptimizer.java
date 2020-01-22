@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.github.jsonldjava.shaded.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
