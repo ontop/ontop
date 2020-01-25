@@ -11,6 +11,10 @@ public interface TargetAtomFactory {
 
     TargetAtom getTripleTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm object);
 
+    // Davide> Quads
+    TargetAtom getQuadTargetAtom(ImmutableTerm subjectTerm, ImmutableTerm predTerm, ImmutableTerm
+            objectTerm, ImmutableTerm graphTerm);
+
     TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI classIRI);
 
     TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI propertyIRI, ImmutableTerm objectTerm);

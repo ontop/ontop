@@ -42,6 +42,11 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
      */
     private ImmutableTerm currentSubject;
 
+    /**
+     * Davide> The current graph
+     */
+    private ImmutableTerm currentGraphLabel;
+
     protected String error = "";
     private final TermFactory termFactory;
     private final RDF rdfFactory;
@@ -266,7 +271,17 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitTriplesStatement(TriplesStatementContext ctx) {
-        return visitTriples(ctx.triples());
+
+        TriplesContext triples = ctx.triples();
+        if( triples != null ){
+            return visitTriples(triples);
+        }
+        else{
+            QuadsContext quads = ctx.quads();
+            if( quads != null )
+                return visitQuads(quads);
+            else throw new IllegalArgumentException("Not triple nor quads");
+        }
     }
 
     @Override
@@ -291,6 +306,12 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
     }
 
     @Override
+    public Stream<TargetAtom> visitQuads(QuadsContext ctx) {
+        currentGraphLabel = visitGraph(ctx.graph());
+        return ctx.triples().stream().flatMap(this::visitTriples);
+    }
+
+    @Override
     public Stream<TargetAtom> visitPredicateObjectList(PredicateObjectListContext ctx) {
         return ctx.predicateObject().stream()
                 .flatMap(this::visitPredicateObject);
@@ -298,9 +319,18 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public Stream<TargetAtom> visitPredicateObject(PredicateObjectContext ctx) {
-        return visitObjectList(ctx.objectList())
-                .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
+        Stream<TargetAtom> result = visitObjectList(ctx.objectList()).map(object ->
+                currentGraphLabel == null ? targetAtomFactory.getTripleTargetAtom(currentSubject,
+                        visitVerb(ctx.verb()), object) : targetAtomFactory.getQuadTargetAtom(currentSubject,
+                        visitVerb(ctx.verb()), object, currentGraphLabel));
+        return result;
+
+        //   return visitObjectList(ctx.objectList())
+        //         .map(t -> targetAtomFactory.getTripleTargetAtom(currentSubject, visitVerb(ctx.verb()), t));
     }
+
+
+
 
     @Override
     public ImmutableTerm visitVerb(VerbContext ctx) {
@@ -319,6 +349,25 @@ public abstract class AbstractTurtleOBDAVisitor extends TurtleOBDABaseVisitor im
 
     @Override
     public ImmutableTerm visitSubject(SubjectContext ctx) {
+        ResourceContext rc = ctx.resource();
+        if (rc != null) {
+            return visitResource(rc);
+        }
+        VariableContext vc = ctx.variable();
+        if (vc != null) {
+            return termFactory.getIRIFunctionalTerm(visitVariable(vc), true);
+        }
+        BlankContext bc = ctx.blank();
+        if (bc != null) {
+            return visitBlank(bc);
+        }
+        return null;
+    }
+
+    // Davide> Quads support
+    @Override
+    public ImmutableTerm visitGraph(GraphContext ctx){
+        if (ctx == null) return null;
         ResourceContext rc = ctx.resource();
         if (rc != null) {
             return visitResource(rc);
