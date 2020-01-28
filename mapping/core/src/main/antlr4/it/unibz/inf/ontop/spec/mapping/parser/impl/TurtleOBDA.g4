@@ -86,6 +86,7 @@ base
 
 quads
   : 'GRAPH' graph '{' triples+ '}'
+  ;
 
 triples
   : subject  predicateObjectList
