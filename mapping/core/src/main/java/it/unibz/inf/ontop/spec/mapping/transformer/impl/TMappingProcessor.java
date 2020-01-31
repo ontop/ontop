@@ -59,7 +59,6 @@ public class TMappingProcessor {
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final NoNullValueEnforcer noNullValueEnforcer;
-    private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
@@ -69,7 +68,7 @@ public class TMappingProcessor {
                               QueryUnionSplitter unionSplitter,
                               UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
-                              SpecificationFactory specificationFactory, IntermediateQueryFactory iqFactory,
+                              IntermediateQueryFactory iqFactory,
                               UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
@@ -77,7 +76,6 @@ public class TMappingProcessor {
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.specificationFactory = specificationFactory;
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
@@ -130,8 +128,7 @@ public class TMappingProcessor {
                                 .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, termFactory))))
                 .collect(ImmutableCollectors.toList());
 
-        return specificationFactory.createMapping(mapping.getMetadata(),
-                        entries.stream()
+        return mapping.update(entries.stream()
                                 .filter(e -> !e.getPredicateInfo().isClass())
                                 .map(this::toCell)
                                 .collect(ImmutableCollectors.toTable()),
