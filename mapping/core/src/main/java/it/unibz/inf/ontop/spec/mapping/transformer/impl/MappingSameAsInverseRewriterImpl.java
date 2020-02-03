@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -51,7 +52,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
             return mapping;
 
         ImmutableTable<RDFAtomPredicate, IRI, IQ> mappingUpdate = mapping.getRDFAtomPredicates().stream()
-                .flatMap(p -> mapping.getRDFPropertyDefinition(p, OWL.SAME_AS)
+                .flatMap(p -> mapping.getAssertion(new MappingAssertionIndex(p, OWL.SAME_AS, false))
                         .map(sameAsDef -> completeSameAsDefinition(sameAsDef, p))
                         .map(sameAsDef -> Tables.immutableCell(p, OWL.SAME_AS, sameAsDef))
                         .map(Stream::of)

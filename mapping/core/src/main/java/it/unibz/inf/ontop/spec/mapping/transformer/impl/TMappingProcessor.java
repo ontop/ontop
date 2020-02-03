@@ -97,9 +97,8 @@ public class TMappingProcessor {
 
         ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.getAssertions().entrySet().stream()
                 .flatMap(e -> unionSplitter.splitUnion(unionNormalizer.optimize(e.getValue()))
-                        .map(q -> Maps.immutableEntry(e.getKey(),
-                                new TMappingRule(e.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory))))
-                .collect(ImmutableCollectors.toMultimap());
+                        .map(q -> new TMappingRule(e.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
+                .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),

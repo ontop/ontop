@@ -165,7 +165,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(rdfAtomPredicate, propertyIri)
+            IQ mappingAssertion = normalizedMapping.getAssertion(new MappingAssertionIndex(rdfAtomPredicate, propertyIri, false))
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             LOGGER.info(mappingAssertion.toString());
@@ -180,7 +180,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(rdfAtomPredicate, CLASS_1)
+        IQ mappingAssertion = normalizedMapping.getAssertion(new MappingAssertionIndex(rdfAtomPredicate, CLASS_1, true))
                 .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
         System.out.println(mappingAssertion);

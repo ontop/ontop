@@ -142,14 +142,14 @@ public class MappingSaturationTest {
         MappingInTransformation saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
         RDFAtomPredicate triplesPredicate = saturatedMapping.getRDFAtomPredicates().iterator().next();
 
-        assertEquals(maGivesLab, saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_GIVES_LAB).get());
-        assertEquals(maGivesLecture, saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_GIVES_LECTURE).get());
+        assertEquals(maGivesLab, saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_GIVES_LAB, false)).get());
+        assertEquals(maGivesLecture, saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_GIVES_LECTURE, false)).get());
 
-        assertTrue(saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_IS_TAUGHT_BY).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_IS_TAUGHT_BY));
+        assertTrue(saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_IS_TAUGHT_BY, false)).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_IS_TAUGHT_BY, false)));
 
-        assertTrue(saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES) + "\nvs\n" + maTeaches);
+        assertTrue(saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_TEACHES, false)).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getAssertion(new MappingAssertionIndex(triplesPredicate, PROP_TEACHES, false)) + "\nvs\n" + maTeaches);
     }
 
 

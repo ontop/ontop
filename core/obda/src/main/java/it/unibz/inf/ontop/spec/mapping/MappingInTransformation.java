@@ -11,13 +11,9 @@ public interface MappingInTransformation {
 
     Mapping getMapping();
 
-    Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI);
-    Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI);
-
-    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
-    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
-
     ImmutableMap<MappingAssertionIndex, IQ> getAssertions();
+
+    Optional<IQ> getAssertion(MappingAssertionIndex idx);
 
     /**
      * TriplePredicate, QuadPredicate, etc.

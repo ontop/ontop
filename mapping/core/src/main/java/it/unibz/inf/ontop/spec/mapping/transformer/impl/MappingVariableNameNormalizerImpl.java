@@ -22,6 +22,7 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,31 +48,22 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
 
     @Override
     public MappingInTransformation normalize(MappingInTransformation mapping) {
-
         AtomicInteger i = new AtomicInteger(0);
-
-        return specificationFactory.createMapping(Stream.concat(
-                normalize(mapping.getRDFPropertyQueries(), false, i),
-                normalize(mapping.getRDFClassQueries(), true, i)).collect(ImmutableCollectors.toMap()));
-    }
-
-    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> normalize(
-            ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> queryCells, boolean isClass, AtomicInteger i) {
-        return queryCells.stream()
-                .map(c -> Maps.immutableEntry(
-                        new MappingAssertionIndex(
-                                c.getRowKey(),
-                                c.getColumnKey(), isClass),
-                        appendSuffixToVariableNames(c.getValue(), i.incrementAndGet())));
+        return specificationFactory.createMapping(
+                mapping.getAssertions().entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> appendSuffixToVariableNames(e.getValue(), i.incrementAndGet()))));
     }
 
     private IQ appendSuffixToVariableNames(IQ query, int suffix) {
-        Map<Variable, Variable> substitutionMap =
+        ImmutableMap<Variable, Variable> substitutionMap =
                 query.getTree().getKnownVariables().stream()
-                        .collect(Collectors.toMap(
-                                v -> v,
-                                v -> termFactory.getVariable(v.getName()+"m"+suffix)));
-        QueryRenamer queryRenamer = transformerFactory.createRenamer(substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap));
+                        .collect(ImmutableCollectors.toMap(
+                                Function.identity(),
+                                v -> termFactory.getVariable(v.getName() + "m" + suffix)));
+        QueryRenamer queryRenamer = transformerFactory.createRenamer(
+                substitutionFactory.getInjectiveVar2VarSubstitution(substitutionMap));
         return queryRenamer.transform(query);
     }
 }

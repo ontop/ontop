@@ -64,29 +64,14 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
     }
 
     @Override
-    public Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI) {
-        return Optional.ofNullable(propertyDefinitions.get(rdfAtomPredicate, propertyIRI));
-    }
-    @Override
-    public Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI) {
-        return Optional.ofNullable(classDefinitions.get(rdfAtomPredicate, classIRI));
+    public Optional<IQ> getAssertion(MappingAssertionIndex idx) {
+        return Optional.ofNullable(assertions.get(idx));
     }
 
     @Override
     public Mapping getMapping() {
         return new MappingImpl(propertyDefinitions, classDefinitions);
     }
-
-    @Override
-    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries() {
-        return propertyDefinitions.cellSet();
-    }
-
-    @Override
-    public ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries() {
-        return classDefinitions.cellSet();
-    }
-
 
     @Override
     public ImmutableMap<MappingAssertionIndex, IQ> getAssertions() {

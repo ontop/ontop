@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -40,40 +41,15 @@ public class MappingMergerImpl implements MappingMerger {
             throw new IllegalArgumentException("The set of mappings is assumed to be nonempty");
         }
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = mergeMappingTables(mappings, MappingInTransformation::getRDFPropertyQueries, false);
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = mergeMappingTables(mappings, MappingInTransformation::getRDFClassQueries, true);
-
-        return specificationFactory.createMapping(Stream.concat(
-                propertyTable.cellSet().stream()
-                        .map(e ->
-                                Maps.immutableEntry(
-                                        new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), false),
-                                        e.getValue())),
-                classTable.cellSet().stream()
-                        .map(e ->
-                                Maps.immutableEntry(
-                                        new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), true),
-                                        e.getValue())))
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingTables(ImmutableSet<MappingInTransformation> mappings, Function<MappingInTransformation, ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>>> extractor, boolean isClass) {
-
         ImmutableMap<MappingAssertionIndex, Collection<IQ>> multiTable = mappings.stream()
-                .flatMap(m -> extractor.apply(m).stream()
-                        .map(c -> Maps.immutableEntry(
-                                new MappingAssertionIndex(c.getRowKey(), c.getColumnKey(), isClass),
-                                c.getValue())))
+                .flatMap(m -> m.getAssertions().entrySet().stream())
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
-        return multiTable.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        e.getKey().getPredicate(),
-                        e.getKey().getIri(),
-                        queryMerger.mergeDefinitions(e.getValue())
-                                .orElseThrow(() -> new MappingMergingException("The query should be present"))))
-                .collect(ImmutableCollectors.toTable());
+        return specificationFactory.createMapping(multiTable.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> queryMerger.mergeDefinitions(e.getValue())
+                                .orElseThrow(() -> new MappingMergingException("The query should be present")))));
     }
-
 }

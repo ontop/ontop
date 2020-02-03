@@ -36,18 +36,11 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
     }
 
     public MappingInTransformation addDistinct(MappingInTransformation mapping){
-        return specificationFactory.createMapping(Stream.concat(
-                updateQueries(mapping.getRDFPropertyQueries(), false),
-                updateQueries(mapping.getRDFClassQueries(), true))
-                .collect(ImmutableCollectors.toMap()));
-    }
-
-    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> updateQueries(ImmutableSet<Table.Cell<RDFAtomPredicate,IRI,IQ>> entry, boolean isClass) {
-        return entry.stream()
-                .map(e -> Maps.immutableEntry(
-                        new MappingAssertionIndex(e.getRowKey(),
-                        e.getColumnKey(), isClass),
-                        updateQuery(e.getValue())));
+        return specificationFactory.createMapping(
+                mapping.getAssertions().entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> updateQuery(e.getValue()))));
     }
 
     /**
