@@ -59,13 +59,13 @@ import java.util.stream.Collectors;
 public class SQLPPMappingToR2RMLConverter {
 
     private List<SQLPPTriplesMap> ppMappingAxioms;
-    private PrefixManager prefixmng;
+    private PrefixManager prefixManager;
     private final RDF rdfFactory;
     private final TermFactory termFactory;
 
     public SQLPPMappingToR2RMLConverter(SQLPPMapping ppMapping, RDF rdfFactory, TermFactory termFactory) {
         this.ppMappingAxioms = ppMapping.getTripleMaps();
-        this.prefixmng = ppMapping.getMetadata().getPrefixManager();
+        this.prefixManager = ppMapping.getPrefixManager();
         this.rdfFactory = rdfFactory;
         this.termFactory = termFactory;
     }
@@ -76,7 +76,7 @@ public class SQLPPMappingToR2RMLConverter {
     public Collection<TriplesMap> getTripleMaps() {
         OBDAMappingTransformer transformer = new OBDAMappingTransformer(rdfFactory, termFactory);
         return splitMappingAxioms(this.ppMappingAxioms).stream()
-                .flatMap(a -> transformer.getTriplesMaps(a, prefixmng))
+                .flatMap(a -> transformer.getTriplesMaps(a, prefixManager))
                 .collect(Collectors.toList());
     }
 
@@ -169,7 +169,7 @@ public class SQLPPMappingToR2RMLConverter {
             final Graph graph = new JenaRDF().asJenaGraph(jenaGraph);
 
             final PrefixMapping jenaPrefixMapping = graph.getPrefixMapping();
-            prefixmng.getPrefixMap()
+            prefixManager.getPrefixMap()
                     .forEach((s, s1) ->
                             jenaPrefixMapping.setNsPrefix(
                                     s.substring(0, s.length()-1) // remove the last ":" from the prefix

@@ -10,10 +10,9 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -26,18 +25,18 @@ import java.util.Optional;
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     private final ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap;
-    private final MappingMetadata mappingMetadata;
+    private final PrefixManager prefixManager;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
-                                      @Assisted MappingMetadata mappingMetadata,
+                                      @Assisted PrefixManager prefixManager,
                                       SpecificationFactory specFactory,
                                       UnionBasedQueryMerger queryMerger,
                                       OntopModelSettings settings) {
         this.provenanceMap = provenanceMap;
-        this.mappingMetadata = mappingMetadata;
+        this.prefixManager = prefixManager;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
 
@@ -71,7 +70,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     @Override
-    public Mapping toRegularMapping() {
+    public MappingInTransformation toRegularMapping() {
 
         ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = getMappingAssertions().stream()
                 .collect(ImmutableCollectors.toMap(
@@ -79,7 +78,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                         MappingTools::extractRDFPredicate
                 ));
 
-        return specFactory.createMapping(mappingMetadata,
+        return specFactory.createMapping(
                     extractTable(iqClassificationMap, false),
                     extractTable(iqClassificationMap, true));
     }
@@ -111,8 +110,8 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
 
     @Override
-    public MappingMetadata getMetadata() {
-        return mappingMetadata;
+    public PrefixManager getPrefixManager() {
+        return prefixManager;
     }
 
 }

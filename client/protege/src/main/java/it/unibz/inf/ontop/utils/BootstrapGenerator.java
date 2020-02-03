@@ -108,7 +108,7 @@ public class BootstrapGenerator {
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 
         if (baseURI == null || baseURI.isEmpty()) {
-            baseURI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
+            baseURI = ppMapping.getPrefixManager().getDefaultPrefix();
         }
         else {
             baseURI = DirectMappingEngine.fixBaseURI(baseURI);

@@ -39,9 +39,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
@@ -190,10 +188,7 @@ public class DirectMappingEngine {
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-
-
-            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
-            mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), mappingMetadata);
+            mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), prefixManager);
         }
         else
             mapping = ppMapping.get();
@@ -223,7 +218,7 @@ public class DirectMappingEngine {
 
 	private SQLPPMapping bootstrapMappings(RDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
-			this.baseIRI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
+			this.baseIRI = ppMapping.getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		List<SQLPPTriplesMap> mappingAxioms = new ArrayList<>();
 		Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
@@ -235,7 +230,7 @@ public class DirectMappingEngine {
 		mappings.addAll(ppMapping.getTripleMaps());
 		mappings.addAll(mappingAxioms);
 
-		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getMetadata());
+		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getPrefixManager());
 	}
 
 

@@ -145,12 +145,9 @@ public class MappingTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
+        MappingInTransformation nonNormalizedMapping = MAPPING_FACTORY.createMapping(transformIntoTable(
                 propertyMapBuilder.build()), transformIntoTable(classMap));
-        Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
+        MappingInTransformation normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /*
          * Test whether two mapping assertions share a variable
@@ -209,9 +206,7 @@ public class MappingTest {
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
+        MAPPING_FACTORY.createMapping(ImmutableTable.of(),
                 transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
         );
     }

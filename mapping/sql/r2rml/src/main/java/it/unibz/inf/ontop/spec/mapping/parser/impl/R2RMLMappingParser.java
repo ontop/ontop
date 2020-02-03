@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.atom.TargetAtom;
 import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -96,9 +95,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
             //TODO: try to extract prefixes from the R2RML mappings
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            MappingMetadata mappingMetadata = specificationFactory.createMetadata(prefixManager);
 
-            return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, mappingMetadata);
+            return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, prefixManager);
         } catch (InvalidR2RMLMappingException e) {
             throw new InvalidMappingException(e.getMessage());
         }

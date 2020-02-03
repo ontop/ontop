@@ -126,7 +126,7 @@ public class OBDAModel {
         try {
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
-                    specificationFactory.createMetadata(prefixManager));
+                    prefixManager);
             /**
              * No mapping so should never happen
              */
@@ -149,7 +149,7 @@ public class OBDAModel {
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
-        prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
+        prefixManager.addPrefixes(ppMapping.getPrefixManager().getPrefixMap());
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(

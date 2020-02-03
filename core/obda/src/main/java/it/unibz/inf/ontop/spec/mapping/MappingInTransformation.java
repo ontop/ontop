@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping;
 
-
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
@@ -11,28 +10,12 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
-/**
- * TODO: explain
- *
- * For more complex indexing schemes (and a richer set of methods), feel free to create your own interface/class
- * for your specific needs (e.g. advanced query unfolding)
- *
- * Immutable
- *
- * See SpecificationFactory for creating a new instance.
- *
- */
-public interface Mapping {
-    /**
-     * rdfAtomPredicate indicates if it is a triple, a quad (or something else)
-     */
+public interface MappingInTransformation {
+
+    Mapping getMapping();
+
     Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI);
     Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI);
-
-    /**
-     * TriplePredicate, QuadPredicate, etc.
-     */
-    ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
 
     /**
      * Properties used to define triples, quads, etc.
@@ -46,5 +29,21 @@ public interface Mapping {
      */
     ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
 
+    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
+    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
+
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
+
+    /**
+     * TriplePredicate, QuadPredicate, etc.
+     */
+    ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
+
+    /**
+     * Inserts (and overwrite if necessary) a mapping definition for a pair (IRI, RDFAtomPredicate)
+     *
+     * Returns a new (immutable) Mapping
+     */
+    MappingInTransformation update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateMap,
+                                   ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateMap);
 }

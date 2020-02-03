@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -60,7 +61,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     }
 
     @Override
-    public Mapping convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled) {
+    public MappingInTransformation convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled) {
 
         ImmutableMultimap<IRI, IQ> classes = ontology.getClassAssertions().stream()
                 .collect(ImmutableCollectors.toMultimap(
@@ -97,10 +98,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         LOGGER.debug("Appended {} annotation assertions as fact rules", ontology.getAnnotationAssertions().size());
         LOGGER.debug("Appended {} class assertions from ontology as fact rules", ontology.getClassAssertions().size());
 
-        Mapping a = mappingFactory.createMapping(
-                mappingFactory.createMetadata(
-                        //TODO: parse the ontology prefixes ??
-                        mappingFactory.createPrefixManager(ImmutableMap.of())),
+        MappingInTransformation a = mappingFactory.createMapping(
                 getTableRepresentation(properties),
                 getTableRepresentation(classes));
 

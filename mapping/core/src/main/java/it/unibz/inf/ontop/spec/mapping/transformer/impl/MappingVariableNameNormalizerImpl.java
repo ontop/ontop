@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -44,15 +45,14 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
     }
 
     @Override
-    public Mapping normalize(Mapping mapping) {
+    public MappingInTransformation normalize(MappingInTransformation mapping) {
 
         AtomicInteger i = new AtomicInteger(0);
 
         ImmutableTable<RDFAtomPredicate, IRI, IQ> newPropertyTable = normalize(mapping.getRDFPropertyQueries(), i);
         ImmutableTable<RDFAtomPredicate, IRI, IQ> newClassTable = normalize(mapping.getRDFClassQueries(), i);
 
-        return specificationFactory.createMapping(mapping.getMetadata(),  newPropertyTable,
-                newClassTable);
+        return specificationFactory.createMapping(newPropertyTable, newClassTable);
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> normalize(

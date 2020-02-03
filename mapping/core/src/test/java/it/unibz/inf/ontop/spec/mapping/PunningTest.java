@@ -86,8 +86,7 @@ public class PunningTest {
         ImmutableMap<IRI, IQ> propertyMap = ImmutableMap.of(PROP_IRI, propertyMappingAssertion);
 
 
-        Mapping mapping = SPECIFICATION_FACTORY.createMapping(SPECIFICATION_FACTORY.createMetadata(
-                SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of())),
+        MappingInTransformation mapping = SPECIFICATION_FACTORY.createMapping(
                 transformIntoTable(propertyMap),
                 transformIntoTable(classMap));
 
@@ -99,7 +98,7 @@ public class PunningTest {
 
         LinearInclusionDependencies<AtomPredicate> lids = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
 
-        Mapping result = tmap.getTMappings(mapping,
+        MappingInTransformation result = tmap.getTMappings(mapping,
                 tbox,
                 new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
                 new ImmutableCQContainmentCheckUnderLIDs(lids));

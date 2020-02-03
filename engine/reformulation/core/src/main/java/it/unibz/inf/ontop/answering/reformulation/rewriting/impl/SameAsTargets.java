@@ -33,6 +33,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -61,7 +62,7 @@ public class SameAsTargets {
     /**
      * TODO: Generalise it to quads and so on
      */
-    public static SameAsTargets extract(Mapping mapping) {
+    public static SameAsTargets extract(MappingInTransformation mapping) {
         Optional<RDFAtomPredicate> triplePredicate = mapping.getRDFAtomPredicates().stream()
                 .filter(p -> p instanceof TriplePredicate)
                 .findFirst();
@@ -75,7 +76,7 @@ public class SameAsTargets {
     }
 
 
-    private static ImmutableSet<String> extractSameAsIRITemplates(Mapping mapping, RDFAtomPredicate rdfAtomPredicate) {
+    private static ImmutableSet<String> extractSameAsIRITemplates(MappingInTransformation mapping, RDFAtomPredicate rdfAtomPredicate) {
 
         Optional<IQ> definition = mapping.getRDFPropertyDefinition(rdfAtomPredicate, OWL.SAME_AS);
         return definition
@@ -109,7 +110,7 @@ public class SameAsTargets {
     }
 
     private static SameAsTargets extractSameAsTargets(ImmutableSet<String> sameAsIriTemplates,
-                                                      Mapping mapping,
+                                                      MappingInTransformation mapping,
                                                       RDFAtomPredicate rdfAtomPredicate) {
         if (sameAsIriTemplates.isEmpty())
             return new SameAsTargets(ImmutableSet.of(), ImmutableSet.of());

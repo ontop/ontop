@@ -133,14 +133,12 @@ public class MappingSaturationTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-
-        Mapping mapping = MAPPING_FACTORY.createMapping(mappingMetadata,
+        MappingInTransformation mapping = MAPPING_FACTORY.createMapping(
                 transformIntoTable(ImmutableMap.of(PROP_TEACHES, maTeaches, PROP_GIVES_LAB, maGivesLab, PROP_GIVES_LECTURE, maGivesLecture)),
                 transformIntoTable(ImmutableMap.of()));
 
 
-        Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
+        MappingInTransformation saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
         RDFAtomPredicate triplesPredicate = saturatedMapping.getRDFAtomPredicates().iterator().next();
 
         assertEquals(maGivesLab, saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_GIVES_LAB).get());

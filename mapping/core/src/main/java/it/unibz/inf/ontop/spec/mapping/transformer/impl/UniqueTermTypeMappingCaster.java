@@ -65,7 +65,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .collect(ImmutableCollectors.toMap(
                         e -> transformMappingAssertion(e.getKey()),
                         Map.Entry::getValue));
-        return mappingFactory.create(newProvenanceMap, mapping.getMetadata());
+        return mappingFactory.create(newProvenanceMap, mapping.getPrefixManager());
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion) {

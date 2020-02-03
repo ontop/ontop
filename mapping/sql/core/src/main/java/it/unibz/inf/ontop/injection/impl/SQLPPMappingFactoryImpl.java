@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
@@ -45,14 +45,14 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
      */
     @Override
     public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> ppMappingAxioms,
-                                                     MappingMetadata mappingMetadata)
+                                                     PrefixManager prefixManager)
             throws DuplicateMappingException {
         try {
             /**
              * Instantiation
              */
             Constructor constructor = findFirstConstructor(SQLPPMapping.class);
-            return (SQLPPMapping) constructor.newInstance(ppMappingAxioms, mappingMetadata);
+            return (SQLPPMapping) constructor.newInstance(ppMappingAxioms, prefixManager);
             /**
              * Exception management
              */

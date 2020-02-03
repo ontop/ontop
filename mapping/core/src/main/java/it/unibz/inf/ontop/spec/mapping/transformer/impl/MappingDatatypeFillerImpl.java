@@ -65,7 +65,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
             newProvenanceMapBuilder.put(newIQ, entry.getValue());
         }
 
-        return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getMetadata());
+        return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getPrefixManager());
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)

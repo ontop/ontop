@@ -26,7 +26,7 @@ public interface MappingWithProvenance {
     /**
      * Conversion -> Provenance info is lost in this new data structure
      */
-    Mapping toRegularMapping();
+    MappingInTransformation toRegularMapping();
 
-    MappingMetadata getMetadata();
+    PrefixManager getPrefixManager();
 }

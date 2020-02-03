@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import org.apache.commons.rdf.api.IRI;
@@ -23,11 +23,8 @@ public interface SpecificationFactory {
 
     PrefixManager createPrefixManager(ImmutableMap<String, String> prefixToURIMap);
 
-    MappingMetadata createMetadata(PrefixManager prefixManager);
-
-    Mapping createMapping(MappingMetadata metadata,
-                          @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
-                          @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable);
+    MappingInTransformation createMapping(@Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
+                                          @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable);
 
     OBDASpecification createSpecification(Mapping saturatedMapping, DBMetadata dbMetadata, ClassifiedTBox tBox);
 }

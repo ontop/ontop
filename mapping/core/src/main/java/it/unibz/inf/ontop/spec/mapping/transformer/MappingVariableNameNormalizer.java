@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer;
 
 
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 
 /**
  * Renames variables,
@@ -9,5 +10,5 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
  */
 public interface MappingVariableNameNormalizer {
 
-    Mapping normalize(Mapping mapping);
+    MappingInTransformation normalize(MappingInTransformation mapping);
 }

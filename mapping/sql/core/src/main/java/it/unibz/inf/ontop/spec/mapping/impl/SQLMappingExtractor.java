@@ -131,7 +131,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
             expandedMappingAxioms = expander.getNonExpandableMappings();
 
         try {
-            return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getMetadata());
+            return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getPrefixManager());
         }
         catch (DuplicateMappingException e) {
             // Internal bug

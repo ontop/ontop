@@ -4,18 +4,19 @@ package it.unibz.inf.ontop.spec.impl;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 
 public class MappingAndDBMetadataImpl implements MappingExtractor.MappingAndDBMetadata {
-    private final Mapping mapping;
+    private final MappingInTransformation mapping;
     private final DBMetadata dbMetadata;
 
-    public MappingAndDBMetadataImpl(Mapping mapping, DBMetadata dbMetadata) {
+    public MappingAndDBMetadataImpl(MappingInTransformation mapping, DBMetadata dbMetadata) {
         this.mapping = mapping;
         this.dbMetadata = dbMetadata;
     }
 
     @Override
-    public Mapping getMapping() {
+    public MappingInTransformation getMapping() {
         return mapping;
     }
 

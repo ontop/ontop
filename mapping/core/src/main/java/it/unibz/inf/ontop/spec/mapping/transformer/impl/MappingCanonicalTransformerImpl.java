@@ -92,7 +92,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                                 ),
                                 Map.Entry::getValue
                         )),
-                mapping.getMetadata()
+                mapping.getPrefixManager()
         );
     }
 

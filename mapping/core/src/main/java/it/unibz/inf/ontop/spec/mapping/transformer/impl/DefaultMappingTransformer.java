@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -50,11 +51,11 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(Mapping mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
+    public OBDASpecification transform(MappingInTransformation mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
         if (ontology.isPresent()) {
-            Mapping factsAsMapping = factConverter.convert(ontology.get().abox(),
+            MappingInTransformation factsAsMapping = factConverter.convert(ontology.get().abox(),
                     settings.isOntologyAnnotationQueryingEnabled());
-            Mapping mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
+            MappingInTransformation mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
             return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
         }
         else {
@@ -63,16 +64,16 @@ public class DefaultMappingTransformer implements MappingTransformer {
         }
     }
 
-    OBDASpecification createSpecification(Mapping mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
-        Mapping sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        Mapping saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
-        Mapping normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+    OBDASpecification createSpecification(MappingInTransformation mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
+        MappingInTransformation sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
+        MappingInTransformation saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
+        MappingInTransformation normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
-        Mapping finalMapping = settings.getCardinalityPreservationMode() == LOOSE
+        MappingInTransformation finalMapping = settings.getCardinalityPreservationMode() == LOOSE
                 ? normalizedMapping
                 : mappingDistinctTransformer.addDistinct(normalizedMapping);
 
-        return specificationFactory.createSpecification(finalMapping, dbMetadata, tbox);
+        return specificationFactory.createSpecification(finalMapping.getMapping(), dbMetadata, tbox);
     }
 }

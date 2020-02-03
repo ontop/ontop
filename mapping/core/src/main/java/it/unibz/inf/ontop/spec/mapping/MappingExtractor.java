@@ -18,7 +18,7 @@ public interface MappingExtractor {
      * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
      */
     interface MappingAndDBMetadata {
-        Mapping getMapping();
+        MappingInTransformation getMapping();
         DBMetadata getDBMetadata();
     }
 

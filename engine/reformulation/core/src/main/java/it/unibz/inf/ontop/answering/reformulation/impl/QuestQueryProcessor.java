@@ -64,12 +64,12 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
 
-		if(log.isDebugEnabled()){
-			log.debug("Mapping: \n{}", Joiner.on("\n").join(
-					saturatedMapping.getRDFAtomPredicates().stream()
-						.flatMap(p -> saturatedMapping.getQueries(p).stream())
-						.iterator()));
-		}
+//		if(log.isDebugEnabled()){
+//			log.debug("Mapping: \n{}", Joiner.on("\n").join(
+//					saturatedMapping.getRDFAtomPredicates().stream()
+//						.flatMap(p -> saturatedMapping.getQueries(p).stream())
+//						.iterator()));
+//		}
 		this.queryUnfolder = translationFactory.create(saturatedMapping);
 
 		this.dbMetadata = obdaSpecification.getDBMetadata();

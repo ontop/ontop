@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -46,7 +46,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
     }
 
     @Override
-    public Mapping rewrite(Mapping mapping) {
+    public MappingInTransformation rewrite(MappingInTransformation mapping) {
         if (!enabled)
             return mapping;
 

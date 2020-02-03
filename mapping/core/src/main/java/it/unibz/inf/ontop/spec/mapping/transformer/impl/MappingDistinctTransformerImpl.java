@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -31,9 +32,8 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         this.iqFactory = iqFactory;
     }
 
-    public Mapping addDistinct(Mapping mapping){
+    public MappingInTransformation addDistinct(MappingInTransformation mapping){
         return specificationFactory.createMapping(
-                mapping.getMetadata(),
                 updateQueries(mapping.getRDFPropertyQueries()),
                 updateQueries(mapping.getRDFClassQueries())
         );
