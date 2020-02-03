@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -72,7 +73,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     @Override
     public MappingInTransformation toRegularMapping() {
 
-        ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap = getMappingAssertions().stream()
+        ImmutableMap<IQ, MappingAssertionIndex> iqClassificationMap = getMappingAssertions().stream()
                 .collect(ImmutableCollectors.toMap(
                         iq -> iq,
                         MappingTools::extractRDFPredicate
@@ -84,7 +85,7 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
-            ImmutableMap<IQ, MappingTools.RDFPredicateInfo> iqClassificationMap, boolean isClass) {
+            ImmutableMap<IQ, MappingAssertionIndex> iqClassificationMap, boolean isClass) {
 
         ImmutableMultimap<Map.Entry<RDFAtomPredicate, IRI>, IQ> multimap = iqClassificationMap.entrySet().stream()
                 .filter(e -> e.getValue().isClass() == isClass)

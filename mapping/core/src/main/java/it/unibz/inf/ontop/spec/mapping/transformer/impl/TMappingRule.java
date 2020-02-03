@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 
 public class TMappingRule {
 
-	private final MappingTools.RDFPredicateInfo predicateInfo;
+	private final MappingAssertionIndex predicateInfo;
 
 	private final DistinctVariableOnlyDataAtom projectionAtom;
 	private final ImmutableSubstitution<ImmutableTerm> substitution;
@@ -90,7 +91,7 @@ public class TMappingRule {
 	}
 
 
-	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingTools.RDFPredicateInfo predicateInfo, TMappingRule baseRule, SubstitutionFactory substitutionFactory) {
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingAssertionIndex predicateInfo, TMappingRule baseRule, SubstitutionFactory substitutionFactory) {
         this.termFactory = baseRule.termFactory;
 
 		this.predicateInfo = predicateInfo;
@@ -126,7 +127,7 @@ public class TMappingRule {
 
 
 
-	public MappingTools.RDFPredicateInfo getPredicateInfo() { return predicateInfo; }
+	public MappingAssertionIndex getPredicateInfo() { return predicateInfo; }
 
 
 	public IQ asIQ(IntermediateQueryFactory iqFactory) {

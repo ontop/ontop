@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingMerger;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -47,10 +47,10 @@ public class MappingMergerImpl implements MappingMerger {
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingTables(ImmutableSet<MappingInTransformation> mappings, Function<MappingInTransformation, ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>>> extractor, boolean isClass) {
 
-        ImmutableMap<MappingTools.RDFPredicateInfo, Collection<IQ>> multiTable = mappings.stream()
+        ImmutableMap<MappingAssertionIndex, Collection<IQ>> multiTable = mappings.stream()
                 .flatMap(m -> extractor.apply(m).stream()
                         .map(c -> Maps.immutableEntry(
-                                new MappingTools.RDFPredicateInfo(c.getRowKey(), c.getColumnKey(), isClass),
+                                new MappingAssertionIndex(c.getRowKey(), c.getColumnKey(), isClass),
                                 c.getValue())))
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();

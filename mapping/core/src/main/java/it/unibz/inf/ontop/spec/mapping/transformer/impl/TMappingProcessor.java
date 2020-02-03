@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -34,11 +33,10 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -97,14 +95,14 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> source = mapping.getRDFAtomPredicates().stream()
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.getRDFAtomPredicates().stream()
                 .flatMap(p -> mapping.getQueries(p).stream())
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .map(q -> new TMappingRule(q, termFactory, atomFactory))
                 .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
-        ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
+        ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
                         this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, (r, p) -> !p.isInverse() || p.getInverse() != r),
@@ -147,13 +145,13 @@ public class TMappingProcessor {
                 noNullValueEnforcer.transform(e.asIQ(iqFactory, queryMerger)).normalizeForOptimization());
     }
 
-    private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
-                                                                                         Predicate<T> representativeFilter,
-                                                                                         ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
-                                                                                         java.util.function.BiFunction<RDFAtomPredicate, T, MappingTools.RDFPredicateInfo> indexOf,
-                                                                                         java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
-                                                                                         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
-                                                                                         BiPredicate<T, T> populationFilter) {
+    private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
+                                                                                 Predicate<T> representativeFilter,
+                                                                                 ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
+                                                                                 java.util.function.BiFunction<RDFAtomPredicate, T, MappingAssertionIndex> indexOf,
+                                                                                 java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
+                                                                                 ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
+                                                                                 BiPredicate<T, T> populationFilter) {
 
 	    if (originalMappingIndex.keySet().isEmpty())
 	        return Stream.empty();
@@ -163,7 +161,7 @@ public class TMappingProcessor {
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(rdfTriple, d), m, substitutionFactory));
 
-	    ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> representatives = dag.stream()
+	    ImmutableMap<MappingAssertionIndex, TMappingEntry> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
                         s -> indexOf.apply(rdfTriple, s.getRepresentative()),
@@ -188,21 +186,21 @@ public class TMappingProcessor {
                 .filter(e -> !e.getValue().isEmpty());
     }
 
-	private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, ClassExpression child) {
+	private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, ClassExpression child) {
         if (child instanceof OClass)
-            return new MappingTools.RDFPredicateInfo(rdfAtomPredicate, ((OClass) child).getIRI(), true);
+            return new MappingAssertionIndex(rdfAtomPredicate, ((OClass) child).getIRI(), true);
         else if (child instanceof ObjectSomeValuesFrom)
             return indexOf(rdfAtomPredicate, ((ObjectSomeValuesFrom) child).getProperty());
         else
             return indexOf(rdfAtomPredicate, ((DataSomeValuesFrom) child).getProperty());
     }
 
-    private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, ObjectPropertyExpression child) {
-        return new MappingTools.RDFPredicateInfo(rdfAtomPredicate,child.getIRI(), false);
+    private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, ObjectPropertyExpression child) {
+        return new MappingAssertionIndex(rdfAtomPredicate,child.getIRI(), false);
     }
 
-    private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, DataPropertyExpression child) {
-        return new MappingTools.RDFPredicateInfo(rdfAtomPredicate, child.getIRI(), false);
+    private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, DataPropertyExpression child) {
+        return new MappingAssertionIndex(rdfAtomPredicate, child.getIRI(), false);
     }
 
     private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
@@ -21,7 +22,7 @@ import java.util.function.Function;
  */
 public class MappingTools {
 
-    public static RDFPredicateInfo extractRDFPredicate(IQ mappingAssertion) {
+    public static MappingAssertionIndex extractRDFPredicate(IQ mappingAssertion) {
         DistinctVariableOnlyDataAtom projectionAtom = mappingAssertion.getProjectionAtom();
         RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())
                 .filter(p -> p instanceof RDFAtomPredicate)
@@ -37,8 +38,8 @@ public class MappingTools {
         IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
 
         return propertyIRI.equals(RDF.TYPE)
-                ? new RDFPredicateInfo(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI), true)
-                : new RDFPredicateInfo(rdfAtomPredicate, propertyIRI, false);
+                ? new MappingAssertionIndex(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI), true)
+                : new MappingAssertionIndex(rdfAtomPredicate, propertyIRI, false);
     }
 
     private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,
@@ -62,48 +63,8 @@ public class MappingTools {
 
 
     private static class MappingPredicateIRIExtractionException extends OntopInternalBugException {
-
         private MappingPredicateIRIExtractionException(String message) {
             super("Internal bug: " + message);
         }
     }
-
-    public static class RDFPredicateInfo {
-        private final boolean isClass;
-        private final IRI iri;
-        private final RDFAtomPredicate predicate;
-
-        public RDFPredicateInfo(RDFAtomPredicate predicate, IRI iri, boolean isClass) {
-            this.predicate = predicate;
-            this.iri = iri;
-            this.isClass = isClass;
-        }
-
-        public boolean isClass() {
-            return isClass;
-        }
-
-        public IRI getIri() {
-            return iri;
-        }
-
-        public RDFAtomPredicate getPredicate() { return predicate; }
-
-        @Override
-        public int hashCode() { return iri.hashCode() ^ predicate.hashCode(); }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof RDFPredicateInfo) {
-                RDFPredicateInfo other = (RDFPredicateInfo)o;
-                return predicate.equals(other.predicate) && iri.equals(other.iri) && isClass == other.isClass;
-            }
-            return false;
-        }
-
-        @Override
-        public String toString() { return predicate + ":" + (isClass ? "C/" : "P/") + iri; }
-    }
-
-
 }

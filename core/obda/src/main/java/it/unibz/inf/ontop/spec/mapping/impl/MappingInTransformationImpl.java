@@ -21,6 +21,7 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
     private final SpecificationFactory specificationFactory;
 
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
+
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
 

@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class TMappingEntry {
     }
 
     // ASSUMES NON-EMPTINESS
-    public MappingTools.RDFPredicateInfo getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
+    public MappingAssertionIndex getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
 
     public RDFAtomPredicate getRDFAtomPredicate() { return rules.iterator().next().getRDFAtomPredicate(); }
 

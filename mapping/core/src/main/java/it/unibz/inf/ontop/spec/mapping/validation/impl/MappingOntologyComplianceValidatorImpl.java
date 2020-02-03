@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
@@ -71,7 +72,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
 
-        MappingTools.RDFPredicateInfo predicateClassification = MappingTools.extractRDFPredicate(mappingAssertion);
+        MappingAssertionIndex predicateClassification = MappingTools.extractRDFPredicate(mappingAssertion);
 
         Optional<RDFTermType> tripleObjectType = predicateClassification.isClass()
                 ? Optional.empty()
