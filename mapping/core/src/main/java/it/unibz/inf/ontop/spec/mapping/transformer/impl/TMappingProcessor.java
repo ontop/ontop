@@ -102,7 +102,7 @@ public class TMappingProcessor {
                 .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
                 .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                 .map(q -> new TMappingRule(q, termFactory, atomFactory))
-                .collect(ImmutableCollectors.toMultimap(q -> q.getPredicateInfo(), q -> q));
+                .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
         ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
@@ -150,54 +150,59 @@ public class TMappingProcessor {
     private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                                                          Predicate<T> representativeFilter,
                                                                                          ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
-                                                                                         java.util.function.Function<T, MappingTools.RDFPredicateInfo> indexOf,
+                                                                                         java.util.function.BiFunction<RDFAtomPredicate, T, MappingTools.RDFPredicateInfo> indexOf,
                                                                                          java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
                                                                                          ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
                                                                                          BiPredicate<T, T> populationFilter) {
 
+	    if (originalMappingIndex.keySet().isEmpty())
+	        return Stream.empty();
+
+        RDFAtomPredicate rdfTriple = originalMappingIndex.keySet().iterator().next().getPredicate();
+
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(rdfTriple, d), m, substitutionFactory));
 
 	    ImmutableMap<MappingTools.RDFPredicateInfo, TMappingEntry> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
-                        s -> indexOf.apply(s.getRepresentative()),
+                        s -> indexOf.apply(rdfTriple, s.getRepresentative()),
                         s -> dag.getSub(s).stream()
                                 .flatMap(ss -> ss.getMembers().stream())
-                                .flatMap(d -> originalMappingIndex.get(indexOf.apply(d)).stream()
+                                .flatMap(d -> originalMappingIndex.get(indexOf.apply(rdfTriple, d)).stream()
                                         .map(headReplacer.apply(d, s.getRepresentative())))
                                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
 
         java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms()), indexOf.apply(rdfTriple, d), m, substitutionFactory));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .flatMap(s -> s.getMembers().stream()
                     .filter(d -> populationFilter.test(s.getRepresentative(), d))
                     .collect(ImmutableCollectors.toMap(
-                            d -> indexOf.apply(d),
-                            d -> representatives.get(indexOf.apply(s.getRepresentative()))
+                            d -> indexOf.apply(rdfTriple, d),
+                            d -> representatives.get(indexOf.apply(rdfTriple, s.getRepresentative()))
                                     .createCopy(headReplacer2.apply(s.getRepresentative(), d))))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
 
-	private MappingTools.RDFPredicateInfo indexOf(ClassExpression child) {
+	private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, ClassExpression child) {
         if (child instanceof OClass)
-            return new MappingTools.RDFPredicateInfo(true, ((OClass) child).getIRI());
+            return new MappingTools.RDFPredicateInfo(rdfAtomPredicate, ((OClass) child).getIRI(), true);
         else if (child instanceof ObjectSomeValuesFrom)
-            return indexOf(((ObjectSomeValuesFrom) child).getProperty());
+            return indexOf(rdfAtomPredicate, ((ObjectSomeValuesFrom) child).getProperty());
         else
-            return indexOf(((DataSomeValuesFrom) child).getProperty());
+            return indexOf(rdfAtomPredicate, ((DataSomeValuesFrom) child).getProperty());
     }
 
-    private MappingTools.RDFPredicateInfo indexOf(ObjectPropertyExpression child) {
-        return new MappingTools.RDFPredicateInfo(false, child.getIRI());
+    private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, ObjectPropertyExpression child) {
+        return new MappingTools.RDFPredicateInfo(rdfAtomPredicate,child.getIRI(), false);
     }
 
-    private MappingTools.RDFPredicateInfo indexOf(DataPropertyExpression child) {
-        return new MappingTools.RDFPredicateInfo(false, child.getIRI());
+    private MappingTools.RDFPredicateInfo indexOf(RDFAtomPredicate rdfAtomPredicate, DataPropertyExpression child) {
+        return new MappingTools.RDFPredicateInfo(rdfAtomPredicate, child.getIRI(), false);
     }
 
     private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {

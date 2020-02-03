@@ -37,8 +37,8 @@ public class MappingTools {
         IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
 
         return propertyIRI.equals(RDF.TYPE)
-                ? new RDFPredicateInfo(true, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
-                : new RDFPredicateInfo(false, propertyIRI);
+                ? new RDFPredicateInfo(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI), true)
+                : new RDFPredicateInfo(rdfAtomPredicate, propertyIRI, false);
     }
 
     private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,
@@ -71,10 +71,12 @@ public class MappingTools {
     public static class RDFPredicateInfo {
         private final boolean isClass;
         private final IRI iri;
+        private final RDFAtomPredicate predicate;
 
-        public RDFPredicateInfo(boolean isClass, IRI iri) {
-            this.isClass = isClass;
+        public RDFPredicateInfo(RDFAtomPredicate predicate, IRI iri, boolean isClass) {
+            this.predicate = predicate;
             this.iri = iri;
+            this.isClass = isClass;
         }
 
         public boolean isClass() {
@@ -85,20 +87,22 @@ public class MappingTools {
             return iri;
         }
 
+        public RDFAtomPredicate getPredicate() { return predicate; }
+
         @Override
-        public int hashCode() { return iri.hashCode(); }
+        public int hashCode() { return iri.hashCode() ^ predicate.hashCode(); }
 
         @Override
         public boolean equals(Object o) {
             if (o instanceof RDFPredicateInfo) {
                 RDFPredicateInfo other = (RDFPredicateInfo)o;
-                return iri.equals(other.iri) && isClass == other.isClass;
+                return predicate.equals(other.predicate) && iri.equals(other.iri) && isClass == other.isClass;
             }
             return false;
         }
 
         @Override
-        public String toString() { return (isClass ? "C/" : "P/") + iri; }
+        public String toString() { return predicate + ":" + (isClass ? "C/" : "P/") + iri; }
     }
 
 
