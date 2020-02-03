@@ -95,12 +95,11 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.getRDFAtomPredicates().stream()
-                .flatMap(p -> mapping.getQueries(p).stream())
-                .flatMap(q -> unionSplitter.splitUnion(unionNormalizer.optimize(q)))
-                .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                .map(q -> new TMappingRule(q, termFactory, atomFactory))
-                .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.getAssertions().entrySet().stream()
+                .flatMap(e -> unionSplitter.splitUnion(unionNormalizer.optimize(e.getValue()))
+                        .map(q -> Maps.immutableEntry(e.getKey(),
+                                new TMappingRule(e.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory))))
+                .collect(ImmutableCollectors.toMultimap());
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),

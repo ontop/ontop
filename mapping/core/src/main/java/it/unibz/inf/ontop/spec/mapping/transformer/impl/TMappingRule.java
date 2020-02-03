@@ -35,10 +35,10 @@ public class TMappingRule {
 
 	private final TermFactory termFactory;
 
-	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
+	public TMappingRule(MappingAssertionIndex predicateInfo, IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
 		this.termFactory = termFactory;
 
-		this.predicateInfo = MappingTools.extractRDFPredicate(iq);
+		this.predicateInfo = predicateInfo;
 		this.projectionAtom = iq.getProjectionAtom();
 		this.substitution = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution();
 

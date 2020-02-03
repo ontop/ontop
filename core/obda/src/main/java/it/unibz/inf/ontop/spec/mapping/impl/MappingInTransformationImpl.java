@@ -25,12 +25,16 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
 
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
+    private final ImmutableMap<MappingAssertionIndex, IQ> assertions;
 
     @AssistedInject
     private MappingInTransformationImpl(
                         @Assisted ImmutableMap<MappingAssertionIndex, IQ> assertions,
                         OntopModelSettings settings,
                         SpecificationFactory specificationFactory) {
+
+        this.assertions = assertions;
+
         this.propertyDefinitions = assertions.entrySet().stream()
                 .filter(e -> !e.getKey().isClass())
                 .map(e -> Tables.immutableCell(
@@ -48,24 +52,16 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
         this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
-            for (IQ query : propertyDefinitions.values()) {
-                checkNullableVariables(query);
-            }
-            for (IQ query : classDefinitions.values()) {
-                checkNullableVariables(query);
+            for (IQ query : assertions.values()) {
+                VariableNullability variableNullability = query.getTree().getVariableNullability();
+                if (!variableNullability.getNullableGroups().isEmpty())
+                    throw new NullableVariableInMappingException(query, variableNullability.getNullableGroups());
             }
         }
 
         rdfAtomPredicates = Sets.union(propertyDefinitions.rowKeySet(), classDefinitions.rowKeySet())
                 .immutableCopy();
     }
-
-    private static void checkNullableVariables(IQ query) throws NullableVariableInMappingException {
-        VariableNullability variableNullability = query.getTree().getVariableNullability();
-        if (!variableNullability.getNullableGroups().isEmpty())
-            throw new NullableVariableInMappingException(query, variableNullability.getNullableGroups());
-    }
-
 
     @Override
     public Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI) {
@@ -93,10 +89,8 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
 
 
     @Override
-    public ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate) {
-        return Stream.concat(classDefinitions.row(rdfAtomPredicate).values().stream(),
-                propertyDefinitions.row(rdfAtomPredicate).values().stream())
-                .collect(ImmutableCollectors.toList());
+    public ImmutableMap<MappingAssertionIndex, IQ> getAssertions() {
+        return assertions;
     }
 
     @Override

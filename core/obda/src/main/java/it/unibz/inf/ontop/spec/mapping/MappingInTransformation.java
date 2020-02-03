@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Table;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import org.apache.commons.rdf.api.IRI;
@@ -20,7 +17,7 @@ public interface MappingInTransformation {
     ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
     ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
 
-    ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
+    ImmutableMap<MappingAssertionIndex, IQ> getAssertions();
 
     /**
      * TriplePredicate, QuadPredicate, etc.
@@ -28,9 +25,9 @@ public interface MappingInTransformation {
     ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
 
     /**
-     * Inserts (and overwrite if necessary) a mapping definition for a pair (IRI, RDFAtomPredicate)
+     * Inserts (and overwrites if necessary) a mapping definition for a pair (IRI, RDFAtomPredicate)
      *
-     * Returns a new (immutable) Mapping
+     * Returns a new (immutable) MappingInTransformation
      */
     MappingInTransformation update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateMap,
                                    ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateMap);

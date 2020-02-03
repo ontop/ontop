@@ -224,12 +224,4 @@ public class MappingTest {
     private IRIConstant getConstantIRI(IRI iri) {
         return TERM_FACTORY.getConstantIRI(iri);
     }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-    }
 }

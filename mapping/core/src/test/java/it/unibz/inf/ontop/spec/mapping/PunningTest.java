@@ -106,13 +106,4 @@ public class PunningTest {
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getIRIFunctionalTerm(IRI_TEMPLATE_1, ImmutableList.of(argument));
     }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-    }
-
 }
