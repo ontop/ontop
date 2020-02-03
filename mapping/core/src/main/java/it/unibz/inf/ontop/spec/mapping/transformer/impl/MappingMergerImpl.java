@@ -9,14 +9,12 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingMerger;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class MappingMergerImpl implements MappingMerger {
 
@@ -41,80 +39,29 @@ public class MappingMergerImpl implements MappingMerger {
             throw new IllegalArgumentException("The set of mappings is assumed to be nonempty");
         }
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = mergeMappingPropertyTables(mappings);
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = mergeMappingClassTables(mappings);
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = mergeMappingTables(mappings, MappingInTransformation::getRDFPropertyQueries, false);
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = mergeMappingTables(mappings, MappingInTransformation::getRDFClassQueries, true);
 
         return specificationFactory.createMapping(propertyTable, classTable);
     }
-/*
-    private PrefixManager mergePrefixManagers(ImmutableSet<MappingInTransformation> mappings) {
-        ImmutableMap<String, Collection<String>> prefixToUris = mappings.stream()
-                .flatMap(m -> m.getPrefixManager().getPrefixMap().entrySet().stream())
+
+    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingTables(ImmutableSet<MappingInTransformation> mappings, Function<MappingInTransformation, ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>>> extractor, boolean isClass) {
+
+        ImmutableMap<MappingTools.RDFPredicateInfo, Collection<IQ>> multiTable = mappings.stream()
+                .flatMap(m -> extractor.apply(m).stream()
+                        .map(c -> Maps.immutableEntry(
+                                new MappingTools.RDFPredicateInfo(c.getRowKey(), c.getColumnKey(), isClass),
+                                c.getValue())))
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
-        ImmutableMap<String, String> prefixToUri = prefixToUris.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> flattenURIList(e.getKey(), e.getValue())
-                ));
-        return new SimplePrefixManager(prefixToUri);
-    }
-
-    private String flattenURIList(String prefix, Collection<String> uris) {
-        if (ImmutableSet.copyOf(uris).size() == 1) {
-            return uris.iterator().next();
-        }
-        throw new MappingMergingException("Conflicting URIs for prefix " + prefix + ": " + uris);
-    }
-*/
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingPropertyTables(ImmutableSet<MappingInTransformation> mappings) {
-
-        ImmutableMap<Map.Entry<RDFAtomPredicate, IRI>, Collection<IQ>> multiTable = mappings.stream()
-                .flatMap(m -> extractCellStream(m,
-                        p -> m.getRDFProperties(p).stream(),
-                        (p, i) -> m.getRDFPropertyDefinition(p, i).get()))
-                .collect(ImmutableCollectors.toMultimap(
-                        c -> Maps.immutableEntry(c.getRowKey(), c.getColumnKey()),
-                        Table.Cell::getValue))
-                .asMap();
-
         return multiTable.entrySet().stream()
                 .map(e -> Tables.immutableCell(
-                        e.getKey().getKey(),
-                        e.getKey().getValue(),
-                        queryMerger.mergeDefinitions((e.getValue()))
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        queryMerger.mergeDefinitions(e.getValue())
                                 .orElseThrow(() -> new MappingMergingException("The query should be present"))))
                 .collect(ImmutableCollectors.toTable());
     }
 
-    private Stream<Table.Cell<RDFAtomPredicate, IRI, IQ>> extractCellStream(
-            MappingInTransformation m,
-            Function<RDFAtomPredicate, Stream<IRI>> iriExtractor,
-            BiFunction<RDFAtomPredicate, IRI, IQ> iqExtractor) {
-
-        return m.getRDFAtomPredicates().stream()
-                .flatMap(p -> iriExtractor.apply(p)
-                            .map(i -> Tables.immutableCell(p, i, iqExtractor.apply(p, i))));
-    }
-
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingClassTables(ImmutableSet<MappingInTransformation> mappings) {
-
-        ImmutableMap<Map.Entry<RDFAtomPredicate, IRI>, Collection<IQ>> multiTable = mappings.stream()
-                .flatMap(m -> extractCellStream(m,
-                        p -> m.getRDFClasses(p).stream(),
-                        (p, i) -> m.getRDFClassDefinition(p, i).get()))
-                .collect(ImmutableCollectors.toMultimap(
-                        c -> Maps.immutableEntry(c.getRowKey(), c.getColumnKey()),
-                        Table.Cell::getValue))
-                .asMap();
-
-        return multiTable.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        e.getKey().getKey(),
-                        e.getKey().getValue(),
-                        queryMerger.mergeDefinitions((e.getValue()))
-                                .orElseThrow(() -> new MappingMergingException("The query should be present"))))
-                .collect(ImmutableCollectors.toTable());
-    }
 }

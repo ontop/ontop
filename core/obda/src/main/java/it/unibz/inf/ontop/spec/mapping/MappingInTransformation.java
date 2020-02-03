@@ -17,18 +17,6 @@ public interface MappingInTransformation {
     Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI);
     Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI);
 
-    /**
-     * Properties used to define triples, quads, etc.
-     *
-     * Does NOT contain rdf:type
-     */
-    ImmutableSet<IRI> getRDFProperties(RDFAtomPredicate rdfAtomPredicate);
-
-    /**
-     * Classes used to define triples, quads, etc.
-     */
-    ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
-
     ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
     ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
 

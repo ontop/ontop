@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 public class MappingInTransformationImpl implements MappingInTransformation  {
 
     private final SpecificationFactory specificationFactory;
+
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
@@ -60,20 +61,6 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
     @Override
     public Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI) {
         return Optional.ofNullable(classDefinitions.get(rdfAtomPredicate, classIRI));
-    }
-
-    @Override
-    public ImmutableSet<IRI> getRDFProperties(RDFAtomPredicate rdfAtomPredicate) {
-        return Optional.ofNullable(propertyDefinitions.rowMap().get(rdfAtomPredicate))
-                .map(m -> ImmutableSet.copyOf(m.keySet()))
-                .orElseGet(ImmutableSet::of);
-    }
-
-    @Override
-    public ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate) {
-        return Optional.ofNullable(classDefinitions.rowMap().get(rdfAtomPredicate))
-                .map(m -> ImmutableSet.copyOf(m.keySet()))
-                .orElseGet(ImmutableSet::of);
     }
 
     @Override
