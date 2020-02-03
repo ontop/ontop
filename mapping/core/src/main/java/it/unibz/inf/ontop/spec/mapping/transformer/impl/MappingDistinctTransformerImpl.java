@@ -12,13 +12,16 @@ import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class MappingDistinctTransformerImpl implements MappingDistinctTransformer {
 
@@ -33,19 +36,18 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
     }
 
     public MappingInTransformation addDistinct(MappingInTransformation mapping){
-        return specificationFactory.createMapping(
-                updateQueries(mapping.getRDFPropertyQueries()),
-                updateQueries(mapping.getRDFClassQueries())
-        );
+        return specificationFactory.createMapping(Stream.concat(
+                updateQueries(mapping.getRDFPropertyQueries(), false),
+                updateQueries(mapping.getRDFClassQueries(), true))
+                .collect(ImmutableCollectors.toMap()));
     }
 
-    private ImmutableTable<RDFAtomPredicate,IRI,IQ> updateQueries(ImmutableSet<Table.Cell<RDFAtomPredicate,IRI,IQ>> entry) {
+    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> updateQueries(ImmutableSet<Table.Cell<RDFAtomPredicate,IRI,IQ>> entry, boolean isClass) {
         return entry.stream()
-                .map(e -> Tables.immutableCell(
-                        e.getRowKey(),
-                        e.getColumnKey(),
-                        updateQuery(e.getValue())))
-                .collect(ImmutableCollectors.toTable());
+                .map(e -> Maps.immutableEntry(
+                        new MappingAssertionIndex(e.getRowKey(),
+                        e.getColumnKey(), isClass),
+                        updateQuery(e.getValue())));
     }
 
     /**

@@ -15,6 +15,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class MappingMergerImpl implements MappingMerger {
 
@@ -42,7 +43,18 @@ public class MappingMergerImpl implements MappingMerger {
         ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable = mergeMappingTables(mappings, MappingInTransformation::getRDFPropertyQueries, false);
         ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable = mergeMappingTables(mappings, MappingInTransformation::getRDFClassQueries, true);
 
-        return specificationFactory.createMapping(propertyTable, classTable);
+        return specificationFactory.createMapping(Stream.concat(
+                propertyTable.cellSet().stream()
+                        .map(e ->
+                                Maps.immutableEntry(
+                                        new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), false),
+                                        e.getValue())),
+                classTable.cellSet().stream()
+                        .map(e ->
+                                Maps.immutableEntry(
+                                        new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), true),
+                                        e.getValue())))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> mergeMappingTables(ImmutableSet<MappingInTransformation> mappings, Function<MappingInTransformation, ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>>> extractor, boolean isClass) {

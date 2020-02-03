@@ -73,34 +73,12 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     @Override
     public MappingInTransformation toRegularMapping() {
 
-        ImmutableMap<IQ, MappingAssertionIndex> iqClassificationMap = getMappingAssertions().stream()
-                .collect(ImmutableCollectors.toMap(
-                        iq -> iq,
-                        MappingTools::extractRDFPredicate
-                ));
+        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = getMappingAssertions().stream()
+                .collect(ImmutableCollectors.toMultimap(MappingTools::extractRDFPredicate, iq -> iq))
+                .asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> mergeDefinitions(e.getValue())));
 
-        return specFactory.createMapping(
-                    extractTable(iqClassificationMap, false),
-                    extractTable(iqClassificationMap, true));
-    }
-
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> extractTable(
-            ImmutableMap<IQ, MappingAssertionIndex> iqClassificationMap, boolean isClass) {
-
-        ImmutableMultimap<Map.Entry<RDFAtomPredicate, IRI>, IQ> multimap = iqClassificationMap.entrySet().stream()
-                .filter(e -> e.getValue().isClass() == isClass)
-                .collect(ImmutableCollectors.toMultimap(
-                        e -> Maps.immutableEntry(
-                                (RDFAtomPredicate) e.getKey().getProjectionAtom().getPredicate(),
-                                e.getValue().getIri()),
-                        Map.Entry::getKey));
-
-        return multimap.asMap().entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        e.getKey().getKey(),
-                        e.getKey().getValue(),
-                        mergeDefinitions(e.getValue())))
-                .collect(ImmutableCollectors.toTable());
+        return specFactory.createMapping(iqClassificationMap);
     }
 
     private IQ mergeDefinitions(Collection<IQ> assertions) {

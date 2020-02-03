@@ -145,8 +145,15 @@ public class MappingTest {
         /*
          * Renaming
          */
-        MappingInTransformation nonNormalizedMapping = MAPPING_FACTORY.createMapping(transformIntoTable(
-                propertyMapBuilder.build()), transformIntoTable(classMap));
+        final RDFAtomPredicate tp = rdfAtomPredicate;
+        MappingInTransformation nonNormalizedMapping = MAPPING_FACTORY.createMapping(Stream.concat(
+                propertyMapBuilder.build().entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                new MappingAssertionIndex(tp, e.getKey(), false), e.getValue())),
+                classMap.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                new MappingAssertionIndex(tp, e.getKey(), true), e.getValue())))
+                .collect(ImmutableCollectors.toMap()));
         MappingInTransformation normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /*
@@ -206,9 +213,8 @@ public class MappingTest {
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        MAPPING_FACTORY.createMapping(ImmutableTable.of(),
-                transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
-        );
+        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
+        MAPPING_FACTORY.createMapping(ImmutableMap.of(new MappingAssertionIndex(tp, CLASS_1, true), mappingAssertion));
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

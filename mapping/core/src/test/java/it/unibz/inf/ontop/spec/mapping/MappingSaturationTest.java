@@ -133,10 +133,11 @@ public class MappingSaturationTest {
         /*
          * Renaming
          */
+        RDFAtomPredicate tp = (RDFAtomPredicate)spoAtom.getPredicate();
         MappingInTransformation mapping = MAPPING_FACTORY.createMapping(
-                transformIntoTable(ImmutableMap.of(PROP_TEACHES, maTeaches, PROP_GIVES_LAB, maGivesLab, PROP_GIVES_LECTURE, maGivesLecture)),
-                transformIntoTable(ImmutableMap.of()));
-
+                ImmutableMap.of(new MappingAssertionIndex(tp, PROP_TEACHES, false), maTeaches,
+                        new MappingAssertionIndex(tp, PROP_GIVES_LAB, false), maGivesLab,
+                        new MappingAssertionIndex(tp, PROP_GIVES_LECTURE, false), maGivesLecture));
 
         MappingInTransformation saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
         RDFAtomPredicate triplesPredicate = saturatedMapping.getRDFAtomPredicates().iterator().next();

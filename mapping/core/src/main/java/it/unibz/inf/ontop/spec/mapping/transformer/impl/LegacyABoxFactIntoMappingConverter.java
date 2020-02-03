@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.ABoxFactIntoMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -98,21 +99,20 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         LOGGER.debug("Appended {} annotation assertions as fact rules", ontology.getAnnotationAssertions().size());
         LOGGER.debug("Appended {} class assertions from ontology as fact rules", ontology.getClassAssertions().size());
 
-        MappingInTransformation a = mappingFactory.createMapping(
-                getTableRepresentation(properties),
-                getTableRepresentation(classes));
-
-        return a;
+        return mappingFactory.createMapping(Stream.concat(
+                getTableRepresentation(properties, false),
+                getTableRepresentation(classes, true))
+                .collect(ImmutableCollectors.toMap()));
     }
 
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> getTableRepresentation(ImmutableMultimap<IRI, IQ> index) {
+    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> getTableRepresentation(ImmutableMultimap<IRI, IQ> index, boolean isClass) {
 
         return index.asMap().entrySet().stream()
-                .map(e -> Tables.immutableCell(
+                .map(e -> Maps.immutableEntry(
+                        new MappingAssertionIndex(
                         (RDFAtomPredicate) projectionAtom.getPredicate(),
-                        e.getKey(),
-                        queryMerger.mergeDefinitions(e.getValue()).get().normalizeForOptimization()))
-                .collect(ImmutableCollectors.toTable());
+                        e.getKey(), isClass),
+                        queryMerger.mergeDefinitions(e.getValue()).get().normalizeForOptimization()));
     }
 
 

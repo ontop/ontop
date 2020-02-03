@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -49,20 +50,19 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
 
         AtomicInteger i = new AtomicInteger(0);
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> newPropertyTable = normalize(mapping.getRDFPropertyQueries(), i);
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> newClassTable = normalize(mapping.getRDFClassQueries(), i);
-
-        return specificationFactory.createMapping(newPropertyTable, newClassTable);
+        return specificationFactory.createMapping(Stream.concat(
+                normalize(mapping.getRDFPropertyQueries(), false, i),
+                normalize(mapping.getRDFClassQueries(), true, i)).collect(ImmutableCollectors.toMap()));
     }
 
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> normalize(
-            ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> queryCells, AtomicInteger i) {
+    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> normalize(
+            ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> queryCells, boolean isClass, AtomicInteger i) {
         return queryCells.stream()
-                .map(c -> Tables.immutableCell(
-                        c.getRowKey(),
-                        c.getColumnKey(),
-                        appendSuffixToVariableNames(c.getValue(), i.incrementAndGet())))
-                .collect(ImmutableCollectors.toTable());
+                .map(c -> Maps.immutableEntry(
+                        new MappingAssertionIndex(
+                                c.getRowKey(),
+                                c.getColumnKey(), isClass),
+                        appendSuffixToVariableNames(c.getValue(), i.incrementAndGet())));
     }
 
     private IQ appendSuffixToVariableNames(IQ query, int suffix) {

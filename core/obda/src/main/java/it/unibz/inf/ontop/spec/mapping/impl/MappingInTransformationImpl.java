@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -27,12 +28,23 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
 
     @AssistedInject
     private MappingInTransformationImpl(
-                        @Assisted("propertyTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
-                        @Assisted("classTable") ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
+                        @Assisted ImmutableMap<MappingAssertionIndex, IQ> assertions,
                         OntopModelSettings settings,
                         SpecificationFactory specificationFactory) {
-        this.propertyDefinitions = propertyTable;
-        this.classDefinitions = classTable;
+        this.propertyDefinitions = assertions.entrySet().stream()
+                .filter(e -> !e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+        this.classDefinitions = assertions.entrySet().stream()
+                .filter(e -> e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
         this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
@@ -44,7 +56,7 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
             }
         }
 
-        rdfAtomPredicates = Sets.union(propertyTable.rowKeySet(), classTable.rowKeySet())
+        rdfAtomPredicates = Sets.union(propertyDefinitions.rowKeySet(), classDefinitions.rowKeySet())
                 .immutableCopy();
     }
 
@@ -105,7 +117,18 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
                         ? classDefinitions
                         : updateDefinitions(classDefinitions, classUpdateTable);
 
-        return specificationFactory.createMapping(newPropertyDefs, newTripleClassDefs);
+        return specificationFactory.createMapping(Stream.concat(
+            newPropertyDefs.cellSet().stream()
+                    .map(e ->
+                        Maps.immutableEntry(
+                                new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), false),
+                                e.getValue())),
+            newTripleClassDefs.cellSet().stream()
+                    .map(e ->
+                        Maps.immutableEntry(
+                                new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), true),
+                                e.getValue())))
+            .collect(ImmutableCollectors.toMap()));
     }
 
     private ImmutableTable<RDFAtomPredicate, IRI, IQ> updateDefinitions(ImmutableTable<RDFAtomPredicate, IRI, IQ> currentTable,

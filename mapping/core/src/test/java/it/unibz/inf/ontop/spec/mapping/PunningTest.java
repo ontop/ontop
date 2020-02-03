@@ -74,7 +74,6 @@ public class PunningTest {
                                 P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                 O, TERM_FACTORY.getConstantIRI(CLASS_IRI))),
                         IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
-        ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_IRI, classMappingAssertion);
 
         // Property
         IQ propertyMappingAssertion = IQ_FACTORY.createIQ(
@@ -83,12 +82,12 @@ public class PunningTest {
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(PROP_IRI))),
                         IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
-        ImmutableMap<IRI, IQ> propertyMap = ImmutableMap.of(PROP_IRI, propertyMappingAssertion);
 
+        RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
 
         MappingInTransformation mapping = SPECIFICATION_FACTORY.createMapping(
-                transformIntoTable(propertyMap),
-                transformIntoTable(classMap));
+                ImmutableMap.of(new MappingAssertionIndex(tp, PROP_IRI, false), propertyMappingAssertion,
+                        new MappingAssertionIndex(tp, CLASS_IRI, true), classMappingAssertion));
 
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
         builder.declareClass(CLASS_IRI);
