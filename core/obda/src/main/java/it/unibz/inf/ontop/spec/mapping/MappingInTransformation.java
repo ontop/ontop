@@ -25,6 +25,5 @@ public interface MappingInTransformation {
      *
      * Returns a new (immutable) MappingInTransformation
      */
-    MappingInTransformation update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateMap,
-                                   ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateMap);
+    MappingInTransformation update(ImmutableMap<MappingAssertionIndex, IQ> assertions);
 }

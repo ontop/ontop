@@ -40,7 +40,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -115,32 +114,21 @@ public class TMappingProcessor {
 
                 .collect(ImmutableCollectors.toMap());
 
-        ImmutableList<TMappingEntry> entries = Stream.concat(
-                saturated.values().stream(),
+        ImmutableMap<MappingAssertionIndex, IQ> entries = Stream.concat(
+                saturated.entrySet().stream(),
                 source.asMap().entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
-                        .map(e -> e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, termFactory))))
-                .collect(ImmutableCollectors.toList());
+                        .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
+                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, termFactory)))))
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, queryMerger))
+                                .normalizeForOptimization()));
 
-        return mapping.update(entries.stream()
-                                .filter(e -> !e.getPredicateInfo().isClass())
-                                .map(this::toCell)
-                                .collect(ImmutableCollectors.toTable()),
-                        entries.stream()
-                                .filter(e -> e.getPredicateInfo().isClass())
-                                .map(this::toCell)
-                                .collect(ImmutableCollectors.toTable()));
-    }
-
-    private Table.Cell<RDFAtomPredicate, IRI, IQ> toCell(TMappingEntry e) {
-	    return Tables.immutableCell(
-	            e.getRDFAtomPredicate(),
-                e.getPredicateInfo().getIri(),
-                // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                noNullValueEnforcer.transform(e.asIQ(iqFactory, queryMerger)).normalizeForOptimization());
+        return mapping.update(entries);
     }
 
     private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,

@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -22,9 +23,6 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
     private final SpecificationFactory specificationFactory;
 
     private final ImmutableSet<RDFAtomPredicate> rdfAtomPredicates;
-
-    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
-    private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
     private final ImmutableMap<MappingAssertionIndex, IQ> assertions;
 
     @AssistedInject
@@ -35,20 +33,6 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
 
         this.assertions = assertions;
 
-        this.propertyDefinitions = assertions.entrySet().stream()
-                .filter(e -> !e.getKey().isClass())
-                .map(e -> Tables.immutableCell(
-                        e.getKey().getPredicate(),
-                        e.getKey().getIri(),
-                        e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-        this.classDefinitions = assertions.entrySet().stream()
-                .filter(e -> e.getKey().isClass())
-                .map(e -> Tables.immutableCell(
-                        e.getKey().getPredicate(),
-                        e.getKey().getIri(),
-                        e.getValue()))
-                .collect(ImmutableCollectors.toTable());
         this.specificationFactory = specificationFactory;
 
         if (settings.isTestModeEnabled()) {
@@ -59,8 +43,9 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
             }
         }
 
-        rdfAtomPredicates = Sets.union(propertyDefinitions.rowKeySet(), classDefinitions.rowKeySet())
-                .immutableCopy();
+        rdfAtomPredicates = assertions.keySet().stream()
+                .map(MappingAssertionIndex::getPredicate)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -70,6 +55,22 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
 
     @Override
     public Mapping getMapping() {
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions = assertions.entrySet().stream()
+                .filter(e -> !e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions = assertions.entrySet().stream()
+                .filter(e -> e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+
         return new MappingImpl(propertyDefinitions, classDefinitions);
     }
 
@@ -84,39 +85,13 @@ public class MappingInTransformationImpl implements MappingInTransformation  {
     }
 
     @Override
-    public MappingInTransformation update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateTable,
-                          ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateTable) {
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> newPropertyDefs =
-                propertyUpdateTable.isEmpty()
-                        ? propertyDefinitions
-                        : updateDefinitions(propertyDefinitions, propertyUpdateTable);
+    public MappingInTransformation update(ImmutableMap<MappingAssertionIndex, IQ> updateAssertions) {
+        if (updateAssertions.isEmpty())
+            return this;
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> newTripleClassDefs =
-                classUpdateTable.isEmpty()
-                        ? classDefinitions
-                        : updateDefinitions(classDefinitions, classUpdateTable);
-
-        return specificationFactory.createMapping(Stream.concat(
-            newPropertyDefs.cellSet().stream()
-                    .map(e ->
-                        Maps.immutableEntry(
-                                new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), false),
-                                e.getValue())),
-            newTripleClassDefs.cellSet().stream()
-                    .map(e ->
-                        Maps.immutableEntry(
-                                new MappingAssertionIndex(e.getRowKey(), e.getColumnKey(), true),
-                                e.getValue())))
-            .collect(ImmutableCollectors.toMap()));
+        return specificationFactory.createMapping(
+                Stream.concat(assertions.entrySet().stream(), updateAssertions.entrySet().stream())
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey, Map.Entry::getValue, (a, u) -> u))); // merger
     }
-
-    private ImmutableTable<RDFAtomPredicate, IRI, IQ> updateDefinitions(ImmutableTable<RDFAtomPredicate, IRI, IQ> currentTable,
-                                                                        ImmutableTable<RDFAtomPredicate, IRI, IQ> updateTable) {
-        return Stream.concat(
-                updateTable.cellSet().stream(),
-                currentTable.cellSet().stream()
-                        .filter(c -> !updateTable.contains(c.getRowKey(), c.getColumnKey())))
-                .collect(ImmutableCollectors.toTable());
-    }
-
 }
