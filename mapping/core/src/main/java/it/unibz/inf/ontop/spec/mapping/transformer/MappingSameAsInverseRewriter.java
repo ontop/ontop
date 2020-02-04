@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
 public interface MappingSameAsInverseRewriter {
 
-    MappingInTransformation rewrite(MappingInTransformation mapping);
+    ImmutableList<MappingAssertion> rewrite(ImmutableList<MappingAssertion> mapping);
 }

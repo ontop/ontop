@@ -78,14 +78,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
     OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
 
-        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
-                .collect(ImmutableCollectors.toMultimap(a -> a.getIndex(), a -> a.getQuery()))
-                .asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> mergeDefinitions(e.getValue())));
-
-        MappingInTransformation m = specificationFactory.createMapping(iqClassificationMap);
-
-        MappingInTransformation sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(m);
+        ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         MappingInTransformation saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
         MappingInTransformation normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
@@ -96,11 +89,4 @@ public class DefaultMappingTransformer implements MappingTransformer {
 
         return specificationFactory.createSpecification(finalMapping.getMapping(), dbMetadata, tbox);
     }
-
-    private IQ mergeDefinitions(Collection<IQ> assertions) {
-        return queryMerger.mergeDefinitions(assertions)
-                .map(IQ::normalizeForOptimization)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
-    }
-
 }

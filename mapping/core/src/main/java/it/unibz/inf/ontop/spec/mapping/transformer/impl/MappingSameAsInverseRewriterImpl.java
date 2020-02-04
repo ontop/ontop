@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
@@ -47,20 +48,20 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
     }
 
     @Override
-    public MappingInTransformation rewrite(MappingInTransformation mapping) {
+    public ImmutableList<MappingAssertion> rewrite(ImmutableList<MappingAssertion> mapping) {
         if (!enabled)
             return mapping;
 
-        ImmutableMap<MappingAssertionIndex, IQ> update = mapping.getRDFAtomPredicates().stream()
-                .map(p -> MappingAssertionIndex.ofProperty(p, OWL.SAME_AS))
-                .flatMap(i -> mapping.getAssertion(i)
-                        .map(sameAsDef -> completeSameAsDefinition(sameAsDef, i.getPredicate()))
-                        .map(sameAsDef -> Maps.immutableEntry(i, sameAsDef))
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toMap());
+        return mapping.stream()
+                .map(a -> transform(a))
+                .collect(ImmutableCollectors.toList());
+    }
 
-        return mapping.update(update);
+    private MappingAssertion transform(MappingAssertion a) {
+        if (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
+            return a;
+
+        return new MappingAssertion(a.getIndex(), completeSameAsDefinition(a.getQuery(), a.getIndex().getPredicate()), a.getProvenance());
     }
 
     private IQ completeSameAsDefinition(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {

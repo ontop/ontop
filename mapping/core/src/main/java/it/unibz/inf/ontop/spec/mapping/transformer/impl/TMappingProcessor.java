@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -33,6 +34,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -60,14 +62,19 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
+    private final SpecificationFactory specificationFactory;
 
     @Inject
-	private TMappingProcessor(AtomFactory atomFactory, TermFactory termFactory,
+	private TMappingProcessor(AtomFactory atomFactory,
+                              TermFactory termFactory,
                               QueryUnionSplitter unionSplitter,
-                              UnionFlattener unionNormalizer, MappingCQCOptimizer mappingCqcOptimizer,
+                              UnionFlattener unionNormalizer,
+                              MappingCQCOptimizer mappingCqcOptimizer,
                               NoNullValueEnforcer noNullValueEnforcer,
                               IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger, SubstitutionFactory substitutionFactory) {
+                              UnionBasedQueryMerger queryMerger,
+                              SubstitutionFactory substitutionFactory,
+                              SpecificationFactory specificationFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
         this.unionSplitter = unionSplitter;
@@ -77,6 +84,7 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
+        this.specificationFactory = specificationFactory;
     }
 
 
@@ -87,16 +95,16 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public MappingInTransformation getTMappings(MappingInTransformation mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
+	public MappingInTransformation getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.getAssertions().entrySet().stream()
-                .flatMap(e -> unionSplitter.splitUnion(unionNormalizer.optimize(e.getValue()))
-                        .map(q -> new TMappingRule(e.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream()
+                .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
+                        .map(q -> new TMappingRule(a.getIndex(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
                 .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
@@ -128,7 +136,7 @@ public class TMappingProcessor {
                         e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, queryMerger))
                                 .normalizeForOptimization()));
 
-        return mapping.update(entries);
+        return specificationFactory.createMapping(entries);
     }
 
     private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,

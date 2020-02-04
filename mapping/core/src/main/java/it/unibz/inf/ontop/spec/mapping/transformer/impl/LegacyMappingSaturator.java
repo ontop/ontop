@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
@@ -50,7 +51,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     }
 
     @Override
-    public MappingInTransformation saturate(MappingInTransformation mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
+    public MappingInTransformation saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
         LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 
