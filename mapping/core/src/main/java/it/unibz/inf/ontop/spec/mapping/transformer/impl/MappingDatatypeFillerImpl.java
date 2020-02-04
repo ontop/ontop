@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
@@ -26,7 +27,6 @@ import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -58,12 +58,12 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     public MappingWithProvenance transform(MappingWithProvenance mapping)
             throws UnknownDatatypeException {
 
-        ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
+        ImmutableList.Builder<MappingAssertion> newProvenanceMapBuilder = ImmutableList.builder();
 
         // no streams because of exception handling
-        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            IQ newIQ = transformMappingAssertion(entry.getKey(), entry.getValue());
-            newProvenanceMapBuilder.put(newIQ, entry.getValue());
+        for (MappingAssertion a : mapping.getMappingAssertions()) {
+            IQ newIQ = transformMappingAssertion(a.getQuery(), a.getProvenance());
+            newProvenanceMapBuilder.add(new MappingAssertion(a.getIndex(), newIQ, a.getProvenance()));
         }
 
         return mappingFactory.create(newProvenanceMapBuilder.build());

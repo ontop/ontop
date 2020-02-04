@@ -19,8 +19,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -61,10 +61,11 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     @Override
     public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        return mappingFactory.create(mapping.getProvenanceMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> transformMappingAssertion(e.getKey()),
-                        Map.Entry::getValue)));
+        return mappingFactory.create(mapping.getMappingAssertions().stream()
+                .map(a -> new MappingAssertion(
+                        a.getIndex(),
+                        transformMappingAssertion(a.getQuery()), a.getProvenance()))
+                .collect(ImmutableCollectors.toList()));
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion) {

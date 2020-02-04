@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
@@ -45,10 +46,11 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
 
     @Override
     public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        return mappingFactory.create(mapping.getProvenanceMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> transformMappingAssertion(e.getKey()),
-                        Map.Entry::getValue)));
+        return mappingFactory.create(mapping.getMappingAssertions().stream()
+                .map(a -> new MappingAssertion(
+                        a.getIndex(),
+                        transformMappingAssertion(a.getQuery()), a.getProvenance()))
+                .collect(ImmutableCollectors.toList()));
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion) {

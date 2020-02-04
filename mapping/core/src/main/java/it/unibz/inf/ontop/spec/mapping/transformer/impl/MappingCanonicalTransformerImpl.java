@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -76,22 +77,20 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
     private Optional<IQ> extractCanIRIDefinition(MappingWithProvenance mapping) {
         return queryMerger.mergeDefinitions(
-                mapping.getProvenanceMap().keySet().stream()
-                        .filter(q -> (MappingTools.extractRDFPredicate(q).getIri().equals(Ontop.CANONICAL_IRI)))
+                mapping.getMappingAssertions().stream()
+                        .filter(a -> a.getIndex().getIri().equals(Ontop.CANONICAL_IRI))
+                        .map(a -> a.getQuery())
                         .collect(ImmutableCollectors.toList()));
     }
 
     private MappingWithProvenance transformMapping(MappingWithProvenance mapping, IntensionalQueryMerger intensionalQueryMerger) {
         return provenanceMappingFactory.create(
-                mapping.getProvenanceMap().entrySet().stream()
-                        .filter(e -> !(MappingTools.extractRDFPredicate(e.getKey()).getIri().equals(Ontop.CANONICAL_IRI)))
-                        .collect(ImmutableCollectors.toMap(
-                                e -> transformAssertion(
-                                        e.getKey(),
-                                        intensionalQueryMerger
-                                ),
-                                Map.Entry::getValue
-                        )));
+                mapping.getMappingAssertions().stream()
+                        .filter(a -> !(a.getIndex().getIri().equals(Ontop.CANONICAL_IRI)))
+                        .map(a -> new MappingAssertion(a.getIndex(),
+                                transformAssertion(a.getQuery(), intensionalQueryMerger),
+                                a.getProvenance()))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     private IQ transformAssertion(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {

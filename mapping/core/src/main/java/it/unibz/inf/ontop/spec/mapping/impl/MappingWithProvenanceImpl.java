@@ -9,38 +9,30 @@ import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
-    private final ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap;
+    private final ImmutableList<MappingAssertion> assertions;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
-    private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
+    private MappingWithProvenanceImpl(@Assisted ImmutableList<MappingAssertion> assertions,
                                       SpecificationFactory specFactory,
                                       UnionBasedQueryMerger queryMerger,
                                       OntopModelSettings settings) {
-        this.provenanceMap = provenanceMap;
+        this.assertions = assertions;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
 
         if (settings.isTestModeEnabled()) {
-            for (IQ query : provenanceMap.keySet()) {
-                checkNullableVariables(query);
+            for (MappingAssertion a : assertions) {
+                checkNullableVariables(a.getQuery());
             }
         }
     }
@@ -52,26 +44,15 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
     }
 
     @Override
-    public ImmutableSet<IQ> getMappingAssertions() {
-        return provenanceMap.keySet();
-    }
-
-    @Override
-    public ImmutableMap<IQ, PPMappingAssertionProvenance> getProvenanceMap() {
-        return provenanceMap;
-    }
-
-    @Override
-    public PPMappingAssertionProvenance getProvenance(IQ mappingAssertion) {
-        return Optional.ofNullable(provenanceMap.get(mappingAssertion))
-                .orElseThrow(() -> new IllegalArgumentException("This assertion is not part of the mapping"));
+    public ImmutableList<MappingAssertion> getMappingAssertions() {
+        return assertions;
     }
 
     @Override
     public MappingInTransformation toRegularMapping() {
 
-        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = getMappingAssertions().stream()
-                .collect(ImmutableCollectors.toMultimap(MappingTools::extractRDFPredicate, iq -> iq))
+        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = assertions.stream()
+                .collect(ImmutableCollectors.toMultimap(a -> a.getIndex(), a -> a.getQuery()))
                 .asMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> mergeDefinitions(e.getValue())));
 

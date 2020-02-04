@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
@@ -28,6 +29,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
+import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -81,9 +83,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
      * May also add views in the DBMetadata!
      */
 
-    public ImmutableMap<IQ, PPMappingAssertionProvenance> convert(Collection<SQLPPTriplesMap> triplesMaps,
-                                                                    RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
-        Map<IQ, PPMappingAssertionProvenance> mutableMap = new HashMap<>();
+    public ImmutableList<MappingAssertion> convert(Collection<SQLPPTriplesMap> triplesMaps,
+                                                   RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
+        List<MappingAssertion> mutableMap = new ArrayList<>();
 
         List<String> errorMessages = new ArrayList<>();
 
@@ -161,9 +163,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0).normalizeForOptimization();
 
-                        PPMappingAssertionProvenance previous = mutableMap.put(iq, provenance);
-                        if (previous != null)
-                            LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
+                        mutableMap.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq), iq,  provenance));
+                        //if (previous != null)
+                        //    LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
                     catch (AttributeNotFoundException e) {
                         errorMessages.add("Error: " + e.getMessage()
@@ -184,7 +186,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         LOGGER.debug("Original mapping size: {}", mutableMap.size());
 
-        return ImmutableMap.copyOf(mutableMap);
+        return ImmutableList.copyOf(mutableMap);
     }
 
 

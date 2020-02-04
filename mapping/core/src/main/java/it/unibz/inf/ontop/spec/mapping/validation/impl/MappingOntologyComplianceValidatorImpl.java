@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
@@ -60,8 +61,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableMultimap<IRI, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
-        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
+        for (MappingAssertion a : mapping.getMappingAssertions()) {
+            validateAssertion(a.getQuery(), a.getProvenance(), ontology, datatypeMap);
         }
     }
 
