@@ -1,0 +1,80 @@
+0
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Person>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#person1>
+1
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Person>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#person2>
+2
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Person>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#person3>
+3
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Person>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#person4>
+4
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Job>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#job1>
+5
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Job>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#job1>
+6
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Job>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#job2>
+7
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#Job>
+	predicate	rdf:type
+	subject	<http://www.semanticweb.org/test#job3>
+8
+	g	<http://example.org/graphs/spiderman>
+	object	"Person 1"^^xsd:string
+	predicate	rdfs:label
+	subject	<http://www.semanticweb.org/test#person1>
+9
+	g	<http://example.org/graphs/spiderman>
+	object	"Person 2"^^xsd:string
+	predicate	rdfs:label
+	subject	<http://www.semanticweb.org/test#person2>
+10
+	g	<http://example.org/graphs/spiderman>
+	object	"Person 3"^^xsd:string
+	predicate	rdfs:label
+	subject	<http://www.semanticweb.org/test#person3>
+11
+	g	<http://example.org/graphs/spiderman>
+	object	"Person 4"^^xsd:string
+	predicate	rdfs:label
+	subject	<http://www.semanticweb.org/test#person4>
+12
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#job1>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	subject	<http://www.semanticweb.org/test#person1>
+13
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#job1>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	subject	<http://www.semanticweb.org/test#person2>
+14
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#job2>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	subject	<http://www.semanticweb.org/test#person3>
+15
+	g	<http://example.org/graphs/spiderman>
+	object	<http://www.semanticweb.org/test#job3>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	subject	<http://www.semanticweb.org/test#person4>

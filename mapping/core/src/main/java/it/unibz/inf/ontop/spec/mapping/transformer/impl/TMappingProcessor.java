@@ -149,6 +149,7 @@ public class TMappingProcessor {
                 noNullValueEnforcer.transform(e.asIQ(iqFactory, queryMerger)).normalizeForOptimization());
     }
 
+    // Davide> TODO Unstreamify this method, it is unreadable.
     private <T> Stream<Map.Entry<MappingTools.RDFPredicateInfo, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                                                          Predicate<T> representativeFilter,
                                                                                          ImmutableMultimap<MappingTools.RDFPredicateInfo, TMappingRule> originalMappingIndex,
@@ -156,6 +157,7 @@ public class TMappingProcessor {
                                                                                          java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
                                                                                          ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
                                                                                          BiPredicate<T, T> populationFilter) {
+
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(d), m, substitutionFactory));
@@ -219,8 +221,10 @@ public class TMappingProcessor {
         }
     }
 
+  // Davide> Retrieves a subject-object list?
     private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadP(boolean isInverse) {
-        return isInverse
+
+      return isInverse
                 ? head -> ImmutableList.of(head.get(1), head.get(0))
                 : Function.identity();
     }

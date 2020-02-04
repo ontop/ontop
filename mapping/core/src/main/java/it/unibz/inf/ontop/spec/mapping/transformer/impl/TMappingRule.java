@@ -95,8 +95,22 @@ public class TMappingRule {
 
 		this.predicateInfo = predicateInfo;
 		this.projectionAtom = baseRule.projectionAtom;
+		if( projectionAtom.getArguments().size() > 3 ){
+			// Quads
+			substitution = makeSubstitutionQuads(headTerms, substitutionFactory);
+		}
+		else
+		substitution = makeSubstitutionTriples(headTerms, substitutionFactory);
+
+
+		this.extensionalNodes = baseRule.extensionalNodes;
+		this.filter = baseRule.filter;
+	}
+
+	private ImmutableSubstitution<ImmutableTerm> makeSubstitutionTriples(ImmutableList<ImmutableTerm> headTerms, SubstitutionFactory substitutionFactory) {
+		ImmutableSubstitution<ImmutableTerm> result = null;
 		if (predicateInfo.isClass()) {
-			substitution = substitutionFactory.getSubstitution(
+			result = substitutionFactory.getSubstitution(
 					projectionAtom.getTerm(0), headTerms.get(0),
 					projectionAtom.getTerm(1), getConstantIRI(RDF.TYPE),
 					projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()));
@@ -105,19 +119,48 @@ public class TMappingRule {
 			if (!headTerms.get(1).equals(projectionAtom.getTerm(2)))
 				throw new IllegalStateException("The last argument does not match");
 
-			substitution = substitutionFactory.getSubstitution(
+			result = substitutionFactory.getSubstitution(
 					projectionAtom.getTerm(0), headTerms.get(0),
 					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()));
 		}
 		else {
-			substitution = substitutionFactory.getSubstitution(
+			result = substitutionFactory.getSubstitution(
 					projectionAtom.getTerm(0), headTerms.get(0),
 					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()),
 					projectionAtom.getTerm(2), headTerms.get(1));
 		}
 
-		this.extensionalNodes = baseRule.extensionalNodes;
-		this.filter = baseRule.filter;
+		return result;
+	}
+
+	// Davide> TODO: Ok, but the problem is that I do not get all the headTerms I need (I do not need the one for the graph...
+	private ImmutableSubstitution<ImmutableTerm> makeSubstitutionQuads(ImmutableList<ImmutableTerm> headTerms, SubstitutionFactory substitutionFactory) {
+		ImmutableSubstitution<ImmutableTerm> result = null;
+		if (predicateInfo.isClass()) {
+			result = substitutionFactory.getSubstitution(
+							projectionAtom.getTerm(0), headTerms.get(0),
+							projectionAtom.getTerm(1), getConstantIRI(RDF.TYPE),
+							projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()),
+							projectionAtom.getTerm(3), headTerms.get(headTerms.size()-1)); // Davide> The last position needs to be guaranteed to be GRAPH
+		}
+		else if (headTerms.get(1) instanceof Variable) {
+			// Davide> TODO Understand what this case is for
+			if (!headTerms.get(1).equals(projectionAtom.getTerm(2)))
+				throw new IllegalStateException("The last argument does not match");
+
+			result = substitutionFactory.getSubstitution(
+					projectionAtom.getTerm(0), headTerms.get(0),
+					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()));
+		}
+		else {
+			result = substitutionFactory.getSubstitution(
+							projectionAtom.getTerm(0), headTerms.get(0),
+							projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()),
+							projectionAtom.getTerm(2), headTerms.get(1),
+							projectionAtom.getTerm(3), headTerms.get(headTerms.size()-1)); // Davide> The last position needs to be guaranteed to be GRAPH
+		}
+
+		return result;
 	}
 
 	private IRIConstant getConstantIRI(IRI iri) {
@@ -143,11 +186,26 @@ public class TMappingRule {
 						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, iqFactory)));
 	}
 
+	// Davide> TODO: This did not foresee at all the possibility to have quads. Now it gets tricky to undo it.
 	public ImmutableList<ImmutableTerm> getHeadTerms() {
-        return predicateInfo.isClass()
+		ImmutableList<ImmutableTerm> result = null;
+
+		if( projectionAtom.getArguments().size() > 3 ){ // projectionAtom.getPredicate().getName("quad")
+			// Quads
+			result = predicateInfo.isClass()
+				? ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)),
+							substitution.applyToVariable(projectionAtom.getTerm(3)))
+				: ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)), // s, o, g
+							substitution.applyToVariable(projectionAtom.getTerm(2)),
+							substitution.applyToVariable(projectionAtom.getTerm(3))
+			);
+		}
+		else
+			result = predicateInfo.isClass()
 				? ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)))
 				: ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)),
 									substitution.applyToVariable(projectionAtom.getTerm(2)));
+        return result;
     }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }

@@ -20,7 +20,7 @@ public interface SubstitutionFactory {
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
                                                                        Variable k3, T v3);
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution(Variable k1, T v1, Variable k2, T v2,
-                                                                       Variable k3, T v3, Variable k4, T v4);
+                                                                       Variable k3, T v3, Variable k4, T v4); // Davide> For quads
     <T extends ImmutableTerm> ImmutableSubstitution<T> getSubstitution();
 
     Var2VarSubstitution getVar2VarSubstitution(ImmutableMap<Variable, Variable> substitutionMap);
