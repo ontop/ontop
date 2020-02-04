@@ -24,6 +24,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -102,9 +103,14 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream()
-                .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
-                        .map(q -> new TMappingRule(a.getIndex(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
+        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
+                .collect(ImmutableCollectors.toMultimap(a -> a.getIndex(), a -> a.getQuery()))
+                .asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> mergeDefinitions(e.getValue())));
+
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = iqClassificationMap.entrySet().stream()
+                .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getValue()))
+                        .map(q -> new TMappingRule(a.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
                 .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
@@ -138,6 +144,13 @@ public class TMappingProcessor {
 
         return entries;
     }
+
+    private IQ mergeDefinitions(Collection<IQ> assertions) {
+        return queryMerger.mergeDefinitions(assertions)
+                .map(IQ::normalizeForOptimization)
+                .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
+    }
+
 
     private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                                                  Predicate<T> representativeFilter,
