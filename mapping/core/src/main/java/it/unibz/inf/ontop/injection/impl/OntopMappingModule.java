@@ -32,7 +32,6 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingCanonicalTransformer.class);
         bindFromSettings(ABoxFactIntoMappingConverter.class);
         bindFromSettings(MappingDatatypeFiller.class);
-        bindFromSettings(MappingMerger.class);
         bindFromSettings(MappingTransformer.class);
         bindFromSettings(MappingOntologyComplianceValidator.class);
         bindFromSettings(MappingSameAsInverseRewriter.class);

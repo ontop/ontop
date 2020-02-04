@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -126,7 +125,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 }
 
                 final IQTree tree = IQ2CQ.toIQTree(dataAtoms.stream()
-                                .map(a -> iqFactory.createExtensionalDataNode(a))
+                                .map(iqFactory::createExtensionalDataNode)
                                 .collect(ImmutableCollectors.toList()),
                         filter, iqFactory);
 

@@ -224,13 +224,13 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
     }
 
-    private class CanonicalTransformerException extends OntopInternalBugException {
+    private static class CanonicalTransformerException extends OntopInternalBugException {
         CanonicalTransformerException(String text) {
             super(text);
         }
     }
 
-    private class UnexpectedPositionException extends CanonicalTransformerException {
+    private static class UnexpectedPositionException extends CanonicalTransformerException {
         UnexpectedPositionException(Position pos) {
             super("Unexpected position: " + pos);
         }

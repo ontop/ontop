@@ -47,7 +47,6 @@ public class MappingTestingTools {
 
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
-    public static final MappingMerger MAPPING_MERGER;
     public static final MappingSameAsInverseRewriter SAME_AS_INVERSE_REWRITER;
     public static final MappingSaturator MAPPING_SATURATOR;
 
@@ -84,7 +83,6 @@ public class MappingTestingTools {
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
-        MAPPING_MERGER = injector.getInstance(MappingMerger.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
         MAPPING_SATURATOR = injector.getInstance(MappingSaturator.class);
         UNION_FLATTENER = injector.getInstance(UnionFlattener.class);
