@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.MappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
@@ -77,7 +78,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
      * - Mismatch between the ontology and the mapping
      */
     protected void validateMapping(Optional<Ontology> ontology,
-                                 MappingWithProvenance filledProvMapping) throws MappingOntologyMismatchException {
+                                 ImmutableList<MappingAssertion> filledProvMapping) throws MappingOntologyMismatchException {
         if (ontology.isPresent()) {
             ontologyComplianceValidator.validate(filledProvMapping, ontology.get());
         }

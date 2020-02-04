@@ -7,18 +7,15 @@ public class MappingCoreSingletonsImpl implements MappingCoreSingletons {
     private final CoreSingletons coreSingletons;
     private final OptimizationSingletons optimizationSingletons;
     private final SpecificationFactory specificationFactory;
-    private final ProvenanceMappingFactory provenanceMappingFactory;
     private final TargetQueryParserFactory targetQueryParserFactory;
 
     @Inject
     private MappingCoreSingletonsImpl(CoreSingletons coreSingletons, OptimizationSingletons optimizationSingletons,
                                      SpecificationFactory specificationFactory,
-                                     ProvenanceMappingFactory provenanceMappingFactory,
                                      TargetQueryParserFactory targetQueryParserFactory) {
         this.coreSingletons = coreSingletons;
         this.optimizationSingletons = optimizationSingletons;
         this.specificationFactory = specificationFactory;
-        this.provenanceMappingFactory = provenanceMappingFactory;
         this.targetQueryParserFactory = targetQueryParserFactory;
     }
 
@@ -35,11 +32,6 @@ public class MappingCoreSingletonsImpl implements MappingCoreSingletons {
     @Override
     public SpecificationFactory getSpecificationFactory() {
         return specificationFactory;
-    }
-
-    @Override
-    public ProvenanceMappingFactory getProvenanceMappingFactory() {
-        return provenanceMappingFactory;
     }
 
     @Override

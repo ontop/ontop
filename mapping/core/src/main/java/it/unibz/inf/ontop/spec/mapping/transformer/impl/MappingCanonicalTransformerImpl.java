@@ -5,10 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
@@ -18,7 +15,6 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -27,14 +23,12 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
 
     private final IntermediateQueryFactory iqFactory;
-    private final ProvenanceMappingFactory provenanceMappingFactory;
     private final QueryTransformerFactory transformerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
@@ -45,26 +39,21 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private enum Position {SUBJECT, PROPERTY, OBJECT}
 
     @Inject
-    private MappingCanonicalTransformerImpl(IntermediateQueryFactory iqFactory,
-                                            ProvenanceMappingFactory provenanceMappingFactory,
+    private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
                                             QueryTransformerFactory transformerFactory,
-                                            SubstitutionFactory substitutionFactory,
-                                            AtomFactory atomFactory,
-                                            CoreUtilsFactory coreUtilsFactory,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
-        this.coreUtilsFactory = coreUtilsFactory;
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.settings = settings;
-        this.iqFactory = iqFactory;
-        this.provenanceMappingFactory = provenanceMappingFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.transformerFactory = transformerFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.atomFactory = atomFactory;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
         this.queryMerger = queryMerger;
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping) {
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
 
         // Isolate mapping assertions with canIRI as predicate
         Optional<IQ> canIRIDefinition = extractCanIRIDefinition(mapping);
@@ -75,22 +64,21 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                 mapping;
     }
 
-    private Optional<IQ> extractCanIRIDefinition(MappingWithProvenance mapping) {
+    private Optional<IQ> extractCanIRIDefinition(ImmutableList<MappingAssertion> mapping) {
         return queryMerger.mergeDefinitions(
-                mapping.getMappingAssertions().stream()
+                mapping.stream()
                         .filter(a -> a.getIndex().getIri().equals(Ontop.CANONICAL_IRI))
                         .map(a -> a.getQuery())
                         .collect(ImmutableCollectors.toList()));
     }
 
-    private MappingWithProvenance transformMapping(MappingWithProvenance mapping, IntensionalQueryMerger intensionalQueryMerger) {
-        return provenanceMappingFactory.create(
-                mapping.getMappingAssertions().stream()
+    private ImmutableList<MappingAssertion> transformMapping(ImmutableList<MappingAssertion> mapping, IntensionalQueryMerger intensionalQueryMerger) {
+        return mapping.stream()
                         .filter(a -> !(a.getIndex().getIri().equals(Ontop.CANONICAL_IRI)))
                         .map(a -> new MappingAssertion(a.getIndex(),
                                 transformAssertion(a.getQuery(), intensionalQueryMerger),
                                 a.getProvenance()))
-                        .collect(ImmutableCollectors.toList()));
+                        .collect(ImmutableCollectors.toList());
     }
 
     private IQ transformAssertion(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {

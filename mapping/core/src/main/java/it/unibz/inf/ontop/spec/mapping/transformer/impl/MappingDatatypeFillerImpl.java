@@ -6,9 +6,9 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
 
 public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
-    private final ProvenanceMappingFactory mappingFactory;
     private final OntopMappingSettings settings;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -41,32 +39,30 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     private final UniqueTermTypeExtractor typeExtractor;
 
     @Inject
-    private MappingDatatypeFillerImpl(ProvenanceMappingFactory mappingFactory, OntopMappingSettings settings,
-                                      TermFactory termFactory, SubstitutionFactory substitutionFactory,
-                                      TypeFactory typeFactory, IntermediateQueryFactory iqFactory,
+    private MappingDatatypeFillerImpl(OntopMappingSettings settings,
+                                      CoreSingletons coreSingletons,
                                       UniqueTermTypeExtractor typeExtractor) {
-        this.mappingFactory = mappingFactory;
         this.settings = settings;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
-        this.iqFactory = iqFactory;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
         this.typeExtractor = typeExtractor;
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping)
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping)
             throws UnknownDatatypeException {
 
         ImmutableList.Builder<MappingAssertion> newProvenanceMapBuilder = ImmutableList.builder();
 
         // no streams because of exception handling
-        for (MappingAssertion a : mapping.getMappingAssertions()) {
+        for (MappingAssertion a : mapping) {
             IQ newIQ = transformMappingAssertion(a.getQuery(), a.getProvenance());
             newProvenanceMapBuilder.add(new MappingAssertion(a.getIndex(), newIQ, a.getProvenance()));
         }
 
-        return mappingFactory.create(newProvenanceMapBuilder.build());
+        return newProvenanceMapBuilder.build();
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)

@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -99,17 +99,17 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        MappingWithProvenance provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
+        ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
         dbMetadata.freeze();
 
-        MappingWithProvenance eqMapping = mappingEqualityTransformer.transform(provMapping);
-        MappingWithProvenance filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
-        MappingWithProvenance castMapping = mappingCaster.transform(filledProvMapping);
-        MappingWithProvenance canonizedMapping = canonicalTransformer.transform(castMapping);
+        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
+        ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
+        ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
+        ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
 
         validateMapping(optionalOntology, canonizedMapping);
 
-        return new MappingAndDBMetadataImpl(canonizedMapping.getMappingAssertions(), dbMetadata);
+        return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)

@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -17,7 +16,6 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
@@ -46,7 +44,6 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
 
     private final TermFactory termFactory;
-    private final ProvenanceMappingFactory provMappingFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
@@ -54,27 +51,21 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     private final CoreSingletons coreSingletons;
 
     @Inject
-    private LegacySQLPPMappingConverter(TermFactory termFactory,
-                                        ProvenanceMappingFactory provMappingFactory,
-                                        NoNullValueEnforcer noNullValueEnforcer,
-                                        IntermediateQueryFactory iqFactory,
-                                        AtomFactory atomFactory,
-                                        SubstitutionFactory substitutionFactory,
+    private LegacySQLPPMappingConverter(NoNullValueEnforcer noNullValueEnforcer,
                                         CoreSingletons coreSingletons) {
-        this.termFactory = termFactory;
-        this.provMappingFactory = provMappingFactory;
+        this.termFactory = coreSingletons.getTermFactory();
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.iqFactory = iqFactory;
-        this.atomFactory = atomFactory;
-        this.substitutionFactory = substitutionFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.atomFactory = coreSingletons.getAtomFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.coreSingletons = coreSingletons;
     }
 
     @Override
-    public MappingWithProvenance convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
-        return provMappingFactory.create(convert(ppMapping.getTripleMaps(), dbMetadata));
+        return convert(ppMapping.getTripleMaps(), dbMetadata);
     }
 
 
