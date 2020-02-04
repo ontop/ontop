@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
 
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 
 /**
  * Renames variables,
@@ -10,5 +11,5 @@ import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
  */
 public interface MappingVariableNameNormalizer {
 
-    MappingInTransformation normalize(MappingInTransformation mapping);
+    ImmutableMap<MappingAssertionIndex, IQ> normalize(ImmutableMap<MappingAssertionIndex, IQ> mapping);
 }

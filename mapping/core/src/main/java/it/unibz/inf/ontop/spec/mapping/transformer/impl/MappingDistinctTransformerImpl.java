@@ -3,44 +3,34 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class MappingDistinctTransformerImpl implements MappingDistinctTransformer {
 
-    private final SpecificationFactory specificationFactory;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private MappingDistinctTransformerImpl(SpecificationFactory specificationFactory,
-                                           IntermediateQueryFactory iqFactory){
-        this.specificationFactory = specificationFactory;
+    private MappingDistinctTransformerImpl(IntermediateQueryFactory iqFactory){
         this.iqFactory = iqFactory;
     }
 
-    public MappingInTransformation addDistinct(MappingInTransformation mapping){
-        return specificationFactory.createMapping(
-                mapping.getAssertions().entrySet().stream()
+    public ImmutableMap<MappingAssertionIndex, IQ> addDistinct(ImmutableMap<MappingAssertionIndex, IQ> mapping){
+        return mapping.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> updateQuery(e.getValue()))));
+                            e -> updateQuery(e.getValue())));
     }
 
     /**

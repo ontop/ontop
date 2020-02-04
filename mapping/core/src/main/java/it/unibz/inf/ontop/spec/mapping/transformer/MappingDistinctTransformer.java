@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 
 public interface MappingDistinctTransformer {
 
     /**
      * TODO: rename the method (too low-level)
      */
-    MappingInTransformation addDistinct(MappingInTransformation mapping);
+    ImmutableMap<MappingAssertionIndex, IQ> addDistinct(ImmutableMap<MappingAssertionIndex, IQ> mapping);
 }

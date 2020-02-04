@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -39,13 +39,12 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
     }
 
     @Override
-    public MappingInTransformation normalize(MappingInTransformation mapping) {
+    public ImmutableMap<MappingAssertionIndex, IQ> normalize(ImmutableMap<MappingAssertionIndex, IQ> mapping) {
         AtomicInteger i = new AtomicInteger(0);
-        return specificationFactory.createMapping(
-                mapping.getAssertions().entrySet().stream()
+        return mapping.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> appendSuffixToVariableNames(e.getValue(), i.incrementAndGet()))));
+                            e -> appendSuffixToVariableNames(e.getValue(), i.incrementAndGet())));
     }
 
     private IQ appendSuffixToVariableNames(IQ query, int suffix) {

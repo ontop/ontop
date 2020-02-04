@@ -97,7 +97,7 @@ public class PunningTest {
 
         LinearInclusionDependencies<AtomPredicate> lids = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
 
-        MappingInTransformation result = tmap.getTMappings(mapping,
+        ImmutableMap<MappingAssertionIndex, IQ> result = tmap.getTMappings(mapping,
                 tbox,
                 new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
                 new ImmutableCQContainmentCheckUnderLIDs(lids));

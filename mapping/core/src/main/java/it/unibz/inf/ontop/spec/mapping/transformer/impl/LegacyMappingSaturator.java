@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
@@ -8,6 +9,7 @@ import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -15,10 +17,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
-import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -51,7 +50,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     }
 
     @Override
-    public MappingInTransformation saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
+    public ImmutableMap<MappingAssertionIndex, IQ> saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
         LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 

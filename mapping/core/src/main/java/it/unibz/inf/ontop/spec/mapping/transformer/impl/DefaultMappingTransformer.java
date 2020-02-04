@@ -2,24 +2,25 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Tables;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.*;
+import it.unibz.inf.ontop.spec.mapping.impl.MappingImpl;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -34,7 +35,6 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private final MappingSameAsInverseRewriter sameAsInverseRewriter;
     private final SpecificationFactory specificationFactory;
     private final RDF rdfFactory;
-    private final UnionBasedQueryMerger queryMerger;
 
     private MappingDistinctTransformer mappingDistinctTransformer;
 
@@ -46,7 +46,6 @@ public class DefaultMappingTransformer implements MappingTransformer {
                                       MappingSameAsInverseRewriter sameAsInverseRewriter,
                                       SpecificationFactory specificationFactory,
                                       RDF rdfFactory,
-                                      UnionBasedQueryMerger queryMerger,
                                       MappingDistinctTransformer mappingDistinctTransformer) {
         this.mappingNormalizer = mappingNormalizer;
         this.mappingSaturator = mappingSaturator;
@@ -56,7 +55,6 @@ public class DefaultMappingTransformer implements MappingTransformer {
         this.specificationFactory = specificationFactory;
         this.rdfFactory = rdfFactory;
         this.mappingDistinctTransformer = mappingDistinctTransformer;
-        this.queryMerger = queryMerger;
     }
 
     @Override
@@ -79,14 +77,35 @@ public class DefaultMappingTransformer implements MappingTransformer {
     OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        MappingInTransformation saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
-        MappingInTransformation normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
-        MappingInTransformation finalMapping = settings.getCardinalityPreservationMode() == LOOSE
+        ImmutableMap<MappingAssertionIndex, IQ> finalMapping = settings.getCardinalityPreservationMode() == LOOSE
                 ? normalizedMapping
                 : mappingDistinctTransformer.addDistinct(normalizedMapping);
 
-        return specificationFactory.createSpecification(finalMapping.getMapping(), dbMetadata, tbox);
+        return specificationFactory.createSpecification(getMapping(finalMapping), dbMetadata, tbox);
     }
+
+    private Mapping getMapping(ImmutableMap<MappingAssertionIndex, IQ> assertions) {
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions = assertions.entrySet().stream()
+                .filter(e -> !e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions = assertions.entrySet().stream()
+                .filter(e -> e.getKey().isClass())
+                .map(e -> Tables.immutableCell(
+                        e.getKey().getPredicate(),
+                        e.getKey().getIri(),
+                        e.getValue()))
+                .collect(ImmutableCollectors.toTable());
+
+        return new MappingImpl(propertyDefinitions, classDefinitions);
+    }
+
 }

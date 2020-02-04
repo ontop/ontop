@@ -146,15 +146,15 @@ public class MappingTest {
          * Renaming
          */
         final RDFAtomPredicate tp = rdfAtomPredicate;
-        MappingInTransformation nonNormalizedMapping = MAPPING_FACTORY.createMapping(Stream.concat(
+        ImmutableMap<MappingAssertionIndex, IQ> nonNormalizedMapping = Stream.concat(
                 propertyMapBuilder.build().entrySet().stream()
                         .map(e -> Maps.immutableEntry(
                                 MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
                 classMap.entrySet().stream()
                         .map(e -> Maps.immutableEntry(
                                 MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
-                .collect(ImmutableCollectors.toMap()));
-        MappingInTransformation normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
+                .collect(ImmutableCollectors.toMap());
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
         /*
          * Test whether two mapping assertions share a variable
@@ -165,8 +165,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getAssertion(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri))
-                    .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+            IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
 
             LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
@@ -180,8 +179,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getAssertion(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1))
-                .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+        IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1));
 
         System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();

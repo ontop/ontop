@@ -17,7 +17,7 @@ public class MappingImpl implements Mapping {
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions;
     private final ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions;
 
-    MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
+    public MappingImpl(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyTable,
                         ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable) {
 
         this.propertyDefinitions = propertyTable;

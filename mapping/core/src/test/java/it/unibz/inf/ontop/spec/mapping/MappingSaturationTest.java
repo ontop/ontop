@@ -139,17 +139,16 @@ public class MappingSaturationTest {
                 new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB), maGivesLab, null),
                 new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE), maGivesLecture, null));
 
-        MappingInTransformation saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
-        RDFAtomPredicate triplesPredicate = saturatedMapping.getRDFAtomPredicates().iterator().next();
+        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
 
-        assertEquals(maGivesLab, saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_GIVES_LAB)).get());
-        assertEquals(maGivesLecture, saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_GIVES_LECTURE)).get());
+        assertEquals(maGivesLab, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB)));
+        assertEquals(maGivesLecture, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE)));
 
-        assertTrue(saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_IS_TAUGHT_BY)).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_IS_TAUGHT_BY)));
+        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)));
 
-        assertTrue(saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_TEACHES)).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getAssertion(MappingAssertionIndex.ofProperty(triplesPredicate, PROP_TEACHES)) + "\nvs\n" + maTeaches);
+        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)) + "\nvs\n" + maTeaches);
     }
 
 
