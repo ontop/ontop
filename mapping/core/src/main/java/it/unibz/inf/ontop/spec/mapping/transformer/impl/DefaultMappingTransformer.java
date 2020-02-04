@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingInTransformation;
+import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -51,16 +52,16 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(MappingInTransformation mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
+    public OBDASpecification transform(MappingWithProvenance mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
         if (ontology.isPresent()) {
             MappingInTransformation factsAsMapping = factConverter.convert(ontology.get().abox(),
                     settings.isOntologyAnnotationQueryingEnabled());
-            MappingInTransformation mappingWithFacts = mappingMerger.merge(mapping, factsAsMapping);
+            MappingInTransformation mappingWithFacts = mappingMerger.merge(mapping.toRegularMapping(), factsAsMapping);
             return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory).build().tbox();
-            return createSpecification(mapping, dbMetadata, emptyTBox);
+            return createSpecification(mapping.toRegularMapping(), dbMetadata, emptyTBox);
         }
     }
 

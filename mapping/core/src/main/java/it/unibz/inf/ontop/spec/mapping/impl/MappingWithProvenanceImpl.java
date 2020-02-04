@@ -26,18 +26,15 @@ import java.util.Optional;
 public class MappingWithProvenanceImpl implements MappingWithProvenance {
 
     private final ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap;
-    private final PrefixManager prefixManager;
     private final SpecificationFactory specFactory;
     private final UnionBasedQueryMerger queryMerger;
 
     @AssistedInject
     private MappingWithProvenanceImpl(@Assisted ImmutableMap<IQ, PPMappingAssertionProvenance> provenanceMap,
-                                      @Assisted PrefixManager prefixManager,
                                       SpecificationFactory specFactory,
                                       UnionBasedQueryMerger queryMerger,
                                       OntopModelSettings settings) {
         this.provenanceMap = provenanceMap;
-        this.prefixManager = prefixManager;
         this.specFactory = specFactory;
         this.queryMerger = queryMerger;
 
@@ -86,11 +83,4 @@ public class MappingWithProvenanceImpl implements MappingWithProvenance {
                 .map(IQ::normalizeForOptimization)
                 .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
     }
-
-
-    @Override
-    public PrefixManager getPrefixManager() {
-        return prefixManager;
-    }
-
 }

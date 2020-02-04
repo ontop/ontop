@@ -60,12 +60,13 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
         ImmutableMap.Builder<IQ, PPMappingAssertionProvenance> newProvenanceMapBuilder = ImmutableMap.builder();
 
+        // no streams because of exception handling
         for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
             IQ newIQ = transformMappingAssertion(entry.getKey(), entry.getValue());
             newProvenanceMapBuilder.put(newIQ, entry.getValue());
         }
 
-        return mappingFactory.create(newProvenanceMapBuilder.build(), mapping.getPrefixManager());
+        return mappingFactory.create(newProvenanceMapBuilder.build());
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance)

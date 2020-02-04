@@ -61,11 +61,10 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
 
     @Override
     public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        ImmutableMap<IQ, PPMappingAssertionProvenance> newProvenanceMap = mapping.getProvenanceMap().entrySet().stream()
+        return mappingFactory.create(mapping.getProvenanceMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         e -> transformMappingAssertion(e.getKey()),
-                        Map.Entry::getValue));
-        return mappingFactory.create(newProvenanceMap, mapping.getPrefixManager());
+                        Map.Entry::getValue)));
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion) {

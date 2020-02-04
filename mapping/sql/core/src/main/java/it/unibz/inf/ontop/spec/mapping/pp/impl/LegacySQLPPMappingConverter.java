@@ -73,7 +73,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     public MappingWithProvenance convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
-        return provMappingFactory.create(convert(ppMapping.getTripleMaps(), dbMetadata), ppMapping.getPrefixManager());
+        return provMappingFactory.create(convert(ppMapping.getTripleMaps(), dbMetadata));
     }
 
 

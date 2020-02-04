@@ -109,7 +109,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         validateMapping(optionalOntology, canonizedMapping);
 
-        return new MappingAndDBMetadataImpl(canonizedMapping.toRegularMapping(), dbMetadata);
+        return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata);
     }
 
     protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)

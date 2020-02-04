@@ -91,9 +91,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                                         intensionalQueryMerger
                                 ),
                                 Map.Entry::getValue
-                        )),
-                mapping.getPrefixManager()
-        );
+                        )));
     }
 
     private IQ transformAssertion(IQ assertion, IntensionalQueryMerger intensionalQueryMerger) {
