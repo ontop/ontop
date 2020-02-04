@@ -146,15 +146,18 @@ public class MappingTest {
          * Renaming
          */
         final RDFAtomPredicate tp = rdfAtomPredicate;
-        ImmutableMap<MappingAssertionIndex, IQ> nonNormalizedMapping = Stream.concat(
+        ImmutableList<MappingAssertion> nonNormalizedMapping = Stream.concat(
                 propertyMapBuilder.build().entrySet().stream()
                         .map(e -> Maps.immutableEntry(
                                 MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
                 classMap.entrySet().stream()
                         .map(e -> Maps.immutableEntry(
                                 MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
-                .collect(ImmutableCollectors.toMap());
-        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
+                .collect(ImmutableCollectors.toMap()).entrySet().stream()
+                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+                .collect(ImmutableCollectors.toList());
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
+                .collect(ImmutableCollectors.toMap(a -> a.getIndex(), a -> a.getQuery()));
 
         /*
          * Test whether two mapping assertions share a variable

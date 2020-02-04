@@ -49,7 +49,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     }
 
     @Override
-    public ImmutableMap<MappingAssertionIndex, IQ> saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
+    public ImmutableList<MappingAssertion> saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
         LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
 

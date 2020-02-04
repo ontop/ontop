@@ -95,7 +95,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public ImmutableMap<MappingAssertionIndex, IQ> getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
+	public ImmutableList<MappingAssertion> getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -141,7 +141,9 @@ public class TMappingProcessor {
                         e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, queryMerger))
                                 .normalizeForOptimization()));
 
-        return entries;
+        return entries.entrySet().stream()
+                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+                .collect(ImmutableCollectors.toList());
     }
 
     private IQ mergeDefinitions(Collection<IQ> assertions) {

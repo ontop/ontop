@@ -77,32 +77,32 @@ public class DefaultMappingTransformer implements MappingTransformer {
     OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
-        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
+        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
+        ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
-        ImmutableMap<MappingAssertionIndex, IQ> finalMapping = settings.getCardinalityPreservationMode() == LOOSE
+        ImmutableList<MappingAssertion> finalMapping = settings.getCardinalityPreservationMode() == LOOSE
                 ? normalizedMapping
                 : mappingDistinctTransformer.addDistinct(normalizedMapping);
 
         return specificationFactory.createSpecification(getMapping(finalMapping), dbMetadata, tbox);
     }
 
-    private Mapping getMapping(ImmutableMap<MappingAssertionIndex, IQ> assertions) {
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions = assertions.entrySet().stream()
-                .filter(e -> !e.getKey().isClass())
+    private Mapping getMapping(ImmutableList<MappingAssertion> assertions) {
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions = assertions.stream()
+                .filter(e -> !e.getIndex().isClass())
                 .map(e -> Tables.immutableCell(
-                        e.getKey().getPredicate(),
-                        e.getKey().getIri(),
-                        e.getValue()))
+                        e.getIndex().getPredicate(),
+                        e.getIndex().getIri(),
+                        e.getQuery()))
                 .collect(ImmutableCollectors.toTable());
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions = assertions.entrySet().stream()
-                .filter(e -> e.getKey().isClass())
+        ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions = assertions.stream()
+                .filter(e -> e.getIndex().isClass())
                 .map(e -> Tables.immutableCell(
-                        e.getKey().getPredicate(),
-                        e.getKey().getIri(),
-                        e.getValue()))
+                        e.getIndex().getPredicate(),
+                        e.getIndex().getIri(),
+                        e.getQuery()))
                 .collect(ImmutableCollectors.toTable());
 
         return new MappingImpl(propertyDefinitions, classDefinitions);

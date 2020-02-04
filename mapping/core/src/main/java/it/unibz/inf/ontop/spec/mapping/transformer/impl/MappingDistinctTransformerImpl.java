@@ -9,12 +9,11 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class MappingDistinctTransformerImpl implements MappingDistinctTransformer {
@@ -26,11 +25,10 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         this.iqFactory = iqFactory;
     }
 
-    public ImmutableMap<MappingAssertionIndex, IQ> addDistinct(ImmutableMap<MappingAssertionIndex, IQ> mapping){
-        return mapping.entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> updateQuery(e.getValue())));
+    public ImmutableList<MappingAssertion> addDistinct(ImmutableList<MappingAssertion> mapping){
+        return mapping.stream()
+                .map(a -> new MappingAssertion(a.getIndex(), updateQuery(a.getQuery()), a.getProvenance()))
+                .collect(ImmutableCollectors.toList());
     }
 
     /**
