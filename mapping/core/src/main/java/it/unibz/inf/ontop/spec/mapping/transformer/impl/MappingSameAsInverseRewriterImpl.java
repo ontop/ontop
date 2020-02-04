@@ -52,9 +52,10 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
             return mapping;
 
         ImmutableMap<MappingAssertionIndex, IQ> update = mapping.getRDFAtomPredicates().stream()
-                .flatMap(p -> mapping.getAssertion(new MappingAssertionIndex(p, OWL.SAME_AS, false))
-                        .map(sameAsDef -> completeSameAsDefinition(sameAsDef, p))
-                        .map(sameAsDef -> Maps.immutableEntry(new MappingAssertionIndex(p, OWL.SAME_AS, false), sameAsDef))
+                .map(p -> MappingAssertionIndex.ofProperty(p, OWL.SAME_AS))
+                .flatMap(i -> mapping.getAssertion(i)
+                        .map(sameAsDef -> completeSameAsDefinition(sameAsDef, i.getPredicate()))
+                        .map(sameAsDef -> Maps.immutableEntry(i, sameAsDef))
                         .map(Stream::of)
                         .orElseGet(Stream::empty))
                 .collect(ImmutableCollectors.toMap());

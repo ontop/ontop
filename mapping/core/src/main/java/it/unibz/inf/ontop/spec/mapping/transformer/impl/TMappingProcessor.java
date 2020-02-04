@@ -174,7 +174,7 @@ public class TMappingProcessor {
 
 	private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, ClassExpression child) {
         if (child instanceof OClass)
-            return new MappingAssertionIndex(rdfAtomPredicate, ((OClass) child).getIRI(), true);
+            return MappingAssertionIndex.ofClass(rdfAtomPredicate, ((OClass) child).getIRI());
         else if (child instanceof ObjectSomeValuesFrom)
             return indexOf(rdfAtomPredicate, ((ObjectSomeValuesFrom) child).getProperty());
         else
@@ -182,11 +182,11 @@ public class TMappingProcessor {
     }
 
     private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, ObjectPropertyExpression child) {
-        return new MappingAssertionIndex(rdfAtomPredicate,child.getIRI(), false);
+        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
     }
 
     private MappingAssertionIndex indexOf(RDFAtomPredicate rdfAtomPredicate, DataPropertyExpression child) {
-        return new MappingAssertionIndex(rdfAtomPredicate, child.getIRI(), false);
+        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
     }
 
     private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {

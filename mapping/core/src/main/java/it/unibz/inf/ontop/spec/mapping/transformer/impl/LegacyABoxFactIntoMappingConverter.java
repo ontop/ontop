@@ -25,6 +25,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 
@@ -64,64 +65,51 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
     @Override
     public MappingInTransformation convert(OntologyABox ontology, boolean isOntologyAnnotationQueryingEnabled) {
 
-        ImmutableMultimap<IRI, IQ> classes = ontology.getClassAssertions().stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        ca -> ca.getConcept().getIRI(),
-                        ca -> createFact(
-                            ca.getIndividual(),
-                            getIRI(RDF.TYPE),
-                            getIRI(ca.getConcept().getIRI()))));
+        ImmutableMultimap<MappingAssertionIndex, IQ> assertions = Stream.concat(
+                ontology.getClassAssertions().stream()
+                    .map(ca -> Maps.immutableEntry(ca.getConcept().getIRI(),
+                        createFact(ca.getIndividual(), RDF.TYPE, getIRI(ca.getConcept().getIRI()))))
+                    .map(e -> Maps.immutableEntry(
+                        MappingAssertionIndex.ofClass((RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(), e.getKey()),
+                        e.getValue())),
 
-        ImmutableMultimap<IRI, IQ> properties = Stream.concat(Stream.concat(
+        Stream.concat(Stream.concat(
                 ontology.getObjectPropertyAssertions().stream()
-                        .map(pa -> createFact(
-                                pa.getSubject(),
-                                getIRI(pa.getProperty().getIRI()),
-                                pa.getObject())),
+                        .map(pa -> Maps.immutableEntry(pa.getProperty().getIRI(),
+                                createFact(pa.getSubject(), pa.getProperty().getIRI(), pa.getObject()))),
 
                 ontology.getDataPropertyAssertions().stream()
-                        .map(da -> createFact(
-                                da.getSubject(),
-                                getIRI(da.getProperty().getIRI()),
-                                da.getValue()))),
+                        .map(da -> Maps.immutableEntry(da.getProperty().getIRI(),
+                                createFact(da.getSubject(), da.getProperty().getIRI(), da.getValue())))),
 
-                isOntologyAnnotationQueryingEnabled
-                        ? ontology.getAnnotationAssertions().stream()
-                            .map(aa -> createFact(
-                                aa.getSubject(),
-                                getIRI(aa.getProperty().getIRI()),
-                                aa.getValue()))
-                        : Stream.of())
-                .collect(ImmutableCollectors.toMultimap(iq -> MappingTools.extractRDFPredicate(iq).getIri(), iq -> iq));
+                (isOntologyAnnotationQueryingEnabled ? ontology.getAnnotationAssertions().stream() : Stream.<AnnotationAssertion>of())
+                        .map(aa -> Maps.immutableEntry(aa.getProperty().getIRI(),
+                                createFact(aa.getSubject(), aa.getProperty().getIRI(), aa.getValue()))))
+
+                .map(e -> Maps.immutableEntry(
+                        MappingAssertionIndex.ofProperty((RDFAtomPredicate) e.getValue().getProjectionAtom().getPredicate(), e.getKey()),
+                        e.getValue())))
+
+                .collect(ImmutableCollectors.toMultimap());
 
         LOGGER.debug("Appended {} object property assertions as fact rules", ontology.getObjectPropertyAssertions().size());
         LOGGER.debug("Appended {} data property assertions as fact rules", ontology.getDataPropertyAssertions().size());
         LOGGER.debug("Appended {} annotation assertions as fact rules", ontology.getAnnotationAssertions().size());
         LOGGER.debug("Appended {} class assertions from ontology as fact rules", ontology.getClassAssertions().size());
 
-        return mappingFactory.createMapping(Stream.concat(
-                getTableRepresentation(properties, false),
-                getTableRepresentation(classes, true))
-                .collect(ImmutableCollectors.toMap()));
+        return mappingFactory.createMapping(assertions.asMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> queryMerger.mergeDefinitions(e.getValue()).get()
+                                .normalizeForOptimization())));
     }
 
-    private Stream<ImmutableMap.Entry<MappingAssertionIndex, IQ>> getTableRepresentation(ImmutableMultimap<IRI, IQ> index, boolean isClass) {
-
-        return index.asMap().entrySet().stream()
-                .map(e -> Maps.immutableEntry(
-                        new MappingAssertionIndex(
-                        (RDFAtomPredicate) projectionAtom.getPredicate(),
-                        e.getKey(), isClass),
-                        queryMerger.mergeDefinitions(e.getValue()).get().normalizeForOptimization()));
-    }
-
-
-    private IQ createFact(ImmutableTerm subject, ImmutableTerm property, ImmutableTerm object) {
+    private IQ createFact(ImmutableTerm subject, IRI property, ImmutableTerm object) {
 
         ConstructionNode topConstructionNode = iqFactory.createConstructionNode(
                 projectionAtom.getVariables(), substitutionFactory.getSubstitution(
                         projectionAtom.getTerm(0), subject,
-                        projectionAtom.getTerm(1), property,
+                        projectionAtom.getTerm(1), getIRI(property),
                         projectionAtom.getTerm(2), object));
 
         IQTree constructionTree = iqFactory.createUnaryIQTree(topConstructionNode, iqFactory.createTrueNode());

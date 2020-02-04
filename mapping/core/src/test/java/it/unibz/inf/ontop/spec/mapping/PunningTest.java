@@ -86,8 +86,8 @@ public class PunningTest {
         RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
 
         MappingInTransformation mapping = SPECIFICATION_FACTORY.createMapping(
-                ImmutableMap.of(new MappingAssertionIndex(tp, PROP_IRI, false), propertyMappingAssertion,
-                        new MappingAssertionIndex(tp, CLASS_IRI, true), classMappingAssertion));
+                ImmutableMap.of(MappingAssertionIndex.ofProperty(tp, PROP_IRI), propertyMappingAssertion,
+                        MappingAssertionIndex.ofClass(tp, CLASS_IRI), classMappingAssertion));
 
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
         builder.declareClass(CLASS_IRI);

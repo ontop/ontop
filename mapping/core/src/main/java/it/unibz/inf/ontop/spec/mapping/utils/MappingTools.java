@@ -38,8 +38,8 @@ public class MappingTools {
         IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
 
         return propertyIRI.equals(RDF.TYPE)
-                ? new MappingAssertionIndex(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI), true)
-                : new MappingAssertionIndex(rdfAtomPredicate, propertyIRI, false);
+                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
+                : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
     }
 
     private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,

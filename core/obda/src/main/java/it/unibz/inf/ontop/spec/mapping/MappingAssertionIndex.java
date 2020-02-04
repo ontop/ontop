@@ -8,10 +8,18 @@ public class MappingAssertionIndex {
     private final IRI iri;
     private final RDFAtomPredicate predicate;
 
-    public MappingAssertionIndex(RDFAtomPredicate predicate, IRI iri, boolean isClass) {
+    private MappingAssertionIndex(RDFAtomPredicate predicate, IRI iri, boolean isClass) {
         this.predicate = predicate;
         this.iri = iri;
         this.isClass = isClass;
+    }
+
+    public static MappingAssertionIndex ofProperty(RDFAtomPredicate predicate, IRI iri) {
+        return new MappingAssertionIndex(predicate, iri, false);
+    }
+
+    public static MappingAssertionIndex ofClass(RDFAtomPredicate predicate, IRI iri) {
+        return new MappingAssertionIndex(predicate, iri, true);
     }
 
     public boolean isClass() {

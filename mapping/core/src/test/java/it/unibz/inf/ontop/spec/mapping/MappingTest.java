@@ -149,10 +149,10 @@ public class MappingTest {
         MappingInTransformation nonNormalizedMapping = MAPPING_FACTORY.createMapping(Stream.concat(
                 propertyMapBuilder.build().entrySet().stream()
                         .map(e -> Maps.immutableEntry(
-                                new MappingAssertionIndex(tp, e.getKey(), false), e.getValue())),
+                                MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
                 classMap.entrySet().stream()
                         .map(e -> Maps.immutableEntry(
-                                new MappingAssertionIndex(tp, e.getKey(), true), e.getValue())))
+                                MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
                 .collect(ImmutableCollectors.toMap()));
         MappingInTransformation normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
 
@@ -165,7 +165,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getAssertion(new MappingAssertionIndex(rdfAtomPredicate, propertyIri, false))
+            IQ mappingAssertion = normalizedMapping.getAssertion(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri))
                     .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
             LOGGER.info(mappingAssertion.toString());
@@ -180,7 +180,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getAssertion(new MappingAssertionIndex(rdfAtomPredicate, CLASS_1, true))
+        IQ mappingAssertion = normalizedMapping.getAssertion(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1))
                 .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
 
         System.out.println(mappingAssertion);
@@ -214,7 +214,7 @@ public class MappingTest {
         LOGGER.info(mappingAssertion.toString());
 
         RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
-        MAPPING_FACTORY.createMapping(ImmutableMap.of(new MappingAssertionIndex(tp, CLASS_1, true), mappingAssertion));
+        MAPPING_FACTORY.createMapping(ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion));
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
