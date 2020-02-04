@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
 

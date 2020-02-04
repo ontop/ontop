@@ -211,8 +211,8 @@ public class MappingTest {
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
-        MAPPING_FACTORY.createMapping(ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion));
+//        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
+//        ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

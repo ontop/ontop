@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
