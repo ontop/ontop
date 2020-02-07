@@ -10,12 +10,10 @@ import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingVariableNameNormalizer;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -43,10 +41,7 @@ public class MappingVariableNameNormalizerImpl implements MappingVariableNameNor
     public ImmutableList<MappingAssertion> normalize(ImmutableList<MappingAssertion> mapping) {
         AtomicInteger i = new AtomicInteger(0);
         return mapping.stream()
-                .map(a -> new MappingAssertion(
-                        a.getIndex(),
-                        appendSuffixToVariableNames(a.getQuery(), i.incrementAndGet()),
-                        a.getProvenance()))
+                .map(a -> a.copyOf(appendSuffixToVariableNames(a.getQuery(), i.incrementAndGet())))
                 .collect(ImmutableCollectors.toList());
     }
 

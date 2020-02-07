@@ -57,7 +57,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
         if (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
             return a;
 
-        return new MappingAssertion(a.getIndex(), completeSameAsDefinition(a.getQuery(), a.getIndex().getPredicate()), a.getProvenance());
+        return a.copyOf(completeSameAsDefinition(a.getQuery(), a.getIndex().getPredicate()));
     }
 
     private IQ completeSameAsDefinition(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {

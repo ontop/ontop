@@ -58,9 +58,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     @Override
     public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
         return mapping.stream()
-                .map(a -> new MappingAssertion(
-                        a.getIndex(),
-                        transformMappingAssertion(a.getQuery()), a.getProvenance()))
+                .map(a -> a.copyOf(transformMappingAssertion(a.getQuery())))
                 .collect(ImmutableCollectors.toList());
     }
 

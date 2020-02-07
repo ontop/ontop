@@ -59,7 +59,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
         // no streams because of exception handling
         for (MappingAssertion a : mapping) {
             IQ newIQ = transformMappingAssertion(a.getQuery(), a.getProvenance());
-            newProvenanceMapBuilder.add(new MappingAssertion(a.getIndex(), newIQ, a.getProvenance()));
+            newProvenanceMapBuilder.add(a.copyOf(newIQ));
         }
 
         return newProvenanceMapBuilder.build();

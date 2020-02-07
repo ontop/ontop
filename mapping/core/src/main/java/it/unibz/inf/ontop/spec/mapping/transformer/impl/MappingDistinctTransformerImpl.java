@@ -27,7 +27,7 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
 
     public ImmutableList<MappingAssertion> addDistinct(ImmutableList<MappingAssertion> mapping){
         return mapping.stream()
-                .map(a -> new MappingAssertion(a.getIndex(), updateQuery(a.getQuery()), a.getProvenance()))
+                .map(a -> a.copyOf(updateQuery(a.getQuery())))
                 .collect(ImmutableCollectors.toList());
     }
 

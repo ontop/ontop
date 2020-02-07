@@ -22,6 +22,7 @@ import java.util.function.Function;
  */
 public class MappingTools {
 
+    @Deprecated
     public static MappingAssertionIndex extractRDFPredicate(IQ mappingAssertion) {
         DistinctVariableOnlyDataAtom projectionAtom = mappingAssertion.getProjectionAtom();
         RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())

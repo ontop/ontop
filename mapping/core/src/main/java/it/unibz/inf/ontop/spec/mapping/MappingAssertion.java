@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping;
 
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 
@@ -15,9 +16,25 @@ public class MappingAssertion {
         this.provenance = provenance;
     }
 
+    public MappingAssertion copyOf(IQ query) {
+        if (!index.getPredicate().equals(query.getProjectionAtom().getPredicate()))
+            throw new MappingAssertionIndexException("Different atoms predicates: "
+                    + index.getPredicate()
+                    + " and "
+                    + query.getProjectionAtom().getPredicate());
+
+        return new MappingAssertion(index, query, provenance);
+    }
+
     public MappingAssertionIndex getIndex() { return index; }
 
     public IQ getQuery() { return query; }
 
     public PPMappingAssertionProvenance getProvenance() { return provenance; }
+
+    private static class MappingAssertionIndexException extends OntopInternalBugException {
+        private MappingAssertionIndexException(String message) {
+            super(message);
+        }
+    }
 }
