@@ -21,7 +21,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -103,7 +102,8 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         if (replacedVar.isPresent()) {
             Variable newVariable = createFreshVariable(assertion, intensionalQueryMerger, replacedVar.get());
             IntensionalDataNode idn = getIDN(replacedVar.get(), newVariable);
-            RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom());
+            RDFAtomPredicate pred = getRDFAtomPredicate(assertion.getProjectionAtom())
+                    .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
 
             DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
                     pred,
@@ -183,33 +183,25 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
     }
 
-    private Optional<IRI> getPropertyIRI(DataAtom atom) {
-        AtomPredicate atomPredicate = atom.getPredicate();
-
-        return Optional.of(atomPredicate)
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .flatMap(p -> p.getPropertyIRI(atom.getArguments()));
-    }
-
     private Variable getVarFromRDFAtom(DistinctVariableOnlyDataAtom atom, Position position) {
+        RDFAtomPredicate predicate = getRDFAtomPredicate(atom)
+                .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
         switch (position) {
             case SUBJECT:
-                return getRDFAtomPredicate(atom).getSubject(atom.getArguments());
+                return predicate.getSubject(atom.getArguments());
             case OBJECT:
-                return getRDFAtomPredicate(atom).getObject(atom.getArguments());
+                return predicate.getObject(atom.getArguments());
             case PROPERTY:
-                return getRDFAtomPredicate(atom).getProperty(atom.getArguments());
+                return predicate.getProperty(atom.getArguments());
             default:
                 throw new UnexpectedPositionException(position);
         }
     }
 
-    private RDFAtomPredicate getRDFAtomPredicate(DataAtom atom){
+    private <P extends AtomPredicate> Optional<RDFAtomPredicate> getRDFAtomPredicate(DataAtom<P> atom){
         return Optional.of(atom.getPredicate())
                 .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p)
-                .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
+                .map(p -> (RDFAtomPredicate) p);
     }
 
     private static class CanonicalTransformerException extends OntopInternalBugException {
@@ -251,7 +243,9 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
 
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
-                if (getPropertyIRI(dataNode.getProjectionAtom())
+                DataAtom<AtomPredicate> atom =  dataNode.getProjectionAtom();
+                if (getRDFAtomPredicate(atom)
+                        .flatMap(p -> p.getPropertyIRI(atom.getArguments()))
                         .filter(i -> i.equals(Ontop.CANONICAL_IRI))
                         .isPresent()) {
                     return Optional.of(definition);
