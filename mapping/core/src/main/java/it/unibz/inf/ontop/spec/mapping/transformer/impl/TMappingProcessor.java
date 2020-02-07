@@ -103,9 +103,12 @@ public class TMappingProcessor {
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
         ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
-                .collect(ImmutableCollectors.toMultimap(a -> a.getIndex(), a -> a.getQuery()))
+                .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, MappingAssertion::getQuery))
                 .asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> mergeDefinitions(e.getValue())));
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> queryMerger.mergeDefinitions(e.getValue())
+                                .map(IQ::normalizeForOptimization).get()));
 
         ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = iqClassificationMap.entrySet().stream()
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getValue()))
@@ -145,13 +148,6 @@ public class TMappingProcessor {
                 .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
                 .collect(ImmutableCollectors.toList());
     }
-
-    private IQ mergeDefinitions(Collection<IQ> assertions) {
-        return queryMerger.mergeDefinitions(assertions)
-                .map(IQ::normalizeForOptimization)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Could not merge assertions: " + assertions));
-    }
-
 
     private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                                                  Predicate<T> representativeFilter,
