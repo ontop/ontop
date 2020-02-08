@@ -56,6 +56,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
                 .forEach(fk -> getLinearInclusionDependency(b, fk));
 
         LinearInclusionDependencies<RelationPredicate> lids = b.build();
+        System.out.println("LIDS: " + lids);
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs(lids);
 
