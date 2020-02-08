@@ -24,9 +24,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
@@ -62,7 +60,6 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
-    private final SpecificationFactory specificationFactory;
 
     @Inject
 	private TMappingProcessor(AtomFactory atomFactory,
@@ -73,8 +70,7 @@ public class TMappingProcessor {
                               NoNullValueEnforcer noNullValueEnforcer,
                               IntermediateQueryFactory iqFactory,
                               UnionBasedQueryMerger queryMerger,
-                              SubstitutionFactory substitutionFactory,
-                              SpecificationFactory specificationFactory) {
+                              SubstitutionFactory substitutionFactory) {
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
         this.unionSplitter = unionSplitter;
@@ -84,7 +80,6 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
-        this.specificationFactory = specificationFactory;
     }
 
 
@@ -102,15 +97,15 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
-                .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, MappingAssertion::getQuery))
-                .asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> queryMerger.mergeDefinitions(e.getValue())
-                                .map(IQ::normalizeForOptimization).get()));
+//        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
+//                .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, MappingAssertion::getQuery));
+//                .asMap().entrySet().stream()
+//                .collect(ImmutableCollectors.toMap(
+//                        Map.Entry::getKey,
+//                        e -> queryMerger.mergeDefinitions(e.getValue())
+//                                .map(IQ::normalizeForOptimization).get()));
 
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = iqClassificationMap.entrySet().stream()
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream().map(a -> Maps.immutableEntry(a.getIndex(), a.getQuery()))
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getValue()))
                         .map(q -> new TMappingRule(a.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
                 .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
