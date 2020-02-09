@@ -24,6 +24,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -31,8 +32,10 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
@@ -40,8 +43,10 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -130,7 +135,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, queryMerger))
+                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, substitutionFactory, queryMerger))
                                 .normalizeForOptimization()));
 
         return entries.entrySet().stream()
@@ -141,8 +146,8 @@ public class TMappingProcessor {
     private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
                                                                                  Predicate<T> representativeFilter,
                                                                                  ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
-                                                                                 java.util.function.BiFunction<RDFAtomPredicate, T, MappingAssertionIndex> indexOf,
-                                                                                 java.util.function.Function<T, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>>> getNewHeadGen,
+                                                                                 BiFunction<RDFAtomPredicate, T, MappingAssertionIndex> indexOf,
+                                                                                 java.util.function.Function<T, BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>>> getNewHeadGen,
                                                                                  ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
                                                                                  BiPredicate<T, T> populationFilter) {
 
@@ -152,7 +157,7 @@ public class TMappingProcessor {
         RDFAtomPredicate rdfTriple = originalMappingIndex.keySet().iterator().next().getPredicate();
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(s).apply(m.getHeadTerms()), indexOf.apply(rdfTriple, d), m, substitutionFactory));
+                (d, r) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, r).getIri()), indexOf.apply(rdfTriple, r), m));
 
 	    ImmutableMap<MappingAssertionIndex, TMappingEntry> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
@@ -165,7 +170,7 @@ public class TMappingProcessor {
                                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
 
         java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms()), indexOf.apply(rdfTriple, d), m, substitutionFactory));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, d).getIri()), indexOf.apply(rdfTriple, d), m));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
@@ -196,26 +201,30 @@ public class TMappingProcessor {
         return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
     }
 
-    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {
+    private java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> getNewHeadC(ClassExpression child) {
         if (child instanceof OClass) {
-            return Function.identity();
+            return (head, iri) -> ImmutableList.of(head.get(0), head.get(1), getConstantIRI(iri));
         }
         else if (child instanceof ObjectSomeValuesFrom) {
             ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
             return some.isInverse()
-                ? head -> ImmutableList.of(head.get(1))
-                : head -> ImmutableList.of(head.get(0));
+                ? (head, iri) -> ImmutableList.of(head.get(2), getConstantIRI(RDF.TYPE), getConstantIRI(iri))
+                : (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(iri));
         }
-        else {
-            DataPropertyExpression some = ((DataSomeValuesFrom) child).getProperty();
+        else if (child instanceof DataSomeValuesFrom) {
             // can never be an inverse
-            return head -> ImmutableList.of(head.get(0));
+            return (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(iri));
         }
+        else
+            throw new MinorOntopInternalBugException("Unexpected type" + child);
     }
 
-    private java.util.function.Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> getNewHeadP(boolean isInverse) {
+    private java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> getNewHeadP(boolean isInverse) {
         return isInverse
-                ? head -> ImmutableList.of(head.get(1), head.get(0))
-                : Function.identity();
+                ? (head, iri) -> ImmutableList.of(head.get(2), getConstantIRI(iri), head.get(0))
+                : (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(iri), head.get(2));
+    }
+    private IRIConstant getConstantIRI(IRI iri) {
+        return termFactory.getConstantIRI(iri);
     }
 }

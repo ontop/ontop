@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -38,9 +39,9 @@ public class TMappingEntry {
                 termFactory);
     }
 
-    public IQ asIQ(IntermediateQueryFactory iqFactory, UnionBasedQueryMerger queryMerger) {
+    public IQ asIQ(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, UnionBasedQueryMerger queryMerger) {
         return queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ(iqFactory))
+                        .map(r -> r.asIQ(iqFactory, substitutionFactory))
                         .collect(ImmutableCollectors.toList())).get();
     }
 

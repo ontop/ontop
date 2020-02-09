@@ -26,7 +26,7 @@ public class TMappingRule {
 	private final MappingAssertionIndex predicateInfo;
 
 	private final DistinctVariableOnlyDataAtom projectionAtom;
-	private final ImmutableSubstitution<ImmutableTerm> substitution;
+	private final ImmutableList<ImmutableTerm> headTerms;
 
 	private final ImmutableList<ExtensionalDataNode> extensionalNodes;
 	// an OR-connected list of AND-connected atomic filters
@@ -39,7 +39,7 @@ public class TMappingRule {
 
 		this.predicateInfo = predicateInfo;
 		this.projectionAtom = iq.getProjectionAtom();
-		this.substitution = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution();
+		this.headTerms = (ImmutableList<ImmutableTerm>) ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
@@ -83,45 +83,22 @@ public class TMappingRule {
 
         this.predicateInfo = baseRule.predicateInfo;
         this.projectionAtom = baseRule.projectionAtom;
-		this.substitution = baseRule.substitution;
+		this.headTerms = baseRule.headTerms;
 
 		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = filter;
 	}
 
 
-	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingAssertionIndex predicateInfo, TMappingRule baseRule, SubstitutionFactory substitutionFactory) {
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingAssertionIndex predicateInfo, TMappingRule baseRule) {
         this.termFactory = baseRule.termFactory;
 
 		this.predicateInfo = predicateInfo;
 		this.projectionAtom = baseRule.projectionAtom;
-		if (predicateInfo.isClass()) {
-			substitution = substitutionFactory.getSubstitution(
-					projectionAtom.getTerm(0), headTerms.get(0),
-					projectionAtom.getTerm(1), getConstantIRI(RDF.TYPE),
-					projectionAtom.getTerm(2), getConstantIRI(predicateInfo.getIri()));
-		}
-		else if (headTerms.get(1) instanceof Variable) {
-			if (!headTerms.get(1).equals(projectionAtom.getTerm(2)))
-				throw new IllegalStateException("The last argument does not match");
-
-			substitution = substitutionFactory.getSubstitution(
-					projectionAtom.getTerm(0), headTerms.get(0),
-					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()));
-		}
-		else {
-			substitution = substitutionFactory.getSubstitution(
-					projectionAtom.getTerm(0), headTerms.get(0),
-					projectionAtom.getTerm(1), getConstantIRI(predicateInfo.getIri()),
-					projectionAtom.getTerm(2), headTerms.get(1));
-		}
+		this.headTerms = headTerms;
 
 		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = baseRule.filter;
-	}
-
-	private IRIConstant getConstantIRI(IRI iri) {
-		return termFactory.getConstantIRI(iri);
 	}
 
 
@@ -129,13 +106,20 @@ public class TMappingRule {
 	public MappingAssertionIndex getPredicateInfo() { return predicateInfo; }
 
 
-	public IQ asIQ(IntermediateQueryFactory iqFactory) {
+	public IQ asIQ(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
 		Optional<ImmutableExpression> mergedConditions = filter.stream()
 				.map(list -> list.stream()
 						.reduce((r, e) -> termFactory.getConjunction(e, r)).get())
 				.reduce((r, e) -> termFactory.getDisjunction(e, r));
+
+		ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+				ImmutableMap.of(projectionAtom.getTerm(0), headTerms.get(0),
+						projectionAtom.getTerm(1), headTerms.get(1),
+						projectionAtom.getTerm(2), headTerms.get(2)).entrySet().stream()
+				.filter(e -> !e.getKey().equals(e.getValue()))
+				.collect(ImmutableCollectors.toMap()));
 
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
@@ -144,11 +128,10 @@ public class TMappingRule {
 	}
 
 	public ImmutableList<ImmutableTerm> getHeadTerms() {
-        return predicateInfo.isClass()
-				? ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)))
-				: ImmutableList.of(substitution.applyToVariable(projectionAtom.getTerm(0)),
-									substitution.applyToVariable(projectionAtom.getTerm(2)));
+		return headTerms;
     }
+
+
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }
 
@@ -158,7 +141,7 @@ public class TMappingRule {
 
 	@Override
 	public int hashCode() {
-		return predicateInfo.getIri().hashCode() ^ substitution.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
+		return predicateInfo.getIri().hashCode() ^ headTerms.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
 	}
 	
 	@Override
@@ -166,7 +149,7 @@ public class TMappingRule {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
 			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
-					substitution.equals(otherRule.substitution) &&
+					headTerms.equals(otherRule.headTerms) &&
 					extensionalNodes.equals(otherRule.extensionalNodes) &&
 					filter.equals(otherRule.filter));
 		}
@@ -175,6 +158,6 @@ public class TMappingRule {
 
 	@Override 
 	public String toString() {
-		return predicateInfo.getIri() + "(" + substitution.apply(projectionAtom.getArguments()) + ") <- " + extensionalNodes + " FILTER " + filter;
+		return predicateInfo.getIri() + "(" + headTerms + ") <- " + extensionalNodes + " FILTER " + filter;
 	}
 }

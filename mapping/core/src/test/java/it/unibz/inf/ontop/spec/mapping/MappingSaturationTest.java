@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -19,19 +18,12 @@ import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
 import static junit.framework.TestCase.*;
 
 public class MappingSaturationTest {
     private static final RelationPredicate P1_PREDICATE;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
-
-    private static final DBMetadata DB_METADATA;
 
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
@@ -58,8 +50,6 @@ public class MappingSaturationTest {
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";
         URI_TEMPLATE_COURSE1 =  "http://example.org/uni1/course/{}";
         URI_TEMPLATE_COURSE2 =  "http://example.org/uni2/course/{}";
-
-        DB_METADATA = dbMetadata;
 
         PROP_GIVES_LECTURE = RDF_FACTORY.createIRI("http://example.org/voc#givesLecture");
         PROP_TEACHES = RDF_FACTORY.createIRI("http://example.org/voc#teaches");
@@ -151,7 +141,6 @@ public class MappingSaturationTest {
         assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
         System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)) + "\nvs\n" + maTeaches);
     }
-
 
     private ImmutableTerm getConstantIRI(IRI iri) {
         return TERM_FACTORY.getConstantIRI(iri);
