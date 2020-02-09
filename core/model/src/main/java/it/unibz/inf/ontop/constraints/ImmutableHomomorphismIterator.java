@@ -33,10 +33,10 @@ public class ImmutableHomomorphismIterator<P extends AtomPredicate> implements I
 
     private final class State {
         final ImmutableHomomorphism homomorphism;
-        final Queue<DataAtom> remainingChoices;
-        final DataAtom atom;
+        final Queue<DataAtom<P>> remainingChoices;
+        final DataAtom<P> atom;
 
-        State(DataAtom atom, ImmutableHomomorphism homomorphism) {
+        State(DataAtom<P> atom, ImmutableHomomorphism homomorphism) {
             this.atom = atom;
             this.homomorphism = homomorphism;
             this.remainingChoices = new ArrayDeque<>(to);
@@ -63,7 +63,7 @@ public class ImmutableHomomorphismIterator<P extends AtomPredicate> implements I
     private ImmutableHomomorphism shift() {
         while (!stack.isEmpty()) {
             State state = stack.peek();
-            DataAtom candidateAtom = state.remainingChoices.poll();
+            DataAtom<P> candidateAtom = state.remainingChoices.poll();
             if (candidateAtom != null) {
                 if (state.atom.getPredicate().equals(candidateAtom.getPredicate())) {
                     ImmutableHomomorphism.Builder builder = ImmutableHomomorphism.builder(state.homomorphism);

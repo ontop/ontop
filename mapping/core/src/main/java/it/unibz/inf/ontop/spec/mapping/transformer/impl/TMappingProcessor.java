@@ -97,17 +97,11 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-//        ImmutableMap<MappingAssertionIndex, IQ> iqClassificationMap = mapping.stream()
-//                .collect(ImmutableCollectors.toMultimap(MappingAssertion::getIndex, MappingAssertion::getQuery));
-//                .asMap().entrySet().stream()
-//                .collect(ImmutableCollectors.toMap(
-//                        Map.Entry::getKey,
-//                        e -> queryMerger.mergeDefinitions(e.getValue())
-//                                .map(IQ::normalizeForOptimization).get()));
-
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream().map(a -> Maps.immutableEntry(a.getIndex(), a.getQuery()))
-                .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getValue()))
-                        .map(q -> new TMappingRule(a.getKey(), mappingCqcOptimizer.optimize(cqContainmentCheck, q), termFactory, atomFactory)))
+        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream()
+                .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
+                        .map(IQ::normalizeForOptimization) // replaces join equalities
+                        .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
+                        .map(q -> new TMappingRule(a.getIndex(), q, termFactory, atomFactory)))
                 .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(

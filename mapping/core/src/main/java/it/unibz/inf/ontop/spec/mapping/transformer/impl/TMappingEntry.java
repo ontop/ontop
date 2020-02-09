@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
@@ -192,20 +193,28 @@ public class TMappingEntry {
                             .map(atom -> from.get().applyToBooleanExpression(atom, termFactory))
                             .collect(ImmutableCollectors.toList());
 
-                    // if each of the existing conditions in one of the filter groups
-                    // is found in the new filter then the new filter is redundant
-                    if (current.getConditions().stream().anyMatch(f -> newf.containsAll(f)))
-                        return;
+                    ImmutableSet<Variable> newfVars = newf.stream()
+                            .flatMap(ImmutableTerm::getVariableStream)
+                            .collect(ImmutableCollectors.toSet());
+                    ImmutableSet<Variable> ccVars = current.getDatabaseAtoms().stream()
+                            .flatMap(a -> a.getVariables().stream())
+                            .collect(ImmutableCollectors.toSet());
+                    if (ccVars.containsAll(newfVars)) {
+                        // if each of the existing conditions in one of the filter groups
+                        // is found in the new filter then the new filter is redundant
+                        if (current.getConditions().stream().anyMatch(newf::containsAll))
+                            return;
 
-                    // REPLACE THE CURRENT RULE
-                    mappingIterator.remove();
-                    rules.add(new TMappingRule(current, Stream.concat(
-                                    current.getConditions().stream()
-                                            // if each of the new conditions is found among econd then the old condition is redundant
-                                            .filter(f -> !f.containsAll(newf)),
-                                    Stream.of(newf))
-                                    .collect(ImmutableCollectors.toList())));
-                    return;
+                        // REPLACE THE CURRENT RULE
+                        mappingIterator.remove();
+                        rules.add(new TMappingRule(current, Stream.concat(
+                                current.getConditions().stream()
+                                        // if each of the new conditions is found among econd then the old condition is redundant
+                                        .filter(f -> !f.containsAll(newf)),
+                                Stream.of(newf))
+                                .collect(ImmutableCollectors.toList())));
+                        return;
+                    }
                 }
             }
             rules.add(assertion);

@@ -112,7 +112,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
     }
 
     protected void registerVariables(ImmutableCollection<DataAtom<P>> atoms) {
-        atoms.stream().forEach(this::registerVariables);
+        atoms.forEach(this::registerVariables);
     }
 
     protected ImmutableHomomorphism extendWithLabelledNulls(LinearInclusionDependency<P> id, ImmutableHomomorphism h) {
@@ -142,7 +142,7 @@ public class LinearInclusionDependencies<P extends AtomPredicate> {
             this.atomFactory = atomFactory;
         }
 
-        public Builder add(DataAtom<P> head, DataAtom<P> body) {
+        public Builder<P> add(DataAtom<P> head, DataAtom<P> body) {
             builder.add(new LinearInclusionDependency<>(head, body));
             return this;
         }

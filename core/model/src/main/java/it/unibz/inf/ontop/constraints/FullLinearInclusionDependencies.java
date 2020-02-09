@@ -46,7 +46,7 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
             super(coreUtilsFactory, atomFactory);
         }
 
-        public Builder add(DataAtom<P> head, DataAtom<P> body) {
+        public Builder<P> add(DataAtom<P> head, DataAtom<P> body) {
             if (!body.getVariables().containsAll(head.getVariables()))
                 throw new IllegalArgumentException();
             super.add(head, body);
