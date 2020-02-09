@@ -1,0 +1,60 @@
+package it.unibz.inf.ontop.constraints.impl;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.Attribute;
+import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint;
+import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
+
+import java.util.stream.Stream;
+
+public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDependenciesImpl<RelationPredicate> {
+
+    protected final AtomFactory atomFactory;
+    private final VariableGenerator variableGenerator;
+
+    public DBLinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory,
+                                              AtomFactory atomFactory) {
+        this.atomFactory = atomFactory;
+        this.variableGenerator = coreUtilsFactory.createVariableGenerator(ImmutableSet.of());
+    }
+
+    @Override
+    protected Stream<DataAtom<RelationPredicate>> chase(DataAtom<RelationPredicate> atom) {
+        return atom.getPredicate().getRelationDefinition().getForeignKeys().stream().flatMap(id -> chase(id, atom));
+    }
+
+    private Stream<DataAtom<RelationPredicate>> chase(ForeignKeyConstraint fk, DataAtom<RelationPredicate> atom) {
+
+        ImmutableMap<Attribute, VariableOrGroundTerm> inversion =
+                fk.getComponents().stream()
+                .collect(ImmutableCollectors.toMap(
+                        ForeignKeyConstraint.Component::getReference,
+                        c -> atom.getArguments().get(c.getAttribute().getIndex() - 1)));
+
+        ImmutableList<VariableOrGroundTerm> newArguments = fk.getReferencedRelation().getAttributes().stream()
+                .map(a -> inversion.getOrDefault(a, variableGenerator.generateNewVariable(a.getID().getName())))
+                .collect(ImmutableCollectors.toList());
+
+        RelationPredicate predicate = fk.getReferencedRelation().getAtomPredicate();
+        return Stream.of(atomFactory.getDataAtom(predicate, newArguments));
+    }
+
+    @Override
+    protected void registerVariables(DataAtom<RelationPredicate> atom) {
+        variableGenerator.registerAdditionalVariables(atom.getVariables());
+    }
+
+    @Override
+    public String toString() {
+        return "DB LIDs";
+    }
+
+}

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.constraints.impl.DBLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
@@ -58,7 +59,9 @@ public class LegacyMappingSaturator implements MappingSaturator {
 
         BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = b.build();
 
-        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs<>(lids);
+        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck =
+                new ImmutableCQContainmentCheckUnderLIDs<>(
+                    new DBLinearInclusionDependenciesImpl(coreUtilsFactory, atomFactory));
 
         return tMappingProcessor.getTMappings(mapping, saturatedTBox, tMappingExclusionConfig, cqContainmentCheck);
     }
