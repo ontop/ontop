@@ -2,7 +2,8 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
+import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -94,12 +95,12 @@ public class PunningTest {
         Ontology ontology = builder.build();
         ClassifiedTBox tbox = ontology.tbox();
 
-        LinearInclusionDependencies<AtomPredicate> lids = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
+        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = LinearInclusionDependenciesImpl.<RelationPredicate>builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
 
         ImmutableList<MappingAssertion> result = tmap.getTMappings(mapping,
                 tbox,
                 new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
-                new ImmutableCQContainmentCheckUnderLIDs(lids));
+                new ImmutableCQContainmentCheckUnderLIDs<>(lids));
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

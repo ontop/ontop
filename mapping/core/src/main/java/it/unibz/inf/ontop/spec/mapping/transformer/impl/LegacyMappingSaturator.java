@@ -3,7 +3,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
+import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
@@ -48,14 +49,14 @@ public class LegacyMappingSaturator implements MappingSaturator {
     @Override
     public ImmutableList<MappingAssertion> saturate(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox saturatedTBox) {
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(coreUtilsFactory, atomFactory);
 
         dbMetadata.getDatabaseRelations().stream()
                 .map(DatabaseRelationDefinition::getForeignKeys)
                 .flatMap(List::stream)
                 .forEach(fk -> getLinearInclusionDependency(b, fk));
 
-        LinearInclusionDependencies<RelationPredicate> lids = b.build();
+        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = b.build();
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck = new ImmutableCQContainmentCheckUnderLIDs<>(lids);
 
@@ -63,7 +64,7 @@ public class LegacyMappingSaturator implements MappingSaturator {
     }
 
 
-    private void getLinearInclusionDependency(LinearInclusionDependencies.Builder<RelationPredicate> b, ForeignKeyConstraint fk) {
+    private void getLinearInclusionDependency(LinearInclusionDependenciesImpl.Builder<RelationPredicate> b, ForeignKeyConstraint fk) {
 
         DatabaseRelationDefinition def1 = fk.getRelation();
         VariableOrGroundTerm[] terms1 = new VariableOrGroundTerm[def1.getAttributes().size()];

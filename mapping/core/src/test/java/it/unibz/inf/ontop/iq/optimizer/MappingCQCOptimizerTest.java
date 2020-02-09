@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
@@ -68,7 +69,7 @@ public class MappingCQCOptimizerTest {
 
         IQ q = IQ_FACTORY.createIQ(root, rootTree);
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
 
         final Variable cmpShare1M = TERM_FACTORY.getVariable("cmpShare1M");
         final Variable fldNpdidField1M = TERM_FACTORY.getVariable("fldNpdidField1M");
@@ -158,7 +159,7 @@ public class MappingCQCOptimizerTest {
 
         System.out.println("ONE " + one + "\n" + "TWO " + two);
 
-        LinearInclusionDependencies.Builder<RelationPredicate> b = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
+        LinearInclusionDependenciesImpl.Builder<RelationPredicate> b = LinearInclusionDependenciesImpl.builder(CORE_UTILS_FACTORY, ATOM_FACTORY);
 
         final Variable addressIdM = TERM_FACTORY.getVariable("address_id_m");
         final Variable addressIdM2 = TERM_FACTORY.getVariable("address_id_m2");
@@ -179,7 +180,7 @@ public class MappingCQCOptimizerTest {
         b.add(ATOM_FACTORY.getDataAtom(store, storeIdM, addressIdM2, staffIdM2),
                 ATOM_FACTORY.getDataAtom(staff, staffIdM, addressIdM, storeIdM));
 
-        LinearInclusionDependencies<RelationPredicate> lids = b.build();
+        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = b.build();
         System.out.println("LIDS: " + lids);
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(lids);
