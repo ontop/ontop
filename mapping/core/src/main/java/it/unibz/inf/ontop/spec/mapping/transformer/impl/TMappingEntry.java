@@ -8,10 +8,8 @@ import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -25,23 +23,18 @@ import java.util.stream.Stream;
 public class TMappingEntry {
     private ImmutableList<TMappingRule> rules;
 
-    private final TermFactory termFactory;
-
-
-    public TMappingEntry(ImmutableList<TMappingRule> rules, TermFactory termFactory) {
+    public TMappingEntry(ImmutableList<TMappingRule> rules) {
         this.rules = rules;
-        this.termFactory = termFactory;
     }
 
     public TMappingEntry createCopy(java.util.function.Function<TMappingRule, TMappingRule> headReplacer) {
         return new TMappingEntry(
-                rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()),
-                termFactory);
+                rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()));
     }
 
-    public IQ asIQ(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory, UnionBasedQueryMerger queryMerger) {
+    public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory, UnionBasedQueryMerger queryMerger) {
         return queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ(iqFactory, substitutionFactory))
+                        .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
                         .collect(ImmutableCollectors.toList())).get();
     }
 
@@ -49,13 +42,8 @@ public class TMappingEntry {
         return rules.isEmpty();
     }
 
-    // ASSUMES NON-EMPTINESS
-    public MappingAssertionIndex getPredicateInfo() { return rules.iterator().next().getPredicateInfo(); }
-
-    public RDFAtomPredicate getRDFAtomPredicate() { return rules.iterator().next().getRDFAtomPredicate(); }
-
     @Override
-    public String toString() { return "TME: " + getPredicateInfo() + ": " + rules.toString(); }
+    public String toString() { return "TME: " + rules.toString(); }
 
     public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
         return Collector.of(
@@ -89,7 +77,7 @@ public class TMappingEntry {
         }
 
         public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules), termFactory);
+            return new TMappingEntry(ImmutableList.copyOf(rules));
         }
 
 

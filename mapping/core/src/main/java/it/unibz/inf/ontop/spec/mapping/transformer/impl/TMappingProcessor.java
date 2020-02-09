@@ -106,8 +106,8 @@ public class TMappingProcessor {
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
                         .map(IQ::normalizeForOptimization) // replaces join equalities
                         .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
-                        .map(q -> new TMappingRule(a.getIndex(), q, termFactory, atomFactory)))
-                .collect(ImmutableCollectors.toMultimap(TMappingRule::getPredicateInfo, Function.identity()));
+                        .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
+                .collect(ImmutableCollectors.toMultimap());
 
         ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
@@ -135,7 +135,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, substitutionFactory, queryMerger))
+                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, termFactory, substitutionFactory, queryMerger))
                                 .normalizeForOptimization()));
 
         return entries.entrySet().stream()
@@ -157,7 +157,7 @@ public class TMappingProcessor {
         RDFAtomPredicate rdfTriple = originalMappingIndex.keySet().iterator().next().getPredicate();
 
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (d, r) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, r).getIri()), indexOf.apply(rdfTriple, r), m));
+                (d, r) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, r).getIri()), m));
 
 	    ImmutableMap<MappingAssertionIndex, TMappingEntry> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
@@ -170,7 +170,7 @@ public class TMappingProcessor {
                                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
 
         java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
-                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, d).getIri()), indexOf.apply(rdfTriple, d), m));
+                (s, d) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, d).getIri()), m));
 
 	    return dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))

@@ -9,21 +9,16 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 
 public class TMappingRule {
-
-	private final MappingAssertionIndex predicateInfo;
 
 	private final DistinctVariableOnlyDataAtom projectionAtom;
 	private final ImmutableList<ImmutableTerm> headTerms;
@@ -32,12 +27,7 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
 
-	private final TermFactory termFactory;
-
-	public TMappingRule(MappingAssertionIndex predicateInfo, IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
-		this.termFactory = termFactory;
-
-		this.predicateInfo = predicateInfo;
+	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
 		this.projectionAtom = iq.getProjectionAtom();
 		this.headTerms = (ImmutableList<ImmutableTerm>) ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
@@ -79,10 +69,7 @@ public class TMappingRule {
 
 
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
-        this.termFactory = baseRule.termFactory;
-
-        this.predicateInfo = baseRule.predicateInfo;
-        this.projectionAtom = baseRule.projectionAtom;
+		this.projectionAtom = baseRule.projectionAtom;
 		this.headTerms = baseRule.headTerms;
 
 		this.extensionalNodes = baseRule.extensionalNodes;
@@ -90,10 +77,7 @@ public class TMappingRule {
 	}
 
 
-	TMappingRule(ImmutableList<ImmutableTerm> headTerms, MappingAssertionIndex predicateInfo, TMappingRule baseRule) {
-        this.termFactory = baseRule.termFactory;
-
-		this.predicateInfo = predicateInfo;
+	TMappingRule(ImmutableList<ImmutableTerm> headTerms, TMappingRule baseRule) {
 		this.projectionAtom = baseRule.projectionAtom;
 		this.headTerms = headTerms;
 
@@ -103,10 +87,7 @@ public class TMappingRule {
 
 
 
-	public MappingAssertionIndex getPredicateInfo() { return predicateInfo; }
-
-
-	public IQ asIQ(IntermediateQueryFactory iqFactory, SubstitutionFactory substitutionFactory) {
+	public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
 		Optional<ImmutableExpression> mergedConditions = filter.stream()
@@ -141,7 +122,7 @@ public class TMappingRule {
 
 	@Override
 	public int hashCode() {
-		return predicateInfo.getIri().hashCode() ^ headTerms.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
+		return headTerms.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
 	}
 	
 	@Override
@@ -158,6 +139,6 @@ public class TMappingRule {
 
 	@Override 
 	public String toString() {
-		return predicateInfo.getIri() + "(" + headTerms + ") <- " + extensionalNodes + " FILTER " + filter;
+		return projectionAtom.getPredicate() + "(" + headTerms + ") <- " + extensionalNodes + " FILTER " + filter;
 	}
 }
