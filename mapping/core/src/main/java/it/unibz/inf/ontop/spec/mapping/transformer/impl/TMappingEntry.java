@@ -5,12 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
@@ -21,35 +17,12 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public class TMappingEntry {
-    private ImmutableList<TMappingRule> rules;
 
-    public TMappingEntry(ImmutableList<TMappingRule> rules) {
-        this.rules = rules;
-    }
-
-    public TMappingEntry createCopy(java.util.function.Function<TMappingRule, TMappingRule> headReplacer) {
-        return new TMappingEntry(
-                rules.stream().map(headReplacer).collect(ImmutableCollectors.toList()));
-    }
-
-    public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory, UnionBasedQueryMerger queryMerger) {
-        return queryMerger.mergeDefinitions(rules.stream()
-                        .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
-                        .collect(ImmutableCollectors.toList())).get();
-    }
-
-    public boolean isEmpty() {
-        return rules.isEmpty();
-    }
-
-    @Override
-    public String toString() { return "TME: " + rules.toString(); }
-
-    public static Collector<TMappingRule, BuilderWithCQC, TMappingEntry> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
+    public static Collector<TMappingRule, BuilderWithCQC, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
         return Collector.of(
                 () -> new BuilderWithCQC(cqc, termFactory), // Supplier
                 BuilderWithCQC::add, // Accumulator
-                (b1, b2) -> b1.addAll(b2.build().rules.iterator()), // Merger
+                (b1, b2) -> b1.addAll(b2.build().iterator()), // Merger
                 BuilderWithCQC::build, // Finisher
                 Collector.Characteristics.UNORDERED);
     }
@@ -76,8 +49,8 @@ public class TMappingEntry {
             return this;
         }
 
-        public TMappingEntry build() {
-            return new TMappingEntry(ImmutableList.copyOf(rules));
+        public ImmutableList<TMappingRule> build() {
+            return ImmutableList.copyOf(rules);
         }
 
 

@@ -85,8 +85,6 @@ public class TMappingRule {
 		this.filter = baseRule.filter;
 	}
 
-
-
 	public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
@@ -108,36 +106,13 @@ public class TMappingRule {
 						IQ2CQ.toIQTree(extensionalNodes, mergedConditions, iqFactory)));
 	}
 
-	public ImmutableList<ImmutableTerm> getHeadTerms() {
-		return headTerms;
-    }
-
-
+	public ImmutableList<ImmutableTerm> getHeadTerms() { return headTerms; }
 
 	public ImmutableList<ExtensionalDataNode> getDatabaseAtoms() { return extensionalNodes; }
 
 	public ImmutableList<ImmutableList<ImmutableExpression>> getConditions() { return filter; }
 
-	public RDFAtomPredicate getRDFAtomPredicate() { return (RDFAtomPredicate) projectionAtom.getPredicate(); }
-
 	@Override
-	public int hashCode() {
-		return headTerms.hashCode() ^ extensionalNodes.hashCode() ^ filter.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		if (other instanceof TMappingRule) {
-			TMappingRule otherRule = (TMappingRule)other;
-			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
-					headTerms.equals(otherRule.headTerms) &&
-					extensionalNodes.equals(otherRule.extensionalNodes) &&
-					filter.equals(otherRule.filter));
-		}
-		return false;
-	}
-
-	@Override 
 	public String toString() {
 		return projectionAtom.getPredicate() + "(" + headTerms + ") <- " + extensionalNodes + " FILTER " + filter;
 	}

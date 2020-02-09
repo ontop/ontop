@@ -48,7 +48,6 @@ import org.apache.commons.rdf.api.IRI;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -109,7 +108,7 @@ public class TMappingProcessor {
                         .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
                 .collect(ImmutableCollectors.toMultimap());
 
-        ImmutableMap<MappingAssertionIndex, TMappingEntry> saturated = Stream.concat(Stream.concat(
+        ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = Stream.concat(Stream.concat(
                 saturate(reasoner.objectPropertiesDAG(),
                         p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
                         this::indexOf, p -> getNewHeadP(p.isInverse()), cqContainmentCheck, (r, p) -> !p.isInverse() || p.getInverse() != r),
@@ -135,7 +134,10 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                        e -> noNullValueEnforcer.transform(e.getValue().asIQ(iqFactory, termFactory, substitutionFactory, queryMerger))
+                        e -> noNullValueEnforcer.transform(
+                                queryMerger.mergeDefinitions(e.getValue().stream()
+                                        .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
+                                        .collect(ImmutableCollectors.toList())).get())
                                 .normalizeForOptimization()));
 
         return entries.entrySet().stream()
@@ -143,7 +145,7 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private <T> Stream<Map.Entry<MappingAssertionIndex, TMappingEntry>> saturate(EquivalencesDAG<T> dag,
+    private <T> Stream<Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
                                                                                  Predicate<T> representativeFilter,
                                                                                  ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
                                                                                  BiFunction<RDFAtomPredicate, T, MappingAssertionIndex> indexOf,
@@ -159,7 +161,7 @@ public class TMappingProcessor {
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (d, r) -> (m -> new TMappingRule(getNewHeadGen.apply(d).apply(m.getHeadTerms(), indexOf.apply(rdfTriple, r).getIri()), m));
 
-	    ImmutableMap<MappingAssertionIndex, TMappingEntry> representatives = dag.stream()
+	    ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> representatives = dag.stream()
                 .filter(s -> representativeFilter.test(s.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
                         s -> indexOf.apply(rdfTriple, s.getRepresentative()),
@@ -178,8 +180,8 @@ public class TMappingProcessor {
                     .filter(d -> populationFilter.test(s.getRepresentative(), d))
                     .collect(ImmutableCollectors.toMap(
                             d -> indexOf.apply(rdfTriple, d),
-                            d -> representatives.get(indexOf.apply(rdfTriple, s.getRepresentative()))
-                                    .createCopy(headReplacer2.apply(s.getRepresentative(), d))))
+                            d -> representatives.get(indexOf.apply(rdfTriple, s.getRepresentative())).stream()
+                                    .map(headReplacer2.apply(s.getRepresentative(), d)).collect(ImmutableCollectors.toList())))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
