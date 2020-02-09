@@ -139,8 +139,8 @@ public class MappingSaturationTest {
                 new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB), maGivesLab, null),
                 new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE), maGivesLecture, null));
 
-        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox).stream()
-                .collect(ImmutableCollectors.toMap(a -> a.getIndex(), a -> a.getQuery()));
+        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, classifiedTBox).stream()
+                .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
 
         assertEquals(maGivesLab, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB)));
         assertEquals(maGivesLecture, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE)));

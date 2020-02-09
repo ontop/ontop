@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDependenciesImpl<RelationPredicate> {
 
-    protected final AtomFactory atomFactory;
+    private final AtomFactory atomFactory;
     private final VariableGenerator variableGenerator;
 
     public DBLinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory,
@@ -28,13 +28,12 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
 
     @Override
     protected Stream<DataAtom<RelationPredicate>> chase(DataAtom<RelationPredicate> atom) {
-        return atom.getPredicate().getRelationDefinition().getForeignKeys().stream().flatMap(id -> chase(id, atom));
+        return atom.getPredicate().getRelationDefinition().getForeignKeys().stream().map(fk -> chase(fk, atom));
     }
 
-    private Stream<DataAtom<RelationPredicate>> chase(ForeignKeyConstraint fk, DataAtom<RelationPredicate> atom) {
+    private DataAtom<RelationPredicate> chase(ForeignKeyConstraint fk, DataAtom<RelationPredicate> atom) {
 
-        ImmutableMap<Attribute, VariableOrGroundTerm> inversion =
-                fk.getComponents().stream()
+        ImmutableMap<Attribute, VariableOrGroundTerm> inversion = fk.getComponents().stream()
                 .collect(ImmutableCollectors.toMap(
                         ForeignKeyConstraint.Component::getReference,
                         c -> atom.getArguments().get(c.getAttribute().getIndex() - 1)));
@@ -43,8 +42,7 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
                 .map(a -> inversion.getOrDefault(a, variableGenerator.generateNewVariable(a.getID().getName())))
                 .collect(ImmutableCollectors.toList());
 
-        RelationPredicate predicate = fk.getReferencedRelation().getAtomPredicate();
-        return Stream.of(atomFactory.getDataAtom(predicate, newArguments));
+        return atomFactory.getDataAtom(fk.getReferencedRelation().getAtomPredicate(), newArguments);
     }
 
     @Override
@@ -56,5 +54,4 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
     public String toString() {
         return "DB LIDs";
     }
-
 }

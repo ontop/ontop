@@ -77,7 +77,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
-        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, dbMetadata, tbox);
+        ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
         ImmutableList<MappingAssertion> normalizedMapping = mappingNormalizer.normalize(saturatedMapping);
 
         // Don't insert the distinct if the cardinality preservation is set to LOOSE
