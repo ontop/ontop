@@ -1,8 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -15,6 +14,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -29,7 +29,7 @@ public class TMappingRule {
 
 	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
 		this.projectionAtom = iq.getProjectionAtom();
-		this.headTerms = (ImmutableList<ImmutableTerm>) ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
+		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
 		IQTree tree = iq.getTree().getChildren().get(0);
 		ImmutableList<ExtensionalDataNode> dataAtoms = IQ2CQ.getExtensionalDataNodes(tree).get();
@@ -66,8 +66,6 @@ public class TMappingRule {
 		this.filter = filterAtoms.isEmpty() ? ImmutableList.of() : ImmutableList.of(filterAtoms);
 	}
 
-
-
 	TMappingRule(TMappingRule baseRule, ImmutableList<ImmutableList<ImmutableExpression>> filter) {
 		this.projectionAtom = baseRule.projectionAtom;
 		this.headTerms = baseRule.headTerms;
@@ -75,7 +73,6 @@ public class TMappingRule {
 		this.extensionalNodes = baseRule.extensionalNodes;
 		this.filter = filter;
 	}
-
 
 	TMappingRule(ImmutableList<ImmutableTerm> headTerms, TMappingRule baseRule) {
 		this.projectionAtom = baseRule.projectionAtom;
@@ -85,8 +82,6 @@ public class TMappingRule {
 		this.filter = baseRule.filter;
 	}
 
-
-
 	public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
@@ -95,12 +90,14 @@ public class TMappingRule {
 						.reduce((r, e) -> termFactory.getConjunction(e, r)).get())
 				.reduce((r, e) -> termFactory.getDisjunction(e, r));
 
+		if (projectionAtom.getArity() != headTerms.size())
+			throw new MinorOntopInternalBugException("size mismatch");
+
 		ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
-				ImmutableMap.of(projectionAtom.getTerm(0), headTerms.get(0),
-						projectionAtom.getTerm(1), headTerms.get(1),
-						projectionAtom.getTerm(2), headTerms.get(2)).entrySet().stream()
-				.filter(e -> !e.getKey().equals(e.getValue()))
-				.collect(ImmutableCollectors.toMap()));
+				IntStream.range(0, projectionAtom.getArity())
+						.mapToObj(i -> Maps.immutableEntry(projectionAtom.getTerm(i), headTerms.get(i)))
+						.filter(e -> !e.getKey().equals(e.getValue())) // v -> v is not allowed in substitutions
+				 		.collect(ImmutableCollectors.toMap()));
 
 		return iqFactory.createIQ(projectionAtom,
 				iqFactory.createUnaryIQTree(
@@ -125,7 +122,7 @@ public class TMappingRule {
 	public boolean equals(Object other) {
 		if (other instanceof TMappingRule) {
 			TMappingRule otherRule = (TMappingRule)other;
-			return (projectionAtom.getArguments().equals(otherRule.projectionAtom.getArguments()) &&
+			return (projectionAtom.equals(otherRule.projectionAtom) &&
 					headTerms.equals(otherRule.headTerms) &&
 					extensionalNodes.equals(otherRule.extensionalNodes) &&
 					filter.equals(otherRule.filter));

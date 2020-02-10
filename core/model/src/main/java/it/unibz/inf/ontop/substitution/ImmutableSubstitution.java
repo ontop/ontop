@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.ConversionException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -26,7 +27,7 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      * If T == ImmutableTerm, throws a ConversionException if
      * a substituted term is not a VariableOrGroundTerm.
      */
-    DataAtom applyToDataAtom(DataAtom atom) throws ConversionException;
+    <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException;
 
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;
