@@ -162,30 +162,31 @@ public class TMappingProcessor {
 	    if (originalMappingIndex.keySet().isEmpty())
 	        return Stream.empty();
 
+	    // from A, \exists R to A, \exists P and from R to P
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (d, r) -> (m -> new TMappingRule(transformer.apply(d).argumentsTransformation().apply(m.getHeadTerms(), transformer.apply(r).indexOf().getIri()), m));
+                (d, rep) -> (m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(rep).getIri()), m));
 
 	    ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> representatives = dag.stream()
-                .filter(s -> representativeFilter.test(s.getRepresentative()))
+                .filter(node -> representativeFilter.test(node.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
-                        s -> transformer.apply(s.getRepresentative()).indexOf(),
-                        s -> dag.getSub(s).stream()
-                                .flatMap(ss -> ss.getMembers().stream())
+                        node -> transformer.apply(node.getRepresentative()).indexOf(),
+                        node -> dag.getSub(node).stream()
+                                .flatMap(subnode -> subnode.getMembers().stream())
                                 .flatMap(d -> originalMappingIndex.get(transformer.apply(d).indexOf()).stream()
-                                        .map(headReplacer.apply(d, s.getRepresentative())))
+                                        .map(headReplacer.apply(d, node.getRepresentative())))
                                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
 
         java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
-                (s, d) -> (m -> new TMappingRule(transformer.apply(d).argumentsTransformation().apply(m.getHeadTerms(), transformer.apply(d).indexOf().getIri()), m));
+                (rep, d) -> (m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m));
 
 	    return dag.stream()
-                .filter(s -> representativeFilter.test(s.getRepresentative()))
-                .flatMap(s -> s.getMembers().stream()
-                    .filter(d -> populationFilter.test(s.getRepresentative(), d))
+                .filter(node -> representativeFilter.test(node.getRepresentative()))
+                .flatMap(node -> node.getMembers().stream()
+                    .filter(d -> populationFilter.test(node.getRepresentative(), d))
                     .collect(ImmutableCollectors.toMap(
                             d -> transformer.apply(d).indexOf(),
-                            d -> representatives.get(transformer.apply(s.getRepresentative()).indexOf()).stream()
-                                    .map(headReplacer2.apply(s.getRepresentative(), d)).collect(ImmutableCollectors.toList())))
+                            d -> representatives.get(transformer.apply(node.getRepresentative()).indexOf()).stream()
+                                    .map(headReplacer2.apply(node.getRepresentative(), d)).collect(ImmutableCollectors.toList())))
                     .entrySet().stream())
                 .filter(e -> !e.getValue().isEmpty());
     }
@@ -193,7 +194,9 @@ public class TMappingProcessor {
     private interface EntityRuleHeadTransformer {
         MappingAssertionIndex indexOf();
 
-        java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> argumentsTransformation();
+        default IRI getIri() { return indexOf().getIri(); }
+
+        ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri);
     }
 
     private static class MappingRuleHeadTransformer {
@@ -220,19 +223,19 @@ public class TMappingProcessor {
                 }
 
                 @Override
-                public java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> argumentsTransformation() {
+                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
                     if (child instanceof OClass) {
-                        return (head, iri) -> ImmutableList.of(head.get(0), head.get(1), getConstantIRI(iri));
+                        return ImmutableList.of(arguments.get(0), arguments.get(1), getConstantIRI(newIri));
                     }
                     else if (child instanceof ObjectSomeValuesFrom) {
                         ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
                         return some.isInverse()
-                                ? (head, iri) -> ImmutableList.of(head.get(2), getConstantIRI(RDF.TYPE), getConstantIRI(iri))
-                                : (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(iri));
+                                ? ImmutableList.of(arguments.get(2), getConstantIRI(RDF.TYPE), getConstantIRI(newIri))
+                                : ImmutableList.of(arguments.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
                     }
                     else if (child instanceof DataSomeValuesFrom) {
                         // can never be an inverse
-                        return (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(iri));
+                        return ImmutableList.of(arguments.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
                     }
                     else
                         throw new MinorOntopInternalBugException("Unexpected type" + child);
@@ -248,10 +251,10 @@ public class TMappingProcessor {
                 }
 
                 @Override
-                public java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> argumentsTransformation() {
+                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
                     return child.isInverse()
-                            ? (head, iri) -> ImmutableList.of(head.get(2), getConstantIRI(iri), head.get(0))
-                            : (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(iri), head.get(2));
+                            ? ImmutableList.of(arguments.get(2), getConstantIRI(newIri), arguments.get(0))
+                            : ImmutableList.of(arguments.get(0), getConstantIRI(newIri), arguments.get(2));
                 }
             };
         }
@@ -263,8 +266,8 @@ public class TMappingProcessor {
                     return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
                 }
                 @Override
-                public java.util.function.BiFunction<ImmutableList<ImmutableTerm>, IRI, ImmutableList<ImmutableTerm>> argumentsTransformation() {
-                    return (head, iri) -> ImmutableList.of(head.get(0), getConstantIRI(iri), head.get(2));
+                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
+                    return ImmutableList.of(arguments.get(0), getConstantIRI(newIri), arguments.get(2));
                 }
             };
         }
