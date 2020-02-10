@@ -46,7 +46,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -159,10 +158,6 @@ public class TMappingProcessor {
                                                                                                ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
                                                                                                BiPredicate<T, T> populationFilter) {
 
-	    if (originalMappingIndex.keySet().isEmpty())
-	        return Stream.empty();
-
-	    // from A, \exists R to A, \exists P and from R to P
 	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
                 (d, rep) -> (m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(rep).getIri()), m));
 
@@ -170,25 +165,37 @@ public class TMappingProcessor {
                 .filter(node -> representativeFilter.test(node.getRepresentative()))
                 .collect(ImmutableCollectors.toMap(
                         node -> transformer.apply(node.getRepresentative()).indexOf(),
-                        node -> dag.getSub(node).stream()
-                                .flatMap(subnode -> subnode.getMembers().stream())
-                                .flatMap(d -> originalMappingIndex.get(transformer.apply(d).indexOf()).stream()
-                                        .map(headReplacer.apply(d, node.getRepresentative())))
-                                .collect(TMappingEntry.toTMappingEntry(cqc, termFactory))));
-
-        java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer2 =
-                (rep, d) -> (m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m));
+                        node -> saturate(transformer.apply(node.getRepresentative()).getIri(),
+                                dag.getSub(node), originalMappingIndex, transformer, cqc)));
 
 	    return dag.stream()
                 .filter(node -> representativeFilter.test(node.getRepresentative()))
                 .flatMap(node -> node.getMembers().stream()
                     .filter(d -> populationFilter.test(node.getRepresentative(), d))
-                    .collect(ImmutableCollectors.toMap(
-                            d -> transformer.apply(d).indexOf(),
-                            d -> representatives.get(transformer.apply(node.getRepresentative()).indexOf()).stream()
-                                    .map(headReplacer2.apply(node.getRepresentative(), d)).collect(ImmutableCollectors.toList())))
-                    .entrySet().stream())
+                    .map(populate(transformer, saturate(transformer.apply(node.getRepresentative()).getIri(),
+                            dag.getSub(node), originalMappingIndex, transformer, cqc))))
                 .filter(e -> !e.getValue().isEmpty());
+    }
+
+    private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> populate(Function<T, EntityRuleHeadTransformer> transformer, ImmutableList<TMappingRule> saturated) {
+	    return d -> Maps.immutableEntry(transformer.apply(d).indexOf(),
+                        saturated.stream()
+                                .map(m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m))
+                                .collect(ImmutableCollectors.toList()));
+    }
+
+    private <T> ImmutableList<TMappingRule> saturate(IRI iri,
+                                                     ImmutableSet<Equivalences<T>> sub,
+                                                     ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
+                                                     Function<T, EntityRuleHeadTransformer> transformer,
+                                                     ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
+
+        return sub.stream()
+                .flatMap(subnode -> subnode.getMembers().stream())
+                .map(transformer)
+                .flatMap(t -> originalMappingIndex.get(t.indexOf()).stream()
+                        .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), iri), m)))
+                .collect(TMappingEntry.toTMappingEntry(cqc, termFactory));
     }
 
     private interface EntityRuleHeadTransformer {
@@ -196,7 +203,7 @@ public class TMappingProcessor {
 
         default IRI getIri() { return indexOf().getIri(); }
 
-        ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri);
+        ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri);
     }
 
     private static class MappingRuleHeadTransformer {
@@ -208,66 +215,74 @@ public class TMappingProcessor {
             this.termFactory = termFactory;
         }
 
-        EntityRuleHeadTransformer transformer(ClassExpression child) {
+        EntityRuleHeadTransformer transformer(ClassExpression ce) {
+            if (ce instanceof OClass) {
+                OClass oc = (OClass)ce;
+                return new EntityRuleHeadTransformer() {
+                    @Override
+                    public MappingAssertionIndex indexOf() {
+                        return MappingAssertionIndex.ofClass(rdfAtomPredicate, oc.getIRI());
+                    }
+                    @Override
+                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
+                        return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                    }
+                };
+            }
+            else if (ce instanceof ObjectSomeValuesFrom) {
+                ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) ce).getProperty();
+                return new EntityRuleHeadTransformer() {
+                    @Override
+                    public MappingAssertionIndex indexOf() {
+                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI());
+                    }
+                    @Override
+                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
+                        return ImmutableList.of(args.get(ope.isInverse() ? 2 : 0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                    }
+                };
+            }
+            else if (ce instanceof DataSomeValuesFrom) {
+                DataPropertyExpression dpe = ((DataSomeValuesFrom) ce).getProperty();
+                return new EntityRuleHeadTransformer() {
+                    @Override
+                    public MappingAssertionIndex indexOf() {
+                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI());
+                    }
+                    @Override
+                    public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
+                        return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                    }
+                };
+            }
+            else
+                throw new MinorOntopInternalBugException("Unexpected type" + ce);
+        }
+
+        EntityRuleHeadTransformer transformer(ObjectPropertyExpression ope) {
             return new EntityRuleHeadTransformer() {
                 @Override
                 public MappingAssertionIndex indexOf() {
-                    if (child instanceof OClass)
-                        return MappingAssertionIndex.ofClass(rdfAtomPredicate, ((OClass) child).getIRI());
-                    else if (child instanceof ObjectSomeValuesFrom)
-                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, ((ObjectSomeValuesFrom) child).getProperty().getIRI());
-                    else if (child instanceof DataSomeValuesFrom)
-                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, (((DataSomeValuesFrom) child).getProperty().getIRI()));
-                    else
-                        throw new MinorOntopInternalBugException("Unexpected type" + child);
+                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI());
                 }
-
                 @Override
-                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
-                    if (child instanceof OClass) {
-                        return ImmutableList.of(arguments.get(0), arguments.get(1), getConstantIRI(newIri));
-                    }
-                    else if (child instanceof ObjectSomeValuesFrom) {
-                        ObjectPropertyExpression some = ((ObjectSomeValuesFrom) child).getProperty();
-                        return some.isInverse()
-                                ? ImmutableList.of(arguments.get(2), getConstantIRI(RDF.TYPE), getConstantIRI(newIri))
-                                : ImmutableList.of(arguments.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
-                    }
-                    else if (child instanceof DataSomeValuesFrom) {
-                        // can never be an inverse
-                        return ImmutableList.of(arguments.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
-                    }
-                    else
-                        throw new MinorOntopInternalBugException("Unexpected type" + child);
+                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
+                    return ope.isInverse()
+                            ? ImmutableList.of(args.get(2), getConstantIRI(newIri), args.get(0))
+                            : ImmutableList.of(args.get(0), getConstantIRI(newIri), args.get(2));
                 }
             };
         }
 
-        EntityRuleHeadTransformer transformer(ObjectPropertyExpression child) {
+        EntityRuleHeadTransformer transformer(DataPropertyExpression dpe) {
             return new EntityRuleHeadTransformer() {
                 @Override
                 public MappingAssertionIndex indexOf() {
-                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
-                }
-
-                @Override
-                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
-                    return child.isInverse()
-                            ? ImmutableList.of(arguments.get(2), getConstantIRI(newIri), arguments.get(0))
-                            : ImmutableList.of(arguments.get(0), getConstantIRI(newIri), arguments.get(2));
-                }
-            };
-        }
-
-        EntityRuleHeadTransformer transformer(DataPropertyExpression child) {
-            return new EntityRuleHeadTransformer() {
-                @Override
-                public MappingAssertionIndex indexOf() {
-                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, child.getIRI());
+                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI());
                 }
                 @Override
-                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> arguments, IRI newIri) {
-                    return ImmutableList.of(arguments.get(0), getConstantIRI(newIri), arguments.get(2));
+                public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
+                    return ImmutableList.of(args.get(0), getConstantIRI(newIri), args.get(2));
                 }
             };
         }
