@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingProcessor;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingSaturatorImpl;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
@@ -61,7 +61,7 @@ public class PunningTest {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        TMappingProcessor tmap = injector.getInstance(TMappingProcessor.class);
+        TMappingSaturatorImpl tmap = injector.getInstance(TMappingSaturatorImpl.class);
 
 
         DataAtom<RelationPredicate> extensionalAtom = ATOM_FACTORY.getDataAtom(company, ImmutableList.of(A, B));
@@ -95,12 +95,7 @@ public class PunningTest {
         Ontology ontology = builder.build();
         ClassifiedTBox tbox = ontology.tbox();
 
-        BasicLinearInclusionDependenciesImpl<RelationPredicate> lids = LinearInclusionDependenciesImpl.<RelationPredicate>builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
-
-        ImmutableList<MappingAssertion> result = tmap.getTMappings(mapping,
-                tbox,
-                new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
-                new ImmutableCQContainmentCheckUnderLIDs<>(lids));
+        ImmutableList<MappingAssertion> result = tmap.saturate(mapping, tbox);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {

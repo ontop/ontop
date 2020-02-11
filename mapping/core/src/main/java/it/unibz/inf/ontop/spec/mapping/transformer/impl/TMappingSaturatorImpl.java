@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import it.unibz.inf.ontop.constraints.impl.DBLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -40,18 +42,22 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingSaturator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class TMappingProcessor {
+@Singleton
+public class TMappingSaturatorImpl implements MappingSaturator  {
 
 	// TODO: the implementation of EXCLUDE ignores equivalent classes / properties
 
+    private final TMappingExclusionConfig tMappingExclusionConfig;
 	private final AtomFactory atomFactory;
 	private final TermFactory termFactory;
     private final QueryUnionSplitter unionSplitter;
@@ -61,17 +67,21 @@ public class TMappingProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
-	private TMappingProcessor(AtomFactory atomFactory,
-                              TermFactory termFactory,
-                              QueryUnionSplitter unionSplitter,
-                              UnionFlattener unionNormalizer,
-                              MappingCQCOptimizer mappingCqcOptimizer,
-                              NoNullValueEnforcer noNullValueEnforcer,
-                              IntermediateQueryFactory iqFactory,
-                              UnionBasedQueryMerger queryMerger,
-                              SubstitutionFactory substitutionFactory) {
+	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
+                                  AtomFactory atomFactory,
+                                  TermFactory termFactory,
+                                  QueryUnionSplitter unionSplitter,
+                                  UnionFlattener unionNormalizer,
+                                  MappingCQCOptimizer mappingCqcOptimizer,
+                                  NoNullValueEnforcer noNullValueEnforcer,
+                                  IntermediateQueryFactory iqFactory,
+                                  UnionBasedQueryMerger queryMerger,
+                                  SubstitutionFactory substitutionFactory,
+                                  CoreUtilsFactory coreUtilsFactory) {
+        this.tMappingExclusionConfig = tMappingExclusionConfig;
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
         this.unionSplitter = unionSplitter;
@@ -81,17 +91,15 @@ public class TMappingProcessor {
         this.iqFactory = iqFactory;
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
+    @Override
+    public ImmutableList<MappingAssertion> saturate(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner) {
 
-	/**
-	 * constructs the TMappings using DAG
-	 * @param mapping
-	 * @param reasoner
-	 * @return
-	 */
-
-	public ImmutableList<MappingAssertion> getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
+        ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc =
+                new ImmutableCQContainmentCheckUnderLIDs<>(
+                        new DBLinearInclusionDependenciesImpl(coreUtilsFactory, atomFactory));
 
 	    // index mapping assertions by the predicate type
         //     same IRI can be a class name and a property name
@@ -111,18 +119,18 @@ public class TMappingProcessor {
                 .map(rdfAtomPredicate -> new TMappingRuleHeadConstructorProvider(rdfAtomPredicate, termFactory))
                 .flatMap(provider -> Stream.concat(Stream.concat(
                     reasoner.objectPropertiesDAG().stream()
-                        .filter(node -> !node.getRepresentative().isInverse() && !excludeFromTMappings.contains(node.getRepresentative()))
+                        .filter(node -> !node.getRepresentative().isInverse() && !tMappingExclusionConfig.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
                                 .filter(d -> !d.isInverse() || d.getInverse() != node.getRepresentative())
                                 .map(saturator(node, reasoner.objectPropertiesDAG(), original, provider::constructor, cqc))),
 
                     reasoner.dataPropertiesDAG().stream()
-                        .filter(node -> !excludeFromTMappings.contains(node.getRepresentative()))
+                        .filter(node -> !tMappingExclusionConfig.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
                                 .map(saturator(node, reasoner.dataPropertiesDAG(), original, provider::constructor, cqc)))),
 
                     reasoner.classesDAG().stream()
-                        .filter(node -> (node.getRepresentative() instanceof OClass) && !excludeFromTMappings.contains((OClass)node.getRepresentative()))
+                        .filter(node -> (node.getRepresentative() instanceof OClass) && !tMappingExclusionConfig.contains((OClass)node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
                                 .filter(d -> d instanceof OClass)
                                 .map(saturator(node, reasoner.classesDAG(), original, provider::constructor, cqc)))))
