@@ -94,7 +94,7 @@ public class TMappingProcessor {
 	 * @return
 	 */
 
-	public ImmutableList<MappingAssertion> getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqContainmentCheck) {
+	public ImmutableList<MappingAssertion> getTMappings(ImmutableList<MappingAssertion> mapping, ClassifiedTBox reasoner, TMappingExclusionConfig excludeFromTMappings, ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
 
 	    if (mapping.isEmpty())
 	        return mapping;
@@ -107,7 +107,7 @@ public class TMappingProcessor {
         ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original = mapping.stream()
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
                         .map(IQ::normalizeForOptimization) // replaces join equalities
-                        .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
+                        .map(q -> mappingCqcOptimizer.optimize(cqc, q))
                         .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
                 .collect(ImmutableCollectors.toMultimap()).asMap();
 
@@ -116,47 +116,45 @@ public class TMappingProcessor {
 
         ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = Stream.concat(Stream.concat(
                 reasoner.objectPropertiesDAG().stream()
+                        .filter(node -> !node.getRepresentative().isInverse() && !excludeFromTMappings.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
-                                .filter(d -> !node.getRepresentative().isInverse()
-                                        && !excludeFromTMappings.contains(node.getRepresentative())
-                                        && (!d.isInverse() || d.getInverse() != node.getRepresentative()))
-                                .map(saturator(node, reasoner.objectPropertiesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck))),
+                                .filter(d -> !d.isInverse() || d.getInverse() != node.getRepresentative())
+                                .map(saturator(node, reasoner.objectPropertiesDAG().getSub(node), original, transformer::transformer, cqc))),
 
                 reasoner.dataPropertiesDAG().stream()
+                        .filter(node -> !excludeFromTMappings.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
-                                .filter(d -> !excludeFromTMappings.contains(node.getRepresentative()))
-                                .map(saturator(node, reasoner.dataPropertiesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck)))),
+                                .map(saturator(node, reasoner.dataPropertiesDAG().getSub(node), original, transformer::transformer, cqc)))),
 
                 reasoner.classesDAG().stream()
+                        .filter(node -> (node.getRepresentative() instanceof OClass) && !excludeFromTMappings.contains((OClass)node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
-                                .filter(d -> (node.getRepresentative() instanceof OClass)
-                                        && !excludeFromTMappings.contains((OClass)node.getRepresentative())
-                                        && (d instanceof OClass))
-                                .map(saturator(node, reasoner.classesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck))))
+                                .filter(d -> d instanceof OClass)
+                                .map(saturator(node, reasoner.classesDAG().getSub(node), original, transformer::transformer, cqc))))
 
                 .filter(e -> !e.getValue().isEmpty())
                 .collect(ImmutableCollectors.toMap());
 
-        ImmutableMap<MappingAssertionIndex, IQ> entries = Stream.concat(
+        ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> combined = Stream.concat(
                 saturated.entrySet().stream(),
                 original.entrySet().stream()
-                        // probably required for vocabulary terms that are not in the ontology
-                        // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
-                                .collect(TMappingEntry.toTMappingEntry(cqContainmentCheck, termFactory)))))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-                        e -> noNullValueEnforcer.transform(
-                                queryMerger.mergeDefinitions(e.getValue().stream()
-                                        .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
-                                        .collect(ImmutableCollectors.toList())).get())
-                                .normalizeForOptimization()));
+                                        .collect(TMappingEntry.toTMappingEntry(cqc, termFactory)))))
+                .collect(ImmutableCollectors.toMap());
 
-        return entries.entrySet().stream()
-                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+        return combined.entrySet().stream()
+                .map(e -> new MappingAssertion(e.getKey(), toIQ(e.getValue()), null))
                 .collect(ImmutableCollectors.toList());
+    }
+
+    private IQ toIQ(Collection<TMappingRule> rules) {
+        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
+        return noNullValueEnforcer.transform(
+                queryMerger.mergeDefinitions(rules.stream()
+                        .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
+                        .collect(ImmutableCollectors.toList())).get())
+                .normalizeForOptimization();
     }
 
     private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturator(Equivalences<T> node,
