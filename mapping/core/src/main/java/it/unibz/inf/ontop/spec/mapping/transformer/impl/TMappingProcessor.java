@@ -46,9 +46,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class TMappingProcessor {
@@ -112,25 +110,25 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toMultimap()).asMap();
 
         RDFAtomPredicate rdfTriple = original.keySet().iterator().next().getPredicate();
-        MappingRuleHeadTransformer transformer = new MappingRuleHeadTransformer(rdfTriple, termFactory);
+        TMappingRuleHeadConstructorProvider provider = new TMappingRuleHeadConstructorProvider(rdfTriple, termFactory);
 
         ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = Stream.concat(Stream.concat(
                 reasoner.objectPropertiesDAG().stream()
                         .filter(node -> !node.getRepresentative().isInverse() && !excludeFromTMappings.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
                                 .filter(d -> !d.isInverse() || d.getInverse() != node.getRepresentative())
-                                .map(saturator(node, reasoner.objectPropertiesDAG().getSub(node), original, transformer::transformer, cqc))),
+                                .map(saturator(node, reasoner.objectPropertiesDAG(), original, provider::constructor, cqc))),
 
                 reasoner.dataPropertiesDAG().stream()
                         .filter(node -> !excludeFromTMappings.contains(node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
-                                .map(saturator(node, reasoner.dataPropertiesDAG().getSub(node), original, transformer::transformer, cqc)))),
+                                .map(saturator(node, reasoner.dataPropertiesDAG(), original, provider::constructor, cqc)))),
 
                 reasoner.classesDAG().stream()
                         .filter(node -> (node.getRepresentative() instanceof OClass) && !excludeFromTMappings.contains((OClass)node.getRepresentative()))
                         .flatMap(node -> node.getMembers().stream()
                                 .filter(d -> d instanceof OClass)
-                                .map(saturator(node, reasoner.classesDAG().getSub(node), original, transformer::transformer, cqc))))
+                                .map(saturator(node, reasoner.classesDAG(), original, provider::constructor, cqc))))
 
                 .filter(e -> !e.getValue().isEmpty())
                 .collect(ImmutableCollectors.toMap());
@@ -158,52 +156,53 @@ public class TMappingProcessor {
     }
 
     private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturator(Equivalences<T> node,
-                                                     ImmutableSet<Equivalences<T>> sub,
+                                                     EquivalencesDAG<T> dag,
                                                      ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
-                                                     Function<T, EntityRuleHeadTransformer> transformer,
+                                                     Function<T, TMappingRuleHeadConstructor> constructor,
                                                      ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
 
-	    IRI iri = transformer.apply(node.getRepresentative()).getIri();
+	    IRI iri = constructor.apply(node.getRepresentative()).getIri();
 
-        ImmutableList<TMappingRule> saturatedRepresentative = sub.stream()
+        ImmutableList<TMappingRule> saturatedRepresentative = dag.getSub(node).stream()
                 .flatMap(subnode -> subnode.getMembers().stream())
-                .map(transformer)
+                .map(constructor)
                 .flatMap(t -> original.getOrDefault(t.indexOf(), ImmutableList.of()).stream()
                         .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), iri), m)))
                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory));
 
-        return d -> Maps.immutableEntry(
-                transformer.apply(d).indexOf(),
-                saturatedRepresentative.stream()
-                        .map(m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m))
-                        .collect(ImmutableCollectors.toList()));
+        return constructor.andThen(
+                t -> Maps.immutableEntry(
+                        t.indexOf(),
+                        saturatedRepresentative.stream()
+                            .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), t.getIri()), m))
+                            .collect(ImmutableCollectors.toList())));
     }
 
-    private interface EntityRuleHeadTransformer {
-        MappingAssertionIndex indexOf();
+    private static abstract class TMappingRuleHeadConstructor {
+        final MappingAssertionIndex index;
+        TMappingRuleHeadConstructor(MappingAssertionIndex index) {
+            this.index = index;
+        }
+        MappingAssertionIndex indexOf() { return index; }
 
-        default IRI getIri() { return indexOf().getIri(); }
+        IRI getIri() { return index.getIri(); }
 
-        ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri);
+        abstract ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri);
     }
 
-    private static class MappingRuleHeadTransformer {
+    private static class TMappingRuleHeadConstructorProvider {
 	    private final RDFAtomPredicate rdfAtomPredicate;
 	    private final TermFactory termFactory;
 
-        MappingRuleHeadTransformer(RDFAtomPredicate rdfAtomPredicate, TermFactory termFactory) {
+        TMappingRuleHeadConstructorProvider(RDFAtomPredicate rdfAtomPredicate, TermFactory termFactory) {
             this.rdfAtomPredicate = rdfAtomPredicate;
             this.termFactory = termFactory;
         }
 
-        EntityRuleHeadTransformer transformer(ClassExpression ce) {
+        TMappingRuleHeadConstructor constructor(ClassExpression ce) {
             if (ce instanceof OClass) {
                 OClass oc = (OClass)ce;
-                return new EntityRuleHeadTransformer() {
-                    @Override
-                    public MappingAssertionIndex indexOf() {
-                        return MappingAssertionIndex.ofClass(rdfAtomPredicate, oc.getIRI());
-                    }
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(rdfAtomPredicate, oc.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                         return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
@@ -212,11 +211,7 @@ public class TMappingProcessor {
             }
             else if (ce instanceof ObjectSomeValuesFrom) {
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) ce).getProperty();
-                return new EntityRuleHeadTransformer() {
-                    @Override
-                    public MappingAssertionIndex indexOf() {
-                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI());
-                    }
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                         return ImmutableList.of(args.get(ope.isInverse() ? 2 : 0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
@@ -225,11 +220,7 @@ public class TMappingProcessor {
             }
             else if (ce instanceof DataSomeValuesFrom) {
                 DataPropertyExpression dpe = ((DataSomeValuesFrom) ce).getProperty();
-                return new EntityRuleHeadTransformer() {
-                    @Override
-                    public MappingAssertionIndex indexOf() {
-                        return MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI());
-                    }
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                         return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
@@ -240,12 +231,8 @@ public class TMappingProcessor {
                 throw new MinorOntopInternalBugException("Unexpected type" + ce);
         }
 
-        EntityRuleHeadTransformer transformer(ObjectPropertyExpression ope) {
-            return new EntityRuleHeadTransformer() {
-                @Override
-                public MappingAssertionIndex indexOf() {
-                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI());
-                }
+        TMappingRuleHeadConstructor constructor(ObjectPropertyExpression ope) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI())) {
                 @Override
                 public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                     return ope.isInverse()
@@ -255,12 +242,8 @@ public class TMappingProcessor {
             };
         }
 
-        EntityRuleHeadTransformer transformer(DataPropertyExpression dpe) {
-            return new EntityRuleHeadTransformer() {
-                @Override
-                public MappingAssertionIndex indexOf() {
-                    return MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI());
-                }
+        TMappingRuleHeadConstructor constructor(DataPropertyExpression dpe) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI())) {
                 @Override
                 public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                     return ImmutableList.of(args.get(0), getConstantIRI(newIri), args.get(2));
