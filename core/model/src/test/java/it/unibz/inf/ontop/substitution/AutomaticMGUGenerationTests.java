@@ -85,11 +85,11 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
 			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
 
-			Substitution mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				computedmgu.addAll(mgu.getMap().entrySet());
+				computedmgu.addAll(mgu.entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);
@@ -121,8 +121,6 @@ public class AutomaticMGUGenerationTests extends TestCase {
 //
 //	/**
 //	 * Test method for
-//	 * {@link org.obda.reformulation.dllite.AtomUnifier#applySubstitution(org.obda.query.domain.CQIE, org.obda.reformulation.dllite.Substitution)}
-//	 * .
 //	 */
 //	
 //	public void testApplySubstitution() {

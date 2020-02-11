@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -33,8 +32,8 @@ public class ImmutableSubstitutionTools {
         this.immutabilityTools = immutabilityTools;
     }
 
-    public ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Substitution substitution) {
-        ImmutableMap<Variable, ImmutableTerm> map = substitution.getMap().entrySet().stream()
+    public ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Map<Variable, Term> substitution) {
+        ImmutableMap<Variable, ImmutableTerm> map = substitution.entrySet().stream()
                 .filter(e -> !e.getKey().equals(e.getValue()))
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,

@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.*;
@@ -143,7 +142,7 @@ public class ImmutableUnificationTools {
         // TODO: avoid use it
         TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size());
 
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
+        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
                 immutabilityTools.convertToMutableFunction(functionSymbol, args1),
                 immutabilityTools.convertToMutableFunction(functionSymbol, args2));
 
@@ -155,7 +154,7 @@ public class ImmutableUnificationTools {
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
+        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
                 immutabilityTools.convertToMutableFunction(atom1),
                 immutabilityTools.convertToMutableFunction(atom2));
 
@@ -164,9 +163,8 @@ public class ImmutableUnificationTools {
         }
 
         ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : mutableSubstitution.getMap().entrySet()) {
+        for (Map.Entry<Variable, Term> entry : mutableSubstitution.entrySet()) {
             VariableOrGroundTerm value = immutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
-
             substitutionMapBuilder.put(entry.getKey(), value);
         }
 

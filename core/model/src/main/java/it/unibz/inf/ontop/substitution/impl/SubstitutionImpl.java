@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.common.base.Joiner;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
-import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.*;
 
@@ -12,34 +11,24 @@ import java.util.*;
  * Mutable reference implementation of a Substitution.
  *
  */
-public class SubstitutionImpl implements Substitution {
+public class SubstitutionImpl {
 
     private final Map<Variable, Term> map;
     private final TermFactory termFactory;
 
-    public SubstitutionImpl(TermFactory termFactory) {
+    SubstitutionImpl(TermFactory termFactory) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
     }
 
-    public SubstitutionImpl(TermFactory termFactory, Variable v, Term t) {
+    SubstitutionImpl(TermFactory termFactory, Variable v, Term t) {
         this.termFactory = termFactory;
         this.map = new HashMap<>();
         map.put(v, t);
     }
 
-    @Override
-    public Map<Variable, Term> getMap() {
+    Map<Variable, Term> getMap() {
         return map;
-    }
-
-    public boolean isEmpty() {
-        return map.isEmpty();
-    }
-
-    @Deprecated
-    public Set<Variable> keySet() {
-        return map.keySet();
     }
 
     @Override
@@ -74,7 +63,7 @@ public class SubstitutionImpl implements Substitution {
             return composeFunctions((Function) term1, (Function) term2);
         }
 
-        Substitution s = createUnifier(term1, term2, termFactory);
+        SubstitutionImpl s = createUnifier(term1, term2, termFactory);
 
         // Rejected substitution (conflicts)
         if (s == null)
@@ -142,7 +131,6 @@ public class SubstitutionImpl implements Substitution {
     }
 
 
-    @Override
     public boolean composeFunctions(Function first, Function second) {
         // Basic case: if predicates are different or their arity is different,
         // then no unifier
@@ -187,7 +175,7 @@ public class SubstitutionImpl implements Substitution {
      * @param term2
      * @return
      */
-    private static Substitution createUnifier(Term term1, Term term2, TermFactory termFactory) {
+    private static SubstitutionImpl createUnifier(Term term1, Term term2, TermFactory termFactory) {
 
         if (!(term1 instanceof Variable) && !(term2 instanceof Variable)) {
 
@@ -251,7 +239,7 @@ public class SubstitutionImpl implements Substitution {
      * @param unifier
      */
 
-    private static void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
+    private static void applySubstitution(Function atom, SubstitutionImpl unifier, int fromIndex) {
 
         List<Term> terms = atom.getTerms();
 

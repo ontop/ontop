@@ -49,12 +49,12 @@ public class ThetaGenerationTest extends TestCase {
 
 	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
-	private Vector<Map.Entry<Variable, Term>> getMGUAsVector(Substitution mgu) {
+	private Vector<Map.Entry<Variable, Term>> getMGUAsVector(Map<Variable, Term>  mgu) {
 		Vector<Map.Entry<Variable, Term>> computedmgu;
 		if (mgu == null) {
 			computedmgu = null;
 		} else {
-			computedmgu = new Vector<>(mgu.getMap().entrySet());
+			computedmgu = new Vector<>(mgu.entrySet());
 		}
 		return computedmgu;
 

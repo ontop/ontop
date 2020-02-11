@@ -33,8 +33,11 @@ package it.unibz.inf.ontop.substitution.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.model.term.Variable;
+
+import java.util.Map;
 
 /**
  * A Class that provides general utilities related to unification, of terms and
@@ -66,10 +69,10 @@ public class UnifierUtilities {
      * @param second
      * @return the substitution corresponding to this unification.
      */
-    public Substitution getMGU(Function first, Function second) {
+    public Map<Variable, Term> getMGU(Function first, Function second) {
         SubstitutionImpl mgu = new SubstitutionImpl(termFactory);
         if (mgu.composeFunctions(first, second))
-            return mgu;
+            return mgu.getMap();
         return null;
     }
 }
