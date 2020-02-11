@@ -191,39 +191,41 @@ public class TMappingProcessor {
     }
 
     private static class TMappingRuleHeadConstructorProvider {
-	    private final RDFAtomPredicate rdfAtomPredicate;
+	    private final RDFAtomPredicate p;
 	    private final TermFactory termFactory;
+        private final IRIConstant rdfType;
 
         TMappingRuleHeadConstructorProvider(RDFAtomPredicate rdfAtomPredicate, TermFactory termFactory) {
-            this.rdfAtomPredicate = rdfAtomPredicate;
+            this.p = rdfAtomPredicate;
             this.termFactory = termFactory;
+            this.rdfType = termFactory.getConstantIRI(RDF.TYPE);
         }
 
         TMappingRuleHeadConstructor constructor(ClassExpression ce) {
             if (ce instanceof OClass) {
                 OClass oc = (OClass)ce;
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(rdfAtomPredicate, oc.getIRI())) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofClass(p, oc.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
-                        return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                        return p.updateObject(args, getConstantIRI(newIri));
                     }
                 };
             }
             else if (ce instanceof ObjectSomeValuesFrom) {
                 ObjectPropertyExpression ope = ((ObjectSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI())) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
-                        return ImmutableList.of(args.get(ope.isInverse() ? 2 : 0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                        return p.updateSPO(args, ope.isInverse() ? p.getObject(args) : p.getSubject(args), rdfType, getConstantIRI(newIri));
                     }
                 };
             }
             else if (ce instanceof DataSomeValuesFrom) {
                 DataPropertyExpression dpe = ((DataSomeValuesFrom) ce).getProperty();
-                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI())) {
+                return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
                     @Override
                     public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
-                        return ImmutableList.of(args.get(0), getConstantIRI(RDF.TYPE), getConstantIRI(newIri));
+                        return p.updateSPO(args, p.getSubject(args), rdfType, getConstantIRI(newIri));
                     }
                 };
             }
@@ -232,21 +234,21 @@ public class TMappingProcessor {
         }
 
         TMappingRuleHeadConstructor constructor(ObjectPropertyExpression ope) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, ope.getIRI())) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, ope.getIRI())) {
                 @Override
                 public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
                     return ope.isInverse()
-                            ? ImmutableList.of(args.get(2), getConstantIRI(newIri), args.get(0))
-                            : ImmutableList.of(args.get(0), getConstantIRI(newIri), args.get(2));
+                            ? p.updateSPO(args, p.getObject(args), getConstantIRI(newIri), p.getSubject(args))
+                            : p.updateSPO(args, p.getSubject(args), getConstantIRI(newIri), p.getObject(args));
                 }
             };
         }
 
         TMappingRuleHeadConstructor constructor(DataPropertyExpression dpe) {
-            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(rdfAtomPredicate, dpe.getIRI())) {
+            return new TMappingRuleHeadConstructor(MappingAssertionIndex.ofProperty(p, dpe.getIRI())) {
                 @Override
                 public ImmutableList<ImmutableTerm> getArguments(ImmutableList<ImmutableTerm> args, IRI newIri) {
-                    return ImmutableList.of(args.get(0), getConstantIRI(newIri), args.get(2));
+                    return p.updateSPO(args, p.getSubject(args), getConstantIRI(newIri), p.getObject(args));
                 }
             };
         }
