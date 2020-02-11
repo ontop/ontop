@@ -104,34 +104,42 @@ public class TMappingProcessor {
         //     but the same IRI cannot be an object and a data or annotation property name at the same time
         // see https://www.w3.org/TR/owl2-new-features/#F12:_Punning
 
-        ImmutableMultimap<MappingAssertionIndex, TMappingRule> source = mapping.stream()
+        ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original = mapping.stream()
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
                         .map(IQ::normalizeForOptimization) // replaces join equalities
                         .map(q -> mappingCqcOptimizer.optimize(cqContainmentCheck, q))
                         .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
-                .collect(ImmutableCollectors.toMultimap());
+                .collect(ImmutableCollectors.toMultimap()).asMap();
 
-        RDFAtomPredicate rdfTriple = source.keySet().iterator().next().getPredicate();
+        RDFAtomPredicate rdfTriple = original.keySet().iterator().next().getPredicate();
         MappingRuleHeadTransformer transformer = new MappingRuleHeadTransformer(rdfTriple, termFactory);
 
         ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = Stream.concat(Stream.concat(
-                saturate(reasoner.objectPropertiesDAG(),
-                        p -> !p.isInverse() && !excludeFromTMappings.contains(p), source,
-                        transformer::transformer, cqContainmentCheck, (r, p) -> !p.isInverse() || p.getInverse() != r),
+                reasoner.objectPropertiesDAG().stream()
+                        .flatMap(node -> node.getMembers().stream()
+                                .filter(d -> !node.getRepresentative().isInverse()
+                                        && !excludeFromTMappings.contains(node.getRepresentative())
+                                        && (!d.isInverse() || d.getInverse() != node.getRepresentative()))
+                                .map(saturator(node, reasoner.objectPropertiesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck))),
 
-                saturate(reasoner.dataPropertiesDAG(),
-                        p -> !excludeFromTMappings.contains(p), source,
-                        transformer::transformer, cqContainmentCheck, (r, p) -> true)),
+                reasoner.dataPropertiesDAG().stream()
+                        .flatMap(node -> node.getMembers().stream()
+                                .filter(d -> !excludeFromTMappings.contains(node.getRepresentative()))
+                                .map(saturator(node, reasoner.dataPropertiesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck)))),
 
-                saturate(reasoner.classesDAG(),
-                        s -> (s instanceof OClass) && !excludeFromTMappings.contains((OClass)s), source,
-                        transformer::transformer, cqContainmentCheck, (r, c) -> c instanceof OClass))
+                reasoner.classesDAG().stream()
+                        .flatMap(node -> node.getMembers().stream()
+                                .filter(d -> (node.getRepresentative() instanceof OClass)
+                                        && !excludeFromTMappings.contains((OClass)node.getRepresentative())
+                                        && (d instanceof OClass))
+                                .map(saturator(node, reasoner.classesDAG().getSub(node), original, transformer::transformer, cqContainmentCheck))))
 
+                .filter(e -> !e.getValue().isEmpty())
                 .collect(ImmutableCollectors.toMap());
 
         ImmutableMap<MappingAssertionIndex, IQ> entries = Stream.concat(
                 saturated.entrySet().stream(),
-                source.asMap().entrySet().stream()
+                original.entrySet().stream()
                         // probably required for vocabulary terms that are not in the ontology
                         // also, for all "excluded" mappings
                         .filter(e -> !saturated.containsKey(e.getKey()))
@@ -151,51 +159,26 @@ public class TMappingProcessor {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private <T> Stream<Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturate(EquivalencesDAG<T> dag,
-                                                                                               Predicate<T> representativeFilter,
-                                                                                               ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
-                                                                                               Function<T, EntityRuleHeadTransformer> transformer,
-                                                                                               ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc,
-                                                                                               BiPredicate<T, T> populationFilter) {
-
-	    java.util.function.BiFunction<T, T, java.util.function.Function<TMappingRule, TMappingRule>> headReplacer =
-                (d, rep) -> (m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(rep).getIri()), m));
-
-	    ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> representatives = dag.stream()
-                .filter(node -> representativeFilter.test(node.getRepresentative()))
-                .collect(ImmutableCollectors.toMap(
-                        node -> transformer.apply(node.getRepresentative()).indexOf(),
-                        node -> saturate(transformer.apply(node.getRepresentative()).getIri(),
-                                dag.getSub(node), originalMappingIndex, transformer, cqc)));
-
-	    return dag.stream()
-                .filter(node -> representativeFilter.test(node.getRepresentative()))
-                .flatMap(node -> node.getMembers().stream()
-                    .filter(d -> populationFilter.test(node.getRepresentative(), d))
-                    .map(populate(transformer, saturate(transformer.apply(node.getRepresentative()).getIri(),
-                            dag.getSub(node), originalMappingIndex, transformer, cqc))))
-                .filter(e -> !e.getValue().isEmpty());
-    }
-
-    private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> populate(Function<T, EntityRuleHeadTransformer> transformer, ImmutableList<TMappingRule> saturated) {
-	    return d -> Maps.immutableEntry(transformer.apply(d).indexOf(),
-                        saturated.stream()
-                                .map(m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m))
-                                .collect(ImmutableCollectors.toList()));
-    }
-
-    private <T> ImmutableList<TMappingRule> saturate(IRI iri,
+    private <T> Function<T, Map.Entry<MappingAssertionIndex, ImmutableList<TMappingRule>>> saturator(Equivalences<T> node,
                                                      ImmutableSet<Equivalences<T>> sub,
-                                                     ImmutableMultimap<MappingAssertionIndex, TMappingRule> originalMappingIndex,
+                                                     ImmutableMap<MappingAssertionIndex, Collection<TMappingRule>> original,
                                                      Function<T, EntityRuleHeadTransformer> transformer,
                                                      ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc) {
 
-        return sub.stream()
+	    IRI iri = transformer.apply(node.getRepresentative()).getIri();
+
+        ImmutableList<TMappingRule> saturatedRepresentative = sub.stream()
                 .flatMap(subnode -> subnode.getMembers().stream())
                 .map(transformer)
-                .flatMap(t -> originalMappingIndex.get(t.indexOf()).stream()
+                .flatMap(t -> original.getOrDefault(t.indexOf(), ImmutableList.of()).stream()
                         .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), iri), m)))
                 .collect(TMappingEntry.toTMappingEntry(cqc, termFactory));
+
+        return d -> Maps.immutableEntry(
+                transformer.apply(d).indexOf(),
+                saturatedRepresentative.stream()
+                        .map(m -> new TMappingRule(transformer.apply(d).getArguments(m.getHeadTerms(), transformer.apply(d).getIri()), m))
+                        .collect(ImmutableCollectors.toList()));
     }
 
     private interface EntityRuleHeadTransformer {
