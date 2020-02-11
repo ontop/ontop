@@ -42,11 +42,6 @@ public abstract class AbstractFunctionalTerm implements Function {
     }
 
     @Override
-    public void setPredicate(Predicate predicate) {
-        this.functor = predicate;
-    }
-
-    @Override
     public Set<Variable> getVariables() {
         Set<Variable> variables = new HashSet<>();
         for (Term t : getTerms()) {
@@ -95,11 +90,6 @@ public abstract class AbstractFunctionalTerm implements Function {
                 "Added because required by the compiler");
     }
 
-
-    @Override
-    public boolean isDataFunction() {
-        return (!(isOperation() || isDataTypeFunction()));
-    }
 
     @Override
     public boolean isOperation() {

@@ -4,7 +4,8 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.datalog.QueryUnionSplitter;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.transformer.QueryUnionSplitter;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
@@ -39,6 +40,7 @@ public class OntopMappingModule extends OntopAbstractModule {
         bindFromSettings(MappingCaster.class);
         bindFromSettings(MappingDistinctTransformer.class);
         bindFromSettings(MappingEqualityTransformer.class);
+        bindFromSettings(TargetAtomFactory.class);
 
         bind(MappingCoreSingletons.class).to(MappingCoreSingletonsImpl.class);
 

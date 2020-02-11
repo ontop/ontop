@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
@@ -144,7 +145,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                             }
                         }
                         ImmutableList<Variable> varList = varBuilder2.build();
-                        ImmutableSubstitution substitution = substitutionFactory.getSubstitution(builder.build());
+                        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(builder.build());
 
                         IQ iq0 = iqFactory.createIQ(
                                     atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),

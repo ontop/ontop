@@ -63,7 +63,7 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 	protected FunctionalTermImpl(Predicate functor, Term... terms) {
 		super(functor);
 
-		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
+		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<>();
 		Collections.addAll(eventlist, terms);
 		
 		this.terms = eventlist;
@@ -73,7 +73,7 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		super(functor);
 
-		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<Term>();
+		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<>();
 		eventlist.addAll(terms);	
 		
 		this.terms = eventlist;		
@@ -109,11 +109,6 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 		return identifier;
 	}
 
-	@Override
-	public void setPredicate(Predicate predicate) {
-		super.setPredicate(predicate);
-		listChanged();
-	}
 
 	@Override
 	public EventGeneratingList<Term> getTerms() {
@@ -122,7 +117,7 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 
 	@Override
 	public Function clone() {
-		ArrayList<Term> copyTerms = new ArrayList<Term>(terms.size());
+		ArrayList<Term> copyTerms = new ArrayList<>(terms.size());
 		
 		for (Term term: terms) {
 			copyTerms.add(term.clone());
@@ -154,49 +149,6 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 		return terms.get(index);
 	}
 
-	@Override
-	public void setTerm(int index, Term newTerm) {
-		listChanged();
-		terms.set(index, newTerm);
-	}
-
-	public void updateTerms(List<Term> newterms) {
-		for (Term term : terms) {
-			if (term instanceof Function) {
-				if (term instanceof ListenableFunction) {
-					ListenableFunction function = (ListenableFunction) term;
-					EventGeneratingList<Term> innertermlist = function.getTerms();
-					innertermlist.removeListener(this);
-				}
-				else if (!(term instanceof ImmutableFunctionalTerm)) {
-					throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  "
-							+ term);
-				}
-			}
-		}
-		terms.clear();
-		terms.addAll(newterms);
-
-		for (Term term : terms) {
-			if (term instanceof Function) {
-				if (term instanceof ListenableFunction) {
-					ListenableFunction function = (ListenableFunction) term;
-					EventGeneratingList<Term> innertermlist = function.getTerms();
-					innertermlist.addListener(this);
-				}
-				else if (!(term instanceof ImmutableFunctionalTerm)) {
-					throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  "
-							+ term);
-				}
-			}
-		}
-		listChanged();
-	}
-
-	@Override
-	public boolean isDataFunction() {
-		return (!(isOperation() || isDataTypeFunction()));
-	}
 
 	@Override
 	public boolean isOperation() {

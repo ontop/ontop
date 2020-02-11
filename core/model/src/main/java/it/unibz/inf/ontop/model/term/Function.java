@@ -51,40 +51,32 @@ public interface Function extends Term {
 	 * 
 	 * @return a list of terms.
 	 */
-	public List<Term> getTerms();
+	List<Term> getTerms();
 
 	/**
 	 * Get the function symbol.
 	 * 
 	 * @return the predicate object.
 	 */
-	public Predicate getFunctionSymbol();
+	Predicate getFunctionSymbol();
 
 	/**
 	 * Get the number of terms (or arguments) in the function symbol.
 	 * 
 	 * @return the arity.
 	 */
-	public int getArity();
+	int getArity();
 
-	public Term getTerm(int index);
-
-	public void setTerm(int index, Term term);
-
-	public void updateTerms(List<Term> literals);
-
-	public void setPredicate(Predicate p);
+	Term getTerm(int index);
 
 	boolean containsTerm(Term t);
-
-	boolean isDataFunction();
 
 	boolean isOperation();
 
 	@Deprecated
 	boolean isDataTypeFunction();
 
-    public Set<Variable> getVariables();
+    Set<Variable> getVariables();
 
 }
 

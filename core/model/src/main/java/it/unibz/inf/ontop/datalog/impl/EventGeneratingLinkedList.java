@@ -45,10 +45,6 @@ public class EventGeneratingLinkedList<E> extends LinkedList<E> implements Event
 
 	public EventGeneratingLinkedList() { }
 
-	public EventGeneratingLinkedList(Collection<E> c) { addAll(c); }
-
-	public EventGeneratingLinkedList(E[] c) { Collections.addAll(this, c); }
-
 	/* (non-Javadoc)
 	 * @see it.unibz.inf.obda.utils.EventGeneratingList#addListener(it.unibz.inf.obda.utils.ListListener)
 	 */

@@ -30,6 +30,6 @@ import java.io.Serializable;
  */
 public interface Term extends Serializable {
 
-	public Term clone();
+	Term clone();
 
 }
