@@ -37,16 +37,14 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
-
 /**
  * @author Mariano Rodriguez Muro
  * 
  */
 public class AutomaticMGUGenerationTests extends TestCase {
 
-	private UnifierUtilities					unifier		= null;
-	private AutomaticMGUTestDataGenerator	generator	= null;
+	private UnifierUtilities					unifier;
+	private AutomaticMGUTestDataGenerator	generator;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
 	/**
@@ -59,9 +57,8 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities(TERM_FACTORY);
+		unifier = new UnifierUtilities();
 		generator = new AutomaticMGUTestDataGenerator();
-
 	}
 
 	public void testGetMGUAtomAtomBoolean() throws Exception {
