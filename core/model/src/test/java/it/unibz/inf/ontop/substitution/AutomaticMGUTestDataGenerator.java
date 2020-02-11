@@ -20,15 +20,16 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.RDF_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
@@ -55,7 +56,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param unifier2
 	 * @return
 	 */
-	public boolean compareUnifiers(List<SingletonSubstitution> unifier1, List<SingletonSubstitution> unifier2) {
+	public boolean compareUnifiers(List<Map.Entry<Variable, Term>> unifier1, List<Map.Entry<Variable, Term>> unifier2) {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
@@ -86,9 +87,9 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param s2
 	 * @return
 	 */
-	public boolean compareSubstitutions(SingletonSubstitution s1, SingletonSubstitution s2) {
-		boolean equalVars = s1.getVariable().toString().equals(s2.getVariable().toString());
-		boolean equalTerms = s1.getTerm().toString().equals(s2.getTerm().toString());
+	public boolean compareSubstitutions(Map.Entry<Variable, Term> s1, Map.Entry<Variable, Term> s2) {
+		boolean equalVars = s1.getKey().toString().equals(s2.getKey().toString());
+		boolean equalTerms = s1.getValue().toString().equals(s2.getValue().toString());
 		return equalVars && equalTerms;
 	}
 
@@ -99,20 +100,20 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param mgustr
 	 * @return
 	 */
-	public List<SingletonSubstitution> getMGU(String mgustr) {
+	public List<Map.Entry<Variable, Term>> getMGU(String mgustr) {
 		if (mgustr.trim().equals("NULL"))
 			return null;
 
 		mgustr = mgustr.substring(1, mgustr.length() - 1);
 		String[] mguStrings = mgustr.split(" ");
 
-		List<SingletonSubstitution> mgu = new ArrayList<>();
+		List<Map.Entry<Variable, Term>> mgu = new ArrayList<>();
 		for (int i = 0; i < mguStrings.length; i++) {
 			String string = mguStrings[i];
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			SingletonSubstitution s = new SingletonSubstitution((Variable)getTerm(elements[0]), getTerm(elements[1]));
+			Map.Entry<Variable, Term> s = Maps.immutableEntry((Variable) getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;

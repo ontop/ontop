@@ -22,6 +22,12 @@ public class SubstitutionImpl implements Substitution {
         this.map = new HashMap<>();
     }
 
+    public SubstitutionImpl(TermFactory termFactory, Variable v, Term t) {
+        this.termFactory = termFactory;
+        this.map = new HashMap<>();
+        map.put(v, t);
+    }
+
     @Override
     public Map<Variable, Term> getMap() {
         return map;
@@ -79,21 +85,21 @@ public class SubstitutionImpl implements Substitution {
             return true;
 
         // Not neutral, not null --> should be a singleton.
-        SingletonSubstitution substitution = (SingletonSubstitution)  s;
+        Map.Entry<Variable, Term> substitution = s.getMap().entrySet().iterator().next();
 
 
         List<Variable> forRemoval = new ArrayList<>();
         for (Map.Entry<Variable,Term> entry : map.entrySet()) {
             Variable v = entry.getKey();
             Term t = entry.getValue();
-            if (substitution.getVariable().equals(t)) { // ROMAN: no need in isEqual(t, s.getVariable())
-                if (v.equals(substitution.getTerm())) {  // ROMAN: no need in isEqual(v, s.getTerm())
+            if (substitution.getKey().equals(t)) {
+                if (v.equals(substitution.getValue())) {
                     // The substitution for the current variable has become
                     // trivial, e.g., x/x with the current composition. We
                     // remove it to keep only a non-trivial unifier
                     forRemoval.add(v);
                 } else
-                    map.put(v, substitution.getTerm());
+                    map.put(v, substitution.getValue());
 
             }
             else if (t instanceof FunctionalTermImpl) {
@@ -104,7 +110,7 @@ public class SubstitutionImpl implements Substitution {
             }
         }
         map.keySet().removeAll(forRemoval);
-        map.put(substitution.getVariable(), substitution.getTerm());
+        map.put(substitution.getKey(), substitution.getValue());
         return true;
     }
 
@@ -113,7 +119,7 @@ public class SubstitutionImpl implements Substitution {
      *
      * Recursive
      */
-    private static boolean applySingletonSubstitution(Function functionalTerm, SingletonSubstitution substitution) {
+    private static boolean applySingletonSubstitution(Function functionalTerm, Map.Entry<Variable, Term> substitution) {
         List<Term> innerTerms = functionalTerm.getTerms();
         boolean innerchanges = false;
         // TODO this ways of changing inner terms in functions is not
@@ -127,8 +133,8 @@ public class SubstitutionImpl implements Substitution {
                 boolean newChange = applySingletonSubstitution((Function) innerTerm, substitution);
                 innerchanges = innerchanges || newChange;
             }
-            else if (substitution.getVariable().equals(innerTerm)) { // ROMAN: no need in isEqual(innerTerm, s.getVariable())
-                functionalTerm.getTerms().set(i, substitution.getTerm());
+            else if (substitution.getKey().equals(innerTerm)) {
+                functionalTerm.getTerms().set(i, substitution.getValue());
                 innerchanges = true;
             }
         }
@@ -165,8 +171,8 @@ public class SubstitutionImpl implements Substitution {
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            SubstitutionUtilities.applySubstitution(firstAtom, this, termidx + 1);
-            SubstitutionUtilities.applySubstitution(secondAtom, this, termidx + 1);
+            applySubstitution(firstAtom, this, termidx + 1);
+            applySubstitution(secondAtom, this, termidx + 1);
         }
 
         return true;
@@ -221,19 +227,48 @@ public class SubstitutionImpl implements Substitution {
             if (t1.equals(t2))   // ROMAN: no need in isEqual(t1, t2) -- both are proper variables
                 return new SubstitutionImpl(termFactory);
             else
-                return new SingletonSubstitution(t1, t2);
+                return new SubstitutionImpl(termFactory, t1, t2);
         }
         else if (t2 instanceof Constant) {
-            return new SingletonSubstitution(t1, t2);
+            return new SubstitutionImpl(termFactory, t1, t2);
         }
         else if (t2 instanceof Function) {
             Function fterm = (Function) t2;
             if (fterm.containsTerm(t1))
                 return null;
             else
-                return new SingletonSubstitution(t1, t2);
+                return new SubstitutionImpl(termFactory, t1, t2);
         }
         // this should never happen
         throw new RuntimeException("Unsupported unification case: " + term1 + " " + term2);
     }
+
+    /**
+     * Applies the substitution to all the terms in the list. Note that this
+     * will not clone the list or the terms inside the list.
+     *
+     * @param atom
+     * @param unifier
+     */
+
+    private static void applySubstitution(Function atom, Substitution unifier, int fromIndex) {
+
+        List<Term> terms = atom.getTerms();
+
+        for (int i = fromIndex; i < terms.size(); i++) {
+            Term t = terms.get(i);
+
+            // unifiers only apply to variables, simple or inside functional terms
+
+            if (t instanceof Variable) {
+                Term replacement = unifier.getMap().get((Variable) t);
+                if (replacement != null)
+                    terms.set(i, replacement);
+            }
+            else if (t instanceof Function) {
+                applySubstitution((Function) t, unifier, 0);
+            }
+        }
+    }
+
 }

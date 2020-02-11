@@ -40,8 +40,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
  * A Class that provides general utilities related to unification, of terms and
  * atoms.
  * <p/>
- * See also SubstitutionUtilities that contains methods that were initially present
- * in this class.
  *
  * @author mariano
  */

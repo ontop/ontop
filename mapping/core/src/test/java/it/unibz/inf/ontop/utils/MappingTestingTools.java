@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.impl.SubstitutionUtilities;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
 
@@ -41,7 +40,6 @@ public class MappingTestingTools {
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
-    public static final SubstitutionUtilities SUBSTITUTION_UTILITIES;
     public static final UnifierUtilities UNIFIER_UTILITIES;
     public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
@@ -94,7 +92,6 @@ public class MappingTestingTools {
 
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
 
-        SUBSTITUTION_UTILITIES = injector.getInstance(SubstitutionUtilities.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 

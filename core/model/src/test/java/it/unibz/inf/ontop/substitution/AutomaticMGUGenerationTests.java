@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.substitution;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
 import java.io.BufferedReader;
@@ -83,27 +82,23 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
 			List<Function> atoms = generator.getAtoms(atomsstr);
-			List<SingletonSubstitution> expectedmgu = generator.getMGU(mgustr);
-
-			List<SingletonSubstitution> computedmgu = new ArrayList<>();
-			Exception expectedException = null;
+			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
+			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
 
 			Substitution mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Map.Entry<Variable, Term> e : mgu.getMap().entrySet()) {
-					computedmgu.add(new SingletonSubstitution(e.getKey(), e.getValue()));
-				}
+				computedmgu.addAll(mgu.getMap().entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);
 
 			if (expectedmgu == null) {
-				assertTrue(computedmgu == null);
+				assertNull(computedmgu);
 			} else {
-				assertTrue(computedmgu != null);
-				assertTrue(computedmgu.size() == expectedmgu.size());
+				assertNotNull(computedmgu);
+				assertEquals(computedmgu.size(), expectedmgu.size());
 				assertTrue(generator.compareUnifiers(expectedmgu, computedmgu));
 
 			}
@@ -111,7 +106,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			testcase = in.readLine();
 		}
 		in.close();
-		log.info("Suceffully executed {} test cases for MGU computation");
+		log.info("Successfully executed {} test cases for MGU computation", casecounter);
 	}
 
 //	/**

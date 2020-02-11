@@ -36,8 +36,6 @@ import java.util.Map;
  *
  *  Typical algebraic operations on substitution functions are composition and union.
  *
- *  See the SubstitutionUtilities
- *
  */
 public interface Substitution {
 
