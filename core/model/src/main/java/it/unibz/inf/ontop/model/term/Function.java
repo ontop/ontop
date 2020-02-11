@@ -48,21 +48,21 @@ public interface Function extends Term {
 	/**
 	 * Get a list of terms (or arguments) that are contained in the function
 	 * symbol.
-	 * 
+	 *
 	 * @return a list of terms.
 	 */
 	List<Term> getTerms();
 
 	/**
 	 * Get the function symbol.
-	 * 
+	 *
 	 * @return the predicate object.
 	 */
 	Predicate getFunctionSymbol();
 
 	/**
 	 * Get the number of terms (or arguments) in the function symbol.
-	 * 
+	 *
 	 * @return the arity.
 	 */
 	int getArity();
@@ -70,13 +70,4 @@ public interface Function extends Term {
 	Term getTerm(int index);
 
 	boolean containsTerm(Term t);
-
-	boolean isOperation();
-
-	@Deprecated
-	boolean isDataTypeFunction();
-
-    Set<Variable> getVariables();
-
 }
-

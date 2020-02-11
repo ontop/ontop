@@ -21,7 +21,6 @@ package it.unibz.inf.ontop.model.term.impl;
  */
 
 import it.unibz.inf.ontop.datalog.ListenableFunction;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -29,20 +28,18 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.datalog.impl.EventGeneratingLinkedList;
 import it.unibz.inf.ontop.datalog.EventGeneratingList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * TODO: rename ListenableFunctionImpl
  *
  * Please consider using ImmutableFunctionalTermImpl instead.
  */
-public class FunctionalTermImpl extends AbstractFunctionalTerm implements ListenableFunction {
+public class FunctionalTermImpl implements ListenableFunction {
 
-	private static final long serialVersionUID = 2832481815465364535L;
+	private final Predicate functor;
+	private final EventGeneratingList<Term> terms;
 
-	private EventGeneratingList<Term> terms;
 	private int identifier = -1;
 
 	// true when the list of terms has been modified
@@ -50,6 +47,43 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 
 	// null when the list of terms has been modified
 	private String string = null;
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof Function)) {
+			return false;
+		}
+		return this.hashCode() == obj.hashCode();
+	}
+
+	@Override
+	public int getArity() {
+		return functor.getArity();
+	}
+
+
+	@Override
+	public Predicate getFunctionSymbol() {
+		return functor;
+	}
+
+	/**
+	 * Check whether the function contains a particular term argument or not.
+	 *
+	 * @param t the term in question.
+	 * @return true if the function contains the term, or false otherwise.
+	 */
+	@Override
+	public boolean containsTerm(Term t) {
+		for (int i = 0; i < terms.size(); i++) {
+			Term t2 = terms.get(i);
+			if (t2.equals(t))
+				return true;
+		}
+		return false;
+	}
+
 
 	/**
 	 * The default constructor.
@@ -60,18 +94,9 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 	 * @param terms
 	 *            the list of arguments.
 	 */
-	protected FunctionalTermImpl(Predicate functor, Term... terms) {
-		super(functor);
-
-		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<>();
-		Collections.addAll(eventlist, terms);
-		
-		this.terms = eventlist;
-		registerListeners(eventlist);
-	}
 
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
-		super(functor);
+		this.functor = functor;
 
 		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<>();
 		eventlist.addAll(terms);	
@@ -132,7 +157,19 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 	@Override
 	public String toString() {
 		if (string == null) {
-			string = super.toString();
+			StringBuilder sb = new StringBuilder();
+			sb.append(functor.toString());
+			sb.append("(");
+			boolean separator = false;
+			for (Term innerTerm : terms) {
+				if (separator) {
+					sb.append(",");
+				}
+				sb.append(innerTerm.toString());
+				separator = true;
+			}
+			sb.append(")");
+			string = sb.toString();
 		}
 		return string;
 	}
@@ -148,17 +185,4 @@ public class FunctionalTermImpl extends AbstractFunctionalTerm implements Listen
 	public Term getTerm(int index) {
 		return terms.get(index);
 	}
-
-
-	@Override
-	public boolean isOperation() {
-		return getFunctionSymbol() instanceof FunctionSymbol;
-	}
-
-	
-	@Override
-	public boolean isDataTypeFunction() {
-		return false;
-	}
-	
 }

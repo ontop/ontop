@@ -49,28 +49,10 @@ public class SingletonSubstitution implements Substitution {
     }
 
     @Override
-    public Term get(Variable var) {
-        if (var.equals(variable))
-            return term;
-        return null;
-    }
-
-    @Override
     public ImmutableMap<Variable, Term> getMap() {
         return ImmutableMap.of(variable, term);
     }
 
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
-
-
-    @Deprecated
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
-        throw new UnsupportedOperationException("Mutable operations are not supported.");
-    }
 
     @Deprecated
     @Override

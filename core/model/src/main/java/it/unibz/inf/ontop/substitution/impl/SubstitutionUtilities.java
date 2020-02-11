@@ -55,7 +55,7 @@ public class SubstitutionUtilities {
             // unifiers only apply to variables, simple or inside functional terms
 
             if (t instanceof Variable) {
-                Term replacement = unifier.get((Variable) t);
+                Term replacement = unifier.getMap().get((Variable) t);
                 if (replacement != null)
                     terms.set(i, replacement);
             } 

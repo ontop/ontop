@@ -5,9 +5,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class GroundTermTools {
 
@@ -52,7 +50,11 @@ public class GroundTermTools {
      */
     public static boolean isGroundTerm(Term term) {
         if (term instanceof Function) {
-            return ((Function)term).getVariables().isEmpty();
+            Set<Variable> variables = new HashSet<>();
+            for (Term t : ((Function)term).getTerms()) {
+                TermUtils.addReferencedVariablesTo(variables, t);
+            }
+            return variables.isEmpty();
         }
         return term instanceof Constant;
     }

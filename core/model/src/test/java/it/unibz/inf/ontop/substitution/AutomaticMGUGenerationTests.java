@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.substitution;
  */
 
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.SingletonSubstitution;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -90,8 +92,8 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			if (mgu == null) {
 				computedmgu = null;
 			} else {
-				for (Variable var : mgu.getMap().keySet()) {
-					computedmgu.add(new SingletonSubstitution(var, mgu.get(var)));
+				for (Map.Entry<Variable, Term> e : mgu.getMap().entrySet()) {
+					computedmgu.add(new SingletonSubstitution(e.getKey(), e.getValue()));
 				}
 			}
 

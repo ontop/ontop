@@ -9,10 +9,6 @@ import java.util.List;
 
 public class ExpressionImpl extends FunctionalTermImpl implements Expression {
 
-    protected ExpressionImpl(BooleanFunctionSymbol functor, Term... terms) {
-        super(functor, terms);
-    }
-
     protected ExpressionImpl(BooleanFunctionSymbol functor, List<Term> terms) {
         super(functor, terms);
     }

@@ -22,22 +22,11 @@ public class SubstitutionImpl implements Substitution {
         this.map = new HashMap<>();
     }
 
-    public SubstitutionImpl(Map<Variable, Term> substitutionMap, TermFactory termFactory) {
-        this.termFactory = termFactory;
-        this.map = substitutionMap;
-    }
-
-    @Override
-    public Term get(Variable var) {
-        return map.get(var);
-    }
-
     @Override
     public Map<Variable, Term> getMap() {
         return map;
     }
 
-    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
@@ -70,8 +59,7 @@ public class SubstitutionImpl implements Substitution {
      * @param term2
      * @return true if the substitution exists (false if it does not)
      */
-    @Override
-    public boolean composeTerms(Term term1, Term term2) {
+    private boolean composeTerms(Term term1, Term term2) {
 
         /**
          * Special case: unification of two functional terms (possibly recursive)
@@ -87,11 +75,11 @@ public class SubstitutionImpl implements Substitution {
             return false;
 
         // Neutral substitution
-        if (s.isEmpty())
+        if (s.getMap().isEmpty())
             return true;
 
         // Not neutral, not null --> should be a singleton.
-        SingletonSubstitution substitution = (SingletonSubstitution) s;
+        SingletonSubstitution substitution = (SingletonSubstitution)  s;
 
 
         List<Variable> forRemoval = new ArrayList<>();

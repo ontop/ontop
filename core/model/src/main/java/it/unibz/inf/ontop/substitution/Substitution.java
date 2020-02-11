@@ -41,14 +41,10 @@ import java.util.Map;
  */
 public interface Substitution {
 
-    Term get(Variable var);
-
     /**
      * Map representation of this function.
      */
     Map<Variable, Term> getMap();
-
-    boolean isEmpty();
 
 
     /***
@@ -64,13 +60,6 @@ public interface Substitution {
      *
      * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
      *
-     * @param term1
-     * @param term2
-     * @return true if the substitution exists (false if it does not)
-     */
-    boolean composeTerms(Term term1, Term term2);
-
-    /**
      * Composes two functional terms. Can be recursive.
      *
      * Side-effect method: might add to new entries to the substitution.
