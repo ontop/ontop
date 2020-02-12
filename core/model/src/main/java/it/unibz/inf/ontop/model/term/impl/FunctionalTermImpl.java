@@ -35,26 +35,18 @@ import java.util.*;
  *
  * Please consider using ImmutableFunctionalTermImpl instead.
  */
-public class FunctionalTermImpl implements ListenableFunction {
+public class FunctionalTermImpl implements Function {
 
 	private final Predicate functor;
-	private final EventGeneratingList<Term> terms;
-
-	private int identifier = -1;
-
-	// true when the list of terms has been modified
-	private boolean rehash = true;
-
-	// null when the list of terms has been modified
-	private String string = null;
-
+	private final List<Term> terms;
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof Function)) {
-			return false;
+		if (obj instanceof FunctionalTermImpl) {
+			FunctionalTermImpl other = (FunctionalTermImpl)obj;
+			return this.functor.equals(other.functor) && this.terms.equals(other.terms);
 		}
-		return this.hashCode() == obj.hashCode();
+		return false;
 	}
 
 	@Override
@@ -76,12 +68,7 @@ public class FunctionalTermImpl implements ListenableFunction {
 	 */
 	@Override
 	public boolean containsTerm(Term t) {
-		for (int i = 0; i < terms.size(); i++) {
-			Term t2 = terms.get(i);
-			if (t2.equals(t))
-				return true;
-		}
-		return false;
+		return terms.contains(t);
 	}
 
 
@@ -97,66 +84,30 @@ public class FunctionalTermImpl implements ListenableFunction {
 
 	protected FunctionalTermImpl(Predicate functor, List<Term> terms) {
 		this.functor = functor;
-
-		EventGeneratingList<Term> eventlist = new EventGeneratingLinkedList<>();
-		eventlist.addAll(terms);	
-		
-		this.terms = eventlist;		
-		registerListeners(eventlist);
+		this.terms = new ArrayList<>(terms);
 	}
 
 	
-	private void registerListeners(EventGeneratingList<? extends Term> functions) {
-		functions.addListener(this);
-		for (Object o : functions) {
-			if (!(o instanceof Function)) {
-				continue;
-			}
-			if (o instanceof ListenableFunction) {
-				ListenableFunction f = (ListenableFunction) o;
-				EventGeneratingList<Term> list = f.getTerms();
-				list.addListener(this);
-				registerListeners(list);
-			}
-			else if (!(o instanceof ImmutableFunctionalTerm)) {
-				throw new IllegalArgumentException("Unknown type of function: not listenable nor immutable:  " + o);
-			}
-		}
-	}
-
 	@Override
 	public int hashCode() {
-		if (rehash) {
-			string = toString();
-			identifier = string.hashCode();
-			rehash = false;
-		}
-		return identifier;
+		return functor.hashCode() ^ terms.hashCode();
 	}
 
-
 	@Override
-	public EventGeneratingList<Term> getTerms() {
+	public List<Term> getTerms() {
 		return terms;
 	}
 
 	@Override
 	public Function clone() {
 		ArrayList<Term> copyTerms = new ArrayList<>(terms.size());
-		
-		for (Term term: terms) {
+		for (Term term: terms)
 			copyTerms.add(term.clone());
-		}
-		FunctionalTermImpl clone = new FunctionalTermImpl(getFunctionSymbol(), copyTerms);
-		clone.identifier = identifier;
-		clone.string = string;
-		clone.rehash = rehash;
-		return clone;
+		return new FunctionalTermImpl(getFunctionSymbol(), copyTerms);
 	}
 
 	@Override
 	public String toString() {
-		if (string == null) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(functor.toString());
 			sb.append("(");
@@ -169,16 +120,7 @@ public class FunctionalTermImpl implements ListenableFunction {
 				separator = true;
 			}
 			sb.append(")");
-			string = sb.toString();
-		}
-		return string;
-	}
-
-
-	@Override
-	public void listChanged() {
-		rehash = true;
-		string = null;
+		return sb.toString();
 	}
 
 	@Override

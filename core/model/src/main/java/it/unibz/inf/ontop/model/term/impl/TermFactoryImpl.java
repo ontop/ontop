@@ -189,11 +189,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 	
 	@Override
-	public Expression getExpression(BooleanFunctionSymbol functor, Term... arguments) {
-		return getExpression(functor, Arrays.asList(arguments));
-	}
-
-	@Override
 	public Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments) {
 		if (isTestModeEnabled) {
 			checkMutability(arguments);
