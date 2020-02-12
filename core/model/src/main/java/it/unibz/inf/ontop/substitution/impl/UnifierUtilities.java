@@ -70,7 +70,10 @@ public class UnifierUtilities {
      * @return the substitution corresponding to this unification.
      */
     public Map<Variable, Term> getMGU(ImmutableList<? extends ImmutableTerm> args1,ImmutableList<? extends ImmutableTerm> args2) {
-        return composeTerms(ImmutableMap.of(), convertToMutableTerms(args1), convertToMutableTerms(args2));
+        //System.out.println("MGU: " + args1 + " v " + args2);
+        ImmutableMap<Variable, Term> r = composeTerms(ImmutableMap.of(), convertToMutableTerms(args1), convertToMutableTerms(args2));
+        //System.out.println("RES: " + r);
+        return r;
     }
 
     /**
@@ -129,17 +132,13 @@ public class UnifierUtilities {
         }
 
         ImmutableMap<Variable, Term> s;
-        if (term1 instanceof Variable)
+        // avoid unifying x with f(g(x))
+        if (term1 instanceof Variable && !variableOccursInTerm((Variable)term1, term2))
             s = ImmutableMap.of((Variable)term1, term2);
-        else if (term2 instanceof Variable)
+        else if (term2 instanceof Variable && !variableOccursInTerm((Variable)term2, term1))
             s = ImmutableMap.of((Variable)term2, term1);
         else
             return null; // neither is a variable, impossible to unify distinct terms
-
-        // x is unified with f(x)
-        Map.Entry<Variable, Term> m = s.entrySet().iterator().next();
-        if (isRecursive(m.getKey(), m.getValue()))
-            return null;
 
         return Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
                 .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
@@ -150,9 +149,9 @@ public class UnifierUtilities {
                 .collect(ImmutableCollectors.toMap());
     }
 
-    private static boolean isRecursive(Variable v, Term t) {
+    private static boolean variableOccursInTerm(Variable v, Term t) {
         if (t instanceof Function)
-            return ((Function)t).getTerms().stream().anyMatch(tt -> isRecursive(v, tt));
+            return ((Function)t).getTerms().stream().anyMatch(tt -> variableOccursInTerm(v, tt));
         return v.equals(t);
     }
 
