@@ -65,6 +65,7 @@ A("test") | A(f(x,y)) = NULL
 A("test") | A(f(x,y,z)) = NULL
 
 A(f(x)) | A(x) = NULL
+A(f(g(x))) | A(x) = NULL
 A(f(x)) | A(y) = {y/f(x)}
 A(f(x)) | A("test") = NULL
 %A(f(x)) | A(<urn::localhost>)  = NULL
