@@ -155,8 +155,8 @@ public class ImmutableUnificationTools {
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
         Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(atom1),
-                immutabilityTools.convertToMutableFunction(atom2));
+                immutabilityTools.convertToMutableFunction(atom1.getPredicate(), atom1.getArguments()),
+                immutabilityTools.convertToMutableFunction(atom2.getPredicate(), atom2.getArguments()));
 
         if (mutableSubstitution == null) {
             return Optional.empty();

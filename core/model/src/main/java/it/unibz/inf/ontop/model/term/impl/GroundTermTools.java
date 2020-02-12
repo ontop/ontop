@@ -1,71 +1,14 @@
 package it.unibz.inf.ontop.model.term.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
 
 import java.util.*;
 
 public class GroundTermTools {
 
-    public static class NonGroundTermException extends RuntimeException {
-        protected  NonGroundTermException(String message) {
-            super(message);
-        }
-    }
-
-
-    public static ImmutableList<GroundTerm> castIntoGroundTerms(List<? extends Term> terms, TermFactory termFactory)
-            throws NonGroundTermException {
-        ImmutableList.Builder<GroundTerm> termBuilder = ImmutableList.builder();
-        for (Term term : terms) {
-            termBuilder.add(castIntoGroundTerm(term, termFactory));
-        }
-
-        return termBuilder.build();
-    }
-
-    public static GroundTerm castIntoGroundTerm(Term term, TermFactory termFactory) throws NonGroundTermException{
-        if (term instanceof GroundTerm)
-            return (GroundTerm) term;
-
-        if (term instanceof Function) {
-            Function functionalTerm = (Function) term;
-            // Recursive
-            FunctionSymbol functionSymbol = Optional.of(functionalTerm.getFunctionSymbol())
-                    .filter(p -> p instanceof FunctionSymbol)
-                    .map(p -> (FunctionSymbol)p)
-                    .orElseThrow(() -> new NonGroundTermException(term + "is not using a function symbol but a"
-                            + functionalTerm.getFunctionSymbol().getClass()));
-
-            return new GroundFunctionalTermImpl(castIntoGroundTerms(functionalTerm.getTerms(), termFactory), functionSymbol, termFactory);
-        }
-
-        throw new NonGroundTermException(term + " is not a ground term");
-    }
-
-    /**
-     * Returns true if is a ground term (even if it is not explicitly typed as such).
-     */
-    public static boolean isGroundTerm(Term term) {
-        if (term instanceof Function) {
-            Set<Variable> variables = new HashSet<>();
-            for (Term t : ((Function)term).getTerms()) {
-                TermUtils.addReferencedVariablesTo(variables, t);
-            }
-            return variables.isEmpty();
-        }
-        return term instanceof Constant;
-    }
-
     public static boolean areGroundTerms(Collection<? extends ImmutableTerm> terms) {
-        for (ImmutableTerm term : terms) {
-            if (!term.isGround()) {
-                return false;
-            }
-        }
-        return true;
+        return terms.stream().allMatch(ImmutableTerm::isGround);
     }
 
     public static void checkNonGroundTermConstraint(NonGroundFunctionalTerm term) throws IllegalArgumentException {
