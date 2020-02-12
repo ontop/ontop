@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.exception;
 
-import it.unibz.inf.ontop.model.term.Expression;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -30,13 +29,6 @@ public class FatalTypingException extends Exception {
     public FatalTypingException(String exception, TermType actualTermType) {
         super("Incompatible type inferred " + ": expected: " + exception
                 + ", actual: " + actualTermType);
-    }
-
-    /**
-     * Incompatibility detected in an expression
-     */
-    public FatalTypingException(Expression expression, FatalTypingException caughtException) {
-        super("In " + expression + ": " + caughtException.getMessage());
     }
 
     /**

@@ -189,14 +189,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 	
 	@Override
-	public Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments) {
-		if (isTestModeEnabled) {
-			checkMutability(arguments);
-		}
-		return new ExpressionImpl(functor, arguments);
-	}
-
-	@Override
 	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments) {
 		return getImmutableExpression(functor, ImmutableList.copyOf(arguments));
 	}
@@ -209,17 +201,6 @@ public class TermFactoryImpl implements TermFactory {
 		}
 		else {
 			return new NonGroundExpressionImpl(functor, arguments, this);
-		}
-	}
-
-	@Override
-	public ImmutableExpression getImmutableExpression(Expression expression) {
-		if (GroundTermTools.isGroundTerm(expression)) {
-			return new GroundExpressionImpl(expression.getFunctionSymbol(),
-					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression), this);
-		}
-		else {
-			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression), this);
 		}
 	}
 
@@ -359,9 +340,8 @@ public class TermFactoryImpl implements TermFactory {
 		}
 
 		if (functor instanceof BooleanFunctionSymbol) {
-			return getExpression((BooleanFunctionSymbol) functor, arguments);
+			return new ExpressionImpl((BooleanFunctionSymbol) functor, arguments);
 		}
-
 		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}

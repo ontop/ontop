@@ -61,14 +61,10 @@ public interface TermFactory {
 	 */
 	Function getFunction(Predicate functor, Term... terms);
 
-	Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments);
-
 	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments);
 
 	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor,
 											   ImmutableList<? extends ImmutableTerm> arguments);
-
-	ImmutableExpression getImmutableExpression(Expression expression);
 
 	/**
 	 * Must be non-empty

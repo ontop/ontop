@@ -3,18 +3,12 @@ package it.unibz.inf.ontop.model.term.impl;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-
-import java.util.stream.Stream;
 
 public class ImmutabilityTools {
 
@@ -33,12 +27,14 @@ public class ImmutabilityTools {
      */
     public ImmutableTerm convertIntoImmutableTerm(Term term) {
         if (term instanceof Function) {
+            Function functionalTerm = (Function) term;
             if (term instanceof Expression) {
                 Expression expression = (Expression) term;
-                return termFactory.getImmutableExpression(expression);
-            } else {
-                Function functionalTerm = (Function) term;
-
+                return termFactory.getImmutableExpression(
+                        expression.getFunctionSymbol(),
+                        convertTerms(functionalTerm));
+            }
+            else {
                 if (functionalTerm.getFunctionSymbol() instanceof FunctionSymbol)
                     return termFactory.getImmutableFunctionalTerm(
                             (FunctionSymbol) functionalTerm.getFunctionSymbol(),
@@ -108,56 +104,6 @@ public class ImmutabilityTools {
 
         }
         return mutableList;
-    }
-
-    public Term convertToMutableTerm(ImmutableTerm term) {
-        if (term instanceof Variable)
-            return (Term) term;
-        else if (term instanceof Constant)
-            return (Term) term;
-        else {
-            return convertToMutableFunction((ImmutableFunctionalTerm) term);
-        }
-    }
-
-
-    /**
-     * This method takes a immutable boolean term and convert it into an old mutable boolean function.
-     */
-    public Expression convertToMutableBooleanExpression(ImmutableExpression booleanExpression) {
-        BooleanFunctionSymbol pred = booleanExpression.getFunctionSymbol();
-        return termFactory.getExpression(pred, convertToMutableTerms(booleanExpression.getTerms()));
-    }
-
-    public ImmutableSet<ImmutableExpression> retainVar2VarEqualityConjuncts(ImmutableExpression expression) {
-        return filterOuterMostConjuncts(e -> e.isVar2VarEquality(), expression);
-    }
-
-    public ImmutableSet<ImmutableExpression> discardVar2VarEqualityConjuncts(ImmutableExpression expression) {
-        return filterOuterMostConjuncts(e -> !(e.isVar2VarEquality()), expression);
-    }
-
-    private ImmutableSet<ImmutableExpression> filterOuterMostConjuncts(java.util.function.Predicate<ImmutableExpression> filterMethod,
-                                                                              ImmutableExpression expression) {
-
-        ImmutableSet<ImmutableExpression> conjuncts = expression.flattenAND()
-                .collect(ImmutableCollectors.toSet());
-        if (conjuncts.size() > 1) {
-            ImmutableList<ImmutableExpression> filteredConjuncts = conjuncts.stream()
-                    .filter(filterMethod)
-                    .collect(ImmutableCollectors.toList());
-            switch (filteredConjuncts.size()) {
-                case 0:
-                    return ImmutableSet.of();
-                case 1:
-                    return ImmutableSet.of(filteredConjuncts.iterator().next());
-                default:
-                    return ImmutableSet.copyOf(filteredConjuncts);
-            }
-        }
-        return filterMethod.test(expression) ?
-                ImmutableSet.of(expression) :
-                ImmutableSet.of();
     }
 
     private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
