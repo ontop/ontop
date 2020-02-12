@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
@@ -34,6 +35,7 @@ public class OntopModelTestingTools {
     public static final IQConverter IQ_CONVERTER;
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
+    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -54,6 +56,7 @@ public class OntopModelTestingTools {
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
+        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
 

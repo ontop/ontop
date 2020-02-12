@@ -123,30 +123,6 @@ public class ImmutabilityTools {
         }
     }
 
-    /**
-     * This method takes a immutable term and convert it into an old mutable function.
-     */
-
-    public Function convertToMutableFunction(Predicate predicateOrFunctionSymbol,
-                                             ImmutableList<? extends ImmutableTerm> terms) {
-        return termFactory.getFunction(predicateOrFunctionSymbol, convertToMutableTerms(terms));
-    }
-
-    public List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
-        List<Term> mutableList = new ArrayList<>(terms.size());
-        for (ImmutableTerm nextTerm : terms) {
-            if (nextTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-                Function newTerm = convertToMutableFunction(term2Change.getFunctionSymbol(), term2Change.getTerms());
-                mutableList.add(newTerm);
-            }
-            else {
-                // Variables and constants are Term-instances
-                mutableList.add((Term) nextTerm);
-            }
-        }
-        return mutableList;
-    }
 
     private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
         ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();

@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.substitution;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.Function;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
@@ -37,6 +38,8 @@ import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 
 /**
  * @author Mariano Rodriguez Muro
@@ -58,7 +61,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities();
+		unifier = new UnifierUtilities(TERM_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
 	}
 
@@ -79,7 +82,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String input = testcase;
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
-			List<Function> atoms = generator.getAtoms(atomsstr);
+			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
 			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
 			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
 

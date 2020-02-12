@@ -139,9 +139,7 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableTerms(args1),
-                immutabilityTools.convertToMutableTerms(args2));
+        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(args1, args2);
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -154,9 +152,7 @@ public class ImmutableUnificationTools {
         if (!atom1.getPredicate().equals(atom2.getPredicate()))
             return Optional.empty();
 
-        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableTerms(atom1.getArguments()),
-                immutabilityTools.convertToMutableTerms(atom2.getArguments()));
+        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -409,15 +405,4 @@ public class ImmutableUnificationTools {
         }
         return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
     }
-
-    /**
-     * TODO: get rid of it about refactoring the unification tools
-     */
-    private static class TemporaryFunctionSymbol extends PredicateImpl {
-
-        private TemporaryFunctionSymbol(int arity) {
-            super("pred", arity);
-        }
-    }
-
 }

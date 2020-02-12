@@ -30,10 +30,13 @@ package it.unibz.inf.ontop.substitution.impl;
  * variables ie. A(#1,#2)
  */
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
+import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,19 +53,51 @@ import java.util.Map;
 @Singleton
 public class UnifierUtilities {
 
+    private final TermFactory termFactory;
+
+    @Inject
+    public UnifierUtilities(TermFactory termFactory) {
+        this.termFactory = termFactory;
+    }
+
     /**
      * Computes the Most General Unifier (MGU) for two n-ary atoms.
      *
-     * @param first
-     * @param second
+     * @param args1
+     * @param args2
      * @return the substitution corresponding to this unification.
      */
-    public Map<Variable, Term> getMGU(List<Term> first, List<Term> second) {
+    public Map<Variable, Term> getMGU(ImmutableList<? extends ImmutableTerm> args1,ImmutableList<? extends ImmutableTerm> args2) {
         Map<Variable,Term> mgu = new HashMap<>();
-        if (composeTerms(mgu, first, second))
+        if (composeTerms(mgu,
+                convertToMutableTerms(args1),
+                convertToMutableTerms(args2)))
             return mgu;
         return null;
     }
+
+    /**
+     * This method takes a immutable term and convert it into an old mutable function.
+     */
+
+    private List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
+        List<Term> mutableList = new ArrayList<>(terms.size());
+        for (ImmutableTerm nextTerm : terms) {
+            if (nextTerm instanceof ImmutableFunctionalTerm) {
+                ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
+                Function newTerm = termFactory.getFunction(
+                        term2Change.getFunctionSymbol(),
+                        convertToMutableTerms(term2Change.getTerms()));
+                mutableList.add(newTerm);
+            }
+            else {
+                // Variables and constants are Term-instances
+                mutableList.add((Term) nextTerm);
+            }
+        }
+        return mutableList;
+    }
+
 
     /***
      * Creates a unifier (singleton substitution) out of term1 and term2.
@@ -95,7 +130,17 @@ public class UnifierUtilities {
             return composeTerms(map, first.clone().getTerms(), second.clone().getTerms());
         }
 
-        ImmutableMap<Variable, Term> s = createUnifier(term1, term2);
+        ImmutableMap<Variable, Term> s;
+        if (term1 instanceof Variable)
+            s = createUnifier((Variable)term1, term2);
+        else if (term2 instanceof Variable)
+            s = createUnifier((Variable)term2, term1);
+        else if (term1.equals(term2))
+            // neither is a variable, impossible to unify unless the two terms are
+            // equal, in which case there the substitution is empty
+            s = ImmutableMap.of();
+        else
+            return false;
 
         // Rejected substitution (conflicts)
         if (s == null)
@@ -121,7 +166,6 @@ public class UnifierUtilities {
                 }
                 else
                     map.put(v, substitution.getValue());
-
             }
             else if (t instanceof Function) {
                 Function fclone = ((Function)t).clone();
@@ -191,57 +235,24 @@ public class UnifierUtilities {
     }
 
 
-    /***
-     * Computes the unifier that makes two terms equal.
-     *
-     * @param term1
-     * @param term2
-     * @return
-     */
-    private static ImmutableMap<Variable, Term> createUnifier(Term term1, Term term2) {
-        if (term1 instanceof Variable || term2 instanceof Variable) {
-            // arranging the terms so that the first is always a variable
-            Variable v;
-            Term t;
-            if (term1 instanceof Variable) {
-                v = (Variable)term1;
-                t = term2;
-            }
-            else {
-                v = (Variable)term2;
-                t = term1;
-            }
-
-            // Undistinguished variables do not need a substitution, the unifier knows about this
-            if  (t instanceof Variable) {
-                if (v.equals(t))
-                    return ImmutableMap.of();
-                else
-                    return ImmutableMap.of(v, t);
-            }
-            else if (t instanceof Constant) {
-                return ImmutableMap.of(v, t);
-            }
-            else if (t instanceof Function) {
-                Function fterm = (Function) t;
-                if (fterm.containsTerm(v))
-                    return null;
-                else
-                    return ImmutableMap.of(v, t);
-            }
-        }
-        else {
-            // neither is a variable, impossible to unify unless the two terms are
-            // equal, in which case there the substitution is empty
-            if (term1.equals(term2))
+    private static ImmutableMap<Variable, Term> createUnifier(Variable v, Term t) {
+        if  (t instanceof Variable) {
+            if (v.equals(t))
                 return ImmutableMap.of();
             else
-                return null;
+                return ImmutableMap.of(v, t);
         }
-        // this should never happen
-        throw new RuntimeException("Exception comparing two terms, unknown term class. Terms: "
-                + term1 + ", " + term2 + " Classes: " + term1.getClass()
-                + ", " + term2.getClass());
+        else if (t instanceof Constant) {
+            return ImmutableMap.of(v, t);
+        }
+        else if (t instanceof Function) {
+            Function fterm = (Function) t;
+            if (fterm.containsTerm(v))
+                return null;
+            else
+                return ImmutableMap.of(v, t);
+        }
+        throw new IllegalArgumentException("Unexpected class " + t.getClass().getName());
     }
 
     /**

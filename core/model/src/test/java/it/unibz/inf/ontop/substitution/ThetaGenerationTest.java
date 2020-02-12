@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.Function;
@@ -31,6 +32,7 @@ import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.List;
@@ -49,7 +51,9 @@ public class ThetaGenerationTest extends TestCase {
 	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
 	private Vector<Map.Entry<Variable, Term>> getMGUAsVector(Term t1, Term t2) {
-		Map<Variable, Term> mgu = UNIFIER_UTILITIES.getMGU(ImmutableList.of(t1), ImmutableList.of(t2));
+		Map<Variable, Term> mgu = UNIFIER_UTILITIES.getMGU(
+				ImmutableList.of(IMMUTABILITY_TOOLS.convertIntoImmutableTerm(t1)),
+				ImmutableList.of(IMMUTABILITY_TOOLS.convertIntoImmutableTerm(t2)));
 		Vector<Map.Entry<Variable, Term>> computedmgu;
 		if (mgu == null) {
 			computedmgu = null;
@@ -121,29 +125,11 @@ public class ThetaGenerationTest extends TestCase {
 		}
 	}
 
-	private static AtomPredicate createClassLikePredicate(String name) {
-		return new DatalogAtomPredicate(SUBQUERY_PRED_PREFIX + name, 1, TYPE_FACTORY);
+	private static FunctionSymbol createClassLikePredicate(String name) {
+		return new OntopModelTestPredicate(SUBQUERY_PRED_PREFIX + name, 1);
 	}
 
 
-
-	/**
-	 * Used for intermediate datalog rules
-	 */
-	private static class DatalogAtomPredicate extends AtomPredicateImpl {
-
-		private DatalogAtomPredicate(String name, int arity, TypeFactory typeFactory) {
-			super(name, createExpectedBaseTypes(arity, typeFactory));
-		}
-
-		private static ImmutableList<TermType> createExpectedBaseTypes(int arity, TypeFactory typeFactory) {
-			TermType rootType = typeFactory.getAbstractAtomicTermType();
-			return IntStream.range(0, arity)
-					.boxed()
-					.map(i -> rootType)
-					.collect(ImmutableCollectors.toList());
-		}
-	}
 
 	//A(x),A('y')
 	public void test_3(){
