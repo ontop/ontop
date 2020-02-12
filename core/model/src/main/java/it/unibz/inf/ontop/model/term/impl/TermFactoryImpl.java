@@ -58,7 +58,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Nullable
 	private final DBConstant doubleNaN;
 	private final DBConstant provenanceConstant;
-	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
 	private final RDF rdfFactory;
@@ -87,7 +86,6 @@ public class TermFactoryImpl implements TermFactory {
 				.map(v -> new DBConstantImpl(v, dbTypeFactory.getDBDoubleType()))
 				.orElse(null);
 		this.provenanceConstant = new DBConstantImpl("ontop-provenance-constant", dbTypeFactory.getDBStringType());
-		this.immutabilityTools = new ImmutabilityTools();
 		this.termTypeConstantMap = new HashMap<>();
 		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeTypeConstant = getRDFTermTypeConstant(typeFactory.getBlankNodeType());
@@ -319,15 +317,6 @@ public class TermFactoryImpl implements TermFactory {
 		return (subTermSubstitutionMap.isEmpty())
 				? getFunctionalTermDecomposition(liftableTerm)
 				: new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitutionMap);
-	}
-
-	private void checkMutability(List<Term> terms) {
-		for(Term term : terms) {
-			if (term instanceof ImmutableFunctionalTerm)
-				throw new IllegalArgumentException("Was expecting a mutable term, not a " + term.getClass());
-			else if (term instanceof Function)
-				checkMutability(((Function) term).getTerms());
-		}
 	}
 
 	@Override

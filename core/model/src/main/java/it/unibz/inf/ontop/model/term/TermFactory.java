@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

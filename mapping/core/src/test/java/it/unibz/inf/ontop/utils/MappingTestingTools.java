@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -41,7 +40,6 @@ public class MappingTestingTools {
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
-    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
 
     public static final ABoxFactIntoMappingConverter A_BOX_FACT_INTO_MAPPING_CONVERTER;
     public static final OntopMappingSettings ONTOP_MAPPING_SETTINGS;
@@ -93,7 +91,6 @@ public class MappingTestingTools {
         EMPTY_PREFIX_MANAGER = MAPPING_FACTORY.createPrefixManager(ImmutableMap.of());
 
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
-        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 

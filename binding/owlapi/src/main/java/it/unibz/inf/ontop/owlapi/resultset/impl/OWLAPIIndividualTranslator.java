@@ -144,7 +144,7 @@ public class OWLAPIIndividualTranslator {
 
 
 	private static class UnexceptedAssertionTermException extends OntopInternalBugException {
-		UnexceptedAssertionTermException(Term term) {
+		UnexceptedAssertionTermException(Constant term) {
 			super("Unexpected term in an assertion (cannot be converted to OWLAPI): " + term);
 		}
 	}
