@@ -21,26 +21,16 @@ package it.unibz.inf.ontop.substitution;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
-import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.impl.FunctionalTermImpl;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.Term;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.util.stream.IntStream;
 
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
@@ -50,11 +40,11 @@ public class ThetaGenerationTest extends TestCase {
 
 	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
-	private Vector<Map.Entry<Variable, Term>> getMGUAsVector(Term t1, Term t2) {
-		Map<Variable, Term> mgu = UNIFIER_UTILITIES.getMGU(
+	private Vector<Map.Entry<Variable, ImmutableTerm>> getMGUAsVector(Term t1, Term t2) {
+		Map<Variable, ImmutableTerm> mgu = UNIFIER_UTILITIES.getMGU(
 				ImmutableList.of(IMMUTABILITY_TOOLS.convertIntoImmutableTerm(t1)),
 				ImmutableList.of(IMMUTABILITY_TOOLS.convertIntoImmutableTerm(t2)));
-		Vector<Map.Entry<Variable, Term>> computedmgu;
+		Vector<Map.Entry<Variable, ImmutableTerm>> computedmgu;
 		if (mgu == null) {
 			computedmgu = null;
 		}
@@ -82,7 +72,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(0, s.size());
 		}
 		catch (Exception e) {
@@ -109,11 +99,11 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(1, s.size());
 
-			Map.Entry<Variable, Term> s0 = s.get(0);
-			Term t = s0.getValue();
+			Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
+			ImmutableTerm t = s0.getValue();
 			Variable v = s0.getKey();
 
 			assertEquals("y", ((Variable) t).getName());
@@ -148,10 +138,10 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> s0 = s.get(0);
+			Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
 			RDFLiteralConstant t = (RDFLiteralConstant) s0.getValue();
 			Variable v = s0.getKey();
 
@@ -212,10 +202,10 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(1, s.size());
 
-			Map.Entry<Variable, Term> s0 = s.get(0);
+			Map.Entry<Variable, ImmutableTerm> s0 = s.get(0);
 			RDFLiteralConstant t = (RDFLiteralConstant) s0.getValue();
 			Variable v = s0.getKey();
 
@@ -240,7 +230,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(0, s.size());
 	}
 
@@ -284,16 +274,16 @@ public class ThetaGenerationTest extends TestCase {
 			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 
 			Predicate pred1 = createClassLikePredicate("A");
-			List<Term> terms1 = new Vector<Term>();
+			List<Term> terms1 = new Vector<>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
 			Predicate pred2 = createClassLikePredicate("A");
-			List<Term> terms2 = new Vector<Term>();
+			List<Term> terms2 = new Vector<>();
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertNull(s);
 		}
 		catch (Exception e) {
@@ -308,12 +298,12 @@ public class ThetaGenerationTest extends TestCase {
 		try {
 			Term t1 = TERM_FACTORY.getRDFLiteralConstant("y", XSD.STRING);
 			Term t2 = TERM_FACTORY.getVariable("y");
-			List<Term> vars = new Vector<Term>();
+			List<Term> vars = new Vector<>();
 			vars.add(t2);
 			Predicate fs = new OntopModelTestPredicate("p", vars.size());
 			FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 			Predicate pred1 = createClassLikePredicate("A");
-			List<Term> terms1 = new Vector<Term>();
+			List<Term> terms1 = new Vector<>();
 			terms1.add(t1);
 			Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
@@ -322,7 +312,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(ot);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertNull(s);
 		}
 		catch (Exception e) {
@@ -351,7 +341,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -359,28 +349,28 @@ public class ThetaGenerationTest extends TestCase {
 	public void test_11(){
 
 		Term t = TERM_FACTORY.getVariable("x");
-		List<Term> vars = new Vector<Term>();
+		List<Term> vars = new Vector<>();
 		vars.add(t);
 		Predicate fs = new OntopModelTestPredicate("p", vars.size());
 		FunctionalTermImpl ot =(FunctionalTermImpl) TERM_FACTORY.getFunction(fs, vars);
 		Term t2 = TERM_FACTORY.getVariable("y");
 
 		Predicate pred1 = createClassLikePredicate("A");
-		List<Term> terms1 = new Vector<Term>();
+		List<Term> terms1 = new Vector<>();
 		terms1.add(ot);
 		Function atom1 = TERM_FACTORY.getFunction(pred1, terms1);
 
 		Predicate pred2 = createClassLikePredicate("A");
-		List<Term> terms2 = new Vector<Term>();
+		List<Term> terms2 = new Vector<>();
 		terms2.add(t2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
-		Function term = (Function) sub.getValue();
-		List<Term> para = term.getTerms();
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
+		ImmutableFunctionalTerm term = (ImmutableFunctionalTerm) sub.getValue();
+		List<? extends ImmutableTerm> para = term.getTerms();
 		Variable var = sub.getKey();
 
 		assertEquals("y", var.getName());
@@ -413,7 +403,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -441,7 +431,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(0, s.size());
 	}
 
@@ -469,11 +459,11 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
-		Term term = sub.getValue();
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
+		ImmutableTerm term = sub.getValue();
 		Variable var = sub.getKey();
 
 		assertEquals("y", ((Variable) term).getName());
@@ -506,7 +496,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -534,10 +524,10 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
 		RDFLiteralConstant term = (RDFLiteralConstant) sub.getValue();
 		Variable var = sub.getKey();
 
@@ -571,7 +561,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -599,7 +589,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 
 	}
@@ -630,7 +620,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot2);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -654,7 +644,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -674,12 +664,12 @@ public class ThetaGenerationTest extends TestCase {
 		Predicate pred2 = createClassLikePredicate("A");
 		Function atom2 = TERM_FACTORY.getFunction(pred2, ot);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
-		Function term = (Function) sub.getValue();
-		List<Term> para = term.getTerms();
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
+		ImmutableFunctionalTerm term = (ImmutableFunctionalTerm) sub.getValue();
+		ImmutableList<? extends ImmutableTerm> para = term.getTerms();
 		Variable var = sub.getKey();
 
 		assertEquals("y", var.getName());
@@ -712,7 +702,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -740,11 +730,11 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
-		Term term = sub.getValue();
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
+		ImmutableTerm term = sub.getValue();
 		Variable var = sub.getKey();
 
 		assertEquals("x", ((Variable) term).getName());
@@ -777,7 +767,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -805,10 +795,10 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertEquals(1, s.size());
 
-		Map.Entry<Variable, Term> sub = s.get(0);
+		Map.Entry<Variable, ImmutableTerm> sub = s.get(0);
 		RDFLiteralConstant term = (RDFLiteralConstant) sub.getValue();
 		Variable var = sub.getKey();
 
@@ -842,7 +832,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -870,7 +860,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -900,7 +890,7 @@ public class ThetaGenerationTest extends TestCase {
 		terms2.add(ot1);
 		Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-		Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+		Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 		assertNull(s);
 	}
 
@@ -922,7 +912,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(0, s.size());
 		}
 		catch (Exception e) {
@@ -950,7 +940,7 @@ public class ThetaGenerationTest extends TestCase {
 			terms2.add(t2);
 			Function atom2 = TERM_FACTORY.getFunction(pred2, terms2);
 
-			Vector<Map.Entry<Variable, Term>> s = getMGUAsVector(atom1, atom2);
+			Vector<Map.Entry<Variable, ImmutableTerm>> s = getMGUAsVector(atom1, atom2);
 			assertEquals(0, s.size());
 		}
 		catch (Exception e) {

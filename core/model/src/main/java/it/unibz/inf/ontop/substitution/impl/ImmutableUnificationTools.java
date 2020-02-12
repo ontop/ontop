@@ -139,35 +139,25 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(args1, args2);
+        ImmutableMap<Variable, ImmutableTerm> mutableSubstitution = unifierUtilities.getMGU(args1, args2);
 
         if (mutableSubstitution == null) {
             return Optional.empty();
         }
-        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution))
-                .map(s -> (ImmutableSubstitution<T>)s);
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)mutableSubstitution));
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom<?> atom1, DataAtom<?> atom2) {
         if (!atom1.getPredicate().equals(atom2.getPredicate()))
             return Optional.empty();
 
-        Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
+        ImmutableMap<Variable, ImmutableTerm> mutableSubstitution = unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
 
         if (mutableSubstitution == null) {
             return Optional.empty();
         }
 
-        ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : mutableSubstitution.entrySet()) {
-            VariableOrGroundTerm value = immutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
-            substitutionMapBuilder.put(entry.getKey(), value);
-        }
-
-        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = substitutionFactory.getSubstitution(
-                substitutionMapBuilder.build());
-        return Optional.of(immutableSubstitution);
-
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)mutableSubstitution));
     }
 
     /**

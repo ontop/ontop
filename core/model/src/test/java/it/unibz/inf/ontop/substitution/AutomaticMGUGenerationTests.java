@@ -84,9 +84,9 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String mgustr = input.split("=")[1].trim();
 			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
 			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
-			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
+			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
 
-			Map<Variable, Term> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+			Map<Variable, ImmutableTerm> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {

@@ -54,7 +54,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param unifier2
 	 * @return
 	 */
-	public boolean compareUnifiers(List<Map.Entry<Variable, Term>> unifier1, List<Map.Entry<Variable, Term>> unifier2) {
+	public boolean compareUnifiers(List<Map.Entry<Variable, Term>> unifier1, List<Map.Entry<Variable, ImmutableTerm>> unifier2) {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
@@ -84,7 +84,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param s2
 	 * @return
 	 */
-	public boolean compareSubstitutions(Map.Entry<Variable, Term> s1, Map.Entry<Variable, Term> s2) {
+	public boolean compareSubstitutions(Map.Entry<Variable, Term> s1, Map.Entry<Variable, ImmutableTerm> s2) {
 		boolean equalVars = s1.getKey().toString().equals(s2.getKey().toString());
 		boolean equalTerms = s1.getValue().toString().equals(s2.getValue().toString());
 		return equalVars && equalTerms;

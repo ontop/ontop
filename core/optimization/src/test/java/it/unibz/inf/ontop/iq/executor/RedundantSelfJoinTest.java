@@ -1201,7 +1201,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(query, expectedQueryBuilder.build());
     }
 
-    @Ignore
     @Test
     public void testOptimizationOnRightPartOfLJ7() throws EmptyQueryException {
         IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
