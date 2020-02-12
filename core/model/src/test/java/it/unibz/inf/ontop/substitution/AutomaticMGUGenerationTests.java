@@ -39,6 +39,7 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 
 /**
@@ -61,7 +62,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities(TERM_FACTORY);
+		unifier = new UnifierUtilities(TERM_FACTORY, SUBSTITUTION_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
 	}
 

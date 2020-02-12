@@ -36,14 +36,12 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.mapdb.Fun;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -57,10 +55,29 @@ import java.util.stream.Stream;
 public class UnifierUtilities {
 
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    public UnifierUtilities(TermFactory termFactory) {
+    public UnifierUtilities(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+    }
+
+    /**
+     * Computes the Most General Unifier (MGU) for two n-ary atoms.
+     *
+     * @param args1
+     * @param args2
+     * @return the substitution corresponding to this unification.
+     *
+     * TEST-ONLY USE
+     */
+    @Deprecated
+    public ImmutableMap<Variable, ImmutableTerm> getMGU(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        ImmutableMap<Variable, ImmutableTerm> r = unify(ImmutableMap.of(), args1, args2);
+        if (r == null)
+            return null;
+        return ImmutableMap.copyOf(new HashMap<>(r)); // quick hack to fix the order
     }
 
     /**
@@ -70,13 +87,12 @@ public class UnifierUtilities {
      * @param args2
      * @return the substitution corresponding to this unification.
      */
-    public ImmutableMap<Variable, ImmutableTerm> getMGU(ImmutableList<? extends ImmutableTerm> args1,ImmutableList<? extends ImmutableTerm> args2) {
-        ImmutableMap<Variable, ImmutableTerm> r = composeTerms(ImmutableMap.of(), args1, args2);
-        if (r == null)
-            return null;
-        return ImmutableMap.copyOf(new HashMap<>(r)); // quick hack to fix the order
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGUSubstitution(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        ImmutableMap<Variable, ImmutableTerm> sub = getMGU(args1, args2);
+        if (sub == null)
+            return Optional.empty();
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)sub));
     }
-
 
     private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
         if (term instanceof ImmutableFunctionalTerm)
@@ -100,32 +116,25 @@ public class UnifierUtilities {
     }
 
 
-    /***
-     * Creates a unifier (singleton substitution) out of term1 and term2.
-     *
-     * Then, composes the current substitution with this unifier.
-     * (remind that composition is not commutative).
-     *
-     *
-     * Note that this Substitution object will be modified in this process.
+    /**
+     * Creates a unifier for args1 and args2
      *
      * The operation is as follows
      *
      * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
      *
-     * @return true if the substitution exists (false if it does not)
+     * @return true the substitution (of null if it does not)
      */
 
-    private ImmutableMap<Variable, ImmutableTerm> composeTerms(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+    private ImmutableMap<Variable, ImmutableTerm> unify(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
         if (args1.size() != args2.size())
             return null;
 
         int arity = args1.size();
-        List<ImmutableTerm> t1 = new ArrayList<>(args1);
-        List<ImmutableTerm> t2 = new ArrayList<>(args2); // mutable copies
         for (int i = 0; i < arity; i++) {
-            ImmutableTerm term1 = t1.get(i);
-            ImmutableTerm term2 = t2.get(i);
+            // applying the computed substitution first
+            ImmutableTerm term1 = apply(args1.get(i), sub);
+            ImmutableTerm term2 = apply(args2.get(i), sub);
 
             if (term1.equals(term2))
                 continue;
@@ -137,7 +146,7 @@ public class UnifierUtilities {
                 if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
                     return null;
 
-                sub = composeTerms(sub, f1.getTerms(), f2.getTerms());
+                sub = unify(sub, f1.getTerms(), f2.getTerms());
                 if (sub == null)
                     return null;
             }
@@ -158,12 +167,6 @@ public class UnifierUtilities {
                         // remove it to keep only a non-trivial unifier
                         .filter(e -> !e.getValue().equals(e.getKey())))
                         .collect(ImmutableCollectors.toMap());
-            }
-            // Applying the newly computed substitution to the 'replacement' of
-            // the existing substitutions
-            for (int j = i + 1; j < arity; j++) {
-                t1.set(j, apply(t1.get(j), sub));
-                t2.set(j, apply(t2.get(j), sub));
             }
         }
         return sub;

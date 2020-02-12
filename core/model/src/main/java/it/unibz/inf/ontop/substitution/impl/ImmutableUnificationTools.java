@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
@@ -24,16 +23,14 @@ public class ImmutableUnificationTools {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
-    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
-                                      ImmutabilityTools immutabilityTools) {
+                                      ImmutableSubstitutionTools substitutionTools,
+                                      UnifierUtilities unifierUtilities) {
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
-        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -136,28 +133,19 @@ public class ImmutableUnificationTools {
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
+        // TODO: why is it here?
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        ImmutableMap<Variable, ImmutableTerm> mutableSubstitution = unifierUtilities.getMGU(args1, args2);
-
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
-        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)mutableSubstitution));
+        return unifierUtilities.getMGUSubstitution(args1, args2);
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom<?> atom1, DataAtom<?> atom2) {
+
         if (!atom1.getPredicate().equals(atom2.getPredicate()))
             return Optional.empty();
 
-        ImmutableMap<Variable, ImmutableTerm> mutableSubstitution = unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
-
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)mutableSubstitution));
+        return unifierUtilities.getMGUSubstitution(atom1.getArguments(), atom2.getArguments());
     }
 
     /**
