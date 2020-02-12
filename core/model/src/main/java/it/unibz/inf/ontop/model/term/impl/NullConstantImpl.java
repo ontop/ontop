@@ -71,7 +71,7 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
      * TODO: get rid of this method and stop this cloning practice
      */
     @Override
-    public Term clone() {
+    public Constant clone() {
         return this;
     }
 }
