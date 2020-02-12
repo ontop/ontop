@@ -25,11 +25,11 @@ import it.unibz.inf.ontop.model.type.TermTypeInference;
 import java.util.Optional;
 
 /**
- * This class defines a type of {@link Term} in which it expresses a quantity
+ * This class defines a type of {@link ImmutableTerm} in which it expresses a quantity
  * that during a calculation is assumed to vary or be capable of varying in
  * value.
  */
-public interface Variable extends NonFunctionalTerm, NonConstantTerm, NonGroundTerm, Comparable<Variable>, Term {
+public interface Variable extends NonFunctionalTerm, NonConstantTerm, NonGroundTerm, Comparable<Variable> {
 
 	String getName();
 

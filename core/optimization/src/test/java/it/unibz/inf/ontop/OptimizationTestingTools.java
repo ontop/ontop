@@ -17,7 +17,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
@@ -43,7 +42,6 @@ public class OptimizationTestingTools {
     public static final OptimizerFactory OPTIMIZER_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
-    public static final ImmutabilityTools IMMUTABILITY_TOOLS;
     public static final IQConverter IQ_CONVERTER;
     public static final DBConstant TRUE, FALSE;
     public static final Constant NULL;
@@ -120,7 +118,6 @@ public class OptimizationTestingTools {
         EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
         EMPTY_METADATA.freeze();
 
-        IMMUTABILITY_TOOLS = injector.getInstance(ImmutabilityTools.class);
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         NULL = TERM_FACTORY.getNullConstant();

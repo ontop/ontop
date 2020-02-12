@@ -14,9 +14,9 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class OntopModelTestPredicate extends PredicateImpl implements FunctionSymbol {
+public class OntopModelTestFunctionSymbol extends PredicateImpl implements FunctionSymbol {
 
-    protected OntopModelTestPredicate(@Nonnull String name, int arity) {
+    protected OntopModelTestFunctionSymbol(@Nonnull String name, int arity) {
         super(name, arity);
     }
 

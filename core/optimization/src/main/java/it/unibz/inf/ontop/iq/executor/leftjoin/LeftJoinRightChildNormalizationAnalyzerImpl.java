@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -29,14 +28,11 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
 
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
-    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private LeftJoinRightChildNormalizationAnalyzerImpl(TermFactory termFactory, AtomFactory atomFactory,
-                                                        ImmutabilityTools immutabilityTools) {
+    private LeftJoinRightChildNormalizationAnalyzerImpl(TermFactory termFactory, AtomFactory atomFactory) {
         this.termFactory = termFactory;
         this.atomFactory = atomFactory;
-        this.immutabilityTools = immutabilityTools;
     }
 
     @Override

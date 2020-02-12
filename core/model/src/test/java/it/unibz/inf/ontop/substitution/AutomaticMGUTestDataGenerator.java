@@ -54,7 +54,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param unifier2
 	 * @return
 	 */
-	public boolean compareUnifiers(List<Map.Entry<Variable, Term>> unifier1, List<Map.Entry<Variable, Term>> unifier2) {
+	public boolean compareUnifiers(List<Map.Entry<Variable, ImmutableTerm>> unifier1, List<Map.Entry<Variable, ImmutableTerm>> unifier2) {
 		if (unifier1.size() != unifier2.size())
 			return false;
 
@@ -84,7 +84,7 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param s2
 	 * @return
 	 */
-	public boolean compareSubstitutions(Map.Entry<Variable, Term> s1, Map.Entry<Variable, Term> s2) {
+	public boolean compareSubstitutions(Map.Entry<Variable, ImmutableTerm> s1, Map.Entry<Variable, ImmutableTerm> s2) {
 		boolean equalVars = s1.getKey().toString().equals(s2.getKey().toString());
 		boolean equalTerms = s1.getValue().toString().equals(s2.getValue().toString());
 		return equalVars && equalTerms;
@@ -97,39 +97,23 @@ public class AutomaticMGUTestDataGenerator {
 	 * @param mgustr
 	 * @return
 	 */
-	public List<Map.Entry<Variable, Term>> getMGU(String mgustr) {
+	public List<Map.Entry<Variable, ImmutableTerm>> getMGU(String mgustr) {
 		if (mgustr.trim().equals("NULL"))
 			return null;
 
 		mgustr = mgustr.substring(1, mgustr.length() - 1);
 		String[] mguStrings = mgustr.split(" ");
 
-		List<Map.Entry<Variable, Term>> mgu = new ArrayList<>();
+		List<Map.Entry<Variable, ImmutableTerm>> mgu = new ArrayList<>();
 		for (int i = 0; i < mguStrings.length; i++) {
 			String string = mguStrings[i];
 			if (string.equals(""))
 				continue;
 			String[] elements = string.split("/");
-			Map.Entry<Variable, Term> s = Maps.immutableEntry((Variable) getTerm(elements[0]), convertToMutable(getTerm(elements[1])));
+			Map.Entry<Variable, ImmutableTerm> s = Maps.immutableEntry((Variable) getTerm(elements[0]), getTerm(elements[1]));
 			mgu.add(s);
 		}
 		return mgu;
-	}
-
-
-	public Term convertToMutable(ImmutableTerm term) {
-		if (term instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) term;
-			List<Term> mutableList = new ArrayList<>(term2Change.getArity());
-			for (ImmutableTerm nextTerm : term2Change.getTerms()) {
-				mutableList.add(convertToMutable(nextTerm));
-			}
-			return TERM_FACTORY.getFunction(term2Change.getFunctionSymbol(), mutableList);
-		}
-		else {
-			// Variables and constants are Term-instances
-			return (Term)term;
-		}
 	}
 
 
@@ -162,7 +146,7 @@ public class AutomaticMGUTestDataGenerator {
 			terms.add(getTerm(termstra[i].trim()));
 		}
 		ImmutableTerm atom = TERM_FACTORY.getImmutableFunctionalTerm(
-				new OntopModelTestPredicate(atomstr.substring(0, 1), terms.size()),
+				new OntopModelTestFunctionSymbol(atomstr.substring(0, 1), terms.size()),
 				ImmutableList.copyOf(terms));
 		return atom;
 	}
@@ -180,7 +164,7 @@ public class AutomaticMGUTestDataGenerator {
 			for (int i = 0; i < subtermstr.length; i++) {
 				fuctTerms.add(getTerm(subtermstr[i]));
 			}
-			FunctionSymbol fs = new OntopModelTestPredicate(termstr.substring(0, 1), fuctTerms.size());
+			FunctionSymbol fs = new OntopModelTestFunctionSymbol(termstr.substring(0, 1), fuctTerms.size());
 			return TERM_FACTORY.getImmutableFunctionalTerm(fs, ImmutableList.copyOf(fuctTerms));
 		}
 		else if (termstr.charAt(0) == '"') {

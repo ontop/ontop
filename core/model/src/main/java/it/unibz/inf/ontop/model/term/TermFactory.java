@@ -34,7 +34,6 @@ import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.substitution.ProtoSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,18 +47,6 @@ public interface TermFactory {
 	/*
 	 * Built-in function predicates
 	 */
-	
-	/**
-	 * Construct a {@link Function} object. A function expression consists of
-	 * functional symbol (or functor) and one or more arguments.
-	 * 
-	 * @param functor
-	 *            the function symbol name.
-	 * @param terms
-	 *            a list of arguments.
-	 * @return the function object.
-	 */
-	Function getFunction(Predicate functor, Term... terms);
 
 	ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments);
 
@@ -140,8 +127,6 @@ public interface TermFactory {
 			ImmutableMap<Variable, ImmutableFunctionalTerm> subTermSubstitutionMap);
 
 
-
-	Function getFunction(Predicate functor, List<Term> terms);
 
 	ImmutableFunctionalTerm getImmutableFunctionalTerm(FunctionSymbol functor, ImmutableList<? extends ImmutableTerm> terms);
 
@@ -293,8 +278,6 @@ public interface TermFactory {
 	RDFLiteralConstant getRDFLiteralConstant(String value, String language);
 
 	RDFConstant getRDFConstant(String lexicalValue, RDFTermType termType);
-
-	Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type);
 
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, String language);
 	ImmutableFunctionalTerm getRDFLiteralFunctionalTerm(ImmutableTerm lexicalTerm, RDFDatatype type);

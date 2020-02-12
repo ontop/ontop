@@ -109,11 +109,9 @@ public class TargetQueryRenderer {
         throw new UnexpectedTermException(term);
     }
 
-    private static String displayConstantBnode(Term term) {
-        return ((BNode) term).getName();
-    }
+    private static String displayConstantBnode(BNode term) { return term.getName(); }
 
-    private static String displayLiteralConstant(Term term) {
+    private static String displayLiteralConstant(RDFLiteralConstant term) {
         return term.toString();
     }
 
@@ -314,9 +312,6 @@ public class TargetQueryRenderer {
     }
 
     private static class UnexpectedTermException extends OntopInternalBugException {
-        private UnexpectedTermException(Term term) {
-            super("Unexpected type " + term.getClass() + " for term: " + term);
-        }
 
         private UnexpectedTermException(ImmutableTerm term) {
             super("Unexpected type " + term.getClass() + " for term: " + term);

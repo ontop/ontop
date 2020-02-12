@@ -1,13 +1,12 @@
 package it.unibz.inf.ontop.substitution.impl;
 
-import java.util.AbstractMap;
 import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
@@ -23,22 +22,10 @@ import java.util.Map;
 public class ImmutableSubstitutionTools {
 
     private final SubstitutionFactory substitutionFactory;
-    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory,
-                                       ImmutabilityTools immutabilityTools) {
+    private ImmutableSubstitutionTools(SubstitutionFactory substitutionFactory) {
         this.substitutionFactory = substitutionFactory;
-        this.immutabilityTools = immutabilityTools;
-    }
-
-    public ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Map<Variable, Term> substitution) {
-        ImmutableMap<Variable, ImmutableTerm> map = substitution.entrySet().stream()
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> immutabilityTools.convertIntoImmutableTerm(e.getValue())));
-        return substitutionFactory.getSubstitution(map);
     }
 
 
@@ -164,7 +151,7 @@ public class ImmutableSubstitutionTools {
         ImmutableMap<Variable, VariableOrGroundTerm> map = substitution.getImmutableMap().entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue())));
+                        e -> GroundTermTools.convertIntoVariableOrGroundTerm(e.getValue())));
         return substitutionFactory.getSubstitution(map);
     }
 

@@ -36,13 +36,12 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.mapdb.Fun;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -56,10 +55,12 @@ import java.util.stream.Stream;
 public class UnifierUtilities {
 
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    public UnifierUtilities(TermFactory termFactory) {
+    public UnifierUtilities(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
     /**
@@ -69,125 +70,92 @@ public class UnifierUtilities {
      * @param args2
      * @return the substitution corresponding to this unification.
      */
-    public Map<Variable, Term> getMGU(ImmutableList<? extends ImmutableTerm> args1,ImmutableList<? extends ImmutableTerm> args2) {
-        return composeTerms(ImmutableMap.of(), convertToMutableTerms(args1), convertToMutableTerms(args2));
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGU(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.equals(args2))
+            return Optional.of(substitutionFactory.getSubstitution());
+
+        ImmutableMap<Variable, ImmutableTerm> sub = unify(ImmutableMap.of(), args1, args2);
+        if (sub == null)
+            return Optional.empty();
+
+        // quick hack to fix the order
+        return Optional.of(substitutionFactory.getSubstitution(
+                (ImmutableMap)ImmutableMap.copyOf(new HashMap<>(sub))));
+    }
+
+    private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm)
+            return ((ImmutableFunctionalTerm)term).getTerms().stream()
+                    .anyMatch(t -> variableOccursInTerm(v, t));
+        return v.equals(term);
     }
 
     /**
-     * This method takes a immutable term and convert it into an old mutable function.
+     * Recursive
      */
-
-    private List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
-        List<Term> mutableList = new ArrayList<>(terms.size());
-        for (ImmutableTerm nextTerm : terms) {
-            if (nextTerm instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm term2Change = (ImmutableFunctionalTerm) nextTerm;
-                Function newTerm = termFactory.getFunction(
-                        term2Change.getFunctionSymbol(),
-                        convertToMutableTerms(term2Change.getTerms()));
-                mutableList.add(newTerm);
-            }
-            else {
-                // Variables and constants are Term-instances
-                mutableList.add((Term) nextTerm);
-            }
+    private ImmutableTerm apply(ImmutableTerm t, ImmutableMap<Variable, ImmutableTerm> sub) {
+        if (t instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)t;
+            ImmutableList<ImmutableTerm> terms = f.getTerms().stream()
+                    .map(tt -> apply(tt, sub))
+                    .collect(ImmutableCollectors.toList());
+            return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), terms);
         }
-        return mutableList;
+        return sub.getOrDefault(t, t);
     }
 
 
-    /***
-     * Creates a unifier (singleton substitution) out of term1 and term2.
-     *
-     * Then, composes the current substitution with this unifier.
-     * (remind that composition is not commutative).
-     *
-     *
-     * Note that this Substitution object will be modified in this process.
+    /**
+     * Creates a unifier for args1 and args2
      *
      * The operation is as follows
      *
      * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
      *
-     * @param term1
-     * @param term2
-     * @return true if the substitution exists (false if it does not)
+     * @return true the substitution (of null if it does not)
      */
-    private ImmutableMap<Variable, Term> composeTerms(ImmutableMap<Variable, Term> sub, Term term1, Term term2) {
 
-        if (term1.equals(term2))
-            return sub;
-
-        // Special case: unification of two functional terms (possibly recursive)
-        if ((term1 instanceof Function) && (term2 instanceof Function)) {
-            Function first = (Function) term1;
-            Function second = (Function) term2;
-            if (!first.getFunctionSymbol().equals(second.getFunctionSymbol()))
-                return null;
-
-            return composeTerms(sub, first.clone().getTerms(), second.clone().getTerms());
-        }
-
-        ImmutableMap<Variable, Term> s;
-        if (term1 instanceof Variable)
-            s = ImmutableMap.of((Variable)term1, term2);
-        else if (term2 instanceof Variable)
-            s = ImmutableMap.of((Variable)term2, term1);
-        else
-            return null; // neither is a variable, impossible to unify distinct terms
-
-        // x is unified with f(x)
-        Map.Entry<Variable, Term> m = s.entrySet().iterator().next();
-        if (isRecursive(m.getKey(), m.getValue()))
+    private ImmutableMap<Variable, ImmutableTerm> unify(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.size() != args2.size())
             return null;
 
-        return Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
-                .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
-                // The substitution for the current variable has become
-                // trivial, e.g., x/x with the current composition. We
-                // remove it to keep only a non-trivial unifier
-                .filter(e -> !e.getValue().equals(e.getKey())))
-                .collect(ImmutableCollectors.toMap());
-    }
+        int arity = args1.size();
+        for (int i = 0; i < arity; i++) {
+            // applying the computed substitution first
+            ImmutableTerm term1 = apply(args1.get(i), sub);
+            ImmutableTerm term2 = apply(args2.get(i), sub);
 
-    private static boolean isRecursive(Variable v, Term t) {
-        if (t instanceof Function)
-            return ((Function)t).getTerms().stream().anyMatch(tt -> isRecursive(v, tt));
-        return v.equals(t);
-    }
+            if (term1.equals(term2))
+                continue;
 
-    /**
-     * May alter the functionalTerm (mutable style)
-     *
-     * Recursive
-     */
-    private Term apply(Term t, ImmutableMap<Variable, Term> sub) {
-        if (t instanceof Function) {
-            Function f = (Function)t;
-            List<Term> newTerms = new ArrayList<>(f.getTerms().size());
-            for (Term tt : f.getTerms())
-                newTerms.add(apply(tt, sub));
-            return termFactory.getFunction(f.getFunctionSymbol(), newTerms);
-        }
+            // Special case: unification of two functional terms (possibly recursive)
+            if ((term1 instanceof ImmutableFunctionalTerm) && (term2 instanceof ImmutableFunctionalTerm)) {
+                ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
+                ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
+                if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
+                    return null;
 
-        return sub.getOrDefault(t, t);
-    }
+                sub = unify(sub, f1.getTerms(), f2.getTerms());
+                if (sub == null)
+                    return null;
+            }
+            else {
+                ImmutableMap<Variable, ImmutableTerm> s;
+                // avoid unifying x with f(g(x))
+                if (term1 instanceof Variable && !variableOccursInTerm((Variable) term1, term2))
+                    s = ImmutableMap.of((Variable) term1, term2);
+                else if (term2 instanceof Variable && !variableOccursInTerm((Variable) term2, term1))
+                    s = ImmutableMap.of((Variable) term2, term1);
+                else
+                    return null; // neither is a variable, impossible to unify distinct terms
 
-    private ImmutableMap<Variable, Term> composeTerms(ImmutableMap<Variable, Term> sub, List<Term> first, List<Term> second) {
-        if (first.size() != second.size())
-            return null;
-
-        int arity = first.size();
-        for (int termidx = 0; termidx < arity; termidx++) {
-            sub = composeTerms(sub, first.get(termidx), second.get(termidx));
-            if (sub == null)
-                return null;
-
-            // Applying the newly computed substitution to the 'replacement' of
-            // the existing substitutions
-            for (int i = termidx + 1; i < arity; i++) {
-                first.set(i, apply(first.get(i), sub));
-                second.set(i, apply(second.get(i), sub));
+                sub = Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
+                        // The substitution for the current variable has become
+                        // trivial, e.g., x/x with the current composition. We
+                        // remove it to keep only a non-trivial unifier
+                        .filter(e -> !e.getValue().equals(e.getKey())))
+                        .collect(ImmutableCollectors.toMap());
             }
         }
         return sub;

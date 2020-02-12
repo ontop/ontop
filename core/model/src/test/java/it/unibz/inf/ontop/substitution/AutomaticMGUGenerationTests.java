@@ -21,9 +21,7 @@ package it.unibz.inf.ontop.substitution;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -33,12 +31,14 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static it.unibz.inf.ontop.OntopModelTestingTools.SUBSTITUTION_FACTORY;
 import static it.unibz.inf.ontop.OntopModelTestingTools.TERM_FACTORY;
 
 /**
@@ -51,17 +51,13 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	private AutomaticMGUTestDataGenerator	generator;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	
 	public void setUp() throws Exception {
 		/*
 		 * TODO modify the API so that function symbols for object terms use the
 		 * Predicate class instead of FunctionSymbol class
 		 */
 
-		unifier = new UnifierUtilities(TERM_FACTORY);
+		unifier = new UnifierUtilities(TERM_FACTORY, SUBSTITUTION_FACTORY);
 		generator = new AutomaticMGUTestDataGenerator();
 	}
 
@@ -83,14 +79,14 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
 			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
-			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
-			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
+			List<Map.Entry<Variable, ImmutableTerm>> expectedmgu = generator.getMGU(mgustr);
+			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
 
-			Map<Variable, Term> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
-			if (mgu == null) {
+			Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+			if (!mgu.isPresent()) {
 				computedmgu = null;
 			} else {
-				computedmgu.addAll(mgu.entrySet());
+				computedmgu.addAll(mgu.get().getImmutableMap().entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);

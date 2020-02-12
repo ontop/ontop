@@ -24,8 +24,8 @@ public class RAExpression {
 
     /**
      * constructs a relation expression
-     *  @param dataAtoms            an {@link ImmutableList}<{@link Function}>
-     * @param filterAtoms          an {@link ImmutableList}<{@link Function}>
+     *  @param dataAtoms            an {@link ImmutableList}<{@link DataAtom<RelationPredicate>}>
+     * @param filterAtoms          an {@link ImmutableList}<{@link ImmutableExpression}>
      * @param attributes           an {@link RAExpressionAttributes}
      */
     public RAExpression(ImmutableList<DataAtom<RelationPredicate>> dataAtoms,
@@ -140,7 +140,7 @@ public class RAExpression {
      * @param re1 a {@link RAExpressionAttributes}
      * @param re2 a {@link RAExpressionAttributes}
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@Link ImmutableList}<{@link Function}>
+     * @return a {@Link ImmutableList}<{@link ImmutableExpression}>
      */
     private static ImmutableList<ImmutableExpression> getJoinOnFilter(RAExpressionAttributes re1,
                                                                                RAExpressionAttributes re2,
