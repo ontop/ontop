@@ -67,9 +67,5 @@ public interface Function extends Term {
 	 */
 	int getArity();
 
-	Term getTerm(int index);
-
-	boolean containsTerm(Term t);
-
 	Function clone();
 }

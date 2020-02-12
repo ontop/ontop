@@ -32,11 +32,11 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import org.mapdb.Fun;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,11 +116,10 @@ public class UnifierUtilities {
      * @param term2
      * @return true if the substitution exists (false if it does not)
      */
-    private static boolean composeTerms(Map<Variable, Term> map, Term term1, Term term2) {
+    private boolean composeTerms(Map<Variable, Term> map, Term term1, Term term2) {
 
-        /**
-         * Special case: unification of two functional terms (possibly recursive)
-         */
+
+        // Special case: unification of two functional terms (possibly recursive)
         if ((term1 instanceof Function) && (term2 instanceof Function)) {
             Function first = (Function) term1;
             Function second = (Function) term2;
@@ -130,52 +129,34 @@ public class UnifierUtilities {
             return composeTerms(map, first.clone().getTerms(), second.clone().getTerms());
         }
 
-        ImmutableMap<Variable, Term> s;
-        if (term1 instanceof Variable)
-            s = createUnifier((Variable)term1, term2);
-        else if (term2 instanceof Variable)
-            s = createUnifier((Variable)term2, term1);
-        else if (term1.equals(term2))
-            // neither is a variable, impossible to unify unless the two terms are
-            // equal, in which case there the substitution is empty
-            s = ImmutableMap.of();
-        else
-            return false;
-
-        // Rejected substitution (conflicts)
-        if (s == null)
-            return false;
-
-        // Neutral substitution
-        if (s.isEmpty())
+        if (term1.equals(term2))
             return true;
 
-        // Not neutral, not null --> should be a singleton.
-        Map.Entry<Variable, Term> substitution = s.entrySet().iterator().next();
+        Map.Entry<Variable, Term> s;
+        if (term1 instanceof Variable)
+            s = Maps.immutableEntry((Variable) term1, term2);
+        else if (term2 instanceof Variable)
+            s = Maps.immutableEntry((Variable)term2, term1);
+        else
+            return false; // neither is a variable, impossible to unify distinct terms
 
-        List<Variable> forRemoval = new ArrayList<>();
-        for (Map.Entry<Variable,Term> entry : map.entrySet()) {
-            Variable v = entry.getKey();
-            Term t = entry.getValue();
-            if (substitution.getKey().equals(t)) {
-                if (v.equals(substitution.getValue())) {
-                    // The substitution for the current variable has become
-                    // trivial, e.g., x/x with the current composition. We
-                    // remove it to keep only a non-trivial unifier
-                    forRemoval.add(v);
-                }
-                else
-                    map.put(v, substitution.getValue());
-            }
-            else if (t instanceof Function) {
-                Function fclone = ((Function)t).clone();
-                boolean innerchanges = applySingletonSubstitution(fclone, substitution);
-                if (innerchanges)
-                    map.put(v, fclone);
-            }
+        // x is unified with f(x)
+        if (s.getValue() instanceof Function
+                && ((Function)s.getValue()).getTerms().contains(s.getKey()))
+            return false;
+
+        // The substitution for the current variable has become
+        // trivial, e.g., x/x with the current composition. We
+        // remove it to keep only a non-trivial unifier
+        if (map.containsKey(s.getValue()))
+            map.remove(s.getValue());
+
+        for (Map.Entry<Variable,Term> e : map.entrySet()) {
+            // not circular x -> y & y -> x
+            if (!(e.getValue().equals(s.getKey()) && s.getValue().equals(e.getKey())))
+                map.put(e.getKey(), composeWithSingletonSubstitution(e.getValue(), s));
         }
-        map.keySet().removeAll(forRemoval);
-        map.put(substitution.getKey(), substitution.getValue());
+        map.put(s.getKey(), s.getValue());
         return true;
     }
 
@@ -184,29 +165,22 @@ public class UnifierUtilities {
      *
      * Recursive
      */
-    private static boolean applySingletonSubstitution(Function functionalTerm, Map.Entry<Variable, Term> substitution) {
-        List<Term> innerTerms = functionalTerm.getTerms();
-        boolean innerchanges = false;
-        // TODO this ways of changing inner terms in functions is not
-        // optimal, modify
+    private Term composeWithSingletonSubstitution(Term t, Map.Entry<Variable, Term> s) {
+        if (t.equals(s.getKey()))
+            return s.getValue();
 
-        for (int i = 0; i < innerTerms.size(); i++) {
-            Term innerTerm = innerTerms.get(i);
-
-            if (innerTerm instanceof Function) {
-                // Recursive call
-                boolean newChange = applySingletonSubstitution((Function) innerTerm, substitution);
-                innerchanges = innerchanges || newChange;
-            }
-            else if (substitution.getKey().equals(innerTerm)) {
-                functionalTerm.getTerms().set(i, substitution.getValue());
-                innerchanges = true;
-            }
+        if (t instanceof Function) {
+            Function f = (Function)t;
+            List<Term> newTerms = new ArrayList<>(f.getTerms().size());
+            for (Term tt : f.getTerms())
+                newTerms.add(composeWithSingletonSubstitution(tt, s));
+            return termFactory.getFunction(f.getFunctionSymbol(), newTerms);
         }
-        return innerchanges;
+
+        return t;
     }
 
-    private static boolean composeTerms(Map<Variable, Term> map, List<Term> first, List<Term> second) {
+    private boolean composeTerms(Map<Variable, Term> map, List<Term> first, List<Term> second) {
         if (first.size() != second.size())
             return false;
 
@@ -234,26 +208,6 @@ public class UnifierUtilities {
         return true;
     }
 
-
-    private static ImmutableMap<Variable, Term> createUnifier(Variable v, Term t) {
-        if  (t instanceof Variable) {
-            if (v.equals(t))
-                return ImmutableMap.of();
-            else
-                return ImmutableMap.of(v, t);
-        }
-        else if (t instanceof Constant) {
-            return ImmutableMap.of(v, t);
-        }
-        else if (t instanceof Function) {
-            Function fterm = (Function) t;
-            if (fterm.containsTerm(v))
-                return null;
-            else
-                return ImmutableMap.of(v, t);
-        }
-        throw new IllegalArgumentException("Unexpected class " + t.getClass().getName());
-    }
 
     /**
      * Applies the substitution to all the terms in the list. Note that this

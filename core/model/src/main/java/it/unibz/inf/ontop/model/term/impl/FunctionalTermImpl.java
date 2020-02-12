@@ -57,18 +57,6 @@ public class FunctionalTermImpl implements Function {
 	}
 
 	/**
-	 * Check whether the function contains a particular term argument or not.
-	 *
-	 * @param t the term in question.
-	 * @return true if the function contains the term, or false otherwise.
-	 */
-	@Override
-	public boolean containsTerm(Term t) {
-		return terms.contains(t);
-	}
-
-
-	/**
 	 * The default constructor.
 	 * 
 	 * @param functor
@@ -117,10 +105,5 @@ public class FunctionalTermImpl implements Function {
 			}
 			sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public Term getTerm(int index) {
-		return terms.get(index);
 	}
 }
