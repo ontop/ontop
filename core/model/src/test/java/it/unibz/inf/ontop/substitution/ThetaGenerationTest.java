@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -39,15 +40,14 @@ public class ThetaGenerationTest extends TestCase {
 	private static final String SUBQUERY_PRED_PREFIX = "ontopSubquery";
 
 	private Vector<Map.Entry<Variable, ImmutableTerm>> getMGUAsVector(ImmutableFunctionalTerm t1, ImmutableFunctionalTerm t2) {
-		Map<Variable, ImmutableTerm> mgu = UNIFIER_UTILITIES.getMGU(
-				ImmutableList.of(t1),
-				ImmutableList.of(t2));
+		Optional<ImmutableSubstitution<ImmutableTerm>> mgu = UNIFIER_UTILITIES.getMGU(
+				ImmutableList.of(t1), ImmutableList.of(t2));
 		Vector<Map.Entry<Variable, ImmutableTerm>> computedmgu;
-		if (mgu == null) {
+		if (!mgu.isPresent()) {
 			computedmgu = null;
 		}
 		else {
-			computedmgu = new Vector<>(mgu.entrySet());
+			computedmgu = new Vector<>(mgu.get().getImmutableMap().entrySet());
 		}
 		return computedmgu;
 	}

@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -137,7 +136,7 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        return unifierUtilities.getMGUSubstitution(args1, args2);
+        return unifierUtilities.getMGU(args1, args2);
     }
 
     public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom<?> atom1, DataAtom<?> atom2) {
@@ -145,7 +144,7 @@ public class ImmutableUnificationTools {
         if (!atom1.getPredicate().equals(atom2.getPredicate()))
             return Optional.empty();
 
-        return unifierUtilities.getMGUSubstitution(atom1.getArguments(), atom2.getArguments());
+        return unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
     }
 
     /**

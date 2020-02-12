@@ -69,32 +69,18 @@ public class UnifierUtilities {
      * @param args1
      * @param args2
      * @return the substitution corresponding to this unification.
-     *
-     * TEST-ONLY USE
      */
-    @Deprecated
-    public ImmutableMap<Variable, ImmutableTerm> getMGU(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
-        ImmutableMap<Variable, ImmutableTerm> r = unify(ImmutableMap.of(), args1, args2);
-        if (r == null)
-            return null;
-        return ImmutableMap.copyOf(new HashMap<>(r)); // quick hack to fix the order
-    }
-
-    /**
-     * Computes the Most General Unifier (MGU) for two n-ary atoms.
-     *
-     * @param args1
-     * @param args2
-     * @return the substitution corresponding to this unification.
-     */
-    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGUSubstitution(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
-        if (args1.isEmpty() && args2.isEmpty())
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGU(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.equals(args2))
             return Optional.of(substitutionFactory.getSubstitution());
 
-        ImmutableMap<Variable, ImmutableTerm> sub = getMGU(args1, args2);
+        ImmutableMap<Variable, ImmutableTerm> sub = unify(ImmutableMap.of(), args1, args2);
         if (sub == null)
             return Optional.empty();
-        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)sub));
+
+        // quick hack to fix the order
+        return Optional.of(substitutionFactory.getSubstitution(
+                (ImmutableMap)ImmutableMap.copyOf(new HashMap<>(sub))));
     }
 
     private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {

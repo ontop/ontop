@@ -32,15 +32,6 @@ public class ImmutableSubstitutionTools {
         this.immutabilityTools = immutabilityTools;
     }
 
-    public ImmutableSubstitution<ImmutableTerm> convertMutableSubstitution(Map<Variable, Term> substitution) {
-        ImmutableMap<Variable, ImmutableTerm> map = substitution.entrySet().stream()
-                .filter(e -> !e.getKey().equals(e.getValue()))
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> immutabilityTools.convertIntoImmutableTerm(e.getValue())));
-        return substitutionFactory.getSubstitution(map);
-    }
-
 
     /**
      * Returns a substitution theta (if it exists) such as :

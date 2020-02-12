@@ -29,28 +29,6 @@ public interface AtomFactory {
     DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate,
                                                                  Variable ... arguments);
 
-    Function getMutableTripleAtom(Term subject, Term predicate, Term object);
-
-    /**
-     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
-     */
-    Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object);
-    
-    /**
-     * In the body, constant IRIs are currently wrapped into a URI function but in the future they will not
-     */
-    Function getMutableTripleBodyAtom(Term subject, IRI classIRI);
-
-    /**
-     * In the head, constant IRIs are wrapped into a URI function
-     */
-    Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object);
-
-    /**
-     * In the head, constant IRIs are wrapped into a URI function
-     */
-    Function getMutableTripleHeadAtom(Term subject, IRI classIRI);
-
     DistinctVariableOnlyDataAtom getDistinctTripleAtom(Variable subject, Variable property, Variable object);
 
     /**

@@ -21,9 +21,7 @@ package it.unibz.inf.ontop.substitution;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 
@@ -33,6 +31,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import junit.framework.TestCase;
 
@@ -83,11 +82,11 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Map.Entry<Variable, ImmutableTerm>> expectedmgu = generator.getMGU(mgustr);
 			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
 
-			Map<Variable, ImmutableTerm> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
-			if (mgu == null) {
+			Optional<ImmutableSubstitution<ImmutableTerm>> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
+			if (!mgu.isPresent()) {
 				computedmgu = null;
 			} else {
-				computedmgu.addAll(mgu.entrySet());
+				computedmgu.addAll(mgu.get().getImmutableMap().entrySet());
 			}
 
 			log.debug("Expected MGU: {}", expectedmgu);
