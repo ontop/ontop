@@ -77,7 +77,6 @@ public class AutomaticMGUTestDataGenerator {
 		 * We found a match for every substitution in unifier1
 		 */
 		return true;
-
 	}
 
 	/***

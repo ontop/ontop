@@ -70,4 +70,6 @@ public interface Function extends Term {
 	Term getTerm(int index);
 
 	boolean containsTerm(Term t);
+
+	Function clone();
 }

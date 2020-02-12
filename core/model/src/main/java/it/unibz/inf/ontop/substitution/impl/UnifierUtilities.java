@@ -52,19 +52,14 @@ public class UnifierUtilities {
 
     /**
      * Computes the Most General Unifier (MGU) for two n-ary atoms.
-     * <p/>
-     * IMPORTANT: Function terms are supported as long as they are not nested.
-     * <p/>
-     * IMPORTANT: handling of AnonymousVariables is questionable --
-     * much is left to UnifierUtilities.apply (and only one version handles them)
      *
      * @param first
      * @param second
      * @return the substitution corresponding to this unification.
      */
-    public Map<Variable, Term> getMGU(Function first, Function second) {
+    public Map<Variable, Term> getMGU(List<Term> first, List<Term> second) {
         Map<Variable,Term> mgu = new HashMap<>();
-        if (composeFunctions(mgu, first, second))
+        if (composeTerms(mgu, first, second))
             return mgu;
         return null;
     }
@@ -92,7 +87,12 @@ public class UnifierUtilities {
          * Special case: unification of two functional terms (possibly recursive)
          */
         if ((term1 instanceof Function) && (term2 instanceof Function)) {
-            return composeFunctions(map, (Function) term1, (Function) term2);
+            Function first = (Function) term1;
+            Function second = (Function) term2;
+            if (!first.getFunctionSymbol().equals(second.getFunctionSymbol()))
+                return false;
+
+            return composeTerms(map, first.clone().getTerms(), second.clone().getTerms());
         }
 
         ImmutableMap<Variable, Term> s = createUnifier(term1, term2);
@@ -123,8 +123,8 @@ public class UnifierUtilities {
                     map.put(v, substitution.getValue());
 
             }
-            else if (t instanceof FunctionalTermImpl) {
-                FunctionalTermImpl fclone = (FunctionalTermImpl)t.clone();
+            else if (t instanceof Function) {
+                Function fclone = ((Function)t).clone();
                 boolean innerchanges = applySingletonSubstitution(fclone, substitution);
                 if (innerchanges)
                     map.put(v, fclone);
@@ -162,18 +162,11 @@ public class UnifierUtilities {
         return innerchanges;
     }
 
-
-    public static boolean composeFunctions(Map<Variable, Term> map, Function first, Function second) {
-        // Basic case: if predicates are different or their arity is different, then no unifier
-        if ((first.getArity() != second.getArity()
-                || !first.getFunctionSymbol().equals(second.getFunctionSymbol()))) {
+    private static boolean composeTerms(Map<Variable, Term> map, List<Term> first, List<Term> second) {
+        if (first.size() != second.size())
             return false;
-        }
 
-        Function firstAtom = (Function) first.clone();
-        Function secondAtom = (Function) second.clone();
-
-        int arity = first.getArity();
+        int arity = first.size();
 
         // Computing the disagreement set
         for (int termidx = 0; termidx < arity; termidx++) {
@@ -182,20 +175,21 @@ public class UnifierUtilities {
             // current terms. If there are any, then we have to take the
             // substituted terms instead of the original ones.
 
-            Term term1 = firstAtom.getTerm(termidx);
-            Term term2 = secondAtom.getTerm(termidx);
+            Term term1 = first.get(termidx);
+            Term term2 = second.get(termidx);
 
             if (!composeTerms(map, term1, term2))
                 return false;
 
             // Applying the newly computed substitution to the 'replacement' of
             // the existing substitutions
-            applySubstitution(firstAtom, map, termidx + 1);
-            applySubstitution(secondAtom, map, termidx + 1);
+            applySubstitution(first, map, termidx + 1);
+            applySubstitution(second, map, termidx + 1);
         }
 
         return true;
     }
+
 
     /***
      * Computes the unifier that makes two terms equal.
@@ -254,12 +248,11 @@ public class UnifierUtilities {
      * Applies the substitution to all the terms in the list. Note that this
      * will not clone the list or the terms inside the list.
      *
-     * @param atom
+     * @param terms
      * @param map
      */
 
-    private static void applySubstitution(Function atom, Map<Variable, Term> map, int fromIndex) {
-        List<Term> terms = atom.getTerms();
+    private static void applySubstitution(List<Term> terms, Map<Variable, Term> map, int fromIndex) {
         for (int i = fromIndex; i < terms.size(); i++) {
             Term t = terms.get(i);
             if (t instanceof Variable) {
@@ -268,7 +261,7 @@ public class UnifierUtilities {
                     terms.set(i, replacement);
             }
             else if (t instanceof Function) {
-                applySubstitution((Function) t, map, 0);
+                applySubstitution(((Function) t).getTerms(), map, 0);
             }
         }
     }

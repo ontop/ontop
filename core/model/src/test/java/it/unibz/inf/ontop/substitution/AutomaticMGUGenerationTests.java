@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.substitution;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.Function;
 import it.unibz.inf.ontop.model.term.Term;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -82,7 +83,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
 			List<Map.Entry<Variable, Term>> computedmgu = new ArrayList<>();
 
-			Map<Variable, Term> mgu = unifier.getMGU(atoms.get(0), atoms.get(1));
+			Map<Variable, Term> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));
 			if (mgu == null) {
 				computedmgu = null;
 			} else {

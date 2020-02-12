@@ -139,12 +139,9 @@ public class ImmutableUnificationTools {
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        // TODO: avoid use it
-        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size());
-
         Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(functionSymbol, args1),
-                immutabilityTools.convertToMutableFunction(functionSymbol, args2));
+                immutabilityTools.convertToMutableTerms(args1),
+                immutabilityTools.convertToMutableTerms(args2));
 
         if (mutableSubstitution == null) {
             return Optional.empty();
@@ -153,10 +150,13 @@ public class ImmutableUnificationTools {
                 .map(s -> (ImmutableSubstitution<T>)s);
     }
 
-    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
+    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom<?> atom1, DataAtom<?> atom2) {
+        if (!atom1.getPredicate().equals(atom2.getPredicate()))
+            return Optional.empty();
+
         Map<Variable, Term> mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(atom1.getPredicate(), atom1.getArguments()),
-                immutabilityTools.convertToMutableFunction(atom2.getPredicate(), atom2.getArguments()));
+                immutabilityTools.convertToMutableTerms(atom1.getArguments()),
+                immutabilityTools.convertToMutableTerms(atom2.getArguments()));
 
         if (mutableSubstitution == null) {
             return Optional.empty();

@@ -132,7 +132,7 @@ public class ImmutabilityTools {
         return termFactory.getFunction(predicateOrFunctionSymbol, convertToMutableTerms(terms));
     }
 
-    private List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
+    public List<Term> convertToMutableTerms(ImmutableList<? extends ImmutableTerm> terms) {
         List<Term> mutableList = new ArrayList<>(terms.size());
         for (ImmutableTerm nextTerm : terms) {
             if (nextTerm instanceof ImmutableFunctionalTerm) {
