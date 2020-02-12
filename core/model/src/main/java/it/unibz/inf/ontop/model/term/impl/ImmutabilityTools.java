@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.DataAtom;
+import it.unibz.inf.ontop.model.term.functionsymbol.BooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -28,21 +29,19 @@ public class ImmutabilityTools {
     public ImmutableTerm convertIntoImmutableTerm(Term term) {
         if (term instanceof Function) {
             Function functionalTerm = (Function) term;
-            if (term instanceof Expression) {
-                Expression expression = (Expression) term;
+            Predicate functor = functionalTerm.getFunctionSymbol();
+            if (functor instanceof BooleanFunctionSymbol) {
                 return termFactory.getImmutableExpression(
-                        expression.getFunctionSymbol(),
+                        (BooleanFunctionSymbol)functor,
                         convertTerms(functionalTerm));
             }
-            else {
-                if (functionalTerm.getFunctionSymbol() instanceof FunctionSymbol)
-                    return termFactory.getImmutableFunctionalTerm(
-                            (FunctionSymbol) functionalTerm.getFunctionSymbol(),
-                            convertTerms(functionalTerm));
-                else
-                    throw new NotAFunctionSymbolException(term + " is not using a FunctionSymbol but a "
-                            + functionalTerm.getFunctionSymbol().getClass());
-            }
+            else if (functor instanceof FunctionSymbol)
+                return termFactory.getImmutableFunctionalTerm(
+                        (FunctionSymbol) functionalTerm.getFunctionSymbol(),
+                        convertTerms(functionalTerm));
+            else
+                throw new NotAFunctionSymbolException(term + " is not using a FunctionSymbol but a "
+                        + functionalTerm.getFunctionSymbol().getClass());
         }
         /*
          * Other terms (constant and variable) are immutable.

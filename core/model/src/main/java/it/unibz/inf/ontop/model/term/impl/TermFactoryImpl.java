@@ -338,11 +338,6 @@ public class TermFactoryImpl implements TermFactory {
 		if (isTestModeEnabled) {
 			checkMutability(arguments);
 		}
-
-		if (functor instanceof BooleanFunctionSymbol) {
-			return new ExpressionImpl((BooleanFunctionSymbol) functor, arguments);
-		}
-		// Default constructor
 		return new FunctionalTermImpl(functor, arguments);
 	}
 
@@ -1078,10 +1073,5 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalLangMatches(), langTagTerm, langRangeTerm);
     }
-
-    private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
-		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
-				iriTypeConstant);
-	}
 
 }
