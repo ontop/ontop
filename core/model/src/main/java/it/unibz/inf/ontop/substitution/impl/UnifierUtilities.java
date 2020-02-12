@@ -78,9 +78,7 @@ public class UnifierUtilities {
         if (sub == null)
             return Optional.empty();
 
-        // quick hack to fix the order
-        return Optional.of(substitutionFactory.getSubstitution(
-                (ImmutableMap)ImmutableMap.copyOf(new HashMap<>(sub))));
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)sub));
     }
 
     private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
