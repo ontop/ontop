@@ -27,7 +27,7 @@ public class OntopEndpointApplication {
 
     @Bean
     public WebMvcConfigurer corsConfigurer(@Value("${cors-allowed-origins:#{null}}") String[] allowedOrigins) {
-        System.err.println("Allowed origins: " + allowedOrigins);
+        // System.err.println("Allowed origins: " + allowedOrigins);
         return (allowedOrigins == null)
                 // No allowed origin, let SpringBoot ignore CORS concerns
                 ? new WebMvcConfigurer() {}
