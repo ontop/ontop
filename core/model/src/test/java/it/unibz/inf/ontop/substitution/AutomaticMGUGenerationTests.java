@@ -52,10 +52,6 @@ public class AutomaticMGUGenerationTests extends TestCase {
 	private AutomaticMGUTestDataGenerator	generator;
 	private Logger						log			= LoggerFactory.getLogger(AutomaticMGUGenerationTests.class);
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	
 	public void setUp() throws Exception {
 		/*
 		 * TODO modify the API so that function symbols for object terms use the
@@ -84,7 +80,7 @@ public class AutomaticMGUGenerationTests extends TestCase {
 			String atomsstr = input.split("=")[0].trim();
 			String mgustr = input.split("=")[1].trim();
 			List<ImmutableTerm> atoms = generator.getAtoms(atomsstr);
-			List<Map.Entry<Variable, Term>> expectedmgu = generator.getMGU(mgustr);
+			List<Map.Entry<Variable, ImmutableTerm>> expectedmgu = generator.getMGU(mgustr);
 			List<Map.Entry<Variable, ImmutableTerm>> computedmgu = new ArrayList<>();
 
 			Map<Variable, ImmutableTerm> mgu = unifier.getMGU(ImmutableList.of(atoms.get(0)), ImmutableList.of(atoms.get(1)));

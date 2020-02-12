@@ -133,7 +133,7 @@ public class ImmutableUnificationTools {
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
-        // TODO: why is it here?
+        // TODO (ROMAN 12/02/20): why is it here?
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 

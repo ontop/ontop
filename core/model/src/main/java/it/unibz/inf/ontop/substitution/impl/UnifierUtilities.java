@@ -88,6 +88,9 @@ public class UnifierUtilities {
      * @return the substitution corresponding to this unification.
      */
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGUSubstitution(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.isEmpty() && args2.isEmpty())
+            return Optional.of(substitutionFactory.getSubstitution());
+
         ImmutableMap<Variable, ImmutableTerm> sub = getMGU(args1, args2);
         if (sub == null)
             return Optional.empty();
