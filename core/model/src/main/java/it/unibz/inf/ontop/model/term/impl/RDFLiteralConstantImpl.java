@@ -31,8 +31,6 @@ import java.util.stream.Stream;
 
 public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements RDFLiteralConstant {
 
-	private static final long serialVersionUID = 8031338451909170400L;
-
 	private final String value;
 	private final String string;
 	private final RDFDatatype termType;
@@ -71,11 +69,6 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 	@Override
 	public int hashCode() {		
 		return string.hashCode();
-	}
-
-	@Override
-	public RDFLiteralConstant clone() {
-		return this;
 	}
 
 	@Override

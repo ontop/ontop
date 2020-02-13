@@ -29,21 +29,17 @@ import java.util.Set;
 
 public class DataSourceImpl implements OBDADataSource {
 
-	private static final long serialVersionUID = 7903755268613089609L;
-
 	private boolean enabled = true;
 	private boolean registred = false;
-	private URI id = null;
+	private URI id;
 
-	private Properties parameters = null;
+	private Properties parameters;
 
 	/**
 	 * Creates a new DataSource object
 	 *
-	 * @param uri
+	 * @param id
 	 *            The URI of the data source
-	 * @param name
-	 *            A generic name for this data source
 	 */
 	protected DataSourceImpl(URI id) {
 		this.id = id;

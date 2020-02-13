@@ -64,11 +64,6 @@ public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConst
 	}
 
 	@Override
-	public IRIConstant clone() {
-		return this;
-	}
-
-	@Override
 	public boolean isGround() {
 		return true;
 	}

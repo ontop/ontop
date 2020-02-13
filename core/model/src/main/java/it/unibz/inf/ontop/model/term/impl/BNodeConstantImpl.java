@@ -72,11 +72,6 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	}
 
 	@Override
-	public BNode clone() {
-		return this;
-	}
-
-	@Override
 	public boolean isGround() {
 		return true;
 	}

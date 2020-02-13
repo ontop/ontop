@@ -89,11 +89,6 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
                 : variables.stream();
     }
 
-    @Override
-    public ImmutableFunctionalTermImpl clone() {
-        return this;
-    }
-
     /**
      * Cached toString()
      */

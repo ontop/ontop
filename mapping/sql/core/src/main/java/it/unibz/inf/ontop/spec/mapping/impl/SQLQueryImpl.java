@@ -24,8 +24,6 @@ import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 public class SQLQueryImpl implements OBDASQLQuery {
 
-	private static final long serialVersionUID = -1910293716786132196L;
-	
 	private final String sqlQuery;
 
 	protected SQLQueryImpl(String sqlQuery) {
@@ -47,7 +45,7 @@ public class SQLQueryImpl implements OBDASQLQuery {
 
 	@Override
 	public SQLQueryImpl clone() {
-		SQLQueryImpl clone = new SQLQueryImpl(new String(sqlQuery));
+		SQLQueryImpl clone = new SQLQueryImpl(sqlQuery);
 		return clone;
 	}
 

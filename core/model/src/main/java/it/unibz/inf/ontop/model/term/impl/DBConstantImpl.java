@@ -89,9 +89,4 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
         else
             return otherTerm.evaluateStrictEq(this, variableNullability);
     }
-
-    @Override
-    public DBConstant clone() {
-        return new DBConstantImpl(value, termType);
-    }
 }

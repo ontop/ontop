@@ -65,13 +65,7 @@ public class PredicateImpl implements Predicate {
 	}
 
 	@Override
-	public Predicate clone() {
-		return this;
-	}
-
-	@Override
 	public String toString() {
 		return name;
 	}
-
 }

@@ -65,11 +65,6 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	}
 
 	@Override
-	public Variable clone() {
-		return this;
-	}
-
-	@Override
 	public boolean isGround() {
 		return false;
 	}
