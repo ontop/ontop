@@ -119,9 +119,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         if (other instanceof ImmutableFunctionalTerm) {
             return toString().equals(other.toString());
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     @Override
