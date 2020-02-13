@@ -56,14 +56,11 @@ public class RDFLiteralConstantImpl extends AbstractNonNullConstant implements R
 		this.termType = typeFactory.getLangTermType(l);
 		this.string = "\"" + value + "@" + l + "\"";
 	}
-	
+
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof RDFLiteralConstantImpl)) {
-			return false;
-		}
-		RDFLiteralConstantImpl value2 = (RDFLiteralConstantImpl) obj;
-		return this.hashCode() == value2.hashCode();
+	public boolean equals(Object other) {
+		return (other instanceof RDFLiteralConstantImpl
+				&& this.string.equals(((RDFLiteralConstantImpl) other).string));
 	}
 
 	@Override

@@ -38,12 +38,9 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof Variable) {
-			Variable name2 = (Variable) obj;
-			return name.equals(name2.getName());
-		}
-		return false;
+	public boolean equals(Object other) {
+		return (other instanceof VariableImpl
+				&& this.name.equals(((VariableImpl) other).name));
 	}
 
 	@Override
