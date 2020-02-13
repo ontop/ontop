@@ -453,7 +453,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     .orElse(rightSubstitution);
 
             /*
-             * Substitution with only a provenance entry -> see if something can be lifted from the grand child
+             * substitution with only a provenance entry -> see if something can be lifted from the grand child
              */
             if (selectedSubstitution.isEmpty())
                 return liftRightGrandChildWithProvenance(

@@ -89,8 +89,7 @@ public class SIRepository {
         ImmutableList<SQLPPTriplesMap> mappingAxioms = dataRepository.getMappings();
 
         try {
-            return new SQLPPMappingImpl(mappingAxioms,
-                    specificationFactory.createMetadata(prefixManager));
+            return new SQLPPMappingImpl(mappingAxioms, prefixManager);
         }
         catch (DuplicateMappingException e) {
             throw new IllegalStateException(e.getMessage());

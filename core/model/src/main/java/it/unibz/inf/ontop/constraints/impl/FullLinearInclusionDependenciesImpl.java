@@ -1,7 +1,8 @@
-package it.unibz.inf.ontop.constraints;
+package it.unibz.inf.ontop.constraints.impl;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -12,11 +13,11 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
  * @param <P>
  */
 
-public class FullLinearInclusionDependencies<P extends AtomPredicate> extends LinearInclusionDependencies<P> {
+public class FullLinearInclusionDependenciesImpl<P extends AtomPredicate> extends LinearInclusionDependenciesImpl<P> {
 
-    private FullLinearInclusionDependencies(CoreUtilsFactory coreUtilsFactory,
-                                        AtomFactory atomFactory,
-                                        ImmutableList<LinearInclusionDependency<P>> dependencies) {
+    private FullLinearInclusionDependenciesImpl(CoreUtilsFactory coreUtilsFactory,
+                                                AtomFactory atomFactory,
+                                                ImmutableList<LinearInclusionDependency<P>> dependencies) {
         super(coreUtilsFactory, atomFactory, dependencies);
     }
 
@@ -40,21 +41,21 @@ public class FullLinearInclusionDependencies<P extends AtomPredicate> extends Li
     }
 
 
-    public static class Builder<P extends AtomPredicate> extends LinearInclusionDependencies.Builder<P> {
+    public static class Builder<P extends AtomPredicate> extends LinearInclusionDependenciesImpl.Builder<P> {
 
         protected Builder(CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
             super(coreUtilsFactory, atomFactory);
         }
 
-        public Builder add(DataAtom<P> head, DataAtom<P> body) {
+        public Builder<P> add(DataAtom<P> head, DataAtom<P> body) {
             if (!body.getVariables().containsAll(head.getVariables()))
                 throw new IllegalArgumentException();
             super.add(head, body);
             return this;
         }
 
-        public FullLinearInclusionDependencies<P> build() {
-            return new FullLinearInclusionDependencies<>(coreUtilsFactory, atomFactory, builder.build());
+        public FullLinearInclusionDependenciesImpl<P> build() {
+            return new FullLinearInclusionDependenciesImpl<>(coreUtilsFactory, atomFactory, builder.build());
         }
     }
 }

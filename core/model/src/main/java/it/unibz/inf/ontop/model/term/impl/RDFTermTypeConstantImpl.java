@@ -63,7 +63,7 @@ public class RDFTermTypeConstantImpl extends AbstractNonNullConstant implements 
      */
     @Deprecated
     @Override
-    public Term clone() {
+    public RDFTermTypeConstant clone() {
         return new RDFTermTypeConstantImpl(rdfTermType, metaType);
     }
 

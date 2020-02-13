@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -110,6 +111,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Equalities that must remain
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> nonLiftableVariables.contains(e.getKey()))
+                                .sorted(Map.Entry.comparingByKey())
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
 

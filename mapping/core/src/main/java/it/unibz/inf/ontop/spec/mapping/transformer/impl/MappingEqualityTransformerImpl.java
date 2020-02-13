@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.ProvenanceMappingFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -17,8 +15,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -31,25 +28,21 @@ import java.util.stream.Stream;
 
 public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
 
-    private final ProvenanceMappingFactory mappingFactory;
     private final IQTreeTransformer expressionTransformer;
     private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    protected MappingEqualityTransformerImpl(ProvenanceMappingFactory mappingFactory,
-                                             UniqueTermTypeExtractor typeExtractor, CoreSingletons coreSingletons) {
-        this.mappingFactory = mappingFactory;
+    protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
+                                             CoreSingletons coreSingletons) {
         this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public MappingWithProvenance transform(MappingWithProvenance mapping) {
-        ImmutableMap<IQ, PPMappingAssertionProvenance> newProvenanceMap = mapping.getProvenanceMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> transformMappingAssertion(e.getKey()),
-                        Map.Entry::getValue));
-        return mappingFactory.create(newProvenanceMap, mapping.getMetadata());
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
+        return mapping.stream()
+                .map(a -> a.copyOf(transformMappingAssertion(a.getQuery())))
+                .collect(ImmutableCollectors.toList());
     }
 
     private IQ transformMappingAssertion(IQ mappingAssertion) {

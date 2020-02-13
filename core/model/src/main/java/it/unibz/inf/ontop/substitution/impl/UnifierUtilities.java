@@ -30,18 +30,24 @@ package it.unibz.inf.ontop.substitution.impl;
  * variables ie. A(#1,#2)
  */
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.model.term.Function;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * A Class that provides general utilities related to unification, of terms and
  * atoms.
  * <p/>
- * See also SubstitutionUtilities that contains methods that were initially present
- * in this class.
  *
  * @author mariano
  */
@@ -49,29 +55,107 @@ import it.unibz.inf.ontop.substitution.Substitution;
 public class UnifierUtilities {
 
     private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
-    public UnifierUtilities(TermFactory termFactory) {
+    public UnifierUtilities(TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
+    }
+
+    /**
+     * Computes the Most General Unifier (MGU) for two n-ary atoms.
+     *
+     * @param args1
+     * @param args2
+     * @return the substitution corresponding to this unification.
+     */
+    public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> getMGU(ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.equals(args2))
+            return Optional.of(substitutionFactory.getSubstitution());
+
+        ImmutableMap<Variable, ImmutableTerm> sub = unify(ImmutableMap.of(), args1, args2);
+        if (sub == null)
+            return Optional.empty();
+
+        return Optional.of(substitutionFactory.getSubstitution((ImmutableMap)sub));
+    }
+
+    private static boolean variableOccursInTerm(Variable v, ImmutableTerm term) {
+        if (term instanceof ImmutableFunctionalTerm)
+            return ((ImmutableFunctionalTerm)term).getTerms().stream()
+                    .anyMatch(t -> variableOccursInTerm(v, t));
+        return v.equals(term);
+    }
+
+    /**
+     * Recursive
+     */
+    private ImmutableTerm apply(ImmutableTerm t, ImmutableMap<Variable, ImmutableTerm> sub) {
+        if (t instanceof ImmutableFunctionalTerm) {
+            ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)t;
+            ImmutableList<ImmutableTerm> terms = f.getTerms().stream()
+                    .map(tt -> apply(tt, sub))
+                    .collect(ImmutableCollectors.toList());
+            return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), terms);
+        }
+        return sub.getOrDefault(t, t);
     }
 
 
     /**
-     * Computes the Most General Unifier (MGU) for two n-ary atoms.
-     * <p/>
-     * IMPORTANT: Function terms are supported as long as they are not nested.
-     * <p/>
-     * IMPORTANT: handling of AnonymousVariables is questionable --
-     * much is left to UnifierUtilities.apply (and only one version handles them)
+     * Creates a unifier for args1 and args2
      *
-     * @param first
-     * @param second
-     * @return the substitution corresponding to this unification.
+     * The operation is as follows
+     *
+     * {x/y, m/y} composed with (y,z) is equal to {x/z, m/z, y/z}
+     *
+     * @return true the substitution (of null if it does not)
      */
-    public Substitution getMGU(Function first, Function second) {
-        SubstitutionImpl mgu = new SubstitutionImpl(termFactory);
-        if (mgu.composeFunctions(first, second))
-            return mgu;
-        return null;
+
+    private ImmutableMap<Variable, ImmutableTerm> unify(ImmutableMap<Variable, ImmutableTerm> sub, ImmutableList<? extends ImmutableTerm> args1, ImmutableList<? extends ImmutableTerm> args2) {
+        if (args1.size() != args2.size())
+            return null;
+
+        int arity = args1.size();
+        for (int i = 0; i < arity; i++) {
+            // applying the computed substitution first
+            ImmutableTerm term1 = apply(args1.get(i), sub);
+            ImmutableTerm term2 = apply(args2.get(i), sub);
+
+            if (term1.equals(term2))
+                continue;
+
+            // Special case: unification of two functional terms (possibly recursive)
+            if ((term1 instanceof ImmutableFunctionalTerm) && (term2 instanceof ImmutableFunctionalTerm)) {
+                ImmutableFunctionalTerm f1 = (ImmutableFunctionalTerm) term1;
+                ImmutableFunctionalTerm f2 = (ImmutableFunctionalTerm) term2;
+                if (!f1.getFunctionSymbol().equals(f2.getFunctionSymbol()))
+                    return null;
+
+                sub = unify(sub, f1.getTerms(), f2.getTerms());
+                if (sub == null)
+                    return null;
+            }
+            else {
+                ImmutableMap<Variable, ImmutableTerm> s;
+                // avoid unifying x with f(g(x))
+                if (term1 instanceof Variable && !variableOccursInTerm((Variable) term1, term2))
+                    s = ImmutableMap.of((Variable) term1, term2);
+                else if (term2 instanceof Variable && !variableOccursInTerm((Variable) term2, term1))
+                    s = ImmutableMap.of((Variable) term2, term1);
+                else
+                    return null; // neither is a variable, impossible to unify distinct terms
+
+                sub = Stream.concat(s.entrySet().stream(), sub.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(e.getKey(), apply(e.getValue(), s)))
+                        // The substitution for the current variable has become
+                        // trivial, e.g., x/x with the current composition. We
+                        // remove it to keep only a non-trivial unifier
+                        .filter(e -> !e.getValue().equals(e.getKey())))
+                        .collect(ImmutableCollectors.toMap());
+            }
+        }
+        return sub;
     }
 }

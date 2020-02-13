@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.protege.gui.treemodels;
 
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 
 public class TreeModelTools {

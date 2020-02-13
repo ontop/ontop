@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
 /**
  * Transforms the equalities coming from the mapping according to their types.
@@ -9,5 +10,5 @@ import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
 public interface MappingEqualityTransformer extends MappingWithProvenanceTransformer {
 
     @Override
-    MappingWithProvenance transform(MappingWithProvenance mapping);
+    ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping);
 }

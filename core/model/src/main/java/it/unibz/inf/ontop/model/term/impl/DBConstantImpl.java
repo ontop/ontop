@@ -91,7 +91,7 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
     }
 
     @Override
-    public Term clone() {
+    public DBConstant clone() {
         return new DBConstantImpl(value, termType);
     }
 }

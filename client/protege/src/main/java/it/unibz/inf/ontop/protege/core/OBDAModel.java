@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -30,7 +32,6 @@ import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.formats.PrefixDocumentFormat;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
 import java.util.*;
@@ -126,7 +127,7 @@ public class OBDAModel {
         try {
             return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
                     // TODO: give an immutable prefix manager!!
-                    specificationFactory.createMetadata(prefixManager));
+                    prefixManager);
             /**
              * No mapping so should never happen
              */
@@ -149,7 +150,7 @@ public class OBDAModel {
         SQLMappingParser mappingParser = configuration.getInjector().getInstance(SQLMappingParser.class);
 
         SQLPPMapping ppMapping = mappingParser.parse(mappingReader);
-        prefixManager.addPrefixes(ppMapping.getMetadata().getPrefixManager().getPrefixMap());
+        prefixManager.addPrefixes(ppMapping.getPrefixManager().getPrefixMap());
         // New map
         triplesMapMap = ppMapping.getTripleMaps().stream()
                 .collect(collectTriplesMaps(

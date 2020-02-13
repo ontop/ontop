@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.exception.NullVariableInMappingException;
@@ -12,6 +13,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
  */
 public interface PPMappingConverter<T extends PreProcessedTriplesMap, M extends PreProcessedMapping<T>, D extends DBMetadata> {
 
-    MappingWithProvenance convert(M ppMapping, D dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException;
+    ImmutableList<MappingAssertion> convert(M ppMapping, D dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException;
 
 }

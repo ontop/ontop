@@ -58,9 +58,7 @@ public class TermFactoryImpl implements TermFactory {
 	@Nullable
 	private final DBConstant doubleNaN;
 	private final DBConstant provenanceConstant;
-	private final ImmutabilityTools immutabilityTools;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
-	private final boolean isTestModeEnabled;
 	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
 	private final RDF rdfFactory;
 	private final ImmutableExpression.Evaluation positiveEvaluation, negativeEvaluation, nullEvaluation;
@@ -88,9 +86,7 @@ public class TermFactoryImpl implements TermFactory {
 				.map(v -> new DBConstantImpl(v, dbTypeFactory.getDBDoubleType()))
 				.orElse(null);
 		this.provenanceConstant = new DBConstantImpl("ontop-provenance-constant", dbTypeFactory.getDBStringType());
-		this.immutabilityTools = new ImmutabilityTools(this);
 		this.termTypeConstantMap = new HashMap<>();
-		this.isTestModeEnabled = settings.isTestModeEnabled();
 		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeTypeConstant = getRDFTermTypeConstant(typeFactory.getBlankNodeType());
 		this.positiveEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
@@ -114,11 +110,6 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public RDFLiteralConstant getRDFLiteralConstant(String value, IRI type) {
 		return getRDFLiteralConstant(value, typeFactory.getDatatype(type));
-	}
-
-	@Override
-	public Function getRDFLiteralMutableFunctionalTerm(Term lexicalTerm, RDFDatatype type) {
-		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, getRDFTermTypeConstant(type));
 	}
 
 	@Override
@@ -184,24 +175,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public Function getFunction(Predicate functor, Term... arguments) {
-		return getFunction(functor, Arrays.asList(arguments));
-	}
-	
-	@Override
-	public Expression getExpression(BooleanFunctionSymbol functor, Term... arguments) {
-		return getExpression(functor, Arrays.asList(arguments));
-	}
-
-	@Override
-	public Expression getExpression(BooleanFunctionSymbol functor, List<Term> arguments) {
-		if (isTestModeEnabled) {
-			checkMutability(arguments);
-		}
-		return new ExpressionImpl(functor, arguments);
-	}
-
-	@Override
 	public ImmutableExpression getImmutableExpression(BooleanFunctionSymbol functor, ImmutableTerm... arguments) {
 		return getImmutableExpression(functor, ImmutableList.copyOf(arguments));
 	}
@@ -214,17 +187,6 @@ public class TermFactoryImpl implements TermFactory {
 		}
 		else {
 			return new NonGroundExpressionImpl(functor, arguments, this);
-		}
-	}
-
-	@Override
-	public ImmutableExpression getImmutableExpression(Expression expression) {
-		if (GroundTermTools.isGroundTerm(expression)) {
-			return new GroundExpressionImpl(expression.getFunctionSymbol(),
-					(ImmutableList<? extends GroundTerm>)(ImmutableList<?>)convertTerms(expression), this);
-		}
-		else {
-			return new NonGroundExpressionImpl(expression.getFunctionSymbol(), convertTerms(expression), this);
 		}
 	}
 
@@ -355,29 +317,6 @@ public class TermFactoryImpl implements TermFactory {
 		return (subTermSubstitutionMap.isEmpty())
 				? getFunctionalTermDecomposition(liftableTerm)
 				: new FunctionalTermDecompositionImpl(liftableTerm, subTermSubstitutionMap);
-	}
-
-	@Override
-	public Function getFunction(Predicate functor, List<Term> arguments) {
-		if (isTestModeEnabled) {
-			checkMutability(arguments);
-		}
-
-		if (functor instanceof BooleanFunctionSymbol) {
-			return getExpression((BooleanFunctionSymbol) functor, arguments);
-		}
-
-		// Default constructor
-		return new FunctionalTermImpl(functor, arguments);
-	}
-
-	private void checkMutability(List<Term> terms) {
-		for(Term term : terms) {
-			if (term instanceof ImmutableFunctionalTerm)
-				throw new IllegalArgumentException("Was expecting a mutable term, not a " + term.getClass());
-			else if (term instanceof Function)
-				checkMutability(((Function) term).getTerms());
-		}
 	}
 
 	@Override
@@ -745,14 +684,6 @@ public class TermFactoryImpl implements TermFactory {
 		return provenanceConstant;
 	}
 
-	private ImmutableList<ImmutableTerm> convertTerms(Function functionalTermToClone) {
-		ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-		for (Term term : functionalTermToClone.getTerms()) {
-			builder.add(immutabilityTools.convertIntoImmutableTerm(term));
-		}
-		return builder.build();
-	}
-
 	@Override
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
@@ -1103,10 +1034,5 @@ public class TermFactoryImpl implements TermFactory {
     public ImmutableExpression getLexicalLangMatches(ImmutableTerm langTagTerm, ImmutableTerm langRangeTerm) {
 		return getImmutableExpression(functionSymbolFactory.getLexicalLangMatches(), langTagTerm, langRangeTerm);
     }
-
-    private Function getIRIMutableFunctionalTermFromLexicalTerm(Term lexicalTerm) {
-		return getFunction(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm,
-				iriTypeConstant);
-	}
 
 }
