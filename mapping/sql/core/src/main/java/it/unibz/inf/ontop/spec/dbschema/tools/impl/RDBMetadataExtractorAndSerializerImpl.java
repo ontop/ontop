@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.spec.dbschema.tools.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
@@ -32,12 +34,16 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
             RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory);
             RDBMetadataExtractionTools.loadMetadata(metadata, localConnection, null);
 
-            Gson gson = new Gson();
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
+
+            //Gson gson = new Gson();
             // TODO: serialize DBMetadata
             //return gson.toJson(metadata);
-            return gson.toJson(new JsonObject());
+            //return gson.toJson(new JsonObject());
+            return jsonString;
 
-        } catch (SQLException e) {
+        } catch (SQLException | JsonProcessingException e) {
             throw new DBMetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
         }
     }

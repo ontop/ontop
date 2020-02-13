@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.dbschema;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -28,7 +29,7 @@ import java.util.*;
 
 /**
  * Represents a database relation (either a table or a view)
- * 
+ *
  * @author Roman Kontchakov
  *
  */
@@ -41,21 +42,21 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
-	private UniqueConstraint pk;	
-	
-	
+	private UniqueConstraint pk;
+
+
 	/**
 	 * used only in DBMetadata
-	 * 
+	 *
 	 * @param name
 	 */
 	protected DatabaseRelationDefinition(RelationID name) {
 		super(name);
 	}
-	
+
 	/**
-	 * creates a new attribute 
-	 * 
+	 * creates a new attribute
+	 *
 	 * @param id
 	 * @param typeName
 	 * @param termType
@@ -64,30 +65,30 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	public Attribute addAttribute(QuotedID id, String typeName, DBTermType termType, boolean canNull) {
 		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id),
 				attributes.size() + 1, typeName, termType, canNull);
-		
+
 		//check for duplicate names (put returns the previous value)
 		Attribute prev = attributeMap.put(id, att);
-		if (prev != null) 
+		if (prev != null)
 			throw new IllegalArgumentException("Duplicate attribute names");
-		
+
 		attributes.add(att);
 		return att;
 	}
 
 	/**
 	 * return an attribute with the specified ID
-	 * 
+	 *
 	 * @param attributeId
 	 * @return
 	 */
-	
+
 	public Attribute getAttribute(QuotedID attributeId) {
 		return attributeMap.get(attributeId);
-	}	
-	
+	}
+
 	/**
 	 * gets attribute with the specified position
-	 * 
+	 *
 	 * @param index is position <em>starting at 1</em>
 	 * @return attribute at the position
 	 */
@@ -99,20 +100,21 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 
 	/**
 	 * returns the list of attributes
-	 * 
+	 *
 	 * @return list of attributes
 	 */
+	//@JsonIgnore
 	@Override
 	public List<Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
 	}
-	
+
 	/**
 	 * adds a unique constraint (a primary key or a unique constraint proper)
 	 *
 	 * @param uc
 	 */
-	
+
 	public void addUniqueConstraint(UniqueConstraint uc) {
 		if (uc.isPrimaryKey()) {
 			if (pk != null)
@@ -127,10 +129,10 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 		}
 		ucs.add(uc);
 	}
-	
+
 	/**
 	 * returns the list of unique constraints (including the primary key if present)
-	 * 
+	 *
 	 * @return
 	 */
 	@Override
@@ -149,31 +151,32 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	public ImmutableList<FunctionalDependency> getOtherFunctionalDependencies() {
 		return ImmutableList.copyOf(otherFunctionalDependencies);
 	}
-	
+
 	/**
 	 * return primary key (if present) or null (otherwise)
-	 * 
+	 *
 	 * @return
 	 */
+	@JsonIgnore
 	@Override
 	public UniqueConstraint getPrimaryKey() {
 		return pk;
 	}
-	
-	
+
+
 	/**
-	 * adds a foreign key constraints 
-	 * 
+	 * adds a foreign key constraints
+	 *
 	 * @param fk a foreign key
 	 */
-	
+
 	public void addForeignKeyConstraint(ForeignKeyConstraint fk) {
 		fks.add(fk);
 	}
-	
+
 	/**
-	 * returns the list of foreign key constraints 
-	 * 
+	 * returns the list of foreign key constraints
+	 *
 	 * @return list of foreign keys
 	 */
 	@Override
