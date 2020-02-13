@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.answering.connection.impl;
 
 import java.sql.Connection;
 
+import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
@@ -60,12 +61,14 @@ public class SQLConnection implements OntopConnection {
 	private final JDBCConnector jdbcConnector;
 	private boolean isClosed;
 	private final RDF rdfFactory;
+	private final JDBCStatementInitializer statementInitializer;
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
 						 DBMetadata dbMetadata,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
-						 RDF rdfFactory, SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
+						 RDF rdfFactory, SubstitutionFactory substitutionFactory, JDBCStatementInitializer statementInitializer,
+						 OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
@@ -74,6 +77,7 @@ public class SQLConnection implements OntopConnection {
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;
 		this.substitutionFactory = substitutionFactory;
+		this.statementInitializer = statementInitializer;
 		this.settings = settings;
 		this.rdfFactory = rdfFactory;
 		this.isClosed = false;
@@ -97,7 +101,7 @@ public class SQLConnection implements OntopConnection {
 			}
 			return new SQLQuestStatement(
 					this.queryProcessor,
-					conn.createStatement(java.sql.ResultSet.TYPE_FORWARD_ONLY, java.sql.ResultSet.CONCUR_READ_ONLY),
+					statementInitializer.createAndInitStatement(conn),
 					inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);

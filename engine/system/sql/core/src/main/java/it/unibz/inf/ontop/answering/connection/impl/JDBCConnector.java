@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.answering.connection.impl;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.connection.DBConnector;
+import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -42,6 +43,7 @@ public class JDBCConnector implements DBConnector {
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
     private final RDF rdfFactory;
+    private final JDBCStatementInitializer statementInitializer;
 
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
@@ -52,6 +54,7 @@ public class JDBCConnector implements DBConnector {
                           TypeFactory typeFactory,
                           SubstitutionFactory substitutionFactory,
                           RDF rdfFactory,
+                          JDBCStatementInitializer statementInitializer,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
         this.dbMetadata = dbMetadata;
@@ -62,6 +65,7 @@ public class JDBCConnector implements DBConnector {
         this.connectionPool = connectionPool;
         this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
+        this.statementInitializer = statementInitializer;
     }
 
     /**
@@ -123,7 +127,7 @@ public class JDBCConnector implements DBConnector {
     public OntopConnection getConnection() throws OntopConnectionException {
 
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
-                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
+                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, statementInitializer, settings);
     }
 
 

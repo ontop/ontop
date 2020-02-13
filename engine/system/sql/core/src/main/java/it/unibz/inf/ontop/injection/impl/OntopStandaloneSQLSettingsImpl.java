@@ -63,6 +63,11 @@ public class OntopStandaloneSQLSettingsImpl extends OntopMappingSQLAllSettingsIm
     }
 
     @Override
+    public int getFetchSize() {
+        return systemSettings.getFetchSize();
+    }
+
+    @Override
     public Optional<Integer> getDefaultQueryTimeout() {
         return getInteger(DEFAULT_QUERY_TIMEOUT);
     }

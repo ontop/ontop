@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSettings;
@@ -11,6 +12,7 @@ import java.util.Properties;
 public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImpl implements OntopSystemSQLSettings {
 
     private static final String DEFAULT_FILE = "system-sql-default.properties";
+    private static final String STATEMENT_INITIALIZER_SUFFIX = "-statementInitializer";
     private final OntopSystemSettings systemSettings;
     private final OntopSQLCredentialSettings sqlCredentialSettings;
 
@@ -23,6 +25,19 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultSystemSQLProperties();
         properties.putAll(userProperties);
+
+        String jdbcDriver = extractJdbcDriver(userProperties);
+
+        /*
+         * Statement initializer
+         */
+        String initializerKey = jdbcDriver + STATEMENT_INITIALIZER_SUFFIX;
+        String initializerName = SQLDialectAdapter.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(initializerKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(initializerName))
+                .ifPresent(v -> properties.setProperty(initializerName, v));
+
         return properties;
     }
 
@@ -60,6 +75,11 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
     @Override
     public int getConnectionPoolMaxSize() {
         return getRequiredInteger(MAX_POOL_SIZE);
+    }
+
+    @Override
+    public int getFetchSize() {
+        return getRequiredInteger(FETCH_SIZE);
     }
 
     @Override
