@@ -1,37 +1,15 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
-/*
- * #%L
- * ontop-reformulation-core
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import java.sql.Connection;
 
 import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
@@ -51,10 +29,8 @@ public class SQLConnection implements OntopConnection {
 
 	private final QueryReformulator queryProcessor;
 	private Connection conn;
-	private final DBMetadata dbMetadata;
 	private final InputQueryFactory inputQueryFactory;
 	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
 	private final SubstitutionFactory substitutionFactory;
 	private final OntopSystemSQLSettings settings;
 
@@ -65,17 +41,14 @@ public class SQLConnection implements OntopConnection {
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
-						 DBMetadata dbMetadata,
-						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
+						 InputQueryFactory inputQueryFactory, TermFactory termFactory,
 						 RDF rdfFactory, SubstitutionFactory substitutionFactory, JDBCStatementInitializer statementInitializer,
 						 OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
-		this.dbMetadata = dbMetadata;
 		this.inputQueryFactory = inputQueryFactory;
 		this.termFactory = termFactory;
-		this.typeFactory = typeFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.statementInitializer = statementInitializer;
 		this.settings = settings;
@@ -102,7 +75,7 @@ public class SQLConnection implements OntopConnection {
 			return new SQLQuestStatement(
 					this.queryProcessor,
 					statementInitializer.createAndInitStatement(conn),
-					inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
+					inputQueryFactory, termFactory, rdfFactory, substitutionFactory, settings);
 		} catch (Exception e) {
 			throw new OntopConnectionException(e);
 		}
