@@ -44,12 +44,9 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof BNodeConstantImpl) {
-			BNodeConstantImpl other = (BNodeConstantImpl) obj;
-			return this.name.equals(other.name);
-		}
-		return false;
+	public boolean equals(Object other) {
+		return (other instanceof BNodeConstantImpl &&
+				this.name.equals(((BNodeConstantImpl) other).name));
 	}
 
 	@Override

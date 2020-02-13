@@ -111,7 +111,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     /**
-     * A bit hacky: only for the functional term
+     * TODO: A bit hacky: only for the functional term
      * that derives from ImmutableFunctionalTermImpl
      */
     @Override

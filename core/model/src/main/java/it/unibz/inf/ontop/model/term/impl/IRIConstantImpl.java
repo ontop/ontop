@@ -43,12 +43,9 @@ public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConst
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof IRIConstantImpl) {
-			IRIConstantImpl other = (IRIConstantImpl) obj;
-			return this.iri.equals(other.iri);
-		}
-		return false;
+	public boolean equals(Object other) {
+		return (other instanceof IRIConstantImpl &&
+					this.iri.equals(((IRIConstantImpl) other).iri));
 	}
 
 	@Override

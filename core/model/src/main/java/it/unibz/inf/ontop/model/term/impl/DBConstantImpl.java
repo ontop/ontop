@@ -69,12 +69,8 @@ public class DBConstantImpl extends AbstractNonNullConstant implements DBConstan
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof DBConstant) {
-            DBConstant otherConstant = (DBConstant) other;
-            return otherConstant.getValue().equals(value);
-        }
-        else
-            return false;
+        return (other instanceof DBConstant &&
+                    ((DBConstant) other).getValue().equals(this.value));
     }
 
     @Override
