@@ -23,7 +23,7 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
                                  ReformulationFactory translationFactory,
                                  OntopSystemFactory systemFactory) {
         QueryReformulator queryReformulator = translationFactory.create(obdaSpecification, executorRegistry);
-        dbConnector = systemFactory.create(queryReformulator, obdaSpecification.getDBMetadata());
+        dbConnector = systemFactory.create(queryReformulator, obdaSpecification.getDBParameters());
     }
 
     @Override

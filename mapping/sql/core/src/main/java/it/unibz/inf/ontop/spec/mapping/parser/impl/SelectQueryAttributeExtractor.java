@@ -52,7 +52,7 @@ public class SelectQueryAttributeExtractor {
     private final SelectQueryAttributeExtractor2 sqae;
 
     public SelectQueryAttributeExtractor(DBMetadata metadata, TermFactory termFactory) {
-        this.idfac = metadata.getQuotedIDFactory();
+        this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
     }
 

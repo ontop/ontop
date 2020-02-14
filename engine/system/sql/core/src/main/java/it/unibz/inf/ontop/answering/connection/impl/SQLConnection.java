@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
@@ -50,7 +51,7 @@ public class SQLConnection implements OntopConnection {
 
 	private final QueryReformulator queryProcessor;
 	private Connection conn;
-	private final DBMetadata dbMetadata;
+	private final DBParameters dbParameters;
 	private final InputQueryFactory inputQueryFactory;
 	private final TermFactory termFactory;
 	private final TypeFactory typeFactory;
@@ -63,13 +64,13 @@ public class SQLConnection implements OntopConnection {
 
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
-						 DBMetadata dbMetadata,
+						 DBParameters dbParameters,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory, TypeFactory typeFactory,
 						 RDF rdfFactory, SubstitutionFactory substitutionFactory, OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
 		this.conn = connection;
-		this.dbMetadata = dbMetadata;
+		this.dbParameters = dbParameters;
 		this.inputQueryFactory = inputQueryFactory;
 		this.termFactory = termFactory;
 		this.typeFactory = typeFactory;

@@ -59,7 +59,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 		this.queryUnfolder = translationFactory.create(obdaSpecification.getSaturatedMapping());
-		this.datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBMetadata());
+		this.datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBParameters());
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;

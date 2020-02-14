@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.answering.connection.DBConnector;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
@@ -37,7 +38,7 @@ public class JDBCConnector implements DBConnector {
     private final Logger log = LoggerFactory.getLogger(JDBCConnector.class);
     private final JDBCConnectionPool connectionPool;
 
-    private final DBMetadata dbMetadata;
+    private final DBParameters dbParameters;
     private final InputQueryFactory inputQueryFactory;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
@@ -45,7 +46,7 @@ public class JDBCConnector implements DBConnector {
 
     @AssistedInject
     private JDBCConnector(@Assisted QueryReformulator queryReformulator,
-                          @Assisted DBMetadata dbMetadata,
+                          @Assisted DBParameters dbParameters,
                           JDBCConnectionPool connectionPool,
                           InputQueryFactory inputQueryFactory,
                           TermFactory termFactory,
@@ -54,7 +55,7 @@ public class JDBCConnector implements DBConnector {
                           RDF rdfFactory,
                           OntopSystemSQLSettings settings) {
         this.queryReformulator = queryReformulator;
-        this.dbMetadata = dbMetadata;
+        this.dbParameters = dbParameters;
         this.inputQueryFactory = inputQueryFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
@@ -123,7 +124,7 @@ public class JDBCConnector implements DBConnector {
     public OntopConnection getConnection() throws OntopConnectionException {
 
         return new SQLConnection(this, queryReformulator, getSQLPoolConnection(),
-                dbMetadata, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
+                dbParameters, inputQueryFactory, termFactory, typeFactory, rdfFactory, substitutionFactory, settings);
     }
 
 

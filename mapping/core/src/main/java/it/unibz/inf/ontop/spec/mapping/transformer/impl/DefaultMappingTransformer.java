@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Tables;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -58,7 +59,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
     }
 
     @Override
-    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, Optional<Ontology> ontology) {
+    public OBDASpecification transform(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, Optional<Ontology> ontology) {
         if (ontology.isPresent()) {
             ImmutableList<MappingAssertion> factsAsMapping = factConverter.convert(ontology.get().abox(),
                     settings.isOntologyAnnotationQueryingEnabled());
@@ -66,15 +67,15 @@ public class DefaultMappingTransformer implements MappingTransformer {
             ImmutableList<MappingAssertion> mappingWithFacts =
                     Stream.concat(mapping.stream(), factsAsMapping.stream()).collect(ImmutableCollectors.toList());
 
-            return createSpecification(mappingWithFacts, dbMetadata, ontology.get().tbox());
+            return createSpecification(mappingWithFacts, dbParameters, ontology.get().tbox());
         }
         else {
             ClassifiedTBox emptyTBox = OntologyBuilderImpl.builder(rdfFactory).build().tbox();
-            return createSpecification(mapping, dbMetadata, emptyTBox);
+            return createSpecification(mapping, dbParameters, emptyTBox);
         }
     }
 
-    OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBMetadata dbMetadata, ClassifiedTBox tbox) {
+    OBDASpecification createSpecification(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters, ClassifiedTBox tbox) {
 
         ImmutableList<MappingAssertion> sameAsOptimizedMapping = sameAsInverseRewriter.rewrite(mapping);
         ImmutableList<MappingAssertion> saturatedMapping = mappingSaturator.saturate(sameAsOptimizedMapping, tbox);
@@ -85,7 +86,7 @@ public class DefaultMappingTransformer implements MappingTransformer {
                 ? normalizedMapping
                 : mappingDistinctTransformer.addDistinct(normalizedMapping);
 
-        return specificationFactory.createSpecification(getMapping(finalMapping), dbMetadata, tbox);
+        return specificationFactory.createSpecification(getMapping(finalMapping), dbParameters, tbox);
     }
 
     private Mapping getMapping(ImmutableList<MappingAssertion> assertions) {

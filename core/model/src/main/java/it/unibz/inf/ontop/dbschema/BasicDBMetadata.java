@@ -161,37 +161,6 @@ public class BasicDBMetadata implements DBMetadata {
         }
         return builder.toString();
     }
-
-    @Override
-    public ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> getUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> constraints = extractUniqueConstraints();
-            if (!isStillMutable)
-                uniqueConstraints = constraints;
-            return constraints;
-        }
-        else
-            return uniqueConstraints;
-
-    }
-
-    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
-
-        return getDatabaseRelations().stream()
-                .flatMap(this::extractUniqueConstraintsFromRelation)
-                .collect(ImmutableCollectors.toMultimap());
-    }
-
-    private Stream<Map.Entry<RelationPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
-            DatabaseRelationDefinition relation) {
-
-        return relation.getUniqueConstraints().stream()
-                .map(uc -> uc.getAttributes().stream()
-                        .map(Attribute::getIndex)
-                        .collect(ImmutableCollectors.toList()))
-                .map(positions -> new AbstractMap.SimpleEntry<>(relation.getAtomPredicate(), positions));
-    }
-
     @Override
     public String getDbmsProductName() {
         return databaseProductName;

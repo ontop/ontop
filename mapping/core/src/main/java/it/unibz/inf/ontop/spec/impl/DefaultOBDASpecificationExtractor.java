@@ -39,7 +39,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 specInput, dbMetadata, optionalOntology, executorRegistry);
 
         return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
     }
 
     @Override
@@ -51,6 +51,6 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                 ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
         return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBMetadata(), optionalOntology);
+                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
     }
 }
