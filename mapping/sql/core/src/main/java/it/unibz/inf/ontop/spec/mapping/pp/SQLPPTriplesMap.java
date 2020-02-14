@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.pp;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 import java.util.Optional;

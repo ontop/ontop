@@ -977,7 +977,7 @@ public class ExpressionParser {
 
         @Override //KEEP (DENSE_RANK FIRST ORDER BY col1)
         public void visit(KeepExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("Keep Expression is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("KeepExpression is not supported yet", expression);
 
         }
 

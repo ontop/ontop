@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -19,14 +18,11 @@ public class AtomFactoryImpl implements AtomFactory {
     private final QuadPredicate quadPredicate;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final ImmutabilityTools immutabilityTools;
 
     @Inject
-    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory,
-                            ImmutabilityTools immutabilityTools) {
+    private AtomFactoryImpl(TermFactory termFactory, TypeFactory typeFactory, org.apache.commons.rdf.api.RDF rdfFactory) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
-        this.immutabilityTools = immutabilityTools;
 
         RDFTermTypeConstant iriType = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 
@@ -69,39 +65,6 @@ public class AtomFactoryImpl implements AtomFactory {
     @Override
     public DistinctVariableOnlyDataAtom getDistinctVariableOnlyDataAtom(AtomPredicate predicate, Variable... arguments) {
         return getDistinctVariableOnlyDataAtom(predicate, ImmutableList.copyOf(arguments));
-    }
-
-    @Override
-    public Function getMutableTripleAtom(Term subject, Term property, Term object) {
-        return termFactory.getFunction(triplePredicate, subject, property, object);
-    }
-
-    @Override
-    public Function getMutableTripleBodyAtom(Term subject, IRI propertyIRI, Term object) {
-        // At the moment, no distinction between body and head atoms (this will change)
-        return getMutableTripleHeadAtom(subject, propertyIRI, object);
-    }
-
-    @Override
-    public Function getMutableTripleBodyAtom(Term subject, IRI classIRI) {
-        // At the moment, no distinction between body and head atoms (this will change)
-        return getMutableTripleHeadAtom(subject, classIRI);
-    }
-
-    @Override
-    public Function getMutableTripleHeadAtom(Term subject, IRI propertyIRI, Term object) {
-        return getMutableTripleAtom(
-                subject,
-                convertIRIIntoConstant(propertyIRI),
-                object);
-    }
-
-    @Override
-    public Function getMutableTripleHeadAtom(Term subject, IRI classIRI) {
-        return getMutableTripleAtom(
-                subject,
-                convertIRIIntoConstant(RDF.TYPE),
-                convertIRIIntoConstant(classIRI));
     }
 
     private IRIConstant convertIRIIntoConstant(IRI iri) {

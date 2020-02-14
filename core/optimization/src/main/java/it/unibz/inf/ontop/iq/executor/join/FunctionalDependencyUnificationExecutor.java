@@ -10,7 +10,7 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
+import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -203,7 +203,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
                     .map(map -> map.entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
-                                    e -> ImmutabilityTools.convertIntoVariableOrGroundTerm(e.getValue()))))
+                                    e -> GroundTermTools.convertIntoVariableOrGroundTerm(e.getValue()))))
                     .map(substitutionFactory::getSubstitution)
                     .orElseThrow(AtomUnificationException::new);
 

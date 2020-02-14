@@ -2,7 +2,8 @@ package it.unibz.inf.ontop.si.impl;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.ontology.owlapi.OWLAPITranslatorOWL2QL;
@@ -27,16 +28,18 @@ public class LoadingConfiguration {
     public LoadingConfiguration() {
         this.jdbcUrl = "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
 
-        OntopSQLCoreConfiguration defaultConfiguration = OntopSQLCoreConfiguration.defaultBuilder()
+        OntopSQLCoreConfiguration defaultConfiguration = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .jdbcDriver(H2_DRIVER)
                 .jdbcUrl(jdbcUrl)
+                .jdbcUser("sa")
+                .jdbcPassword("")
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
         termFactory = defaultConfiguration.getTermFactory();
         typeFactory = defaultConfiguration.getTypeFactory();
         translatorOWL2QL = injector.getInstance(OWLAPITranslatorOWL2QL.class);
-        targetAtomFactory = defaultConfiguration.getInjector().getInstance(TargetAtomFactory.class);
+        targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
         rdfFactory = injector.getInstance(RDF.class);
     }
 
@@ -52,9 +55,7 @@ public class LoadingConfiguration {
         return typeFactory;
     }
 
-    public TargetAtomFactory getTargetAtomFactory() {
-        return targetAtomFactory;
-    }
+    public TargetAtomFactory getTargetAtomFactory() { return targetAtomFactory; }
 
     public String getJdbcUrl() {
         return jdbcUrl;

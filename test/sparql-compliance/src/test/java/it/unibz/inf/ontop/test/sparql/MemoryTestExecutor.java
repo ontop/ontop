@@ -87,8 +87,7 @@ public class MemoryTestExecutor {
 	}
 
 
-	public void runTest()
-		throws Exception
+	public void runTest() throws Exception
 	{
 		try (OntopRepository dataRep = createRepository();
 			 RepositoryConnection con = dataRep.getConnection()) {
@@ -121,7 +120,6 @@ public class MemoryTestExecutor {
 	}
 
 	private void compareTupleQueryResults(TupleQueryResult queryResult, TupleQueryResult expectedResult)
-		throws Exception
 	{
 		// Create MutableTupleQueryResult to be able to re-iterate over the
 		// results
@@ -326,7 +324,7 @@ public class MemoryTestExecutor {
 				// Enter recursion
 				result = matchBindingSets(queryResult1, queryResult2, newBNodeMapping, idx + 1);
 
-				if (result == true) {
+				if (result) {
 					// models match, look no further
 					break;
 				}
@@ -412,8 +410,8 @@ public class MemoryTestExecutor {
 							compareResult = leftLit.integerValue().compareTo(rightLit.integerValue());
 						}
 						else if (dt1.equals(XMLSchema.BOOLEAN)) {
-							Boolean leftBool = Boolean.valueOf(leftLit.booleanValue());
-							Boolean rightBool = Boolean.valueOf(rightLit.booleanValue());
+							Boolean leftBool = leftLit.booleanValue();
+							Boolean rightBool = rightLit.booleanValue();
 							compareResult = leftBool.compareTo(rightBool);
 						}
 						else if (XMLDatatypeUtil.isCalendarDatatype(dt1)) {
@@ -424,7 +422,7 @@ public class MemoryTestExecutor {
 						}
 
 						if (compareResult != null) {
-							if (compareResult.intValue() != 0) {
+							if (compareResult != 0) {
 								return false;
 							}
 						}
@@ -446,7 +444,6 @@ public class MemoryTestExecutor {
 	}
 
 	private void compareGraphs(Set<Statement> queryResult, Set<Statement> expectedResult)
-		throws Exception
 	{
 		if (!Models.isomorphic(expectedResult, queryResult)) {
 			// Don't use RepositoryUtil.difference, it reports incorrect diffs
@@ -499,26 +496,19 @@ public class MemoryTestExecutor {
 	}
 
 
-	private String readQueryString()
-		throws IOException
+	private String readQueryString() throws IOException
 	{
-		InputStream stream = new URL(queryFileURL).openStream();
-		try {
+		try (InputStream stream = new URL(queryFileURL).openStream()) {
 			return IOUtil.readString(new InputStreamReader(stream, "UTF-8"));
-		}
-		finally {
-			stream.close();
 		}
 	}
 
-	private TupleQueryResult readExpectedTupleQueryResult(Repository dataRep)
-		throws Exception
+	private TupleQueryResult readExpectedTupleQueryResult(Repository dataRep) throws Exception
 	{
 		Optional<QueryResultFormat> tqrFormat = QueryResultIO.getParserFormatForFileName(resultFileURL);
 
 		if (tqrFormat.isPresent()) {
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				TupleQueryResultParser parser = QueryResultIO.createTupleParser(tqrFormat.get());
 				parser.setValueFactory(dataRep.getValueFactory());
 
@@ -527,9 +517,6 @@ public class MemoryTestExecutor {
 
 				parser.parseQueryResult(in);
 				return qrBuilder.getQueryResult();
-			}
-			finally {
-				in.close();
 			}
 		}
 		else {
@@ -544,12 +531,8 @@ public class MemoryTestExecutor {
 		Optional<QueryResultFormat> bqrFormat = BooleanQueryResultParserRegistry.getInstance().getFileFormatForFileName(resultFileURL);
 
 		if (bqrFormat.isPresent()) {
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				return QueryResultIO.parseBoolean(in, bqrFormat.get());
-			}
-			finally {
-				in.close();
 			}
 		}
 		else {
@@ -558,8 +541,7 @@ public class MemoryTestExecutor {
 		}
 	}
 
-	private Set<Statement> readExpectedGraphQueryResult(Repository dataRep)
-		throws Exception
+	private Set<Statement> readExpectedGraphQueryResult(Repository dataRep) throws Exception
 	{
 		Optional<RDFFormat> rdfFormat = Rio.getParserFormatForFileName(resultFileURL);
 
@@ -574,15 +556,11 @@ public class MemoryTestExecutor {
 //			parser.setDatatypeHandling(DatatypeHandling.IGNORE);
 //			parser.setPreserveBNodeIDs(true);
 
-			Set<Statement> result = new LinkedHashSet<Statement>();
+			Set<Statement> result = new LinkedHashSet<>();
 			parser.setRDFHandler(new StatementCollector(result));
 
-			InputStream in = new URL(resultFileURL).openStream();
-			try {
+			try (InputStream in = new URL(resultFileURL).openStream()) {
 				parser.parse(in, resultFileURL);
-			}
-			finally {
-				in.close();
 			}
 
 			return result;

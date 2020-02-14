@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
-import it.unibz.inf.ontop.constraints.FullLinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.FullLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -52,7 +52,7 @@ import java.util.function.Function;
  */
 public class DummyRewriter implements QueryRewriter {
 
-    private FullLinearInclusionDependencies<RDFAtomPredicate> sigma;
+    private FullLinearInclusionDependenciesImpl<RDFAtomPredicate> sigma;
 
     protected final IntermediateQueryFactory iqFactory;
     protected final AtomFactory atomFactory;
@@ -70,7 +70,7 @@ public class DummyRewriter implements QueryRewriter {
     @Override
     public void setTBox(ClassifiedTBox reasoner) {
 
-        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependencies.builder(coreUtilsFactory, atomFactory);
+        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder = FullLinearInclusionDependenciesImpl.builder(coreUtilsFactory, atomFactory);
 
         Variable x = termFactory.getVariable("x");
         Variable y = termFactory.getVariable("y");
@@ -85,7 +85,7 @@ public class DummyRewriter implements QueryRewriter {
         sigma = builder.build();
     }
 
-    protected FullLinearInclusionDependencies<RDFAtomPredicate> getSigma() {
+    protected FullLinearInclusionDependenciesImpl<RDFAtomPredicate> getSigma() {
         return sigma;
     }
 
@@ -133,7 +133,7 @@ public class DummyRewriter implements QueryRewriter {
     private static <T> void traverseDAG(EquivalencesDAG<T> dag,
                                         java.util.function.Predicate<T> filter,
                                         Function<T, DataAtom<RDFAtomPredicate>> translate,
-                                        FullLinearInclusionDependencies.Builder<RDFAtomPredicate> builder) {
+                                        FullLinearInclusionDependenciesImpl.Builder<RDFAtomPredicate> builder) {
         for (Equivalences<T> node : dag)
             for (Equivalences<T> subNode : dag.getSub(node))
                 for (T sub : subNode)

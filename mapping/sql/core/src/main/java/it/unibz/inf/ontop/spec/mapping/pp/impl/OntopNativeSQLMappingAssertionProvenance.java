@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 

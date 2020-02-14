@@ -145,12 +145,19 @@ public class MappingTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-
-        Mapping nonNormalizedMapping = MAPPING_FACTORY.createMapping(mappingMetadata,  transformIntoTable(
-                propertyMapBuilder.build()), transformIntoTable(classMap));
-        Mapping normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping);
+        final RDFAtomPredicate tp = rdfAtomPredicate;
+        ImmutableList<MappingAssertion> nonNormalizedMapping = Stream.concat(
+                propertyMapBuilder.build().entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                MappingAssertionIndex.ofProperty(tp, e.getKey()), e.getValue())),
+                classMap.entrySet().stream()
+                        .map(e -> Maps.immutableEntry(
+                                MappingAssertionIndex.ofClass(tp, e.getKey()), e.getValue())))
+                .collect(ImmutableCollectors.toMap()).entrySet().stream()
+                .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
+                .collect(ImmutableCollectors.toList());
+        ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
+                .collect(ImmutableCollectors.toMap(a -> a.getIndex(), a -> a.getQuery()));
 
         /*
          * Test whether two mapping assertions share a variable
@@ -161,8 +168,7 @@ public class MappingTest {
         // Properties
         for (IRI propertyIri : propertyIris){
 
-            IQ mappingAssertion = normalizedMapping.getRDFPropertyDefinition(rdfAtomPredicate, propertyIri)
-                    .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+            IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIri));
 
             LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
@@ -176,8 +182,7 @@ public class MappingTest {
         }
 
         // Class
-        IQ mappingAssertion = normalizedMapping.getRDFClassDefinition(rdfAtomPredicate, CLASS_1)
-                .orElseThrow(() -> new IllegalStateException("Test fail: missing mapping assertion "));
+        IQ mappingAssertion = normalizedMapping.get(MappingAssertionIndex.ofClass(rdfAtomPredicate, CLASS_1));
 
         System.out.println(mappingAssertion);
         ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
@@ -209,11 +214,8 @@ public class MappingTest {
         IQ mappingAssertion = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info(mappingAssertion.toString());
 
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(
-                MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
-        MAPPING_FACTORY.createMapping(mappingMetadata,  ImmutableTable.of(),
-                transformIntoTable(ImmutableMap.of(CLASS_1, mappingAssertion))
-        );
+//        RDFAtomPredicate tp = (RDFAtomPredicate)projectionAtom.getPredicate();
+//        ImmutableMap.of(MappingAssertionIndex.ofClass(tp, CLASS_1), mappingAssertion);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
@@ -222,13 +224,5 @@ public class MappingTest {
 
     private IRIConstant getConstantIRI(IRI iri) {
         return TERM_FACTORY.getConstantIRI(iri);
-    }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
     }
 }

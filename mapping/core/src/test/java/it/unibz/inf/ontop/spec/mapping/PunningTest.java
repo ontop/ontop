@@ -2,7 +2,8 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.constraints.LinearInclusionDependencies;
+import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
+import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
@@ -11,12 +12,11 @@ import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingProcessor;
+import it.unibz.inf.ontop.spec.mapping.transformer.impl.TMappingSaturatorImpl;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.spec.ontology.OntologyBuilder;
 import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
 
@@ -61,7 +61,7 @@ public class PunningTest {
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
-        TMappingProcessor tmap = injector.getInstance(TMappingProcessor.class);
+        TMappingSaturatorImpl tmap = injector.getInstance(TMappingSaturatorImpl.class);
 
 
         DataAtom<RelationPredicate> extensionalAtom = ATOM_FACTORY.getDataAtom(company, ImmutableList.of(A, B));
@@ -74,7 +74,6 @@ public class PunningTest {
                                 P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                 O, TERM_FACTORY.getConstantIRI(CLASS_IRI))),
                         IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
-        ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_IRI, classMappingAssertion);
 
         // Property
         IQ propertyMappingAssertion = IQ_FACTORY.createIQ(
@@ -83,13 +82,12 @@ public class PunningTest {
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(PROP_IRI))),
                         IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
-        ImmutableMap<IRI, IQ> propertyMap = ImmutableMap.of(PROP_IRI, propertyMappingAssertion);
 
+        RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
 
-        Mapping mapping = SPECIFICATION_FACTORY.createMapping(SPECIFICATION_FACTORY.createMetadata(
-                SPECIFICATION_FACTORY.createPrefixManager(ImmutableMap.of())),
-                transformIntoTable(propertyMap),
-                transformIntoTable(classMap));
+        ImmutableList<MappingAssertion> mapping = ImmutableList.of(
+                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_IRI), propertyMappingAssertion, null),
+                new MappingAssertion(MappingAssertionIndex.ofClass(tp, CLASS_IRI), classMappingAssertion, null));
 
         OntologyBuilder builder = OntologyBuilderImpl.builder(RDF_FACTORY);
         builder.declareClass(CLASS_IRI);
@@ -97,24 +95,10 @@ public class PunningTest {
         Ontology ontology = builder.build();
         ClassifiedTBox tbox = ontology.tbox();
 
-        LinearInclusionDependencies<AtomPredicate> lids = LinearInclusionDependencies.builder(CORE_UTILS_FACTORY, ATOM_FACTORY).build();
-
-        Mapping result = tmap.getTMappings(mapping,
-                tbox,
-                new TMappingExclusionConfig(ImmutableSet.of(), ImmutableSet.of()),
-                new ImmutableCQContainmentCheckUnderLIDs(lids));
+        ImmutableList<MappingAssertion> result = tmap.saturate(mapping, tbox);
     }
 
     private ImmutableFunctionalTerm generateURI1(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getIRIFunctionalTerm(IRI_TEMPLATE_1, ImmutableList.of(argument));
     }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-    }
-
 }

@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MappingException;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
 public interface MappingWithProvenanceTransformer {
 
-    MappingWithProvenance transform(MappingWithProvenance mapping) throws MappingException;
+    ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) throws MappingException;
 }

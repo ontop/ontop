@@ -35,17 +35,15 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
 
     @Override
-    public DataAtom applyToDataAtom(DataAtom atom) throws ConversionException {
+    public <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException {
         ImmutableList<? extends ImmutableTerm> newArguments = apply(atom.getArguments());
 
-        for (ImmutableTerm subTerm : newArguments) {
-            if (!(subTerm instanceof VariableOrGroundTerm))
-                throw new ConversionException("The sub-term: " + subTerm + " is not a VariableOrGroundTerm");
-
+        if (!newArguments.stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
+            throw new ConversionException("The substitution applied to a DataAtom has " +
+                    " produced some non-VariableOrGroundTerm arguments " + newArguments);
         }
 
-        return atomFactory.getDataAtom(atom.getPredicate(),
-                (ImmutableList<? extends VariableOrGroundTerm>) newArguments);
+        return atomFactory.getDataAtom(atom.getPredicate(), (ImmutableList<VariableOrGroundTerm>) newArguments);
     }
 
     @Override
@@ -87,7 +85,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
         Map<Variable, ImmutableTerm> substitutionMap = new HashMap<>();
 
-        /**
+        /*
          * For all variables in the domain of f
          */
 
@@ -95,7 +93,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
             substitutionMap.put(gEntry.getKey(), apply(gEntry.getValue()));
         }
 
-        /**
+        /*
          * For the other variables (in the local domain but not in f)
          */
         for (Map.Entry<Variable, ? extends ImmutableTerm> localEntry :  getImmutableMap().entrySet()) {
@@ -133,7 +131,7 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
 
             T otherTerm = otherMap.get(otherVariable);
 
-            /**
+            /*
              * TODO: explain
              */
             if (isDefining(otherVariable) && (!get(otherVariable).equals(otherTerm))) {
@@ -165,14 +163,14 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     public Optional<ImmutableSubstitution<? extends ImmutableTerm>> unionHeterogeneous(
             ImmutableSubstitution<? extends ImmutableTerm> otherSubstitution) {
         if (otherSubstitution.isEmpty())
-            return Optional.of((ImmutableSubstitution<? extends ImmutableTerm>)this);
+            return Optional.of(this);
         else if(isEmpty())
             return Optional.of(otherSubstitution);
 
         ImmutableMap<Variable, T> localMap = getImmutableMap();
         ImmutableSet<? extends Map.Entry<Variable, ? extends ImmutableTerm>> otherEntrySet = otherSubstitution.getImmutableMap().entrySet();
 
-        /**
+        /*
          * Checks for multiple entries of the same variable
          */
         if (otherEntrySet.stream()

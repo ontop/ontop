@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.*;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -229,7 +229,7 @@ public class NodeDeletionTest {
 
         QueryNode optimizedRootNode = optimizedQuery.getRootNode();
         assertTrue(optimizedRootNode instanceof UnionNode);
-        assertEquals(optimizedQuery.getChildren(optimizedRootNode).size(), 2);
+        assertEquals(2, optimizedQuery.getChildren(optimizedRootNode).size());
     }
 
     @Test(expected = EmptyQueryException.class)

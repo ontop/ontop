@@ -100,7 +100,7 @@ public class SQLMappingParserUsingOwlTest {
 
     private void saveRegularFile() throws Exception {
         SQLPPMapping ppMapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
-                specificationFactory.createMetadata(specificationFactory.createPrefixManager(ImmutableMap.of())));
+                specificationFactory.createPrefixManager(ImmutableMap.of()));
         OntopNativeMappingSerializer writer = new OntopNativeMappingSerializer(ppMapping);
         writer.save(new File("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda"));
     }
@@ -113,7 +113,7 @@ public class SQLMappingParserUsingOwlTest {
         SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolRegularFile.obda");
 
         // Check the content
-        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 5);
+        assertEquals(ppMapping.getPrefixManager().getPrefixMap().size(), 5);
         assertEquals(ppMapping.getTripleMaps().size(), 0);
     }
 
@@ -121,7 +121,7 @@ public class SQLMappingParserUsingOwlTest {
         SQLPPMapping ppMapping = loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolMultipleDataSources.obda");
 
         // Check the content
-        assertEquals(ppMapping.getMetadata().getPrefixManager().getPrefixMap().size(), 6);
+        assertEquals(ppMapping.getPrefixManager().getPrefixMap().size(), 6);
         assertEquals(ppMapping.getTripleMaps().size(), 2);
     }
 

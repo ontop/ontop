@@ -25,14 +25,14 @@ import java.util.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.spec.mapping.MappingMetadata;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 
 public class SQLPPMappingImpl implements SQLPPMapping {
 
-	private final MappingMetadata mappingMetadata;
+	private final PrefixManager prefixManager;
 	private final ImmutableList<SQLPPTriplesMap> triplesMaps;
     private final ImmutableMap<String, SQLPPTriplesMap> mappingIndexById;
 
@@ -40,11 +40,11 @@ public class SQLPPMappingImpl implements SQLPPMapping {
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public SQLPPMappingImpl(ImmutableList<SQLPPTriplesMap> newMappings,
-                            MappingMetadata mappingMetadata) throws DuplicateMappingException {
+                            PrefixManager prefixManager) throws DuplicateMappingException {
 
         checkDuplicates(newMappings);
         this.triplesMaps = newMappings;
-        this.mappingMetadata = mappingMetadata;
+        this.prefixManager = prefixManager;
         this.mappingIndexById = indexMappingsById(triplesMaps);
     }
 
@@ -100,15 +100,15 @@ public class SQLPPMappingImpl implements SQLPPMapping {
     @Override
     public SQLPPMapping clone() {
         try {
-            return new SQLPPMappingImpl(triplesMaps, mappingMetadata);
+            return new SQLPPMappingImpl(triplesMaps, prefixManager);
         } catch (DuplicateMappingException e) {
             throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
         }
     }
 
     @Override
-    public MappingMetadata getMetadata() {
-		return mappingMetadata;
+    public PrefixManager getPrefixManager() {
+		return prefixManager;
 	}
 
     @Override

@@ -11,9 +11,9 @@ public class ImmutableCQContainmentCheckUnderLIDs<P extends AtomPredicate> imple
 
     private final Map<ImmutableList<DataAtom<P>>, ImmutableSet<DataAtom<P>>> chaseCache = new HashMap<>();
 
-    private final LinearInclusionDependencies<P> dependencies;
+    private final BasicLinearInclusionDependenciesImpl<P> dependencies;
 
-    public ImmutableCQContainmentCheckUnderLIDs(LinearInclusionDependencies<P> dependencies) {
+    public ImmutableCQContainmentCheckUnderLIDs(BasicLinearInclusionDependenciesImpl<P> dependencies) {
         this.dependencies = dependencies;
     }
 

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.datalog;
+package it.unibz.inf.ontop.spec.mapping.transformer;
 
 
 import it.unibz.inf.ontop.iq.IQ;
