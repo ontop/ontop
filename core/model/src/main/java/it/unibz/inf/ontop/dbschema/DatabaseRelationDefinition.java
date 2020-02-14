@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -103,7 +105,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 *
 	 * @return list of attributes
 	 */
-	//@JsonIgnore
+	@JsonProperty("columns")
 	@Override
 	public List<Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
@@ -179,6 +181,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 *
 	 * @return list of foreign keys
 	 */
+	@JsonSerialize(contentUsing = ForeignKeyConstraint.ForeignKeyConstraintSerializer.class)
 	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
 		return ImmutableList.copyOf(fks);

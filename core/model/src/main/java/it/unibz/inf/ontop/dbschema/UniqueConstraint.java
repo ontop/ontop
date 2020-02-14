@@ -161,6 +161,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 *
 	 * @return list of attributes
 	 */
+	@JsonProperty("determinants")
 	@JsonSerialize(contentUsing = Attribute.AttributeSerializer.class)
 	public ImmutableList<Attribute> getAttributes() {
 		return attributes;

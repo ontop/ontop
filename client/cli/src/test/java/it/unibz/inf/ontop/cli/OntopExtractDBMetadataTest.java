@@ -1,3 +1,5 @@
+package it.unibz.inf.ontop.cli;
+
 import it.unibz.inf.ontop.cli.H2ExternalResourceForBookExample;
 import it.unibz.inf.ontop.cli.Ontop;
 import org.junit.ClassRule;
