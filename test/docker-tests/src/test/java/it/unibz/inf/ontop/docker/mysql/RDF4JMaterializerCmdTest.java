@@ -132,7 +132,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			System.out.println(outfile);
 
 			MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
 			RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(
@@ -171,7 +170,6 @@ public class RDF4JMaterializerCmdTest extends TestCase {
 			manager = ontology.getOWLOntologyManager();
 
 			MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-					.enableDBResultsStreaming(DO_STREAM_RESULTS)
 					.build();
 
 			OntopOWLAPIMaterializer materializer = OntopOWLAPIMaterializer.defaultMaterializer(

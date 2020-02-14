@@ -44,7 +44,6 @@ public class OntopRDFMaterializerLoading {
             SIRepository repo = new SIRepository(ontology.tbox(), loadingConfiguration);
 
             MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-                    .enableDBResultsStreaming(true)
                     .build();
             OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(obdaConfiguration, materializationParams);
             try (MaterializedGraphResultSet graphResultSet = materializer.materialize()) {

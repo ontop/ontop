@@ -142,14 +142,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 		return new OntopGraphOWLResultSet(resultSet);
 	}
 
-	public int getFetchSize() throws OntopOWLException {
-		try {
-			return st.getFetchSize();
-		} catch (OntopConnectionException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
 	public int getMaxRows() throws OntopOWLException {
 		try {
 			return st.getMaxRows();
@@ -169,14 +161,6 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 	public int getQueryTimeout() throws OntopOWLException {
 		try {
 			return st.getQueryTimeout();
-		} catch (OntopConnectionException e) {
-			throw new OntopOWLException(e);
-		}
-	}
-
-	public void setFetchSize(int rows) throws OntopOWLException {
-		try {
-			st.setFetchSize(rows);
 		} catch (OntopConnectionException e) {
 			throw new OntopOWLException(e);
 		}
