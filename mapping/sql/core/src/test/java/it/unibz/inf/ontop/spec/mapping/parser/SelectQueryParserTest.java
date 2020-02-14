@@ -419,12 +419,12 @@ public class SelectQueryParserTest {
     }
 
     private DataAtom<RelationPredicate> dataAtomOf(DBMetadata m, String predicateName, String var1, String var2) {
-        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getQuotedIDFactory().createRelationID(null, predicateName))),
+        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName))),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private DataAtom<RelationPredicate> dataAtomOf(DBMetadata m, String predicateName, String var1, String var2, String var3, String var4) {
-        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getQuotedIDFactory().createRelationID(null, predicateName))),
+        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName))),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 

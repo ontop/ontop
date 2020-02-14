@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
@@ -12,5 +13,5 @@ public interface TranslationFactory {
 
     QueryUnfolder create(Mapping mapping);
 
-    NativeQueryGenerator create(DBMetadata metadata);
+    NativeQueryGenerator create(DBParameters dbParameters);
 }

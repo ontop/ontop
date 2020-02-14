@@ -40,7 +40,7 @@ public class SelectQueryParser {
 
     public SelectQueryParser(DBMetadata metadata, CoreSingletons coreSingletons) {
         this.metadata = metadata;
-        this.idfac = metadata.getQuotedIDFactory();
+        this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.atomFactory = coreSingletons.getAtomFactory();

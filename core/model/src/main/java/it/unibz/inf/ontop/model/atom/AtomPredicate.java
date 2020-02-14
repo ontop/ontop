@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.model.atom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.functionsymbol.Predicate;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -18,5 +19,6 @@ public interface AtomPredicate extends Predicate {
      * NOT FOR precise type inference.
      *
      */
+    @JsonIgnore
     ImmutableList<TermType> getBaseTypesForValidation();
 }

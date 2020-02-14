@@ -9,9 +9,9 @@ package it.unibz.inf.ontop.dbschema;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
@@ -28,11 +29,11 @@ import java.util.List;
 
 
 /**
- * Basis of the representation for information on both<br> 
+ * Basis of the representation for information on both<br>
  *   (a) relational tables and views<br>
  *   (b) and views created by the SQL parser for complex sub-queries
- * 
- * 
+ *
+ *
  * @author Roman Kontchakov
  *
  */
@@ -46,7 +47,7 @@ public abstract class RelationDefinition {
 	 */
 	@Nullable
 	private RelationPredicate predicate;
-	
+
 	protected RelationDefinition(RelationID id) {
 		this.id = id;
 	}
@@ -54,7 +55,7 @@ public abstract class RelationDefinition {
 	public RelationID getID() {
 		return id;
 	}
-	
+
 	public abstract Attribute getAttribute(int index);
 
 	public abstract List<Attribute> getAttributes();
@@ -62,6 +63,7 @@ public abstract class RelationDefinition {
 	/**
 	 * Call it only after having completely assigned the attributes!
 	 */
+	@JsonIgnore
 	public RelationPredicate getAtomPredicate() {
 		if (predicate == null)
 			predicate = new RelationPredicateImpl(this);

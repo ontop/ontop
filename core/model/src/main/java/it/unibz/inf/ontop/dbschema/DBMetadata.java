@@ -20,30 +20,6 @@ public interface DBMetadata {
 
     String printKeys();
 
-    /***
-     * Generates a map for each predicate in the body of the rules in 'program'
-     * that contains the Primary Key data for the predicates obtained from the
-     * info in the metadata.
-     *
-     * It also returns the columns with unique constraints
-     *
-     * For instance, Given the table definition
-     *   Tab0[col1:pk, col2:pk, col3, col4:unique, col5:unique],
-     *
-     * The methods will return the following Multimap:
-     *  { Tab0 -> { [col1, col2], [col4], [col5] } }
-     *
-     *
-     */
-    ImmutableMultimap<RelationPredicate,ImmutableList<Integer>> getUniqueConstraints();
-
-
-    /**
-     * Use DBParameters.getQuotedIDFactory() instead
-     */
-    @Deprecated
-    QuotedIDFactory getQuotedIDFactory();
-
     /**
      * Retrieves the data definition object based on its name. The
      * <name>id</name> is a table name.

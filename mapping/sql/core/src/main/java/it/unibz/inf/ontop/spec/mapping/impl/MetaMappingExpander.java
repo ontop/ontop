@@ -172,7 +172,7 @@ public class MetaMappingExpander {
 
 				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateAtom);
 
-				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getQuotedIDFactory(), templateVariables);
+				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
 
 				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
 
