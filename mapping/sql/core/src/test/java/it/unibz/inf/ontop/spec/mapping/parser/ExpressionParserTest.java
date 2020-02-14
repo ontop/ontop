@@ -45,7 +45,7 @@ public class ExpressionParserTest {
     @Before
     public void beforeEachTest() {
         METADATA = EMPTY_METADATA;
-        IDFAC = METADATA.getQuotedIDFactory();
+        IDFAC = METADATA.getDBParameters().getQuotedIDFactory();
         dbLongType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
     }
 

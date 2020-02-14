@@ -58,15 +58,6 @@ public class RDFTermTypeConstantImpl extends AbstractNonNullConstant implements 
         return getValue();
     }
 
-    /**
-     * TODO: remove it
-     */
-    @Deprecated
-    @Override
-    public RDFTermTypeConstant clone() {
-        return new RDFTermTypeConstantImpl(rdfTermType, metaType);
-    }
-
     @Override
     public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
         if (otherTerm instanceof Constant) {

@@ -89,11 +89,6 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
                 : variables.stream();
     }
 
-    @Override
-    public ImmutableFunctionalTermImpl clone() {
-        return this;
-    }
-
     /**
      * Cached toString()
      */
@@ -116,7 +111,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
     }
 
     /**
-     * A bit hacky: only for the functional term
+     * TODO: A bit hacky: only for the functional term
      * that derives from ImmutableFunctionalTermImpl
      */
     @Override
@@ -124,9 +119,7 @@ public abstract class ImmutableFunctionalTermImpl implements ImmutableFunctional
         if (other instanceof ImmutableFunctionalTerm) {
             return toString().equals(other.toString());
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     @Override

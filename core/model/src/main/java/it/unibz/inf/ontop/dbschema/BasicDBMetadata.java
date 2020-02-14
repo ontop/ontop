@@ -29,6 +29,7 @@ public class BasicDBMetadata implements DBMetadata {
     private final String driverVersion;
     private final String databaseProductName;
     private final String databaseVersion;
+
     private final QuotedIDFactory idfac;
     private final DBParameters dbParameters;
     private boolean isStillMutable;
@@ -168,39 +169,6 @@ public class BasicDBMetadata implements DBMetadata {
         return builder.toString();
     }
 
-    @JsonIgnore
-    @Override
-    public ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> getUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> constraints = extractUniqueConstraints();
-            if (!isStillMutable)
-                uniqueConstraints = constraints;
-            return constraints;
-        }
-        else
-            return uniqueConstraints;
-
-    }
-
-    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> extractUniqueConstraints() {
-
-        return getDatabaseRelations().stream()
-                .flatMap(this::extractUniqueConstraintsFromRelation)
-                .collect(ImmutableCollectors.toMultimap());
-    }
-
-    private Stream<Map.Entry<RelationPredicate, ImmutableList<Integer>>> extractUniqueConstraintsFromRelation(
-            DatabaseRelationDefinition relation) {
-
-        return relation.getUniqueConstraints().stream()
-                .map(uc -> uc.getAttributes().stream()
-                        .map(Attribute::getIndex)
-                        .collect(ImmutableCollectors.toList()))
-                .map(positions -> new AbstractMap.SimpleEntry<>(relation.getAtomPredicate(), positions));
-    }
-
-    @JsonIgnore
-    //@JsonProperty("metadata.dbmsProductName")
     @Override
     public String getDbmsProductName() {
         return databaseProductName;

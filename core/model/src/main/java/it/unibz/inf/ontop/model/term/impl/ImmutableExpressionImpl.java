@@ -28,11 +28,6 @@ public abstract class ImmutableExpressionImpl extends ImmutableFunctionalTermImp
     }
 
     @Override
-    public ImmutableExpressionImpl clone() {
-        return this;
-    }
-
-    @Override
     public BooleanFunctionSymbol getFunctionSymbol() {
         return (BooleanFunctionSymbol) super.getFunctionSymbol();
     }

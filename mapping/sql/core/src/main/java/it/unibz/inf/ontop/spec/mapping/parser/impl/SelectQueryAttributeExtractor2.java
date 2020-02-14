@@ -35,7 +35,7 @@ public class SelectQueryAttributeExtractor2 {
 
     public SelectQueryAttributeExtractor2(DBMetadata metadata, TermFactory termFactory) {
         this.metadata = metadata;
-        this.idfac = metadata.getQuotedIDFactory();
+        this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         this.termFactory = termFactory;
     }
 

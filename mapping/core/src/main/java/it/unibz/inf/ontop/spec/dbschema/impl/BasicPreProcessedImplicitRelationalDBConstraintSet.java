@@ -69,7 +69,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
      */
     @Override
     public void insertUniqueConstraints(DBMetadata md) {
-        QuotedIDFactory idfac = md.getQuotedIDFactory();
+        QuotedIDFactory idfac = md.getDBParameters().getQuotedIDFactory();
         int counter = 0; // id of the generated constraint
 
         for (String[] uc : ucs) {
@@ -110,7 +110,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
      */
     @Override
     public void insertForeignKeyConstraints(DBMetadata md) {
-        QuotedIDFactory idfac = md.getQuotedIDFactory();
+        QuotedIDFactory idfac = md.getDBParameters().getQuotedIDFactory();
         int counter = 0; // id of the generated constraint
 
         for (String[] fk : fks) {

@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
+import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.OntopConnectionException;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
@@ -23,7 +25,7 @@ import org.apache.commons.rdf.api.RDF;
  * TODO: rename it SQLQuestConnection
  *
  * @author mariano
- * 
+ *
  */
 public class SQLConnection implements OntopConnection {
 
@@ -42,7 +44,8 @@ public class SQLConnection implements OntopConnection {
 
 	public SQLConnection(JDBCConnector jdbcConnector, QueryReformulator queryProcessor, Connection connection,
 						 InputQueryFactory inputQueryFactory, TermFactory termFactory,
-						 RDF rdfFactory, SubstitutionFactory substitutionFactory, JDBCStatementInitializer statementInitializer,
+						 RDF rdfFactory, SubstitutionFactory substitutionFactory,
+			 			 JDBCStatementInitializer statementInitializer,
 						 OntopSystemSQLSettings settings) {
 		this.jdbcConnector = jdbcConnector;
 		this.queryProcessor = queryProcessor;
@@ -55,7 +58,7 @@ public class SQLConnection implements OntopConnection {
 		this.rdfFactory = rdfFactory;
 		this.isClosed = false;
 	}
-	
+
 	@Override
 	public void close() throws OntopConnectionException {
 		try {

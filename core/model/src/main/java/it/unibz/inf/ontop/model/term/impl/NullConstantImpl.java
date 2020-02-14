@@ -66,12 +66,4 @@ public class NullConstantImpl extends AbstractNonFunctionalTerm implements Const
     public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
         return true;
     }
-
-    /**
-     * TODO: get rid of this method and stop this cloning practice
-     */
-    @Override
-    public Constant clone() {
-        return this;
-    }
 }
