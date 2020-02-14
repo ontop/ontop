@@ -36,8 +36,10 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
             return jsonString;
 
-        } catch (SQLException | JsonProcessingException e) {
+        } catch (SQLException e) {
             throw new DBMetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
+        } catch (JsonProcessingException e) {
+            throw new DBMetadataExtractionException("problem with JSON processing.\n" + e);
         }
     }
 }

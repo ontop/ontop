@@ -169,6 +169,7 @@ public class BasicDBMetadata implements DBMetadata {
         return builder.toString();
     }
 
+    @JsonIgnore
     @Override
     public String getDbmsProductName() {
         return databaseProductName;

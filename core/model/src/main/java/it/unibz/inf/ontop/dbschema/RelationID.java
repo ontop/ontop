@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -38,7 +39,7 @@ import java.io.IOException;
  *
  */
 
-@JsonSerialize(using = RelationID.RelationIDSerializer.class)
+//@JsonSerialize(using = RelationID.RelationIDSerializer.class)
 public class RelationID {
 
 	private final QuotedID schema, table;
@@ -90,6 +91,7 @@ public class RelationID {
 	 *
 	 * @return null if the schema name is empty or SQL rendering of the schema name (possibly in quotation marks)
 	 */
+	@JsonIgnore
 	public String getSchemaSQLRendering() {
 		return schema.getSQLRendering();
 	}
@@ -98,6 +100,7 @@ public class RelationID {
 	 *
 	 * @return SQL rendering of the table name (possibly in quotation marks)
 	 */
+	@JsonIgnore
 	public String getTableNameSQLRendering() {
 		return table.getSQLRendering();
 	}
@@ -106,7 +109,7 @@ public class RelationID {
 	 *
 	 * @return null if the schema name is empty or the schema name (as is, without quotation marks)
 	 */
-
+	@JsonProperty("schema")
 	public String getSchemaName() {
 		return schema.getName();
 	}
@@ -115,6 +118,8 @@ public class RelationID {
 	 *
 	 * @return table name (as is, without quotation marks)
 	 */
+
+	@JsonProperty("name")
 	public String getTableName() {
 		return table.getName();
 	}
@@ -155,11 +160,11 @@ public class RelationID {
 		return false;
 	}
 
-	static class RelationIDSerializer extends JsonSerializer<RelationID> {
-
-		@Override
-		public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-			gen.writeString(value.getTableName());
-		}
-	}
+//	static class RelationIDSerializer extends JsonSerializer<RelationID> {
+//
+//		@Override
+//		public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+//			gen.writeString(value.getTableName());
+//		}
+//	}
 }

@@ -22,7 +22,10 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -93,4 +96,15 @@ public class RDBMetadata extends BasicDBMetadata {
     public DBTypeFactory getDBTypeFactory() {
 		return typeFactory.getDBTypeFactory();
     }
+
+    @JsonProperty("metadata")
+	Map<String, String> getMedadataForJsonExport(){
+		return ImmutableMap.of(
+				"dbmsProductName", this.getDbmsProductName(),
+				"dbmsVersion", this.getDbmsVersion(),
+				"driverName", this.getDriverName(),
+				"driverVersion", this.getDriverVersion(),
+				"quotationString", this.getDBParameters().getQuotedIDFactory().getIDQuotationString()
+		);
+	}
 }

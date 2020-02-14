@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 
 public interface OntopSystemFactory {
 
-    DBConnector create(QueryReformulator translator, DBParameters dbParameters);
+    DBConnector create(QueryReformulator translator);
 
     OntopQueryEngine create(OBDASpecification obdaSpecification, ExecutorRegistry executorRegistry);
 }
