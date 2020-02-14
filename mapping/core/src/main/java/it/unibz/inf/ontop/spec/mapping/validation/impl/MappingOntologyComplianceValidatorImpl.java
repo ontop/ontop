@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
-import it.unibz.inf.ontop.spec.mapping.MappingWithProvenance;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -54,30 +54,29 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      *
      */
     @Override
-    public void validate(MappingWithProvenance mapping, Ontology ontology)
+    public void validate(ImmutableList<MappingAssertion> mapping, Ontology ontology)
             throws MappingOntologyMismatchException {
 
         ImmutableMultimap<IRI, Datatype> datatypeMap = computeDataTypeMap(ontology.tbox());
 
-        for (Map.Entry<IQ, PPMappingAssertionProvenance> entry : mapping.getProvenanceMap().entrySet()) {
-            validateAssertion(entry.getKey(), entry.getValue(), ontology, datatypeMap);
-        }
+        for (MappingAssertion a : mapping)
+            validateAssertion(a, ontology, datatypeMap);
     }
 
-    private void validateAssertion(IQ mappingAssertion, PPMappingAssertionProvenance provenance,
+    private void validateAssertion(MappingAssertion mappingAssertion,
                                    Ontology ontology,
                                    ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
+        ImmutableList<Variable> projectedVariables = mappingAssertion.getQuery().getProjectionAtom().getArguments();
 
-        MappingTools.RDFPredicateInfo predicateClassification = MappingTools.extractRDFPredicate(mappingAssertion);
+        MappingAssertionIndex predicateClassification = mappingAssertion.getIndex();
 
         Optional<RDFTermType> tripleObjectType = predicateClassification.isClass()
                 ? Optional.empty()
-                : extractTripleObjectType(mappingAssertion);
+                : extractTripleObjectType(mappingAssertion.getQuery());
 
-        checkTripleObject(predicateClassification.getIri(), tripleObjectType, provenance, ontology, datatypeMap);
+        checkTripleObject(predicateClassification.getIri(), tripleObjectType, mappingAssertion.getProvenance(), ontology, datatypeMap);
     }
 
 

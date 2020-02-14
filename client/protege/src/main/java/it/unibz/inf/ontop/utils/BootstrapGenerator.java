@@ -5,8 +5,8 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -108,7 +108,7 @@ public class BootstrapGenerator {
         RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 
         if (baseURI == null || baseURI.isEmpty()) {
-            baseURI = ppMapping.getMetadata().getPrefixManager().getDefaultPrefix();
+            baseURI = ppMapping.getPrefixManager().getDefaultPrefix();
         }
         else {
             baseURI = DirectMappingEngine.fixBaseURI(baseURI);

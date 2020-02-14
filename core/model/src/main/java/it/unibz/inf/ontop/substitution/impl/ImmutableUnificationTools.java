@@ -7,11 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.term.impl.ImmutabilityTools;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.impl.PredicateImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
 import java.util.*;
@@ -25,16 +22,14 @@ public class ImmutableUnificationTools {
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableSubstitutionTools substitutionTools;
     private final UnifierUtilities unifierUtilities;
-    private final ImmutabilityTools immutabilityTools;
 
     @Inject
     private ImmutableUnificationTools(SubstitutionFactory substitutionFactory,
-                                      ImmutableSubstitutionTools substitutionTools, UnifierUtilities unifierUtilities,
-                                      ImmutabilityTools immutabilityTools) {
+                                      ImmutableSubstitutionTools substitutionTools,
+                                      UnifierUtilities unifierUtilities) {
         this.substitutionFactory = substitutionFactory;
         this.substitutionTools = substitutionTools;
         this.unifierUtilities = unifierUtilities;
-        this.immutabilityTools = immutabilityTools;
     }
 
     /**
@@ -137,43 +132,19 @@ public class ImmutableUnificationTools {
 
     public <T extends ImmutableTerm> Optional<ImmutableSubstitution<T>> computeMGU(ImmutableList<T> args1,
                                                                                    ImmutableList<T> args2) {
+        // TODO (ROMAN 12/02/20): why is it here?
         if (args1.size() != args2.size())
             throw new IllegalArgumentException("The two argument lists must have the same size");
 
-        // TODO: avoid use it
-        TemporaryFunctionSymbol functionSymbol = new TemporaryFunctionSymbol(args1.size());
-
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(functionSymbol, args1),
-                immutabilityTools.convertToMutableFunction(functionSymbol, args2));
-
-        if (mutableSubstitution == null) {
-            return Optional.empty();
-        }
-        return Optional.of(substitutionTools.convertMutableSubstitution(mutableSubstitution))
-                .map(s -> (ImmutableSubstitution<T>)s);
+        return unifierUtilities.getMGU(args1, args2);
     }
 
-    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom atom1, DataAtom atom2) {
-        Substitution mutableSubstitution = unifierUtilities.getMGU(
-                immutabilityTools.convertToMutableFunction(atom1),
-                immutabilityTools.convertToMutableFunction(atom2));
+    public Optional<ImmutableSubstitution<VariableOrGroundTerm>> computeAtomMGU(DataAtom<?> atom1, DataAtom<?> atom2) {
 
-        if (mutableSubstitution == null) {
+        if (!atom1.getPredicate().equals(atom2.getPredicate()))
             return Optional.empty();
-        }
 
-        ImmutableMap.Builder<Variable, VariableOrGroundTerm> substitutionMapBuilder = ImmutableMap.builder();
-        for (Map.Entry<Variable, Term> entry : mutableSubstitution.getMap().entrySet()) {
-            VariableOrGroundTerm value = immutabilityTools.convertIntoVariableOrGroundTerm(entry.getValue());
-
-            substitutionMapBuilder.put(entry.getKey(), value);
-        }
-
-        ImmutableSubstitution<VariableOrGroundTerm> immutableSubstitution = substitutionFactory.getSubstitution(
-                substitutionMapBuilder.build());
-        return Optional.of(immutableSubstitution);
-
+        return unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
     }
 
     /**
@@ -411,15 +382,4 @@ public class ImmutableUnificationTools {
         }
         return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
     }
-
-    /**
-     * TODO: get rid of it about refactoring the unification tools
-     */
-    private static class TemporaryFunctionSymbol extends PredicateImpl {
-
-        private TemporaryFunctionSymbol(int arity) {
-            super("pred", arity);
-        }
-    }
-
 }

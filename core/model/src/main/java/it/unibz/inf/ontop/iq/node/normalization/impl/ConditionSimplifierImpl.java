@@ -110,6 +110,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         // Equalities that must remain
                         normalizedUnifier.getImmutableMap().entrySet().stream()
                                 .filter(e -> nonLiftableVariables.contains(e.getKey()))
+                                .sorted(Map.Entry.comparingByKey())
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
 

@@ -13,15 +13,13 @@ import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingSameAsInverseRewriter;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
-import java.util.stream.Stream;
 
 public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRewriter {
 
@@ -46,19 +44,20 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
     }
 
     @Override
-    public Mapping rewrite(Mapping mapping) {
+    public ImmutableList<MappingAssertion> rewrite(ImmutableList<MappingAssertion> mapping) {
         if (!enabled)
             return mapping;
 
-        ImmutableTable<RDFAtomPredicate, IRI, IQ> mappingUpdate = mapping.getRDFAtomPredicates().stream()
-                .flatMap(p -> mapping.getRDFPropertyDefinition(p, OWL.SAME_AS)
-                        .map(sameAsDef -> completeSameAsDefinition(sameAsDef, p))
-                        .map(sameAsDef -> Tables.immutableCell(p, OWL.SAME_AS, sameAsDef))
-                        .map(Stream::of)
-                        .orElseGet(Stream::empty))
-                .collect(ImmutableCollectors.toTable());
+        return mapping.stream()
+                .map(a -> transform(a))
+                .collect(ImmutableCollectors.toList());
+    }
 
-        return mapping.update(mappingUpdate, ImmutableTable.of());
+    private MappingAssertion transform(MappingAssertion a) {
+        if (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
+            return a;
+
+        return a.copyOf(completeSameAsDefinition(a.getQuery(), a.getIndex().getPredicate()));
     }
 
     private IQ completeSameAsDefinition(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {

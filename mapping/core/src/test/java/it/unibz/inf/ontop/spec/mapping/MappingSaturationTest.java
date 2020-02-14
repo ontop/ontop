@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -19,19 +18,12 @@ import it.unibz.inf.ontop.spec.ontology.impl.OntologyBuilderImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
-import static it.unibz.inf.ontop.utils.MappingTestingTools.TERM_FACTORY;
 import static junit.framework.TestCase.*;
 
 public class MappingSaturationTest {
     private static final RelationPredicate P1_PREDICATE;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
-
-    private static final DBMetadata DB_METADATA;
 
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
@@ -58,8 +50,6 @@ public class MappingSaturationTest {
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";
         URI_TEMPLATE_COURSE1 =  "http://example.org/uni1/course/{}";
         URI_TEMPLATE_COURSE2 =  "http://example.org/uni2/course/{}";
-
-        DB_METADATA = dbMetadata;
 
         PROP_GIVES_LECTURE = RDF_FACTORY.createIRI("http://example.org/voc#givesLecture");
         PROP_TEACHES = RDF_FACTORY.createIRI("http://example.org/voc#teaches");
@@ -133,37 +123,26 @@ public class MappingSaturationTest {
         /*
          * Renaming
          */
-        MappingMetadata mappingMetadata = MAPPING_FACTORY.createMetadata(MAPPING_FACTORY.createPrefixManager(ImmutableMap.of()));
+        RDFAtomPredicate tp = (RDFAtomPredicate)spoAtom.getPredicate();
+        ImmutableList<MappingAssertion> mapping = ImmutableList.of(
+                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES), maTeaches, null),
+                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB), maGivesLab, null),
+                new MappingAssertion(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE), maGivesLecture, null));
 
-        Mapping mapping = MAPPING_FACTORY.createMapping(mappingMetadata,
-                transformIntoTable(ImmutableMap.of(PROP_TEACHES, maTeaches, PROP_GIVES_LAB, maGivesLab, PROP_GIVES_LECTURE, maGivesLecture)),
-                transformIntoTable(ImmutableMap.of()));
+        ImmutableMap<MappingAssertionIndex, IQ> saturatedMapping = MAPPING_SATURATOR.saturate(mapping, classifiedTBox).stream()
+                .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
 
+        assertEquals(maGivesLab, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LAB)));
+        assertEquals(maGivesLecture, saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_GIVES_LECTURE)));
 
-        Mapping saturatedMapping = MAPPING_SATURATOR.saturate(mapping, DB_METADATA, classifiedTBox);
-        RDFAtomPredicate triplesPredicate = saturatedMapping.getRDFAtomPredicates().iterator().next();
+        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_IS_TAUGHT_BY)));
 
-        assertEquals(maGivesLab, saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_GIVES_LAB).get());
-        assertEquals(maGivesLecture, saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_GIVES_LECTURE).get());
-
-        assertTrue(saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_IS_TAUGHT_BY).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_IS_TAUGHT_BY + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_IS_TAUGHT_BY));
-
-        assertTrue(saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES).get().getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
-        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.getRDFPropertyDefinition(triplesPredicate, PROP_TEACHES) + "\nvs\n" + maTeaches);
+        assertTrue(saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)).getTree().getChildren().get(0).getRootNode() instanceof UnionNode);
+        System.out.println(PROP_TEACHES + ":\n" + saturatedMapping.get(MappingAssertionIndex.ofProperty(tp, PROP_TEACHES)) + "\nvs\n" + maTeaches);
     }
-
 
     private ImmutableTerm getConstantIRI(IRI iri) {
         return TERM_FACTORY.getConstantIRI(iri);
     }
-
-    private static ImmutableTable<RDFAtomPredicate, IRI, IQ> transformIntoTable(ImmutableMap<IRI, IQ> map) {
-        return map.entrySet().stream()
-                .map(e -> Tables.immutableCell(
-                        (RDFAtomPredicate)e.getValue().getProjectionAtom().getPredicate(),
-                        e.getKey(), e.getValue()))
-                .collect(ImmutableCollectors.toTable());
-    }
-
 }

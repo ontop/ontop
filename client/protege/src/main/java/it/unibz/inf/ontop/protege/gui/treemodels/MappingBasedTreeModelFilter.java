@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.protege.gui.treemodels;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 
 public class MappingBasedTreeModelFilter extends TreeModelFilter<SQLPPTriplesMap> {

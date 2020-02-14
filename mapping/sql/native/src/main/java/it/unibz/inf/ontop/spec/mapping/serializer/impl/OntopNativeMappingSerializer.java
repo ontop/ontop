@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.model.atom.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.OntopNativeMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -61,7 +61,7 @@ public class OntopNativeMappingSerializer {
      */
 
     private void writePrefixDeclaration(BufferedWriter writer) throws IOException {
-        final ImmutableMap<String, String> prefixMap = ppMapping.getMetadata().getPrefixManager().getPrefixMap();
+        final ImmutableMap<String, String> prefixMap = ppMapping.getPrefixManager().getPrefixMap();
 
         if (prefixMap.size() == 0) {
             return; // do nothing if there is no prefixes to write
@@ -101,7 +101,7 @@ public class OntopNativeMappingSerializer {
     }
 
     private String printTargetQuery(ImmutableList<TargetAtom> query) {
-        return TargetQueryRenderer.encode(query, ppMapping.getMetadata().getPrefixManager());
+        return TargetQueryRenderer.encode(query, ppMapping.getPrefixManager());
     }
 
     private String printSourceQuery(OBDASQLQuery query) {

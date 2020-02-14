@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -26,7 +25,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final TargetAtomFactory targetAtomFactory;
     private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
     private final OntopModelSettings settings;
@@ -36,7 +34,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                FunctionSymbolFactory functionSymbolFactory,
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
-                               TargetAtomFactory targetAtomFactory, UniqueTermTypeExtractor uniqueTermTypeExtractor,
+                               UniqueTermTypeExtractor uniqueTermTypeExtractor,
                                IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
@@ -45,7 +43,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.atomFactory = atomFactory;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.targetAtomFactory = targetAtomFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
         this.settings = settings;
@@ -89,11 +86,6 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public CoreUtilsFactory getCoreUtilsFactory() {
         return coreUtilsFactory;
-    }
-
-    @Override
-    public TargetAtomFactory getTargetAtomFactory() {
-        return targetAtomFactory;
     }
 
     @Override

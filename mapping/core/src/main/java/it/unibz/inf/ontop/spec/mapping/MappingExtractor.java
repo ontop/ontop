@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
@@ -18,7 +19,7 @@ public interface MappingExtractor {
      * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
      */
     interface MappingAndDBMetadata {
-        Mapping getMapping();
+        ImmutableList<MappingAssertion> getMapping();
         DBMetadata getDBMetadata();
     }
 

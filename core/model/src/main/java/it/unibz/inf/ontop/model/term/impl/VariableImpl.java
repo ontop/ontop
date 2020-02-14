@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class VariableImpl extends AbstractNonFunctionalTerm implements Variable, Comparable<Variable> {
@@ -32,19 +33,17 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 	private final String name;
 
 	protected VariableImpl(String name) {
-		if (name == null) {
-			throw new RuntimeException("Variable name cannot be null");
-		}
+		Objects.requireNonNull(name, "Variable name cannot be null");
 		this.name = name;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof Variable)) {
-			return false;
+		if (obj instanceof Variable) {
+			Variable name2 = (Variable) obj;
+			return name.equals(name2.getName());
 		}
-		Variable name2 = (Variable) obj;
-		return name.equals(name2.getName());
+		return false;
 	}
 
 	@Override
@@ -93,7 +92,7 @@ public class VariableImpl extends AbstractNonFunctionalTerm implements Variable,
 		}
 		// Constant
 		else  {
-			return ((Constant) otherTerm).isNull()
+			return otherTerm.isNull()
 					? IncrementalEvaluation.declareIsNull()
 					: IncrementalEvaluation.declareSameExpression();
 		}

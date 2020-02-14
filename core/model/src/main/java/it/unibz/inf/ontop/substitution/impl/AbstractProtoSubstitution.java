@@ -61,7 +61,7 @@ public abstract class AbstractProtoSubstitution<T extends ImmutableTerm> impleme
     }
 
     @Override
-    public ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
+    public ImmutableList<ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms) {
         return terms.stream()
                 .map(this::apply)
                 .collect(ImmutableCollectors.toList());

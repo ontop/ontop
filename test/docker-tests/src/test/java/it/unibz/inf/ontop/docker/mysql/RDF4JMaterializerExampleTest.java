@@ -1,25 +1,5 @@
 package it.unibz.inf.ontop.docker.mysql;
 
-/*
- * #%L
- * ontop-quest-sesame
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
@@ -36,13 +16,8 @@ import java.nio.file.Paths;
 public class RDF4JMaterializerExampleTest {
 
 	private static final String inputFile = "/mysql/example/exampleBooks.obda";
-	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks.properties";
+	private static final String PROPERTY_FILE = "/mysql/example/exampleBooks-materialize.properties";
 	private static final String OUTPUT_BASENAME = "exampleBooks.nt";
-
-	/**
-	 * TODO: try with result streaming
-	 */
-	private static boolean DO_STREAM_RESULTS = false;
 	
 	public void generateTriples() throws Exception {
 
@@ -56,7 +31,6 @@ public class RDF4JMaterializerExampleTest {
 				.build();
 
 		MaterializationParams materializationParams = MaterializationParams.defaultBuilder()
-				.enableDBResultsStreaming(DO_STREAM_RESULTS)
 				.build();
 
 		RDF4JMaterializer materializer = RDF4JMaterializer.defaultMaterializer(configuration, materializationParams);

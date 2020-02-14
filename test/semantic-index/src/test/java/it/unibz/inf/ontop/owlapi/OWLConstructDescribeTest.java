@@ -20,8 +20,6 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -39,7 +37,7 @@ import java.util.Properties;
  * both constant and uri objects. It must be clear if it's a data property or
  * object property.
  */
-public class OWLConstructDescribeTest{
+public class OWLConstructDescribeTest {
 
 	OntopOWLReasoner reasoner = null;
 	OWLConnection conn = null;

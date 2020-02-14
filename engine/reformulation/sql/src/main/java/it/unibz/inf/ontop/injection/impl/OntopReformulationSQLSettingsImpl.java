@@ -27,22 +27,28 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
         sqlSettings = new OntopSQLCoreSettingsImpl(copyProperties());
     }
 
-    private static Properties loadProperties(Properties userProperties) {
-        Properties properties = loadDefaultQASQLProperties();
-        properties.putAll(userProperties);
-
-        String jdbcUrl = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_URL))
+    protected static String extractJdbcUrl(Properties userProperties) {
+        return Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_URL))
                 .orElseThrow(() -> new InvalidOntopConfigurationException(OntopSQLCoreSettings.JDBC_URL + " is required"));
+    }
 
-        String jdbcDriver = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_DRIVER))
+    protected static String extractJdbcDriver(Properties userProperties) {
+        return Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_DRIVER))
                 .orElseGet(() -> {
                     try {
-                        return DriverManager.getDriver(jdbcUrl).getClass().getCanonicalName();
+                        return DriverManager.getDriver(extractJdbcUrl(userProperties)).getClass().getCanonicalName();
                     } catch (SQLException e) {
                         throw new InvalidOntopConfigurationException("Impossible to get the JDBC driver. Reason: "
                                 + e.getMessage());
                     }
                 });
+    }
+
+    private static Properties loadProperties(Properties userProperties) {
+        Properties properties = loadDefaultQASQLProperties();
+        properties.putAll(userProperties);
+
+        String jdbcDriver = extractJdbcDriver(userProperties);
 
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
         properties.putAll(userProperties);

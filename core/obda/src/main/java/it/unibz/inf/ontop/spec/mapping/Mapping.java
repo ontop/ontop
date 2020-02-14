@@ -23,14 +23,16 @@ import java.util.Optional;
  *
  */
 public interface Mapping {
-
-    MappingMetadata getMetadata();
-
     /**
      * rdfAtomPredicate indicates if it is a triple, a quad (or something else)
      */
     Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI);
     Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI);
+
+    /**
+     * TriplePredicate, QuadPredicate, etc.
+     */
+    ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
 
     /**
      * Properties used to define triples, quads, etc.
@@ -45,20 +47,4 @@ public interface Mapping {
     ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
 
     ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
-
-    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFPropertyQueries();
-    ImmutableSet<Table.Cell<RDFAtomPredicate, IRI, IQ>> getRDFClassQueries();
-
-    /**
-     * TriplePredicate, QuadPredicate, etc.
-     */
-    ImmutableSet<RDFAtomPredicate> getRDFAtomPredicates();
-
-    /**
-     * Inserts (and overwrite if necessary) a mapping definition for a pair (IRI, RDFAtomPredicate)
-     *
-     * Returns a new (immutable) Mapping
-     */
-    Mapping update(ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyUpdateMap,
-                   ImmutableTable<RDFAtomPredicate, IRI, IQ> classUpdateMap);
 }

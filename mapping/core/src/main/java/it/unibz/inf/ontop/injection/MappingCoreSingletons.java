@@ -17,11 +17,6 @@ public interface MappingCoreSingletons {
     SpecificationFactory getSpecificationFactory();
 
     /**
-     * For building MappingWithProvenance
-     */
-    ProvenanceMappingFactory getProvenanceMappingFactory();
-
-    /**
      * TODO: shall we remove it?
      */
     TargetQueryParserFactory getTargetQueryParserFactory();

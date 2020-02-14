@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
-import it.unibz.inf.ontop.model.atom.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.apache.commons.rdf.api.RDF;

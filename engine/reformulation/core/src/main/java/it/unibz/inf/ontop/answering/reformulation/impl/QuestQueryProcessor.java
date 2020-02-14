@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.answering.reformulation.impl;
 
-import com.google.common.base.Joiner;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.QueryCache;
@@ -11,7 +10,6 @@ import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
 import it.unibz.inf.ontop.answering.reformulation.rewriting.QueryRewriter;
 import it.unibz.inf.ontop.answering.reformulation.unfolding.QueryUnfolder;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -20,7 +18,6 @@ import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +37,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 	private static final Logger log = LoggerFactory.getLogger(QuestQueryProcessor.class);
 	private final ExecutorRegistry executorRegistry;
-	private final DBMetadata dbMetadata;
 	private final InputQueryTranslator inputQueryTranslator;
 	private final InputQueryFactory inputQueryFactory;
 	private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
@@ -54,26 +50,17 @@ public class QuestQueryProcessor implements QueryReformulator {
 								QueryRewriter queryRewriter,
 								InputQueryFactory inputQueryFactory,
 								InputQueryTranslator inputQueryTranslator,
-								GeneralStructuralAndSemanticIQOptimizer generalOptimizer, QueryPlanner queryPlanner) {
+								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
+								QueryPlanner queryPlanner) {
 		this.inputQueryFactory = inputQueryFactory;
 		this.rewriter = queryRewriter;
 		this.generalOptimizer = generalOptimizer;
 		this.queryPlanner = queryPlanner;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
+		this.queryUnfolder = translationFactory.create(obdaSpecification.getSaturatedMapping());
+		this.datasourceQueryGenerator = translationFactory.create(obdaSpecification.getDBMetadata());
 
-		Mapping saturatedMapping = obdaSpecification.getSaturatedMapping();
-
-		if(log.isDebugEnabled()){
-			log.debug("Mapping: \n{}", Joiner.on("\n").join(
-					saturatedMapping.getRDFAtomPredicates().stream()
-						.flatMap(p -> saturatedMapping.getQueries(p).stream())
-						.iterator()));
-		}
-		this.queryUnfolder = translationFactory.create(saturatedMapping);
-
-		this.dbMetadata = obdaSpecification.getDBMetadata();
-		this.datasourceQueryGenerator = translationFactory.create(dbMetadata);
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
 		this.executorRegistry = executorRegistry;
@@ -158,7 +145,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 		IQ convertedIQ = query.translate(inputQueryTranslator);
 		log.debug("Parsed query converted into IQ:\n{}", convertedIQ);
 		try {
-          //  IQ convertedIQ = preProcess(translation);
 			IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
 			return rewrittenIQ.toString();
 		}

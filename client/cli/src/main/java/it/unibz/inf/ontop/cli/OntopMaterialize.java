@@ -1,34 +1,16 @@
 package it.unibz.inf.ontop.cli;
 
-/*
- * #%L
- * ontop-cli
- * %%
- * Copyright (C) 2009 - 2014 Free University of Bozen-Bolzano
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.OptionType;
 import com.github.rvesse.airline.annotations.restrictions.AllowedValues;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration.Builder;
+import it.unibz.inf.ontop.injection.impl.OntopModelConfigurationImpl;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import org.apache.commons.rdf.api.IRI;
@@ -42,6 +24,7 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
+import javax.annotation.Nullable;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -50,8 +33,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static it.unibz.inf.ontop.injection.OntopSystemSQLSettings.FETCH_SIZE;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Command(name = "materialize",
@@ -75,6 +60,7 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
 
 
     private static final int TRIPLE_LIMIT_PER_FILE = 500000;
+    private static final String DEFAULT_FETCH_SIZE = "50000";
     private static final String RDF_XML = "rdfxml";
     private static final String TURTLE = "turtle";
     private static final String NTRIPLES = "ntriples";
@@ -101,19 +87,12 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             description = "All the SQL results of one big query will be stored in memory. Not recommended. Default: false.")
     private boolean noStream = false;
 
-    private boolean doStreamResults = true;
-
     public OntopMaterialize() {
     }
 
     @Override
     public void run() {
 
-        //   Streaming is necessary to materialize large RDF graphs without
-        //   storing all the SQL results of one big query in memory.
-        if (noStream) {
-            doStreamResults = false;
-        }
         RDF4JMaterializer materializer = createMaterializer();
         OutputSpec outputSpec = (outputFile == null) ?
                 new OutputSpec(format) :
@@ -136,7 +115,6 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             materializer = RDF4JMaterializer.defaultMaterializer(
                     materializerConfiguration,
                     MaterializationParams.defaultBuilder()
-                            .enableDBResultsStreaming(doStreamResults)
                             .build()
             );
         } catch (OBDASpecificationException | OWLOntologyCreationException e) {
@@ -277,8 +255,37 @@ public class OntopMaterialize extends OntopReasoningCommandBase {
             configBuilder.nativeOntopMappingFile(mappingFile);
         }
 
+        Properties properties = OntopModelConfigurationImpl.extractProperties(
+                OntopModelConfigurationImpl.extractPropertyFile(propertiesFile));
+
+
+        @Nullable
+        String userFetchSizeStr = properties.getProperty(FETCH_SIZE);
+
+        if (userFetchSizeStr != null) {
+            try {
+                int userFetchSize = Integer.parseInt(userFetchSizeStr);
+                if (noStream && userFetchSize > 0)
+                    throw new InvalidOntopConfigurationException("Do not provide a positive " + FETCH_SIZE
+                            + " together with no streaming option");
+                else if ((!noStream) && userFetchSize <= 0) {
+                    throw new InvalidOntopConfigurationException("Do not provide a non-positive " + FETCH_SIZE
+                            + " together with the streaming option");
+                }
+            } catch (NumberFormatException e ) {
+                throw new InvalidOntopConfigurationException(FETCH_SIZE + " was expected an integer");
+            }
+        }
+        /*
+         * Set the default FETCH_SIZE for materializer
+         */
+        else if (!noStream)
+            properties.setProperty(FETCH_SIZE, DEFAULT_FETCH_SIZE);
+        else
+            properties.setProperty(FETCH_SIZE, "-1");
+
         return configBuilder
-                .propertyFile(propertiesFile)
+                .properties(properties)
                 .enableOntologyAnnotationQuerying(true);
     }
 

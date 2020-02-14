@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-
-import it.unibz.inf.ontop.spec.mapping.Mapping;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
 /**
  * Renames variables,
@@ -9,5 +9,5 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
  */
 public interface MappingVariableNameNormalizer {
 
-    Mapping normalize(Mapping mapping);
+    ImmutableList<MappingAssertion> normalize(ImmutableList<MappingAssertion> mapping);
 }

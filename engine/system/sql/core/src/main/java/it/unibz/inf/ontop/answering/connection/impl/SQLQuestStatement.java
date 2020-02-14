@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.connection.impl;
 
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
@@ -39,33 +38,21 @@ public class SQLQuestStatement extends QuestStatement {
 
     private final Statement sqlStatement;
     private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
     private final RDF rdfFactory;
     private final SubstitutionFactory substitutionFactory;
     private final OntopSystemSQLSettings settings;
 
     public SQLQuestStatement(QueryReformulator queryProcessor, Statement sqlStatement,
                              InputQueryFactory inputQueryFactory,
-                             TermFactory termFactory, TypeFactory typeFactory,
+                             TermFactory termFactory,
                              RDF rdfFactory, SubstitutionFactory substitutionFactory,
                              OntopSystemSQLSettings settings) {
         super(queryProcessor, inputQueryFactory);
         this.sqlStatement = sqlStatement;
         this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
         this.rdfFactory = rdfFactory;
         this.substitutionFactory = substitutionFactory;
         this.settings = settings;
-    }
-
-    @Override
-    public int getFetchSize() throws OntopConnectionException {
-        try {
-            return sqlStatement.getFetchSize();
-        } catch (SQLException e) {
-            throw new OntopConnectionException(e);
-        }
-
     }
 
     @Override
@@ -82,16 +69,6 @@ public class SQLQuestStatement extends QuestStatement {
     public void getMoreResults() throws OntopConnectionException {
         try {
             sqlStatement.getMoreResults();
-        } catch (SQLException e) {
-            throw new OntopConnectionException(e);
-        }
-
-    }
-
-    @Override
-    public void setFetchSize(int rows) throws OntopConnectionException {
-        try {
-            sqlStatement.setFetchSize(rows);
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
         }

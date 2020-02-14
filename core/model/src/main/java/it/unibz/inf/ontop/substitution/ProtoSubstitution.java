@@ -42,6 +42,6 @@ public interface ProtoSubstitution<T extends ImmutableTerm> {
 
     ImmutableExpression applyToBooleanExpression(ImmutableExpression booleanExpression);
 
-    ImmutableList<? extends ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
+    ImmutableList<ImmutableTerm> apply(ImmutableList<? extends ImmutableTerm> terms);
 
 }
