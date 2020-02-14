@@ -32,11 +32,7 @@ import java.util.stream.Stream;
  */
 public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode {
 
-	private static final long serialVersionUID = 214867118996974157L;
-
 	private final String name;
-
-	private final int identifier;
 	private final ObjectRDFType type;
 
 	/**
@@ -44,22 +40,18 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	 */
 	protected BNodeConstantImpl(String name, TypeFactory typeFactory) {
 		this.name = name;
-		this.identifier = name.hashCode();
 		this.type = typeFactory.getBlankNodeType();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof BNodeConstantImpl)) {
-			return false;
-		}
-		BNodeConstantImpl uri2 = (BNodeConstantImpl) obj;
-		return this.identifier == uri2.identifier;
+	public boolean equals(Object other) {
+		return (other instanceof BNodeConstantImpl &&
+				this.name.equals(((BNodeConstantImpl) other).name));
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		return name.hashCode();
 	}
 
 	@Override
@@ -69,11 +61,6 @@ public class BNodeConstantImpl extends AbstractNonNullConstant implements BNode 
 	@Override
 	public String getValue() {
 		return name;
-	}
-
-	@Override
-	public BNode clone() {
-		return this;
 	}
 
 	@Override

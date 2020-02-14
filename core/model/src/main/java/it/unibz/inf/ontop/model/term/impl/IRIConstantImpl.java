@@ -34,38 +34,28 @@ import java.util.stream.Stream;
  */
 public class IRIConstantImpl extends AbstractNonNullConstant implements IRIConstant {
 
-	private final int identifier;
 	private final IRI iri;
 	private final ObjectRDFType type;
 
 	protected IRIConstantImpl(IRI iri, TypeFactory typeFactory) {
 		this.iri = iri;
-		this.identifier = iri.hashCode();
 		this.type = typeFactory.getIRITermType();
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof IRIConstantImpl)) {
-			return false;
-		}
-		IRIConstantImpl uri2 = (IRIConstantImpl) obj;
-		return this.identifier == uri2.identifier;
+	public boolean equals(Object other) {
+		return (other instanceof IRIConstantImpl &&
+					this.iri.equals(((IRIConstantImpl) other).iri));
 	}
 
 	@Override
 	public int hashCode() {
-		return identifier;
+		return iri.hashCode();
 	}
 
 	@Override
 	public IRI getIRI() {
 		return iri;
-	}
-
-	@Override
-	public IRIConstant clone() {
-		return this;
 	}
 
 	@Override
