@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
+@Singleton
 public class PostgresJDBCStatementInitializer extends DefaultJDBCStatementInitializer {
 
     @Inject

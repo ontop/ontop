@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
+import it.unibz.inf.ontop.answering.connection.JDBCStatementInitializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
@@ -32,7 +33,7 @@ public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImp
          * Statement initializer
          */
         String initializerKey = jdbcDriver + STATEMENT_INITIALIZER_SUFFIX;
-        String initializerName = SQLDialectAdapter.class.getCanonicalName();
+        String initializerName = JDBCStatementInitializer.class.getCanonicalName();
         Optional.ofNullable(properties.getProperty(initializerKey))
                 // Must NOT override user properties
                 .filter(v -> !userProperties.containsKey(initializerName))
