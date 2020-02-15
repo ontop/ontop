@@ -132,8 +132,13 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private TranslationResult translate(TupleExpr node) throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
 
-        if (node instanceof StatementPattern)
-            return translateTriplePattern((StatementPattern) node);
+        if (node instanceof StatementPattern){
+            StatementPattern stmt = (StatementPattern)node;
+            if( stmt.getScope().equals(StatementPattern.Scope.NAMED_CONTEXTS) ){
+                return translateQuadPattern(stmt); // Davide> Quad
+            }
+            else return translateTriplePattern((StatementPattern) node);
+        }
 
         if (node instanceof Join)
             return translateJoinLikeNode((Join) node);
@@ -834,6 +839,21 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                 translateRDF4JVar(triple.getSubjectVar(), ImmutableSet.of(), true),
                                 translateRDF4JVar(triple.getPredicateVar(), ImmutableSet.of(), true),
                                 translateRDF4JVar(triple.getObjectVar(), ImmutableSet.of(), true)
+                        )),
+                ImmutableSet.of()
+        );
+    }
+
+    // Davide> Quads support
+    private TranslationResult translateQuadPattern(StatementPattern quad) {
+
+        return new TranslationResult(
+                iqFactory.createIntensionalDataNode(
+                        atomFactory.getIntensionalQuadAtom(
+                                translateRDF4JVar(quad.getSubjectVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getPredicateVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getObjectVar(), ImmutableSet.of(), true),
+                                translateRDF4JVar(quad.getContextVar(), ImmutableSet.of(), true)
                         )),
                 ImmutableSet.of()
         );
