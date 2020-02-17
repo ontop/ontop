@@ -32,7 +32,7 @@ public class QuadsTest {
   private static final String DROP_SCRIPT = "src/test/resources/quads/drop.sql";
   private static final String OWL_FILE = "src/test/resources/quads/test.owl";
   private static final String MAPPING_FILE = "src/test/resources/quads/test.obda";
-  private static final String RESULT_FILE="src/test/resources/quads/query-result-2.txt";
+  private static final String RESULT_FILE="src/test/resources/quads/query-result.txt";
   private static final ToStringRenderer renderer = ToStringRenderer.getInstance();
 
   private static final String URL = "jdbc:h2:mem:job";

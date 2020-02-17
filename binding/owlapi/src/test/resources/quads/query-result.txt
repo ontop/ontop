@@ -1,80 +1,75 @@
 0
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Person>
-	predicate	rdf:type
 	subject	<http://www.semanticweb.org/test#person1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
 1
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Person>
-	predicate	rdf:type
 	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
 2
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Person>
-	predicate	rdf:type
 	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
 3
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Person>
-	predicate	rdf:type
 	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Person>
 4
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Job>
-	predicate	rdf:type
 	subject	<http://www.semanticweb.org/test#job1>
+	predicate	rdf:type
+	object	<http://www.semanticweb.org/test#Job>
 5
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Job>
+	subject	<http://www.semanticweb.org/test#job2>
 	predicate	rdf:type
-	subject	<http://www.semanticweb.org/test#job1>
+	object	<http://www.semanticweb.org/test#Job>
 6
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Job>
+	subject	<http://www.semanticweb.org/test#job3>
 	predicate	rdf:type
-	subject	<http://www.semanticweb.org/test#job2>
+	object	<http://www.semanticweb.org/test#Job>
 7
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#Job>
-	predicate	rdf:type
-	subject	<http://www.semanticweb.org/test#job3>
+	subject	<http://www.semanticweb.org/test#person1>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
 8
 	g	<http://example.org/graphs/spiderman>
-	object	"Person 1"^^xsd:string
-	predicate	rdfs:label
-	subject	<http://www.semanticweb.org/test#person1>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job1>
 9
 	g	<http://example.org/graphs/spiderman>
-	object	"Person 2"^^xsd:string
-	predicate	rdfs:label
-	subject	<http://www.semanticweb.org/test#person2>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job2>
 10
 	g	<http://example.org/graphs/spiderman>
-	object	"Person 3"^^xsd:string
-	predicate	rdfs:label
-	subject	<http://www.semanticweb.org/test#person3>
+	subject	<http://www.semanticweb.org/test#person4>
+	predicate	<http://www.semanticweb.org/test#hasJob>
+	object	<http://www.semanticweb.org/test#job3>
 11
 	g	<http://example.org/graphs/spiderman>
-	object	"Person 4"^^xsd:string
+	subject	<http://www.semanticweb.org/test#person1>
 	predicate	rdfs:label
-	subject	<http://www.semanticweb.org/test#person4>
+	object	"Person 1"^^xsd:string
 12
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#job1>
-	predicate	<http://www.semanticweb.org/test#hasJob>
-	subject	<http://www.semanticweb.org/test#person1>
+	subject	<http://www.semanticweb.org/test#person2>
+	predicate	rdfs:label
+	object	"Person 2"^^xsd:string
 13
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#job1>
-	predicate	<http://www.semanticweb.org/test#hasJob>
-	subject	<http://www.semanticweb.org/test#person2>
+	subject	<http://www.semanticweb.org/test#person3>
+	predicate	rdfs:label
+	object	"Person 3"^^xsd:string
 14
 	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#job2>
-	predicate	<http://www.semanticweb.org/test#hasJob>
-	subject	<http://www.semanticweb.org/test#person3>
-15
-	g	<http://example.org/graphs/spiderman>
-	object	<http://www.semanticweb.org/test#job3>
-	predicate	<http://www.semanticweb.org/test#hasJob>
 	subject	<http://www.semanticweb.org/test#person4>
+	predicate	rdfs:label
+	object	"Person 4"^^xsd:string
