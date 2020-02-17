@@ -32,7 +32,7 @@ public class QuadsTest {
   private static final String DROP_SCRIPT = "src/test/resources/quads/drop.sql";
   private static final String OWL_FILE = "src/test/resources/quads/test.owl";
   private static final String MAPPING_FILE = "src/test/resources/quads/test.obda";
-  private static final String RESULT_FILE="src/test/resources/quads/query-result.txt";
+  private static final String RESULT_FILE="src/test/resources/quads/query-result-2.txt";
   private static final ToStringRenderer renderer = ToStringRenderer.getInstance();
 
   private static final String URL = "jdbc:h2:mem:job";
@@ -81,7 +81,7 @@ public class QuadsTest {
             "{ GRAPH ?g {?subject  ?predicate ?object } } ";
 
 
-    int expectedCardinality = 16;
+    int expectedCardinality = 15;
     String sql = execute(queryQuad, expectedCardinality);
 
     System.out.println("SQL Query: \n" + sql);
@@ -116,14 +116,15 @@ public class QuadsTest {
       StringBuilder builder = new StringBuilder();
       while (rs.hasNext()) {
         final OWLBindingSet bindingSet = rs.next();
-        Iterator<OWLBinding> it = bindingSet.iterator();
         builder.append(i + "\n");
-        while (it.hasNext()) {
-          OWLBinding b = it.next();
-          builder.append("\t" + b.getName() + "\t" + stringify(b.getValue()) + "\n");
-        }
         String graph = stringify(bindingSet.getBinding("g").getValue());
-        String instance = stringify(bindingSet.getBinding("subject").getValue());
+        String subject = stringify(bindingSet.getBinding("subject").getValue());
+        String predicate = stringify(bindingSet.getBinding("predicate").getValue());
+        String object = stringify(bindingSet.getBinding("object").getValue());
+        builder.append("\t" + "g" + "\t" + graph + "\n");
+        builder.append("\t" + "subject" + "\t" + subject + "\n");
+        builder.append("\t" + "predicate" + "\t" + predicate + "\n");
+        builder.append("\t" + "object" + "\t" + object + "\n");
         i++;
       }
       assertTrue(i == expectedCardinality);
