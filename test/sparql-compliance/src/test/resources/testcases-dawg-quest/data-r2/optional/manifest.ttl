@@ -15,6 +15,8 @@
      #:dawg-optional-complex-1 # Disabled due to limitations of H2 (LJ + union sub-query)
      :dawg-optional-complex-2 # WON'T FIX: graph
      :dawg-optional-complex-3 # WON'T FIX: graph
+     :optional-complex-2-without-graph-ontop
+     :optional-complex-3-without-graph-ontop
      #:dawg-optional-complex-4 # Disabled due to limitations of H2 (LJ + union sub-query)
     ).
 
@@ -41,6 +43,16 @@
       qt:data   <complex-data-2.ttl> ] ;
     mf:result  <result-opt-complex-2.ttl> .
 
+:optional-complex-2-without-graph-ontop a mf:QueryEvaluationTest ;
+    mf:name    "Complex optional semantics: 2 - without graph (Ontop)" ;
+    rdfs:comment
+            "Complex optional: LeftJoin(BGP(..),Union(..,..))" ;
+    dawgt:approval dawgt:Approved ;
+    mf:action
+    [ qt:query  <q-opt-complex-2-without-graph-ontop.rq> ;
+      qt:data   <complex-data-no-graph-ontop.ttl> ] ;
+    mf:result  <result-opt-complex-2.ttl> .
+
 :dawg-optional-complex-3 a mf:QueryEvaluationTest ;
     mf:name    "Complex optional semantics: 3" ;
     rdfs:comment
@@ -51,6 +63,16 @@
     [ qt:query  <q-opt-complex-3.rq> ;
       qt:graphData <complex-data-1.ttl>;
       qt:data   <complex-data-2.ttl> ] ;
+    mf:result  <result-opt-complex-3.ttl> .
+
+:optional-complex-3-without-graph-ontop a mf:QueryEvaluationTest ;
+    mf:name    "Complex optional semantics: 3 - without graph (Ontop)" ;
+    rdfs:comment
+            "Complex optional: LeftJoin(BGP(..),Union(..,..))" ;
+    dawgt:approval dawgt:Approved ;
+    mf:action
+    [ qt:query  <q-opt-complex-3-without-graph-ontop.rq> ;
+      qt:data   <complex-data-no-graph-ontop.ttl> ] ;
     mf:result  <result-opt-complex-3.ttl> .
 
 :dawg-optional-complex-4 a mf:QueryEvaluationTest ;

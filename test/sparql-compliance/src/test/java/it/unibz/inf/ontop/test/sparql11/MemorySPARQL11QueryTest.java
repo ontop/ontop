@@ -155,6 +155,9 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//wrong result, unexpected binding
 			propertyPathManifest + "pp06",
 
+			// Quads are not yet supported by the SI
+			propertyPathManifest + "pp07",
+
 			// Not supported: ArbitraryLengthPath
 			propertyPathManifest + "pp12",
 			propertyPathManifest + "pp14",
@@ -189,20 +192,28 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 
 			/* SUBQUERY
 			*/
-			//Quad translated as a triple. TODO: fix it
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery01",
+			// Quads are not yet supported by the SI
 			subqueryManifest + "subquery02",
-			//Quad translated as a triple. TODO: fix it
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery03",
+			// Quads are not yet supported by the SI
 			subqueryManifest + "subquery04",
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery05",
+			// Quads are not yet supported by the SI
+			subqueryManifest + "subquery07",
 			// EXISTS is not supported yet
 			subqueryManifest + "subquery10",
 
-			//ORDER BY IRI (for supported by the SI)
+			//ORDER BY IRI (not supported by the SI)
 			subqueryManifest + "subquery11",
 
 			//unbound variable: Var TODO: fix it
 			subqueryManifest + "subquery12",
 
-			//ORDER BY IRI (for supported by the SI)
+			//ORDER BY IRI (not supported by the SI)
 			subqueryManifest + "subquery13",
 
 			//missing results (TODO: fix)
