@@ -84,7 +84,8 @@ public class AtomFactoryImpl implements AtomFactory {
 
     // Davide> TODO Add "quad" version for other methods as well
     @Override
-    public DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property, VariableOrGroundTerm object, VariableOrGroundTerm graph) {
+    public DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property,
+                                                          VariableOrGroundTerm object, VariableOrGroundTerm graph) {
         return getDataAtom(quadPredicate, subject, property, object, graph);
     }
 
@@ -99,6 +100,12 @@ public class AtomFactoryImpl implements AtomFactory {
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI classIRI) {
         // TODO: in the future, constants will be for IRIs in intensional data atoms
         return getIntensionalTripleAtom(subject, RDF.TYPE, convertIRIIntoConstant(classIRI));
+    }
+
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, IRI classIRI, VariableOrGroundTerm graph) {
+        // TODO: in the future, constants will be for IRIs in intensional data atoms
+        return getIntensionalQuadAtom(subject, convertIRIIntoConstant(RDF.TYPE), convertIRIIntoConstant(classIRI), graph);
     }
 
     @Override
