@@ -16,7 +16,7 @@ public class QuadPredicateImpl extends RDFAtomPredicateImpl implements QuadPredi
 
     protected QuadPredicateImpl(ImmutableList<TermType> expectedBaseTypes, RDFTermTypeConstant iriType,
                                 RDF rdfFactory) {
-        super("triple", expectedBaseTypes,0, 1, 2, iriType, rdfFactory);
+        super("quad", expectedBaseTypes,0, 1, 2, iriType, rdfFactory);
     }
 
     @Override

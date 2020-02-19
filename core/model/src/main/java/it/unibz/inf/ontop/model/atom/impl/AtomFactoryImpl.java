@@ -82,6 +82,12 @@ public class AtomFactoryImpl implements AtomFactory {
         return getDataAtom(triplePredicate, subject, property, object);
     }
 
+    // Davide> TODO Add "quad" version for other methods as well
+    @Override
+    public DataAtom<AtomPredicate> getIntensionalQuadAtom(VariableOrGroundTerm subject, VariableOrGroundTerm property, VariableOrGroundTerm object, VariableOrGroundTerm graph) {
+        return getDataAtom(quadPredicate, subject, property, object, graph);
+    }
+
     @Override
     public DataAtom<AtomPredicate> getIntensionalTripleAtom(VariableOrGroundTerm subject, IRI propertyIRI,
                                                             VariableOrGroundTerm object) {

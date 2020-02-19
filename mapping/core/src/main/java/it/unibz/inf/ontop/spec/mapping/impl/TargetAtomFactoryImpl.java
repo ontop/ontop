@@ -20,7 +20,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
 
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final Variable s, p, o;
+    private final Variable s, p, o, g;
     private final TermFactory termFactory;
 
     @Inject
@@ -31,7 +31,7 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
         this.s = this.termFactory.getVariable("s");
         this.p = this.termFactory.getVariable("p");
         this.o = this.termFactory.getVariable("o");
-
+        this.g = this.termFactory.getVariable("g");
     }
 
     @Override
@@ -47,6 +47,27 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
                 IntStream.range(0, 3)
                         .boxed()
                         .map(i -> Maps.immutableEntry(projectionAtom.getTerm(i), initialTerms.get(i)))
+                        .filter(e -> !e.getKey().equals(e.getValue()))
+                        .collect(ImmutableCollectors.toMap()));
+        return new TargetAtomImpl(projectionAtom, substitution);
+    }
+
+    // Davide> Quads
+    @Override
+    public TargetAtom getQuadTargetAtom(ImmutableTerm subject, ImmutableTerm pred, ImmutableTerm
+            object, ImmutableTerm graph) {
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctQuadAtom(
+                (subject instanceof Variable) ? (Variable) subject : s,
+                (pred instanceof Variable) && (!pred.equals(subject)) ? (Variable) pred : p,
+                (object instanceof Variable) && (!object.equals(subject)) && (!object.equals(pred))
+                        ? (Variable) object : o,
+                (graph instanceof Variable) ? (Variable) graph : g);
+        ImmutableList<ImmutableTerm> initialTerms = ImmutableList.of(subject, pred, object, graph);
+        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(
+                IntStream.range(0, 4)
+                        .boxed()
+                        .map(i -> Maps.immutableEntry(projectionAtom.getTerm(i), initialTerms.get(i)
+                        ))
                         .filter(e -> !e.getKey().equals(e.getValue()))
                         .collect(ImmutableCollectors.toMap()));
         return new TargetAtomImpl(projectionAtom, substitution);
