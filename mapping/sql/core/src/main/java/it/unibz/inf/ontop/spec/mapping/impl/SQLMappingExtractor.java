@@ -94,8 +94,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         log.debug("DB Metadata: \n{}", dbMetadata);
 
-        log.debug(dbMetadata.printKeys());
-
         SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)

@@ -110,7 +110,7 @@ public class MappingTest {
 
         // Properties
         for (IRI propertyIri : propertyIris){
-            IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+            IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
             ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                     SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                             P, getConstantIRI(propertyIri),
@@ -128,7 +128,7 @@ public class MappingTest {
         }
 
         // Class
-        IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                 SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                         P, getConstantIRI(RDF.TYPE),
@@ -207,7 +207,7 @@ public class MappingTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
 

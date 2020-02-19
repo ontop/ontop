@@ -6,17 +6,17 @@ import static org.junit.Assert.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import org.junit.Test;
 
 public class QuotedIdentifierTest {
 
-	RDBMetadata dbMetadata = createDummyMetadata();
-	QuotedIDFactory fac = dbMetadata.getQuotedIDFactory();
-		
+
 	@Test
 	public void test1() {
-		
+		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+
 		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
 
 		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "abc").getSQLRendering(), "\"abc\"");
@@ -45,44 +45,43 @@ public class QuotedIdentifierTest {
 		
 		//assertEquals(fac.createRelationFromString("A").getSQLRendering(), "A");
 	}
-	
+
+	@Test
 	public void test1b() {
-		Set<QuotedID> s = new HashSet<>();
-		
-		s.add(fac.createAttributeID("aaa"));
-		s.add(fac.createAttributeID("\"AAA\""));
+		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+
+		Set<QuotedID> s = ImmutableSet.of(
+				fac.createAttributeID("aaa"),
+				fac.createAttributeID("\"AAA\""));
 		
 		assertEquals(s.size(), 1);
-		
+	}
+
+	@Test
+	public void test1c() {
+		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+
 		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createAttributeID("aaa"));
 		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createAttributeID("\"AAA\""));
 		assertEquals(a1, a2);
 	}
-	
-	@Test
+
+
 	public void test2() {
 		String s = "SELECT Able.\"id\", bB.Col4 AS c FROM TaBle1 able, (SELECT col4 FROM Bable) Bb, " +
 					"c JOIN d ON c.id = d.Id " +
 					"WHERE \"AblE\".Col = Able.col2";
-		
-		System.out.println(s);
-		
+		// TODO
 	}
 
-	@Test
 	public void test2b() throws Exception {
 		String s = "SELECT a.id AS c FROM A";
-		
-		System.out.println(s);
-		
+		// TODO
 	}
 	
-	@Test
 	public void test3() throws Exception {
 		String s = "SELECT * FROM A JOIN B ON NOT (a.id <> b.id)";
-		
-		System.out.println(s);
-		
+		// TODO
 	}
 	
 }

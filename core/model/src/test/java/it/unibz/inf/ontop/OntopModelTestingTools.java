@@ -61,7 +61,7 @@ public class OntopModelTestingTools {
     }
 
     public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
+        return DEFAULT_DUMMY_DB_METADATA.copyOf();
     }
 
 }

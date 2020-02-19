@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
@@ -87,6 +86,14 @@ public class RDBMetadata extends BasicDBMetadata {
 	@Deprecated
 	@Override
 	public RDBMetadata clone() {
+		throw new RuntimeException("METADATA CLONE");
+//		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
+//				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
+//				parserViewCounter, typeFactory);
+	}
+
+	@Deprecated
+	public RDBMetadata copyOf() {
 		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
 				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
 				parserViewCounter, typeFactory);

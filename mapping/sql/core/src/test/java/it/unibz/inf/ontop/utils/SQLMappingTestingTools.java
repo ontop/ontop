@@ -18,7 +18,6 @@ public class SQLMappingTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
@@ -61,16 +60,9 @@ public class SQLMappingTestingTools {
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(LegacySQLPPMappingConverter.class);
-
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static RDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
+        return DEFAULT_DUMMY_DB_METADATA.copyOf();
     }
 }

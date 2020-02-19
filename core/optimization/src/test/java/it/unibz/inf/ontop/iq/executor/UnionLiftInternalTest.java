@@ -53,9 +53,6 @@ public class UnionLiftInternalTest {
     private static DistinctVariableOnlyDataAtom TABLE4_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             P2_PREDICATE, ImmutableList.of(Y, Z));
 
-    public UnionLiftInternalTest() {
-    }
-
 
     @Test
     public void unionLiftInternalTest1 () throws EmptyQueryException {
@@ -63,7 +60,7 @@ public class UnionLiftInternalTest {
         /**
          * Original Query
          */
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -113,7 +110,7 @@ public class UnionLiftInternalTest {
         /**
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         InnerJoinNode joinNodeExpected = IQ_FACTORY.createInnerJoinNode();
         UnionNode unionNodeExpected = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
@@ -160,7 +157,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -197,7 +194,7 @@ public class UnionLiftInternalTest {
         /**
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
@@ -237,7 +234,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -278,7 +275,7 @@ public class UnionLiftInternalTest {
         /**
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
@@ -330,7 +327,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -371,7 +368,7 @@ public class UnionLiftInternalTest {
         /*
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
@@ -418,7 +415,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -466,7 +463,7 @@ public class UnionLiftInternalTest {
         /*
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
@@ -530,7 +527,7 @@ public class UnionLiftInternalTest {
         /**
          * Second Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder2 = createQueryBuilder();
 
         UnionNode unionNode8 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
         UnionNode unionNode9 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C));
@@ -606,7 +603,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -651,7 +648,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -700,7 +697,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -750,7 +747,7 @@ public class UnionLiftInternalTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         P3_PREDICATE, ImmutableList.of(A, B, C));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode rootConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution());
@@ -784,7 +781,7 @@ public class UnionLiftInternalTest {
         /*
          * Expected Query
          */
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(A, B, C, E));
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();

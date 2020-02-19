@@ -45,7 +45,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeRemoval_innerJoinParent1() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -61,7 +61,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
@@ -75,7 +75,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeRemoval_innerJoinParent2() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -92,7 +92,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
         expectedQueryBuilder.init(projectionAtom, rootNode);
@@ -108,7 +108,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeRemoval_innerJoinParent3() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A), Y, generateInt(B)));
@@ -124,7 +124,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, jn);
@@ -139,7 +139,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeRemoval_leftJoinParent() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -154,7 +154,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
@@ -168,7 +168,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeChainRemoval() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -188,7 +188,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeNonRemoval_leftJoinParent() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -202,7 +202,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, ljn);
@@ -218,7 +218,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testSingleTrueNodeNonRemoval_UnionParent() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, NULL));
@@ -232,7 +232,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, un);
@@ -248,7 +248,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testMultipleTrueNodesRemoval1() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -266,7 +266,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
@@ -280,7 +280,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testMultipleTrueNodesRemoval2() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -297,7 +297,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, DATA_NODE_1);
@@ -312,7 +312,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testTrueNodesPartialRemoval1() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_1_PREDICATE, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateInt(A)));
@@ -329,7 +329,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, ljn);
@@ -344,7 +344,7 @@ public class TrueNodesRemovalOptimizerTest {
     public void testTrueNodesPartialRemoval2() throws EmptyQueryException {
 
         //Unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_0_PREDICATE);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of());
         queryBuilder.init(projectionAtom, rootNode);
@@ -361,7 +361,7 @@ public class TrueNodesRemovalOptimizerTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         expectedQueryBuilder.init(projectionAtom, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());

@@ -28,7 +28,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 1), x);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -64,7 +64,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -111,7 +111,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -177,7 +177,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
 
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -241,7 +241,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);

@@ -25,7 +25,6 @@ public class MappingTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
@@ -36,7 +35,9 @@ public class MappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
+
     private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -94,9 +95,6 @@ public class MappingTestingTools {
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
-
         BasicDBMetadata dbMetadataWithPredicates = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadataWithPredicates.getQuotedIDFactory();
 
@@ -110,12 +108,12 @@ public class MappingTestingTools {
         dbMetadataWithPredicates.freeze();
     }
 
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
+    public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
+        return DEFAULT_DUMMY_DB_METADATA.copyOf();
     }
 
 

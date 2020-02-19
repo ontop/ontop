@@ -30,7 +30,6 @@ public class OptimizationTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
@@ -48,6 +47,7 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
+
     private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final Variable X;
@@ -115,8 +115,6 @@ public class OptimizationTestingTools {
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
@@ -169,11 +167,11 @@ public class OptimizationTestingTools {
         ANS1_AR5_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(5);
     }
 
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
+    public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
+        return DEFAULT_DUMMY_DB_METADATA.copyOf();
     }
 }

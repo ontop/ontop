@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -18,7 +17,6 @@ public class SQLAllMappingTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
@@ -27,6 +25,7 @@ public class SQLAllMappingTestingTools {
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final RDF RDF_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
+
     private static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
@@ -46,16 +45,9 @@ public class SQLAllMappingTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
-
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
     public static RDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
+        return DEFAULT_DUMMY_DB_METADATA.copyOf();
     }
 }

@@ -58,9 +58,6 @@ public class BindingLiftTest {
     private final ImmutableExpression EXPRESSIONGT = TERM_FACTORY.getDBDefaultInequality(
             GT, Z, Y);
 
-    public BindingLiftTest() {
-    }
-
     @Test
     public void testSimpleSubstitution() throws EmptyQueryException {
         testSimpleSubstitution(false);
@@ -73,7 +70,7 @@ public class BindingLiftTest {
 
     private void testSimpleSubstitution(boolean withTopConstructionNode) throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, X, Y, Z);
 
         QueryNode joinNode = IQ_FACTORY.createInnerJoinNode(EXPRESSIONGT);
@@ -134,7 +131,7 @@ public class BindingLiftTest {
 
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
 
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -165,7 +162,7 @@ public class BindingLiftTest {
     public void testLeftJoinSubstitution() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, X, W, Z);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -231,7 +228,7 @@ public class BindingLiftTest {
         //----------------------------------------------------------------------
         // Construct expected query
         //Construct unoptimized query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( W, generateString(B), X, generateIRIWithTemplate1(A),
                         Z, generateInt(D))));
@@ -270,7 +267,7 @@ public class BindingLiftTest {
     @Test
     public void testUnionSubstitution() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -346,7 +343,7 @@ public class BindingLiftTest {
         //----------------------------------------------------------------------
         //Construct expected query
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, TERM_FACTORY.getIRIFunctionalTerm(F0, false),
@@ -393,7 +390,7 @@ public class BindingLiftTest {
 
     @Test
     public void testEqualityLiftingNonProjected1() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ANS1_AR1_PREDICATE, X);
 
@@ -456,7 +453,7 @@ public class BindingLiftTest {
 
     @Test
     public void testEqualityLiftingNonProjected2WithTopConstructionNode() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ANS1_AR1_PREDICATE, X);
 
@@ -525,7 +522,7 @@ public class BindingLiftTest {
 
     @Test
     public void testEqualityLiftingNonProjected2() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ANS1_AR1_PREDICATE, X);
 
@@ -624,7 +621,7 @@ public class BindingLiftTest {
     @Test
     public void testNewConstructionNode() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
@@ -683,7 +680,7 @@ public class BindingLiftTest {
         Variable f2 = TERM_FACTORY.getVariable("f2");
         Variable f3 = TERM_FACTORY.getVariable("f3");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false),
@@ -751,7 +748,7 @@ public class BindingLiftTest {
     @Test
     public void testCompositeURITemplateDoubleRun() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
         UnionNode unionNode =  IQ_FACTORY.createUnionNode(ImmutableSet.of(X,Y));
@@ -808,7 +805,7 @@ public class BindingLiftTest {
         Variable f5 = TERM_FACTORY.getVariable("f5");
         Variable f6 = TERM_FACTORY.getVariable("f6");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, generateCompositeURI2(af3,bf4),
@@ -871,7 +868,7 @@ public class BindingLiftTest {
     @Test
     public void testCompositeURITemplateDoubleRunYProjectedAway() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -932,7 +929,7 @@ public class BindingLiftTest {
         Variable f5 = TERM_FACTORY.getVariable("f5");
         Variable f6 = TERM_FACTORY.getVariable("f6");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of( X, generateCompositeURI2(af3,bf4))));
 
@@ -999,7 +996,7 @@ public class BindingLiftTest {
 
     private void testLeftJoinAndUnionLiftSubstitution(boolean withTopConstructionNode) throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, X, Y, Z, W);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -1067,7 +1064,7 @@ public class BindingLiftTest {
         //----------------------------------------------------------------------
         // Construct expected query
         //Construct unoptimized query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         W, generateInt(H),
@@ -1141,7 +1138,7 @@ public class BindingLiftTest {
     public void testConstantNonPropagationAcrossUnions() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateIRIWithTemplate1(B))));
@@ -1201,7 +1198,7 @@ public class BindingLiftTest {
 
         Variable f0f2 = TERM_FACTORY.getVariable("f0f2");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, TERM_FACTORY.getIRIFunctionalTerm(f0f2, false),
@@ -1255,7 +1252,7 @@ public class BindingLiftTest {
     public void testConstantNonPropagationAcrossUnions2() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateIRIWithTemplate1(B))));
@@ -1307,7 +1304,7 @@ public class BindingLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
         Variable f0f1 = TERM_FACTORY.getVariable("f0f1");
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
                         X, TERM_FACTORY.getIRIFunctionalTerm(f0f1, false),
@@ -1364,7 +1361,7 @@ public class BindingLiftTest {
 
     private void testTrueNode(ImmutableExpression joiningCondition) throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(joiningCondition);
@@ -1400,7 +1397,7 @@ public class BindingLiftTest {
 
         Variable af0 = TERM_FACTORY.getVariable("af0");
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(af0), Y,
                         TERM_FACTORY.getRDFLiteralConstant("2", XSD.INTEGER))));
@@ -1427,7 +1424,7 @@ public class BindingLiftTest {
 
     private void testJoinAndNotMatchingDatatypesDoubleRun(ImmutableExpression joiningCondition) throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
@@ -1463,7 +1460,7 @@ public class BindingLiftTest {
         IntermediateQuery unOptimizedQuery = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateInt(AF0), Y, generateInt(F))));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
@@ -1488,7 +1485,7 @@ public class BindingLiftTest {
     @Ignore
     public void testDatatypeExpressionEvaluator() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of()));
@@ -1511,7 +1508,7 @@ public class BindingLiftTest {
         System.out.println("\nBefore optimization: \n" + unOptimizedQuery);
 
         // Expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ImmutableSubstitution expectedRootNodeSubstitution = SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X,
                 generateInt(A), Y, generateInt(B)));
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y), expectedRootNodeSubstitution);
@@ -1536,7 +1533,7 @@ public class BindingLiftTest {
     public void testEmptySubstitutionToBeLifted() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
 
@@ -1582,7 +1579,7 @@ public class BindingLiftTest {
 
     @Test
     public void testUnionRemoval() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -1619,7 +1616,7 @@ public class BindingLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode3);
         expectedQueryBuilder.addChild(constructionNode3, DATA_NODE_6);
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -1643,7 +1640,7 @@ public class BindingLiftTest {
         testJoinTemplateAndFunctionalGroundTerm(false);
     }
     private void testJoinTemplateAndFunctionalGroundTerm(boolean trueNodeOnTheLeft) throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
@@ -1675,7 +1672,7 @@ public class BindingLiftTest {
         System.out.println("\nBefore optimization: \n" +  unOptimizedQuery);
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
                         ImmutableMap.of(
@@ -1709,7 +1706,7 @@ public class BindingLiftTest {
                 ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                         ANS1_AR3_PREDICATE, ImmutableList.of(X,Y, Z));
 
-        IntermediateQueryBuilder originalBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder originalBuilder = createQueryBuilder();
 
         ConstructionNode emptyConstructionNode = IQ_FACTORY.createConstructionNode(ROOT_CONSTRUCTION_NODE_ATOM.getVariables());
         ConstructionNode emptyConstructionNode2 = emptyConstructionNode.clone();
@@ -1797,7 +1794,7 @@ public class BindingLiftTest {
          * Expected Query
          */
         Variable bf2f3 = TERM_FACTORY.getVariable("bf2f3");
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
 
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
         UnionNode unionNode4 = IQ_FACTORY.createUnionNode(ImmutableSet.of(F, bf2f3));
@@ -1842,7 +1839,7 @@ public class BindingLiftTest {
     @Test
     public void testProjectionAwaySubQuery() throws EmptyQueryException {
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();

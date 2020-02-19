@@ -46,8 +46,6 @@ public class RedundantJoinFKTest {
 
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getStrictEquality(B, ONE);
 
-    private static final DBMetadata DB_METADATA;
-
     static {
 
         /**
@@ -88,15 +86,13 @@ public class RedundantJoinFKTest {
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         dbMetadata.freeze();
-
-        DB_METADATA = dbMetadata;
     }
 
 
     @Test
     public void testForeignKeyOptimization() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -116,7 +112,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
         expectedQueryBuilder.addChild(constructionNode, filterNode);
@@ -133,7 +129,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, A,B);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -163,7 +159,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -192,7 +188,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, A, D);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -224,7 +220,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization3() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -253,7 +249,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyOptimization1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -285,7 +281,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         expectedQueryBuilder.init(projectionAtom1, constructionNode);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(
@@ -309,7 +305,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyOptimization2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -329,7 +325,7 @@ public class RedundantJoinFKTest {
 
         System.out.println("\n After optimization: \n" +  query);
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getDBIsNotNull(A),
@@ -347,7 +343,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization4() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -376,7 +372,7 @@ public class RedundantJoinFKTest {
     @Test
     public void testForeignKeyNonOptimization5() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, A);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);

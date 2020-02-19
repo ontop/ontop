@@ -33,19 +33,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class ExpressionParserTest {
 
-
     private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
     private static final DBBooleanFunctionSymbol IS_NULL = DB_FS_FACTORY.getDBIsNull();
 
-
-    private DBMetadata METADATA;
     private QuotedIDFactory IDFAC;
     private DBTermType dbLongType;
 
     @Before
     public void beforeEachTest() {
-        METADATA = EMPTY_METADATA;
-        IDFAC = METADATA.getDBParameters().getQuotedIDFactory();
+        DBMetadata metadata = createDummyMetadata();
+        IDFAC = metadata.getDBParameters().getQuotedIDFactory();
         dbLongType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
     }
 

@@ -2,18 +2,11 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class BasicDBMetadata implements DBMetadata {
 
@@ -33,9 +26,6 @@ public class BasicDBMetadata implements DBMetadata {
     private final QuotedIDFactory idfac;
     private final DBParameters dbParameters;
     private boolean isStillMutable;
-
-    @Nullable
-    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
@@ -58,7 +48,6 @@ public class BasicDBMetadata implements DBMetadata {
         this.relations = relations;
         this.listOfTables = listOfTables;
         this.isStillMutable = true;
-        this.uniqueConstraints = null;
         this.dbParameters = new BasicDBParametersImpl(idfac);
     }
 
@@ -116,15 +105,6 @@ public class BasicDBMetadata implements DBMetadata {
         return def;
     }
 
-    @Override
-    public RelationDefinition getRelation(RelationID name) {
-        RelationDefinition def = relations.get(name);
-        if (def == null && name.hasSchema()) {
-            def = relations.get(name.getSchemalessID());
-        }
-        return def;
-    }
-
     @JsonProperty("relations")
     @Override
     public Collection<DatabaseRelationDefinition> getDatabaseRelations() {
@@ -137,40 +117,16 @@ public class BasicDBMetadata implements DBMetadata {
     }
 
     @JsonIgnore
-    @Override
     public String getDriverName() {
         return driverName;
     }
 
     @JsonIgnore
-    @Override
     public String getDriverVersion() {
         return driverVersion;
     }
 
-    @Override
-    public String printKeys() {
-        StringBuilder builder = new StringBuilder();
-        Collection<DatabaseRelationDefinition> table_list = getDatabaseRelations();
-        // Prints all primary keys
-        builder.append("\n====== Unique constraints ==========\n");
-        for (DatabaseRelationDefinition dd : table_list) {
-            builder.append(dd + ";\n");
-            for (UniqueConstraint uc : dd.getUniqueConstraints())
-                builder.append(uc + ";\n");
-            builder.append("\n");
-        }
-        // Prints all foreign keys
-        builder.append("====== Foreign key constraints ==========\n");
-        for(DatabaseRelationDefinition dd : table_list) {
-            for (ForeignKeyConstraint fk : dd.getForeignKeys())
-                builder.append(fk + ";\n");
-        }
-        return builder.toString();
-    }
-
     @JsonIgnore
-    @Override
     public String getDbmsProductName() {
         return databaseProductName;
     }
@@ -188,10 +144,20 @@ public class BasicDBMetadata implements DBMetadata {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        for (RelationID key : relations.keySet()) {
-            bf.append(key);
+        for (Map.Entry<RelationID, RelationDefinition> e : relations.entrySet()) {
+            bf.append(e.getKey());
             bf.append("=");
-            bf.append(relations.get(key).toString());
+            bf.append(e.getValue().toString());
+            bf.append("\n");
+        }
+        // Prints all primary keys
+        bf.append("\n====== constraints ==========\n");
+        for (Map.Entry<RelationID, RelationDefinition> e : relations.entrySet()) {
+            for (UniqueConstraint uc : e.getValue().getUniqueConstraints())
+                bf.append(uc + ";\n");
+            bf.append("\n");
+            for (ForeignKeyConstraint fk : e.getValue().getForeignKeys())
+                bf.append(fk + ";\n");
             bf.append("\n");
         }
         return bf.toString();
@@ -204,22 +170,19 @@ public class BasicDBMetadata implements DBMetadata {
     @Deprecated
     @Override
     public BasicDBMetadata clone() {
+        throw new RuntimeException("METADATA CLONE");
+//        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
+//                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
+    }
+
+    @Deprecated
+    public BasicDBMetadata copyOf() {
         return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
                 new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
     }
 
     protected boolean isStillMutable() {
         return isStillMutable;
-    }
-
-    @Override
-    public ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables() {
-        return ImmutableMap.copyOf(tables);
-    }
-
-    @Override
-    public ImmutableMap<RelationID, RelationDefinition> copyRelations() {
-        return ImmutableMap.copyOf(relations);
     }
 
     @JsonIgnore
