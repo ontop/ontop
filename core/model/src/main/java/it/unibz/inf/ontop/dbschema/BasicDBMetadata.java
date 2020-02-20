@@ -10,12 +10,8 @@ import java.util.*;
 
 public class BasicDBMetadata implements DBMetadata {
 
-
     private final Map<RelationID, DatabaseRelationDefinition> tables;
-
-    // relations include tables and views (views are only created for complex queries in mappings)
-    protected final Map<RelationID, RelationDefinition> relations;
-
+    // tables.values() can contain duplicates due to schemaless table names
     private final List<DatabaseRelationDefinition> listOfTables;
 
     private final String driverName;
@@ -35,7 +31,6 @@ public class BasicDBMetadata implements DBMetadata {
         this.databaseProductName = databaseProductName;
         this.databaseVersion = databaseVersion;
         this.tables = new HashMap<>();
-        this.relations = new HashMap<>();
         this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;
         this.dbParameters = new BasicDBParametersImpl(idfac);
@@ -56,7 +51,6 @@ public class BasicDBMetadata implements DBMetadata {
         }
         DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
         add(table, tables);
-        add(table, relations);
         listOfTables.add(table);
         return table;
     }
@@ -134,20 +128,17 @@ public class BasicDBMetadata implements DBMetadata {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        for (Map.Entry<RelationID, RelationDefinition> e : relations.entrySet()) {
-            bf.append(e.getKey());
-            bf.append("=");
-            bf.append(e.getValue().toString());
-            bf.append("\n");
+        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : tables.entrySet()) {
+            bf.append(e.getKey()).append("=").append(e.getValue()).append("\n");
         }
         // Prints all primary keys
         bf.append("\n====== constraints ==========\n");
-        for (Map.Entry<RelationID, RelationDefinition> e : relations.entrySet()) {
+        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : tables.entrySet()) {
             for (UniqueConstraint uc : e.getValue().getUniqueConstraints())
-                bf.append(uc + ";\n");
+                bf.append(uc).append(";\n");
             bf.append("\n");
             for (ForeignKeyConstraint fk : e.getValue().getForeignKeys())
-                bf.append(fk + ";\n");
+                bf.append(fk).append(";\n");
             bf.append("\n");
         }
         return bf.toString();

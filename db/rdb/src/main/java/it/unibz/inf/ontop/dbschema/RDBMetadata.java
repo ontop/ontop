@@ -33,6 +33,8 @@ import java.util.*;
 public class RDBMetadata extends BasicDBMetadata {
 
 	private int parserViewCounter;
+	private final Map<RelationID, ParserViewDefinition> parserViewDefinitions;
+
 
 	protected final TypeFactory typeFactory;
 
@@ -47,6 +49,7 @@ public class RDBMetadata extends BasicDBMetadata {
 				QuotedIDFactory idfac, TypeFactory typeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
 		this.typeFactory = typeFactory;
+		this.parserViewDefinitions = new HashMap<>();
 	}
 
 	/**
@@ -67,9 +70,17 @@ public class RDBMetadata extends BasicDBMetadata {
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 
 		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getDBTypeFactory());
-		// UGLY!!
-		add(view, relations);
+		add(view, parserViewDefinitions);
 		return view;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder bf = new StringBuilder(super.toString());
+		for (Map.Entry<RelationID, ParserViewDefinition> e : parserViewDefinitions.entrySet()) {
+			bf.append(e.getKey()).append("=").append(e.getValue()).append("\n");
+		}
+		return bf.toString();
 	}
 
 	@JsonIgnore
