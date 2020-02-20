@@ -36,8 +36,7 @@ import java.util.*;
 public class ParserViewDefinition extends RelationDefinition {
 
 	private final ImmutableList<Attribute> attributes;
-	private final ImmutableMap<QuotedID, Attribute> attributeMap;
-	
+
 	private final String statement;
 	
 	/**
@@ -51,17 +50,14 @@ public class ParserViewDefinition extends RelationDefinition {
 		this.statement = statement;
 
 		ImmutableList.Builder<Attribute> attributeBuilder = ImmutableList.builder();
-		ImmutableMap.Builder<QuotedID, Attribute> attributeMapBuilder = ImmutableMap.builder();
 		int c = 1;
 		for (QuotedID id : attrs) {
 			Attribute att = new Attribute(this,
 					new QualifiedAttributeID(name, id), c, null, true, dbTypeFactory);
 			c++;
-			attributeMapBuilder.put(id, att);
 			attributeBuilder.add(att);
 		}
 		this.attributes = attributeBuilder.build();
-		this.attributeMap = attributeMapBuilder.build();
 	}
 
 	/**

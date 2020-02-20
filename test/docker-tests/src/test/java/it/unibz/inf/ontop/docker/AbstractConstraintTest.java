@@ -70,8 +70,8 @@ public abstract class AbstractConstraintTest extends TestCase {
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
-			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
+			RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
 		}
 		catch (IOException e) {
 			log.error("IOException during setUp of propertyFile");

@@ -52,7 +52,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory);
+            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {
@@ -78,7 +78,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
-                RDBMetadataExtractionTools.loadMetadata(metadata, connection, null);
+                RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, null);
             }
             else {
                 try {
@@ -94,7 +94,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                         realTables.addAll(referredTables);
                     });
 
-                    RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
+                    RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, realTables);
                 }
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);

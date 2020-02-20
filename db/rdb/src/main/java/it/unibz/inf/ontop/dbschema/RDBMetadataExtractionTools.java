@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class RDBMetadataExtractionTools {
 	 */
 
 	public static RDBMetadata createMetadata(Connection conn,
-											 TypeFactory typeFactory) throws SQLException  {
+											 DBTypeFactory dbTypeFactory) throws SQLException  {
 
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -166,7 +167,7 @@ public class RDBMetadataExtractionTools {
 		}
 
 		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac, typeFactory);
+							productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
 		
 		return metadata;	
 	}
@@ -181,7 +182,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(RDBMetadata metadata, Connection conn, Set<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(RDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, Set<RelationID> realTables) throws SQLException {
 
 		if (printouts)
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
@@ -212,7 +213,7 @@ public class RDBMetadataExtractionTools {
 							ImmutableSet.of("sys", "INFORMATION_SCHEMA"), idfac);
 				else
 					// for other database engines, including H2, HSQL, PostgreSQL and MySQL
-					seedRelationIds = getTableListDefault(md, ImmutableSet.<String>of(), idfac);
+					seedRelationIds = getTableListDefault(md, ImmutableSet.of(), idfac);
 			}
 			else
 				seedRelationIds = getTableList(null, realTables, idfac);
@@ -261,7 +262,7 @@ public class RDBMetadataExtractionTools {
 					int columnSize = rs.getInt("COLUMN_SIZE");
 					//int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
 
-					DBTermType termType = metadata.getDBTypeFactory().getDBTermType(typeName, columnSize);
+					DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
 					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
 				}

@@ -21,22 +21,15 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 
-import java.util.*;
 
 public class RDBMetadata extends BasicDBMetadata {
 
 	private int parserViewCounter;
-	private final Map<RelationID, ParserViewDefinition> parserViewDefinitions;
 
-
-	protected final TypeFactory typeFactory;
+	protected final DBTypeFactory dbTypeFactory;
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -46,10 +39,9 @@ public class RDBMetadata extends BasicDBMetadata {
 	 */
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-				QuotedIDFactory idfac, TypeFactory typeFactory) {
+				QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
-		this.typeFactory = typeFactory;
-		this.parserViewDefinitions = new HashMap<>();
+		this.dbTypeFactory = dbTypeFactory;
 	}
 
 	/**
@@ -69,33 +61,6 @@ public class RDBMetadata extends BasicDBMetadata {
 		}
 		RelationID id = getQuotedIDFactory().createRelationID(null, String.format("view_%s", parserViewCounter++));
 
-		ParserViewDefinition view = new ParserViewDefinition(id, attributes, sql, typeFactory.getDBTypeFactory());
-		add(view, parserViewDefinitions);
-		return view;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder bf = new StringBuilder(super.toString());
-		for (Map.Entry<RelationID, ParserViewDefinition> e : parserViewDefinitions.entrySet()) {
-			bf.append(e.getKey()).append("=").append(e.getValue()).append("\n");
-		}
-		return bf.toString();
-	}
-
-	@JsonIgnore
-    public DBTypeFactory getDBTypeFactory() {
-		return typeFactory.getDBTypeFactory();
-    }
-
-    @JsonProperty("metadata")
-	Map<String, String> getMedadataForJsonExport(){
-		return ImmutableMap.of(
-				"dbmsProductName", this.getDbmsProductName(),
-				"dbmsVersion", this.getDbmsVersion(),
-				"driverName", this.getDriverName(),
-				"driverVersion", this.getDriverVersion(),
-				"quotationString", this.getDBParameters().getQuotedIDFactory().getIDQuotationString()
-		);
+		return new ParserViewDefinition(id, attributes, sql, dbTypeFactory);
 	}
 }

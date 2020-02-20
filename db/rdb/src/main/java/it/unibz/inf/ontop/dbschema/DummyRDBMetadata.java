@@ -13,11 +13,17 @@ public class DummyRDBMetadata extends RDBMetadata {
     private DummyRDBMetadata(TypeFactory typeFactory) {
 
         super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""), typeFactory);
+                new QuotedIDFactoryStandardSQL("\""), typeFactory.getDBTypeFactory());
+    }
+
+    private DummyRDBMetadata(DBTypeFactory dbTypeFactory) {
+
+        super("dummy class", null, null, "",
+                new QuotedIDFactoryStandardSQL("\""), dbTypeFactory);
     }
 
     public DummyRDBMetadata emptyCopyOf() {
-        return new DummyRDBMetadata(typeFactory);
+        return new DummyRDBMetadata(dbTypeFactory);
     }
 
 }

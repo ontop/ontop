@@ -56,9 +56,9 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory());
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
 
-			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+			RDBMetadataExtractionTools.loadMetadata(metadata, defaultConfiguration.getTypeFactory().getDBTypeFactory(), conn, null);
 		}
 		catch (IOException e) {
 			log.error("IOException during setUp of propertyFile");

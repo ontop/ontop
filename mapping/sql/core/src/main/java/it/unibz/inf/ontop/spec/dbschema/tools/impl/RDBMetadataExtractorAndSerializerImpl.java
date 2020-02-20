@@ -29,8 +29,8 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     public String extractAndSerialize() throws DBMetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory);
-            RDBMetadataExtractionTools.loadMetadata(metadata, localConnection, null);
+            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory.getDBTypeFactory());
+            RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), localConnection, null);
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);

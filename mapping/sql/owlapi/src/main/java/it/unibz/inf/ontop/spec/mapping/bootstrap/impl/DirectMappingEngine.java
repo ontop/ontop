@@ -209,9 +209,9 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
+			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 			// this operation is EXPENSIVE
-			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+			RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
 			return bootstrapMappings(metadata, ppMapping);
 		}
 	}

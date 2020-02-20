@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,35 +51,22 @@ public class BasicDBMetadata implements DBMetadata {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
         DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
-        add(table, tables);
-        listOfTables.add(table);
-        return table;
-    }
-
-    /**
-     * Inserts a new data definition to this metadata object.
-     *
-     * @param td
-     *            The data definition. It can be a {@link DatabaseRelationDefinition} or a
-     *            {@link ParserViewDefinition} object.
-     */
-    protected <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
-        if (!isStillMutable) {
-            throw new IllegalStateException("Too late, cannot add a schema");
-        }
-        schema.put(td.getID(), td);
-        if (td.getID().hasSchema()) {
-            RelationID noSchemaID = td.getID().getSchemalessID();
-            if (!schema.containsKey(noSchemaID)) {
-                schema.put(noSchemaID, td);
+        tables.put(table.getID(), table);
+        if (table.getID().hasSchema()) {
+            RelationID noSchemaID = table.getID().getSchemalessID();
+            if (!tables.containsKey(noSchemaID)) {
+                tables.put(noSchemaID, table);
             }
             else {
-                LOGGER.warn("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
+                LOGGER.warn("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + table + "\nAND\n" + tables.get(noSchemaID));
                 //schema.remove(noSchemaID);
                 // TODO (ROMAN 8 Oct 2015): think of a better way of resolving ambiguities
             }
         }
+        listOfTables.add(table);
+        return table;
     }
+
 
     @Override
     public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
@@ -152,6 +140,17 @@ public class BasicDBMetadata implements DBMetadata {
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
+    }
+
+    @JsonProperty("metadata")
+    Map<String, String> getMedadataForJsonExport() {
+        return ImmutableMap.of(
+                "dbmsProductName", getDbmsProductName(),
+                "dbmsVersion", getDbmsVersion(),
+                "driverName", getDriverName(),
+                "driverVersion", getDriverVersion(),
+                "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
+        );
     }
 
 }
