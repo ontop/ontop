@@ -36,7 +36,7 @@ public class MappingTestingTools {
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    private static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
@@ -113,7 +113,7 @@ public class MappingTestingTools {
     }
 
     public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.copyOf();
+        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 
 

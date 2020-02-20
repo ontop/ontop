@@ -23,7 +23,6 @@ public class BasicDBMetadata implements DBMetadata {
     private final String databaseProductName;
     private final String databaseVersion;
 
-    private final QuotedIDFactory idfac;
     private final DBParameters dbParameters;
     private boolean isStillMutable;
 
@@ -31,22 +30,13 @@ public class BasicDBMetadata implements DBMetadata {
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
                               QuotedIDFactory idfac) {
-        this(driverName, driverVersion, databaseProductName, databaseVersion, new HashMap<>(),
-                new HashMap<>(), new LinkedList<>(), idfac);
-    }
-
-    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
-            RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                              QuotedIDFactory idfac) {
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.databaseProductName = databaseProductName;
         this.databaseVersion = databaseVersion;
-        this.idfac = idfac;
-        this.tables = tables;
-        this.relations = relations;
-        this.listOfTables = listOfTables;
+        this.tables = new HashMap<>();
+        this.relations = new HashMap<>();
+        this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;
         this.dbParameters = new BasicDBParametersImpl(idfac);
     }
@@ -138,7 +128,7 @@ public class BasicDBMetadata implements DBMetadata {
 
     @JsonIgnore
     public QuotedIDFactory getQuotedIDFactory() {
-        return idfac;
+        return dbParameters.getQuotedIDFactory();
     }
 
     @Override
@@ -161,24 +151,6 @@ public class BasicDBMetadata implements DBMetadata {
             bf.append("\n");
         }
         return bf.toString();
-    }
-
-    protected Map<RelationID, DatabaseRelationDefinition> getTables() {
-        return tables;
-    }
-
-    @Deprecated
-    @Override
-    public BasicDBMetadata clone() {
-        throw new RuntimeException("METADATA CLONE");
-//        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
-//                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
-    }
-
-    @Deprecated
-    public BasicDBMetadata copyOf() {
-        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
-                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
     }
 
     protected boolean isStillMutable() {

@@ -172,6 +172,6 @@ public class OptimizationTestingTools {
     }
 
     public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.copyOf();
+        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 }

@@ -34,7 +34,7 @@ public class RDBMetadata extends BasicDBMetadata {
 
 	private int parserViewCounter;
 
-	private final TypeFactory typeFactory;
+	protected final TypeFactory typeFactory;
 
 	/**
 	 * Constructs an initial metadata with some general information about the
@@ -46,17 +46,6 @@ public class RDBMetadata extends BasicDBMetadata {
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 				QuotedIDFactory idfac, TypeFactory typeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
-		this.typeFactory = typeFactory;
-	}
-
-
-	private RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-						QuotedIDFactory idfac, Map<RelationID, DatabaseRelationDefinition> tables,
-						Map<RelationID, RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-						int parserViewCounter, TypeFactory typeFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, tables, relations,
-				listOfTables, idfac);
-		this.parserViewCounter = parserViewCounter;
 		this.typeFactory = typeFactory;
 	}
 
@@ -81,22 +70,6 @@ public class RDBMetadata extends BasicDBMetadata {
 		// UGLY!!
 		add(view, relations);
 		return view;
-	}
-
-	@Deprecated
-	@Override
-	public RDBMetadata clone() {
-		throw new RuntimeException("METADATA CLONE");
-//		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
-//				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-//				parserViewCounter, typeFactory);
-	}
-
-	@Deprecated
-	public RDBMetadata copyOf() {
-		return new RDBMetadata(getDriverName(), getDriverVersion(), getDbmsProductName(), getDbmsVersion(), getQuotedIDFactory(),
-				new HashMap<>(getTables()), new HashMap<>(relations), new LinkedList<>(getDatabaseRelations()),
-				parserViewCounter, typeFactory);
 	}
 
 	@JsonIgnore
