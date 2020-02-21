@@ -24,14 +24,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
@@ -87,7 +90,10 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
-		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(ImmutableList.of(mappingAxiom), md).stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
+		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
+				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
+						new SimplePrefixManager(ImmutableMap.of())), md, null)
+				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());
