@@ -210,4 +210,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
                 + (offset > 0 ? " offset=" + offset : "")
                 + (limit == null ? "" : " limit=" + limit);
     }
+
+    /**
+     * Stops constraints
+     */
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, child);
+    }
 }
