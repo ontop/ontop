@@ -95,9 +95,11 @@ public class SliceOverUnionDistribution {
         TupleOWLResultSet rs = st.executeSelectQuery(query);
         int i = 0;
         while (rs.hasNext()) {
-            rs.next();
+            OWLBindingSet o = rs.next();
+            System.out.println(o.toString());
             i++;
         }
+        System.out.println(i);
         assertTrue(i == 1);
         conn.close();
         reasoner.dispose();
