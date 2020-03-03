@@ -27,8 +27,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
- * Makes sure that SLICE does not distribute over UNION (reproduces a bug).
- * Warning: assumes that the implementation of LIMIT is deterministic
+ * Checks that that SLICE does not distribute over UNION (reproduces a bug).
  */
 public class SliceOverUnionDistribution {
 
@@ -96,10 +95,8 @@ public class SliceOverUnionDistribution {
         int i = 0;
         while (rs.hasNext()) {
             OWLBindingSet o = rs.next();
-            System.out.println(o.toString());
             i++;
         }
-        System.out.println(i);
         assertTrue(i == 1);
         conn.close();
         reasoner.dispose();
