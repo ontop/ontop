@@ -50,9 +50,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         this.limit = null;
     }
 
+    /**
+     * Does not lift unions, blocks them
+     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        throw new RuntimeException("TODO: implement it");
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override
@@ -209,5 +212,13 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return SLICE_STR
                 + (offset > 0 ? " offset=" + offset : "")
                 + (limit == null ? "" : " limit=" + limit);
+    }
+
+    /**
+     * Stops constraints
+     */
+    @Override
+    public IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, child);
     }
 }
