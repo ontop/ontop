@@ -50,9 +50,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         this.limit = null;
     }
 
+    /**
+     * Does not lift unions, blocks them
+     */
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
-        throw new RuntimeException("TODO: implement it");
+        return iqFactory.createUnaryIQTree(this, child);
     }
 
     @Override
