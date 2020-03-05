@@ -235,9 +235,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 Stream.concat(
                         sharedVars.stream()
                                 .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars)),
-                        sharedVars.stream()
-                                .map(v -> termFactory.getStrictEquality(v, sub.get(v)))
-                ).collect(ImmutableCollectors.toList())
+                        Stream.of(
+                                getDisjunction(
+                                        sharedVars.stream()
+                                                .map(v -> termFactory.getStrictEquality(v, sub.get(v)))
+                                                .collect(ImmutableCollectors.toList())
+                        ))).collect(ImmutableCollectors.toList())
         );
     }
 
