@@ -135,10 +135,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			negationManifest + "full-minuend",
 			// DISABLED DUE TO ORDER OVER IRI
 			negationManifest + "partial-minuend",
-			// TODO: enable it
-    		negationManifest + "full-minuend-modified",
-			// TODO: enable it
-    		negationManifest + "partial-minuend-modified",
 
 			/* EXISTS
 			not supported yet */
