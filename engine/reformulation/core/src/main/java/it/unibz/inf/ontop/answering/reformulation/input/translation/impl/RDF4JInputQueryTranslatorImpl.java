@@ -231,9 +231,13 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
 
     private ImmutableExpression getLJConditionForDifference(ImmutableSet<Variable> sharedVars, InjectiveVar2VarSubstitution sub,
                                                             ImmutableSet<Variable> leftNullableVars, ImmutableSet<Variable> rightNullableVars) {
-        return getConjunction(sharedVars.stream()
-                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars))
-                .collect(ImmutableCollectors.toList())
+        return getConjunction(
+                Stream.concat(
+                        sharedVars.stream()
+                                .map(v -> getEqOrNullable(v, sub.get(v), leftNullableVars, rightNullableVars)),
+                        sharedVars.stream()
+                                .map(v -> termFactory.getStrictEquality(v, sub.get(v)))
+                ).collect(ImmutableCollectors.toList())
         );
     }
 
