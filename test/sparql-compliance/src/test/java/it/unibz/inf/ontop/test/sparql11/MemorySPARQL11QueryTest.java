@@ -199,14 +199,8 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			//ORDER BY IRI (not supported by the SI)
 			subqueryManifest + "subquery11",
 
-			//unbound variable: Var TODO: fix it
-			subqueryManifest + "subquery12",
-
 			//ORDER BY IRI (not supported by the SI)
-			subqueryManifest + "subquery13",
-
-			//missing results (TODO: fix)
-			subqueryManifest + "subquery14"
+			subqueryManifest + "subquery13"
 	);
 
 	public MemorySPARQL11QueryTest(String testIRI, String name, String queryFileURL, String resultFileURL, Dataset dataSet,
