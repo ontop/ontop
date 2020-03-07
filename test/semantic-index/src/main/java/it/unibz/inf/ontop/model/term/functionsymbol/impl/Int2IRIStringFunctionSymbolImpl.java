@@ -18,11 +18,13 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
 
     private final DBTermType dbStringType;
     private final IRIDictionary iriDictionary;
+    private final DBTermType integerType;
 
     public Int2IRIStringFunctionSymbolImpl(@Nonnull DBTermType integerType, @Nonnull DBTermType dbStringType,
                                               @Nonnull IRIDictionary iriDictionary) {
         super("int2IRIString-" + iriDictionary.toString(), ImmutableList.of(integerType));
         this.dbStringType = dbStringType;
+        this.integerType = integerType;
         this.iriDictionary = iriDictionary;
     }
 
@@ -76,7 +78,7 @@ public class Int2IRIStringFunctionSymbolImpl extends FunctionSymbolImpl {
         ImmutableTerm subTerm = terms.get(0);
         return Optional.ofNullable(iriDictionary.getId(otherTerm.getValue()))
                 .filter(id -> id >= 0)
-                .map(termFactory::getDBIntegerConstant)
+                .map(id -> termFactory.getDBConstant(String.format("%d", id), integerType))
                 .map(i -> termFactory.getStrictEquality(subTerm, i))
                 .map(IncrementalEvaluation::declareSimplifiedExpression)
                 .orElseGet(IncrementalEvaluation::declareIsFalse);

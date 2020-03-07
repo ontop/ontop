@@ -44,13 +44,6 @@ public class MemorySPARQL11QueryTest extends MemoryOntopTestCase {
 			// TODO: support IF
 			aggregatesManifest + "agg-err-02",
 
-			/* BINDINGS
-			 */
-			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
-			bindingsManifest + "values8",
-			// TODO: fix it (UNDEF involves the notion of COMPATIBILITY when joining)
-			bindingsManifest + "values5",
-
 			/* FUNCTIONS*/
 
 			//bnode not supported in SPARQL transformation
