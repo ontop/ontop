@@ -265,7 +265,7 @@ public class RDBMSSIRepositoryManager {
 
 		DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
 		int2IRIStringFunctionSymbol = new Int2IRIStringFunctionSymbolImpl(
-				dbTypeFactory.getDBLargeIntegerType(), dbTypeFactory.getDBStringType(), uriMap);
+				dbTypeFactory.getDBTermType("INTEGER"), dbTypeFactory.getDBStringType(), uriMap);
 		iriTypeConstant = termFactory.getRDFTermTypeConstant(typeFactory.getIRITermType());
 	}
 
