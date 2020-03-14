@@ -51,7 +51,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
 
         ImmutableList<Redundancy> redundancies = findRedundancies(query, joinNode, dataNodeMap);
 
-        ImmutableSet<DataNode> nodesToRemove = redundancies.stream()
+        ImmutableSet<ExtensionalDataNode> nodesToRemove = redundancies.stream()
                 .map(r -> r.dataNode)
                 .collect(ImmutableCollectors.toSet());
 
@@ -77,7 +77,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private NodeCentricOptimizationResults<InnerJoinNode> applyOptimization(IntermediateQuery query,
                                                                             QueryTreeComponent treeComponent,
                                                                             InnerJoinNode joinNode,
-                                                                            ImmutableSet<DataNode> nodesToRemove,
+                                                                            ImmutableSet<ExtensionalDataNode> nodesToRemove,
                                                                             ImmutableSet<Variable> variablesToRequireNonNull) {
 
         /*
@@ -243,10 +243,10 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     }
 
     private static class Redundancy {
-        private final DataNode dataNode;
+        private final ExtensionalDataNode dataNode;
         private final ImmutableSet<Variable> fkVariables;
 
-        private Redundancy(DataNode dataNode, ImmutableSet<Variable> fkVariables) {
+        private Redundancy(ExtensionalDataNode dataNode, ImmutableSet<Variable> fkVariables) {
             this.dataNode = dataNode;
             this.fkVariables = fkVariables;
         }

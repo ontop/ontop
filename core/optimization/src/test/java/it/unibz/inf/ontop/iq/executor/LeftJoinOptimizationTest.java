@@ -595,7 +595,7 @@ public class LeftJoinOptimizationTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(constructionNode1, joinNode);
         expectedQueryBuilder.addChild(joinNode, dataNode1);
-        DataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, F0,
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M1, F0,
                 O1F1));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 

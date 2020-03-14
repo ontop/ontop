@@ -186,7 +186,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         LeftJoinNode normalizedLeftJoin = updateRightNodesAndLJ(leftJoinNode, rightComponent, newLJCondition,
                 analysis.getProposedRightDataNode(), treeComponent);
 
-        DataNode newRightChild = analysis.getProposedRightDataNode()
+        ExtensionalDataNode newRightChild = analysis.getProposedRightDataNode()
                 .orElse(rightComponent.dataNode);
 
         LeftJoinNode leftJoinNodeToUpgrade = newLJCondition
@@ -249,7 +249,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
     private LeftJoinNode updateRightNodesAndLJ(LeftJoinNode leftJoinNode,
                                                DataNodeAndSubstitution rightComponent,
                                                Optional<ImmutableExpression> newLJCondition,
-                                               Optional<DataNode> proposedRightDataNode,
+                                               Optional<ExtensionalDataNode> proposedRightDataNode,
                                                QueryTreeComponent treeComponent) {
         rightComponent.constructionNode
                 .ifPresent(n -> treeComponent.replaceNodeByChild(n, Optional.empty()));
@@ -263,7 +263,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
         return newLeftJoinNode;
     }
 
-    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, DataNode rightChild,
+    private LeftJoinNode liftCondition(LeftJoinNode leftJoinNode, QueryNode leftChild, ExtensionalDataNode rightChild,
                                        ImmutableSet<Variable> requiredVariablesAboveLJ, QueryTreeComponent treeComponent,
                                        Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
                                        VariableGenerator variableGenerator, IntermediateQuery query) {
@@ -296,7 +296,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                              query, treeComponent, remainingRightSubstitution, variableGenerator);
     }
 
-    private LeftJoinNode updateConditionalVariables(ImmutableSet<Variable> rightVariablesToUpdate, DataNode rightChild,
+    private LeftJoinNode updateConditionalVariables(ImmutableSet<Variable> rightVariablesToUpdate, ExtensionalDataNode rightChild,
                                                     LeftJoinNode newLeftJoinNode, ImmutableExpression ljCondition,
                                                     IntermediateQuery query, QueryTreeComponent treeComponent,
                                                     Optional<ImmutableSubstitution<ImmutableTerm>> remainingRightSubstitution,
@@ -309,7 +309,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
          * Update the right child
          */
         InjectiveVar2VarSubstitution localSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(newVariableMap);
-        DataNode newRightChild = rightChild.newAtom(localSubstitution.applyToDataAtom(rightChild.getProjectionAtom()));
+        ExtensionalDataNode newRightChild = rightChild.newAtom(localSubstitution.applyToDataAtom(rightChild.getProjectionAtom()));
         treeComponent.replaceNode(rightChild, newRightChild);
 
         ImmutableExpression newCondition = localSubstitution.applyToBooleanExpression(ljCondition);

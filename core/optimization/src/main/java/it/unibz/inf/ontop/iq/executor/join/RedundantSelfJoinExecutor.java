@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.InvalidQueryOptimizationProposalException;
 import it.unibz.inf.ontop.iq.impl.QueryTreeComponent;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.EmptyNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
@@ -161,7 +160,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
             return Optional.empty();
         }
 
-        ImmutableSet<DataNode> removedDataNodes =predicateProposals.stream()
+        ImmutableSet<ExtensionalDataNode> removedDataNodes =predicateProposals.stream()
                 .flatMap(p -> p.getRemovedDataNodes().stream())
                 .collect(ImmutableCollectors.toSet());
 

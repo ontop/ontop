@@ -17,9 +17,9 @@ import java.util.stream.Stream;
 
 public class IQ2CQ {
 
-    public static ImmutableList<DataAtom<RelationPredicate>> toDataAtoms(ImmutableList<? extends IQTree> nodes) {
+    public static ImmutableList<DataAtom<RelationPredicate>> toDataAtoms(ImmutableList<ExtensionalDataNode> nodes) {
          return nodes.stream()
-                .map(n -> ((DataNode<RelationPredicate>) n.getRootNode()).getProjectionAtom())
+                .map(n -> n.getProjectionAtom())
                 .collect(ImmutableCollectors.toList());
     }
 

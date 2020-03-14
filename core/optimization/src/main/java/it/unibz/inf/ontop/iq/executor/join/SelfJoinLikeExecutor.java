@@ -93,18 +93,18 @@ public class SelfJoinLikeExecutor {
     protected static class ConcreteProposal {
 
         private final Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution;
-        private final ImmutableCollection<DataNode> removedDataNodes;
+        private final ImmutableCollection<ExtensionalDataNode> removedDataNodes;
         private final Optional<ImmutableExpression> optionalIsNotNullExpression;
 
         public ConcreteProposal(Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalSubstitution,
-                                ImmutableCollection<DataNode> removedDataNodes,
+                                ImmutableCollection<ExtensionalDataNode> removedDataNodes,
                                 Optional<ImmutableExpression> optionalIsNotNullExpression) {
             this.optionalSubstitution = optionalSubstitution;
             this.removedDataNodes = removedDataNodes;
             this.optionalIsNotNullExpression = optionalIsNotNullExpression;
         }
 
-        public ImmutableCollection<DataNode> getDataNodesToRemove() {
+        public ImmutableCollection<ExtensionalDataNode> getDataNodesToRemove() {
             return removedDataNodes;
         }
 

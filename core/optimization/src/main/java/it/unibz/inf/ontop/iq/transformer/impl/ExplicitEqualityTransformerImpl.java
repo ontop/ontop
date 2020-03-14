@@ -74,12 +74,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformIntensionalData(IntensionalDataNode dn) {
-            return transformDataNode(dn);
+            return transformIntensionalDataNode(dn);
         }
 
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dn) {
-            return transformDataNode(dn);
+            return transformExtensionalDataNode(dn);
         }
 
         @Override
@@ -183,8 +183,24 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     ));
         }
 
-        private IQTree transformDataNode(DataNode dn) {
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn);
+        private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
+
+            if (empt(replacementVars))
+                return dn;
+
+            FilterNode filter = createFilter(dn.getProjectionAtom(), replacementVars);
+            DataAtom atom = replaceVars(dn.getProjectionAtom(), replacementVars);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dn.getVariables()),
+                    iqFactory.createUnaryIQTree(
+                            filter,
+                            dn.newAtom(atom))
+            );
+        }
+
+        private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
 
             if (empt(replacementVars))
                 return dn;
@@ -219,10 +235,10 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             );
         }
 
-        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataNode dn) {
+        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom dataAtom) {
             Set<Variable> vars = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
-            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dn.getProjectionAtom().getArguments()) {
+            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dataAtom.getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {

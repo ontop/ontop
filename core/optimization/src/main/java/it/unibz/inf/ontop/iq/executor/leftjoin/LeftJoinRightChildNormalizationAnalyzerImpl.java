@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -217,12 +216,12 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
     public static class LeftJoinRightChildNormalizationAnalysisImpl implements LeftJoinRightChildNormalizationAnalysis {
 
         @Nullable
-        private final DataNode newRightDataNode;
+        private final ExtensionalDataNode newRightDataNode;
         @Nullable
         private final ImmutableExpression expression;
         private final boolean isMatchingAConstraint;
 
-        private LeftJoinRightChildNormalizationAnalysisImpl(DataNode newRightDataNode, ImmutableExpression expression) {
+        private LeftJoinRightChildNormalizationAnalysisImpl(ExtensionalDataNode newRightDataNode, ImmutableExpression expression) {
             this.newRightDataNode = newRightDataNode;
             this.expression = expression;
             this.isMatchingAConstraint = true;
@@ -240,7 +239,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
         }
 
         @Override
-        public Optional<DataNode> getProposedRightDataNode() {
+        public Optional<ExtensionalDataNode> getProposedRightDataNode() {
             return Optional.ofNullable(newRightDataNode);
         }
 

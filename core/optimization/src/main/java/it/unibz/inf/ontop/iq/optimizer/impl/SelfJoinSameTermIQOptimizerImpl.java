@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
@@ -135,7 +134,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             return Optional.of(child)
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
-                    .map(DataNode::getProjectionAtom)
+                    .map(ExtensionalDataNode::getProjectionAtom)
                     .filter(a1 -> otherChildren
                             .flatMap(t -> t.acceptVisitor(requiredDataAtomExtractor))
                             .anyMatch(a2 -> isDetectedAsRedundant(a1, a2, discardedVariables)))
