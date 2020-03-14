@@ -47,6 +47,21 @@ public abstract class AbstractImmutableSubstitutionImpl<T  extends ImmutableTerm
     }
 
     @Override
+    public ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
+            throws ConversionException {
+        ImmutableMap<Integer, ? extends ImmutableTerm> newArgumentMap = argumentMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> apply(e.getValue())));
+
+        if (!newArgumentMap.values().stream().allMatch(t -> t instanceof VariableOrGroundTerm)) {
+            throw new ConversionException("The substitution applied to an argument map has " +
+                    " produced some non-VariableOrGroundTerm arguments " + newArgumentMap);
+        }
+        return (ImmutableMap<Integer, ? extends VariableOrGroundTerm>) newArgumentMap;
+    }
+
+    @Override
     public DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom dataAtom)
             throws ConversionException {
         ImmutableList<? extends ImmutableTerm> newArguments = apply(dataAtom.getArguments());

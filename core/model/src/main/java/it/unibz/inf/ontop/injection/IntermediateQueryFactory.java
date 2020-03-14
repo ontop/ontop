@@ -49,8 +49,18 @@ public interface IntermediateQueryFactory {
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
+    @Deprecated
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
-    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> newDataAtom, VariableNullability variableNullability);
+
+    /**
+     * NB: keys of the argumentMap are indices. They start at 0.
+     */
+    ExtensionalDataNode createExtensionalDataNode(RelationPredicate predicate,
+                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
+
+    ExtensionalDataNode createExtensionalDataNode(RelationPredicate predicate,
+                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                                                  VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 
