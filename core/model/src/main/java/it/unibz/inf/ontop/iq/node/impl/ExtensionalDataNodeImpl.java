@@ -22,6 +22,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -40,7 +41,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
 
-    private final RelationPredicate relationPredicate;
+    private final RelationDefinition relationDefinition;
     private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
 
 
@@ -59,34 +60,34 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                                     CoreUtilsFactory coreUtilsFactory) {
         super(atom, iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
-        this.relationPredicate = atom.getPredicate();
+        this.relationDefinition = atom.getPredicate().getRelationDefinition();
         this.argumentMap = extractArgumentMap(atom);
     }
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted RelationPredicate relationPredicate,
+    private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory,
                                     TermFactory termFactory,
                                     AtomFactory atomFactory) {
-        super(convertIntoDataAtom(relationPredicate, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
+        super(convertIntoDataAtom(relationDefinition, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
-        this.relationPredicate = relationPredicate;
+        this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
     }
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted RelationPredicate relationPredicate,
+    private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory,
                                     TermFactory termFactory,
                                     AtomFactory atomFactory) {
-        super(convertIntoDataAtom(relationPredicate, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
+        super(convertIntoDataAtom(relationDefinition, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
-        this.relationPredicate = relationPredicate;
+        this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
     }
@@ -105,10 +106,11 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     /**
      * TEMPORARY
      */
-    private static DataAtom<RelationPredicate> convertIntoDataAtom(RelationPredicate predicate,
+    private static DataAtom<RelationPredicate> convertIntoDataAtom(RelationDefinition relationDefinition,
                                                                    ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                                                    TermFactory termFactory,
                                                                    AtomFactory atomFactory) {
+        RelationPredicate predicate = relationDefinition.getAtomPredicate();
         ImmutableList<? extends VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
                 .boxed()
                 .map(i -> Optional.ofNullable(argumentMap.get(i))
@@ -120,8 +122,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public RelationPredicate getRelationPredicate() {
-        return relationPredicate;
+    public RelationDefinition getRelationDefinition() {
+        return relationDefinition;
     }
 
     @Override
@@ -146,8 +148,10 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     }
 
     @Override
-    public ExtensionalDataNode newAtom(DataAtom<RelationPredicate> newAtom) {
-        return iqFactory.createExtensionalDataNode(newAtom);
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArguments = descendingSubstitution.applyToArgumentMap(argumentMap);
+        return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 
     @Override
@@ -194,8 +198,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     public IQTree applyFreshRenaming(InjectiveVar2VarSubstitution freshRenamingSubstitution) {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = freshRenamingSubstitution.applyToArgumentMap(argumentMap);
         return (variableNullability == null)
-                ? iqFactory.createExtensionalDataNode(relationPredicate, newArgumentMap)
-                : iqFactory.createExtensionalDataNode(relationPredicate, newArgumentMap,
+                ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
+                : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
                 variableNullability.applyFreshRenaming(freshRenamingSubstitution));
     }
 

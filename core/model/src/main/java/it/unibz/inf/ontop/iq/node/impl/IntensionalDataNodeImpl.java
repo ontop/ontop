@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
@@ -124,6 +126,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public IntensionalDataNode newAtom(DataAtom newAtom) {
         return iqFactory.createIntensionalDataNode(newAtom);
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        DataAtom novelAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
+        return newAtom(novelAtom);
     }
 
 }

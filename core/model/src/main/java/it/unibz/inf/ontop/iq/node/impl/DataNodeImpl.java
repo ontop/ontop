@@ -55,15 +55,6 @@ public abstract class DataNodeImpl<P extends AtomPredicate> extends LeafIQTreeIm
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        DataAtom novelAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
-        return newAtom(novelAtom);
-    }
-
-    protected abstract LeafIQTree newAtom(DataAtom<P> novelAtom);
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
         return ImmutableSet.of();
     }

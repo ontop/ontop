@@ -111,7 +111,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
                         .map(IQ::normalizeForOptimization) // replaces join equalities
                         .map(q -> mappingCqcOptimizer.optimize(cqc, q))
-                        .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
+                        .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, iqFactory))))
                 .collect(ImmutableCollectors.toMultimap()).asMap();
 
         ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = original.keySet().stream()

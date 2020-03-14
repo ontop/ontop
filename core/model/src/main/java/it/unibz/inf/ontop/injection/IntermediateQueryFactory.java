@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -55,10 +56,10 @@ public interface IntermediateQueryFactory {
     /**
      * NB: keys of the argumentMap are indices. They start at 0.
      */
-    ExtensionalDataNode createExtensionalDataNode(RelationPredicate predicate,
+    ExtensionalDataNode createExtensionalDataNode(RelationDefinition relationDefinition,
                                                   ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
 
-    ExtensionalDataNode createExtensionalDataNode(RelationPredicate predicate,
+    ExtensionalDataNode createExtensionalDataNode(RelationDefinition relationDefinition,
                                                   ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                                   VariableNullability variableNullability);
 

@@ -309,7 +309,8 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
          * Update the right child
          */
         InjectiveVar2VarSubstitution localSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(newVariableMap);
-        ExtensionalDataNode newRightChild = rightChild.newAtom(localSubstitution.applyToDataAtom(rightChild.getProjectionAtom()));
+        ExtensionalDataNode newRightChild = iqFactory.createExtensionalDataNode(rightChild.getRelationDefinition(),
+                localSubstitution.applyToArgumentMap(rightChild.getArgumentMap()));
         treeComponent.replaceNode(rightChild, newRightChild);
 
         ImmutableExpression newCondition = localSubstitution.applyToBooleanExpression(ljCondition);

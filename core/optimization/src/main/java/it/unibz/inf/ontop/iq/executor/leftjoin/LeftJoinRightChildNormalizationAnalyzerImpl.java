@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -26,12 +27,13 @@ import java.util.stream.Stream;
 public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRightChildNormalizationAnalyzer {
 
     private final TermFactory termFactory;
-    private final AtomFactory atomFactory;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
-    private LeftJoinRightChildNormalizationAnalyzerImpl(TermFactory termFactory, AtomFactory atomFactory) {
+    private LeftJoinRightChildNormalizationAnalyzerImpl(TermFactory termFactory,
+                                                        IntermediateQueryFactory iqFactory) {
         this.termFactory = termFactory;
-        this.atomFactory = atomFactory;
+        this.iqFactory = iqFactory;
     }
 
     @Override
@@ -77,8 +79,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .collect(ImmutableCollectors.toList());
 
         if (!conflictingRightArgumentIndexes.isEmpty()) {
-            ExtensionalDataNode newRightDataNode = rightDataNode.newAtom(computeNewRightAtom(rightProjectionAtom.getPredicate(),
-                    rightArguments, conflictingRightArgumentIndexes, variableGenerator));
+            ExtensionalDataNode newRightDataNode = iqFactory.createExtensionalDataNode(
+                    rightProjectionAtom.getPredicate().getRelationDefinition(),
+                    computeNewRightArgumentMap(rightArguments, conflictingRightArgumentIndexes, variableGenerator));
             ImmutableExpression newExpression = computeExpression(rightArguments,
                     newRightDataNode.getProjectionAtom().getArguments());
 
@@ -188,16 +191,16 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .anyMatch(i -> rightArguments.get(i).equals(rightVariable));
     }
 
-    private DataAtom<RelationPredicate> computeNewRightAtom(RelationPredicate predicate, ImmutableList<? extends VariableOrGroundTerm> rightArguments,
-                                         ImmutableList<Integer> conflictingRightArgumentIndexes, VariableGenerator variableGenerator) {
-        ImmutableList<VariableOrGroundTerm> newArguments = IntStream.range(0, rightArguments.size())
+    private ImmutableMap<Integer, VariableOrGroundTerm> computeNewRightArgumentMap(ImmutableList<? extends VariableOrGroundTerm> rightArguments,
+                                                                                   ImmutableList<Integer> conflictingRightArgumentIndexes, VariableGenerator variableGenerator) {
+        return IntStream.range(0, rightArguments.size())
                 .boxed()
-                .map(i -> conflictingRightArgumentIndexes.contains(i)
-                        ? variableGenerator.generateNewVariable()
-                        : rightArguments.get(i))
-                .collect(ImmutableCollectors.toList());
-
-        return atomFactory.getDataAtom(predicate, newArguments);
+                .collect(ImmutableCollectors.toMap(
+                        i -> i,
+                        i -> conflictingRightArgumentIndexes.contains(i)
+                                ? variableGenerator.generateNewVariable()
+                                : rightArguments.get(i)
+                ));
     }
 
     private ImmutableExpression computeExpression(ImmutableList<? extends VariableOrGroundTerm> formerRightArguments,
