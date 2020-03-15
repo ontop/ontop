@@ -50,7 +50,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
     @Override
     protected Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                   RelationPredicate predicate,
+                                                                   RelationDefinition relation,
                                                                    ImmutableList<Variable> priorityVariables,
                                                                    IntermediateQuery query)
             throws AtomUnificationException {
@@ -58,7 +58,6 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         if (initialNodes.size() < 2)
             return Optional.empty();
 
-        RelationDefinition relation = predicate.getRelationDefinition();
 
         /*
          * Does nothing

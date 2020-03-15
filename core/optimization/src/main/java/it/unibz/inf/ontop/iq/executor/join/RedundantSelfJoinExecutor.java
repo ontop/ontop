@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -62,7 +63,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
         // Non-final
         InnerJoinNode topJoinNode = highLevelProposal.getFocusNode();
 
-        ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
+        ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialMap = extractDataNodes(query.getChildren(topJoinNode));
 
         /*
          * Tries to optimize if there are data nodes
@@ -130,16 +131,16 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     /**
      * Throws an AtomUnificationException when the results are guaranteed to be empty
      */
-    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap,
+    private Optional<ConcreteProposal> propose(InnerJoinNode joinNode, ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap,
                                                ImmutableList<Variable> priorityVariables,
                                                IntermediateQuery query)
             throws AtomUnificationException {
 
         ImmutableList.Builder<PredicateLevelProposal> proposalListBuilder = ImmutableList.builder();
 
-        for (RelationPredicate predicate : initialDataNodeMap.keySet()) {
-            ImmutableCollection<ExtensionalDataNode> initialNodes = initialDataNodeMap.get(predicate);
-            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, predicate,
+        for (RelationDefinition relation : initialDataNodeMap.keySet()) {
+            ImmutableCollection<ExtensionalDataNode> initialNodes = initialDataNodeMap.get(relation);
+            Optional<PredicateLevelProposal> predicateProposal = proposePerPredicate(joinNode, initialNodes, relation,
                     priorityVariables, query);
             predicateProposal.ifPresent(proposalListBuilder::add);
         }
@@ -149,7 +150,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
 
     protected Optional<ConcreteProposal> createConcreteProposal(
             ImmutableList<PredicateLevelProposal> predicateProposals,
-            ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap, ImmutableList<Variable> priorityVariables) {
+            ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap, ImmutableList<Variable> priorityVariables) {
 
 
 
@@ -179,7 +180,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     }
 
     protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                            RelationPredicate predicate,
+                                                                            RelationDefinition relationDefinition,
                                                                             ImmutableList<Variable> priorityVariables,
                                                                             IntermediateQuery query) throws AtomUnificationException;
 

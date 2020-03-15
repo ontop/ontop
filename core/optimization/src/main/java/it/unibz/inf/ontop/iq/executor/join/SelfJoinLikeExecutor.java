@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor.join;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -186,12 +187,12 @@ public class SelfJoinLikeExecutor {
     }
 
 
-    protected static ImmutableMultimap<RelationPredicate, ExtensionalDataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
-        ImmutableMultimap.Builder<RelationPredicate, ExtensionalDataNode> mapBuilder = ImmutableMultimap.builder();
+    protected static ImmutableMultimap<RelationDefinition, ExtensionalDataNode> extractDataNodes(ImmutableList<QueryNode> siblings) {
+        ImmutableMultimap.Builder<RelationDefinition, ExtensionalDataNode> mapBuilder = ImmutableMultimap.builder();
         for (QueryNode node : siblings) {
             if (node instanceof ExtensionalDataNode) {
                 ExtensionalDataNode dataNode = (ExtensionalDataNode) node;
-                mapBuilder.put(dataNode.getProjectionAtom().getPredicate(), dataNode);
+                mapBuilder.put(dataNode.getRelationDefinition(), dataNode);
             }
         }
         return mapBuilder.build();
@@ -324,11 +325,11 @@ public class SelfJoinLikeExecutor {
 
     protected Optional<ImmutableSubstitution<VariableOrGroundTerm>> mergeSubstitutions(
             ImmutableList<ImmutableSubstitution<VariableOrGroundTerm>> substitutions,
-            ImmutableMultimap<RelationPredicate, ExtensionalDataNode> initialDataNodeMap,
+            ImmutableMultimap<RelationDefinition, ExtensionalDataNode> initialDataNodeMap,
             ImmutableList<Variable> priorityVariables)
             throws AtomUnificationException {
 
-        ImmutableMap<Variable, Collection<RelationPredicate>> occurrenceVariableMap = initialDataNodeMap.asMap().entrySet().stream()
+        ImmutableMap<Variable, Collection<RelationDefinition>> occurrenceVariableMap = initialDataNodeMap.asMap().entrySet().stream()
                 .flatMap(e -> e.getValue().stream()
                         .flatMap(n -> n.getVariables().stream())
                         .map(v -> Maps.immutableEntry(v, e.getKey())))

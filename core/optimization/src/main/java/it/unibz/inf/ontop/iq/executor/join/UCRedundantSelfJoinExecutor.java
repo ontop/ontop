@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.Attribute;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -42,11 +43,11 @@ public class UCRedundantSelfJoinExecutor extends RedundantSelfJoinExecutor {
      */
     @Override
     protected Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                   RelationPredicate predicate,
+                                                                   RelationDefinition relationDefinition,
                                                                    ImmutableList<Variable> priorityVariables,
                                                                    IntermediateQuery query) throws AtomUnificationException {
 
-        ImmutableList<UniqueConstraint> uniqueConstraints = predicate.getRelationDefinition().getUniqueConstraints();
+        ImmutableList<UniqueConstraint> uniqueConstraints = relationDefinition.getUniqueConstraints();
         if (uniqueConstraints.isEmpty()) {
             return Optional.empty();
         }
