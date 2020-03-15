@@ -1683,7 +1683,9 @@ public class BindingLiftTest {
                                 Y, generateURI2(B))));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(DATA_NODE_1.getProjectionAtom().getPredicate(), ONE_STR, B));
+                DATA_NODE_1.getRelationDefinition(), ImmutableMap.of(
+                        0, ONE_STR,
+                        1, B));
         expectedQueryBuilder.addChild(newConstructionNode, newLeftDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

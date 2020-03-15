@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
@@ -13,9 +11,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.TrueNode;
 import it.unibz.inf.ontop.iq.optimizer.SelfJoinSameTermIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.visitor.RequiredDataAtomExtractor;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -63,7 +59,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
         private final OptimizationSingletons optimizationSingletons;
         private final IntermediateQueryFactory iqFactory;
         private final TermFactory termFactory;
-        private final RequiredDataAtomExtractor requiredDataAtomExtractor;
+        private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
 
         protected SameTermSelfJoinTransformer(ImmutableSet<Variable> discardedVariables,
                                               IQTreeTransformer lookForDistinctTransformer,
@@ -74,7 +70,7 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
             iqFactory = coreSingletons.getIQFactory();
             termFactory = coreSingletons.getTermFactory();
-            requiredDataAtomExtractor = optimizationSingletons.getRequiredDataAtomExtractor();
+            requiredExtensionalDataNodeExtractor = optimizationSingletons.getRequiredExtensionalDataNodeExtractor();
         }
 
         @Override
@@ -134,29 +130,29 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             return Optional.of(child)
                     .filter(c -> c instanceof ExtensionalDataNode)
                     .map(c -> (ExtensionalDataNode) c)
-                    .map(ExtensionalDataNode::getProjectionAtom)
-                    .filter(a1 -> otherChildren
-                            .flatMap(t -> t.acceptVisitor(requiredDataAtomExtractor))
-                            .anyMatch(a2 -> isDetectedAsRedundant(a1, a2, discardedVariables)))
+                    .filter(d1 -> otherChildren
+                            .flatMap(t -> t.acceptVisitor(requiredExtensionalDataNodeExtractor))
+                            .anyMatch(d2 -> isDetectedAsRedundant(d1, d2, discardedVariables)))
                     .isPresent();
         }
 
-        private boolean isDetectedAsRedundant(DataAtom<RelationPredicate> atom, DataAtom<RelationPredicate> otherAtom,
+        private boolean isDetectedAsRedundant(ExtensionalDataNode dataNode, ExtensionalDataNode otherDataNode,
                                               ImmutableSet<Variable> discardedVariables) {
-            if (!atom.getPredicate().equals(otherAtom.getPredicate()))
+            if (!dataNode.getRelationDefinition().equals(otherDataNode.getRelationDefinition()))
                 return false;
 
-            ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
-            ImmutableList<? extends VariableOrGroundTerm> otherArguments = otherAtom.getArguments();
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> otherArgumentMap = otherDataNode.getArgumentMap();
 
-            ImmutableList<? extends VariableOrGroundTerm> differentArguments = IntStream.range(0, atom.getArity())
-                    .filter(i -> !arguments.get(i).equals(otherArguments.get(i)))
-                    .boxed()
-                    .map(arguments::get)
+            Sets.SetView<Integer> allIndexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet());
+
+            ImmutableList<? extends VariableOrGroundTerm> differentArguments = allIndexes.stream()
+                    .filter(i -> !argumentMap.get(i).equals(otherArgumentMap.get(i)))
+                    .map(argumentMap::get)
                     .collect(ImmutableCollectors.toList());
 
             // There must be at least one match
-            if (differentArguments.size() == atom.getArity())
+            if (differentArguments.size() == allIndexes.size())
                 return false;
 
             /*
