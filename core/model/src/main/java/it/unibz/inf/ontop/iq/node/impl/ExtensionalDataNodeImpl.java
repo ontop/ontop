@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -252,18 +253,22 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public boolean isSyntacticallyEquivalentTo(QueryNode node) {
         return (node instanceof ExtensionalDataNode)
-                && ((ExtensionalDataNode) node).getProjectionAtom().equals(this.getProjectionAtom());
+                && ((ExtensionalDataNode) node).getRelationDefinition().equals(relationDefinition)
+                && ((ExtensionalDataNode) node).getArgumentMap().equals(argumentMap);
     }
 
     @Override
     public boolean isEquivalentTo(QueryNode queryNode) {
-        return (queryNode instanceof ExtensionalDataNode)
-                && getProjectionAtom().equals(((ExtensionalDataNode) queryNode).getProjectionAtom());
+        return isSyntacticallyEquivalentTo(queryNode);
     }
-
 
     @Override
     public String toString() {
-        return EXTENSIONAL_NODE_STR + " " + getProjectionAtom();
+        return String.format("%s %s(%s)",
+                EXTENSIONAL_NODE_STR,
+                relationDefinition.getID().toString(),
+                argumentMap.entrySet().stream()
+                .map(e -> e.getKey() + ":" + e.getValue())
+                .collect(Collectors.joining(",")));
     }
 }
