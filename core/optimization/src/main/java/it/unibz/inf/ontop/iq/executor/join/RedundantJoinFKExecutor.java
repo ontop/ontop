@@ -132,7 +132,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         return query.getChildren(joinNode).stream()
                 .filter(c -> c instanceof ExtensionalDataNode)
                 .map(c -> (ExtensionalDataNode) c)
-                .map(c -> Maps.immutableEntry(c.getProjectionAtom().getPredicate().getRelationDefinition(), c))
+                .map(c -> Maps.immutableEntry(c.getRelationDefinition(), c))
                 .collect(ImmutableCollectors.toMultimap());
     }
 
@@ -178,12 +178,12 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
      */
     private boolean areMatching(ExtensionalDataNode sourceDataNode, ExtensionalDataNode targetDataNode, ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> sourceArguments = sourceDataNode.getProjectionAtom().getArguments();
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> sourceArgumentMap = sourceDataNode.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = targetDataNode.getArgumentMap();
 
         return constraint.getComponents().stream()
-                .allMatch(c -> sourceArguments.get(c.getAttribute().getIndex() - 1)
-                        .equals(targetArguments.get(c.getReference().getIndex() - 1)));
+                .allMatch(c -> sourceArgumentMap.get(c.getAttribute().getIndex() - 1)
+                        .equals(targetArgumentMap.get(c.getReference().getIndex() - 1)));
     }
 
     /**
@@ -192,7 +192,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     private boolean areNonFKColumnsUnused(ExtensionalDataNode targetDataNode, IntermediateQuery query,
                                           ForeignKeyConstraint constraint) {
 
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = targetDataNode.getProjectionAtom().getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArguments = targetDataNode.getArgumentMap();
 
         ImmutableSet<Integer> fkTargetIndexes = constraint.getComponents().stream()
                 .map(c -> c.getReference().getIndex() - 1)
@@ -233,10 +233,10 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
     }
 
     private ImmutableSet<Variable> extractJoiningVariables(ExtensionalDataNode node, ForeignKeyConstraint constraint) {
-        ImmutableList<? extends VariableOrGroundTerm> targetArguments = node.getProjectionAtom().getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = node.getArgumentMap();
 
         return constraint.getComponents().stream()
-                .map(c -> targetArguments.get(c.getReference().getIndex() - 1))
+                .map(c -> targetArgumentMap.get(c.getReference().getIndex() - 1))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable) t)
                 .collect(ImmutableCollectors.toSet());

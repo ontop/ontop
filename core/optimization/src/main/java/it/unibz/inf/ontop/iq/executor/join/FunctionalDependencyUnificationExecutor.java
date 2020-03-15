@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -116,17 +115,17 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, ExtensionalDataNode> nodeMultiMap = initialNodes.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        n -> extractDeterminantArguments(n.getProjectionAtom(), constraintDeterminantIndexes),
+                        n -> extractDeterminantArguments(n, constraintDeterminantIndexes),
                         n -> n));
 
         return nodeMultiMap.asMap().values();
     }
 
-    private ImmutableList<VariableOrGroundTerm> extractDeterminantArguments(DataAtom dataAtom,
+    private ImmutableList<VariableOrGroundTerm> extractDeterminantArguments(ExtensionalDataNode dataNode,
                                                                             ImmutableList<Integer> determinantIndexes) {
-        ImmutableList<? extends VariableOrGroundTerm> arguments = dataAtom.getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
         return determinantIndexes.stream()
-                .map(i -> arguments.get(i - 1))
+                .map(i -> argumentMap.get(i - 1))
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -168,7 +167,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
             if (currentDataNode == referenceDataNode)
                 continue;
 
-            unifyDependentTerms(referenceDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(),
+            unifyDependentTerms(referenceDataNode, currentDataNode,
                     dependentIndexes, nullableIndexes)
                     .ifPresent(substitutionCollection::add);
         }
@@ -183,16 +182,19 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
      * Throws an AtomUnificationException if unification is impossible
      */
     private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifyDependentTerms(
-            DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes,
+            ExtensionalDataNode leftNode, ExtensionalDataNode rightNode, ImmutableList<Integer> dependentIndexes,
             ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
+
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> leftArgumentMap = leftNode.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap = rightNode.getArgumentMap();
 
         // Non-final
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> currentUnifier = Optional.empty();
 
         for (Integer dependentIndex : dependentIndexes) {
-            VariableOrGroundTerm leftArgument = leftAtom.getTerm(dependentIndex);
-            VariableOrGroundTerm rightArgument = rightAtom.getTerm(dependentIndex);
+            VariableOrGroundTerm leftArgument = leftArgumentMap.get(dependentIndex);
+            VariableOrGroundTerm rightArgument = rightArgumentMap.get(dependentIndex);
 
             /*
              * Throws an exception if the unification is not possible
@@ -227,20 +229,4 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         }
         return currentUnifier.filter(s -> !s.isEmpty());
     }
-
-
-
-    /**
-     * TODO: explain
-     */
-    private boolean isRemovable(ExtensionalDataNode node, ImmutableSet<Integer> independentIndexes,
-                                ImmutableSet<Variable> requiredAndCooccuringVariables) {
-        ImmutableList<? extends VariableOrGroundTerm> arguments = node.getProjectionAtom().getArguments();
-
-        return independentIndexes.stream()
-                .map(i -> arguments.get(i - 1))
-                .allMatch(t -> (t instanceof Variable) && (!requiredAndCooccuringVariables.contains(t)));
-    }
-
-
 }

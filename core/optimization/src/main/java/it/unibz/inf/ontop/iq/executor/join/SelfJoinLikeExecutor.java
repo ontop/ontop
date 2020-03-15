@@ -445,23 +445,12 @@ public class SelfJoinLikeExecutor {
     /**
      * Returns the list of the terms from atom corresponding
      * to the positions
-     * TODO: explain
      */
-    protected static ImmutableList<VariableOrGroundTerm> extractArguments(DataAtom atom,
+    protected static ImmutableList<VariableOrGroundTerm> extractArguments(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                                                           ImmutableList<Integer> positions) {
-        ImmutableList.Builder<VariableOrGroundTerm> listBuilder = ImmutableList.builder();
-        int atomLength = atom.getArguments().size();
-
-        for (Integer keyIndex : positions) {
-            if (keyIndex > atomLength) {
-                // TODO: find another exception
-                throw new RuntimeException("The key index does not respect the arity of the atom " + atom);
-            }
-            else {
-                listBuilder.add(atom.getTerm(keyIndex - 1));
-            }
-        }
-        return listBuilder.build();
+        return positions.stream()
+                .map(i -> argumentMap.get(i -1))
+                .collect(ImmutableCollectors.toList());
     }
 
     protected <N extends JoinOrFilterNode> NodeCentricOptimizationResults<N> updateJoinNodeAndPropagateSubstitution(
