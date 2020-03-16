@@ -80,6 +80,11 @@ public class TargetAtomFactoryImpl implements TargetAtomFactory {
     }
 
     @Override
+    public TargetAtom getQuadTargetAtom(ImmutableTerm subjectTerm, IRI classIRI, ImmutableTerm graphTerm) {
+        return getQuadTargetAtom(subjectTerm, createIRIConstant(RDF.TYPE), createIRIConstant(classIRI), graphTerm);
+    }
+
+    @Override
     public TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI propertyIRI, ImmutableTerm objectTerm) {
         return getTripleTargetAtom(subjectTerm, createIRIConstant(propertyIRI), objectTerm);
     }

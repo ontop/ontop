@@ -68,6 +68,12 @@ public class R2RMLParser {
 		return extractSubjectTerm(subjectMap, "");
 	}
 
+	public ImmutableList<NonVariableTerm> extractGraphTerms(SubjectMap subjectMap) {
+		return subjectMap.getGraphMaps().stream()
+				.map(g -> extractIRIorBnodeTerm(g, ""))
+				.collect(ImmutableCollectors.toList());
+	}
+
 	private ImmutableTerm extractSubjectTerm(SubjectMap subjectMap, String joinCond) {
 		return extractIRIorBnodeTerm(subjectMap, joinCond);
 	}
