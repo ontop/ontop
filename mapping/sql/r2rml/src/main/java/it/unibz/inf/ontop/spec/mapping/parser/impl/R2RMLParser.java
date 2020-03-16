@@ -69,7 +69,13 @@ public class R2RMLParser {
 	}
 
 	public ImmutableList<NonVariableTerm> extractGraphTerms(SubjectMap subjectMap) {
-		return subjectMap.getGraphMaps().stream()
+		List<GraphMap> graphMaps = subjectMap.getGraphMaps();
+
+		for (GraphMap graphMap : graphMaps) {
+			if (!graphMap.getTermType().equals(R2RMLVocabulary.iri))
+				throw new R2RMLParsingBugException("The graph map must be an IRI, not " + graphMap.getTermType());
+		}
+		return graphMaps.stream()
 				.map(g -> extractIRIorBnodeTerm(g, ""))
 				.collect(ImmutableCollectors.toList());
 	}
