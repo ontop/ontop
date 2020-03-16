@@ -12,6 +12,8 @@ import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
+import it.unibz.inf.ontop.model.term.IRIConstant;
+import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * High-level class that implements the MappingParser interface for R2RML.
@@ -167,8 +170,26 @@ public class R2RMLMappingParser implements SQLMappingParser {
         SubjectMap subjectMap = tm.getSubjectMap();
         ImmutableTerm subjectTerm = r2rmlParser.extractSubjectTerm(subjectMap);
 
+        ImmutableList<NonVariableTerm> graphTerms = r2rmlParser.extractGraphTerms(subjectMap);
+        boolean includeDefaultGraph = graphTerms.isEmpty() ||
+                graphTerms.stream().anyMatch(R2RMLMappingParser::isDefaultGraph);
+
+        ImmutableList<NonVariableTerm> namedGraphTerms = graphTerms.stream()
+                .filter(t -> !isDefaultGraph(t))
+                .collect(ImmutableCollectors.toList());
+
         r2rmlParser.extractClassIRIs(subjectMap)
-                .map(i -> targetAtomFactory.getTripleTargetAtom(subjectTerm, i))
+                .flatMap(i -> {
+
+                    Stream<TargetAtom> quads = namedGraphTerms.stream()
+                            .map(g -> targetAtomFactory.getQuadTargetAtom(subjectTerm, i, g));
+
+                    return includeDefaultGraph
+                            ? Stream.concat(
+                                Stream.of(targetAtomFactory.getTripleTargetAtom(subjectTerm, i)),
+                                quads)
+                            : quads;
+                })
                 .forEach(targetAtoms::add);
 
         for (PredicateObjectMap pom : tm.getPredicateObjectMaps()) {
@@ -176,11 +197,20 @@ public class R2RMLMappingParser implements SQLMappingParser {
             List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pom);
             for (ImmutableTerm objectTerm : r2rmlParser.extractRegularObjectTerms(pom)) {
                 for (NonVariableTerm predicateTerm : predicateTerms) {
-                    targetAtoms.add(targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateTerm, objectTerm));
+                    if (includeDefaultGraph)
+                        targetAtoms.add(targetAtomFactory.getTripleTargetAtom(subjectTerm, predicateTerm, objectTerm));
+                    for (NonVariableTerm graphTerm : namedGraphTerms) {
+                        targetAtoms.add(targetAtomFactory.getQuadTargetAtom(subjectTerm, predicateTerm, objectTerm, graphTerm));
+                    }
                 }
             }
         }
         return targetAtoms.build();
+    }
+
+    private static boolean isDefaultGraph(ImmutableTerm graphTerm) {
+        return (graphTerm instanceof IRIConstant)
+                && ((IRIConstant) graphTerm).getIRI().equals(R2RMLVocabulary.defaultGraph);
     }
 
     private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm,
