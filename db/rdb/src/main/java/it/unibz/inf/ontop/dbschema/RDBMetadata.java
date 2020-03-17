@@ -29,6 +29,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
+import java.sql.Timestamp;
 import java.util.*;
 
 public class RDBMetadata extends BasicDBMetadata {
@@ -99,12 +100,13 @@ public class RDBMetadata extends BasicDBMetadata {
 
     @JsonProperty("metadata")
 	Map<String, String> getMedadataForJsonExport(){
-		return ImmutableMap.of(
-				"dbmsProductName", this.getDbmsProductName(),
-				"dbmsVersion", this.getDbmsVersion(),
-				"driverName", this.getDriverName(),
-				"driverVersion", this.getDriverVersion(),
-				"quotationString", this.getDBParameters().getQuotedIDFactory().getIDQuotationString()
-		);
+		return ImmutableMap.<String,String>builder()
+				.put("extractionTime", new Timestamp(System.currentTimeMillis()).toInstant().toString())
+				.put("dbmsProductName", this.getDbmsProductName())
+				.put("dbmsVersion", this.getDbmsVersion())
+				.put("driverName", this.getDriverName())
+				.put("driverVersion", this.getDriverVersion())
+				.put("quotationString", this.getDBParameters().getQuotedIDFactory().getIDQuotationString())
+				.build();
 	}
 }
