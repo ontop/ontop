@@ -145,7 +145,7 @@ public class QuotedID {
     public static class QuotedIDSerializer extends JsonSerializer<QuotedID> {
 		@Override
 		public void serialize(QuotedID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-			gen.writeString(value.getName());
+			gen.writeString(value.getSQLRendering());
 		}
 	}
 }
