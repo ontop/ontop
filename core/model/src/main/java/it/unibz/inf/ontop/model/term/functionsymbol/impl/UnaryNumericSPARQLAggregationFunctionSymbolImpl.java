@@ -103,9 +103,11 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
     protected AggregationSimplification decomposeUnityped(ImmutableTerm subTerm, RDFTermType subTermType,
                                                           boolean hasGroupBy, VariableNullability variableNullability,
                                                           VariableGenerator variableGenerator, TermFactory termFactory) {
+
         if (!(subTermType instanceof ConcreteNumericRDFDatatype)) {
-            ImmutableFunctionalTerm.FunctionalTermDecomposition decomposition = termFactory.getFunctionalTermDecomposition(termFactory.getNullConstant());
-            return AggregationSimplification.create(decomposition);
+            // Special case of the multityped case. Does not return a null when the group is empty (use a count)
+            // TODO: consider the possibility to disable it through the settings (returning a simple NULL)
+            return decomposeMultityped(subTerm, ImmutableSet.of(subTermType), hasGroupBy, variableNullability, variableGenerator, termFactory);
         }
 
         ConcreteNumericRDFDatatype inputNumericDatatype = (ConcreteNumericRDFDatatype) subTermType;

@@ -214,8 +214,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
                 new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
+                new GroupConcatSPARQLFunctionSymbolImpl(xsdString,1, false),
+                new GroupConcatSPARQLFunctionSymbolImpl(xsdString,2, false)
                 );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -242,10 +242,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 // Distinct can be safely ignored
                 new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
-                // TODO: update
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
-                // TODO: update
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
+                new GroupConcatSPARQLFunctionSymbolImpl(xsdString,1, true),
+                new GroupConcatSPARQLFunctionSymbolImpl(xsdString,2, true)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
