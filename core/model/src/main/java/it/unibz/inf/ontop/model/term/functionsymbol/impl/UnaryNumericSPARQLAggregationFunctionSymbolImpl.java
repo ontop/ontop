@@ -96,8 +96,6 @@ public abstract class UnaryNumericSPARQLAggregationFunctionSymbolImpl extends SP
             default:
                 return Optional.of(decomposeMultityped(subTerm, subTermPossibleTypes, hasGroupBy, variableNullability, variableGenerator, termFactory));
         }
-
-
     }
 
     protected AggregationSimplification decomposeUnityped(ImmutableTerm subTerm, RDFTermType subTermType,

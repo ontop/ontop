@@ -1165,7 +1165,20 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             }
             if (expr instanceof GroupConcat) {
                 ValueExpr sep = ((GroupConcat) expr).getSeparator();
-                return sep == null ?
+                ImmutableTerm sepTerm = sep == null
+                        ? null
+                        : getTerm(sep, knownVariables);
+                if (sepTerm != null
+                        && !((sepTerm instanceof RDFConstant)
+                            && ((RDFConstant) sepTerm).getType().isA(typeFactory.getXsdStringDatatype()))) {
+
+                    // TODO: overcome this restriction
+                    throw new RuntimeException(new OntopUnsupportedInputQueryException(
+                            "The function GROUP_CONCAT is " +
+                            "only supported with a string constant for the second argument or without second argument"));
+                }
+
+                return sepTerm == null ?
                         termFactory.getImmutableFunctionalTerm(
                                 functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
                                         SPARQL.GROUP_CONCAT,
@@ -1179,10 +1192,7 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                                         2
                                 ),
                                 term,
-                                getTerm(
-                                        sep,
-                                        ImmutableSet.of()
-                                ));
+                                sepTerm);
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(

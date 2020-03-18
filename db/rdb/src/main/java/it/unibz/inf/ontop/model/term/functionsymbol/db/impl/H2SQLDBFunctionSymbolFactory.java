@@ -20,8 +20,10 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     private static final String UUID_STR = "RANDOM_UUID";
     private static final String REGEXP_LIKE_STR = "REGEXP_LIKE";
+    private static final String LISTAGG_STR = "LISTAGG";
 
     private static final String UNSUPPORTED_MSG = "Not supported by H2";
+;
 
     @Inject
     private H2SQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -120,6 +122,18 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
         return new NullToleratingDBConcatFunctionSymbol(CONCAT_STR, arity, dbStringType, abstractRootDBType, false);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "LISTAGG(%s%s,%s) WITHIN GROUP (ORDER BY %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                        ));
     }
 
     @Override

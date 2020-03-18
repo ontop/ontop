@@ -68,6 +68,8 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     private DBIsNullOrNotFunctionSymbol isNotNull;
     // Created in init()
     private DBIsTrueFunctionSymbol isTrue;
+
+
     protected AbstractSQLDBFunctionSymbolFactory(ImmutableTable<String, Integer, DBFunctionSymbol> regularFunctionTable,
                                                  TypeFactory typeFactory) {
         super(regularFunctionTable, typeFactory);
@@ -294,6 +296,14 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
         return new DefaultDBIsTrueFunctionSymbol(dbBooleanType);
+    }
+
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                isDistinct
+                        ? Serializers.getDistinctAggregationSerializer("GROUP_CONCAT")
+                        : Serializers.getRegularSerializer("GROUP_CONCAT"));
     }
 
     @Override

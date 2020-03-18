@@ -559,6 +559,12 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
+    public ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct) {
+		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getNullIgnoringDBGroupConcat(isDistinct), subTerm,
+				getDBStringConstant(separator));
+    }
+
+    @Override
     public ImmutableExpression getNotYetTypedEquality(ImmutableTerm t1, ImmutableTerm t2) {
 		return getImmutableExpression(functionSymbolFactory.getNotYetTypedEquality(), t1, t2);
     }
