@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.model.term.*;
@@ -12,31 +11,26 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
     private final RDFDatatype xsdStringType;
+    private final String separator;
     private final boolean isDistinct;
 
-    protected GroupConcatSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType, int arity, boolean isDistinct) {
+    protected GroupConcatSPARQLFunctionSymbolImpl(RDFDatatype xsdStringType, String separator, boolean isDistinct) {
         super(
-                "SP_GROUP_CONCAT"+arity,
+                "SP_GROUP_CONCAT" + (separator.equals(" ") ? "": separator),
                 SPARQL.GROUP_CONCAT,
-                IntStream.range(0, arity).boxed()
-                        .map(i -> xsdStringType)
-                        .collect(ImmutableCollectors.toList())
+                ImmutableList.of(xsdStringType)
         );
         this.xsdStringType = xsdStringType;
+        this.separator = separator;
         this.isDistinct = isDistinct;
-        if(arity < 1 || arity > 2){
-            throw new RuntimeException("Arity 1 or 2 expected");
-        }
     }
 
     public boolean isDistinct() {
@@ -82,29 +76,18 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
             throw new IllegalArgumentException("The size of possibleRDFTypes is expected to match the arity of " +
                     "the function symbol");
         }
-        /*
-         * Currently, we can assume that the second argument is a constant string (enforced by the translator)
-         */
+
         ImmutableTerm firstSubTerm = subTerms.get(0);
         ImmutableSet<RDFTermType> subTermPossibleTypes = possibleRDFTypes.get(0);
 
-        String separator = (getArity() == 2)
-                ? Optional.of(subTerms.get(1))
-                .filter(t -> t instanceof RDFConstant)
-                .map(t -> (RDFConstant)t)
-                .filter(c -> c.getType().isA(xsdStringType))
-                .map(Constant::getValue)
-                .orElseThrow(() -> new MinorOntopInternalBugException("Was expected to be a constant string"))
-                : " ";
-
         return subTermPossibleTypes.stream().allMatch(t -> t.isA(xsdStringType))
-                ? Optional.of(decomposeString(firstSubTerm, separator, hasGroupBy, variableNullability,
+                ? Optional.of(decomposeString(firstSubTerm, hasGroupBy, variableNullability,
                     variableGenerator, termFactory))
-                : Optional.of(decomposeWithNonString(firstSubTerm, separator, hasGroupBy, variableNullability,
+                : Optional.of(decomposeWithNonString(firstSubTerm, variableNullability,
                     variableGenerator, termFactory));
     }
 
-    private AggregationSimplification decomposeString(ImmutableTerm firstSubTerm, String separator, boolean hasGroupBy,
+    private AggregationSimplification decomposeString(ImmutableTerm firstSubTerm, boolean hasGroupBy,
                                                       VariableNullability variableNullability,
                                                       VariableGenerator variableGenerator, TermFactory termFactory) {
         ImmutableTerm subTermLexicalTerm = extractLexicalTerm(firstSubTerm, termFactory);
@@ -137,8 +120,7 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
         return termFactory.getDBGroupConcat(subTermLexicalTerm, separator, isDistinct);
     }
 
-    private AggregationSimplification decomposeWithNonString(ImmutableTerm subTerm, String separator, boolean hasGroupBy,
-                                                             VariableNullability variableNullability,
+    private AggregationSimplification decomposeWithNonString(ImmutableTerm subTerm, VariableNullability variableNullability,
                                                              VariableGenerator variableGenerator, TermFactory termFactory) {
 
         ImmutableTerm subTermLexicalTerm = extractLexicalTerm(subTerm, termFactory);

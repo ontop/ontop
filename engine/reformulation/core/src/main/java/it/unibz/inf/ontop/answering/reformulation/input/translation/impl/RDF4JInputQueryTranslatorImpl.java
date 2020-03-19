@@ -1156,37 +1156,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 );
             }
             if (expr instanceof GroupConcat) {
-                ValueExpr sep = ((GroupConcat) expr).getSeparator();
-                ImmutableTerm sepTerm = sep == null
-                        ? null
-                        : getTerm(sep, knownVariables);
-                if (sepTerm != null
-                        && !((sepTerm instanceof RDFConstant)
-                            && ((RDFConstant) sepTerm).getType().isA(typeFactory.getXsdStringDatatype()))) {
+                String separator = Optional.ofNullable(((GroupConcat) expr).getSeparator())
+                        .map(e -> ((ValueConstant) e).getValue().stringValue())
+                        // Default separator
+                        .orElse(" ");
 
-                    // TODO: overcome this restriction
-                    throw new RuntimeException(new OntopUnsupportedInputQueryException(
-                            "The function GROUP_CONCAT is " +
-                            "only supported with a string constant for the second argument or without second argument"));
-                }
-
-                return sepTerm == null ?
-                        termFactory.getImmutableFunctionalTerm(
-                                getSPARQLAggregateFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        1,
-                                        ((GroupConcat) expr).isDistinct()
-                                ),
-                                term
-                        ) :
-                        termFactory.getImmutableFunctionalTerm(
-                                getSPARQLAggregateFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        2,
-                                        ((GroupConcat) expr).isDistinct()
-                                ),
-                                term,
-                                sepTerm);
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, ((GroupConcat) expr).isDistinct()),
+                        term);
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(

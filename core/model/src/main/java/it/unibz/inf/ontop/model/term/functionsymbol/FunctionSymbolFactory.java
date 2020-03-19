@@ -69,6 +69,8 @@ public interface FunctionSymbolFactory {
                         + " with arity " + arity + " is not available"));
     }
 
+    SPARQLAggregationFunctionSymbol getSPARQLGroupConcatFunctionSymbol(String separator, boolean isDistinct);
+
 
     /**
      * Special function capturing the EBV logic
@@ -119,5 +121,4 @@ public interface FunctionSymbolFactory {
                                                      DBTermType targetType);
 
     FunctionSymbol getUnaryLexicalFunctionSymbol(Function<DBTermType, DBFunctionSymbol> dbFunctionSymbolFct);
-
 }
