@@ -299,14 +299,6 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
-    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
-        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                isDistinct
-                        ? Serializers.getDistinctAggregationSerializer("GROUP_CONCAT")
-                        : Serializers.getRegularSerializer("GROUP_CONCAT"));
-    }
-
-    @Override
     protected DBTypeConversionFunctionSymbol createSimpleCastFunctionSymbol(DBTermType targetType) {
         return new DefaultSimpleDBCastFunctionSymbol(dbTypeFactory.getAbstractRootDBType(), targetType,
                 Serializers.getCastSerializer(targetType));

@@ -890,7 +890,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
     protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
-    protected abstract DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct);
+
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                isDistinct
+                        ? Serializers.getDistinctAggregationSerializer("GROUP_CONCAT")
+                        : Serializers.getRegularSerializer("GROUP_CONCAT"));
+    }
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
