@@ -1233,8 +1233,7 @@ public class LeftJoinProfTest {
         List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
-
-    @Ignore("TODO: support it")
+    
     @Test
     public void testGroupConcat6() throws Exception {
 
@@ -1253,7 +1252,7 @@ public class LeftJoinProfTest {
                 "GROUP BY ?p\n" +
                 "ORDER BY ?p\n";
 
-        List<String> expectedValues = ImmutableList.of("nothing", "nothing", "nothing", "nothing", "", "", "", "");
+        List<String> expectedValues = ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "", "nothing");
         checkReturnedValuesAndReturnSql(query, expectedValues);
     }
 

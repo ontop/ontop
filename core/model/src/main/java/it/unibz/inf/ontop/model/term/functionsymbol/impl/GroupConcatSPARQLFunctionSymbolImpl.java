@@ -3,9 +3,12 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLAggregationFunctionSymbol;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
@@ -14,6 +17,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl implements SPARQLAggregationFunctionSymbol {
 
@@ -136,7 +140,93 @@ public class GroupConcatSPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImp
     private AggregationSimplification decomposeWithNonString(ImmutableTerm subTerm, String separator, boolean hasGroupBy,
                                                              VariableNullability variableNullability,
                                                              VariableGenerator variableGenerator, TermFactory termFactory) {
-        throw new RuntimeException("TODO: support the case with non-strings");
+
+        ImmutableTerm subTermLexicalTerm = extractLexicalTerm(subTerm, termFactory);
+        ImmutableTerm subTermTypeTerm = extractRDFTermTypeTerm(subTerm, termFactory);
+        /*
+         * String sub-variable
+         */
+        Variable stringSubVar = variableGenerator.generateNewVariable("s");
+        Variable incompatibleSubVariable = variableGenerator.generateNewVariable("nonStr");
+
+        /*
+         * Requests to make sure that the sub-tree with provide these novel numeric and non-numeric variables
+         */
+        ImmutableSet<DefinitionPushDownRequest> pushDownRequests = computeRequests(subTermLexicalTerm, subTermTypeTerm, stringSubVar,
+                incompatibleSubVariable, variableNullability, termFactory);
+
+        Variable strAggregateVar = variableGenerator.generateNewVariable("agg");
+        Variable incompatibleCountVariable = variableGenerator.generateNewVariable("nonStrCount");
+
+        ImmutableMap<Variable, ImmutableFunctionalTerm> substitutionMap = computeSubstitutionMap(
+                strAggregateVar, stringSubVar, incompatibleCountVariable, incompatibleSubVariable, termFactory, separator);
+
+        ImmutableFunctionalTerm liftableTerm = computeLiftableTerm(strAggregateVar, incompatibleCountVariable,
+                termFactory);
+
+        return AggregationSimplification.create(
+                termFactory.getFunctionalTermDecomposition(liftableTerm, substitutionMap),
+                pushDownRequests);
+    }
+
+    private ImmutableSet<DefinitionPushDownRequest> computeRequests(
+            ImmutableTerm subTermLexicalTerm, ImmutableTerm subTermTypeTerm,
+            Variable strSubTermVar,
+            Variable incompatibleVariable,
+            VariableNullability variableNullability, TermFactory termFactory) {
+
+        return ImmutableSet.of(
+                createStrRequest(strSubTermVar, subTermLexicalTerm, subTermTypeTerm, variableNullability, termFactory),
+                createNonStrRequest(subTermTypeTerm, incompatibleVariable, termFactory));
+    }
+
+    private DefinitionPushDownRequest createStrRequest(Variable strVariable,
+                                                       ImmutableTerm subTermLexicalTerm,
+                                                       ImmutableTerm subTermTypeTerm,
+                                                       VariableNullability variableNullability,
+                                                       TermFactory termFactory) {
+        ImmutableTerm definition = subTermLexicalTerm.simplify(variableNullability);
+        ImmutableExpression condition = termFactory.getIsAExpression(subTermTypeTerm, xsdStringType);
+
+        return DefinitionPushDownRequest.create(strVariable, definition, condition);
+    }
+
+    protected DefinitionPushDownRequest createNonStrRequest(ImmutableTerm subTermTypeTerm, Variable nonStrVariable,
+                                                            TermFactory termFactory) {
+        ImmutableTerm definition = termFactory.getDBBooleanConstant(true);
+        ImmutableExpression condition = termFactory.getDBNot(termFactory.getIsAExpression(subTermTypeTerm, xsdStringType));
+
+        return DefinitionPushDownRequest.create(nonStrVariable, definition, condition);
+    }
+
+    private ImmutableMap<Variable, ImmutableFunctionalTerm> computeSubstitutionMap(
+            Variable strAggregateVar, Variable strSubTermVar, Variable incompatibleCountVariable,
+            Variable incompatibleSubVariable, TermFactory termFactory, String separator) {
+
+        return ImmutableMap.of(
+                strAggregateVar, createAggregate(strSubTermVar, separator, termFactory),
+                incompatibleCountVariable, termFactory.getDBCount(incompatibleSubVariable, false));
+    }
+
+    private ImmutableFunctionalTerm computeLiftableTerm(Variable strAggregateVar, Variable incompatibleCountVariable,
+                                                        TermFactory termFactory) {
+        DBConstant zero = termFactory.getDBIntegerConstant(0);
+        ImmutableExpression incompatibleCondition = termFactory.getDBNumericInequality(InequalityLabel.GT,
+                incompatibleCountVariable, zero);
+
+        ImmutableFunctionalTerm lexicalTerm = termFactory.getDBCase(
+                Stream.of(
+                        // Checks the incompatibility first
+                        Maps.immutableEntry(incompatibleCondition, termFactory.getNullConstant()),
+                        // Then the group_concat value
+                        Maps.immutableEntry(termFactory.getDBIsNotNull(strAggregateVar), strAggregateVar)),
+                termFactory.getDBStringConstant(""), true);
+
+        ImmutableFunctionalTerm typeTerm = termFactory.getIfElseNull(
+                incompatibleCondition.negate(termFactory),
+                termFactory.getRDFTermTypeConstant(xsdStringType));
+
+        return termFactory.getRDFFunctionalTerm(lexicalTerm, typeTerm);
     }
 
     @Override
