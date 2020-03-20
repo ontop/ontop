@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.impl.OntopModelSettingsImpl;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.*;
@@ -34,6 +35,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final Map<Integer, FunctionSymbol> commonDenominatorMap;
     private final Map<Integer, SPARQLFunctionSymbol> concatMap;
     private final Map<Integer, SPARQLFunctionSymbol> coalesceMap;
+    private final Map<String, SPARQLAggregationFunctionSymbol> distinctSparqlGroupConcatMap;
+    private final Map<String, SPARQLAggregationFunctionSymbol> nonDistinctSparqlGroupConcatMap;
     private final Map<RDFTermType, BooleanFunctionSymbol> isAMap;
     private final Map<InequalityLabel, BooleanFunctionSymbol> lexicalInequalityFunctionSymbolMap;
     private final BooleanFunctionSymbol rdf2DBBooleanFunctionSymbol;
@@ -74,6 +77,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.commonDenominatorMap = new ConcurrentHashMap<>();
         this.concatMap = new ConcurrentHashMap<>();
         this.coalesceMap = new ConcurrentHashMap<>();
+        this.distinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
+        this.nonDistinctSparqlGroupConcatMap = new ConcurrentHashMap<>();
         this.isAMap = new ConcurrentHashMap<>();
         this.lexicalInequalityFunctionSymbolMap = new ConcurrentHashMap<>();
         this.areCompatibleRDFStringFunctionSymbol = new AreCompatibleRDFStringFunctionSymbolImpl(metaRDFType, dbBooleanType);
@@ -213,10 +218,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, false),
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 new AvgSPARQLFunctionSymbolImpl(abstractRDFType, false),
-                new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
-                );
+                new MinBasedSampleSPARQLFunctionSymbol(typeFactory));
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
 
@@ -241,11 +243,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new MinOrMaxSPARQLFunctionSymbolImpl(typeFactory, true),
                 // Distinct can be safely ignored
                 new MinBasedSampleSPARQLFunctionSymbol(typeFactory),
-                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true),
-                // TODO: update
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,1),
-                // TODO: update
-                new DummyGroupConcatSPARQLFunctionSymbol(xsdString,2)
+                new AvgSPARQLFunctionSymbolImpl(abstractRDFType, true)
         );
 
         ImmutableTable.Builder<String, Integer, SPARQLFunctionSymbol> tableBuilder = ImmutableTable.builder();
@@ -341,6 +339,17 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public Optional<SPARQLFunctionSymbol> getSPARQLDistinctAggregateFunctionSymbol(String officialName, int arity) {
         return Optional.ofNullable(distinctSparqlAggregateFunctionTable.get(officialName, arity));
+    }
+
+    @Override
+    public SPARQLAggregationFunctionSymbol getSPARQLGroupConcatFunctionSymbol(String separator, boolean isDistinct) {
+        return isDistinct
+                ? distinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, true))
+                : nonDistinctSparqlGroupConcatMap.computeIfAbsent(separator, s -> createSPARQLGroupConcat(s, false));
+    }
+
+    protected SPARQLAggregationFunctionSymbol createSPARQLGroupConcat(String separator, boolean isDistinct) {
+        return new GroupConcatSPARQLFunctionSymbolImpl(typeFactory.getXsdStringDatatype(), separator, isDistinct);
     }
 
     @Override

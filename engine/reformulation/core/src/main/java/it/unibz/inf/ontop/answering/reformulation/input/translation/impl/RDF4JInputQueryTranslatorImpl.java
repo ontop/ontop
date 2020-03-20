@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.LangSPARQLFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.SPARQLFunctionSymbol;
@@ -1105,18 +1106,9 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
             //Unary count
             if (expr instanceof Count) {
                 Count count = (Count) expr;
-                if (count.isDistinct())
-                    return termFactory.getImmutableFunctionalTerm(
-                            functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(SPARQL.COUNT,1),
-                            term
-                    );
                 return termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                SPARQL.COUNT,
-                                1
-                        ),
-                        term
-                );
+                        getSPARQLAggregateFunctionSymbol(SPARQL.COUNT, 1, count.isDistinct()),
+                        term);
             }
             if (expr instanceof Avg) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1164,25 +1156,14 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
                 );
             }
             if (expr instanceof GroupConcat) {
-                ValueExpr sep = ((GroupConcat) expr).getSeparator();
-                return sep == null ?
-                        termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        1
-                                ),
-                                term
-                        ) :
-                        termFactory.getImmutableFunctionalTerm(
-                                functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                                        SPARQL.GROUP_CONCAT,
-                                        2
-                                ),
-                                term,
-                                getTerm(
-                                        sep,
-                                        ImmutableSet.of()
-                                ));
+                String separator = Optional.ofNullable(((GroupConcat) expr).getSeparator())
+                        .map(e -> ((ValueConstant) e).getValue().stringValue())
+                        // Default separator
+                        .orElse(" ");
+
+                return termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, ((GroupConcat) expr).isDistinct()),
+                        term);
             }
             if (expr instanceof Not) {
                 return termFactory.getImmutableFunctionalTerm(
@@ -1367,6 +1348,12 @@ public class RDF4JInputQueryTranslatorImpl implements RDF4JInputQueryTranslator 
         // If
         // BNodeGenerator
         throw new RuntimeException(new OntopUnsupportedInputQueryException("The expression " + expr + " is not supported yet!"));
+    }
+
+    private FunctionSymbol getSPARQLAggregateFunctionSymbol(String officialName, int arity, boolean isDistinct) {
+        return isDistinct
+                ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, arity)
+                : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, arity);
     }
 
     /**

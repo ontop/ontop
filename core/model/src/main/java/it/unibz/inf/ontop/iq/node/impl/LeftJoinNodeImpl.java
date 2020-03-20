@@ -207,7 +207,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables())
                 .immutableCopy();
 
-        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = leftChild.getPossibleVariableDefinitions().stream()
+        ImmutableSet<ImmutableSubstitution<NonVariableTerm>> rightDefs = rightChild.getPossibleVariableDefinitions().stream()
                 .map(s -> s.reduceDomainToIntersectionWith(rightSpecificVariables))
                 .collect(ImmutableCollectors.toSet());
 
