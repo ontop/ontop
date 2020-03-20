@@ -893,9 +893,13 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
         return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                isDistinct
-                        ? Serializers.getDistinctAggregationSerializer("GROUP_CONCAT")
-                        : Serializers.getRegularSerializer("GROUP_CONCAT"));
+                (terms, termConverter, termFactory) -> String.format(
+                        "LISTAGG(%s%s,%s) WITHIN GROUP (ORDER BY %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                ));
     }
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);

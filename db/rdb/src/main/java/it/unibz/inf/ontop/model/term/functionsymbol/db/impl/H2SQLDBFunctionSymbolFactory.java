@@ -125,18 +125,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
     }
 
     @Override
-    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
-        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                (terms, termConverter, termFactory) -> String.format(
-                        "LISTAGG(%s%s,%s) WITHIN GROUP (ORDER BY %s)",
-                        isDistinct ? "DISTINCT " : "",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1)),
-                        termConverter.apply(terms.get(0))
-                        ));
-    }
-
-    @Override
     protected DBFunctionSymbol createCeilFunctionSymbol(DBTermType dbTermType) {
         return new UnaryDBFunctionSymbolWithSerializerImpl(CEIL_STR, dbTermType, dbTermType, false,
                 (terms, termConverter, termFactory) -> String.format(
