@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 @Singleton
@@ -27,6 +28,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final CoreUtilsFactory coreUtilsFactory;
     private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
     private final IntermediateQueryFactory iqFactory;
+    private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
 
     @Inject
@@ -35,7 +37,8 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                DBFunctionSymbolFactory dbFunctionsymbolFactory, AtomFactory atomFactory,
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
                                UniqueTermTypeExtractor uniqueTermTypeExtractor,
-                               IntermediateQueryFactory iqFactory, OntopModelSettings settings) {
+                               IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
+                               OntopModelSettings settings) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -45,6 +48,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.coreUtilsFactory = coreUtilsFactory;
         this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
         this.iqFactory = iqFactory;
+        this.unificationTools = unificationTools;
         this.settings = settings;
     }
 
@@ -101,5 +105,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public OntopModelSettings getSettings() {
         return settings;
+    }
+
+    @Override
+    public ImmutableUnificationTools getUnificationTools() {
+        return unificationTools;
     }
 }

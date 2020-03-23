@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 
 /**
@@ -39,6 +40,8 @@ public interface CoreSingletons {
     UniqueTermTypeExtractor getUniqueTermTypeExtractor();
 
     OntopModelSettings getSettings();
+
+    ImmutableUnificationTools getUnificationTools();
 
     // TODO: complete
 }

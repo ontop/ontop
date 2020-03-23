@@ -4,12 +4,15 @@ import java.util.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.*;
 
@@ -147,6 +150,35 @@ public class ImmutableUnificationTools {
         return unifierUtilities.getMGU(atom1.getArguments(), atom2.getArguments());
     }
 
+    public Optional<ArgumentMapUnification> computeArgumentMapMGU(
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap1,
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap2) {
+        ImmutableSet<Integer> firstIndexes = argumentMap1.keySet();
+        ImmutableSet<Integer> secondIndexes = argumentMap2.keySet();
+
+        Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, secondIndexes);
+
+        Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifier = unifierUtilities.getMGU(
+                commonIndexes.stream()
+                        .map(argumentMap1::get)
+                        .collect(ImmutableCollectors.toList()),
+                commonIndexes.stream()
+                        .map(argumentMap2::get)
+                        .collect(ImmutableCollectors.toList()));
+
+        return unifier
+                .map(u -> new ArgumentMapUnification(
+                        // Merges the argument maps and applies the unifier
+                        u.applyToArgumentMap(
+                                Sets.union(firstIndexes, secondIndexes).stream()
+                                        .collect(ImmutableCollectors.toMap(
+                                                i -> i,
+                                                i -> Optional.ofNullable((VariableOrGroundTerm) argumentMap1.get(i))
+                                                .orElseGet(() -> argumentMap2.get(i))))),
+                        u));
+
+    }
+
     /**
      * TODO: make it replace computeMGUS()
      */
@@ -161,6 +193,10 @@ public class ImmutableUnificationTools {
      */
     public Optional<ImmutableSubstitution<ImmutableTerm>> computeMGUS(ImmutableSubstitution<? extends ImmutableTerm> substitution1,
                                                                       ImmutableSubstitution<? extends ImmutableTerm> substitution2) {
+        if (substitution1.isEmpty())
+            return Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution2);
+        else if (substitution2.isEmpty())
+            Optional.of((ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)substitution1);
 
         ImmutableList.Builder<ImmutableTerm> firstArgListBuilder = ImmutableList.builder();
         ImmutableList.Builder<ImmutableTerm> secondArgListBuilder = ImmutableList.builder();
@@ -381,5 +417,16 @@ public class ImmutableUnificationTools {
             }
         }
         return substitutionFactory.getSubstitution(ImmutableMap.copyOf(substitutionMap));
+    }
+
+    public static class ArgumentMapUnification {
+        public final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
+        public final ImmutableSubstitution<VariableOrGroundTerm> substitution;
+
+        public ArgumentMapUnification(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                                      ImmutableSubstitution<VariableOrGroundTerm> substitution) {
+            this.argumentMap = argumentMap;
+            this.substitution = substitution;
+        }
     }
 }
