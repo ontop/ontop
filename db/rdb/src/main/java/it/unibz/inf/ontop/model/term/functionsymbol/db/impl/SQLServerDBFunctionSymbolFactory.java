@@ -363,6 +363,22 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return super.createDBAvg(inputType, isDistinct);
     }
 
+    /**
+     * NB: SQL Server does not support (yet?) DISTINCT in STRING_AGG
+     * TODO: throw an exception?
+     */
+    @Override
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "STRING_AGG(%s%s,%s) WITHIN GROUP (ORDER BY %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
+
     @Override
     protected DBBooleanFunctionSymbol createDBBooleanCase(int arity, boolean doOrderingMatter) {
         return new WrappedDBBooleanCaseFunctionSymbolImpl(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);

@@ -160,11 +160,11 @@ public class RelationID {
 		return false;
 	}
 
-//	static class RelationIDSerializer extends JsonSerializer<RelationID> {
-//
-//		@Override
-//		public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-//			gen.writeString(value.getTableName());
-//		}
-//	}
+	static class RelationIDSerializer extends JsonSerializer<RelationID> {
+
+		@Override
+		public void serialize(RelationID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			gen.writeString(value.getSQLRendering());
+		}
+	}
 }

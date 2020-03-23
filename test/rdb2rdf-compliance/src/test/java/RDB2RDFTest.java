@@ -36,16 +36,12 @@ import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
@@ -91,7 +87,7 @@ public class RDB2RDFTest {
 			"tc0005a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0005b",
-			// Named graph
+			// Expect an exception when processing the mapping (non-IRI for named graph) TODO: throw it
 			"tc0007h",
 			// The SQL should not be rejected
 			"tc0009a",
@@ -416,14 +412,31 @@ public class RDB2RDFTest {
 		RepositoryConnection con = null;
 		try {
 			con = dataRep.getConnection();
-			String graphq = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
-			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, graphq);
+			String tripleQuery = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
+			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, tripleQuery);
+			Set<Statement> triples = QueryResults.asSet(gquery.evaluate());
 
-			Set<Statement> actual = QueryResults.asSet(gquery.evaluate());
+			TupleQuery namedGraphQuery = con.prepareTupleQuery(QueryLanguage.SPARQL,
+					"SELECT DISTINCT ?g WHERE { GRAPH ?g {?s ?p ?o } }");
+			ImmutableSet<Resource> namedGraphs = QueryResults.asSet(namedGraphQuery.evaluate()).stream()
+					.map(bs -> bs.getBinding("g"))
+					.map(Binding::getValue)
+					.map(v -> (Resource) v)
+					.collect(ImmutableCollectors.toSet());
+
+			String quadQuery = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH ?g {?s ?p ?o} }";
+			Set<Statement> actual = new HashSet<>(triples);
+			for (Resource namedGraph : namedGraphs) {
+				GraphQuery query = con.prepareGraphQuery(quadQuery);
+				query.setBinding("g", namedGraph);
+				QueryResults.asSet(query.evaluate()).stream()
+						.map(s -> FACTORY.createStatement(s.getSubject(), s.getPredicate(), s.getObject(), namedGraph))
+						.forEach(actual::add);
+			}
 
 			Set<Statement> expected = ImmutableSet.of();
 			if (outputExpected) {
-				expected = stripNamedGraphs(Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get()));
+				expected = Rio.parse(stream(outputFile), BASE_IRI, Rio.getParserFormatForFileName(outputFile).get());
 			}
 
 			if (!Models.isomorphic(expected, actual)) {
@@ -454,21 +467,6 @@ public class RDB2RDFTest {
 		Rio.write(actual, pw, RDFFormat.NQUADS);
 		pw.flush();
 		return sw.toString();
-	}
-
-	/**
-	 * Remove named graphs from expected answers since they are not supported
-	 */
-	private Set<Statement> stripNamedGraphs(Iterable<Statement> statements) {
-		Set<Statement> model = Sets.newHashSet();
-		for (Statement stmt : statements) {
-			if (stmt.getContext() != null) {
-				stmt = FACTORY.createStatement(stmt.getSubject(), stmt.getPredicate(), stmt.getObject());
-			}
-
-			model.add(stmt);
-		}
-		return model;
 	}
 }
 

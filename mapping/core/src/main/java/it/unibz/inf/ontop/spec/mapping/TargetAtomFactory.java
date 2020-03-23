@@ -18,6 +18,8 @@ public interface TargetAtomFactory {
 
     TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI classIRI);
 
+    TargetAtom getQuadTargetAtom(ImmutableTerm subjectTerm, IRI classIRI, ImmutableTerm graphTerm);
+
     TargetAtom getTripleTargetAtom(ImmutableTerm subjectTerm, IRI propertyIRI, ImmutableTerm objectTerm);
 
     /**

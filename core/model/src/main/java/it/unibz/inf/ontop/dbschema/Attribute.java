@@ -174,7 +174,7 @@ public class Attribute {
 	public static class AttributeSerializer extends JsonSerializer<Attribute> {
 		@Override
 		public void serialize(Attribute value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-			gen.writeString(value.getID().getName());
+			gen.writeString(value.getID().getSQLRendering());
 		}
 	}
 }

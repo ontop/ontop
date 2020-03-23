@@ -217,11 +217,11 @@ public class ForeignKeyConstraint {
                 {
                     gen.writeFieldName("from");
                     gen.writeStartObject();
-                    gen.writeStringField("relation", value.relation.getID().getTableName());
+                    gen.writeStringField("relation", value.relation.getID().getSQLRendering());
                     {
                         gen.writeArrayFieldStart("columns");
                         for (Component component : value.getComponents()) {
-                            gen.writeString(component.getAttribute().getID().getName());
+                            gen.writeString(component.getAttribute().getID().getSQLRendering());
                         }
                         gen.writeEndArray();
                     }
@@ -230,11 +230,11 @@ public class ForeignKeyConstraint {
                 {
                     gen.writeFieldName("to");
                     gen.writeStartObject();
-                    gen.writeStringField("relation", value.referencedRelation.getID().getTableName());
+                    gen.writeStringField("relation", value.referencedRelation.getID().getSQLRendering());
                     {
                         gen.writeArrayFieldStart("columns");
                         for (Component component : value.getComponents()) {
-                            gen.writeString(component.getReference().getID().getName());
+                            gen.writeString(component.getReference().getID().getSQLRendering());
                         }
                         gen.writeEndArray();
                     }

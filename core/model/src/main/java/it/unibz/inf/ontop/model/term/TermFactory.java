@@ -569,4 +569,6 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getDBMin(ImmutableTerm subTerm, DBTermType dbType);
     ImmutableFunctionalTerm getDBMax(ImmutableTerm subTerm, DBTermType dbType);
+
+	ImmutableFunctionalTerm getDBGroupConcat(ImmutableTerm subTerm, String separator, boolean isDistinct);
 }

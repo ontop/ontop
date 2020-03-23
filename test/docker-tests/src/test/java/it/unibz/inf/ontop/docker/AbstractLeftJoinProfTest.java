@@ -981,6 +981,131 @@ public abstract class AbstractLeftJoinProfTest extends AbstractVirtualModeTest {
         System.out.println("SQL Query: \n" + sql);
     }
 
+    @Test
+    public void testGroupConcat1() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     ?p :nickname ?n .\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat2() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog Rog", "Frankie Frankie", "Johnny Johnny", "King of Pop King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat3() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(DISTINCT ?n) AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat4() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(?n ; separator='|') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog|Rog", "Frankie|Frankie", "Johnny|Johnny", "King of Pop|King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat5() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (GROUP_CONCAT(DISTINCT ?n ; separator='|') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :nickname ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("Rog", "Frankie", "Johnny", "King of Pop", "", "", "", "");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
+    @Test
+    public void testGroupConcat6() throws Exception {
+
+        String query =  "PREFIX : <http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#>\n" +
+                "\n" +
+                "SELECT ?p (COALESCE(GROUP_CONCAT(?n),'nothing') AS ?v)\n" +
+                "WHERE {\n" +
+                "   ?p a :Professor . \n" +
+                "   OPTIONAL { \n" +
+                "     { ?p :nickname ?n }\n" +
+                "     UNION \n" +
+                "     { ?p :teaches ?c .\n" +
+                "       ?c :nbStudents ?n }\n" +
+                "   }\n" +
+                "}\n" +
+                "GROUP BY ?p\n" +
+                "ORDER BY ?p\n";
+
+        List<String> expectedValues = ImmutableList.of("nothing", "Frankie", "nothing", "King of Pop", "", "", "", "nothing");
+        checkReturnedValuesAndReturnSql(query, expectedValues);
+    }
+
     private static boolean containsMoreThanOneOccurrence(String query, String pattern) {
         int firstOccurrenceIndex = query.indexOf(pattern);
         if (firstOccurrenceIndex >= 0) {
