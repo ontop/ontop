@@ -186,11 +186,13 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             try {
                 ImmutableList<IQTree> children = ImmutableList.of(liftedLeftChild, rightChild);
+                VariableNullability childVariableNullability = variableNullabilityTools.getChildrenVariableNullability(
+                        ImmutableList.of(leftGrandChild, rightChild));
 
                 return bindingLifter.liftRegularChildBinding(leftConstructionNode, 0, leftGrandChild,
                         children,
                         leftGrandChild.getVariables(), ljCondition, variableGenerator,
-                        variableNullabilityTools.getChildrenVariableNullability(children), this::applyLeftChildBindingLift)
+                        childVariableNullability, this::applyLeftChildBindingLift)
                         // Recursive (for optimization purposes)
                         .liftLeftChild();
             }
