@@ -140,16 +140,44 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                             optimizationStates.stream()
                                     .flatMap(s -> s.newExpressions.stream())));
 
-            IQTree newJoinTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren)
-                    .applyDescendingSubstitution(unifier, Optional.empty());
+            return buildNewTree(newChildren, newExpression, unifier, tree.getVariables());
+        }
+
+        private IQTree buildNewTree(ImmutableList<IQTree> children, Optional<ImmutableExpression> expression,
+                                    ImmutableSubstitution<VariableOrGroundTerm> unifier,
+                                    ImmutableSet<Variable> treeVariables) {
+
+            ImmutableList<IQTree> newChildren = unifier.isEmpty()
+                    ? children
+                    : children.stream()
+                    .map(t -> t.applyDescendingSubstitution(unifier, Optional.empty()))
+                    .collect(ImmutableCollectors.toList());
+
+            Optional<ImmutableExpression> newExpression = expression
+                    .map(unifier::applyToBooleanExpression);
+
+            IQTree newTree;
+            switch (newChildren.size()) {
+                case 0:
+                    throw new MinorOntopInternalBugException("Should have been detected before");
+                case 1:
+                    IQTree child = newChildren.iterator().next();
+                    newTree = newExpression
+                            .map(e -> (IQTree) iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), child))
+                            .orElse(child);
+                    break;
+                default:
+                    newTree = iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(newExpression), newChildren);
+            }
 
             return unifier.isEmpty()
-                    ? newJoinTree
+                    ? newTree
                     : iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(tree.getVariables(),
+                            iqFactory.createConstructionNode(treeVariables,
                                     (ImmutableSubstitution<ImmutableTerm>)(ImmutableSubstitution<?>)unifier),
-                            newJoinTree);
+                                    newTree);
         }
+
 
         protected OptimizationState optimizeExtensionalDataNodes(RelationDefinition relationDefinition,
                                                                  Collection<ExtensionalDataNode> dataNodes) {
@@ -198,9 +226,12 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
             if (simplifications.stream().anyMatch(s -> !s.isPresent()))
                 return noSolutionState;
 
-            Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(simplifications.stream()
-                            .map(Optional::get)
-                            .map(s -> s.substitution));
+            Optional<ImmutableSubstitution<VariableOrGroundTerm>> optionalUnifier = unifySubstitutions(
+                    Stream.concat(
+                            simplifications.stream()
+                                    .map(Optional::get)
+                                    .map(s -> s.substitution),
+                            Stream.of(state.substitution)));
 
             if (!optionalUnifier.isPresent()) {
                 return noSolutionState;

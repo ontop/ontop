@@ -29,7 +29,7 @@ public class JoinCompositeExecutor
         ImmutableList.Builder<SimpleNodeCentricExecutor<InnerJoinNode, InnerJoinOptimizationProposal>>
                 executorBuilder = ImmutableList.builder();
         executorBuilder.add(expressionExecutor);
-        executorBuilder.add(ucSelfJoinExecutor);
+        //executorBuilder.add(ucSelfJoinExecutor);
         executorBuilder.add(fkExecutor);
         executorBuilder.add(nufcSelfJoinExecutor);
 

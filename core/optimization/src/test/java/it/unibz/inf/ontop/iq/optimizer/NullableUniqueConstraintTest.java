@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
@@ -18,6 +19,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -184,7 +186,11 @@ public class NullableUniqueConstraintTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
+
+        ExtensionalDataNode newNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_PREDICATE.getRelationDefinition(),
+                ImmutableMap.of(0, A, 1, F0, 2, GF1));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -192,7 +198,52 @@ public class NullableUniqueConstraintTest {
                         newConstructionNode,
                         IQ_FACTORY.createUnaryIQTree(
                                 filterNode,
-                                leftNode1)));
+                                newNode)));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Ignore("TODO: enable it once  sparse extensional data node are fully supported")
+    @Test
+    public void testFilterAboveSparse1() throws EmptyQueryException {
+        ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_PREDICATE.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+        ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_PREDICATE.getRelationDefinition(),
+                ImmutableMap.of(0, A, 1, TWO, 2, G));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, G);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        filterNode,
+                        IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                                IQ_FACTORY.createLeftJoinNode(),
+                                leftNode1,
+                                rightNode)));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
+                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
+
+        ExtensionalDataNode newNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_PREDICATE.getRelationDefinition(),
+                ImmutableMap.of(0, A, 1, B, 2, C));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        newConstructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                filterNode,
+                                newNode)));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }

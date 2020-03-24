@@ -67,6 +67,7 @@ public class OntopOptimizationModule extends OntopAbstractModule {
         bindFromSettings(QueryPlanner.class);
         bindFromSettings(SelfJoinSameTermIQOptimizer.class);
         bindFromSettings(RequiredExtensionalDataNodeExtractor.class);
+        bindFromSettings(SelfJoinUCIQOptimizer.class);
 
         bind(OptimizationSingletons.class).to(OptimizationSingletonsImpl.class);
 
