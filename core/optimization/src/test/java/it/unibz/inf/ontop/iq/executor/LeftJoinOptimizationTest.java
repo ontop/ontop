@@ -298,7 +298,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
-                TABLE1_PREDICATE, M, NF1, ONE));
+                TABLE1_PREDICATE, M, N1, ONE));
         expectedQueryBuilder.addChild(constructionNode1, newDataNode);
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -328,7 +328,7 @@ public class LeftJoinOptimizationTest {
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
 
         ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(
-                TABLE1_PREDICATE, M, NF1, ONE));
+                TABLE1_PREDICATE, M, N1, ONE));
         expectedQueryBuilder.addChild(constructionNode1, newDataNode);
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -378,10 +378,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(F0, TWO), NF1)));
+                        TERM_FACTORY.getStrictEquality(O, TWO), N1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O)));
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }
@@ -406,10 +406,10 @@ public class LeftJoinOptimizationTest {
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, TERM_FACTORY.getIfElseNull( 
-                        TERM_FACTORY.getStrictEquality(F0, NF1), NF1)));
+                        TERM_FACTORY.getStrictEquality(O, N1), N1)));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
         expectedQueryBuilder.addChild(newConstructionNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, NF1, F0)));
+                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N1, O)));
 
         optimizeAndCheck(query, expectedQueryBuilder.build());
     }

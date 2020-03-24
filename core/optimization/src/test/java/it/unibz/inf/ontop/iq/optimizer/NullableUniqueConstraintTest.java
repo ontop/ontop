@@ -196,11 +196,7 @@ public class NullableUniqueConstraintTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
-
-        ExtensionalDataNode newNode = IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_PREDICATE.getRelationDefinition(),
-                ImmutableMap.of(0, A, 1, F0, 2, GF1));
+                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -208,12 +204,11 @@ public class NullableUniqueConstraintTest {
                         newConstructionNode,
                         IQ_FACTORY.createUnaryIQTree(
                                 filterNode,
-                                newNode)));
+                                leftNode1)));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: enable it once  sparse extensional data node are fully supported")
     @Test
     public void testFilterAboveSparse1() throws EmptyQueryException {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(
@@ -241,11 +236,11 @@ public class NullableUniqueConstraintTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
 
         ExtensionalDataNode newNode = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_PREDICATE.getRelationDefinition(),
-                ImmutableMap.of(0, A, 1, B, 2, C));
+                ImmutableMap.of(0, A, 1, F0, 2, GF1));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,

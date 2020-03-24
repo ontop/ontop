@@ -251,6 +251,7 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                                                Optional<ImmutableExpression> newLJCondition,
                                                Optional<ExtensionalDataNode> proposedRightDataNode,
                                                QueryTreeComponent treeComponent) {
+        ImmutableSet<Variable> projectedVariables = treeComponent.getVariables(leftJoinNode);
         rightComponent.constructionNode
                 .ifPresent(n -> treeComponent.replaceNodeByChild(n, Optional.empty()));
         rightComponent.filterNode
@@ -259,6 +260,11 @@ public class LeftToInnerJoinExecutor implements SimpleNodeCentricExecutor<LeftJo
                 .ifPresent(n -> treeComponent.replaceNode(rightComponent.dataNode, n));
         LeftJoinNode newLeftJoinNode = leftJoinNode.changeOptionalFilterCondition(newLJCondition);
         treeComponent.replaceNode(leftJoinNode, newLeftJoinNode);
+
+        // Maintains the same projected variables
+        ImmutableSet<Variable> tmpProjectedVariables = treeComponent.getVariables(newLeftJoinNode);
+        if (!projectedVariables.equals(tmpProjectedVariables))
+            treeComponent.insertParent(newLeftJoinNode, iqFactory.createConstructionNode(projectedVariables));
 
         return newLeftJoinNode;
     }
