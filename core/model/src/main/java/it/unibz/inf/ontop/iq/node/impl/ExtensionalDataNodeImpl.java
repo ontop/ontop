@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
@@ -16,10 +15,8 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -28,8 +25,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,12 +34,16 @@ import java.util.stream.IntStream;
  *
  * Most likely (but not necessarily) will be overwritten by native query language specific implementations.
  */
-public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> implements ExtensionalDataNode {
+public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements ExtensionalDataNode {
 
     private static final String EXTENSIONAL_NODE_STR = "EXTENSIONAL";
 
     private final RelationDefinition relationDefinition;
     private final ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap;
+
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> variables;
 
 
     // LAZY
@@ -59,7 +59,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory) {
-        super(atom, iqTreeTools, iqFactory);
+        super(iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
         this.relationDefinition = atom.getPredicate().getRelationDefinition();
         this.argumentMap = extractArgumentMap(atom);
@@ -69,10 +69,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory,
-                                    TermFactory termFactory,
-                                    AtomFactory atomFactory) {
-        super(convertIntoDataAtom(relationDefinition, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
+                                    CoreUtilsFactory coreUtilsFactory) {
+        super(iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
@@ -83,10 +81,8 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory,
-                                    TermFactory termFactory,
-                                    AtomFactory atomFactory) {
-        super(convertIntoDataAtom(relationDefinition, argumentMap, termFactory, atomFactory), iqTreeTools, iqFactory);
+                                    CoreUtilsFactory coreUtilsFactory) {
+        super(iqTreeTools, iqFactory);
         this.coreUtilsFactory = coreUtilsFactory;
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
@@ -102,24 +98,6 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                 .collect(ImmutableCollectors.toMap(
                         i -> i,
                         atom::getTerm));
-    }
-
-    /**
-     * TEMPORARY
-     */
-    private static DataAtom<RelationPredicate> convertIntoDataAtom(RelationDefinition relationDefinition,
-                                                                   ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
-                                                                   TermFactory termFactory,
-                                                                   AtomFactory atomFactory) {
-        RelationPredicate predicate = relationDefinition.getAtomPredicate();
-        ImmutableList<? extends VariableOrGroundTerm> newArguments = IntStream.range(0, predicate.getArity())
-                .boxed()
-                .map(i -> Optional.ofNullable(argumentMap.get(i))
-                        .map(a -> (VariableOrGroundTerm)a)
-                        .orElseGet(() -> termFactory.getVariable("v" + UUID.randomUUID().toString())))
-                .collect(ImmutableCollectors.toList());
-
-        return atomFactory.getDataAtom(predicate, newArguments);
     }
 
     @Override
@@ -140,7 +118,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
 
     @Override
     public ExtensionalDataNode clone() {
-        return iqFactory.createExtensionalDataNode(getProjectionAtom());
+        return iqFactory.createExtensionalDataNode(relationDefinition, argumentMap);
     }
 
     @Override
@@ -160,16 +138,11 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
         if (!getVariables().contains(variable))
             throw new IllegalArgumentException("The variable " + variable + " is not projected by " + this);
 
-        DataAtom<RelationPredicate> atom = getProjectionAtom();
-
-        RelationDefinition relation = atom.getPredicate().getRelationDefinition();
-
-        ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
-
         // NB: DB column indexes start at 1.
-        return IntStream.range(1, arguments.size() + 1)
-                .filter(i -> arguments.get(i - 1).equals(variable))
-                .mapToObj(relation::getAttribute)
+        return argumentMap.entrySet().stream()
+                .filter(e -> e.getValue().equals(variable))
+                .map(e -> e.getKey() + 1)
+                .map(relationDefinition::getAttribute)
                 .allMatch(Attribute::canNull);
     }
 
@@ -183,7 +156,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
      */
     @Override
     public boolean isDistinct() {
-        return !getProjectionAtom().getPredicate().getRelationDefinition().getUniqueConstraints().isEmpty();
+        return !relationDefinition.getUniqueConstraints().isEmpty();
     }
 
     @Override
@@ -207,17 +180,14 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public VariableNullability getVariableNullability() {
         if (variableNullability == null) {
-            DataAtom<RelationPredicate> atom = getProjectionAtom();
-            RelationDefinition relation = atom.getPredicate().getRelationDefinition();
 
-            ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
-            ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(arguments);
+            ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
 
             // NB: DB column indexes start at 1.
-            ImmutableSet<ImmutableSet<Variable>> nullableGroups = IntStream.range(0, arguments.size())
-                    .filter(i -> arguments.get(i) instanceof Variable)
-                    .filter(i -> relation.getAttribute(i + 1).canNull())
-                    .mapToObj(arguments::get)
+            ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
+                    .filter(e -> e.getValue() instanceof Variable)
+                    .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).canNull())
+                    .map(Map.Entry::getValue)
                     .map(a -> (Variable) a)
                     // An implicit filter condition makes them non-nullable
                     .filter(a -> argMultiset.count(a) < 2)
@@ -237,11 +207,10 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         if (uniqueConstraints == null) {
-            ImmutableList<? extends VariableOrGroundTerm> arguments = getProjectionAtom().getArguments();
 
-            uniqueConstraints = getProjectionAtom().getPredicate().getRelationDefinition().getUniqueConstraints().stream()
+            uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
                     .map(uc -> uc.getAttributes().stream()
-                            .map(a ->  arguments.get(a.getIndex() -1))
+                            .map(a ->  argumentMap.get(a.getIndex() -1))
                             .filter(t -> t instanceof Variable)
                             .map(v -> (Variable)v)
                             .collect(ImmutableCollectors.toSet()))
@@ -270,5 +239,47 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
                 argumentMap.entrySet().stream()
                 .map(e -> e.getKey() + ":" + e.getValue())
                 .collect(Collectors.joining(",")));
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public synchronized ImmutableSet<Variable> getLocalVariables() {
+        if (variables == null) {
+            variables = argumentMap.values()
+                    .stream()
+                    .filter(Variable.class::isInstance)
+                    .map(Variable.class::cast)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return variables;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getLocallyDefinedVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getRequiredVariables(IntermediateQuery query) {
+        return getLocallyRequiredVariables();
+    }
+
+    @Override
+    public ImmutableSet<Variable> getKnownVariables() {
+        return getLocalVariables();
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
     }
 }

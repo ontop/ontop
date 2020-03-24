@@ -14,9 +14,6 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
  */
 public interface ExtensionalDataNode extends LeafIQTree {
 
-    @Deprecated
-    DataAtom<RelationPredicate> getProjectionAtom();
-
     RelationDefinition getRelationDefinition();
 
     ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();

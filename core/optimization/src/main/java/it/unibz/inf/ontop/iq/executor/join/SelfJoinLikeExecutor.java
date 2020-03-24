@@ -291,10 +291,16 @@ public class SelfJoinLikeExecutor {
         ImmutableList.Builder<ImmutableSubstitution<VariableOrGroundTerm>> nonSharedSubstitutionListBuilder = ImmutableList.builder();
 
         // Non-final
-        DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
+        // TODO:remove!!!!!
+        //DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
+        DataAtom accumulatedAtom = null;
+        if (accumulatedAtom == null)
+            throw new RuntimeException("This code is broken and will be removed soon");
 
         while (nodeIterator.hasNext()) {
-            DataAtom newAtom = nodeIterator.next().getProjectionAtom();
+            // TODO: remove!!!!!
+            //DataAtom accumulatedAtom = nodeIterator.next().getProjectionAtom();
+            DataAtom newAtom = null;
 
             /*
              * Before the following unification, we detach a fragment about non-shared variables from the accumulated substitution
