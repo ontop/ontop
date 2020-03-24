@@ -89,11 +89,16 @@ public class NullableUniqueConstraintTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
+
+        ExtensionalDataNode newLeftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F0, GF1));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, leftNode2));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(newConstructionNode, joinTree));
+                IQ_FACTORY.createUnaryIQTree(newConstructionNode, newJoinTree));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
@@ -127,18 +132,23 @@ public class NullableUniqueConstraintTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        ImmutableExpression bEquality = TERM_FACTORY.getStrictEquality(B, TWO);
+        ImmutableExpression bEquality = TERM_FACTORY.getStrictEquality(F0, TWO);
 
         ImmutableFunctionalTerm newHDefinition = TERM_FACTORY.getIfElseNull(bEquality, ONE);
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(
-                        G, TERM_FACTORY.getIfElseNull(bEquality, C),
+                        G, TERM_FACTORY.getIfElseNull(bEquality, GF1),
                         H, newHDefinition));
+
+        ExtensionalDataNode newLeftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F0, GF1));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, leftNode2));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(newConstructionNode, joinTree));
+                IQ_FACTORY.createUnaryIQTree(newConstructionNode, newJoinTree));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
