@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
@@ -40,6 +42,7 @@ import static junit.framework.TestCase.assertTrue;
 public class RedundantSelfJoinTest {
 
     private final static RelationPredicate TABLE1_PREDICATE;
+    private static final DatabaseRelationDefinition TABLE_1;
     private final static RelationPredicate TABLE2_PREDICATE;
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE4_PREDICATE;
@@ -85,12 +88,12 @@ public class RedundantSelfJoinTest {
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
+        TABLE_1 = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
+        Attribute col1T1 = TABLE_1.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
+        TABLE_1.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
+        TABLE_1.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
+        TABLE_1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
+        TABLE1_PREDICATE = TABLE_1.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -1336,6 +1339,112 @@ public class RedundantSelfJoinTest {
 
 
         optimizeAndCompare(initialQuery, expectedQueryBuilder.build());
+    }
+
+    @Ignore("TODO: enable it once we are able to cleanup strict-equalities with ground functional terms")
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm1() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                1, M));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                2, N));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, N);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                1, M,
+                2, N));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedDataNode);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm2() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, TWO));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, M);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm, TWO)),
+                dataNode2);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Ignore("TODO: enable it once we are able to cleanup strict-equalities with ground functional terms")
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm3() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm1 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
+
+        GroundFunctionalTerm groundFunctionalTerm2 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("g", 0));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm1));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm2));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, M);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm1, groundFunctionalTerm2)),
+                dataNode1);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) throws EmptyQueryException {
+        optimizeAndCompare(
+                IQ_CONVERTER.convert(initialIQ, EXECUTOR_REGISTRY),
+                IQ_CONVERTER.convert(expectedIQ, EXECUTOR_REGISTRY));
     }
 
     private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) throws EmptyQueryException {

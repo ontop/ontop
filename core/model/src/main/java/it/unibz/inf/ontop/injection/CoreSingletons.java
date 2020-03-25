@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.injection;
 
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -42,6 +43,8 @@ public interface CoreSingletons {
     OntopModelSettings getSettings();
 
     ImmutableUnificationTools getUnificationTools();
+
+    ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer();
 
     // TODO: complete
 }

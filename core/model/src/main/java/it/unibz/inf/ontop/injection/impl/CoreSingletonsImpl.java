@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
+import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -30,6 +31,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
     private final IntermediateQueryFactory iqFactory;
     private final ImmutableUnificationTools unificationTools;
     private final OntopModelSettings settings;
+    private final ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer;
 
     @Inject
     private CoreSingletonsImpl(TermFactory termFactory, TypeFactory typeFactory,
@@ -38,7 +40,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
                                SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory,
                                UniqueTermTypeExtractor uniqueTermTypeExtractor,
                                IntermediateQueryFactory iqFactory, ImmutableUnificationTools unificationTools,
-                               OntopModelSettings settings) {
+                               OntopModelSettings settings, ConstructionSubstitutionNormalizer constructionSubstitutionNormalizer) {
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.functionSymbolFactory = functionSymbolFactory;
@@ -50,6 +52,7 @@ public class CoreSingletonsImpl implements CoreSingletons {
         this.iqFactory = iqFactory;
         this.unificationTools = unificationTools;
         this.settings = settings;
+        this.constructionSubstitutionNormalizer = constructionSubstitutionNormalizer;
     }
 
     @Override
@@ -110,5 +113,10 @@ public class CoreSingletonsImpl implements CoreSingletons {
     @Override
     public ImmutableUnificationTools getUnificationTools() {
         return unificationTools;
+    }
+
+    @Override
+    public ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer() {
+        return constructionSubstitutionNormalizer;
     }
 }

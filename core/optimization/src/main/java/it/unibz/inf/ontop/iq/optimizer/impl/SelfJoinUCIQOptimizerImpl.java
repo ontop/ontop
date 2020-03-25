@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -65,7 +64,7 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
                     .map(t -> t.acceptTransformer(this))
                     .collect(ImmutableCollectors.toList());
 
-            return simplifier.transformInnerJoin(tree, rootNode, liftedChildren);
+            return simplifier.transformInnerJoin(rootNode, liftedChildren, tree.getVariables());
         }
     }
 
@@ -84,21 +83,28 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
         @Override
         protected Optional<DeterminantGroupEvaluation> evaluateDeterminantGroup(ImmutableList<VariableOrGroundTerm> determinants,
                                                                                 Collection<ExtensionalDataNode> dataNodes,
-                                                                                ImmutableSet<Attribute> dependents) {
+                                                                                UniqueConstraint constraint) {
             if (dataNodes.size() < 2)
                 throw new IllegalArgumentException("At least two nodes");
 
-            ImmutableSet<ImmutableExpression> expressions = determinants.stream()
-                    .filter(d -> d instanceof Variable)
-                    .map(d -> (Variable) d)
-                    .map(termFactory::getDBIsNotNull)
+            NormalizationBeforeUnification normalization = normalizeDataNodes(dataNodes, constraint);
+
+
+            ImmutableSet<ImmutableExpression> expressions = Stream.concat(
+                    determinants.stream()
+                            .filter(d -> d instanceof Variable)
+                            .map(d -> (Variable) d)
+                            .map(termFactory::getDBIsNotNull),
+                    normalization.equalities.stream())
                     .collect(ImmutableCollectors.toSet());
 
-            return unifyDataNodes(dataNodes.stream())
+            return unifyDataNodes(normalization.dataNodes.stream())
                     .map(u -> new DeterminantGroupEvaluation(
                             expressions,
-                            ImmutableList.of(iqFactory.createExtensionalDataNode(
-                                    dataNodes.iterator().next().getRelationDefinition(), u.argumentMap)),
+                            ImmutableList.of(
+                                    iqFactory.createExtensionalDataNode(
+                                            dataNodes.iterator().next().getRelationDefinition(),
+                                            u.argumentMap)),
                             u.substitution));
         }
     }
