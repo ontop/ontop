@@ -455,7 +455,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return results.getExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getNonFunctionalTermFragment()));
+                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getVariableOrGroundTermFragment()));
     }
 
     /**
@@ -483,7 +483,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<NonFunctionalTerm> downSubstitution =
+        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution =
                 substitutionFactory.getSubstitution(
                         downSubstitutionExpressions.stream()
                             .map(ImmutableFunctionalTerm::getTerms)
@@ -493,7 +493,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                     ? args.reverse() : args)
                             .collect(ImmutableCollectors.toMap(
                                     args -> (Variable) args.get(0),
-                                    args -> (NonFunctionalTerm) args.get(1))));
+                                    args -> (VariableOrGroundTerm) args.get(1))));
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 expressions.stream()

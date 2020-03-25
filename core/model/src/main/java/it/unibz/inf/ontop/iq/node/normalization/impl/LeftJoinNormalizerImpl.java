@@ -366,7 +366,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         ljCondition, leftVariables,
                         variableNullabilityTools.getChildrenVariableNullability(ImmutableList.of(leftChild, rightChild)));
 
-                ImmutableSubstitution<NonFunctionalTerm> downSubstitution = selectDownSubstitution(
+                ImmutableSubstitution<? extends VariableOrGroundTerm> downSubstitution = selectDownSubstitution(
                         simplificationResults.getSubstitution(), rightChild.getVariables());
 
                 if (downSubstitution.isEmpty())
@@ -669,9 +669,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
          *
          * Useful when there is an equality between two variables defined on the right (otherwise would not converge)
          */
-        private ImmutableSubstitution<NonFunctionalTerm> selectDownSubstitution(
-                ImmutableSubstitution<NonFunctionalTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
-            ImmutableMap<Variable, NonFunctionalTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
+        private ImmutableSubstitution<? extends VariableOrGroundTerm> selectDownSubstitution(
+                ImmutableSubstitution<? extends VariableOrGroundTerm> simplificationSubstitution, ImmutableSet<Variable> rightVariables) {
+            ImmutableMap<Variable, ? extends VariableOrGroundTerm> newMap = simplificationSubstitution.getImmutableMap().entrySet().stream()
                     .filter(e -> rightVariables.contains(e.getKey()))
                     .collect(ImmutableCollectors.toMap());
             return substitutionFactory.getSubstitution(newMap);
