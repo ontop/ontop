@@ -1341,7 +1341,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialQuery, expectedQueryBuilder.build());
     }
 
-    @Ignore("TODO: enable it once we are able to cleanup strict-equalities with ground functional terms")
     @Test
     public void testSelfJoinEliminationFunctionalGroundTerm1() throws EmptyQueryException {
         GroundFunctionalTerm groundFunctionalTerm =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
@@ -1405,7 +1404,6 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    @Ignore("TODO: enable it once we are able to cleanup strict-equalities with ground functional terms")
     @Test
     public void testSelfJoinEliminationFunctionalGroundTerm3() throws EmptyQueryException {
         GroundFunctionalTerm groundFunctionalTerm1 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
@@ -1433,7 +1431,7 @@ public class RedundantSelfJoinTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
-                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm1, groundFunctionalTerm2)),
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm2, groundFunctionalTerm1)),
                 dataNode1);
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
