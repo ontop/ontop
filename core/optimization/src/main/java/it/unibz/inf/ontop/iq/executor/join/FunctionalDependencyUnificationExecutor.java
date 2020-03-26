@@ -42,7 +42,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
                                                     SubstitutionFactory substitutionFactory,
                                                     ImmutableUnificationTools unificationTools,
                                                     TermFactory termFactory) {
-        super(iqFactory,substitutionFactory, unificationTools, termFactory);
+        super(iqFactory,unificationTools, termFactory);
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
     }
@@ -78,7 +78,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
         return (dependentUnifiers.isEmpty())
                 ? Optional.empty()
-                : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableSet.of(), isNotNullConjunction));
+                : Optional.of(new PredicateLevelProposal(dependentUnifiers, isNotNullConjunction));
     }
 
     /**

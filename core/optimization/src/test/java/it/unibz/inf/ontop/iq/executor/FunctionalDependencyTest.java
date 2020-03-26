@@ -24,7 +24,6 @@ import static junit.framework.TestCase.assertTrue;
 /**
  * Elimination of redundant self-joins using a non unique functional constraint
  */
-@Ignore("TODO: re-enable it")
 public class FunctionalDependencyTest {
 
     private final static RelationPredicate TABLE1_PREDICATE;

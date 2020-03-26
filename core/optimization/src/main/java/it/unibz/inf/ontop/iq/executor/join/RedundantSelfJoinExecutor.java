@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.executor.join;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -16,15 +15,12 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.proposal.InnerJoinOptimizationProposal;
 import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -46,9 +42,8 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
     private final TermFactory termFactory;
 
     protected RedundantSelfJoinExecutor(IntermediateQueryFactory iqFactory,
-                                        SubstitutionFactory substitutionFactory,
                                         ImmutableUnificationTools unificationTools, TermFactory termFactory) {
-        super(substitutionFactory, unificationTools, termFactory);
+        super(unificationTools, termFactory);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
     }
@@ -161,12 +156,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
             return Optional.empty();
         }
 
-        ImmutableSet<ExtensionalDataNode> removedDataNodes =predicateProposals.stream()
-                .flatMap(p -> p.getRemovedDataNodes().stream())
-                .collect(ImmutableCollectors.toSet());
-
-        if (removedDataNodes.isEmpty()
-                && (! optionalMergedSubstitution.isPresent()))
+        if (! optionalMergedSubstitution.isPresent())
             return Optional.empty();
 
         Optional<ImmutableExpression> isNotConjunction = termFactory.getConjunction(predicateProposals.stream()
@@ -176,7 +166,7 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
                 .flatMap(ImmutableExpression::flattenAND)
                 .distinct());
 
-        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, removedDataNodes, isNotConjunction));
+        return Optional.of(new ConcreteProposal(optionalMergedSubstitution, isNotConjunction));
     }
 
     protected abstract Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
@@ -195,12 +185,6 @@ public abstract class RedundantSelfJoinExecutor extends SelfJoinLikeExecutor imp
                                                                                      InnerJoinNode topJoinNode,
                                                                                      ConcreteProposal proposal)
             throws EmptyQueryException {
-        /*
-         * First, add and remove non-top nodes
-         */
-        proposal.getDataNodesToRemove()
-                .forEach(treeComponent::removeSubTree);
-
         return updateJoinNodeAndPropagateSubstitution(query, treeComponent, topJoinNode, proposal);
     }
     

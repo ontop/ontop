@@ -22,10 +22,12 @@ public class JoinCompositeExecutor
     private final ImmutableList<SimpleNodeCentricExecutor<InnerJoinNode, InnerJoinOptimizationProposal>> executors;
 
     @Inject
-    private JoinCompositeExecutor(RedundantJoinFKExecutor fkExecutor) {
+    private JoinCompositeExecutor(RedundantJoinFKExecutor fkExecutor,
+                                  FunctionalDependencyUnificationExecutor fdExecutor) {
         ImmutableList.Builder<SimpleNodeCentricExecutor<InnerJoinNode, InnerJoinOptimizationProposal>>
                 executorBuilder = ImmutableList.builder();
         executorBuilder.add(fkExecutor);
+        executorBuilder.add(fdExecutor);
 
         executors = executorBuilder.build();
     }
