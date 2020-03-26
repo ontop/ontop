@@ -417,6 +417,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return ImmutableSet.of();
     }
 
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
+        return computeNotInternallyRequiredVariables(ImmutableList.of(leftChild, rightChild));
+    }
+
     /**
      * Can propagate on the left, but not on the right.
      *

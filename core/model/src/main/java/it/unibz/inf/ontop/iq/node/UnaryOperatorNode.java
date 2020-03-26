@@ -63,4 +63,6 @@ public interface UnaryOperatorNode extends QueryNode {
     IQTree removeDistincts(IQTree child, IQProperties iqProperties);
 
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child);
+
+    ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child);
 }

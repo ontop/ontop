@@ -176,4 +176,9 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         return getRootNode().inferUniqueConstraints(getChildren());
     }
+
+    @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(getChildren());
+    }
 }

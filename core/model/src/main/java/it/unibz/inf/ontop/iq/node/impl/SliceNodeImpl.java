@@ -148,6 +148,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return child.getNotInternallyRequiredVariables();
+    }
+
+    @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
     }

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -45,6 +46,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Nullable
     private ImmutableSet<Variable> variables;
 
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> notInternallyRequiredVariables;
 
     // LAZY
     @Nullable
@@ -178,7 +182,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public VariableNullability getVariableNullability() {
+    public synchronized VariableNullability getVariableNullability() {
         if (variableNullability == null) {
 
             ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
@@ -205,7 +209,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     @Override
-    public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
+    public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
         if (uniqueConstraints == null) {
 
             uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
@@ -217,6 +221,25 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                     .collect(ImmutableCollectors.toSet());
         }
         return uniqueConstraints;
+    }
+
+    /**
+     * Only co-occuring variables are required.
+     */
+    @Override
+    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        if (notInternallyRequiredVariables == null) {
+            ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
+                    .filter(t -> t instanceof Variable)
+                    .map(t -> (Variable)t)
+                    .collect(ImmutableCollectors.toMultiset());
+
+            notInternallyRequiredVariables = multiset.entrySet().stream()
+                    .filter(e -> e.getCount() == 1)
+                    .map(Multiset.Entry::getElement)
+                    .collect(ImmutableCollectors.toSet());
+        }
+        return notInternallyRequiredVariables;
     }
 
     @Override

@@ -288,6 +288,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 .collect(ImmutableCollectors.toSet());
     }
 
+    /**
+     * For a construction node, none of the projected variables is required.
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return getVariables();
+    }
+
     private boolean isChildVariableNullable(IntermediateQuery query, Variable variable) {
         return query.getFirstChild(this)
                 .map(c -> c.isVariableNullable(query, variable))

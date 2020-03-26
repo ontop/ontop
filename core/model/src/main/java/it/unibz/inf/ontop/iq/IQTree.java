@@ -143,4 +143,9 @@ public interface IQTree {
      */
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
 
+    /**
+     * Variables that are the tree proposes for removal if the ancestor trees do not need them.
+     */
+    ImmutableSet<Variable> getNotInternallyRequiredVariables();
+
 }

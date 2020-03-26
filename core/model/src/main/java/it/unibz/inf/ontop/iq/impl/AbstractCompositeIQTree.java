@@ -277,6 +277,21 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> implements Co
     protected abstract ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints();
 
     @Override
+    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        // Non-final
+        ImmutableSet<Variable> notInternallyRequiredVariables = treeCache.getNotInternallyRequiredVariables();
+        if (notInternallyRequiredVariables != null)
+            return notInternallyRequiredVariables;
+
+        notInternallyRequiredVariables = computeNotInternallyRequiredVariables();
+        treeCache.setNotInternallyRequiredVariables(notInternallyRequiredVariables);
+        return notInternallyRequiredVariables;
+    }
+
+    protected abstract ImmutableSet<Variable> computeNotInternallyRequiredVariables();
+
+
+    @Override
     public boolean isDistinct() {
         // Non-final
         Boolean isDistinct = treeCache.isDistinct();

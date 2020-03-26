@@ -29,6 +29,9 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     private ImmutableSet<Variable> variables;
 
     @Nullable
+    private ImmutableSet<Variable> notInternallyRequiredVariables;
+
+    @Nullable
     private ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions;
 
     @Nullable
@@ -53,6 +56,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     protected ConcreteIQTreeCacheImpl(CoreSingletons coreSingletons, boolean isNormalizedForOptimization,
                                       boolean areDistinctAlreadyRemoved, @Nullable VariableNullability variableNullability,
                                       @Nullable ImmutableSet<Variable> variables,
+                                      @Nullable ImmutableSet<Variable> notInternallyRequiredVariables,
                                       @Nullable ImmutableSet<ImmutableSubstitution<NonVariableTerm>> possibleVariableDefinitions,
                                       @Nullable ImmutableSet<ImmutableSet<Variable>> uniqueConstraints,
                                       @Nullable Boolean isDistinct) {
@@ -61,6 +65,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
         this.coreSingletons = coreSingletons;
         this.variableNullability = variableNullability;
         this.variables = variables;
+        this.notInternallyRequiredVariables = notInternallyRequiredVariables;
         this.possibleVariableDefinitions = possibleVariableDefinitions;
         this.uniqueConstraints = uniqueConstraints;
         this.isDistinct = isDistinct;
@@ -80,6 +85,12 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public ImmutableSet<Variable> getVariables() {
         return variables;
+    }
+
+    @Nullable
+    @Override
+    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return notInternallyRequiredVariables;
     }
 
     @Override
@@ -111,9 +122,14 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     }
 
     @Override
+    public void setNotInternallyRequiredVariables(@Nonnull ImmutableSet<Variable> notInternallyRequiredVariables) {
+        this.notInternallyRequiredVariables = notInternallyRequiredVariables;
+    }
+
+    @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithoutEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved,
-                variableNullability, variables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
+                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
     }
 
     /**
@@ -122,7 +138,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareAsNormalizedForOptimizationWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, true, areDistinctAlreadyRemoved,
-                variableNullability, variables, null, null, null);
+                variableNullability, variables, null, null, null, null);
     }
 
     /**
@@ -131,13 +147,13 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareConstraintPushedDownWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, false, areDistinctAlreadyRemoved,
-                null, variables, null, null, null);
+                null, variables, null, null, null, null);
     }
 
     @Override
     public IQTreeCache declareDistinctRemovalWithoutEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, true,
-                variableNullability, variables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
+                variableNullability, variables, notInternallyRequiredVariables, possibleVariableDefinitions, uniqueConstraints, isDistinct);
     }
 
     /**
@@ -146,7 +162,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
     @Override
     public IQTreeCache declareDistinctRemovalWithEffect() {
         return new ConcreteIQTreeCacheImpl(coreSingletons, false, true,
-                variableNullability, variables, possibleVariableDefinitions, null, null);
+                variableNullability, variables, null, possibleVariableDefinitions, null, null);
     }
 
     @Override
@@ -203,6 +219,12 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 .map(renamingSubstitution::applyToVariable)
                 .collect(ImmutableCollectors.toSet());
 
+        ImmutableSet<Variable> newNotInternallyRequiredVariables = notInternallyRequiredVariables == null
+                ? null
+                : notInternallyRequiredVariables.stream()
+                .map(renamingSubstitution::applyToVariable)
+                .collect(ImmutableCollectors.toSet());
+
         ImmutableSet<ImmutableSubstitution<NonVariableTerm>> newPossibleDefinitions = possibleVariableDefinitions == null
                 ? null
                 : possibleVariableDefinitions.stream()
@@ -218,6 +240,7 @@ public class ConcreteIQTreeCacheImpl implements ConcreteIQTreeCache {
                 .collect(ImmutableCollectors.toSet());
 
         return new ConcreteIQTreeCacheImpl(coreSingletons, isNormalizedForOptimization, areDistinctAlreadyRemoved,
-                newVariableNullability, newVariables, newPossibleDefinitions, newUniqueConstraints, isDistinct);
+                newVariableNullability, newVariables, newNotInternallyRequiredVariables, newPossibleDefinitions,
+                newUniqueConstraints, isDistinct);
     }
 }

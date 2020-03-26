@@ -137,6 +137,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(getChild());
+    }
+
+    @Override
     public IQTree removeDistincts() {
         IQProperties properties = getProperties();
 

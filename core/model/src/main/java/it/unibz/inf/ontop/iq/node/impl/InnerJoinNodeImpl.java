@@ -387,6 +387,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
                 .collect(ImmutableCollectors.toSet());
     }
 
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
+        return super.computeNotInternallyRequiredVariables(children);
+    }
+
     private Stream<Map.Entry<IQTree, IQTree>> extractFunctionalDependencies(
             IQTree t1, IQTree t2, ImmutableMap<IQTree, ImmutableSet<ImmutableSet<Variable>>> constraintMap) {
         ImmutableSet<Variable> commonVariables = Sets.intersection(t1.getVariables(), t2.getVariables())

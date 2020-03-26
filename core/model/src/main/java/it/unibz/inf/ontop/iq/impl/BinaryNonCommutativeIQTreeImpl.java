@@ -188,4 +188,9 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         return getRootNode().inferUniqueConstraints(leftChild, rightChild);
     }
+
+    @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
+    }
 }

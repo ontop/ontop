@@ -364,6 +364,14 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return ImmutableSet.of();
     }
 
+    /**
+     * All the variables of an union could be projected out
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
+        return getVariables();
+    }
+
     @Override
     public ImmutableSet<Variable> getVariables() {
         return projectedVariables;

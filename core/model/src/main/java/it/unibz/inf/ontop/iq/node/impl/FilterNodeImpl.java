@@ -199,6 +199,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return computeNotInternallyRequiredVariables(ImmutableList.of(child));
+    }
+
+    @Override
     public boolean isConstructed(Variable variable, IQTree child) {
         return child.isConstructed(variable);
     }

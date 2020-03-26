@@ -248,6 +248,14 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                   .collect(ImmutableCollectors.toSet());
     }
 
+    /**
+     * Out of the projected variables, only the grouping variables are required
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return substitution.getImmutableMap().keySet();
+    }
+
     @Override
     public ImmutableSubstitution<ImmutableFunctionalTerm> getSubstitution() {
         return substitution;

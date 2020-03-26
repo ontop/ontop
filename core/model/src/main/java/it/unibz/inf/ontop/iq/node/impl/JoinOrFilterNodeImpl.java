@@ -2,7 +2,9 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -101,6 +103,20 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
             throw new InvalidIntermediateQueryException("Expression " + expression + " of "
                     + expression + " uses unbound variables (" + unboundVariables +  ").\n" + this);
         }
+    }
+
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> conditionVariables = getLocallyRequiredVariables();
+
+        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
+                .flatMap(c -> c.getNotInternallyRequiredVariables().stream())
+                .collect(ImmutableCollectors.toMultiset());
+
+        return childVariableMultiset.entrySet().stream()
+                .filter(e -> e.getCount() == 1)
+                .map(Multiset.Entry::getElement)
+                .filter(v -> !conditionVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
     }
 
 }

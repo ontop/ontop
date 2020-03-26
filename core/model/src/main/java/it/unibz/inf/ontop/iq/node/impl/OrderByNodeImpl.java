@@ -144,6 +144,18 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
         return child.inferUniqueConstraints();
     }
 
+    /**
+     * Subtracts from the variables proposed by the child the one used for ordering
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        ImmutableSet<Variable> localVariables = getLocalVariables();
+
+        return child.getNotInternallyRequiredVariables().stream()
+                .filter(v -> !localVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
+    }
+
     @Override
     public void acceptVisitor(QueryNodeVisitor visitor) {
         visitor.visit(this);
