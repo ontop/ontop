@@ -29,6 +29,8 @@ public class NullableUniqueConstraintTest {
 
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
+    private static final RelationDefinition TABLE1;
+    private static final RelationDefinition TABLE2;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
     private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
@@ -50,6 +52,7 @@ public class NullableUniqueConstraintTest {
         table1Def.addUniqueConstraint(UniqueConstraint.builder(table1Def)
                 .add(table1Col1)
                 .build("uc1", false));
+        TABLE1 = table1Def;
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
@@ -62,6 +65,7 @@ public class NullableUniqueConstraintTest {
         table2Def.addUniqueConstraint(UniqueConstraint.builder(table2Def)
                 .add(table2Col1)
                 .build("uc2", false));
+        TABLE2 = table2Def;
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         dbMetadata.freeze();
@@ -270,6 +274,38 @@ public class NullableUniqueConstraintTest {
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        constructionNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                newFilterNode,
+                                dataNode2)));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testSimpleJoin2() throws EmptyQueryException {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B, 2, E));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, E);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                constructionNode,
+                IQ_FACTORY.createNaryIQTree(
+                        IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(dataNode1, dataNode2)));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        FilterNode newFilterNode = IQ_FACTORY.createFilterNode(
+                TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getDBIsNotNull(A),
+                        TERM_FACTORY.getDBIsNotNull(B)));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
