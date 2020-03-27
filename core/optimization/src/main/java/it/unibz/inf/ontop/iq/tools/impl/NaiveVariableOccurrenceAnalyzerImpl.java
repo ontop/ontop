@@ -13,6 +13,8 @@ import it.unibz.inf.ontop.iq.tools.VariableOccurrenceAnalyzer;
 public class NaiveVariableOccurrenceAnalyzerImpl implements VariableOccurrenceAnalyzer {
     @Override
     public boolean isVariableUsedSomewhereElse(IntermediateQuery query, QueryNode originNode, Variable variable) {
+        if (query.getProjectionAtom().getArguments().contains(variable))
+            return true;
         return query.getNodesInTopDownOrder().stream()
                 .filter(n -> n != originNode)
                 .anyMatch(n -> n.getLocalVariables().contains(variable));
