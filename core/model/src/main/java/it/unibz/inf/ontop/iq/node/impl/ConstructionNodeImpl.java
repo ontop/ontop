@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.exception.InvalidQueryNodeException;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.NotRequiredVariableRemover;
 import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
@@ -47,6 +48,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     private static final String CONSTRUCTION_NODE_STR = "CONSTRUCT";
     private final Constant nullValue;
     private final ConstructionSubstitutionNormalizer substitutionNormalizer;
+    private final NotRequiredVariableRemover notRequiredVariableRemover;
 
     @AssistedInject
     private ConstructionNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
@@ -56,13 +58,14 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  OntopModelSettings settings,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory) {
+                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitution;
         this.nullValue = termFactory.getNullConstant();
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
+        this.notRequiredVariableRemover = notRequiredVariableRemover;
         this.childVariables = extractChildVariables(projectedVariables, substitution);
 
         if (settings.isTestModeEnabled())
@@ -110,7 +113,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                  ImmutableSubstitutionTools substitutionTools, SubstitutionFactory substitutionFactory,
                                  TermFactory termFactory, IntermediateQueryFactory iqFactory,
                                  ConstructionSubstitutionNormalizer substitutionNormalizer,
-                                 CoreUtilsFactory coreUtilsFactory) {
+                                 CoreUtilsFactory coreUtilsFactory, NotRequiredVariableRemover notRequiredVariableRemover) {
         super(substitutionFactory, iqFactory, unificationTools, constructionNodeTools, substitutionTools, termFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
         this.substitution = substitutionFactory.getSubstitution();
@@ -118,6 +121,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         this.nullValue = termFactory.getNullConstant();
         this.childVariables = extractChildVariables(projectedVariables, substitution);
         this.substitutionNormalizer = substitutionNormalizer;
+        this.notRequiredVariableRemover = notRequiredVariableRemover;
 
         validateNode();
     }
@@ -371,22 +375,23 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
-        QueryNode liftedChildRoot = liftedChild.getRootNode();
-        if (liftedChildRoot instanceof ConstructionNode)
-            return mergeWithChild((ConstructionNode) liftedChildRoot, (UnaryIQTree) liftedChild, currentIQProperties);
-        else if (liftedChild.isDeclaredAsEmpty()) {
+        IQTree shrunkChild = removeNotRequiredVariables(liftedChild);
+        QueryNode shrunkChildRoot = shrunkChild.getRootNode();
+        if (shrunkChildRoot instanceof ConstructionNode)
+            return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, currentIQProperties);
+        else if (shrunkChild.isDeclaredAsEmpty()) {
             return iqFactory.createEmptyNode(projectedVariables);
         }
         /*
          * If useless, returns the child
          */
-        else if (liftedChild.getVariables().equals(projectedVariables))
-            return liftedChild;
+        else if (shrunkChild.getVariables().equals(projectedVariables))
+            return shrunkChild;
         else {
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                    substitution.simplifyValues(liftedChild.getVariableNullability()), projectedVariables);
+                    substitution.simplifyValues(shrunkChild.getVariableNullability()), projectedVariables);
 
-            IQTree newChild = normalization.updateChild(liftedChild);
+            IQTree newChild = normalization.updateChild(shrunkChild);
             return normalization.generateTopConstructionNode()
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
                             currentIQProperties.declareNormalizedForOptimization()))
@@ -396,6 +401,10 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                                     iqFactory.createConstructionNode(projectedVariables),
                                     newChild));
         }
+    }
+
+    private IQTree removeNotRequiredVariables(IQTree liftedChild) {
+        return notRequiredVariableRemover.optimize(liftedChild, childVariables);
     }
 
     @Override
