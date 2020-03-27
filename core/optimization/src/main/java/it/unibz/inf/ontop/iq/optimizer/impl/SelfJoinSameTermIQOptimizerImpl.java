@@ -143,11 +143,17 @@ public class SelfJoinSameTermIQOptimizerImpl implements SelfJoinSameTermIQOptimi
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> otherArgumentMap = otherDataNode.getArgumentMap();
 
-            Sets.SetView<Integer> allIndexes = Sets.union(argumentMap.keySet(), otherArgumentMap.keySet());
+            ImmutableSet<Integer> firstIndexes = argumentMap.keySet();
+            ImmutableSet<Integer> otherIndexes = otherArgumentMap.keySet();
+
+            Sets.SetView<Integer> allIndexes = Sets.union(firstIndexes, otherIndexes);
+            Sets.SetView<Integer> commonIndexes = Sets.intersection(firstIndexes, otherIndexes);
 
             ImmutableList<? extends VariableOrGroundTerm> differentArguments = allIndexes.stream()
-                    .filter(i -> !argumentMap.get(i).equals(otherArgumentMap.get(i)))
-                    .map(argumentMap::get)
+                    .filter(i -> !(commonIndexes.contains(i) && argumentMap.get(i).equals(otherArgumentMap.get(i))))
+                    .flatMap(i -> Optional.ofNullable(argumentMap.get(i))
+                            .map(Stream::of)
+                            .orElseGet(Stream::empty))
                     .collect(ImmutableCollectors.toList());
 
             // There must be at least one match
