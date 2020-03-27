@@ -186,6 +186,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         ImmutableList<Optional<DeterminantGroupEvaluation>> simplifications = map.entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
+                .filter(e -> e.getKey().stream().allMatch(Optional::isPresent))
                 .map(e -> evaluateDeterminantGroup(
                         e.getKey().stream()
                                 .map(Optional::get)

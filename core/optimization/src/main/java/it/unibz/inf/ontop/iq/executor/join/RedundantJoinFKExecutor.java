@@ -19,6 +19,8 @@ import it.unibz.inf.ontop.iq.proposal.NodeCentricOptimizationResults;
 import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -201,10 +203,9 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         /*
          * Terms appearing in non-FK positions
          */
-        ImmutableList<VariableOrGroundTerm> remainingTerms = IntStream.range(0, targetArguments.size())
-                .filter(i -> !fkTargetIndexes.contains(i))
-                .boxed()
-                .map(targetArguments::get)
+        ImmutableList<VariableOrGroundTerm> remainingTerms = targetArguments.entrySet().stream()
+                .filter(e -> !fkTargetIndexes.contains(e.getKey()))
+                .map(Map.Entry::getValue)
                 .collect(ImmutableCollectors.toList());
 
         /*

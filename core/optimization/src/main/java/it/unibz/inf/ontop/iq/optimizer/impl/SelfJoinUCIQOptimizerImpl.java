@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
@@ -89,9 +91,15 @@ public class SelfJoinUCIQOptimizerImpl implements SelfJoinUCIQOptimizer {
 
             NormalizationBeforeUnification normalization = normalizeDataNodes(dataNodes, constraint);
 
+            ImmutableMultiset<? extends VariableOrGroundTerm> variableOccurences = dataNodes.stream()
+                    .flatMap(n -> n.getArgumentMap().values().stream())
+                    .collect(ImmutableCollectors.toMultiset());
 
             ImmutableSet<ImmutableExpression> expressions = Stream.concat(
-                    determinants.stream()
+                    variableOccurences.entrySet().stream()
+                            // Co-occuring terms
+                            .filter(e -> e.getCount() > 1)
+                            .map(Multiset.Entry::getElement)
                             .filter(d -> d instanceof Variable)
                             .map(d -> (Variable) d)
                             .map(termFactory::getDBIsNotNull),

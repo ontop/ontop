@@ -36,6 +36,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
+    private final TermFactory termFactory;
 
     @Inject
     private FunctionalDependencyUnificationExecutor(IntermediateQueryFactory iqFactory,
@@ -45,6 +46,8 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         super(iqFactory,unificationTools, termFactory);
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
+        this.termFactory = termFactory;
+
     }
 
     @Override
@@ -119,11 +122,16 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         return nodeMultiMap.asMap().values();
     }
 
+    /**
+     * NB: creates fresh variables for not present arguments
+     */
     private ImmutableList<VariableOrGroundTerm> extractDeterminantArguments(ExtensionalDataNode dataNode,
                                                                             ImmutableList<Integer> determinantIndexes) {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
         return determinantIndexes.stream()
-                .map(i -> argumentMap.get(i - 1))
+                .map(i -> Optional.ofNullable((VariableOrGroundTerm) argumentMap.get(i - 1))
+                        // Creates a fresh variable so as to keep it alone in its group
+                        .orElseGet(() -> termFactory.getVariable(UUID.randomUUID().toString())))
                 .collect(ImmutableCollectors.toList());
     }
 
