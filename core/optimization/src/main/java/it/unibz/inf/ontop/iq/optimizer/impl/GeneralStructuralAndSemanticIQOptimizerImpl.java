@@ -25,15 +25,13 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final IntermediateQueryFactory iqFactory;
-    private final ProjectionShrinkingOptimizer projectionShrinker;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
                                                         FlattenUnionOptimizer flattenUnionOptimizer,
                                                         IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
-                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory,
-                                                        ProjectionShrinkingOptimizer projectionShrinker) {
+                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
         this.flattenUnionOptimizer = flattenUnionOptimizer;
@@ -41,7 +39,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.iqFactory = iqFactory;
-        this.projectionShrinker = projectionShrinker;
     }
 
     @Override
@@ -53,8 +50,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
         try {
             // Non-final
             IntermediateQuery intermediateQuery = iqConverter.convert(liftedQuery, executorRegistry);
-
-            intermediateQuery = projectionShrinker.optimize(intermediateQuery);
 
             LOGGER.debug("After projection shrinking: \n" + intermediateQuery.toString());
 
