@@ -375,7 +375,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
 
         IQTree liftedChild = child.normalizeForOptimization(variableGenerator);
-        IQTree shrunkChild = removeNotRequiredVariables(liftedChild);
+        IQTree shrunkChild = removeNotRequiredVariables(liftedChild, variableGenerator);
         QueryNode shrunkChildRoot = shrunkChild.getRootNode();
         if (shrunkChildRoot instanceof ConstructionNode)
             return mergeWithChild((ConstructionNode) shrunkChildRoot, (UnaryIQTree) shrunkChild, currentIQProperties);
@@ -403,8 +403,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         }
     }
 
-    private IQTree removeNotRequiredVariables(IQTree liftedChild) {
-        return notRequiredVariableRemover.optimize(liftedChild, childVariables);
+    private IQTree removeNotRequiredVariables(IQTree liftedChild, VariableGenerator variableGenerator) {
+        return notRequiredVariableRemover.optimize(liftedChild, childVariables, variableGenerator);
     }
 
     @Override

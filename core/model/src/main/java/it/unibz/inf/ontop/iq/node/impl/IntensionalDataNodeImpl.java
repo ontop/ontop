@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -134,5 +136,13 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
             ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom novelAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
         return newAtom(novelAtom);
+    }
+
+    /**
+     * All the variables are required, because an intensional data node cannot be sparse.
+     */
+    @Override
+    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return ImmutableSet.of();
     }
 }
