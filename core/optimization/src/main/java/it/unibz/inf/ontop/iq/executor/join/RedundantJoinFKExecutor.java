@@ -184,8 +184,12 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = targetDataNode.getArgumentMap();
 
         return constraint.getComponents().stream()
-                .allMatch(c -> sourceArgumentMap.get(c.getAttribute().getIndex() - 1)
-                        .equals(targetArgumentMap.get(c.getReference().getIndex() - 1)));
+                .allMatch(c -> {
+                    Optional<? extends VariableOrGroundTerm> source = Optional.ofNullable(
+                            sourceArgumentMap.get(c.getAttribute().getIndex() - 1));
+                    return source.isPresent()
+                            && source.equals(Optional.ofNullable(targetArgumentMap.get(c.getReference().getIndex() - 1)));
+                });
     }
 
     /**
