@@ -6,6 +6,8 @@ import it.unibz.inf.ontop.owlapi.connection.OntopOWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OntopOWLStatement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
@@ -36,4 +38,23 @@ public class LeftJoinProfOracleTest extends AbstractLeftJoinProfTest {
         REASONER.dispose();
     }
 
+    /**
+     * DISTINCT is not (yet ?) supported in LISTAGG in Oracle
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat3() throws Exception {
+        super.testGroupConcat3();
+    }
+
+    /**
+     * DISTINCT is not (yet ?) supported in LISTAGG in Oracle
+     */
+    @Ignore
+    @Test
+    @Override
+    public void testGroupConcat5() throws Exception {
+        super.testGroupConcat5();
+    }
 }

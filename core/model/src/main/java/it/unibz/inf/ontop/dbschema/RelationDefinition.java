@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
@@ -52,6 +54,8 @@ public abstract class RelationDefinition {
 		this.id = id;
 	}
 
+	@JsonProperty("name")
+	@JsonSerialize(using = RelationID.RelationIDSerializer.class)
 	public RelationID getID() {
 		return id;
 	}

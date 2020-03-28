@@ -92,6 +92,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     private DBBooleanFunctionSymbol nonStrictDefaultEqOperator;
     // Created in init()
     private DBBooleanFunctionSymbol booleanIfElseNullFunctionSymbol;
+    // Created in init()
+    private DBFunctionSymbol nonDistinctGroupConcat;
+    // Created in init()
+    private DBFunctionSymbol distinctGroupConcat;
 
     /**
      *  For conversion function symbols that are SIMPLE CASTs from an undetermined type (no normalization)
@@ -326,8 +330,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         minutesFunctionSymbol = createMinutesFunctionSymbol();
         secondsFunctionSymbol = createSecondsFunctionSymbol();
         tzFunctionSymbol = createTzFunctionSymbol();
-    }
 
+        nonDistinctGroupConcat = createDBGroupConcat(dbStringType, false);
+        distinctGroupConcat = createDBGroupConcat(dbStringType, true);
+    }
 
     protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -869,6 +875,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     }
 
     @Override
+    public DBFunctionSymbol getNullIgnoringDBGroupConcat(boolean isDistinct) {
+        return isDistinct ? distinctGroupConcat : nonDistinctGroupConcat;
+    }
+
+    @Override
     public DBFunctionSymbol getDBIntIndex(int nbValues) {
         // TODO: cache it
         return new DBIntIndexFunctionSymbolImpl(dbIntegerType, rootDBType, nbValues);
@@ -879,6 +890,17 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBFunctionSymbol createDBAvg(DBTermType termType, boolean isDistinct);
     protected abstract DBFunctionSymbol createDBMin(DBTermType termType);
     protected abstract DBFunctionSymbol createDBMax(DBTermType termType);
+
+    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+                (terms, termConverter, termFactory) -> String.format(
+                        "LISTAGG(%s%s,%s) WITHIN GROUP (ORDER BY %s)",
+                        isDistinct ? "DISTINCT " : "",
+                        termConverter.apply(terms.get(0)),
+                        termConverter.apply(terms.get(1)),
+                        termConverter.apply(terms.get(0))
+                ));
+    }
 
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);

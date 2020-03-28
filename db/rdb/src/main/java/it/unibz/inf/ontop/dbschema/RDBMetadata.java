@@ -23,7 +23,6 @@ package it.unibz.inf.ontop.dbschema;
 
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
-
 public class RDBMetadata extends BasicDBMetadata {
 
 	protected final DBTypeFactory dbTypeFactory;
@@ -42,5 +41,4 @@ public class RDBMetadata extends BasicDBMetadata {
 	}
 
 	public DBTypeFactory getDBTypeFactory() { return dbTypeFactory; }
-
 }
