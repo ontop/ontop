@@ -64,8 +64,9 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
             return new LeftJoinRightChildNormalizationAnalysisImpl(false);
         }
 
+        int rightArity = rightDataNode.getRelationDefinition().getAttributes().size();
         ImmutableSet<Integer> nonMatchedRightAttributeIndexes = extractNonMatchedRightAttributeIndexes(matchedUCs,
-                matchedFKs, rightArgumentMap.size());
+                matchedFKs, rightArity);
         ImmutableList<Integer> conflictingRightArgumentIndexes = nonMatchedRightAttributeIndexes.stream()
                 .filter(i -> isRightArgumentConflicting(i, leftVariables, rightArgumentMap, nonMatchedRightAttributeIndexes))
                 .collect(ImmutableCollectors.toList());
@@ -153,8 +154,8 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
 
 
     private ImmutableSet<Integer> extractNonMatchedRightAttributeIndexes(ImmutableCollection<UniqueConstraint> matchedUCs,
-                                                                          ImmutableCollection<ForeignKeyConstraint> matchedFKs,
-                                                                          int arity) {
+                                                                         ImmutableCollection<ForeignKeyConstraint> matchedFKs,
+                                                                         int arity) {
         return IntStream.range(0, arity)
                 .filter(i -> (matchedUCs.stream()
                         .noneMatch(uc ->
