@@ -101,11 +101,14 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> leftArgumentMap,
                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap, VariableNullability variableNullability) {
         return uniqueConstraint.getAttributes().stream()
-                .allMatch(a -> leftArgumentMap.get(a.getIndex() -1)
-                        .equals(rightArgumentMap.get(a.getIndex() - 1))
+                .allMatch(a -> {
+                    Optional<? extends VariableOrGroundTerm> leftArg = Optional.ofNullable(leftArgumentMap.get(a.getIndex() - 1));
+
+                    return leftArg.isPresent()
+                            && leftArg.equals(Optional.ofNullable(rightArgumentMap.get(a.getIndex() - 1)))
                         // Non-null term (at the level of the LJ tree)
-                       && (!leftArgumentMap.get(a.getIndex() - 1)
-                        .isNullable(variableNullability.getNullableVariables())));
+                       && (!leftArg.get().isNullable(variableNullability.getNullableVariables()));
+                });
     }
 
     private ImmutableSet<ForeignKeyConstraint> extractMatchedFKs(
@@ -136,11 +139,16 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap,
                                  VariableNullability variableNullability) {
         return foreignKey.getComponents().stream()
-                .allMatch(c -> leftArgumentMap.get(c.getAttribute().getIndex() - 1)
-                        .equals(rightArgumentMap.get(c.getReference().getIndex() - 1))
+                .allMatch(c -> {
+                    Optional<? extends VariableOrGroundTerm> leftArg = Optional.ofNullable(
+                            leftArgumentMap.get(c.getAttribute().getIndex() - 1));
+
+                        return leftArg.isPresent()
+                                && leftArg.equals(Optional.ofNullable(
+                                        rightArgumentMap.get(c.getReference().getIndex() - 1)))
                         // Non-nullable term
-                        &&  (!leftArgumentMap.get(c.getAttribute().getIndex() - 1)
-                        .isNullable(variableNullability.getNullableVariables())));
+                        &&  (!leftArg.get().isNullable(variableNullability.getNullableVariables()));
+                });
     }
 
 
