@@ -101,7 +101,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
 
     @Override
-    public boolean isDistinct(IQTree child) {
+    public boolean isDistinct(IQTree tree, IQTree child) {
         return true;
     }
 

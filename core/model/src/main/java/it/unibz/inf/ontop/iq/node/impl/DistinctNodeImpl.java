@@ -71,7 +71,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public boolean isDistinct(IQTree child) {
+    public boolean isDistinct(IQTree tree, IQTree child) {
         return true;
     }
 

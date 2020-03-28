@@ -58,7 +58,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 
-    boolean isDistinct(IQTree leftChild, IQTree rightChild);
+    boolean isDistinct(IQTree tree, IQTree leftChild, IQTree rightChild);
 
     IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild);
 

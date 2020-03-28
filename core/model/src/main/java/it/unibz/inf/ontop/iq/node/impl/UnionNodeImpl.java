@@ -163,7 +163,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
-    public boolean isDistinct(ImmutableList<IQTree> children) {
+    public boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {
         if (children.stream().anyMatch(c -> !c.isDistinct()))
             return false;
 

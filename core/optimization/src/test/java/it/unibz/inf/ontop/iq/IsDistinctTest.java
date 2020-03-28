@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -76,7 +75,12 @@ public class IsDistinctTest {
         assertTrue(tree.isDistinct());
     }
 
-    @Ignore("TODO: detect it")
+    @Test
+    public void testExtensionalDataNodeNullableUC5() {
+        ExtensionalDataNode tree = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
+        assertFalse(tree.isDistinct());
+    }
+
     @Test
     public void testFilterNullableUC1() {
         ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE1_AR1, ImmutableMap.of(0, A));
@@ -99,7 +103,6 @@ public class IsDistinctTest {
         assertFalse(tree.isDistinct());
     }
 
-    @Ignore("TODO: detect it")
     @Test
     public void testInnerJoinNullableUC1() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
@@ -113,7 +116,6 @@ public class IsDistinctTest {
         assertTrue(tree.isDistinct());
     }
 
-    @Ignore("TODO: detect it")
     @Test
     public void testInnerJoinNullableUC2() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
@@ -140,7 +142,6 @@ public class IsDistinctTest {
         assertFalse(tree.isDistinct());
     }
 
-    @Ignore("TODO: detect it")
     @Test
     public void testLeftJoinNullableUC1() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
@@ -151,10 +152,9 @@ public class IsDistinctTest {
                 IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBIsNotNull(A)),
                 dataNode1, dataNode2);
 
-        assertTrue(tree.isDistinct());
+        assertFalse(tree.isDistinct());
     }
 
-    @Ignore("TODO: detect it")
     @Test
     public void testLeftJoinNullableUC2() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
@@ -165,7 +165,7 @@ public class IsDistinctTest {
                 IQ_FACTORY.createLeftJoinNode(),
                 dataNode1, dataNode2);
 
-        assertTrue(tree.isDistinct());
+        assertFalse(tree.isDistinct());
     }
 
     @Test
@@ -179,5 +179,44 @@ public class IsDistinctTest {
                 dataNode1, dataNode2);
 
         assertFalse(tree.isDistinct());
+    }
+
+    @Test
+    public void testLeftJoinNullableUC4() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR1.getRelationDefinition(),
+                ImmutableMap.of(0, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A, 1, B));
+
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBIsNotNull(A)),
+                dataNode1, dataNode2);
+
+        assertTrue(tree.isDistinct());
+    }
+
+    @Test
+    public void testLeftJoinNullableUC5() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR1.getRelationDefinition(),
+                ImmutableMap.of(0, B));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A));
+
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getDBIsNotNull(A)),
+                dataNode1, dataNode2);
+
+        assertTrue(tree.isDistinct());
+    }
+
+    @Test
+    public void testLeftJoinNullableUC6() {
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(PK_TABLE1_AR1.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(NULLABLE_UC_TABLE2_AR2, ImmutableMap.of(0, A));
+
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                IQ_FACTORY.createLeftJoinNode(),
+                dataNode1, dataNode2);
+
+        assertTrue(tree.isDistinct());
     }
 }

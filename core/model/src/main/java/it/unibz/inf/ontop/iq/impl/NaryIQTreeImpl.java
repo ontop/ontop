@@ -133,7 +133,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(getChildren());
+        return getRootNode().isDistinct(this, getChildren());
     }
 
     @Override
