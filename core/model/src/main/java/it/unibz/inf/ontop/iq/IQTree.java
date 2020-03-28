@@ -139,7 +139,9 @@ public interface IQTree {
     /**
      * NOT guaranteed to return all the unique constraints (MAY BE INCOMPLETE)
      *
-     * Set of sets of determinants
+     * Set of sets of determinants.
+     *
+     * Warning: some determinants may be nullable!
      */
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
 
