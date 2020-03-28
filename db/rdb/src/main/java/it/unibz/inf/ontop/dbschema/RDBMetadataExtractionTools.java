@@ -24,7 +24,6 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,14 +218,6 @@ public class RDBMetadataExtractionTools {
 				seedRelationIds = getTableList(null, realTables, idfac);
 		}
 
-		DatatypeNormalizer dt = DefaultTypeFixer;
-		if (productName.contains("Oracle"))
-			dt = OracleTypeFixer;
-		else if (productName.contains("MySQL"))
-			dt = MySQLTypeFixer;
-		else if (productName.contains("Microsoft SQL Server"))
-			dt = SQLServerTypeFixer;
-
 		List<DatabaseRelationDefinition> extractedRelations = new LinkedList<>();
 
         String catalog = getCatalog(metadata, conn);
@@ -291,11 +282,9 @@ public class RDBMetadataExtractionTools {
 
     private static String getCatalog(RDBMetadata metadata, Connection conn) throws SQLException {
         String catalog = null;
-
-        Statement statement = conn.createStatement();
-
         if (metadata.getDbmsProductName().contains("MySQL")) {
-            try (ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
+            try (Statement statement = conn.createStatement();
+				 ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
                 if (rs.next()) {
                     catalog = rs.getString(1);
                 }
@@ -360,20 +349,16 @@ public class RDBMetadataExtractionTools {
 		}
 		return relationIds;
 	}
-
-
-
-
+	
 
 	private static String getOracleDefaultOwner(Connection conn) throws SQLException {
 		// Obtain the table owner (i.e., schema name)
 		String loggedUser = "SYSTEM"; // default value
-		try (Statement stmt = conn.createStatement()) {
-			try (ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
+		try (Statement stmt = conn.createStatement();
+			 ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
 				if (resultSet.next()) {
 					loggedUser = resultSet.getString("user");
 				}
-			}
 		}
 		return loggedUser.toUpperCase();
 	}
@@ -465,52 +450,6 @@ public class RDBMetadataExtractionTools {
 */
 
 
-	/**
-	 * A method of fixing discrepancies in datatype correspondence
-	 */
-
-	private interface DatatypeNormalizer {
-		int getCorrectedDatatype(int dataType, String typeName);
-	}
-
-	private static final DatatypeNormalizer DefaultTypeFixer = (dataType, typeName) -> dataType;
-
-	private static final DatatypeNormalizer MySQLTypeFixer = (dataType, typeName) -> {
-		// Fix for MySQL YEAR (see Table 5.2 at
-		//        http://dev.mysql.com/doc/connector-j/en/connector-j-reference-type-conversions.html)
-		if (dataType ==  Types.DATE && typeName.equals("YEAR"))
-			return -10000;
-		return dataType;
-	};
-
-	private static final DatatypeNormalizer OracleTypeFixer = (dataType, typeName) -> {
-
-		//TODO
-		// Oracle bug here - wrong automatic typing - Date vs DATETIME - driver ojdbc16-11.2.0.3
-		// Oracle returns 93 for DATE SQL types, but this corresponds to
-		// TIMESTAMP. This causes a wrong typing to xsd:dateTime and later
-		// parsing errors. To avoid this bug manually type the column in the
-		// mapping. This may be a problem of the driver, try with other version
-		// I tried oracle thin driver ojdbc16-11.2.0.3
-		//
-		// ROMAN (19 Sep 2015): see
-		//    http://www.oracle.com/technetwork/database/enterprise-edition/jdbc-faq-090281.html#08_01
-
-		if (dataType == Types.TIMESTAMP && typeName.equals("DATE"))
-			return Types.DATE;
-		else if (typeName.equals("TIMESTAMP(6) WITH TIME ZONE"))
-			return Types.TIMESTAMP_WITH_TIMEZONE;
-		else
-			return dataType;
-	};
-
-	private static final DatatypeNormalizer SQLServerTypeFixer = (dataType, typeName) -> {
-        if (typeName.equals("datetimeoffset"))
-            return Types.TIMESTAMP;
-		else
-        	return dataType;
-    };
-
 
 	/**
 	 * Prints column names of a given table.
@@ -562,7 +501,8 @@ public class RDBMetadataExtractionTools {
 		// Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
 		try (ResultSet rs = md.getPrimaryKeys(null, id.getSchemaName(), id.getTableName())) {
 			extractPrimaryKey(relation, idfac, id, rs);
-		} catch (SQLSyntaxErrorException e) {
+		}
+		catch (SQLSyntaxErrorException e) {
 		    // WORKAROUND for MySQL connector >= 8.0:
             // <https://github.com/ontop/ontop/issues/270>
             try (ResultSet rs = md.getPrimaryKeys(id.getSchemaName(), null, id.getTableName())) {
@@ -608,7 +548,8 @@ public class RDBMetadataExtractionTools {
 		// extracting unique
 		try (ResultSet rs = md.getIndexInfo(null, id.getSchemaName(), id.getTableName(), true, true)) {
             extractUniqueAttributes(relation, idfac, rs);
-        } catch (Exception e){
+        }
+		catch (Exception e){
 		    // Workaround for MySQL-connector >= 8.0
             try (ResultSet rs = md.getIndexInfo(id.getSchemaName(),null, id.getTableName(), true, true)) {
                 extractUniqueAttributes(relation, idfac, rs);
