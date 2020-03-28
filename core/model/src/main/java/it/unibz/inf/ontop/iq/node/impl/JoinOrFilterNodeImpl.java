@@ -108,13 +108,23 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
         ImmutableSet<Variable> conditionVariables = getLocallyRequiredVariables();
 
-        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
+        ImmutableSet<Variable> notInternallyRequiredByAtLeastAChild = children.stream()
                 .flatMap(c -> c.getNotInternallyRequiredVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        // All variables are required
+        if (notInternallyRequiredByAtLeastAChild.isEmpty())
+            return notInternallyRequiredByAtLeastAChild;
+
+        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
+                .flatMap(c -> c.getVariables().stream())
                 .collect(ImmutableCollectors.toMultiset());
 
         return childVariableMultiset.entrySet().stream()
+                // Only coming from one child
                 .filter(e -> e.getCount() == 1)
                 .map(Multiset.Entry::getElement)
+                .filter(notInternallyRequiredByAtLeastAChild::contains)
                 .filter(v -> !conditionVariables.contains(v))
                 .collect(ImmutableCollectors.toSet());
     }
