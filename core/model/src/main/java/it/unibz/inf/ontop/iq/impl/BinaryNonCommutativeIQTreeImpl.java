@@ -137,7 +137,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(leftChild, rightChild);
+        return getRootNode().isDistinct(this, leftChild, rightChild);
     }
 
     @Override

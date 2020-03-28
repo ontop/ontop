@@ -103,7 +103,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(getChild());
+        return getRootNode().isDistinct(this, getChild());
     }
 
     @Override

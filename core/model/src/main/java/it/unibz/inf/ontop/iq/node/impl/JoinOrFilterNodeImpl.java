@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -127,6 +128,19 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                 .filter(notInternallyRequiredByAtLeastAChild::contains)
                 .filter(v -> !conditionVariables.contains(v))
                 .collect(ImmutableCollectors.toSet());
+    }
+
+    protected boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {
+        if (children.stream().allMatch(IQTree::isDistinct))
+            return true;
+
+        ImmutableSet<ImmutableSet<Variable>> constraints = tree.inferUniqueConstraints();
+        if (constraints.isEmpty())
+            return false;
+
+        VariableNullability variableNullability = tree.getVariableNullability();
+        return constraints.stream()
+                .anyMatch(c -> c.stream().noneMatch(variableNullability::isPossiblyNullable));
     }
 
 }
