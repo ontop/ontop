@@ -52,8 +52,9 @@ public class ParserViewDefinition extends RelationDefinition {
 		ImmutableList.Builder<Attribute> attributeBuilder = ImmutableList.builder();
 		int c = 1;
 		for (QuotedID id : attrs) {
+			// TODO: infer types?
 			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, null, true, dbTypeFactory);
+					new QualifiedAttributeID(name, id), c, null, dbTypeFactory.getAbstractRootDBType(), true);
 			c++;
 			attributeBuilder.add(att);
 		}

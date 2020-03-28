@@ -145,8 +145,7 @@ public class DirectMappingAxiomProducer {
 		//DataType Atoms
 		for (Attribute att : table.getAttributes()) {
 			// TODO: check having a default datatype is ok
-			IRI typeIRI = att.getTermType()
-					.flatMap(DBTermType::getNaturalRDFDatatype)
+			IRI typeIRI = att.getTermType().getNaturalRDFDatatype()
 					.map(RDFDatatype::getIRI)
 					.orElse(XSD.STRING);
 

@@ -94,7 +94,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
             ImmutableCollection<Collection<ExtensionalDataNode>>> constraintNodeMap) throws AtomUnificationException {
 
         ImmutableSet<Integer> nullableIndexes = databaseRelation.getAttributes().stream()
-                .filter(Attribute::canNull)
+                .filter(Attribute::isNullable)
                 .map(a -> a.getIndex() - 1)
                 .collect(ImmutableCollectors.toSet());
 

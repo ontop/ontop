@@ -97,7 +97,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
         return IntStream.range(1, arguments.size() + 1)
                 .filter(i -> arguments.get(i - 1).equals(variable))
                 .mapToObj(relation::getAttribute)
-                .allMatch(Attribute::canNull);
+                .allMatch(Attribute::isNullable);
     }
 
     @Override
@@ -143,7 +143,7 @@ public class ExtensionalDataNodeImpl extends DataNodeImpl<RelationPredicate> imp
             // NB: DB column indexes start at 1.
             ImmutableSet<ImmutableSet<Variable>> nullableGroups = IntStream.range(0, arguments.size())
                     .filter(i -> arguments.get(i) instanceof Variable)
-                    .filter(i -> relation.getAttribute(i + 1).canNull())
+                    .filter(i -> relation.getAttribute(i + 1).isNullable())
                     .mapToObj(arguments::get)
                     .map(a -> (Variable) a)
                     // An implicit filter condition makes them non-nullable
