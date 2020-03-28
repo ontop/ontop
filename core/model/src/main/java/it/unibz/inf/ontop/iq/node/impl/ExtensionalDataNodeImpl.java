@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multiset;
+import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -27,6 +24,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -53,9 +51,14 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     // LAZY
     @Nullable
     private VariableNullability variableNullability;
+
     //LAZY
     @Nullable
     private ImmutableSet<ImmutableSet<Variable>> uniqueConstraints;
+
+    //LAZY
+    @Nullable
+    private Boolean isDistinct;
 
     private final CoreUtilsFactory coreUtilsFactory;
 
@@ -155,12 +158,28 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         return transformer.transformExtensionalData(this);
     }
 
-    /**
-     * Is distinct if it has at least one unique constraint
-     */
     @Override
-    public boolean isDistinct() {
-        return !relationDefinition.getUniqueConstraints().isEmpty();
+    public synchronized boolean isDistinct() {
+        if (isDistinct == null)
+        isDistinct = relationDefinition.getUniqueConstraints().stream()
+                .map(UniqueConstraint::getDeterminants)
+                .anyMatch(this::areDeterminantsPresentAndNotNull);
+        return isDistinct;
+    }
+
+    private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
+        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = determinants.stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
+
+        VariableNullability variableNullability = getVariableNullability();
+
+        return arguments.stream().allMatch(Optional::isPresent)
+                && arguments.stream()
+                .map(Optional::get)
+                .filter(t -> t instanceof Variable)
+                .map(v -> (Variable) v)
+                .noneMatch(variableNullability::isPossiblyNullable);
     }
 
     @Override
@@ -213,14 +232,27 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         if (uniqueConstraints == null) {
 
             uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
-                    .map(uc -> uc.getAttributes().stream()
-                            .map(a ->  argumentMap.get(a.getIndex() -1))
-                            .filter(t -> t instanceof Variable)
-                            .map(v -> (Variable)v)
-                            .collect(ImmutableCollectors.toSet()))
+                    .map(this::convertUniqueConstraint)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .collect(ImmutableCollectors.toSet());
         }
         return uniqueConstraints;
+    }
+
+    private Optional<ImmutableSet<Variable>> convertUniqueConstraint(UniqueConstraint uniqueConstraint) {
+        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = uniqueConstraint.getDeterminants().stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
+
+        if (!arguments.stream().allMatch(Optional::isPresent))
+            return Optional.empty();
+
+        return Optional.of(arguments.stream()
+                .map(Optional::get)
+                .filter(t -> t instanceof Variable)
+                .map(v -> (Variable)v)
+                .collect(ImmutableCollectors.toSet()));
     }
 
     /**
