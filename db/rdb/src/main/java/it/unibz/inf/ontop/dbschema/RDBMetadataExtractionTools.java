@@ -527,12 +527,12 @@ public class RDBMetadataExtractionTools {
 		}
 		if (!primaryKeyAttributes.isEmpty()) {
 			// use the KEY_SEQ values to restore the correct order of attributes in the PK
-			UniqueConstraint.Builder builder = UniqueConstraint.builder(relation);
+			UniqueConstraint.BuilderImpl builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
 			for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
 				QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idfac, primaryKeyAttributes.get(i));
-				builder.add(relation.getAttribute(attrId));
+				builder.addDeterminant(relation.getAttribute(attrId));
 			}
-			relation.addUniqueConstraint(builder.build(currentName, true));
+			relation.addUniqueConstraint(builder.build());
 		}
 	}
 
@@ -558,8 +558,7 @@ public class RDBMetadataExtractionTools {
 	}
 
     private static void extractUniqueAttributes(DatabaseRelationDefinition relation, QuotedIDFactory idfac, ResultSet rs) throws SQLException {
-        UniqueConstraint.Builder builder = null;
-        String currentName = null;
+        UniqueConstraint.BuilderImpl builder = null;
         while (rs.next()) {
             // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
             //       tableIndexClustered - this is a clustered index
@@ -567,21 +566,21 @@ public class RDBMetadataExtractionTools {
             //       tableIndexOther (all are static final int in DatabaseMetaData)
             if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
                 if (builder != null)
-                    relation.addUniqueConstraint(builder.build(currentName, false));
+                    relation.addUniqueConstraint(builder.build());
 
                 builder = null;
                 continue;
             }
             if (rs.getShort("ORDINAL_POSITION") == 1) {
                 if (builder != null)
-                    relation.addUniqueConstraint(builder.build(currentName, false));
+                    relation.addUniqueConstraint(builder.build());
 
                 // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
                 // and so, no need to check whether TABLE_SCHEM and TABLE_NAME match
 
                 if (!rs.getBoolean("NON_UNIQUE")) {
-                    builder = UniqueConstraint.builder(relation);
-                    currentName = rs.getString("INDEX_NAME");
+					String name = rs.getString("INDEX_NAME");
+                    builder = UniqueConstraint.builder(relation, name);
                 }
                 else
                     builder = null;
@@ -602,11 +601,11 @@ public class RDBMetadataExtractionTools {
                     attrId = QuotedID.createIdFromDatabaseRecord(idfac, "\"" + rs.getString("COLUMN_NAME") + "\"");
                     attr = relation.getAttribute(attrId);
                 }
-                builder.add(attr);
+                builder.addDeterminant(attr);
             }
         }
         if (builder != null)
-            relation.addUniqueConstraint(builder.build(currentName, false));
+            relation.addUniqueConstraint(builder.build());
     }
 
     /**

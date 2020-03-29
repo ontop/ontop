@@ -151,9 +151,9 @@ public class LeftJoinOptimizationTest {
         Attribute table5Col1 = table5Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
         table5Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         table5Def.addUniqueConstraint(
-                UniqueConstraint.builder(table5Def)
-                    .add(table5Col1)
-                    .build("uc5", false));
+                UniqueConstraint.builder(table5Def, "uc5")
+                    .addDeterminant(table5Col1)
+                    .build());
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
         dbMetadata.freeze();

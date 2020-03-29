@@ -28,7 +28,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -136,9 +136,9 @@ public class RedundantSelfJoinTest {
         table6Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
         Attribute col3T6 = table6Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
         table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T6));
-        table6Def.addUniqueConstraint(new UniqueConstraint.Builder(table6Def)
-                .add(col3T6)
-                .build("table6-uc3", false));
+        table6Def.addUniqueConstraint(UniqueConstraint.builder(table6Def, "table6-uc3")
+                .addDeterminant(col3T6)
+                .build());
         TABLE6_PREDICATE = table6Def.getAtomPredicate();
 
         dbMetadata.freeze();

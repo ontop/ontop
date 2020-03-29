@@ -45,9 +45,9 @@ public class NullableUniqueConstraintTest {
         Attribute table1Col1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
         table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
         table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.builder(table1Def)
-                .add(table1Col1)
-                .build("uc1", false));
+        table1Def.addUniqueConstraint(UniqueConstraint.builder(table1Def, "uc1")
+                .addDeterminant(table1Col1)
+                .build());
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
@@ -57,9 +57,9 @@ public class NullableUniqueConstraintTest {
         Attribute table2Col1 = table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
         table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
         table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
-        table2Def.addUniqueConstraint(UniqueConstraint.builder(table2Def)
-                .add(table2Col1)
-                .build("uc2", false));
+        table2Def.addUniqueConstraint(UniqueConstraint.builder(table2Def, "uc2")
+                .addDeterminant(table2Col1)
+                .build());
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         dbMetadata.freeze();

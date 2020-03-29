@@ -32,7 +32,7 @@ public class WrongForeignKeyTest {
         // Independent
         table1Def.addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
                 .addDeterminant(col2T1)
                 .addDependent(col3T1)
                 .addDependent(col4T1)
@@ -60,11 +60,11 @@ public class WrongForeignKeyTest {
         Attribute col5T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table3Def.addAttribute(ID_FACTORY.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(col2T3)
                 .addDependent(col3T3)
                 .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());

@@ -25,7 +25,7 @@ import java.util.Set;
  */
 public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PreProcessedImplicitRelationalDBConstraintSet {
 
-    private static Logger log = LoggerFactory.getLogger(BasicPreProcessedImplicitRelationalDBConstraintSet.class);
+    private static final Logger log = LoggerFactory.getLogger(BasicPreProcessedImplicitRelationalDBConstraintSet.class);
 
     // List of two-element arrays: table id and a comma-separated list of columns
     private final ImmutableList<String[]> ucs;
@@ -80,7 +80,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
                 log.warn("Error in user-supplied unique constraint: table " + tableId + " not found.");
                 continue;
             }
-            UniqueConstraint.Builder builder = UniqueConstraint.builder(td);
+            UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(td, td.getID().getTableName() + "_USER_UC_" + counter);
             String[] attrs = uc[1].split(",");
             for (String attr : attrs) {
                 QuotedID attrId = idfac.createAttributeID(attr);
@@ -92,10 +92,10 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
                 }
                 //td.setAttribute(key_pos, new Attribute(td, attr.getName(), attr.getType(), false, attr.getSQLTypeName())); // true
                 // ROMAN (17 Aug 2015): do we really change it into NON NULL?
-                builder.add(attribute);
+                builder.addDeterminant(attribute);
             }
             if (builder != null) // if all attributes have been identified
-                td.addUniqueConstraint(builder.build(td.getID().getTableName() + "_USER_UC_" + counter, false));
+                td.addUniqueConstraint(builder.build());
             counter++;
         }
     }

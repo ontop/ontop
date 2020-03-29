@@ -29,10 +29,10 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 /**
- * Primary key or a unique constraint<br>
+ * Primary key or a unique constraint
  *
- * PRIMARY KEY (columnName (, columnName)*)<br>
- * UNIQUE (columnName (, columnName)*)<br>
+ * PRIMARY KEY (columnName (, columnName)*)
+ * UNIQUE (columnName (, columnName)*)
  *
  * (a form of equality-generating dependencies)
  *
@@ -42,28 +42,20 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 public class UniqueConstraint implements FunctionalDependency {
 
-	public static final class Builder {
+	public static final class BuilderImpl implements FunctionalDependency.Builder {
 		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
 		private final DatabaseRelationDefinition relation;
+		private final String name;
+		private boolean isPK;
 
-		/**
-		 * creates a UNIQUE constraint builder
-		 *
-		 * @param relation
-		 */
-
-		public Builder(DatabaseRelationDefinition relation) {
+		private BuilderImpl(DatabaseRelationDefinition relation, String name, boolean isPK) {
 			this.relation = relation;
+			this.name = name;
+			this.isPK = isPK;
 		}
 
-		/**
-		 * adds an attribute to the UNIQUE constraint
-		 *
-		 * @param attribute
-		 * @return
-		 */
-
-		public Builder add(Attribute attribute) {
+		@Override
+		public BuilderImpl addDeterminant(Attribute attribute) {
 			if (relation != attribute.getRelation())
 				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
 
@@ -71,40 +63,54 @@ public class UniqueConstraint implements FunctionalDependency {
 			return this;
 		}
 
-		/**
-		 * builds a UNIQUE constraint (this includes PRIMARY KEY)
-		 *
-		 * @param name
-		 * @return null if the list of attributes is empty
-		 */
+		@Override
+		public BuilderImpl addDependent(Attribute dependent) {
+			throw new IllegalArgumentException("No dependents");
+		}
 
-		public UniqueConstraint build(String name, boolean isPK) {
+		@Override
+		public UniqueConstraint build() {
 			ImmutableList<Attribute> attributes = builder.build();
 			if (attributes.isEmpty())
 				throw new IllegalArgumentException("UC cannot have no attributes");
-			return new UniqueConstraint(name, isPK, builder.build());
+			return new UniqueConstraint(name, isPK, attributes);
 		}
 	}
 
 	public static UniqueConstraint primaryKeyOf(Attribute att) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
-		return builder.add(att).build("PK_" + att.getRelation().getID().getTableName(), true);
+		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att.getRelation(),
+				"PK_" + att.getRelation().getID().getTableName());
+		return builder.addDeterminant(att).build();
 	}
 
-	public static UniqueConstraint primaryKeyOf(Attribute att, Attribute att2) {
-		UniqueConstraint.Builder builder = new UniqueConstraint.Builder((DatabaseRelationDefinition)att.getRelation());
-		return builder.add(att).add(att2).build("PK_" + att.getRelation().getID().getTableName(), true);
+	public static UniqueConstraint primaryKeyOf(Attribute att1, Attribute att2) {
+		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att1.getRelation(),
+				"PK_" + att1.getRelation().getID().getTableName());
+		return builder.addDeterminant(att1).addDeterminant(att2).build();
 	}
 
 	/**
-	 * creates a UNIQUE constraint builder (which is also used for a PRIMARY KET builder)
+	 * creates a UNIQUE constraint builder
 	 *
 	 * @param relation
+	 * @param name
 	 * @return
 	 */
 
-	public static Builder builder(DatabaseRelationDefinition relation) {
-		return new Builder(relation);
+	public static BuilderImpl builder(DatabaseRelationDefinition relation, String name) {
+		return new BuilderImpl(relation, name, false);
+	}
+
+	/**
+	 * creates a PRIMARY KEY  builder
+	 *
+	 * @param relation
+	 * @param name
+	 * @return
+	 */
+
+	public static BuilderImpl primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+		return new BuilderImpl(relation, name, true);
 	}
 
 	private final String name;
@@ -185,7 +191,7 @@ public class UniqueConstraint implements FunctionalDependency {
 			.append(" ADD CONSTRAINT ").append(name).append(isPK ? " PRIMARY KEY " : " UNIQUE ")
 			.append("(");
 		Joiner.on(", ").appendTo(bf, attributes.stream()
-				.map(a -> a.getID().toString())
+				.map(Attribute::getID)
 				.collect(ImmutableCollectors.toList()));
 		bf.append(")");
 		return bf.toString();

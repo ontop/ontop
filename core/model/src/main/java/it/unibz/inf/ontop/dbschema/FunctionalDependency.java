@@ -19,7 +19,7 @@ public interface FunctionalDependency {
         FunctionalDependency build();
     }
 
-    static Builder defaultBuilder() {
-        return new FunctionalDependencyImpl.BuilderImpl();
+    static Builder defaultBuilder(RelationDefinition relation) {
+        return new FunctionalDependencyImpl.BuilderImpl(relation);
     }
 }

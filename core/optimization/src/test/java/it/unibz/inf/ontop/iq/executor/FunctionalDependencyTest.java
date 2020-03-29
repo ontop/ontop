@@ -82,7 +82,7 @@ public class FunctionalDependencyTest {
         // Independent
         table1Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
                 .addDeterminant(col2T1)
                 .addDependent(col3T1)
                 .addDependent(col4T1)
@@ -111,11 +111,11 @@ public class FunctionalDependencyTest {
         Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table3Def.addAttribute(idFactory.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(col2T3)
                 .addDependent(col3T3)
                 .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(col4T3)
                 .addDependent(col5T3)
                 .build());
@@ -132,11 +132,11 @@ public class FunctionalDependencyTest {
         // Independent
         table4Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
                 .addDeterminant(col3T4)
                 .addDependent(col4T4)
                 .build());
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
                 .addDeterminant(col2T4)
                 .addDependent(col3T4)
                 .addDependent(col4T4)
