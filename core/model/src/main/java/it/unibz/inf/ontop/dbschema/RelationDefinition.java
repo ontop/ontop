@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -62,7 +63,7 @@ public abstract class RelationDefinition {
 
 	public abstract Attribute getAttribute(int index);
 
-	public abstract List<Attribute> getAttributes();
+	public abstract ImmutableList<Attribute> getAttributes();
 
 	/**
 	 * Call it only after having completely assigned the attributes!
@@ -78,7 +79,7 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
 
-	public abstract UniqueConstraint getPrimaryKey();
+	public abstract Optional<UniqueConstraint> getPrimaryKey();
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 }

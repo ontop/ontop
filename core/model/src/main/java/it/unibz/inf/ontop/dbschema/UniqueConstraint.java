@@ -23,10 +23,11 @@ package it.unibz.inf.ontop.dbschema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.stream.Collectors;
 
 /**
  * Primary key or a unique constraint
@@ -186,14 +187,13 @@ public class UniqueConstraint implements FunctionalDependency {
 
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append("ALTER TABLE ").append(attributes.get(0).getRelation().getID())
-			.append(" ADD CONSTRAINT ").append(name).append(isPK ? " PRIMARY KEY " : " UNIQUE ")
-			.append("(");
-		Joiner.on(", ").appendTo(bf, attributes.stream()
-				.map(Attribute::getID)
-				.collect(ImmutableCollectors.toList()));
-		bf.append(")");
-		return bf.toString();
+		return "ALTER TABLE " + attributes.get(0).getRelation().getID() +
+				" ADD CONSTRAINT " + name + (isPK ? " PRIMARY KEY " : " UNIQUE ") +
+				"(" +
+				attributes.stream()
+						.map(Attribute::getID)
+						.map(QuotedID::toString)
+						.collect(Collectors.joining(", ")) +
+				")";
 	}
 }

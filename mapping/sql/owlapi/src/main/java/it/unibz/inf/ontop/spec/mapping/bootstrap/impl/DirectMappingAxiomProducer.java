@@ -28,17 +28,16 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.R2RMLIRISafeEncoder;
-import it.unibz.inf.ontop.dbschema.ForeignKeyConstraint.Component;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class DirectMappingAxiomProducer {
@@ -109,12 +108,10 @@ public class DirectMappingAxiomProducer {
 				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
 	}
 
-	private static List<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
-		UniqueConstraint pk = table.getPrimaryKey();
-		if (pk != null)
-			return pk.getAttributes();
-		else
-			return table.getAttributes();
+	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
+		Optional<UniqueConstraint> pk = table.getPrimaryKey();
+		return pk.map(UniqueConstraint::getAttributes)
+				.orElse(table.getAttributes());
 	}
 	
 	private static String getColumnNameWithAlias(Attribute attr) {
@@ -215,12 +212,10 @@ public class DirectMappingAxiomProducer {
      *     - if it is not the last column in the foreign key, a SEMICOLON character ';'
      */
     private IRI getReferencePropertyIRI(ForeignKeyConstraint fk) {
-        List<String> attributes = new ArrayList<>(fk.getComponents().size());
- 		for (Component component : fk.getComponents())
-            attributes.add(R2RMLIRISafeEncoder.encode(component.getAttribute().getID().getName()));
-        
         return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(fk.getRelation().getID().getTableName())
-                + "#ref-" + Joiner.on(";").join(attributes));
+                + "#ref-" + fk.getComponents().stream()
+				.map(c -> R2RMLIRISafeEncoder.encode(c.getAttribute().getID().getName()))
+				.collect(Collectors.joining(";")));
     }
 
     /**
@@ -241,18 +236,15 @@ public class DirectMappingAxiomProducer {
     private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref,
 										  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		
-		String varNamePrefix = ref
-				? td.getID().getTableName() + "_"
-				: "";
+		String varNamePrefix = ref ? td.getID().getTableName() + "_" : "";
 
-		UniqueConstraint pk = td.getPrimaryKey();
-		if (pk != null) {
-			
-			List<String> attributes = new ArrayList<>(pk.getAttributes().size());
-			for (Attribute att : pk.getAttributes()) 
-				attributes.add(R2RMLIRISafeEncoder.encode(att.getID().getName()) + "={}");
-			
-			String template = baseIRI + R2RMLIRISafeEncoder.encode(td.getID().getTableName()) + "/" + Joiner.on(";").join(attributes);
+		Optional<UniqueConstraint> pko = td.getPrimaryKey();
+		if (pko.isPresent()) {
+			UniqueConstraint pk = pko.get();
+			String template = baseIRI + R2RMLIRISafeEncoder.encode(td.getID().getTableName()) + "/"
+					+ pk.getAttributes().stream()
+						.map(a -> R2RMLIRISafeEncoder.encode(a.getID().getName()) + "={}")
+						.collect(Collectors.joining(";"));
 
 			ImmutableList<Variable> arguments = pk.getAttributes().stream()
 					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
@@ -261,9 +253,9 @@ public class DirectMappingAxiomProducer {
 			return termFactory.getIRIFunctionalTerm(template, arguments);
 		}
 		else {
-			List<ImmutableTerm> vars = new ArrayList<>(td.getAttributes().size());
-			for (Attribute att : td.getAttributes())
-				vars.add(termFactory.getVariable(varNamePrefix + att.getID().getName()));
+			ImmutableList<ImmutableTerm> vars = td.getAttributes().stream()
+					.map(a -> termFactory.getVariable(varNamePrefix + a.getID().getName()))
+					.collect(ImmutableCollectors.toList());
 
 			/*
 			 * Re-use the blank node template if already existing
@@ -272,7 +264,7 @@ public class DirectMappingAxiomProducer {
 					.computeIfAbsent(td,
 							d -> dbFunctionSymbolFactory.getFreshBnodeStringTemplateFunctionSymbol(vars.size()));
 
-			ImmutableFunctionalTerm lexicalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, ImmutableList.copyOf(vars));
+			ImmutableFunctionalTerm lexicalTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, vars);
 			return termFactory.getRDFFunctionalTerm(lexicalTerm,
 					termFactory.getRDFTermTypeConstant(typeFactory.getBlankNodeType()));
 		}

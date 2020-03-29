@@ -78,7 +78,7 @@ public class ParserViewDefinition extends RelationDefinition {
 	}
 
 	@Override
-	public List<Attribute> getAttributes() { return attributes; }
+	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
 	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
@@ -91,9 +91,7 @@ public class ParserViewDefinition extends RelationDefinition {
 	}
 
 	@Override
-	public UniqueConstraint getPrimaryKey() {
-		return null;
-	}
+	public Optional<UniqueConstraint> getPrimaryKey() { return Optional.empty(); }
 
 	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {

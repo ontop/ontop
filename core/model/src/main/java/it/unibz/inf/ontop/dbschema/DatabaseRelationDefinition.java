@@ -95,8 +95,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 	@Override
 	public Attribute getAttribute(int index) {
-		Attribute attribute = attributes.get(index - 1);
-		return attribute;
+		return attributes.get(index - 1);
 	}
 
 	/**
@@ -106,8 +105,8 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 	@JsonProperty("columns")
 	@Override
-	public List<Attribute> getAttributes() {
-		return Collections.unmodifiableList(attributes);
+	public ImmutableList<Attribute> getAttributes() {
+		return ImmutableList.copyOf(attributes);
 	}
 
 	/**
@@ -160,8 +159,8 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 	@JsonIgnore
 	@Override
-	public UniqueConstraint getPrimaryKey() {
-		return pk;
+	public Optional<UniqueConstraint> getPrimaryKey() {
+		return Optional.ofNullable(pk);
 	}
 
 
