@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -64,28 +61,28 @@ public class MappingTest {
 
         DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false));
         P1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p3"))
+            .addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false));
         P3_PREDICATE = table3Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p4"))
+            .addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false));
         P4_PREDICATE = table4Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p5"))
+            .addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false));
         P5_PREDICATE = table5Def.getAtomPredicate();
 
 
-        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true);
+        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID("DB2INST1", "brokerworksfor"))
+            .addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true));
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";

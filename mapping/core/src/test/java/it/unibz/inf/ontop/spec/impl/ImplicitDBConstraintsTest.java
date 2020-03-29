@@ -32,12 +32,12 @@ public class ImplicitDBConstraintsTest {
 
 		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
-		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		td.addAttribute(idfac.createAttributeID("KEYNAME"), stringType.getName(), stringType, false); // from 1
+		DatabaseRelationDefinition td = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
+			.addAttribute(idfac.createAttributeID("KEYNAME"), stringType.getName(), stringType, false)); // from 1
 
-		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
-		td2.addAttribute(idfac.createAttributeID("KEY1"), stringType.getName(), stringType, false);  // from 1
-		td2.addAttribute(idfac.createAttributeID("KEY2"), stringType.getName(), stringType, false);
+		DatabaseRelationDefinition td2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
+			.addAttribute(idfac.createAttributeID("KEY1"), stringType.getName(), stringType, false)  // from 1
+			.addAttribute(idfac.createAttributeID("KEY2"), stringType.getName(), stringType, false));
 	}
 	
 	@Test

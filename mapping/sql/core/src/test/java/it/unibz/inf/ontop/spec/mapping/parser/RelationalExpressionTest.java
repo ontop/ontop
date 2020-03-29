@@ -56,9 +56,9 @@ public class RelationalExpressionTest {
 
         DBTermType dbInteger = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition P = METADATA.createDatabaseRelation(table1);
-        P.addAttribute(attX, dbInteger.getName(), dbInteger, true);
-        P.addAttribute(attY, dbInteger.getName(), dbInteger, true);
+        DatabaseRelationDefinition P = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table1)
+            .addAttribute(attX, dbInteger.getName(), dbInteger, true)
+            .addAttribute(attY, dbInteger.getName(), dbInteger, true));
 
         f1 = ATOM_FACTORY.getDataAtom(P.getAtomPredicate(), ImmutableList.of(x, y));
 
@@ -80,9 +80,9 @@ public class RelationalExpressionTest {
         QuotedID attu = MDFAC.createAttributeID("A");
         QuotedID attv = MDFAC.createAttributeID("C");
 
-        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(table2);
-        Q.addAttribute(attu, dbInteger.getName(), dbInteger, true);
-        Q.addAttribute(attv, dbInteger.getName(), dbInteger, true);
+        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table2)
+            .addAttribute(attu, dbInteger.getName(), dbInteger, true)
+            .addAttribute(attv, dbInteger.getName(), dbInteger, true));
 
         f2 = ATOM_FACTORY.getDataAtom(Q.getAtomPredicate(), ImmutableList.of(u, v));
 

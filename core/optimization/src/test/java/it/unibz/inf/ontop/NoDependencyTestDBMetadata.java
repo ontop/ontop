@@ -66,13 +66,13 @@ public class NoDependencyTestDBMetadata {
     public static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
                                                                    int tableNumber, int arity, DBTermType termType, String prefix,
                                                             boolean canBeNull) {
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
+
+        RelationDefinition.AttributeListBuilder builder =  new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
                 prefix + "TABLE" + tableNumber + "AR" + arity));
-
-
         for (int i = 1; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), termType.getName(), termType, canBeNull);
+            builder.addAttribute(idFactory.createAttributeID("col" + i), termType.getName(), termType, canBeNull);
         }
+        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(builder);
         return tableDef.getAtomPredicate();
     }
 

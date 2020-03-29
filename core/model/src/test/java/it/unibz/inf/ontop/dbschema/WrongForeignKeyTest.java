@@ -24,49 +24,49 @@ public class WrongForeignKeyTest {
         /*
          * Table 1:
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(ID_FACTORY.createRelationID("schema1","table1"));
-        Attribute col1T1 = table1Def.addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T1 = table1Def.addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T1 = table1Def.addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T1 = table1Def.addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        // Independent
-        table1Def.addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table1"))
+            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType.getName(), integerDBType, false)
+            // Independent
+            .addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false));
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
         table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
-                .addDeterminant(col2T1)
-                .addDependent(col3T1)
-                .addDependent(col4T1)
+                .addDeterminant(table1Def.getAttribute(2))
+                .addDependent(table1Def.getAttribute(3))
+                .addDependent(table1Def.getAttribute(4))
                 .build());
 
 
         /*
          * Table 2:
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(ID_FACTORY.createRelationID("schema1","table2"));
-        table2Def.addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T2 = table2Def.addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table2Def.addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table2"))
+            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
 
 
         /*
          * Table 3:
          */
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(ID_FACTORY.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        Attribute col5T3 = table3Def.addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table3Def.addAttribute(ID_FACTORY.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID(null,"table3"))
+            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType.getName(), integerDBType, false)
+            .addAttribute(ID_FACTORY.createAttributeID("col6"), integerDBType.getName(), integerDBType, false));
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
         table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(col2T3)
-                .addDependent(col3T3)
+                .addDeterminant(table3Def.getAttribute(2))
+                .addDependent(table3Def.getAttribute(3))
                 .build());
         table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(col4T3)
-                .addDependent(col5T3)
+                .addDeterminant(table3Def.getAttribute(4))
+                .addDependent(table3Def.getAttribute(5))
                 .build());
 
 

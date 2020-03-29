@@ -43,14 +43,14 @@ public class BasicDBMetadata implements DBMetadata {
      * to the lookup table (see getDatabaseRelation and getRelation) with
      * both the fully qualified id and the table name only id
      *
-     * @param id
+     * @param builder
      * @return
      */
-    public DatabaseRelationDefinition createDatabaseRelation(RelationID id) {
+    public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(builder);
         tables.put(table.getID(), table);
         if (table.getID().hasSchema()) {
             RelationID noSchemaID = table.getID().getSchemalessID();

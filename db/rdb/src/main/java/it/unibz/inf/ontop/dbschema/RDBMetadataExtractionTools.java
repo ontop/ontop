@@ -218,14 +218,14 @@ public class RDBMetadataExtractionTools {
 				seedRelationIds = getTableList(null, realTables, idfac);
 		}
 
-		List<DatabaseRelationDefinition> extractedRelations = new LinkedList<>();
+		List<RelationDefinition.AttributeListBuilder> extractedRelations = new LinkedList<>();
 
         String catalog = getCatalog(metadata, conn);
 
         for (RelationID seedId : seedRelationIds) {
 			// the same seedId can be mapped to many tables (if the seedId has no schema)
 			// we collect attributes from all of them
-			DatabaseRelationDefinition currentRelation = null;
+			RelationDefinition.AttributeListBuilder currentRelation = null;
 
 			// catalog is ignored for now (rs.getString("TABLE_CAT"))
             try (ResultSet rs = md.getColumns(catalog, seedId.getSchemaName(), seedId.getTableName(), null)) {
@@ -241,9 +241,9 @@ public class RDBMetadataExtractionTools {
 					if (printouts)
 						System.out.println("         " + relationId + "." + attributeId);
 
-					if (currentRelation == null || !currentRelation.getID().equals(relationId)) {
+					if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
 						// switch to the next database relation
-						currentRelation = metadata.createDatabaseRelation(relationId);
+						currentRelation = new RelationDefinition.AttributeListBuilder(relationId);
 						extractedRelations.add(currentRelation);
 					}
 
@@ -251,8 +251,6 @@ public class RDBMetadataExtractionTools {
 					boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
 					String typeName = rs.getString("TYPE_NAME");
 					int columnSize = rs.getInt("COLUMN_SIZE");
-					//int dataType = dt.getCorrectedDatatype(rs.getInt("DATA_TYPE"), typeName);
-
 					DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
 					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
@@ -260,7 +258,13 @@ public class RDBMetadataExtractionTools {
 			}
 		}
 
-		for (DatabaseRelationDefinition relation : extractedRelations)	{
+        List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
+		for (RelationDefinition.AttributeListBuilder r : extractedRelations) {
+			DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
+			extractedRelations2.add(relation);
+		}
+
+		for (DatabaseRelationDefinition relation : extractedRelations2)	{
 			getPrimaryKey(md, relation, metadata.getQuotedIDFactory());
 			getUniqueAttributes(md, relation, metadata.getQuotedIDFactory());
 			getForeignKeys(md, relation, metadata);

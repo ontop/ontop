@@ -20,13 +20,13 @@ public abstract class AbstractBasicMappingMistakeTest {
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
 
-        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(
-                idFactory.createRelationID(null, "PERSON"));
-        Attribute personId = personTable.addAttribute(idFactory.createAttributeID("ID"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBLargeIntegerType(), false);
-        personTable.addAttribute(idFactory.createAttributeID("FNAME"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBStringType(), false);
-        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personId));
+        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
+                idFactory.createRelationID(null, "PERSON"))
+            .addAttribute(idFactory.createAttributeID("ID"),
+                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBLargeIntegerType(), false)
+            .addAttribute(idFactory.createAttributeID("FNAME"),
+                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBStringType(), false));
+        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
 
         dbMetadata.freeze();
         this.dbMetadata = dbMetadata;

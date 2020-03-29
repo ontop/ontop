@@ -21,13 +21,11 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a database relation (either a table or a view)
@@ -38,75 +36,18 @@ import java.util.*;
 
 public class DatabaseRelationDefinition extends RelationDefinition {
 
-	private final List<Attribute> attributes = new ArrayList<>();
-	private final Map<QuotedID, Attribute> attributeMap = new HashMap<>();
-
 	private final List<UniqueConstraint> ucs = new LinkedList<>();
 	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
 	private UniqueConstraint pk;
 
-
 	/**
 	 * used only in DBMetadata
 	 *
-	 * @param name
+	 * @param builder
 	 */
-	protected DatabaseRelationDefinition(RelationID name) {
-		super(name);
-	}
-
-	/**
-	 * creates a new attribute
-	 *
-	 * @param id
-	 * @param typeName
-	 * @param termType
-	 * @param canNull
-	 */
-	public Attribute addAttribute(QuotedID id, String typeName, DBTermType termType, boolean canNull) {
-		Attribute att = new Attribute(this, id, attributes.size() + 1, typeName, termType, canNull);
-
-		//check for duplicate names (put returns the previous value)
-		Attribute prev = attributeMap.put(id, att);
-		if (prev != null)
-			throw new IllegalArgumentException("Duplicate attribute names");
-
-		attributes.add(att);
-		return att;
-	}
-
-	/**
-	 * return an attribute with the specified ID
-	 *
-	 * @param attributeId
-	 * @return
-	 */
-
-	public Attribute getAttribute(QuotedID attributeId) {
-		return attributeMap.get(attributeId);
-	}
-
-	/**
-	 * gets attribute with the specified position
-	 *
-	 * @param index is position <em>starting at 1</em>
-	 * @return attribute at the position
-	 */
-	@Override
-	public Attribute getAttribute(int index) {
-		return attributes.get(index - 1);
-	}
-
-	/**
-	 * returns the list of attributes
-	 *
-	 * @return list of attributes
-	 */
-	@JsonProperty("columns")
-	@Override
-	public ImmutableList<Attribute> getAttributes() {
-		return ImmutableList.copyOf(attributes);
+	protected DatabaseRelationDefinition(AttributeListBuilder builder) {
+		super(builder);
 	}
 
 	/**
@@ -153,9 +94,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	}
 
 	/**
-	 * return primary key (if present) or null (otherwise)
-	 *
-	 * @return
+	 * @return primary
 	 */
 	@JsonIgnore
 	@Override
@@ -188,11 +127,12 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append("CREATE TABLE ").append(getID()).append(" (\n   ");
-		Joiner.on(",\n   ").appendTo(bf, attributes);
-		bf.append("\n)");
-		return bf.toString();
+		return "CREATE TABLE " + getID() +
+				" (\n   " +
+				getAttributes().stream()
+						.map(Attribute::toString)
+						.collect(Collectors.joining(",\n   ")) +
+				"\n)";
 	}
 
 }

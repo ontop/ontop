@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a complex sub-query created by the SQL parser (not a database view!)
@@ -34,8 +35,6 @@ import java.util.*;
 */
 
 public class ParserViewDefinition extends RelationDefinition {
-
-	private final ImmutableList<Attribute> attributes;
 
 	private final String statement;
 	
@@ -46,19 +45,17 @@ public class ParserViewDefinition extends RelationDefinition {
 	
 	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement,
 								DBTypeFactory dbTypeFactory) {
-		super(name);
+		super(attributeListBuilder(name, attrs, dbTypeFactory));
 		this.statement = statement;
+	}
 
-		ImmutableList.Builder<Attribute> attributeBuilder = ImmutableList.builder();
-		int c = 1;
+	private static AttributeListBuilder attributeListBuilder(RelationID name, ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
+		AttributeListBuilder builder = new AttributeListBuilder(name);
 		for (QuotedID id : attrs) {
 			// TODO: infer types?
-			Attribute att = new Attribute(this,
-					id, c, null, dbTypeFactory.getAbstractRootDBType(), true);
-			c++;
-			attributeBuilder.add(att);
+			builder.addAttribute(id, null, dbTypeFactory.getAbstractRootDBType(), true);
 		}
-		this.attributes = attributeBuilder.build();
+		return builder;
 	}
 
 	/**
@@ -70,15 +67,6 @@ public class ParserViewDefinition extends RelationDefinition {
 	public String getStatement() {
 		return statement;
 	}
-
-	@Override
-	public Attribute getAttribute(int index) {
-		// positions start at 1
-		return attributes.get(index - 1);
-	}
-
-	@Override
-	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
 	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
@@ -101,11 +89,9 @@ public class ParserViewDefinition extends RelationDefinition {
 
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append(getID()).append(" [");
-		Joiner.on(", ").appendTo(bf, attributes);
-		bf.append("]").append(" (").append(statement).append(")");
-		return bf.toString();
+		return getID() + " [" + getAttributes().stream()
+				.map(Attribute::toString)
+				.collect(Collectors.joining(", ")) +
+				"]" + " (" + statement + ")";
 	}
-
 }

@@ -68,6 +68,7 @@ public class DirectMappingAxiomProducer {
 
 	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition,
 			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+
 		Map<String, ImmutableList<TargetAtom>> refAxioms = new HashMap<>();
 		for (ForeignKeyConstraint fk : table.getForeignKeys())
 			refAxioms.put(getRefSQL(fk), getRefCQ(fk, bnodeTemplateMap));
@@ -104,7 +105,7 @@ public class DirectMappingAxiomProducer {
 		final String tables = fk.getRelation().getID().getSQLRendering() + 
 							", " + fk.getReferencedRelation().getID().getSQLRendering();
 		
-		return String.format("SELECT %s FROM %s WHERE %s", 
+		return String.format("SELECT %s FROM %s WHERE %s",
 				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
 	}
 

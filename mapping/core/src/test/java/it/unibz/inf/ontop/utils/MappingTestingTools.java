@@ -119,14 +119,15 @@ public class MappingTestingTools {
 
     private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
                                                              int tableNumber, int arity) {
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                "TABLE" + tableNumber + "AR" + arity));
+
+        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(
+                null, "TABLE" + tableNumber + "AR" + arity));
 
         DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
         for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), stringType.getName(), stringType, false);
+            builder.addAttribute(idFactory.createAttributeID("col" + i), stringType.getName(), stringType, false);
         }
-        return tableDef.getAtomPredicate();
+        return dbMetadata.createDatabaseRelation(builder).getAtomPredicate();
     }
 }

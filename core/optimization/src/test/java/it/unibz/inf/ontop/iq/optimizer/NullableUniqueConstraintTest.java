@@ -41,24 +41,24 @@ public class NullableUniqueConstraintTest {
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        Attribute table1Col1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
-        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true));
         table1Def.addUniqueConstraint(UniqueConstraint.builder(table1Def, "uc1")
-                .addDeterminant(table1Col1)
+                .addDeterminant(table1Def.getAttribute(1))
                 .build());
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        Attribute table2Col1 = table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true));
         table2Def.addUniqueConstraint(UniqueConstraint.builder(table2Def, "uc2")
-                .addDeterminant(table2Col1)
+                .addDeterminant(table2Def.getAttribute(1))
                 .build());
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 

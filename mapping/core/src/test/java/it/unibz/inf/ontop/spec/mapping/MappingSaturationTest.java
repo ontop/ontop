@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -42,9 +43,9 @@ public class MappingSaturationTest {
 
         DBTermType dbIntType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), dbIntType.getName(), dbIntType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), dbIntType.getName(), dbIntType, false);
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
+            .addAttribute(idFactory.createAttributeID("col1"), dbIntType.getName(), dbIntType, false)
+            .addAttribute(idFactory.createAttributeID("col12"), dbIntType.getName(), dbIntType, false));
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";

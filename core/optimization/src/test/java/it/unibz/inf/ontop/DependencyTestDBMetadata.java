@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop;
 
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.UniqueConstraint;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -38,14 +35,14 @@ public class DependencyTestDBMetadata {
 
     private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
                                                              int tableNumber, int arity) {
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,
-                "PK_TABLE" + tableNumber + "AR" + arity));
-
         DBTermType dbStringTermType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
-
+        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
+                "PK_TABLE" + tableNumber + "AR" + arity));
         for (int i=1 ; i <= arity; i++) {
-            tableDef.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType.getName(), dbStringTermType, false);
+            builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType.getName(), dbStringTermType, false);
         }
+        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(builder);
+
         tableDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1)));
         return tableDef.getAtomPredicate();
     }

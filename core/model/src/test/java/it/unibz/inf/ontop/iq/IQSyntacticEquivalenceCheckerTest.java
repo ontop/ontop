@@ -50,19 +50,19 @@ public class IQSyntacticEquivalenceCheckerTest {
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
+                    .addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
+            .addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), INT_STRING, integerDBType, false);
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE3"))
+            .addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), INT_STRING, integerDBType, false));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         dbMetadata.freeze();

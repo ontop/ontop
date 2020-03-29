@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -108,17 +109,17 @@ public class ImmutableHomomorphismTest {
         QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
         DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
-        DatabaseRelationDefinition A = metadata.createDatabaseRelation(idFactory.createRelationID(null, "ADDRESS"));
-        A.addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false);
-        A.addAttribute(idFactory.createAttributeID("address"), "varchar", stringType, false);
-        DatabaseRelationDefinition S = metadata.createDatabaseRelation(idFactory.createRelationID(null, "STAFF"));
-        S.addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false);
-        S.addAttribute(idFactory.createAttributeID("address_id"), "varchar", stringType, false);
-        S.addAttribute(idFactory.createAttributeID("store_id"), "varchar", stringType, false);
-        DatabaseRelationDefinition T = metadata.createDatabaseRelation(idFactory.createRelationID(null, "STORE"));
-        T.addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false);
-        T.addAttribute(idFactory.createAttributeID("staff_id"), "varchar", stringType, false);
-        T.addAttribute(idFactory.createAttributeID("address_id"), "varchar", stringType, false);
+        DatabaseRelationDefinition A = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "ADDRESS"))
+            .addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false)
+            .addAttribute(idFactory.createAttributeID("address"), "varchar", stringType, false));
+        DatabaseRelationDefinition S = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STAFF"))
+            .addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false)
+            .addAttribute(idFactory.createAttributeID("address_id"), "varchar", stringType, false)
+            .addAttribute(idFactory.createAttributeID("store_id"), "varchar", stringType, false));
+        DatabaseRelationDefinition T = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STORE"))
+            .addAttribute(idFactory.createAttributeID("id"), "varchar", stringType, false)
+            .addAttribute(idFactory.createAttributeID("staff_id"), "varchar", stringType, false)
+            .addAttribute(idFactory.createAttributeID("address_id"), "varchar", stringType, false));
 
         ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
         // ADDRESS(ADDRESS_ID0,ADDRESS3)
