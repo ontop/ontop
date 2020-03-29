@@ -123,7 +123,7 @@ public class DirectMappingAxiomProducer {
 	}
 	
 	private static String getColumnName(Attribute attr) {
-		 return attr.getQualifiedID().getSQLRendering();
+		 return new QualifiedAttributeID(attr.getRelation().getID(), attr.getID()).getSQLRendering();
 	}
 
 

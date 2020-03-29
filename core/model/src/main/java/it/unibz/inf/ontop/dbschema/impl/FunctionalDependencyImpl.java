@@ -31,14 +31,8 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
 
     public static class BuilderImpl implements Builder {
 
-        private final Set<Attribute> determinants;
-        private final Set<Attribute> dependents;
-
-        public BuilderImpl() {
-            determinants = new HashSet<>();
-            dependents = new HashSet<>();
-        }
-
+        private final Set<Attribute> determinants = new HashSet<>();
+        private final Set<Attribute> dependents = new HashSet<>();
 
         @Override
         public Builder addDeterminant(Attribute determinant) {

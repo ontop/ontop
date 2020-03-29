@@ -28,9 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Primary key or a unique constraint<br>
  *
@@ -68,7 +65,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 		public Builder add(Attribute attribute) {
 			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("Unique Key requires the same table in all attributes: " + relation + " " + attribute);
+				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
 
 			builder.add(attribute);
 			return this;
@@ -84,7 +81,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		public UniqueConstraint build(String name, boolean isPK) {
 			ImmutableList<Attribute> attributes = builder.build();
 			if (attributes.isEmpty())
-				return null;
+				throw new IllegalArgumentException("UC cannot have no attributes");
 			return new UniqueConstraint(name, isPK, builder.build());
 		}
 	}
@@ -183,15 +180,13 @@ public class UniqueConstraint implements FunctionalDependency {
 
 	@Override
 	public String toString() {
-		List<String> columns = new ArrayList<>(attributes.size());
-		for (Attribute c : attributes)
-			columns.add(c.getID().toString());
-
 		StringBuilder bf = new StringBuilder();
 		bf.append("ALTER TABLE ").append(attributes.get(0).getRelation().getID())
 			.append(" ADD CONSTRAINT ").append(name).append(isPK ? " PRIMARY KEY " : " UNIQUE ")
 			.append("(");
-		Joiner.on(", ").appendTo(bf, columns);
+		Joiner.on(", ").appendTo(bf, attributes.stream()
+				.map(a -> a.getID().toString())
+				.collect(ImmutableCollectors.toList()));
 		bf.append(")");
 		return bf.toString();
 	}

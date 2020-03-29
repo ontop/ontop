@@ -39,10 +39,9 @@ import java.io.IOException;
 
 public class Attribute {
 
-	private final RelationDefinition relation; // reference to the relation or parser view
+	private final RelationDefinition relation;
 
-	private final QualifiedAttributeID id; // qualified id (table = tableId for database relation
-	                                       //               parser views, however, have properly qualified column names
+	private final QuotedID id;
 	private final int index;
 	private final DBTermType termType;
 	private final String typeName;
@@ -51,7 +50,7 @@ public class Attribute {
 	/**
 	 * With a term type
 	 */
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
+	Attribute(RelationDefinition relation, QuotedID id, int index, String typeName,
 			  DBTermType termType, boolean isNullable) {
 		this.relation = relation;
 		this.id = id;
@@ -61,20 +60,15 @@ public class Attribute {
 		this.isNullable = isNullable;
 	}
 
-	@JsonProperty("name")
-	@JsonSerialize(using = QuotedID.QuotedIDSerializer.class)
-	public QuotedID getID() {
-		return id.getAttribute();
-	}
-
-	@JsonIgnore
-	public QualifiedAttributeID getQualifiedID() {
-		return id;
-	}
-
 	@JsonIgnore
 	public RelationDefinition getRelation() {
 		return relation;
+	}
+
+	@JsonProperty("name")
+	@JsonSerialize(using = QuotedID.QuotedIDSerializer.class)
+	public QuotedID getID() {
+		return id;
 	}
 
 	/**
@@ -102,7 +96,7 @@ public class Attribute {
 
 	@Override
 	public String toString() {
-		return id.getAttribute() + " " + typeName + (isNullable ? "" : " NOT NULL");
+		return id + " " + typeName + (isNullable ? "" : " NOT NULL");
 	}
 
 	@Override
@@ -113,7 +107,7 @@ public class Attribute {
 		if (obj instanceof Attribute) {
 			Attribute other = (Attribute)obj;
 			// the same reference(!) for the relation
-			return this.id.equals(other.id) && (this.relation == other.relation);
+			return (this.relation == other.relation) && this.id.equals(other.id);
 		}
 
 		return false;

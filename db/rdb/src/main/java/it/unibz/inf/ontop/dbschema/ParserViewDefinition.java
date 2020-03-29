@@ -54,7 +54,7 @@ public class ParserViewDefinition extends RelationDefinition {
 		for (QuotedID id : attrs) {
 			// TODO: infer types?
 			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, null, dbTypeFactory.getAbstractRootDBType(), true);
+					id, c, null, dbTypeFactory.getAbstractRootDBType(), true);
 			c++;
 			attributeBuilder.add(att);
 		}

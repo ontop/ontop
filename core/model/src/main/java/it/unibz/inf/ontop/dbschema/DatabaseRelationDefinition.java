@@ -65,8 +65,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @param canNull
 	 */
 	public Attribute addAttribute(QuotedID id, String typeName, DBTermType termType, boolean canNull) {
-		Attribute att = new Attribute(this, new QualifiedAttributeID(getID(), id),
-				attributes.size() + 1, typeName, termType, canNull);
+		Attribute att = new Attribute(this, id, attributes.size() + 1, typeName, termType, canNull);
 
 		//check for duplicate names (put returns the previous value)
 		Attribute prev = attributeMap.put(id, att);
