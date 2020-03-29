@@ -253,7 +253,7 @@ public class RDBMetadataExtractionTools {
 					int columnSize = rs.getInt("COLUMN_SIZE");
 					DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-					currentRelation.addAttribute(attributeId, typeName, termType, isNullable);
+					currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
 				}
 			}
 		}

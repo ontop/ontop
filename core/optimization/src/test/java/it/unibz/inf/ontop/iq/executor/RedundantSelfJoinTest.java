@@ -74,7 +74,7 @@ public class RedundantSelfJoinTest {
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
 
     static{
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
@@ -84,9 +84,9 @@ public class RedundantSelfJoinTest {
          * Table 1: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
@@ -94,9 +94,9 @@ public class RedundantSelfJoinTest {
          * Table 2: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
@@ -104,9 +104,9 @@ public class RedundantSelfJoinTest {
          * Table 3: composite unique constraint over the first TWO columns
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table3"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1), table3Def.getAttribute(2)));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
@@ -114,8 +114,8 @@ public class RedundantSelfJoinTest {
          * Table 4: unique constraint over the first column
          */
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table4"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
@@ -123,8 +123,8 @@ public class RedundantSelfJoinTest {
          * Table 5: unique constraint over the second column
          */
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table5"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
         table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table5Def.getAttribute(2)));
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
@@ -132,16 +132,14 @@ public class RedundantSelfJoinTest {
          * Table 6: two atomic unique constraints over the first and third columns
          */
         DatabaseRelationDefinition table6Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table6"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table6Def.getAttribute(1)));
         table6Def.addUniqueConstraint(UniqueConstraint.builder(table6Def, "table6-uc3")
                 .addDeterminant(table6Def.getAttribute(3))
                 .build());
         TABLE6_PREDICATE = table6Def.getAtomPredicate();
-
-        dbMetadata.freeze();
     }
 
     @Test

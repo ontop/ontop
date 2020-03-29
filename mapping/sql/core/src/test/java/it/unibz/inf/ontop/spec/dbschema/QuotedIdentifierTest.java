@@ -15,7 +15,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1() {
-		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+		QuotedIDFactory fac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
 		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
 
@@ -48,7 +48,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1b() {
-		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+		QuotedIDFactory fac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
 		Set<QuotedID> s = ImmutableSet.of(
 				fac.createAttributeID("aaa"),
@@ -59,7 +59,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1c() {
-		QuotedIDFactory fac = createDummyMetadata().getQuotedIDFactory();
+		QuotedIDFactory fac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
 		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createAttributeID("aaa"));
 		QualifiedAttributeID a2 = new QualifiedAttributeID(null, fac.createAttributeID("\"AAA\""));

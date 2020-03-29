@@ -23,11 +23,6 @@ public interface DBMetadata {
     Collection<DatabaseRelationDefinition> getDatabaseRelations();
 
     /**
-     * After calling this method, the DBMetadata cannot be modified
-     */
-    void freeze();
-
-    /**
      * New-gen interface
      *
      * TODO: stop using the DBMetadata object in most of the code but DBParameters instead when needed

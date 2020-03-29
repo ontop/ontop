@@ -71,7 +71,7 @@ public class LeftJoinOptimizationTest {
     private final static ImmutableExpression EXPRESSION2 = TERM_FACTORY.getStrictEquality(N, M);
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
@@ -81,9 +81,9 @@ public class LeftJoinOptimizationTest {
          * Table 1: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, true));
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
@@ -91,9 +91,9 @@ public class LeftJoinOptimizationTest {
          * Table 2: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(1)));
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Def.getAttribute(2), table1Def.getAttribute(1)));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
@@ -102,9 +102,9 @@ public class LeftJoinOptimizationTest {
          * Table 3: composite unique constraint over the first TWO columns
          */
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE3"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1), table3Def.getAttribute(2)));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
@@ -112,10 +112,10 @@ public class LeftJoinOptimizationTest {
          * Table 1a: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table1aDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1A"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false));
         table1aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1aDef.getAttribute(1)));
         TABLE1a_PREDICATE = table1aDef.getAtomPredicate();
 
@@ -123,9 +123,9 @@ public class LeftJoinOptimizationTest {
          * Table 2a: non-composite unique constraint and regular field
          */
         DatabaseRelationDefinition table2aDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2A"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         table2aDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2aDef.getAttribute(1)));
         ForeignKeyConstraint.Builder fkBuilder = ForeignKeyConstraint.builder(table2aDef, table1aDef);
         fkBuilder.add(table2aDef.getAttribute(2), table1aDef.getAttribute(1));
@@ -137,9 +137,9 @@ public class LeftJoinOptimizationTest {
          * Table 4: non-composite unique constraint and nullable fk
          */
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE4"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, true));
         table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
         table4Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk4-1", table4Def.getAttribute(3), table1Def.getAttribute(1)));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
@@ -148,15 +148,13 @@ public class LeftJoinOptimizationTest {
          * Table 5: nullable unique constraint
          */
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE5"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
         table5Def.addUniqueConstraint(
                 UniqueConstraint.builder(table5Def, "uc5")
                     .addDeterminant(table5Def.getAttribute(1))
                     .build());
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
-
-        dbMetadata.freeze();
     }
 
     @Test

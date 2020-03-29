@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -51,41 +50,39 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
         table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Def.getAttribute(2), table1Def.getAttribute(1)));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE3"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE4"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
 
         table4Def.addForeignKeyConstraint(new ForeignKeyConstraint.Builder(table4Def, table3Def)
                 .add(table4Def.getAttribute(2), table3Def.getAttribute(1))
                 .add(table4Def.getAttribute(3), table3Def.getAttribute(2))
                 .build("fk2-1"));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
-
-        dbMetadata.freeze();
     }
 
 

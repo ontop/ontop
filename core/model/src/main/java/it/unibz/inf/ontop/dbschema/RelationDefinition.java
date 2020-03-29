@@ -141,8 +141,13 @@ public abstract class RelationDefinition {
 			return relationID;
 		}
 
-		public AttributeListBuilder addAttribute(QuotedID id, String typeName, DBTermType termType, boolean isNullable) {
+		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
 			list.add(new AttributeInfo(id, list.size() + 1, termType, typeName, isNullable));
+			return this;
+		}
+
+		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable) {
+			list.add(new AttributeInfo(id, list.size() + 1, termType, termType.getName(), isNullable));
 			return this;
 		}
 

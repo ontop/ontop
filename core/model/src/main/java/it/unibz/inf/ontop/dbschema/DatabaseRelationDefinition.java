@@ -94,7 +94,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	}
 
 	/**
-	 * @return primary
+	 * @return primary key
 	 */
 	@JsonIgnore
 	@Override
@@ -124,15 +124,12 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 		return ImmutableList.copyOf(fks);
 	}
 
-
 	@Override
 	public String toString() {
-		return "CREATE TABLE " + getID() +
-				" (\n   " +
+		return "CREATE TABLE " + getID() + " (\n   " +
 				getAttributes().stream()
 						.map(Attribute::toString)
 						.collect(Collectors.joining(",\n   ")) +
 				"\n)";
 	}
-
 }

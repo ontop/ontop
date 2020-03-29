@@ -83,7 +83,6 @@ public class BasicDBMetadata implements DBMetadata {
         return Collections.unmodifiableCollection(listOfTables);
     }
 
-    @Override
     public void freeze() {
         isStillMutable = false;
     }

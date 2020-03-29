@@ -48,7 +48,7 @@ public class OptimizationTestingTools {
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
 
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final Variable X;
     public static final Variable Y;
@@ -169,9 +169,5 @@ public class OptimizationTestingTools {
 
     public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
-    }
-
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 }

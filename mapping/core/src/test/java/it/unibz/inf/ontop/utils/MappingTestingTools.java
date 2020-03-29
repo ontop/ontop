@@ -36,7 +36,7 @@ public class MappingTestingTools {
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
@@ -95,38 +95,29 @@ public class MappingTestingTools {
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
-        BasicDBMetadata dbMetadataWithPredicates = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadataWithPredicates.getQuotedIDFactory();
-
-        TABLE1_AR2 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 1, 2);
-        TABLE2_AR2 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 2, 2);
-        TABLE1_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 4, 3);
-        TABLE2_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 5, 3);
-        TABLE3_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 6, 3);
-        TABLE4_AR3 = createRelationPredicate(dbMetadataWithPredicates, idFactory, 7, 3);
-
-        dbMetadataWithPredicates.freeze();
+        TABLE1_AR2 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 1, 2);
+        TABLE2_AR2 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 2, 2);
+        TABLE1_AR3 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 4, 3);
+        TABLE2_AR3 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 5, 3);
+        TABLE3_AR3 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 6, 3);
+        TABLE4_AR3 = createRelationPredicate(DEFAULT_DUMMY_DB_METADATA, 7, 3);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
-    }
-
-
-    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
+    private static RelationPredicate createRelationPredicate(DummyBasicDBMetadata dbMetadata,
                                                              int tableNumber, int arity) {
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(
                 null, "TABLE" + tableNumber + "AR" + arity));
 
-        DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+        DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
-        for (int i=1 ; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), stringType.getName(), stringType, false);
+        for (int i = 1 ; i <= arity; i++) {
+            builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
         }
         return dbMetadata.createDatabaseRelation(builder).getAtomPredicate();
     }

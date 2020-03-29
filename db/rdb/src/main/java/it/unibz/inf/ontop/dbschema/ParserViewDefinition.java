@@ -20,9 +20,7 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.*;
@@ -53,7 +51,7 @@ public class ParserViewDefinition extends RelationDefinition {
 		AttributeListBuilder builder = new AttributeListBuilder(name);
 		for (QuotedID id : attrs) {
 			// TODO: infer types?
-			builder.addAttribute(id, null, dbTypeFactory.getAbstractRootDBType(), true);
+			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
 		}
 		return builder;
 	}

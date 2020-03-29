@@ -1,10 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -38,14 +35,13 @@ public class MappingSaturationTest {
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTermType dbIntType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType largeIntDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
-            .addAttribute(idFactory.createAttributeID("col1"), dbIntType.getName(), dbIntType, false)
-            .addAttribute(idFactory.createAttributeID("col12"), dbIntType.getName(), dbIntType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), largeIntDBType, false)
+            .addAttribute(idFactory.createAttributeID("col12"), largeIntDBType, false));
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";

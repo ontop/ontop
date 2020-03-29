@@ -57,31 +57,31 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
     }
 
 	public void setUp() {
-		md = createDummyMetadata();
+		md = DEFAULT_DUMMY_DB_METADATA;
 		QuotedIDFactory idfac = md.getQuotedIDFactory();
 
-		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+		DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+		DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
 		// Database schema
 		DatabaseRelationDefinition table1 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Student"))
-			.addAttribute(idfac.createAttributeID("id"), integerType.getName(), integerType, false)
-			.addAttribute(idfac.createAttributeID("first_name"), stringType.getName(), stringType, false)
-			.addAttribute(idfac.createAttributeID("last_name"), stringType.getName(), stringType, false)
-			.addAttribute(idfac.createAttributeID("year"), integerType.getName(), integerType, false)
-			.addAttribute(idfac.createAttributeID("nationality"), stringType.getName(), stringType, false));
+			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("first_name"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("last_name"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("year"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("nationality"), stringDBType, false));
 		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 
 		DatabaseRelationDefinition table2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Course"))
-			.addAttribute(idfac.createAttributeID("cid"), stringType.getName(), stringType, false)
-			.addAttribute(idfac.createAttributeID("title"), stringType.getName(), stringType, false)
-			.addAttribute(idfac.createAttributeID("credits"), integerType.getName(), integerType, false)
-			.addAttribute(idfac.createAttributeID("description"), stringType.getName(), stringType, false));
+			.addAttribute(idfac.createAttributeID("cid"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("title"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("credits"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("description"), stringDBType, false));
 		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 
 		DatabaseRelationDefinition table3 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Enrollment"))
-			.addAttribute(idfac.createAttributeID("student_id"), integerType.getName(), integerType, false)
-			.addAttribute(idfac.createAttributeID("course_id"), stringType.getName(), stringType, false));
+			.addAttribute(idfac.createAttributeID("student_id"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("course_id"), stringDBType, false));
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
 				table3.getAttribute(idfac.createAttributeID("course_id"))));
 	}

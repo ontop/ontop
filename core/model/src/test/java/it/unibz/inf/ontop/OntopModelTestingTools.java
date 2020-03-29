@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -35,7 +34,7 @@ public class OntopModelTestingTools {
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
@@ -58,9 +57,5 @@ public class OntopModelTestingTools {
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
 
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
-    }
-
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 }

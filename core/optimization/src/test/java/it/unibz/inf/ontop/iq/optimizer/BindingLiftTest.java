@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.DummyBasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -2375,14 +2376,11 @@ public class BindingLiftTest {
 
     @Test
     public void testProvenanceVariableAndProjection1() {
-
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
 
-        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 2, true);
-        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 2, 2, true);
+        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 1, 2, true);
+        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 2, 2, true);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table1Ar2, A, B));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table2Ar2, C, D));

@@ -61,8 +61,4 @@ public class SQLMappingTestingTools {
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(LegacySQLPPMappingConverter.class);
     }
-
-    public static RDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
-    }
 }

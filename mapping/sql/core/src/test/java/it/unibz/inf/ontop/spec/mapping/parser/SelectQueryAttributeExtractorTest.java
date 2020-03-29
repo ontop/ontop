@@ -14,7 +14,7 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        RDBMetadata metadata = createDummyMetadata();
+        RDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
         DatabaseRelationDefinition r = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student")));
 

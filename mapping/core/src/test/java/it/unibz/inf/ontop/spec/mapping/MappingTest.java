@@ -40,8 +40,6 @@ public class MappingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
-    private static final DBMetadata DB_METADATA;
-
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
     private static Variable C = TERM_FACTORY.getVariable("c");
@@ -56,38 +54,36 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col12"), integerDBType, false));
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p3"))
-            .addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col31"), integerDBType, false));
         P3_PREDICATE = table3Def.getAtomPredicate();
 
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p4"))
-            .addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col41"), integerDBType, false));
         P4_PREDICATE = table4Def.getAtomPredicate();
 
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p5"))
-            .addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false));
+            .addAttribute(idFactory.createAttributeID("col51"), integerDBType, false));
         P5_PREDICATE = table5Def.getAtomPredicate();
 
 
         DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID("DB2INST1", "brokerworksfor"))
-            .addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true));
+            .addAttribute(idFactory.createAttributeID("broker"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("company"), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("client"), integerDBType, true));
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";
-
-        DB_METADATA = dbMetadata;
 
         PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
         PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");

@@ -42,16 +42,14 @@ public class PunningTest {
 
     static {
 
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "company"))
-            .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType.getName(), integerType, false)
-            .addAttribute(idFactory.createAttributeID("cmpShortName"), integerType.getName(), integerType, false));
+            .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("cmpShortName"), integerDBType, false));
         company = table24Def.getAtomPredicate();
-
-        dbMetadata.freeze();
     }
 
     @Test
