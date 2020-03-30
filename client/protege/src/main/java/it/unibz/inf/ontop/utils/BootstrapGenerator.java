@@ -102,7 +102,7 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection is missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
+        BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 
         // this operation is EXPENSIVE
         RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);

@@ -113,7 +113,7 @@ public class RDBMetadataExtractionTools {
 	 * @throws SQLException
 	 */
 
-	public static RDBMetadata createMetadata(Connection conn,
+	public static BasicDBMetadata createMetadata(Connection conn,
 											 DBTypeFactory dbTypeFactory) throws SQLException  {
 
 		final DatabaseMetaData md = conn.getMetaData();
@@ -165,7 +165,7 @@ public class RDBMetadataExtractionTools {
 			}
 		}
 
-		RDBMetadata metadata = new RDBMetadata(md.getDriverName(), md.getDriverVersion(),
+		BasicDBMetadata metadata = new BasicDBMetadata(md.getDriverName(), md.getDriverVersion(),
 							productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
 		
 		return metadata;	
@@ -181,7 +181,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(RDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, Set<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(BasicDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, Set<RelationID> realTables) throws SQLException {
 
 		if (printouts)
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
@@ -284,7 +284,7 @@ public class RDBMetadataExtractionTools {
 		}
 	}
 
-    private static String getCatalog(RDBMetadata metadata, Connection conn) throws SQLException {
+    private static String getCatalog(BasicDBMetadata metadata, Connection conn) throws SQLException {
         String catalog = null;
         if (metadata.getDBParameters().getDbmsProductName().contains("MySQL")) {
             try (Statement statement = conn.createStatement();

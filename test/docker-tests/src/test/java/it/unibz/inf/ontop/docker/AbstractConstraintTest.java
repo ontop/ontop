@@ -38,7 +38,7 @@ import java.util.Properties;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private RDBMetadata metadata;
+	private BasicDBMetadata metadata;
 	
 	private static final String TB_BOOK = "Book";
 	private static final String TB_WRITER = "Writer";

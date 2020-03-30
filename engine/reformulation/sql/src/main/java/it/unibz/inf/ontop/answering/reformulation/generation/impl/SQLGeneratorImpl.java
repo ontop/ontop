@@ -8,9 +8,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerato
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;

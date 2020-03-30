@@ -23,8 +23,8 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
@@ -209,14 +209,14 @@ public class DirectMappingEngine {
 			throw new IllegalArgumentException("Model should not be null");
 		}
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
+			BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 			// this operation is EXPENSIVE
 			RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
 			return bootstrapMappings(metadata, ppMapping);
 		}
 	}
 
-	private SQLPPMapping bootstrapMappings(RDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
+	private SQLPPMapping bootstrapMappings(BasicDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
 		if (baseIRI == null || baseIRI.isEmpty())
 			this.baseIRI = ppMapping.getPrefixManager().getDefaultPrefix();
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();

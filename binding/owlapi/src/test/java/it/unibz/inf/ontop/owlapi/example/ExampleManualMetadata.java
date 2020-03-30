@@ -54,7 +54,7 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private static void defMeasTable(RDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
@@ -63,7 +63,7 @@ private static void defMeasTable(RDBMetadata dbMetadata, DBTypeFactory dbTypeFac
 		.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defMessTable(RDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
@@ -71,17 +71,17 @@ private static void defMessTable(RDBMetadata dbMetadata, DBTypeFactory dbTypeFac
 		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defStaticTable(RDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defStaticTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
 		.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
 }
-private static RDBMetadata getMeta(){
+private static BasicDBMetadata getMeta(){
 	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 	Injector defaultInjector = defaultConfiguration.getInjector();
 
-	RDBMetadata dbMetadata = defaultInjector.getInstance(DummyRDBMetadata.class);
+	BasicDBMetadata dbMetadata = defaultInjector.getInstance(DummyRDBMetadata.class);
 	DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
 
 	defMeasTable(dbMetadata, dbTypeFactory,"burner");

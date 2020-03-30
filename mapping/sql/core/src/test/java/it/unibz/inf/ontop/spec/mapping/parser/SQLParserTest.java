@@ -20,10 +20,7 @@ package it.unibz.inf.ontop.spec.mapping.parser;
  * #L%
  */
 
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -40,7 +37,7 @@ import static org.junit.Assert.assertFalse;
 
 public class SQLParserTest {
 
-	private RDBMetadata metadata;
+	private BasicDBMetadata metadata;
 	private SelectQueryParser sqp;
 
 	@Before

@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 /**
  * For test purposes
  */
-public class DummyRDBMetadata extends RDBMetadata {
+public class DummyRDBMetadata extends BasicDBMetadata {
 
     @Inject
     private DummyRDBMetadata(TypeFactory typeFactory) {

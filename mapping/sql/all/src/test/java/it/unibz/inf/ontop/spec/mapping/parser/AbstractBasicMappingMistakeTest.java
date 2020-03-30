@@ -15,7 +15,7 @@ public abstract class AbstractBasicMappingMistakeTest {
     private final DBMetadata dbMetadata;
 
     AbstractBasicMappingMistakeTest() {
-        RDBMetadata dbMetadata = createDummyMetadata();
+        BasicDBMetadata dbMetadata = createDummyMetadata();
         QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();

@@ -107,7 +107,7 @@ public class Attribute {
 		if (obj instanceof Attribute) {
 			Attribute other = (Attribute)obj;
 			// the same reference(!) for the relation
-			return (this.relation == other.relation) && this.id.equals(other.id);
+			return this.id.equals(other.id) && (this.relation == other.relation);
 		}
 
 		return false;

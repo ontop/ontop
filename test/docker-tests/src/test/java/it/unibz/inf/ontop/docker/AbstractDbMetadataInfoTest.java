@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import junit.framework.TestCase;
@@ -34,7 +34,7 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private RDBMetadata metadata;
+	private BasicDBMetadata metadata;
 	private String propertyFile;
 	private Properties properties;
 

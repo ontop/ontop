@@ -64,7 +64,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, BasicDBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         int parserViewCounter = 0;

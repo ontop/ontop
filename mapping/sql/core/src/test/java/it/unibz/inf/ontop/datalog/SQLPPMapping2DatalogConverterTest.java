@@ -48,7 +48,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final TargetQueryParser targetParser;
 
-	private RDBMetadata md;
+	private BasicDBMetadata md;
 
 	public SQLPPMapping2DatalogConverterTest() {
 		targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(ImmutableMap.of(

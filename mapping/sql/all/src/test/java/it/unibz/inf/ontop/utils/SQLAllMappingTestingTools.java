@@ -47,7 +47,7 @@ public class SQLAllMappingTestingTools {
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
     }
 
-    public static RDBMetadata createDummyMetadata() {
+    public static BasicDBMetadata createDummyMetadata() {
         return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 }

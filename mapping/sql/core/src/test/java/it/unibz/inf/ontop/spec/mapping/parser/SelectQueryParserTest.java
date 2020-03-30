@@ -435,7 +435,7 @@ public class SelectQueryParserTest {
 
 
     private DBMetadata createMetadata() {
-        RDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idfac = metadata.getQuotedIDFactory();
 
         DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();

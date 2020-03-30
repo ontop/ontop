@@ -2,8 +2,8 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -39,7 +39,7 @@ import java.util.Optional;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, RDBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
+public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, BasicDBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
 
     private final SQLPPMappingConverter ppMappingConverter;
     private final RDBMetadataExtractor dbMetadataExtractor;
@@ -82,7 +82,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      * During the conversion, data types are inferred and mapping assertions are validated
      * TODO: move this method to AbstractMappingExtractor
      */
-    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
+    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<BasicDBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
@@ -90,7 +90,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
-        RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+        BasicDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
 
         log.debug("DB Metadata: \n{}", dbMetadata);
 
@@ -111,7 +111,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         // dbMetadata GOES NO FURTHER - no need to freeze it
     }
 
-    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
+    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, BasicDBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
         MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), termFactory,
@@ -141,7 +141,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     /**
      * Makes use of the DB connection
      */
-    private RDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
+    private BasicDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<BasicDBMetadata> optionalDBMetadata,
                                           OBDASpecInput specInput)
             throws DBMetadataExtractionException {
 
@@ -175,14 +175,14 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                 SQLPPMapping.class.getSimpleName());
     }
 
-    protected Optional<RDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
+    protected Optional<BasicDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
         if (optionalDBMetadata.isPresent()) {
             DBMetadata md = optionalDBMetadata.get();
-            if (md instanceof RDBMetadata) {
-                return Optional.of((RDBMetadata) md);
+            if (md instanceof BasicDBMetadata) {
+                return Optional.of((BasicDBMetadata) md);
             }
             throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
-                    RDBMetadata.class.getSimpleName());
+                    BasicDBMetadata.class.getSimpleName());
         }
         return Optional.empty();
     }

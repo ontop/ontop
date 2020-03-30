@@ -49,10 +49,10 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
+    public BasicDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
+            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {
@@ -61,11 +61,11 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
+    public BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
                                DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
 
-        if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
+        if (!(partiallyDefinedMetadata instanceof BasicDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
@@ -74,7 +74,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                 : Optional.empty();
 
         try {
-            RDBMetadata metadata = (RDBMetadata) partiallyDefinedMetadata;
+            BasicDBMetadata metadata = (BasicDBMetadata) partiallyDefinedMetadata;
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
