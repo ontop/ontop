@@ -86,8 +86,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 
-		System.out.println(metadata.getDatabaseRelations());
-
 		DatabaseRelationDefinition tBook = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK));
 		if (tBook != null) {
 			List<UniqueConstraint> ucs = tBook.getUniqueConstraints();
