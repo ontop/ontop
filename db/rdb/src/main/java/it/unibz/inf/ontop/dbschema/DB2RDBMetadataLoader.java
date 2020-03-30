@@ -1,15 +1,17 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class DB2RDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
-    DB2RDBMetadataLoader(Connection connection, QuotedIDFactory idFactory) {
-        super(connection, idFactory);
+    DB2RDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+        super(connection, idFactory, dbTypeFactory);
 
     }
     // select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1

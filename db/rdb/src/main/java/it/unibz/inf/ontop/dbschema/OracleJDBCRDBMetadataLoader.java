@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,8 +12,8 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final String defaultTableOwner;
 
-    OracleJDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory) throws SQLException {
-        super(connection, idFactory);
+    OracleJDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+        super(connection, idFactory, dbTypeFactory);
         this.defaultTableOwner = getDefaultOwner();
     }
 
@@ -24,7 +25,9 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
             if (table.hasSchema() || table.getTableName().equals("DUAL"))
                 builder.add(table);
             else {
-                RelationID qualifiedTableId = idFactory.createRelationID(defaultTableOwner, table.getTableNameSQLRendering());
+                RelationID qualifiedTableId = idFactory.createRelationID(
+                        defaultTableOwner,
+                        table.getTableNameSQLRendering());
                 builder.add(qualifiedTableId);
             }
         }
@@ -37,17 +40,21 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
         // Obtain the relational objects (i.e., tables and views)
         ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(getTableListQuery())) {
-            while (rs.next())
-                relationIds.add(getTableID(rs));
+             ResultSet rs = stmt.executeQuery(TABLE_LIST_QUERY)) {
+            while (rs.next()) {
+                RelationID id = RelationID.createRelationIdFromDatabaseRecord(idFactory,
+                        defaultTableOwner,
+                        rs.getString("object_name"));
+                relationIds.add(id);
+            }
         }
         return relationIds.build();
     }
 
 
-    protected String getTableListQuery() {
-        // filter out all irrelevant table and view names
-        return "SELECT table_name as object_name FROM user_tables WHERE " +
+    // filter out all irrelevant table and view names
+    private static final String TABLE_LIST_QUERY =
+        "SELECT table_name as object_name FROM user_tables WHERE " +
                 "   NOT table_name LIKE 'MVIEW$_%' AND " +
                 "   NOT table_name LIKE 'LOGMNR_%' AND " +
                 "   NOT table_name LIKE 'AQ$_%' AND " +
@@ -60,8 +67,6 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
                 "   NOT view_name LIKE 'AQ$_%'";
-    }
-
 
     private final String getDefaultOwner() throws SQLException {
         // Obtain the table owner (i.e., schema name)
@@ -73,9 +78,5 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
             }
         }
         return loggedUser.toUpperCase();
-    }
-
-    protected RelationID getTableID(ResultSet rs) throws SQLException {
-        return RelationID.createRelationIdFromDatabaseRecord(idFactory, defaultTableOwner, rs.getString("object_name"));
     }
 }

@@ -1,28 +1,29 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
 
     protected final Connection connection;
+    protected final DatabaseMetaData metadata;
     protected final QuotedIDFactory idFactory;
+    protected final DBTypeFactory dbTypeFactory;
 
-    JDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory) {
+    JDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
         this.connection = connection;
+        this.metadata = connection.getMetaData();
         this.idFactory = idFactory;
+        this.dbTypeFactory = dbTypeFactory;
     }
 
     @Override
     public ImmutableList<RelationID> getRelationIDs() throws SQLException {
-        DatabaseMetaData md = connection.getMetaData();
         ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
-        try (ResultSet rs = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
+        try (ResultSet rs = metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
             while (rs.next()) {
                 // String catalog = rs.getString("TABLE_CAT"); // not used
                 String schema = rs.getString("TABLE_SCHEM");
@@ -42,8 +43,32 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
     }
 
     @Override
-    public RelationDefinition.AttributeListBuilder getRelationAttributes(RelationID relationID) {
-        return null;
+    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID id) throws SQLException {
+
+        ImmutableList.Builder<RelationDefinition.AttributeListBuilder> relations = ImmutableList.builder();
+        RelationDefinition.AttributeListBuilder currentRelation = null;
+
+        try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
+            while (rs.next()) {
+                RelationID relationId = getRelationID(rs);
+                QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
+
+                if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
+                    // switch to the next database relation
+                    currentRelation = new RelationDefinition.AttributeListBuilder(relationId);
+                    relations.add(currentRelation);
+                }
+
+                // columnNoNulls, columnNullable, columnNullableUnknown
+                boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
+                String typeName = rs.getString("TYPE_NAME");
+                int columnSize = rs.getInt("COLUMN_SIZE");
+                DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
+
+                currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
+            }
+        }
+        return relations.build();
     }
 
     @Override
@@ -53,6 +78,19 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
 
     protected boolean ignoreSchema(String schema) {
         return false;
+    }
+
+    // catalog is ignored for now (rs.getString("TABLE_CAT"))
+    protected String getRelationCatalog(RelationID relationID) { return null; }
+
+    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaName(); }
+
+    protected String getRelationName(RelationID relationID) { return relationID.getTableName(); }
+
+    protected RelationID getRelationID(ResultSet rs) throws SQLException {
+        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+                rs.getString("TABLE_SCHEM"),
+                rs.getString("TABLE_NAME"));
     }
 
 }

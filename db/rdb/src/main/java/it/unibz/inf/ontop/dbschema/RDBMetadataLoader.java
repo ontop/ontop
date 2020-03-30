@@ -9,7 +9,13 @@ public interface RDBMetadataLoader {
 
     ImmutableList<RelationID> getRelationIDs(ImmutableList<RelationID> seed);
 
-    RelationDefinition.AttributeListBuilder getRelationAttributes(RelationID relationID);
+    /**
+     * relationID can be mapped to many tables (if, for example, it has no schema)
+     *
+     * @param relationID
+     * @return
+     */
+    ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws SQLException;
 
     void insertIntegrityConstraints(RelationDefinition relation);
 }

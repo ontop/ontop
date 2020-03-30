@@ -1,15 +1,17 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class MSSQLDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
 
-    MSSQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory) {
-        super(connection, idFactory);
+    MSSQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+        super(connection, idFactory, dbTypeFactory);
     }
 
     // SELECT SCHEMA_NAME() would give default schema name

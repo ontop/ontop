@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,64 +193,26 @@ public class RDBMetadataExtractionTools {
 
 		RDBMetadataLoader metadataLoader;
 		if (productName.contains("Oracle"))
-			metadataLoader = new OracleJDBCRDBMetadataLoader(conn, idfac);
+			metadataLoader = new OracleJDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
 		else if (productName.contains("DB2"))
-			metadataLoader = new DB2RDBMetadataLoader(conn, idfac);
+			metadataLoader = new DB2RDBMetadataLoader(conn, idfac, dbTypeFactory);
 		else if (productName.contains("SQL Server"))
-			metadataLoader = new MSSQLDBMetadataLoader(conn, idfac);
+			metadataLoader = new MSSQLDBMetadataLoader(conn, idfac, dbTypeFactory);
+		else if (productName.contains("MySQL"))
+			metadataLoader = new MySQLDBMetadataLoader(conn, idfac, dbTypeFactory);
 		else
-			metadataLoader = new JDBCRDBMetadataLoader(conn, idfac);
+			metadataLoader = new JDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
 
-		List<RelationID> seedRelationIds;
-		if (realTables == null || realTables.isEmpty())
-			seedRelationIds = metadataLoader.getRelationIDs();
-		else
-			seedRelationIds = metadataLoader.getRelationIDs(realTables);
-
-		List<RelationDefinition.AttributeListBuilder> extractedRelations = new LinkedList<>();
-
-        String catalog = getCatalog(metadata, conn);
-
-        for (RelationID seedId : seedRelationIds) {
-			// the same seedId can be mapped to many tables (if the seedId has no schema)
-			// we collect attributes from all of them
-			RelationDefinition.AttributeListBuilder currentRelation = null;
-
-			// catalog is ignored for now (rs.getString("TABLE_CAT"))
-            try (ResultSet rs = md.getColumns(catalog, seedId.getSchemaName(), seedId.getTableName(), null)) {
-				while (rs.next()) {
-					String schema = rs.getString("TABLE_SCHEM");
-					// MySQL workaround
-					if (schema == null)
-						schema = rs.getString("TABLE_CAT");
-
-					RelationID relationId = RelationID.createRelationIdFromDatabaseRecord(idfac, schema,
-										rs.getString("TABLE_NAME"));
-					QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idfac, rs.getString("COLUMN_NAME"));
-					if (printouts)
-						System.out.println("         " + relationId + "." + attributeId);
-
-					if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
-						// switch to the next database relation
-						currentRelation = new RelationDefinition.AttributeListBuilder(relationId);
-						extractedRelations.add(currentRelation);
-					}
-
-					// columnNoNulls, columnNullable, columnNullableUnknown
-					boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
-					String typeName = rs.getString("TYPE_NAME");
-					int columnSize = rs.getInt("COLUMN_SIZE");
-					DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
-
-					currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
-				}
-			}
-		}
+		List<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
+			? metadataLoader.getRelationIDs()
+			: metadataLoader.getRelationIDs(realTables);
 
         List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
-		for (RelationDefinition.AttributeListBuilder r : extractedRelations) {
-			DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
-			extractedRelations2.add(relation);
+		for (RelationID seedId : seedRelationIds) {
+			for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
+				DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
+				extractedRelations2.add(relation);
+			}
 		}
 
 		for (DatabaseRelationDefinition relation : extractedRelations2)	{
@@ -274,19 +234,6 @@ public class RDBMetadataExtractionTools {
 			System.out.println("DBMetadataExtractor END OF REPORT\n=================================");
 		}
 	}
-
-    private static String getCatalog(BasicDBMetadata metadata, Connection conn) throws SQLException {
-        String catalog = null;
-        if (metadata.getDBParameters().getDbmsProductName().contains("MySQL")) {
-            try (Statement statement = conn.createStatement();
-				 ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
-                if (rs.next()) {
-                    catalog = rs.getString(1);
-                }
-            }
-        }
-        return catalog;
-    }
 
 
 
