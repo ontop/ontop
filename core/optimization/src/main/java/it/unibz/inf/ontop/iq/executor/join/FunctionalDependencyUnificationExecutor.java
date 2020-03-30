@@ -199,21 +199,23 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> currentUnifier = Optional.empty();
 
         for (Integer dependentIndex : dependentIndexes) {
-            VariableOrGroundTerm leftArgument = leftArgumentMap.get(dependentIndex);
-            VariableOrGroundTerm rightArgument = rightArgumentMap.get(dependentIndex);
+            Optional<VariableOrGroundTerm> leftArgument = Optional.ofNullable(leftArgumentMap.get(dependentIndex));
+            Optional<VariableOrGroundTerm> rightArgument = Optional.ofNullable(rightArgumentMap.get(dependentIndex));
 
             /*
              * Throws an exception if the unification is not possible
              */
-            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = unificationTools.computeDirectedMGU(
-                    rightArgument, leftArgument)
+            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = (leftArgument.isPresent() && rightArgument.isPresent())
+                    ? unificationTools.computeDirectedMGU(rightArgument.get(), leftArgument.get())
                     .map(ImmutableSubstitution::getImmutableMap)
                     .map(map -> map.entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
                                     e -> GroundTermTools.convertIntoVariableOrGroundTerm(e.getValue()))))
                     .map(substitutionFactory::getSubstitution)
-                    .orElseThrow(AtomUnificationException::new);
+                    .orElseThrow(AtomUnificationException::new)
+                    // Empty substitution if any of the argument is missing
+                    : substitutionFactory.getSubstitution();
 
             ImmutableSubstitution<VariableOrGroundTerm> candidateUnifier = currentUnifier.isPresent()
                     ? unificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
