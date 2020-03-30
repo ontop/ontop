@@ -32,7 +32,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -41,10 +40,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private BasicDBMetadata metadata;
 	private QuotedIDFactory ID_FACTORY;
 	
-	private static final String TB_BOOK = "Book";
-	private static final String TB_WRITER = "Writer";
-	private static final String TB_EDITION = "Edition";
-	private static final String TB_BOOKWRITER = "BookWriter";
+	private static final String TB_BOOK = "\"Book\"";
+	private static final String TB_WRITER = "\"Writer\"";
+	private static final String TB_EDITION = "\"Edition\"";
+	private static final String TB_BOOKWRITER = "\"BookWriter\"";
 
 	private String propertyFile;
 	private Properties properties;
@@ -138,7 +137,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		DatabaseRelationDefinition tBookWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER));
 		if (tBookWriter != null) {
-			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
+			List<ForeignKeyConstraint> fks =  tBookWriter.getForeignKeys();
 			assertEquals(2, fks.size());
 		}
 		else
@@ -146,7 +145,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		DatabaseRelationDefinition tEdition = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION));
 		if (tEdition != null) {
-			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
+			List<ForeignKeyConstraint> fks =  tEdition.getForeignKeys();
 			assertEquals(1, fks.size());
 		}
 		else
@@ -154,7 +153,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		DatabaseRelationDefinition tWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER));
 		if (tWriter != null) {
-			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
+			List<ForeignKeyConstraint> fks =  tWriter.getForeignKeys();
 			assertEquals(0, fks.size());
 		}
 		else
