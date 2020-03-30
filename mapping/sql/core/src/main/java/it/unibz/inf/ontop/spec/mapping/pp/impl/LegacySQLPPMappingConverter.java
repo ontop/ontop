@@ -122,11 +122,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
                             ImmutableTerm t = atom.getSubstitution().get(v);
                             if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getQuotedIDFactory()));
+                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory()));
                                 varBuilder2.add(v);
                             }
                             else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getQuotedIDFactory());
+                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory());
                                 if (tt instanceof Variable) { // avoids Var -> Var
                                     Variable v2 = (Variable) tt;
                                     varBuilder2.add(v2);

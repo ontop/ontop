@@ -109,7 +109,7 @@ public class MappingTestingTools {
 
     private static RelationPredicate createRelationPredicate(DummyBasicDBMetadata dbMetadata,
                                                              int tableNumber, int arity) {
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(
                 null, "TABLE" + tableNumber + "AR" + arity));

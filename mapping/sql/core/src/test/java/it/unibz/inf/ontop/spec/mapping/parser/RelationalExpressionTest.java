@@ -45,7 +45,7 @@ public class RelationalExpressionTest {
     @Before
     public void setupTest(){
         METADATA = DEFAULT_DUMMY_DB_METADATA;
-        MDFAC = METADATA.getQuotedIDFactory();
+        MDFAC = METADATA.getDBParameters().getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");

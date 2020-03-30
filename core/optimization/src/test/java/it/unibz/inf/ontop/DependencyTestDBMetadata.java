@@ -33,7 +33,7 @@ public class DependencyTestDBMetadata {
 
     private static RelationPredicate createRelationPredicate(DummyBasicDBMetadata dbMetadata,
                                                              int tableNumber, int arity) {
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
                 "PK_TABLE" + tableNumber + "AR" + arity));

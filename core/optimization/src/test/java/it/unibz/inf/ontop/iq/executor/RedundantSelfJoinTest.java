@@ -75,7 +75,7 @@ public class RedundantSelfJoinTest {
 
     static{
         DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();

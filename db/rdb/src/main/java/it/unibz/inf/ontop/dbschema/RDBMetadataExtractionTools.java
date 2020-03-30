@@ -190,7 +190,7 @@ public class RDBMetadataExtractionTools {
 		String productName = md.getDatabaseProductName();
 
 		List<RelationID> seedRelationIds;
-		QuotedIDFactory idfac =  metadata.getQuotedIDFactory();
+		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
 
 		if (productName.contains("Oracle")) {
 			String defaultSchema = getOracleDefaultOwner(conn);
@@ -265,8 +265,8 @@ public class RDBMetadataExtractionTools {
 		}
 
 		for (DatabaseRelationDefinition relation : extractedRelations2)	{
-			getPrimaryKey(md, relation, metadata.getQuotedIDFactory());
-			getUniqueAttributes(md, relation, metadata.getQuotedIDFactory());
+			getPrimaryKey(md, relation, metadata.getDBParameters().getQuotedIDFactory());
+			getUniqueAttributes(md, relation, metadata.getDBParameters().getQuotedIDFactory());
 			getForeignKeys(md, relation, metadata);
 			if (printouts) {
 				System.out.println(relation + ";");

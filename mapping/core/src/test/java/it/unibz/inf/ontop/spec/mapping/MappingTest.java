@@ -55,7 +55,7 @@ public class MappingTest {
 
     static {
         DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 

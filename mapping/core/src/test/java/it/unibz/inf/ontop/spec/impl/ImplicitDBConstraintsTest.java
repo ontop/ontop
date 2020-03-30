@@ -29,7 +29,7 @@ public class ImplicitDBConstraintsTest {
 	@Before
 	public void setupMetadata(){
 		md = DEFAULT_DUMMY_DB_METADATA;
-		idfac = md.getQuotedIDFactory();
+		idfac = md.getDBParameters().getQuotedIDFactory();
 
 		DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 

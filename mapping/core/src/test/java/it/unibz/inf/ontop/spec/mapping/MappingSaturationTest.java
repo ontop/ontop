@@ -36,7 +36,7 @@ public class MappingSaturationTest {
 
     static {
         DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType largeIntDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))

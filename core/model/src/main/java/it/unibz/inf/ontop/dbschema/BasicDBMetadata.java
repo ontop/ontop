@@ -79,11 +79,6 @@ public class BasicDBMetadata implements DBMetadata {
         isStillMutable = false;
     }
 
-    @JsonIgnore
-    public QuotedIDFactory getQuotedIDFactory() {
-        return dbParameters.getQuotedIDFactory();
-    }
-
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
@@ -101,10 +96,6 @@ public class BasicDBMetadata implements DBMetadata {
             bf.append("\n");
         }
         return bf.toString();
-    }
-
-    protected boolean isStillMutable() {
-        return isStillMutable;
     }
 
     @JsonIgnore

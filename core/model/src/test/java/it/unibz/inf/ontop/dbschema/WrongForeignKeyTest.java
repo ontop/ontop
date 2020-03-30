@@ -16,7 +16,7 @@ public class WrongForeignKeyTest {
 
     static{
         DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        ID_FACTORY = dbMetadata.getQuotedIDFactory();
+        ID_FACTORY = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();

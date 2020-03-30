@@ -63,7 +63,7 @@ public class NoDependencyTestDBMetadata {
                                                                    int tableNumber, int arity, DBTermType termType, String prefix,
                                                             boolean canBeNull) {
 
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         RelationDefinition.AttributeListBuilder builder =  new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
                 prefix + "TABLE" + tableNumber + "AR" + arity));
         for (int i = 1; i <= arity; i++) {

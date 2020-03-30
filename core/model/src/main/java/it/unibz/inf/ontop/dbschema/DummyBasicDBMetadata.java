@@ -29,10 +29,6 @@ public class DummyBasicDBMetadata implements DBMetadata {
         return dbParameters;
     }
 
-    public QuotedIDFactory getQuotedIDFactory() {
-        return dbParameters.getQuotedIDFactory();
-    }
-
     public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
         return new DatabaseRelationDefinition(builder);
     }

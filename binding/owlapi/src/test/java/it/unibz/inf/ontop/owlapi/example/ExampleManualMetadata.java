@@ -55,7 +55,7 @@ private void setup()  throws Exception {
 }
 
 private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
 		.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false)
@@ -64,7 +64,7 @@ private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTyp
 }
 
 private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
 		.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType(), false)
@@ -72,7 +72,7 @@ private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTyp
 }
 
 private static void defStaticTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
 		.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
