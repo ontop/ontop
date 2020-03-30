@@ -105,7 +105,7 @@ public class BootstrapGenerator {
         BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 
         // this operation is EXPENSIVE
-        RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
+        RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 
         if (baseURI == null || baseURI.isEmpty()) {
             baseURI = ppMapping.getPrefixManager().getDefaultPrefix();

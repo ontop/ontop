@@ -30,7 +30,7 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory.getDBTypeFactory());
-            RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), localConnection, null);
+            RDBMetadataExtractionTools.loadMetadata(metadata, localConnection, null);
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);

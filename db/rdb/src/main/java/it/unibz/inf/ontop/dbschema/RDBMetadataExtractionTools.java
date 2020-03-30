@@ -182,7 +182,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(BasicDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
 
 		if (printouts)
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
@@ -190,6 +190,7 @@ public class RDBMetadataExtractionTools {
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
 
+		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
 
 		RDBMetadataLoader metadataLoader;

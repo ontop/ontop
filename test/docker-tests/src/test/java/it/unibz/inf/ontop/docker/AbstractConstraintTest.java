@@ -70,7 +70,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
-			RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
+			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 			ID_FACTORY = metadata.getDBParameters().getQuotedIDFactory();
 		}
 		catch (IOException e) {

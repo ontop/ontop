@@ -79,7 +79,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
-                RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, null);
+                RDBMetadataExtractionTools.loadMetadata(metadata, connection, null);
             }
             else {
                 try {
@@ -95,7 +95,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                         realTables.addAll(referredTables);
                     });
 
-                    RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, ImmutableList.copyOf(realTables));
+                    RDBMetadataExtractionTools.loadMetadata(metadata, connection, ImmutableList.copyOf(realTables));
                 }
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);
@@ -108,7 +108,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             });
 
             return metadata;
-
         }
         catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());
