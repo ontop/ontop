@@ -20,7 +20,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStructuralAndSemanticIQOptimizerImpl.class);
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
-    private final FlattenUnionOptimizer flattenUnionOptimizer;
     private final IQConverter iqConverter;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
@@ -29,12 +28,10 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
-                                                        FlattenUnionOptimizer flattenUnionOptimizer,
                                                         IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
                                                         AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
-        this.flattenUnionOptimizer = flattenUnionOptimizer;
         this.iqConverter = iqConverter;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
@@ -59,9 +56,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
                     "New query after fixed point join optimization (%d ms): \n%s",
                     System.currentTimeMillis() - beginningJoinLike,
                     intermediateQuery.toString()));
-
-            intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
-            LOGGER.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
 
             IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(iqConverter.convert(intermediateQuery));
             LOGGER.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
