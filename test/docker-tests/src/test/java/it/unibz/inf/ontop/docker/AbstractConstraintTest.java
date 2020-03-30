@@ -41,10 +41,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private BasicDBMetadata metadata;
 	private QuotedIDFactory ID_FACTORY;
 	
-	private static final String TB_BOOK = "Book";
-	private static final String TB_WRITER = "Writer";
-	private static final String TB_EDITION = "Edition";
-	private static final String TB_BOOKWRITER = "BookWriter";
+	private static final String TB_BOOK = "BOOK";
+	private static final String TB_WRITER = "WRITER";
+	private static final String TB_EDITION = "EDITION";
+	private static final String TB_BOOKWRITER = "BOOKWRITER";
 
 	private String propertyFile;
 	private Properties properties;
@@ -89,29 +89,40 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		System.out.println(metadata.getDatabaseRelations());
 
-		List<UniqueConstraint> ucBook =
-			metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK))
-					.getUniqueConstraints();
-		assertEquals(1, ucBook.size());
-		assertEquals(1, ucBook.get(0).getAttributes().size());
+		DatabaseRelationDefinition tBook = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK));
+		if (tBook != null) {
+			List<UniqueConstraint> ucBook = tBook.getUniqueConstraints();
+			assertEquals(1, ucBook.size());
+			assertEquals(1, ucBook.get(0).getAttributes().size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
 
-		List<UniqueConstraint> ucBookWriter =
-				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER))
-						.getUniqueConstraints();
-		assertEquals(0, ucBookWriter.size());
+		DatabaseRelationDefinition tBookWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER));
+		if (tBookWriter != null) {
+			List<UniqueConstraint> ucBookWriter = tBookWriter.getUniqueConstraints();
+			assertEquals(0, ucBookWriter.size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
 
-		List<UniqueConstraint> ucEdition =
-				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION))
-						.getUniqueConstraints();
-		assertEquals(1, ucEdition.size());
-		assertEquals(1, ucEdition.get(0).getAttributes().size());
+		DatabaseRelationDefinition tEdition = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION));
+		if (tEdition != null) {
+			List<UniqueConstraint> ucEdition = tEdition.getUniqueConstraints();
+			assertEquals(1, ucEdition.size());
+			assertEquals(1, ucEdition.get(0).getAttributes().size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
 
-		List<UniqueConstraint> ucWriter =
-				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER))
-						.getUniqueConstraints();
-		assertEquals(1, ucWriter.size());
-		assertEquals(1, ucWriter.get(0).getAttributes().size());
-
+		DatabaseRelationDefinition tWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER));
+		if (tWriter != null) {
+			List<UniqueConstraint> ucWriter = tWriter.getUniqueConstraints();
+			assertEquals(1, ucWriter.size());
+			assertEquals(1, ucWriter.get(0).getAttributes().size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_WRITER + " is not found");
 /*
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		for (DatabaseRelationDefinition t : tables) {
