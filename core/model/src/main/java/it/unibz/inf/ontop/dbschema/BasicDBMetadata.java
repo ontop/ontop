@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,26 +16,17 @@ public class BasicDBMetadata implements DBMetadata {
     // tables.values() can contain duplicates due to schemaless table names
     private final List<DatabaseRelationDefinition> listOfTables;
 
-    private final String driverName;
-    private final String driverVersion;
-    private final String databaseProductName;
-    private final String databaseVersion;
-
     private final DBParameters dbParameters;
     private boolean isStillMutable;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              QuotedIDFactory idfac) {
-        this.driverName = driverName;
-        this.driverVersion = driverVersion;
-        this.databaseProductName = databaseProductName;
-        this.databaseVersion = databaseVersion;
+                              QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
         this.tables = new HashMap<>();
         this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;
-        this.dbParameters = new BasicDBParametersImpl(idfac);
+        this.dbParameters = new BasicDBParametersImpl(driverName,  driverVersion,  databaseProductName, databaseVersion, idfac, dbTypeFactory);
     }
 
     /**
@@ -88,26 +80,6 @@ public class BasicDBMetadata implements DBMetadata {
     }
 
     @JsonIgnore
-    public String getDriverName() {
-        return driverName;
-    }
-
-    @JsonIgnore
-    public String getDriverVersion() {
-        return driverVersion;
-    }
-
-    @JsonIgnore
-    public String getDbmsProductName() {
-        return databaseProductName;
-    }
-
-    @JsonIgnore
-    public String getDbmsVersion() {
-        return databaseVersion;
-    }
-
-    @JsonIgnore
     public QuotedIDFactory getQuotedIDFactory() {
         return dbParameters.getQuotedIDFactory();
     }
@@ -144,10 +116,10 @@ public class BasicDBMetadata implements DBMetadata {
     @JsonProperty("metadata")
     Map<String, String> getMedadataForJsonExport() {
         return ImmutableMap.of(
-                "dbmsProductName", getDbmsProductName(),
-                "dbmsVersion", getDbmsVersion(),
-                "driverName", getDriverName(),
-                "driverVersion", getDriverVersion(),
+                "dbmsProductName", getDBParameters().getDbmsProductName(),
+                "dbmsVersion", getDBParameters().getDbmsVersion(),
+                "driverName", getDBParameters().getDriverName(),
+                "driverVersion", getDBParameters().getDriverVersion(),
                 "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
         );
     }

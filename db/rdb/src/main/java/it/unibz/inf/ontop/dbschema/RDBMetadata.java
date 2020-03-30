@@ -25,8 +25,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 public class RDBMetadata extends BasicDBMetadata {
 
-	protected final DBTypeFactory dbTypeFactory;
-
 	/**
 	 * Constructs an initial metadata with some general information about the
 	 * database, e.g., the driver name, the database engine name.
@@ -36,9 +34,8 @@ public class RDBMetadata extends BasicDBMetadata {
 
 	RDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
 				QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
-		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac);
-		this.dbTypeFactory = dbTypeFactory;
+		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, dbTypeFactory);
 	}
 
-	public DBTypeFactory getDBTypeFactory() { return dbTypeFactory; }
+	public DBTypeFactory getDBTypeFactory() { return getDBParameters().getDBTypeFactory(); }
 }

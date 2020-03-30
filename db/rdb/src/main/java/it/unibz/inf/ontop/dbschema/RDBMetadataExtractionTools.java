@@ -286,7 +286,7 @@ public class RDBMetadataExtractionTools {
 
     private static String getCatalog(RDBMetadata metadata, Connection conn) throws SQLException {
         String catalog = null;
-        if (metadata.getDbmsProductName().contains("MySQL")) {
+        if (metadata.getDBParameters().getDbmsProductName().contains("MySQL")) {
             try (Statement statement = conn.createStatement();
 				 ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
                 if (rs.next()) {

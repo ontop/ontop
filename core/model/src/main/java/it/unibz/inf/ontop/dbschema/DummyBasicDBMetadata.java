@@ -15,7 +15,7 @@ public class DummyBasicDBMetadata implements DBMetadata {
 
     @Inject
     private DummyBasicDBMetadata() {
-        this.dbParameters = new BasicDBParametersImpl(new QuotedIDFactoryStandardSQL("\""));
+        this.dbParameters = new BasicDBParametersImpl(null, null, null, null, new QuotedIDFactoryStandardSQL("\""), null);
     }
 
     @Override

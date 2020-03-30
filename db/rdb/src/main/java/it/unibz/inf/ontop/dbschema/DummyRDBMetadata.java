@@ -23,7 +23,7 @@ public class DummyRDBMetadata extends RDBMetadata {
     }
 
     public DummyRDBMetadata emptyCopyOf() {
-        return new DummyRDBMetadata(dbTypeFactory);
+        return new DummyRDBMetadata(getDBTypeFactory());
     }
 
 }
