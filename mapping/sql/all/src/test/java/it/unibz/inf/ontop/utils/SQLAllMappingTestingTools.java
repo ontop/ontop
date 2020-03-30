@@ -26,7 +26,7 @@ public class SQLAllMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
 
-    private static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -45,9 +45,5 @@ public class SQLAllMappingTestingTools {
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
-    }
-
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.emptyCopyOf();
     }
 }

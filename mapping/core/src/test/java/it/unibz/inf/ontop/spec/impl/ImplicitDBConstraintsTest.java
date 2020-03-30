@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstrai
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
 import it.unibz.inf.ontop.spec.dbschema.impl.BasicPreProcessedImplicitRelationalDBConstraintExtractor;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -58,7 +57,6 @@ public class ImplicitDBConstraintsTest {
 		assertEquals(0, refs.size());
 	}
 
-	@Ignore
 	@Test
 	public void testAddPrimaryKeys() throws ImplicitDBContraintException {
 		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
@@ -79,7 +77,6 @@ public class ImplicitDBConstraintsTest {
 		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
 	}
 
-	@Ignore
 	@Test
 	public void testAddForeignKeys() throws ImplicitDBContraintException {
 		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
@@ -93,7 +90,6 @@ public class ImplicitDBConstraintsTest {
 		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
 	}
 
-	@Ignore
 	@Test
 	public void testAddKeys() throws ImplicitDBContraintException {
 		PreProcessedImplicitRelationalDBConstraintSet uc = CONSTRAINT_EXTRACTOR.extract(
@@ -109,6 +105,4 @@ public class ImplicitDBConstraintsTest {
 		assertEquals(ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))),
 						dd.getUniqueConstraints().get(0).getAttributes());
 	}
-
-	
 }

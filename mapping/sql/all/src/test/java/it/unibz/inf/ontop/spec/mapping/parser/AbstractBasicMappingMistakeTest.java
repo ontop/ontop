@@ -12,10 +12,10 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private final DBMetadata dbMetadata;
+    private static final BasicDBMetadata dbMetadata;
 
-    AbstractBasicMappingMistakeTest() {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
+    static {
+        dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
@@ -27,7 +27,6 @@ public abstract class AbstractBasicMappingMistakeTest {
         personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
 
         dbMetadata.freeze();
-        this.dbMetadata = dbMetadata;
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {

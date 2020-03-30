@@ -130,7 +130,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
-		BasicDBMetadata dbMetadata = createDummyMetadata();
+		BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
 		QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         /**

@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 /**
@@ -15,15 +14,4 @@ public class DummyRDBMetadata extends BasicDBMetadata {
         super("dummy class", null, null, "",
                 new QuotedIDFactoryStandardSQL("\""), typeFactory.getDBTypeFactory());
     }
-
-    private DummyRDBMetadata(DBTypeFactory dbTypeFactory) {
-
-        super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""), dbTypeFactory);
-    }
-
-    public DummyRDBMetadata emptyCopyOf() {
-        return new DummyRDBMetadata(getDBParameters().getDBTypeFactory());
-    }
-
 }
