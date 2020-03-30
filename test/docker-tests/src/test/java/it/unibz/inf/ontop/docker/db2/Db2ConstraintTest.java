@@ -26,6 +26,7 @@ public class Db2ConstraintTest extends AbstractConstraintTest {
 
 	private static final String propertyFile = "/db2/bind/db2-smallbooks.properties";
 
+	// TODO: CHECK THAT THE DATABASE CONTAINS THE TABLES
 	public Db2ConstraintTest(String method) {
 		super(method, propertyFile);
 	}
