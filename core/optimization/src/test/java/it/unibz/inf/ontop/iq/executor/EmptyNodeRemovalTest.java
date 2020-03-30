@@ -443,7 +443,9 @@ public class EmptyNodeRemovalTest {
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A)));
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -669,7 +671,9 @@ public class EmptyNodeRemovalTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, TERM_FACTORY.getNullConstant(),
                         Y, TERM_FACTORY.getNullConstant())));
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
-        expectedQueryBuilder.addChild(newRootNode, DATA_NODE_2);
+        expectedQueryBuilder.addChild(newRootNode, IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR1.getRelationDefinition(),
+                ImmutableMap.of()));
 
         optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());
     }
