@@ -17,8 +17,7 @@ public abstract class AbstractBasicMappingMistakeTest {
     static {
         dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
 
         DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
                 idFactory.createRelationID(null, "PERSON"))

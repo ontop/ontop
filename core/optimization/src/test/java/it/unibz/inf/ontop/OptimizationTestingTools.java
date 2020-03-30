@@ -48,7 +48,7 @@ public class OptimizationTestingTools {
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
 
-    public static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final Variable X;
     public static final Variable Y;

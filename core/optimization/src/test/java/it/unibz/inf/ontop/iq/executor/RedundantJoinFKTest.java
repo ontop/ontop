@@ -50,10 +50,9 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))

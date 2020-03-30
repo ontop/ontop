@@ -44,8 +44,8 @@ public class SQLParserTest {
 	public void beforeEachTest() {
 		metadata = DEFAULT_DUMMY_DB_METADATA;
 		QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
+		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 
-		DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
 		DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 		DBTermType booleanDBType = dbTypeFactory.getDBBooleanType();
 		DBTermType dateDBType = dbTypeFactory.getDBDateType();

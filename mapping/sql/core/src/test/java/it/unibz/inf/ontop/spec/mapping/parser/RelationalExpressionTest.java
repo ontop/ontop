@@ -54,7 +54,7 @@ public class RelationalExpressionTest {
         attX = MDFAC.createAttributeID("A");
         attY = MDFAC.createAttributeID("B");
 
-        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = METADATA.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition P = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table1)
             .addAttribute(attX, integerDBType, true)

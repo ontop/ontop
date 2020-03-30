@@ -2376,11 +2376,11 @@ public class BindingLiftTest {
 
     @Test
     public void testProvenanceVariableAndProjection1() {
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
 
-        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 1, 2, true);
-        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 2, 2, true);
+        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, 1, 2, true);
+        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, 2, 2, true);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table1Ar2, A, B));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(table2Ar2, C, D));

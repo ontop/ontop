@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.DEFAULT_DUMMY_DB_METADATA;
-import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 
 /**
  * Test that we correctly output exceptions in case we try to insert an incorrect foreign key (missing values)
@@ -15,10 +14,9 @@ public class WrongForeignKeyTest {
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
     static{
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         ID_FACTORY = dbMetadata.getDBParameters().getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table1"))

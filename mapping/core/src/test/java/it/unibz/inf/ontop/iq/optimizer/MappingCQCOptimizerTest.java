@@ -28,10 +28,9 @@ public class MappingCQCOptimizerTest {
     @Test
     public void test() {
 
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "company"))
             .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType, false)
@@ -97,10 +96,9 @@ public class MappingCQCOptimizerTest {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
 
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition addressTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "address"))
             .addAttribute(idFactory.createAttributeID("address_id"), integerType, false)

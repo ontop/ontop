@@ -39,27 +39,27 @@ public class NoDependencyTestDBMetadata {
     public static final RelationPredicate INT_TABLE2_NULL_AR2;
     public static final RelationPredicate INT_TABLE1_NULL_AR3;
 
-    public static RelationPredicate createStringRelationPredicate(DummyBasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory,
+    public static RelationPredicate createStringRelationPredicate(BasicDBMetadata dbMetadata,
                                                                    int tableNumber, int arity, boolean canBeNull) {
-        return createRelationPredicate(dbMetadata, tableNumber, arity, dbTypeFactory.getDBStringType(), "STR_", canBeNull);
+        return createRelationPredicate(dbMetadata, tableNumber, arity, dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
     }
 
-    public static RelationPredicate createStringRelationPredicate(DummyBasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory,
+    public static RelationPredicate createStringRelationPredicate(BasicDBMetadata dbMetadata,
                                                                   int tableNumber, int arity) {
-        return createStringRelationPredicate(dbMetadata, dbTypeFactory, tableNumber, arity, false);
+        return createStringRelationPredicate(dbMetadata, tableNumber, arity, false);
     }
 
-    public static RelationPredicate createIntRelationPredicate(DummyBasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory,
+    public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata,
                                                                int tableNumber, int arity, boolean canBeNull) {
-        return createRelationPredicate(dbMetadata, tableNumber, arity, dbTypeFactory.getDBLargeIntegerType(), "INT_", canBeNull);
+        return createRelationPredicate(dbMetadata, tableNumber, arity, dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
     }
 
-    public static RelationPredicate createIntRelationPredicate(DummyBasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory,
+    public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata,
                                                                 int tableNumber, int arity) {
-        return createIntRelationPredicate(dbMetadata, dbTypeFactory, tableNumber, arity, false);
+        return createIntRelationPredicate(dbMetadata, tableNumber, arity, false);
     }
 
-    public static RelationPredicate createRelationPredicate(DummyBasicDBMetadata dbMetadata,
+    public static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata,
                                                                    int tableNumber, int arity, DBTermType termType, String prefix,
                                                             boolean canBeNull) {
 
@@ -74,36 +74,34 @@ public class NoDependencyTestDBMetadata {
     }
 
     static {
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        TABLE1_AR1 = createStringRelationPredicate(dbMetadata, 1, 1);
+        TABLE2_AR1 = createStringRelationPredicate(dbMetadata, 2, 1);
+        TABLE3_AR1 = createStringRelationPredicate(dbMetadata, 3, 1);
+        TABLE4_AR1 = createStringRelationPredicate(dbMetadata, 4, 1);
+        TABLE5_AR1 = createStringRelationPredicate(dbMetadata, 5, 1);
 
-        TABLE1_AR1 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 1, 1);
-        TABLE2_AR1 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 2, 1);
-        TABLE3_AR1 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 3, 1);
-        TABLE4_AR1 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 4, 1);
-        TABLE5_AR1 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 5, 1);
+        TABLE1_AR2 = createStringRelationPredicate(dbMetadata, 1, 2);
+        TABLE2_AR2 = createStringRelationPredicate(dbMetadata, 2, 2);
+        TABLE3_AR2 = createStringRelationPredicate(dbMetadata, 3, 2);
+        TABLE4_AR2 = createStringRelationPredicate(dbMetadata, 4, 2);
+        TABLE5_AR2 = createStringRelationPredicate(dbMetadata, 5, 2);
+        TABLE6_AR2 = createStringRelationPredicate(dbMetadata, 6, 2);
 
-        TABLE1_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 1, 2);
-        TABLE2_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 2, 2);
-        TABLE3_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 3, 2);
-        TABLE4_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 4, 2);
-        TABLE5_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 5, 2);
-        TABLE6_AR2 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 6, 2);
+        TABLE1_AR3 = createStringRelationPredicate(dbMetadata, 1, 3);
+        TABLE2_AR3 = createStringRelationPredicate(dbMetadata, 2, 3);
+        TABLE3_AR3 = createStringRelationPredicate(dbMetadata, 3, 3);
+        TABLE4_AR3 = createStringRelationPredicate(dbMetadata, 4, 3);
+        TABLE5_AR3 = createStringRelationPredicate(dbMetadata, 5, 3);
+        TABLE6_AR3 = createStringRelationPredicate(dbMetadata, 6, 3);
 
-        TABLE1_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 1, 3);
-        TABLE2_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 2, 3);
-        TABLE3_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 3, 3);
-        TABLE4_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 4, 3);
-        TABLE5_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 5, 3);
-        TABLE6_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 6, 3);
+        TABLE7_AR4 = createStringRelationPredicate(dbMetadata, 7, 4);
 
-        TABLE7_AR4 = createStringRelationPredicate(dbMetadata, dbTypeFactory, 7, 4);
+        INT_TABLE1_AR2 = createIntRelationPredicate(dbMetadata,1, 2);
+        INT_TABLE2_AR2 = createIntRelationPredicate(dbMetadata, 2, 2);
 
-        INT_TABLE1_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory,1, 2);
-        INT_TABLE2_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, 2, 2);
-
-        INT_TABLE1_NULL_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, 1, 2, true);
-        INT_TABLE2_NULL_AR2 = createIntRelationPredicate(dbMetadata, dbTypeFactory, 2, 2, true);
-        INT_TABLE1_NULL_AR3 = createIntRelationPredicate(dbMetadata, dbTypeFactory, 1, 3, true);
+        INT_TABLE1_NULL_AR2 = createIntRelationPredicate(dbMetadata, 1, 2, true);
+        INT_TABLE2_NULL_AR2 = createIntRelationPredicate(dbMetadata, 2, 2, true);
+        INT_TABLE1_NULL_AR3 = createIntRelationPredicate(dbMetadata, 1, 3, true);
     }
 }

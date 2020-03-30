@@ -41,7 +41,6 @@ public class SelectQueryParserTest {
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
-    private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 
     @Test
@@ -437,8 +436,7 @@ public class SelectQueryParserTest {
     private DBMetadata createMetadata() {
         BasicDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
-
-        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = metadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition relation1 =
                 metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))

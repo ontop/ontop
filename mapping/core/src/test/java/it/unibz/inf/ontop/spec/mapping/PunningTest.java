@@ -39,12 +39,10 @@ public class PunningTest {
     private static final IRI PROP_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
     private static final IRI CLASS_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
 
-
     static {
-
-        DummyBasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "company"))
             .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerDBType, false)

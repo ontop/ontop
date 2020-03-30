@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 public class ImplicitDBConstraintsTest {
 
-	private DummyBasicDBMetadata md;
+	private BasicDBMetadata md;
 	private QuotedIDFactory idfac;
 
 	private static final PreProcessedImplicitRelationalDBConstraintExtractor CONSTRAINT_EXTRACTOR = Guice.createInjector()
@@ -30,7 +30,7 @@ public class ImplicitDBConstraintsTest {
 		md = DEFAULT_DUMMY_DB_METADATA;
 		idfac = md.getDBParameters().getQuotedIDFactory();
 
-		DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
 
 		DatabaseRelationDefinition td = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
 			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));

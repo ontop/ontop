@@ -20,7 +20,6 @@ public class SQLAllMappingTestingTools {
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
-    public static final TypeFactory TYPE_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final RDF RDF_FACTORY;
@@ -39,7 +38,6 @@ public class SQLAllMappingTestingTools {
         MAPPING_FACTORY = injector.getInstance(SpecificationFactory.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
-        TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);

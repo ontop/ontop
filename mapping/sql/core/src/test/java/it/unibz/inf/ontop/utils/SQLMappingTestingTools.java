@@ -21,7 +21,6 @@ public class SQLMappingTestingTools {
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
-    public static final TypeFactory TYPE_FACTORY;
     public static final DBFunctionSymbolFactory DB_FS_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -50,7 +49,6 @@ public class SQLMappingTestingTools {
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
-        TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
 

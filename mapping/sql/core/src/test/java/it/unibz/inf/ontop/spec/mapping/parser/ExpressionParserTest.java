@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
@@ -37,13 +38,15 @@ public class ExpressionParserTest {
     private static final DBBooleanFunctionSymbol IS_NULL = DB_FS_FACTORY.getDBIsNull();
 
     private QuotedIDFactory IDFAC;
+    private DBTypeFactory DB_TYPE_FACTORY;
     private DBTermType dbLongType;
 
     @Before
     public void beforeEachTest() {
         DBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
         IDFAC = metadata.getDBParameters().getQuotedIDFactory();
-        dbLongType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DB_TYPE_FACTORY = metadata.getDBParameters().getDBTypeFactory();
+        dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();
     }
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
@@ -63,7 +66,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getDBConstant("1.0", TYPE_FACTORY.getDBTypeFactory().getDBDoubleType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("1.0", DB_TYPE_FACTORY.getDBDoubleType()), translation);
     }
 
     @Test
@@ -100,7 +103,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02", TYPE_FACTORY.getDBTypeFactory().getDBDateType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02", DB_TYPE_FACTORY.getDBDateType()), translation);
     }
 
     @Test
@@ -113,7 +116,7 @@ public class ExpressionParserTest {
 
         System.out.println(translation);
 
-        assertEquals(TERM_FACTORY.getDBConstant("15:57:02", TYPE_FACTORY.getDBTypeFactory().getDBTimeType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
     }
 
     @Test
@@ -127,7 +130,7 @@ public class ExpressionParserTest {
         System.out.println(translation);
 
         assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03",
-                TYPE_FACTORY.getDBTypeFactory().getDBDateTimestampType()), translation);
+                DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
     }
 
     @Test
@@ -946,7 +949,7 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
-                        TERM_FACTORY.getDBConstant("1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getDBDefaultInequality(LTE),
                         v,
@@ -1042,7 +1045,7 @@ public class ExpressionParserTest {
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.NUMERIC_MULTIPLY),
-                TERM_FACTORY.getDBConstant("-1", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType()),
+                TERM_FACTORY.getDBConstant("-1", DB_TYPE_FACTORY.getDBLargeIntegerType()),
                 v), translation);
     }
 

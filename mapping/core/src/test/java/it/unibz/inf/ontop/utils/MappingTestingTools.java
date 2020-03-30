@@ -36,7 +36,7 @@ public class MappingTestingTools {
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    public static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
@@ -107,14 +107,13 @@ public class MappingTestingTools {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    private static RelationPredicate createRelationPredicate(DummyBasicDBMetadata dbMetadata,
+    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata,
                                                              int tableNumber, int arity) {
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        DBTermType stringDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType();
 
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(
                 null, "TABLE" + tableNumber + "AR" + arity));
-
-        DBTermType stringDBType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
         for (int i = 1 ; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
