@@ -5,7 +5,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
 /**
- * A dummy DBMetadata
+ * A dummy DBMetadata for tests only
  */
 public class DummyBasicDBMetadata extends BasicDBMetadata {
 
