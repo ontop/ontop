@@ -39,6 +39,7 @@ import java.util.Properties;
 public abstract class AbstractConstraintTest extends TestCase {
 	
 	private BasicDBMetadata metadata;
+	private QuotedIDFactory ID_FACTORY;
 	
 	private static final String TB_BOOK = "Book";
 	private static final String TB_WRITER = "Writer";
@@ -54,7 +55,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public AbstractConstraintTest(String method, String propertyFile) {
 		super(method);
 		this.propertyFile = propertyFile;
-
 	}
 	
 	@Override
@@ -72,6 +72,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 			RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), conn, null);
+			ID_FACTORY = metadata.getDBParameters().getQuotedIDFactory();
 		}
 		catch (IOException e) {
 			log.error("IOException during setUp of propertyFile");
@@ -85,7 +86,31 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
-		
+
+		List<UniqueConstraint> ucBook =
+			metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK))
+					.getUniqueConstraints();
+		assertEquals(1, ucBook.size());
+		assertEquals(1, ucBook.get(0).getAttributes().size());
+
+		List<UniqueConstraint> ucBookWriter =
+				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER))
+						.getUniqueConstraints();
+		assertEquals(0, ucBookWriter.size());
+
+		List<UniqueConstraint> ucEdition =
+				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION))
+						.getUniqueConstraints();
+		assertEquals(1, ucEdition.size());
+		assertEquals(1, ucEdition.get(0).getAttributes().size());
+
+		List<UniqueConstraint> ucWriter =
+				metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER))
+						.getUniqueConstraints();
+		assertEquals(1, ucWriter.size());
+		assertEquals(1, ucWriter.get(0).getAttributes().size());
+
+/*
 		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 		for (DatabaseRelationDefinition t : tables) {
 			UniqueConstraint pkc = null;
@@ -105,6 +130,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 				writeLog(t.getID().getSQLRendering(), pkc.getAttributes());
 		}
 		log.info("\n");
+ */
 	}
 	
 	public void testForeignKey() {
