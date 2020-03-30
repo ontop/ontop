@@ -319,11 +319,11 @@ public class NullableUniqueConstraintTest {
     }
 
 
-    private void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) throws EmptyQueryException {
-        IntermediateQuery newIntermediateQuery = JOIN_LIKE_OPTIMIZER.optimize(
-                IQ_CONVERTER.convert(initialIQ.normalizeForOptimization(), EXECUTOR_REGISTRY));
+    private void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(
+                initialIQ.normalizeForOptimization(), EXECUTOR_REGISTRY);
 
-        assertEquals(expectedIQ, IQ_CONVERTER.convert(newIntermediateQuery));
+        assertEquals(expectedIQ, optimizedIQ);
     }
 
 }

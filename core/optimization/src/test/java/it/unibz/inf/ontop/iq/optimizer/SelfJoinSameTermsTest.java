@@ -439,11 +439,8 @@ public class SelfJoinSameTermsTest {
         optimizeAndCompare(initialQuery, initialQuery);
     }
 
-    private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) throws EmptyQueryException {
-        IQ optimizedQuery = IQ_CONVERTER.convert(
-                JOIN_LIKE_OPTIMIZER.optimize(
-                        IQ_CONVERTER.convert(initialQuery, EXECUTOR_REGISTRY)));
-
+    private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery, EXECUTOR_REGISTRY);
         assertEquals(expectedQuery, optimizedQuery);
     }
 

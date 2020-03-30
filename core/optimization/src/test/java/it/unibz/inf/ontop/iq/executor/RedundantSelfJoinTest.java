@@ -678,7 +678,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.out.println("\n Optimized query (should not be produced): \n" +  optimizedQuery);
     }
 
@@ -805,7 +805,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        JOIN_LIKE_OPTIMIZER.optimize(query);
+        optimize(query);
     }
 
     @Test
@@ -1439,19 +1439,25 @@ public class RedundantSelfJoinTest {
         optimizeAndCompare(initialIQ, expectedIQ);
     }
 
-    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) throws EmptyQueryException {
-        optimizeAndCompare(
-                IQ_CONVERTER.convert(initialIQ, EXECUTOR_REGISTRY),
-                IQ_CONVERTER.convert(expectedIQ, EXECUTOR_REGISTRY));
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        System.out.println("Initial query: "+ initialIQ);
+        System.out.println("Expected query: "+ expectedIQ);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        System.out.println("Optimized query: "+ optimizedIQ);
     }
 
-    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) throws EmptyQueryException {
-        System.out.println("Initial query: "+ initialQuery);
-        System.out.println("Expected query: "+ expectedQuery);
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
-        System.out.println("Optimized query: "+ optimizedQuery);
+    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) {
+        optimizeAndCompare(IQ_CONVERTER.convert(initialQuery), IQ_CONVERTER.convert(expectedQuery));
+    }
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 
     private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1(DBMetadata metadata)

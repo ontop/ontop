@@ -51,7 +51,7 @@ public class NodeDeletionTest {
         /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 
@@ -91,7 +91,7 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
@@ -157,7 +157,7 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode newRootNode = optimizedQuery.getRootNode();
@@ -224,7 +224,7 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode optimizedRootNode = optimizedQuery.getRootNode();
@@ -266,10 +266,20 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
+    }
+
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 }
