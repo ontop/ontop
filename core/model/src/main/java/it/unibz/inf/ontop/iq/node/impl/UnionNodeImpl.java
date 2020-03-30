@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -409,12 +408,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
         return projectedVariables.equals(((UnionNode) queryNode).getVariables());
     }
 
-
     /**
      * TODO: refactor
      */
-    private IQTree liftBinding(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-
+    @Override
+    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         ImmutableList<IQTree> liftedChildren = children.stream()
                 .map(c -> c.normalizeForOptimization(variableGenerator))
                 .filter(c -> !c.isDeclaredAsEmpty())
@@ -427,16 +425,8 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             case 1:
                 return liftedChildren.get(0);
             default:
-                return liftBindingFromLiftedChildren(liftedChildren, variableGenerator, currentIQProperties);
+                return liftBindingFromLiftedChildrenAndFlatten(liftedChildren, variableGenerator, currentIQProperties);
         }
-    }
-
-    /**
-     * TODO: refactor
-     */
-    @Override
-    public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQProperties currentIQProperties) {
-        return liftBinding(children, variableGenerator, currentIQProperties);
     }
 
     @Override
@@ -496,15 +486,15 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     /**
      * Has at least two children
      */
-    private IQTree liftBindingFromLiftedChildren(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
-                                                 IQProperties currentIQProperties) {
+    private IQTree liftBindingFromLiftedChildrenAndFlatten(ImmutableList<IQTree> liftedChildren, VariableGenerator variableGenerator,
+                                                           IQProperties currentIQProperties) {
 
         /*
          * Cannot lift anything if some children do not have a construction node
          */
         if (liftedChildren.stream()
                 .anyMatch(c -> !(c.getRootNode() instanceof ConstructionNode)))
-            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), currentIQProperties.declareNormalizedForOptimization());
 
         ImmutableList<ImmutableSubstitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildren.stream()
                 .map(c -> (ConstructionNode) c.getRootNode())
@@ -516,7 +506,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                     projectedVariables, tmpNormalizedChildSubstitutions, variableGenerator);
 
         if (mergedSubstitution.isEmpty()) {
-            return iqFactory.createNaryIQTree(this, liftedChildren, currentIQProperties.declareNormalizedForOptimization());
+            return iqFactory.createNaryIQTree(this, flattenChildren(liftedChildren), currentIQProperties.declareNormalizedForOptimization());
         }
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables,
                 // Cleans up the temporary "normalization"
@@ -530,9 +520,25 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
                         .boxed()
                         .map(i -> updateChild((UnaryIQTree) liftedChildren.get(i), mergedSubstitution,
                                 tmpNormalizedChildSubstitutions.get(i), unionVariables))
+                        .flatMap(this::flattenChild)
                         .collect(ImmutableCollectors.toList()));
 
         return iqFactory.createUnaryIQTree(newRootNode, unionIQ);
+    }
+
+    private ImmutableList<IQTree> flattenChildren(ImmutableList<IQTree> liftedChildren) {
+        ImmutableList<IQTree> flattenedChildren = liftedChildren.stream()
+                .flatMap(this::flattenChild)
+                .collect(ImmutableCollectors.toList());
+        return (liftedChildren.size() == flattenedChildren.size())
+                ? liftedChildren
+                : flattenedChildren;
+    }
+
+    private Stream<IQTree> flattenChild(IQTree child) {
+        return (child.getRootNode() instanceof UnionNode)
+                ? child.getChildren().stream()
+                : Stream.of(child);
     }
 
     private ImmutableSubstitution<ImmutableTerm> tmpNormalizeNullAndRDFConstantsInSubstitution(
