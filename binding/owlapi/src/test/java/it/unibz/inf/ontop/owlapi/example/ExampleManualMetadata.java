@@ -81,7 +81,7 @@ private static BasicDBMetadata getMeta(){
 	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 	Injector defaultInjector = defaultConfiguration.getInjector();
 
-	BasicDBMetadata dbMetadata = defaultInjector.getInstance(DummyRDBMetadata.class);
+	BasicDBMetadata dbMetadata = defaultInjector.getInstance(BasicDBMetadata.class);
 	DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
 
 	defMeasTable(dbMetadata, dbTypeFactory,"burner");

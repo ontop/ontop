@@ -31,7 +31,7 @@ public class SQLMappingTestingTools {
     public static final CoreSingletons CORE_SINGLETONS;
     public static final LegacySQLPPMappingConverter LEGACY_SQL_PP_MAPPING_CONVERTER;
 
-    public static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
 
     static {
@@ -54,7 +54,7 @@ public class SQLMappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
