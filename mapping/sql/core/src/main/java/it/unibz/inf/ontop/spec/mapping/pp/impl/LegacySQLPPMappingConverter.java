@@ -92,7 +92,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, termFactory)
                             .extract(sourceQuery);
-                    ParserViewDefinition view = createParserView(dbMetadata.getQuotedIDFactory(), dbMetadata.getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
+                    ParserViewDefinition view = createParserView(dbMetadata.getDBParameters().getQuotedIDFactory(), dbMetadata.getDBParameters().getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()

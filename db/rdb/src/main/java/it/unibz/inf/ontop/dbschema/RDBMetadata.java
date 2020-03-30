@@ -36,6 +36,4 @@ public class RDBMetadata extends BasicDBMetadata {
 				QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
 		super(driverName, driverVersion, databaseProductName, databaseVersion, idfac, dbTypeFactory);
 	}
-
-	public DBTypeFactory getDBTypeFactory() { return getDBParameters().getDBTypeFactory(); }
 }
