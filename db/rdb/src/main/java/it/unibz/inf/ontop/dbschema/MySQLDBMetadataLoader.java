@@ -20,6 +20,9 @@ public class MySQLDBMetadataLoader extends JDBCRDBMetadataLoader {
         }
     }
 
+    // WORKAROUND for MySQL connector >= 8.0:
+    // <https://github.com/ontop/ontop/issues/270>
+
     @Override
     protected String getRelationCatalog(RelationID relationID) { return catalog; }
 
@@ -29,4 +32,11 @@ public class MySQLDBMetadataLoader extends JDBCRDBMetadataLoader {
                 rs.getString("TABLE_CAT"),
                 rs.getString("TABLE_NAME"));
     }
+
+    protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
+        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+                rs.getString("PKTABLE_CAT"),
+                rs.getString("PKTABLE_NAME"));
+    }
+
 }

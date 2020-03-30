@@ -34,7 +34,6 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
         return builder.build();
     }
 
-
     @Override
     public ImmutableList<RelationID> getRelationIDs() throws SQLException {
         // Obtain the relational objects (i.e., tables and views)
@@ -50,7 +49,6 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
         }
         return relationIds.build();
     }
-
 
     // filter out all irrelevant table and view names
     private static final String TABLE_LIST_QUERY =

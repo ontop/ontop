@@ -17,5 +17,5 @@ public interface RDBMetadataLoader {
      */
     ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws SQLException;
 
-    void insertIntegrityConstraints(RelationDefinition relation);
+    void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws SQLException;
 }
