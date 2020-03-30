@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.dbschema.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
@@ -94,7 +95,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                         realTables.addAll(referredTables);
                     });
 
-                    RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, realTables);
+                    RDBMetadataExtractionTools.loadMetadata(metadata, typeFactory.getDBTypeFactory(), connection, ImmutableList.copyOf(realTables));
                 }
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);

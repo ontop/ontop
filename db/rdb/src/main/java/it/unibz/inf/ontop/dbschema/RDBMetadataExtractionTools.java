@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.dbschema;
 */
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -181,7 +182,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(BasicDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, Set<RelationID> realTables) throws SQLException {
+	public static void loadMetadata(BasicDBMetadata metadata, DBTypeFactory dbTypeFactory, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
 
 		if (printouts)
 			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
@@ -189,34 +190,23 @@ public class RDBMetadataExtractionTools {
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
 
-		List<RelationID> seedRelationIds;
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
 
-		if (productName.contains("Oracle")) {
-			String defaultSchema = getOracleDefaultOwner(conn);
-			if (realTables == null || realTables.isEmpty())
-				seedRelationIds = getTableList(conn, new OracleRelationListProvider(idfac, defaultSchema), idfac);
-			else
-				seedRelationIds = getTableList(defaultSchema, realTables, idfac);
-		}
-		else {
-			if (realTables == null || realTables.isEmpty())  {
-				if (productName.contains("DB2"))
-					// select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
-					seedRelationIds = getTableListDefault(md,
-							ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT"), idfac);
-				else if (productName.contains("SQL Server"))  // MS SQL Server
-					// SELECT SCHEMA_NAME() would give default schema name
-					// https://msdn.microsoft.com/en-us/library/ms175068.aspx
-					seedRelationIds = getTableListDefault(md,
-							ImmutableSet.of("sys", "INFORMATION_SCHEMA"), idfac);
-				else
-					// for other database engines, including H2, HSQL, PostgreSQL and MySQL
-					seedRelationIds = getTableListDefault(md, ImmutableSet.of(), idfac);
-			}
-			else
-				seedRelationIds = getTableList(null, realTables, idfac);
-		}
+		RDBMetadataLoader metadataLoader;
+		if (productName.contains("Oracle"))
+			metadataLoader = new OracleJDBCRDBMetadataLoader(conn, idfac);
+		else if (productName.contains("DB2"))
+			metadataLoader = new DB2RDBMetadataLoader(conn, idfac);
+		else if (productName.contains("SQL Server"))
+			metadataLoader = new MSSQLDBMetadataLoader(conn, idfac);
+		else
+			metadataLoader = new JDBCRDBMetadataLoader(conn, idfac);
+
+		List<RelationID> seedRelationIds;
+		if (realTables == null || realTables.isEmpty())
+			seedRelationIds = metadataLoader.getRelationIDs();
+		else
+			seedRelationIds = metadataLoader.getRelationIDs(realTables);
 
 		List<RelationDefinition.AttributeListBuilder> extractedRelations = new LinkedList<>();
 
@@ -298,201 +288,7 @@ public class RDBMetadataExtractionTools {
     }
 
 
-    /**
-	 * Retrieve the normalized list of tables from a given list of RelationIDs
-	 */
 
-	private static List<RelationID> getTableList(String defaultTableSchema, Set<RelationID> realTables, QuotedIDFactory idfac) throws SQLException {
-
-		List<RelationID> fks = new LinkedList<>();
-		for (RelationID table : realTables) {
-			// defaultTableSchema is non-empty only for Oracle and DUAL is a special Oracle table
-			if (table.hasSchema() || (defaultTableSchema == null) || table.getTableName().equals("DUAL"))
-				fks.add(table);
-			else {
-				RelationID qualifiedTableId = idfac.createRelationID(defaultTableSchema, table.getTableNameSQLRendering());
-				fks.add(qualifiedTableId);
-			}
-		}
-		return fks;
-	}
-
-
-
-	/**
-	 * Retrieve the table and view list from the JDBC driver (works for most database engines, e.g., MySQL and PostgreSQL)
-	 */
-	private static List<RelationID> getTableListDefault(DatabaseMetaData md, ImmutableSet<String> ignoredSchemas, QuotedIDFactory idfac) throws SQLException {
-		List<RelationID> relationIds = new LinkedList<>();
-		try (ResultSet rs = md.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
-			while (rs.next()) {
-				// String catalog = rs.getString("TABLE_CAT"); // not used
-				String schema = rs.getString("TABLE_SCHEM");
-				String table = rs.getString("TABLE_NAME");
-				if (ignoredSchemas.contains(schema)) {
-					continue;
-				}
-				RelationID id = RelationID.createRelationIdFromDatabaseRecord(idfac, schema, table);
-				relationIds.add(id);
-			}
-		}
-		return relationIds;
-	}
-
-	/**
-	 * Retrieve metadata for a specific database engine
-	 */
-	private static List<RelationID> getTableList(Connection conn, RelationListProvider relationListProvider, QuotedIDFactory idfac) throws SQLException {
-
-		// Obtain the relational objects (i.e., tables and views)
-		List<RelationID> relationIds = new LinkedList<>();
-		try (Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery(relationListProvider.getQuery())) {
-			while (rs.next())
-				relationIds.add(relationListProvider.getTableID(rs));
-		}
-		return relationIds;
-	}
-	
-
-	private static String getOracleDefaultOwner(Connection conn) throws SQLException {
-		// Obtain the table owner (i.e., schema name)
-		String loggedUser = "SYSTEM"; // default value
-		try (Statement stmt = conn.createStatement();
-			 ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
-				if (resultSet.next()) {
-					loggedUser = resultSet.getString("user");
-				}
-		}
-		return loggedUser.toUpperCase();
-	}
-
-
-
-	private interface RelationListProvider {
-		String getQuery();
-		RelationID getTableID(ResultSet rs) throws SQLException;
-	}
-
-
-	/**
-	 * Table list for Oracle
-	 */
-
-	private static final class OracleRelationListProvider implements RelationListProvider {
-
-		private final String defaultTableOwner;
-		private final QuotedIDFactory idfac;
-
-		public OracleRelationListProvider(QuotedIDFactory idfac, String defaultTableOwner) {
-			this.defaultTableOwner = defaultTableOwner;
-			this.idfac = idfac;
-		}
-
-		@Override
-		public String getQuery() {
-			// filter out all irrelevant table and view names
-			return "SELECT table_name as object_name FROM user_tables WHERE " +
-			       "   NOT table_name LIKE 'MVIEW$_%' AND " +
-			       "   NOT table_name LIKE 'LOGMNR_%' AND " +
-			       "   NOT table_name LIKE 'AQ$_%' AND " +
-			       "   NOT table_name LIKE 'DEF$_%' AND " +
-			       "   NOT table_name LIKE 'REPCAT$_%' AND " +
-			       "   NOT table_name LIKE 'LOGSTDBY$%' AND " +
-			       "   NOT table_name LIKE 'OL$%' " +
-			       "UNION ALL " +
-			       "SELECT view_name as object_name FROM user_views WHERE " +
-			       "   NOT view_name LIKE 'MVIEW_%' AND " +
-			       "   NOT view_name LIKE 'LOGMNR_%' AND " +
-			       "   NOT view_name LIKE 'AQ$_%'";
-		}
-
-		@Override
-		public RelationID getTableID(ResultSet rs) throws SQLException {
-			return RelationID.createRelationIdFromDatabaseRecord(idfac, defaultTableOwner, rs.getString("object_name"));
-		}
-	};
-
-	/**
-	 * Table list for DB2 database engine (not needed now -- use JDBC metadata instead)
-	 */
-/*
-	private static final RelationListProvider DB2RelationListProvider = new RelationListProvider() {
-		@Override
-		public String getQuery() {
-			return "SELECT TABSCHEMA, TABNAME " +
-			       "FROM SYSCAT.TABLES " +
-			       "WHERE OWNERTYPE='U' AND (TYPE='T' OR TYPE='V') " +
-			       "     AND TBSPACEID IN (SELECT TBSPACEID FROM SYSCAT.TABLESPACES WHERE TBSPACE LIKE 'USERSPACE%')";
-		}
-
-		@Override
-		public RelationID getTableID(ResultSet rs) throws SQLException {
-			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABSCHEMA"), rs.getString("TABNAME"));
-		}
-	};
-*/
-
-	/**
-	 * Table list for MS SQL Server database engine (not needed now -- use JDBC metadata instead)
-	 */
-/*
-	private static final RelationListProvider MSSQLServerRelationListProvider = new RelationListProvider() {
-		@Override
-		public String getQuery() {
-			return "SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME " +
-					"FROM INFORMATION_SCHEMA.TABLES " +
-					"WHERE TABLE_TYPE='BASE TABLE' OR TABLE_TYPE='VIEW'";
-		}
-
-		@Override
-		public RelationID getTableID(ResultSet rs) throws SQLException {
-			//String tblCatalog = rs.getString("TABLE_CATALOG");
-			return RelationID.createRelationIdFromDatabaseRecord(rs.getString("TABLE_SCHEMA"), rs.getString("TABLE_NAME"));
-		}
-	};
-*/
-
-
-
-	/**
-	 * Prints column names of a given table.
-     *
-	 */
-/*
-	private static void displayColumnNames(DatabaseMetaData dbMetadata,
-			Connection connection, ResultSet rsColumns,
-			String tableSchema, String tableName) throws SQLException {
-
-		log.debug("=============== COLUMN METADATA ========================");
-
-		if (dbMetadata.getDatabaseProductName().contains("DB2")) {
-			 // Alternative solution for DB2 to print column names
-		     // Queries directly the system table SysCat.Columns
-			//  ROMAN (20 Sep 2015): use PreparedStatement instead?
-			try (Statement st = connection.createStatement()) {
-		        String sqlQuery = String.format("SELECT colname, typename \n FROM SysCat.Columns \n" +
-		        								"WHERE tabname = '%s' AND tabschema = '%s'", tableName, tableSchema);
-
-		        try (ResultSet results = st.executeQuery(sqlQuery)) {
-			        while (results.next()) {
-			            log.debug("Column={} Type={}", results.getString("colname"), results.getString("typename"));
-			        }
-		        }
-			}
-		}
-		else {
-			 // Generic procedure based on JDBC
-			ResultSetMetaData columnMetadata = rsColumns.getMetaData();
-			int count = columnMetadata.getColumnCount();
-			for (int j = 0; j < count; j++) {
-			    String columnName = columnMetadata.getColumnName(j + 1);
-			    String value = rsColumns.getString(columnName);
-			    log.debug("Column={} Type={}", columnName, value);
-			}
-		}
-	}
-*/
 
 
 
