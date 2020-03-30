@@ -84,7 +84,6 @@ public class ParserViewDefinition extends RelationDefinition {
 		return ImmutableList.of();
 	}
 
-
 	@Override
 	public String toString() {
 		return getID() + " [" + getAttributes().stream()
