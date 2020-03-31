@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IntermediateQuery;
-import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -97,8 +94,11 @@ public class NullableUniqueConstraintTest {
 
         ExtensionalDataNode newLeftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F0, GF1));
 
+        ExtensionalDataNode newLeftNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_PREDICATE.getRelationDefinition(), ImmutableMap.of(0, A));
+
         NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, leftNode2));
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, newLeftNode2));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -147,8 +147,11 @@ public class NullableUniqueConstraintTest {
 
         ExtensionalDataNode newLeftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F0, GF1));
 
+        ExtensionalDataNode newLeftNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_PREDICATE.getRelationDefinition(), ImmutableMap.of(0, A));
+
         NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
-                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, leftNode2));
+                IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(newLeftNode1, newLeftNode2));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -159,18 +162,15 @@ public class NullableUniqueConstraintTest {
 
     @Test
     public void testNotSimplified1() throws EmptyQueryException {
-        ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
+        ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_PREDICATE.getRelationDefinition(), ImmutableMap.of(0, A));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, TWO, G));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, G);
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
-                constructionNode,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(
+        IQTree initialTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
                         IQ_FACTORY.createLeftJoinNode(),
                         leftNode1,
-                        rightNode));
+                        rightNode);
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
@@ -200,7 +200,9 @@ public class NullableUniqueConstraintTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
-                        TERM_FACTORY.getStrictEquality(B, TWO), C)));
+                        TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
+
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, F0, GF1));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -208,7 +210,7 @@ public class NullableUniqueConstraintTest {
                         newConstructionNode,
                         IQ_FACTORY.createUnaryIQTree(
                                 filterNode,
-                                leftNode1)));
+                                newDataNode)));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
@@ -259,8 +261,8 @@ public class NullableUniqueConstraintTest {
 
     @Test
     public void testSimpleJoin1() throws EmptyQueryException {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, D, E));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B, 2, C));;
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, D, 2, E));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_2_PREDICATE, A, E);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -275,13 +277,13 @@ public class NullableUniqueConstraintTest {
 
         FilterNode newFilterNode = IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A));
 
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A,  2, E));
+
         IQ expectedIQ = IQ_FACTORY.createIQ(
                 projectionAtom,
-                IQ_FACTORY.createUnaryIQTree(
-                        constructionNode,
                         IQ_FACTORY.createUnaryIQTree(
                                 newFilterNode,
-                                dataNode2)));
+                                newDataNode2));
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }

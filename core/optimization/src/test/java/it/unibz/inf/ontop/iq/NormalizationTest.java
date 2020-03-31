@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -145,7 +146,9 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionMerge1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -155,13 +158,14 @@ public class NormalizationTest {
         UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, downIqTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, extensionalDataNode);
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
     public void testConstructionMerge2() {
         ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B));
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -171,14 +175,18 @@ public class NormalizationTest {
         UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, downIqTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
-        UnaryIQTree expectedIqTree = IQ_FACTORY.createUnaryIQTree(topConstructionNode, extensionalDataNode);
+        IQTree expectedIqTree = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));;
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedIqTree);
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
     public void testConstructionMerge3() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
@@ -197,7 +205,9 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionMerge4() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(C),
                 SUBSTITUTION_FACTORY.getSubstitution(C, createInjectiveFunctionalTerm1(A)));
 
@@ -239,7 +249,11 @@ public class NormalizationTest {
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(createInjectiveFunctionalTerm1(A))));
 
-        UnaryIQTree expectedIqTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, extensionalDataNode);
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
+        UnaryIQTree expectedIqTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, newExtensionalDataNode);
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedIqTree);
         normalizeAndCompare(initialIQ, expectedIQ);
     }
@@ -261,8 +275,11 @@ public class NormalizationTest {
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
-        UnaryIQTree expectedIqTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, extensionalDataNode);
-        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedIqTree);
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newExtensionalDataNode);
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
@@ -305,7 +322,9 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionFilter1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
@@ -338,7 +357,14 @@ public class NormalizationTest {
         UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(constructionNode, subTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, iqTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
+        UnaryIQTree newIQTree = IQ_FACTORY.createUnaryIQTree(filterNode, newExtensionalDataNode);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newIQTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
@@ -430,7 +456,9 @@ public class NormalizationTest {
     public void testFilterBindings1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
 
         ImmutableFunctionalTerm xDefinition = createInjectiveFunctionalTerm1(A);
 
@@ -527,9 +555,36 @@ public class NormalizationTest {
                         IQ_FACTORY.createUnaryIQTree(constructionNode, extensionalDataNode)));
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
+        ExtensionalDataNode newExtensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
         UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
-                IQ_FACTORY.createUnaryIQTree(constructionNode,
-                        IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode)));
+                        IQ_FACTORY.createUnaryIQTree(filterNode, newExtensionalDataNode));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testFilterDistinct3() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
+
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
+
+        ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, B, TWO);
+        FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
+
+        UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode,
+                IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(constructionNode, extensionalDataNode)));
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(distinctNode,
+                        IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode));
 
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
         normalizeAndCompare(initialIQ, expectedIQ);
@@ -767,15 +822,15 @@ public class NormalizationTest {
     public void testLJ1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
 
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
-        IQTree tree = IQ_FACTORY.createUnaryIQTree(constructionNode,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, extensionalDataNode1, extensionalDataNode2));
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode, extensionalDataNode1, extensionalDataNode2);
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
         normalizeAndCompare(initialIQ, initialIQ);
@@ -785,7 +840,10 @@ public class NormalizationTest {
     public void testLJ2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, C, D);
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -990,7 +1048,9 @@ public class NormalizationTest {
     public void testLJDistinct4() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -999,14 +1059,16 @@ public class NormalizationTest {
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
-        IQTree tree = IQ_FACTORY.createUnaryIQTree(constructionNode,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
-                        extensionalDataNode1,
-                        IQ_FACTORY.createUnaryIQTree(distinctNode, extensionalDataNode2)));
+        IQTree ljTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
+                extensionalDataNode1,
+                IQ_FACTORY.createUnaryIQTree(distinctNode, extensionalDataNode2));
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(constructionNode, ljTree);
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, ljTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
@@ -1035,17 +1097,18 @@ public class NormalizationTest {
     public void testLJDistinct6() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(PK_TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, A, C);
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
-        IQTree tree = IQ_FACTORY.createUnaryIQTree(constructionNode,
-                IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
+        IQTree tree = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
                         extensionalDataNode1,
-                        extensionalDataNode2));
+                        extensionalDataNode2);
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
         normalizeAndCompare(initialIQ, initialIQ);
@@ -1470,7 +1533,9 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, A, B, C);
+        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR3.getRelationDefinition(),
+                ImmutableMap.of(1, B, 2, C));
         ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, D, E);
 
         ConstructionNode lowerLeftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
@@ -1676,7 +1741,9 @@ public class NormalizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
+        ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(
+                INT_TABLE2_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(1, B));
 
         ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
@@ -1729,7 +1796,9 @@ public class NormalizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
+        ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(
+                INT_TABLE2_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(1, B));
 
         ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
@@ -1738,8 +1807,7 @@ public class NormalizationTest {
         ConstructionNode subConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(B));
 
         UnaryIQTree rightChild = IQ_FACTORY.createUnaryIQTree(
-                rightTopConstructionNode,
-                IQ_FACTORY.createUnaryIQTree(
+                rightTopConstructionNode, IQ_FACTORY.createUnaryIQTree(
                         distinctNode,
                         IQ_FACTORY.createUnaryIQTree(
                                 subConstructionNode,
@@ -1758,7 +1826,18 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
 
-        normalizeAndCompare(initialIQ, initialIQ);
+        UnaryIQTree newRightChild = IQ_FACTORY.createUnaryIQTree(
+                rightTopConstructionNode, IQ_FACTORY.createUnaryIQTree(
+                        distinctNode,
+                        rightNode));
+
+
+        BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
+                leftNode, newRightChild);
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(rootConstructionNode, newLeftJoinTree);
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
     }
 
     @Test
@@ -1819,7 +1898,8 @@ public class NormalizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE1_NULL_AR3, D, B, F);
+        ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3.getRelationDefinition(),
+                ImmutableMap.of(0, D, 1,B));
 
         ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
@@ -1864,7 +1944,8 @@ public class NormalizationTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE1_NULL_AR3, D, B, F);
+        ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3.getRelationDefinition(),
+                ImmutableMap.of(0, D, 1,B));
 
         ImmutableExpression ljExpression = TERM_FACTORY.getDBNumericInequality(GT, B, ONE);
         ImmutableExpression filterExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
@@ -1913,7 +1994,8 @@ public class NormalizationTest {
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
         ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
-        ExtensionalDataNode rightNode2 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, F);
+        ExtensionalDataNode rightNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE2_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, D));
 
         ImmutableExpression joinExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
 
@@ -1963,7 +2045,8 @@ public class NormalizationTest {
 
         ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
         ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
-        ExtensionalDataNode rightNode2 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, F);
+        ExtensionalDataNode rightNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE2_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, D));
 
         ImmutableExpression joinExpression = TERM_FACTORY.getDBNumericInequality(LT, D, ONE);
         ImmutableExpression ljExpression = TERM_FACTORY.getDBNumericInequality(GT, B, ONE);

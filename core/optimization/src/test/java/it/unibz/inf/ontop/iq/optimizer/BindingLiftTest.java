@@ -2116,12 +2116,16 @@ public class BindingLiftTest {
         IQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, leftJoinTree);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, constructionTree);
 
+        Variable prov = TERM_FACTORY.getVariable("prov");
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, B, 1, prov));
+
         // Expected
         BinaryNonCommutativeIQTree newLeftJoinTree = IQ_FACTORY.createBinaryNonCommutativeIQTree(
-                IQ_FACTORY.createLeftJoinNode(), dataNode1, dataNode2);
+                IQ_FACTORY.createLeftJoinNode(), dataNode1, newDataNode2);
 
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(C, ONE)));
+                SUBSTITUTION_FACTORY.getSubstitution(D, generateIfIsNotNullElseNull(prov, ONE)));
 
         IQTree newConstructionTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode, newLeftJoinTree);
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, newConstructionTree);
