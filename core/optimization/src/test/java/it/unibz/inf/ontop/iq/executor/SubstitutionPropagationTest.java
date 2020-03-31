@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.executor;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -99,7 +100,8 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
 
-        ExtensionalDataNode rightDataNode = buildExtensionalDataNode(TABLE3_AR2, A, D);
+        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, rightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
@@ -248,8 +250,12 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_AR2, A, D));
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_AR2, A, E));
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -297,8 +303,12 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_AR2, A, D));
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_AR2, A, F));
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
 
@@ -382,8 +392,9 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_AR2, A, D));
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newDataNode1);
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
 
@@ -644,7 +655,9 @@ public class SubstitutionPropagationTest {
                         X, generateURI1(A),
                         Y, NULL));
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
-        expectedQueryBuilder.addChild(expectedRootNode, DATA_NODE_1);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(expectedRootNode, newDataNode1);
 
         propagateAndCompare(initialQueryBuilder.build(), expectedQueryBuilder.build());
     }
@@ -761,8 +774,12 @@ public class SubstitutionPropagationTest {
         expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE1_AR2, A, B));
         UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
         expectedQueryBuilder.addChild(joinNode, newUnionNode);
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE3_AR2, A, D));
-        expectedQueryBuilder.addChild(newUnionNode, buildExtensionalDataNode(TABLE2_AR2, A, E));
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode2);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -896,7 +913,10 @@ public class SubstitutionPropagationTest {
                         Y, generateURI1(A)));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newDataNode1);
 
         expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_AR2, A, A));
 
@@ -940,9 +960,13 @@ public class SubstitutionPropagationTest {
                 rightConstructionNode.getSubstitution());
         expectedQueryBuilder.init(projectionAtom, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE1_AR2, A, C));
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newLeftDataNode);
 
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_AR2, A, D));
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -981,8 +1005,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, DATA_NODE_1);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE3_AR2, A, A));
+
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newLeftDataNode);
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A, 1, A));
+        expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -1024,10 +1053,13 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
         expectedQueryBuilder.init(projectionAtom, leftConstructionNode);
         expectedQueryBuilder.addChild(leftConstructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, buildExtensionalDataNode(TABLE1_AR2, A, B));
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newLeftDataNode);
+        ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A, 1, A));
+        expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
-        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, A)));
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -1063,13 +1095,15 @@ public class SubstitutionPropagationTest {
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
         expectedQueryBuilder.init(projectionAtom, unionNode);
 
-        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(unionNode, newDataNode1);
         expectedQueryBuilder.addChild(unionNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, D)));
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A)));
 
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, F));
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
@@ -1103,20 +1137,20 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
+        expectedQueryBuilder.init(projectionAtom, newUnionNode);
 
-        expectedQueryBuilder.addChild(rootNode, unionNode);
-        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
 
-        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B),
-                SUBSTITUTION_FACTORY.getSubstitution(B, ONE));
-        expectedQueryBuilder.addChild(unionNode, newConstructionNode);
-        expectedQueryBuilder.addChild(newConstructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, D)));
+        expectedQueryBuilder.addChild(newUnionNode, joinNode);
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newDataNode2);
 
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, F));
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
@@ -1150,19 +1184,20 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
+        expectedQueryBuilder.init(projectionAtom, newUnionNode);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
 
-        expectedQueryBuilder.addChild(rootNode, unionNode);
-        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(newUnionNode, joinNode);
 
-        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B),
-                SUBSTITUTION_FACTORY.getSubstitution(B, A));
-        expectedQueryBuilder.addChild(unionNode, newConstructionNode);
-        expectedQueryBuilder.addChild(newConstructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, D)));
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newLeftDataNode);
+
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, F));
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
@@ -1196,20 +1231,20 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
+        UnionNode newUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(A));
+        expectedQueryBuilder.init(projectionAtom, newUnionNode);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newUnionNode, newDataNode1);
 
-        expectedQueryBuilder.addChild(rootNode, unionNode);
-        expectedQueryBuilder.addChild(unionNode, DATA_NODE_1);
+        expectedQueryBuilder.addChild(newUnionNode, joinNode);
 
-        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B),
-                SUBSTITUTION_FACTORY.getSubstitution(B, generateURI1(A)));
-        expectedQueryBuilder.addChild(unionNode, newConstructionNode);
-        expectedQueryBuilder.addChild(newConstructionNode, joinNode);
-        expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, D)));
+        ExtensionalDataNode newLeftDataNode = IQ_FACTORY.createExtensionalDataNode(
+                TABLE3_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(joinNode, newLeftDataNode);
 
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, F));
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
         expectedQueryBuilder.addChild(joinNode, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
@@ -1241,11 +1276,9 @@ public class SubstitutionPropagationTest {
         IntermediateQuery initialQuery = initialQueryBuilder.build();
 
         IntermediateQueryBuilder expectedQueryBuilder = initialQuery.newBuilder();
-        expectedQueryBuilder.init(projectionAtom, rootNode);
-
         ExtensionalDataNode newRightDataNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR2, B, F));
-        expectedQueryBuilder.addChild(rootNode, newRightDataNode);
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, B));
+        expectedQueryBuilder.init(projectionAtom, newRightDataNode);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }
@@ -1279,7 +1312,9 @@ public class SubstitutionPropagationTest {
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(X, uriA, Y, uriA));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
-        expectedQueryBuilder.addChild(newConstructionNode, dataNode);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE2_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        expectedQueryBuilder.addChild(newConstructionNode, newDataNode1);
 
         propagateAndCompare(initialQuery, expectedQueryBuilder.build());
     }

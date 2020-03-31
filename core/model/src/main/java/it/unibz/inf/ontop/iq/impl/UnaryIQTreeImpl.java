@@ -103,7 +103,7 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(getChild());
+        return getRootNode().isDistinct(this, getChild());
     }
 
     @Override
@@ -134,6 +134,11 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     @Override
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         return getRootNode().inferUniqueConstraints(getChild());
+    }
+
+    @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(getChild());
     }
 
     @Override

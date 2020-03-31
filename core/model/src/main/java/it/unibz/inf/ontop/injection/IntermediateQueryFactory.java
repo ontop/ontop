@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -49,8 +50,18 @@ public interface IntermediateQueryFactory {
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
+    @Deprecated
     ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
-    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> newDataAtom, VariableNullability variableNullability);
+
+    /**
+     * NB: keys of the argumentMap are indices. They start at 0.
+     */
+    ExtensionalDataNode createExtensionalDataNode(RelationDefinition relationDefinition,
+                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
+
+    ExtensionalDataNode createExtensionalDataNode(RelationDefinition relationDefinition,
+                                                  ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                                                  VariableNullability variableNullability);
 
     EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables);
 

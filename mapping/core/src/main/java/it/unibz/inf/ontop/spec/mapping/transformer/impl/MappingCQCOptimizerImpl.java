@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -13,6 +14,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCQCOptimizer;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -22,11 +24,14 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final CoreSingletons coreSingletons;
 
     @Inject
-    public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory) {
+    public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+                                   CoreSingletons coreSingletons) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -64,7 +69,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .collect(ImmutableCollectors.toSet())
                             .containsAll(answerVariables)) {
 
-                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(subChildren)), new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children)))) {
+                        if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables,
+                                IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
+                                new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children, coreSingletons)))) {
                             children = subChildren;
                             if (children.size() < 2)
                                 break;

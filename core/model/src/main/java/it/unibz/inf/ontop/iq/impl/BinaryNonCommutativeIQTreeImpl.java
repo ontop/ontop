@@ -137,7 +137,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(leftChild, rightChild);
+        return getRootNode().isDistinct(this, leftChild, rightChild);
     }
 
     @Override
@@ -187,5 +187,10 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         return getRootNode().inferUniqueConstraints(leftChild, rightChild);
+    }
+
+    @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(leftChild, rightChild);
     }
 }

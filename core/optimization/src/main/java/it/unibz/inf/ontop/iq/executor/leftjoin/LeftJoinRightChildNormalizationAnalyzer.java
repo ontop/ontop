@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.executor.leftjoin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -34,7 +33,7 @@ public interface LeftJoinRightChildNormalizationAnalyzer {
         /**
          * Only if the data node has changed
          */
-        Optional<DataNode> getProposedRightDataNode();
+        Optional<ExtensionalDataNode> getProposedRightDataNode();
 
         Optional<ImmutableExpression> getAdditionalExpression();
     }

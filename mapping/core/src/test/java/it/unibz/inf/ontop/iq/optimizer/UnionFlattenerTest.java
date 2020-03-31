@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -200,7 +201,7 @@ public class UnionFlattenerTest {
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
         ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, Y, Z));
+                TABLE4_AR3.getRelationDefinition(), ImmutableMap.of(1, Y, 2, Z));
 
         IQTree union1 = IQ_FACTORY.createNaryIQTree(
                 unionNode1,

@@ -5,12 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonConstantTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 
 import java.util.Optional;
@@ -30,7 +28,7 @@ public interface SQLAlgebraFactory {
 
     SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
 
-    SQLTable createSQLTable(DataAtom<RelationPredicate> atom);
+    SQLTable createSQLTable(RelationDefinition relationDefinition, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
 
     SQLInnerJoinExpression createSQLInnerJoinExpression(@Assisted("leftExpression") SQLExpression left, @Assisted("rightExpression") SQLExpression right, Optional<ImmutableExpression> joinCondition);
 

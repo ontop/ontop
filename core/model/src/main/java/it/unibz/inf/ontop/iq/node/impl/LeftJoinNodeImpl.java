@@ -379,9 +379,41 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 .anyMatch(c -> c.isConstructed(variable));
     }
 
+    /**
+     * May check if the common
+     */
     @Override
-    public boolean isDistinct(IQTree leftChild, IQTree rightChild) {
-        return leftChild.isDistinct() && rightChild.isDistinct();
+    public boolean isDistinct(IQTree tree, IQTree leftChild, IQTree rightChild) {
+        if (!leftChild.isDistinct())
+            return false;
+        if (rightChild.isDistinct())
+            return true;
+
+        Optional<ImmutableExpression> optionalFilterCondition = getOptionalFilterCondition();
+
+        ImmutableSet<Variable> leftVariables = leftChild.getVariables();
+        ImmutableSet<Variable> rightVariables = rightChild.getVariables();
+        Sets.SetView<Variable> commonVariables = Sets.intersection(leftVariables, rightVariables);
+
+        if ((!optionalFilterCondition.isPresent()) && commonVariables.isEmpty())
+            return false;
+
+        ImmutableSet<ImmutableSet<Variable>> rightConstraints = rightChild.inferUniqueConstraints();
+        if (rightConstraints.isEmpty())
+            return false;
+
+        // Common variables have an implicit IS_NOT_NULL condition
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = rightChild.getVariableNullability().getNullableGroups().stream()
+                .filter(g -> g.stream().noneMatch(commonVariables::contains))
+                .collect(ImmutableCollectors.toSet());
+
+        VariableNullability variableNullabilityForRight = optionalFilterCondition
+                .map(c -> variableNullabilityTools.updateWithFilter(
+                        optionalFilterCondition.get(), nullableGroups, rightVariables))
+                .orElseGet(() -> coreUtilsFactory.createVariableNullability(nullableGroups, rightVariables));
+
+        return rightConstraints.stream()
+                .anyMatch(c -> c.stream().noneMatch(variableNullabilityForRight::isPossiblyNullable));
     }
 
     @Override
@@ -415,6 +447,11 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree leftChild, IQTree rightChild) {
         return ImmutableSet.of();
+    }
+
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild) {
+        return computeNotInternallyRequiredVariables(ImmutableList.of(leftChild, rightChild));
     }
 
     /**
@@ -455,7 +492,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return results.getExpression()
                 .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
                 .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getNonFunctionalTermFragment()));
+                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.getVariableOrGroundTermFragment()));
     }
 
     /**
@@ -483,7 +520,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 })
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSubstitution<NonFunctionalTerm> downSubstitution =
+        ImmutableSubstitution<VariableOrGroundTerm> downSubstitution =
                 substitutionFactory.getSubstitution(
                         downSubstitutionExpressions.stream()
                             .map(ImmutableFunctionalTerm::getTerms)
@@ -493,7 +530,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                                     ? args.reverse() : args)
                             .collect(ImmutableCollectors.toMap(
                                     args -> (Variable) args.get(0),
-                                    args -> (NonFunctionalTerm) args.get(1))));
+                                    args -> (VariableOrGroundTerm) args.get(1))));
 
         Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                 expressions.stream()

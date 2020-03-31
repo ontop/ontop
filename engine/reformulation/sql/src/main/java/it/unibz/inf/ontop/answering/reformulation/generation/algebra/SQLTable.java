@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
 
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 
 /**
  * TODO: find a better name
  */
 public interface SQLTable extends SQLExpression {
 
-    DataAtom<RelationPredicate> getAtom();
+    RelationDefinition getRelationDefinition();
+
+    ImmutableMap<Integer, ? extends VariableOrGroundTerm> getArgumentMap();
 
 }

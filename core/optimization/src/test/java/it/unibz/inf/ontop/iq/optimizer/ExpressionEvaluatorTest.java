@@ -132,13 +132,12 @@ public class ExpressionEvaluatorTest {
 
         unOptimizedQuery = BINDING_LIFT_OPTIMIZER.optimize(unOptimizedQuery);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(unOptimizedQuery);
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(IQ_CONVERTER.convert(unOptimizedQuery), EXECUTOR_REGISTRY);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
-        IntermediateQuery expectedQuery = getExpectedQuery();
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
-
+        IQ expectedQuery = IQ_CONVERTER.convert(getExpectedQuery());
+        assertEquals(expectedQuery, optimizedQuery);
     }
 
     /**

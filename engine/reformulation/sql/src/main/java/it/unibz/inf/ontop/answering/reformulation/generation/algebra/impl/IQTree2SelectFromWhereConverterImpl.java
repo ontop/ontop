@@ -179,7 +179,8 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
         else if (rootNode instanceof  ExtensionalDataNode){
             ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
 
-            return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getProjectionAtom());
+            return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getRelationDefinition(),
+                    extensionalDataNode.getArgumentMap());
         }
         else if (rootNode instanceof InnerJoinNode){
             List<SQLExpression> joinedExpressions = tree.getChildren().stream()

@@ -338,6 +338,9 @@ public class IntermediateQueryImpl implements IntermediateQuery {
                 break;
             optionalAncestor = getParent(ancestor);
         }
+        // Root reached
+        if (!optionalAncestor.isPresent())
+            requiredVariableBuilder.addAll(getProjectionAtom().getVariables());
 
         ImmutableSet<Variable> requiredVariables = requiredVariableBuilder.build();
         /*
