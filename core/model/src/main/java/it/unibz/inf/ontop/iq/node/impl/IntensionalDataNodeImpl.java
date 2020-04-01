@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -15,8 +17,11 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.InjectiveVar2VarSubstitution;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -126,4 +131,18 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         return iqFactory.createIntensionalDataNode(newAtom);
     }
 
+    @Override
+    public IQTree applyDescendingSubstitutionWithoutOptimizing(
+            ImmutableSubstitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+        DataAtom novelAtom = descendingSubstitution.applyToDataAtom(getProjectionAtom());
+        return newAtom(novelAtom);
+    }
+
+    /**
+     * All the variables are required, because an intensional data node cannot be sparse.
+     */
+    @Override
+    public synchronized ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return ImmutableSet.of();
+    }
 }

@@ -133,7 +133,7 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     protected boolean computeIsDistinct() {
-        return getRootNode().isDistinct(getChildren());
+        return getRootNode().isDistinct(this, getChildren());
     }
 
     @Override
@@ -175,5 +175,10 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     protected ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
         return getRootNode().inferUniqueConstraints(getChildren());
+    }
+
+    @Override
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables() {
+        return getRootNode().computeNotInternallyRequiredVariables(getChildren());
     }
 }

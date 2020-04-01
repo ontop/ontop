@@ -62,6 +62,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(OrderByNormalizer.class);
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
+        bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(RDF.class);
         bindFromSettings(UniqueTermTypeExtractor.class);
         bindFromSettings(DBFunctionSymbolFactory.class);

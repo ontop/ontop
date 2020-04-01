@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -236,7 +237,9 @@ public class TrueNodesRemovalOptimizerTest {
 
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, un);
-        expectedQueryBuilder.addChild(un, DATA_NODE_1);
+        expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR1.getRelationDefinition(),
+                ImmutableMap.of()));
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -365,7 +368,9 @@ public class TrueNodesRemovalOptimizerTest {
 
         expectedQueryBuilder.init(projectionAtom, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
-        expectedQueryBuilder.addChild(un, DATA_NODE_1);
+        expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR1.getRelationDefinition(),
+                ImmutableMap.of()));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 

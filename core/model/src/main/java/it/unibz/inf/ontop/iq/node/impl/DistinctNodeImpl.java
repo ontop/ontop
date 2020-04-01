@@ -71,7 +71,7 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public boolean isDistinct(IQTree child) {
+    public boolean isDistinct(IQTree tree, IQTree child) {
         return true;
     }
 
@@ -99,6 +99,14 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
         return Sets.union(
                 child.inferUniqueConstraints(),
                 ImmutableSet.of(child.getVariables())).immutableCopy();
+    }
+
+    /**
+     * TODO: implement it more seriously, by consider functional dependencies between variables
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return ImmutableSet.of();
     }
 
     @Override

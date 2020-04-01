@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -18,9 +19,9 @@ import java.util.stream.Stream;
 
 public class TMappingEntry {
 
-    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
+    public static Collector<TMappingRule, TMappingEntry, ImmutableList<TMappingRule>> toTMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, CoreSingletons coreSingletons) {
         return Collector.of(
-                () -> new TMappingEntry(cqc, termFactory), // Supplier
+                () -> new TMappingEntry(cqc, coreSingletons), // Supplier
                 TMappingEntry::add, // Accumulator
                 (b1, b2) -> b1.addAll(b2.build().iterator()), // Merger
                 TMappingEntry::build, // Finisher
@@ -30,10 +31,12 @@ public class TMappingEntry {
     private final List<TMappingRule> rules = new ArrayList<>();
     private final ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc;
     private final TermFactory termFactory;
+    private final CoreSingletons coreSingletons;
 
-    public TMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, TermFactory termFactory) {
+    public TMappingEntry(ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> cqc, CoreSingletons coreSingletons) {
         this.cqc = cqc;
-        this.termFactory = termFactory;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.coreSingletons = coreSingletons;
     }
 
     public TMappingEntry add(TMappingRule rule) {
@@ -182,6 +185,7 @@ public class TMappingEntry {
                 return Optional.empty();
 
         ImmutableHomomorphism h = builder.build();
-        return Optional.of(cqc.homomorphismIterator(h, IQ2CQ.toDataAtoms(from.getDatabaseAtoms()), IQ2CQ.toDataAtoms(to.getDatabaseAtoms())));
+        return Optional.of(cqc.homomorphismIterator(h, IQ2CQ.toDataAtoms(from.getDatabaseAtoms(), coreSingletons),
+                IQ2CQ.toDataAtoms(to.getDatabaseAtoms(), coreSingletons)));
     }
 }

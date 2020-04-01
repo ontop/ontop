@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
@@ -39,6 +41,7 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class RedundantSelfJoinTest {
 
+    private final static DatabaseRelationDefinition TABLE_1;
     private final static RelationPredicate TABLE1_PREDICATE;
     private final static RelationPredicate TABLE2_PREDICATE;
     private final static RelationPredicate TABLE3_PREDICATE;
@@ -82,12 +85,12 @@ public class RedundantSelfJoinTest {
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table1"))
+        TABLE_1 = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table1"))
             .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
             .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
             .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
+        TABLE_1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(TABLE_1.getAttribute(1)));
+        TABLE1_PREDICATE = TABLE_1.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
@@ -159,9 +162,9 @@ public class RedundantSelfJoinTest {
 
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
-                SUBSTITUTION_FACTORY.getSubstitution(M, N));
+                SUBSTITUTION_FACTORY.getSubstitution(N, M));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, N, N, O));
+        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, M, O));
         expectedQueryBuilder.addChild(constructionNode1, dataNode3);
 
         optimizeAndCompare(query, expectedQueryBuilder.build());
@@ -669,7 +672,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.out.println("\n Optimized query (should not be produced): \n" +  optimizedQuery);
     }
 
@@ -796,7 +799,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
         System.out.println("\nBefore optimization: \n" +  query);
 
-        JOIN_LIKE_OPTIMIZER.optimize(query);
+        optimize(query);
     }
 
     @Test
@@ -1317,24 +1320,138 @@ public class RedundantSelfJoinTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
-                SUBSTITUTION_FACTORY.getSubstitution(Y, X)
+                SUBSTITUTION_FACTORY.getSubstitution(X, Y)
         );
         expectedQueryBuilder.init(projectionAtom, unionNode);
         expectedQueryBuilder.addChild(unionNode, dataNode3);
         expectedQueryBuilder.addChild(unionNode, constructionNode);
-        expectedQueryBuilder.addChild(constructionNode, dataNode1);
+
+        ExtensionalDataNode newDataNode = IQ_FACTORY.createExtensionalDataNode(
+                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, Y, constant));
+
+        expectedQueryBuilder.addChild(constructionNode, newDataNode);
 
 
         optimizeAndCompare(initialQuery, expectedQueryBuilder.build());
     }
 
-    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) throws EmptyQueryException {
-        System.out.println("Initial query: "+ initialQuery);
-        System.out.println("Expected query: "+ expectedQuery);
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
-        System.out.println("Optimized query: "+ optimizedQuery);
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm1() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                1, M));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                2, N));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, N);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, groundFunctionalTerm,
+                1, M,
+                2, N));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedDataNode);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm2() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, TWO));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, M);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm, TWO)),
+                dataNode2);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testSelfJoinEliminationFunctionalGroundTerm3() throws EmptyQueryException {
+        GroundFunctionalTerm groundFunctionalTerm1 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("fct", 1),
+                ONE);
+
+        GroundFunctionalTerm groundFunctionalTerm2 =  (GroundFunctionalTerm) TERM_FACTORY.getImmutableFunctionalTerm(
+                FUNCTION_SYMBOL_FACTORY.getDBFunctionSymbolFactory()
+                        .getRegularDBFunctionSymbol("g", 0));
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm1));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE_1, ImmutableMap.of(
+                0, M,
+                1, groundFunctionalTerm2));
+
+        NaryIQTree initialTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, M);
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(groundFunctionalTerm2, groundFunctionalTerm1)),
+                dataNode1);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        System.out.println("Initial query: "+ initialIQ);
+        System.out.println("Expected query: "+ expectedIQ);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        System.out.println("Optimized query: "+ optimizedIQ);
+    }
+
+    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) {
+        optimizeAndCompare(IQ_CONVERTER.convert(initialQuery), IQ_CONVERTER.convert(expectedQuery));
+    }
+
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 
     private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1()

@@ -27,7 +27,7 @@ public class TMappingRule {
 	// an OR-connected list of AND-connected atomic filters
 	private final ImmutableList<ImmutableList<ImmutableExpression>> filter;
 
-	public TMappingRule(IQ iq, TermFactory termFactory, AtomFactory atomFactory) {
+	public TMappingRule(IQ iq, TermFactory termFactory, IntermediateQueryFactory iqFactory) {
 		this.projectionAtom = iq.getProjectionAtom();
 		this.headTerms = ((ConstructionNode)iq.getTree().getRootNode()).getSubstitution().apply(projectionAtom.getArguments());
 
@@ -44,17 +44,18 @@ public class TMappingRule {
 
 		VariableGenerator variableGenerator = iq.getVariableGenerator();
 		ImmutableMap<ImmutableTerm, VariableOrGroundTerm> valueMap = dataAtoms.stream()
-				.flatMap(n -> n.getProjectionAtom().getArguments().stream())
+				.flatMap(n -> n.getArgumentMap().values().stream())
 				.filter(t -> !(t instanceof Variable))
 				.distinct()
 				.collect(ImmutableCollectors.toMap(t -> t, t -> variableGenerator.generateNewVariable()));
 
 		this.extensionalNodes = dataAtoms.stream()
-					.map(n -> n.newAtom(atomFactory.getDataAtom(
-							n.getProjectionAtom().getPredicate(),
-							n.getProjectionAtom().getArguments().stream()
-									.map(term -> valueMap.getOrDefault(term, term))
-									.collect(ImmutableCollectors.toList()))))
+					.map(n -> iqFactory.createExtensionalDataNode(
+							n.getRelationDefinition(),
+							n.getArgumentMap().entrySet().stream()
+									.collect(ImmutableCollectors.toMap(
+											Map.Entry::getKey,
+											e -> valueMap.getOrDefault(e.getValue(), e.getValue())))))
 					.collect(ImmutableCollectors.toList());
 
 		ImmutableList<ImmutableExpression> filterAtoms = Stream.concat(

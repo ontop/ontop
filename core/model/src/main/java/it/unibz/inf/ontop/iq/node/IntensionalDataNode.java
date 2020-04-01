@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.iq.node;
 
+import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 /**
  * TODO: explain
@@ -11,7 +13,9 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  *
  * See IntermediateQueryFactory for creating a new instance.
  */
-public interface IntensionalDataNode extends DataNode<AtomPredicate> {
+public interface IntensionalDataNode extends LeafIQTree {
+
+    DataAtom<AtomPredicate> getProjectionAtom();
 
     @Override
     IntensionalDataNode clone();
@@ -19,6 +23,5 @@ public interface IntensionalDataNode extends DataNode<AtomPredicate> {
     @Override
     IntensionalDataNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
 
-    @Override
     IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom);
 }

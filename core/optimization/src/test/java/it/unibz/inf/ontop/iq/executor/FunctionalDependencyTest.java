@@ -174,7 +174,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -212,7 +212,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
@@ -255,7 +255,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -291,7 +291,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -327,7 +327,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -368,7 +368,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -419,7 +419,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -470,7 +470,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -514,7 +514,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -569,7 +569,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
 
@@ -608,7 +608,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -646,7 +646,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     /**
@@ -691,7 +691,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -732,7 +732,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -761,7 +761,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -791,7 +791,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -821,7 +821,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -859,7 +859,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -911,7 +911,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Ignore("TODO: remove the redundant join")
@@ -950,7 +950,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -987,7 +987,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -1024,7 +1024,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -1070,19 +1070,27 @@ public class FunctionalDependencyTest {
 
         expectedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
 
-        optimizeAndCompare(query, expectedBuilder.build(), joinNode);
+        optimizeAndCompare(query, expectedBuilder.build());
     }
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
-                                           InnerJoinNode joinNode)
-            throws EmptyQueryException {
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        System.out.println("Initial query: "+ initialIQ);
+        System.out.println("Expected query: "+ expectedIQ);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        System.out.println("Optimized query: "+ optimizedIQ);
+    }
 
-        System.out.println("\nBefore optimization: \n" +  query);
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) {
+        optimizeAndCompare(IQ_CONVERTER.convert(initialQuery), IQ_CONVERTER.convert(expectedQuery));
+    }
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 }

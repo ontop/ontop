@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -58,24 +59,33 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
-        queryBuilder2.init(projectionAtom1, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, unionNode2);
-        queryBuilder2.addChild(unionNode2, dataNode1);
-        queryBuilder2.addChild(unionNode2, dataNode2);
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+
+        queryBuilder2.init(projectionAtom1, unionNode2);
+        queryBuilder2.addChild(unionNode2, newDataNode1);
+        queryBuilder2.addChild(unionNode2, newDataNode2);
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" +  query2);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
+    }
+
+    private static IntermediateQuery optimize(IntermediateQuery initialQuery) throws EmptyQueryException {
+        IQ initialIQ = IQ_CONVERTER.convert(initialQuery);
+        return IQ_CONVERTER.convert(
+                initialIQ.normalizeForOptimization(),
+                EXECUTOR_REGISTRY);
     }
 
     @Test
@@ -87,7 +97,9 @@ public class ProjectionShrinkingOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode();
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X,Y));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, Y, Z));
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, Y));
+
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, X, Y));
 
@@ -104,12 +116,9 @@ public class ProjectionShrinkingOptimizerTest {
 
         IntermediateQuery query2 = query1.createSnapshot();
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
-        System.out.println("\nExpected: \n" +  query2);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
     }
@@ -138,25 +147,33 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom2 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
 
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         InnerJoinNode innerJoinNode2 = IQ_FACTORY.createInnerJoinNode();
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
-        queryBuilder2.init(projectionAtom2, constructionNode2);
-        queryBuilder2.addChild(constructionNode2, innerJoinNode2);
-        queryBuilder2.addChild(innerJoinNode2, dataNode1);
+        queryBuilder2.init(projectionAtom2, innerJoinNode2);
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+
+        queryBuilder2.addChild(innerJoinNode2, newDataNode1);
         queryBuilder2.addChild(innerJoinNode2, unionNode2);
-        queryBuilder2.addChild(unionNode2, dataNode2);
-        queryBuilder2.addChild(unionNode2, dataNode3);
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+
+        queryBuilder2.addChild(unionNode2, newDataNode2);
+
+        ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+
+        queryBuilder2.addChild(unionNode2, newDataNode3);
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" +  query2);
@@ -190,9 +207,7 @@ public class ProjectionShrinkingOptimizerTest {
         IntermediateQuery query2 = query1.createSnapshot();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -224,8 +239,7 @@ public class ProjectionShrinkingOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -233,12 +247,17 @@ public class ProjectionShrinkingOptimizerTest {
 
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE2_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+        ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE3_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, X));
+
         queryBuilder2.init(projectionAtom1, constructionNode1);
         queryBuilder2.addChild(constructionNode1, innerJoinNode1);
         queryBuilder2.addChild(innerJoinNode1, dataNode1);
         queryBuilder2.addChild(innerJoinNode1, unionNode2);
-        queryBuilder2.addChild(unionNode2, dataNode2);
-        queryBuilder2.addChild(unionNode2, dataNode3);
+        queryBuilder2.addChild(unionNode2, newDataNode2);
+        queryBuilder2.addChild(unionNode2, newDataNode3);
 
 
         IntermediateQuery query2 = queryBuilder2.build();
@@ -270,8 +289,7 @@ public class ProjectionShrinkingOptimizerTest {
         IntermediateQuery query1 = queryBuilder1.build();
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
 
@@ -282,8 +300,14 @@ public class ProjectionShrinkingOptimizerTest {
         queryBuilder2.init(projectionAtom1, constructionNode1);
         queryBuilder2.addChild(constructionNode1, filterNode1);
         queryBuilder2.addChild(filterNode1, unionNode2);
-        queryBuilder2.addChild(unionNode2, dataNode4);
-        queryBuilder2.addChild(unionNode2, dataNode5);
+
+        ExtensionalDataNode newDataNode4 = IQ_FACTORY.createExtensionalDataNode(TABLE4_AR3.getRelationDefinition(),
+                ImmutableMap.of(1, Y, 2, Z));
+        ExtensionalDataNode newDataNode5 = IQ_FACTORY.createExtensionalDataNode(TABLE5_AR3.getRelationDefinition(),
+                ImmutableMap.of(1, Y, 2, Z));
+
+        queryBuilder2.addChild(unionNode2, newDataNode4);
+        queryBuilder2.addChild(unionNode2, newDataNode5);
 
 
         IntermediateQuery query2 = queryBuilder2.build();
@@ -313,8 +337,7 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
@@ -322,46 +345,13 @@ public class ProjectionShrinkingOptimizerTest {
 
         ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X,generateInt(A)));
-        queryBuilder2.init(projectionAtom1, constructionNode1);
-        queryBuilder2.addChild(constructionNode1, constructionNode3);
-        queryBuilder2.addChild(constructionNode3, dataNode1);
+        queryBuilder2.init(projectionAtom1, constructionNode3);
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                TABLE1_AR2.getRelationDefinition(), ImmutableMap.of(0, A));
+        queryBuilder2.addChild(constructionNode3, newDataNode1);
 
         IntermediateQuery query2 = queryBuilder2.build();
-        System.out.println("\nExpected: \n" +  query2);
-
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
-    }
-
-    @Test
-    public void testConstructionNodeAndImplicitJoinCondition1() throws EmptyQueryException {
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
-        DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
-
-        ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
-        InnerJoinNode innerJoinNode1 = IQ_FACTORY.createInnerJoinNode();
-        ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
-                SUBSTITUTION_FACTORY.getSubstitution(X,generateInt(A),Y,generateInt(B)));
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, Y, Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
-
-        queryBuilder1.init(projectionAtom1, constructionNode1);
-        queryBuilder1.addChild(constructionNode1, innerJoinNode1);
-        queryBuilder1.addChild(innerJoinNode1, dataNode1);
-        queryBuilder1.addChild(innerJoinNode1, constructionNode2);
-        queryBuilder1.addChild(constructionNode2, dataNode2);
-
-        IntermediateQuery query1 = queryBuilder1.build();
-
-        System.out.println("\nBefore optimization: \n" +  query1);
-
-        IntermediateQuery query2 = query1.createSnapshot();
-
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
-
-        System.out.println("\nAfter optimization: \n" +  optimizedQuery);
-
         System.out.println("\nExpected: \n" +  query2);
 
         assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, query2));
@@ -390,22 +380,29 @@ public class ProjectionShrinkingOptimizerTest {
 
         System.out.println("\nBefore optimization: \n" +  query1);
 
-        ProjectionShrinkingOptimizer projectionShrinkingOptimizer = new ProjectionShrinkingOptimizer();
-        IntermediateQuery optimizedQuery = projectionShrinkingOptimizer.optimize(query1);
+        IntermediateQuery optimizedQuery = optimize(query1);
 
         System.out.println("\nAfter optimization: \n" +  optimizedQuery);
 
         IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
-        ConstructionNode constructionNode3 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
-                SUBSTITUTION_FACTORY.getSubstitution(X,generateInt(A)));
+        Variable XF0 = TERM_FACTORY.getVariable("Xf0");
+
+        InnerJoinNode newInnerJoinNode1 = IQ_FACTORY.createInnerJoinNode(
+                TERM_FACTORY.getStrictEquality(TERM_FACTORY.getRDFFunctionalTerm(A,
+                        TERM_FACTORY.getRDFTermTypeConstant(TYPE_FACTORY.getXsdIntegerDatatype())), XF0));
+
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, XF0,1, Z));
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
 
 
         queryBuilder2.init(projectionAtom1, constructionNode1);
-        queryBuilder2.addChild(constructionNode1, innerJoinNode1);
-        queryBuilder2.addChild(innerJoinNode1, dataNode1);
-        queryBuilder2.addChild(innerJoinNode1, constructionNode3);
-        queryBuilder2.addChild(constructionNode3, dataNode2);
+        queryBuilder2.addChild(constructionNode1, newInnerJoinNode1);
+        queryBuilder2.addChild(newInnerJoinNode1, newDataNode1);
+        queryBuilder2.addChild(newInnerJoinNode1, newDataNode2);
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" +  query2);

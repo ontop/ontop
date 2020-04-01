@@ -29,6 +29,15 @@ public interface ImmutableSubstitution<T extends ImmutableTerm> extends ProtoSub
      */
     <P extends AtomPredicate> DataAtom<P> applyToDataAtom(DataAtom<P> atom) throws ConversionException;
 
+    /**
+     * Only guaranteed for T extends VariableOrGroundTerm.
+     * <p>
+     * If T == ImmutableTerm, throws a ConversionException if
+     * a substituted term is not a VariableOrGroundTerm.
+     */
+    ImmutableMap<Integer, ? extends VariableOrGroundTerm> applyToArgumentMap(ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap)
+            throws ConversionException;
+
     DistinctVariableOnlyDataAtom applyToDistinctVariableOnlyDataAtom(DistinctVariableOnlyDataAtom projectionAtom)
             throws ConversionException;
 
