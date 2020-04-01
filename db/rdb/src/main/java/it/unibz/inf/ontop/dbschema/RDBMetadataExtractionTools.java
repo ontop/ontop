@@ -87,16 +87,6 @@ import java.util.*;
  * getIdentifierQuoteString returns double quotation marks ("").
  *
  *
- * MySQL
- * -----
- *
- * http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html
- *
- * How table and database names are stored on disk and used in MySQL is affected
- * by the lower_case_table_names system variable, which you can set when starting mysqld.
- *
- * Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases.
- *
  */
 
 public class RDBMetadataExtractionTools {
