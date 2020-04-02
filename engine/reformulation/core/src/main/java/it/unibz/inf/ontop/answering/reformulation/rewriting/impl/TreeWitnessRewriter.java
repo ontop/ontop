@@ -290,9 +290,6 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                 TriplePredicate triplePredicate = (TriplePredicate) atom.getPredicate();
                 ImmutableList<? extends VariableOrGroundTerm> arguments = atom.getArguments();
 
-                // the contains tests are inefficient, but tests fails without them
-                // p.isClass etc. do not work correctly -- throw exceptions because COL_TYPE is null
-
                 Optional<IRI> classIRI = triplePredicate.getClassIRI(arguments);
                 if (classIRI.isPresent()) {
                     IRI iri = classIRI.get();
@@ -301,25 +298,25 @@ public class TreeWitnessRewriter extends DummyRewriter implements ExistentialQue
                         OClass equivalent = (OClass) tbox.classesDAG().getCanonicalForm(c);
                         return dataNode.newAtom(getAtom(arguments.get(0), equivalent));
                     }
-                    return  dataNode;
                 }
-
-                Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
-                if (propertyIRI.isPresent()) {
-                    IRI iri = propertyIRI.get();
-                    if (tbox.objectProperties().contains(iri)) {
-                        ObjectPropertyExpression ope = tbox.objectProperties().get(iri);
-                        ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
-                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                else {
+                    Optional<IRI> propertyIRI = triplePredicate.getPropertyIRI(arguments);
+                    if (propertyIRI.isPresent()) {
+                        IRI iri = propertyIRI.get();
+                        if (tbox.objectProperties().contains(iri)) {
+                            ObjectPropertyExpression ope = tbox.objectProperties().get(iri);
+                            ObjectPropertyExpression equivalent = tbox.objectPropertiesDAG().getCanonicalForm(ope);
+                            return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                        }
+                        else if (tbox.dataProperties().contains(iri)) {
+                            DataPropertyExpression dpe = tbox.dataProperties().get(iri);
+                            DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
+                            return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
+                        }
                     }
-                    else if (tbox.dataProperties().contains(iri)) {
-                        DataPropertyExpression dpe = tbox.dataProperties().get(iri);
-                        DataPropertyExpression equivalent = tbox.dataPropertiesDAG().getCanonicalForm(dpe);
-                        return dataNode.newAtom(getAtom(arguments.get(0), equivalent, arguments.get(2)));
-                    }
-                    return  dataNode;
                 }
-                throw new MinorOntopInternalBugException("Unknown type of triple atoms");
+                return  dataNode;
+                //throw new MinorOntopInternalBugException("Unknown type of triple atoms");
             }
         });
     }
