@@ -6,8 +6,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
@@ -21,17 +19,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Scanner;
 
-import static org.junit.Assert.assertEquals;
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertFalse;
 
 public class LeftJoinMultipleMatchingTest {
@@ -44,25 +35,14 @@ public class LeftJoinMultipleMatchingTest {
     private OWLConnection conn;
     private OntopOWLReasoner reasoner;
 
-    String URL = "jdbc:h2:mem:raisjunit";
-    String USER = "sa";
-    String PASSWORD = "";
+    static final String URL = "jdbc:h2:mem:raisjunit";
+    static final String USER = "sa";
+    static final String PASSWORD = "";
 
     @Before
     public void setUp() throws Exception {
-
-        sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
-        java.sql.Statement s = sqlConnection.createStatement();
-
-        try {
-            String text = new Scanner( new File("src/test/resources/ljoptional/rais-create-h2.sql") ).useDelimiter("\\A").next();
-            s.execute(text);
-
-        } catch(SQLException sqle) {
-            System.out.println("Exception in creating db from script "+sqle);
-        }
-
-        s.close();
+        sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
+        executeFromFile(sqlConnection, "src/test/resources/ljoptional/rais-create-h2.sql");
     }
 
 
@@ -71,36 +51,11 @@ public class LeftJoinMultipleMatchingTest {
         conn.close();
         reasoner.dispose();
         if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
-                dropTables();
-            } catch (SQLException sqle) {
-                System.out.println("Table not found, not dropping");
-            } finally {
-                s.close();
+                executeFromFile(sqlConnection, "src/test/resources/ljoptional/rais-drop-h2.sql");
                 sqlConnection.close();
-            }
         }
     }
 
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = sqlConnection.createStatement();
-
-        FileReader reader = new FileReader("src/test/resources/ljoptional/rais-drop-h2.sql");
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        sqlConnection.commit();
-    }
 
 
     private void runTests(String obdaFile) throws Exception {

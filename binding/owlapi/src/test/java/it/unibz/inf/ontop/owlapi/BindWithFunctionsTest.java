@@ -15,9 +15,6 @@ import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.sql.*;
 import java.text.DateFormat;
@@ -27,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -44,55 +42,18 @@ public class BindWithFunctionsTest {
 
     @Before
 	public void setUp() throws Exception {
-	
     	String url = "jdbc:h2:mem:questjunitdb";
 		String username = "sa";
 		String password = "";
 
 		conn = DriverManager.getConnection(url, username, password);
-		
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		
-		st.executeUpdate(bf.toString()); 
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/bind/sparqlBindWithFns-create-h2.sql");
 	}
 
 	@After
 	public void tearDown() throws Exception {
-
-		  dropTables();
-			conn.close();
-		
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/bind/sparqlBindWithFns-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/bind/sparqlBindWithFns-drop-h2.sql");
+        conn.close();
 	}
 
 

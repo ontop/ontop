@@ -58,28 +58,6 @@ public class ReverseURIH2Test {
 
 	private static Connection sqlConnection;
 
-	private static void runUpdateOnSQLDB(String sqlscript, Connection sqlConnection)
-			throws Exception {
-
-		Statement st = sqlConnection.createStatement();
-
-		FileReader reader = new FileReader(sqlscript);
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			bf.append("\n");
-			line = in.readLine();
-		}
-		in.close();
-
-		System.out.println(bf.toString());
-		st.executeUpdate(bf.toString());
-		if (!sqlConnection.getAutoCommit())
-			sqlConnection.commit();
-	}
-	
 	@Before
 	public void init() {
 		

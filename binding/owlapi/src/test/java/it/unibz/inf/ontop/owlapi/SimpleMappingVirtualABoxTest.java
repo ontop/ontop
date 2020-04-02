@@ -28,17 +28,12 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import junit.framework.TestCase;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -52,8 +47,6 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
 	final String owlfile = "src/test/resources/test/simplemapping.owl";
 	final String obdafile = "src/test/resources/test/simplemapping.obda";
 
@@ -63,49 +56,14 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/simplemapping-create-h2.sql");
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-		dropTables();
+		executeFromFile(conn, "src/test/resources/test/simplemapping-drop-h2.sql");
 		conn.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/simplemapping-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
 	}
 
 	private void runTests(Properties p) throws Exception {
@@ -150,16 +108,12 @@ public class SimpleMappingVirtualABoxTest extends TestCase {
 			assertEquals("<http://example.org/uri1>", ToStringRenderer.getInstance().getRendering(ind1));
 			assertEquals("<http://example.org/uri1>", ToStringRenderer.getInstance().getRendering(ind2));
 			assertEquals("\"value1\"^^xsd:string", ToStringRenderer.getInstance().getRendering(val));
-			
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
+		}
+		finally {
 			try {
 				st.close();
-			} catch (Exception e) {
-				throw e;
-			} finally {
+			}
+			finally {
 				conn.close();
 				reasoner.dispose();
 			}

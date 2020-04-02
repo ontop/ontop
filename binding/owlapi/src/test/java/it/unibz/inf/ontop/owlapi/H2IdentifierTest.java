@@ -61,18 +61,11 @@ public class H2IdentifierTest {
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
-		java.sql.Statement s = sqlConnection.createStatement();
 
-		try {
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
 			String text = new Scanner( new File("src/test/resources/identifiers/create-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
-			//Server.startWebServer(sqlConnection);
-
-		} catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
 		}
-
-		s.close();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -88,33 +81,17 @@ public class H2IdentifierTest {
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-
-
-
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private void dropTables() throws Exception {
-
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -176,23 +153,19 @@ public class H2IdentifierTest {
 	}
 
 	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
-		OWLStatement st = conn.createStatement();
-		String retval;
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
-			retval = ind1.toString();
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
+			String retval = ind1.toString();
+			return retval;
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
-		return retval;
 	}
 
 	@Test

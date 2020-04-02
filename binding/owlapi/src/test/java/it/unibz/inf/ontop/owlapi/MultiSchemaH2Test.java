@@ -70,9 +70,8 @@ public class MultiSchemaH2Test  {
 		try {
 			String text = new Scanner( new File("src/test/resources/multischema/stockexchange-h2Schema.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
-			//Server.startWebServer(sqlConnection);
-
-		} catch(SQLException sqle) {
+		}
+		catch(SQLException sqle) {
 			System.out.println("Exception in creating db from script");
 		}
 

@@ -21,10 +21,8 @@ import static junit.framework.TestCase.assertTrue;
 
 public class H2ASKTest {
 
-	 static final String owlFile =
-	 "src/test/resources/stockexchange/stockexchange.owl";
-	 static final String obdaFile =
-	 "src/test/resources/stockexchange/stockexchange-h2.obda";
+	 static final String owlFile = "src/test/resources/stockexchange/stockexchange.owl";
+	 static final String obdaFile = "src/test/resources/stockexchange/stockexchange-h2.obda";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
@@ -37,18 +35,11 @@ public class H2ASKTest {
 		String user = "fish";
 		String password = "fish";
 		sqlConnection = DriverManager.getConnection(url, user, password);
-		java.sql.Statement s = sqlConnection.createStatement();
 
-		try {
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
 			String text = new Scanner( new File("src/test/resources/stockexchange/stockexchange-create-h2.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
-			//Server.startWebServer(sqlConnection);
-
-		} catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script "+sqle.getMessage());
 		}
-
-		s.close();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -66,23 +57,10 @@ public class H2ASKTest {
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-
-
-
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private void dropTables() throws Exception {
-
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {

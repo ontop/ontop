@@ -20,17 +20,14 @@ import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertTrue;
 
 public class CanonicalIRIUniversityTest {
-
 
     final String owlFile = "src/test/resources/canonicalIRI/university/univ-ontology.ttl";
     final String obdaFile = "src/test/resources/canonicalIRI/university/univ-ontology.obda";
@@ -48,10 +45,7 @@ public class CanonicalIRIUniversityTest {
     @Before
     public void setUp() throws Exception{
         sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-        java.sql.Statement s = sqlConnection.createStatement();
-        String text = new Scanner( new File("src/test/resources/canonicalIRI/university/dataset_dump.sql") ).useDelimiter("\\A").next();
-        s.execute(text);
-        s.close();
+        executeFromFile(sqlConnection, "src/test/resources/canonicalIRI/university/dataset_dump.sql");
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
@@ -70,8 +64,6 @@ public class CanonicalIRIUniversityTest {
 
         reasoner = factory.createReasoner(config);
         conn = reasoner.getConnection();
-
-
     }
 
     @After
@@ -79,13 +71,10 @@ public class CanonicalIRIUniversityTest {
         conn.close();
         reasoner.dispose();
         if (!sqlConnection.isClosed()) {
-            java.sql.Statement s = sqlConnection.createStatement();
-            try {
+            try (java.sql.Statement s = sqlConnection.createStatement()) {
                 s.execute("DROP ALL OBJECTS DELETE FILES");
-            } catch (SQLException sqle) {
-                System.out.println("Table not found, not dropping");
-            } finally {
-                s.close();
+            }
+            finally {
                 sqlConnection.close();
             }
         }
@@ -146,10 +135,6 @@ public class CanonicalIRIUniversityTest {
 
                 }
             }
-
-
-
-
         }
     }
 
@@ -210,7 +195,6 @@ public class CanonicalIRIUniversityTest {
                     "}\n";
 
         runSelectQuery(query);
-
     }
 
     @Test
@@ -225,8 +209,6 @@ public class CanonicalIRIUniversityTest {
                         "}";
 
         runSelectQuery(query);
-
-
     }
 
     @Test
@@ -241,8 +223,6 @@ public class CanonicalIRIUniversityTest {
                         "}";
 
         runSelectQuery(query);
-
-
     }
 
 }
