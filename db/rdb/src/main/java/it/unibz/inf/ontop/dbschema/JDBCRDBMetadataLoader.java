@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -11,21 +12,26 @@ import java.util.Map;
 public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
 
     protected final Connection connection;
-    protected final DatabaseMetaData metadata;
     protected final QuotedIDFactory idFactory;
     protected final DBTypeFactory dbTypeFactory;
+    protected final DatabaseMetaData metadata;
 
-    JDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+    JDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         this.connection = connection;
-        this.metadata = connection.getMetaData();
         this.idFactory = idFactory;
         this.dbTypeFactory = dbTypeFactory;
+        try {
+            this.metadata = connection.getMetaData();
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
     @Override
-    public ImmutableList<RelationID> getRelationIDs() throws SQLException {
-        ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
+    public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
         try (ResultSet rs = metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
+            ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
             while (rs.next()) {
                 // String catalog = rs.getString("TABLE_CAT"); // not used
                 String schema = rs.getString("TABLE_SCHEM");
@@ -35,20 +41,23 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
                     builder.add(id);
                 }
             }
+            return builder.build();
         }
-        return builder.build();
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
     @Override
     public RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID id) throws SQLException {
-
-        ImmutableList.Builder<RelationDefinition.AttributeListBuilder> relations = ImmutableList.builder();
-        RelationDefinition.AttributeListBuilder currentRelation = null;
+    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID id) throws MetadataExtractionException {
 
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
+            ImmutableList.Builder<RelationDefinition.AttributeListBuilder> relations = ImmutableList.builder();
+            RelationDefinition.AttributeListBuilder currentRelation = null;
+
             while (rs.next()) {
                 RelationID relationId = getRelationID(rs);
                 if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
@@ -66,19 +75,27 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
 
                 currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
             }
+            return relations.build();
         }
-        return relations.build();
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws SQLException {
+    public void insertIntegrityConstraints(DBMetadata md) throws MetadataExtractionException {
+        // TODO:
+    }
+
+    @Override
+    public void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException {
         DatabaseRelationDefinition r = (DatabaseRelationDefinition)relation;
         insertPrimaryKey(r);
         insertUniqueAttributes(r);
         insertForeignKeys(r, dbMetadata);
     }
 
-    private void insertPrimaryKey(DatabaseRelationDefinition relation) throws SQLException {
+    private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
         RelationID id = relation.getID();
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
@@ -104,9 +121,12 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
                 relation.addUniqueConstraint(builder.build());
             }
         }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
-    private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws SQLException {
+    private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException {
         RelationID id = relation.getID();
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
@@ -159,9 +179,12 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
             if (builder != null)
                 relation.addUniqueConstraint(builder.build());
         }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
-    private void insertForeignKeys(DatabaseRelationDefinition relation, DBMetadata dbMetadata) throws SQLException {
+    private void insertForeignKeys(DatabaseRelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException {
 
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
@@ -195,6 +218,9 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
             }
             if (builder != null)
                 relation.addForeignKeyConstraint(builder.build(currentName));
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
         }
     }
 

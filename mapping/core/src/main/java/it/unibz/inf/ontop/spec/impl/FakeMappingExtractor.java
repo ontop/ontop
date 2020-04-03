@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.spec.impl;
 
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
-import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
@@ -21,7 +19,7 @@ public class FakeMappingExtractor implements MappingExtractor {
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry) throws MappingException, DBMetadataExtractionException {
+                                        @Nonnull ExecutorRegistry executorRegistry) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
@@ -30,8 +28,7 @@ public class FakeMappingExtractor implements MappingExtractor {
                                         @Nonnull OBDASpecInput specInput,
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+                                        @Nonnull ExecutorRegistry executorRegistry) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 }

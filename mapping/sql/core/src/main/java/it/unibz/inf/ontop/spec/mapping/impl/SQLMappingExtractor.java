@@ -86,7 +86,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException,
+            throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
@@ -143,7 +143,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      */
     private BasicDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<BasicDBMetadata> optionalDBMetadata,
                                           OBDASpecInput specInput)
-            throws DBMetadataExtractionException {
+            throws MetadataExtractionException {
 
         boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
 
@@ -163,7 +163,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
          * Problem while creating the connection
          */
         catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
+            throw new MetadataExtractionException(e.getMessage());
         }
     }
 

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
@@ -11,12 +12,15 @@ public class MySQLDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final String defaultDatabase;
 
-    MySQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+    MySQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
 
         try (Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
             defaultDatabase = (rs.next()) ? rs.getString(1) : null;
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
         }
     }
 

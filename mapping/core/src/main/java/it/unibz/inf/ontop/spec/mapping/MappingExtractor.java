@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -28,12 +28,12 @@ public interface MappingExtractor {
                                  @Nonnull Optional<DBMetadata> dbMetadata,
                                  @Nonnull Optional<Ontology> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+            throws MappingException, MetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                  @Nonnull OBDASpecInput specInput,
                                  @Nonnull Optional<DBMetadata> dbMetadata,
                                  @Nonnull Optional<Ontology> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+            throws MappingException, MetadataExtractionException;
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.dbschema.tools.DBMetadataExtractorAndSerializer;
@@ -26,7 +26,7 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     }
 
     @Override
-    public String extractAndSerialize() throws DBMetadataExtractionException {
+    public String extractAndSerialize() throws MetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             BasicDBMetadata metadata = RDBMetadataExtractionTools.loadFullMetadata(localConnection, typeFactory.getDBTypeFactory());
@@ -36,9 +36,9 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
             return jsonString;
 
         } catch (SQLException e) {
-            throw new DBMetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
+            throw new MetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
         } catch (JsonProcessingException e) {
-            throw new DBMetadataExtractionException("problem with JSON processing.\n" + e);
+            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
         }
     }
 }

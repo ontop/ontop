@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -46,7 +47,7 @@ public class BootstrapGenerator {
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
                               OWLModelManager owlManager)
-            throws DuplicateMappingException, SQLException {
+            throws DuplicateMappingException, SQLException, MetadataExtractionException {
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
@@ -58,7 +59,7 @@ public class BootstrapGenerator {
         bootstrapMappingAndOntologyProtege(baseUri);
     }
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, SQLException {
+    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, SQLException, MetadataExtractionException {
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
@@ -79,7 +80,7 @@ public class BootstrapGenerator {
     }
 
     private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI)
-            throws DuplicateMappingException, SQLException {
+            throws DuplicateMappingException, MetadataExtractionException, SQLException {
 
         List<SQLPPTriplesMap> newTriplesMap = new ArrayList<>();
 

@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.docker;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
@@ -61,7 +62,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	}
 	
 	@Override
-	public void setUp() throws IOException, SQLException {
+	public void setUp() throws IOException, SQLException, MetadataExtractionException {
 		InputStream pStream = this.getClass().getResourceAsStream(propertyFile);
 		properties = new Properties();
 		properties.load(pStream);
@@ -77,7 +78,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
 		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
 
-		RDBMetadataExtractionTools.loadMetadataForRelations(METADATA, conn,
+		RDBMetadataExtractionTools.loadMetadatMappingAssistantPanel.javaaForRelations(METADATA, conn,
 				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
 
 		tBook = METADATA.getDatabaseRelation(iBook);

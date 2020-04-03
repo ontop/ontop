@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
-import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class ImplicitDBConstraintsTest {
 	}
 	
 	@Test
-	public void testEmptyUserConstraints() throws DBMetadataExtractionException {
+	public void testEmptyUserConstraints() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "empty_constraints.lst")), idfac);
 
@@ -53,7 +53,7 @@ public class ImplicitDBConstraintsTest {
 	}
 
 	@Test
-	public void testUserPKeys() throws DBMetadataExtractionException {
+	public void testUserPKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "pkeys.lst")), idfac);
 		List<RelationID> refs = uc.getRelationIDs();
@@ -61,7 +61,7 @@ public class ImplicitDBConstraintsTest {
 	}
 
 	@Test
-	public void testAddPrimaryKeys() throws DBMetadataExtractionException {
+	public void testAddPrimaryKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "pkeys.lst")), idfac);
 		uc.insertIntegrityConstraints(this.md);
@@ -72,7 +72,7 @@ public class ImplicitDBConstraintsTest {
 
 
 	@Test
-	public void testGetReferredTables() throws DBMetadataExtractionException {
+	public void testGetReferredTables() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "fkeys.lst")), idfac);
 		List<RelationID> refs = uc.getRelationIDs();
@@ -81,7 +81,7 @@ public class ImplicitDBConstraintsTest {
 	}
 
 	@Test
-	public void testAddForeignKeys() throws DBMetadataExtractionException {
+	public void testAddForeignKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "fkeys.lst")), idfac);
 		uc.insertIntegrityConstraints(this.md);
@@ -94,7 +94,7 @@ public class ImplicitDBConstraintsTest {
 	}
 
 	@Test
-	public void testAddKeys() throws DBMetadataExtractionException {
+	public void testAddKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "keys.lst")), idfac);
 		uc.insertIntegrityConstraints(this.md);

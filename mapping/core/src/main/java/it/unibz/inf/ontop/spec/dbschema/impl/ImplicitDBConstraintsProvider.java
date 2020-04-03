@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

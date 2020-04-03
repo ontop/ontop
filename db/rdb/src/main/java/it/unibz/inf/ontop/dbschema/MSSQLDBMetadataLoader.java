@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
@@ -10,7 +11,7 @@ public class MSSQLDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
 
-    MSSQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+    MSSQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
     }
 

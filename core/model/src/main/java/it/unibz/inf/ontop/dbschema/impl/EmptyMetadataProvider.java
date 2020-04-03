@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.spec.dbschema.impl;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
 
 public class EmptyMetadataProvider implements MetadataProvider {
 

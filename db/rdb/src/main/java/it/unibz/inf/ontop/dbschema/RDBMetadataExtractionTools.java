@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
@@ -159,23 +160,23 @@ public class RDBMetadataExtractionTools {
 		return metadata;	
 	}
 
-	public static void loadFullMetadata0(BasicDBMetadata metadata, Connection conn) throws SQLException {
+	public static void loadFullMetadata0(BasicDBMetadata metadata, Connection conn) throws SQLException, MetadataExtractionException {
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 	}
 
-	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException {
+	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
 		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		return metadata;
 	}
 
-	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException {
+	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
 		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
 		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		return metadata.getDatabaseRelations();
 	}
 
-	public static void loadMetadataForRelations(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
+	public static void loadMetadataForRelations(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
 		loadMetadata(metadata, conn, realTables);
 	}
 
@@ -189,7 +190,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	private static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
+	private static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws MetadataExtractionException {
 
 		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();

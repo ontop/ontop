@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectA
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -825,7 +826,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 				relationList.addElement(relation);
 			}
 		}
-		catch (SQLException e) {
+		catch (SQLException | MetadataExtractionException e) {
 			// NO-OP
 		}
 		cboDataSet.setModel(relationList);

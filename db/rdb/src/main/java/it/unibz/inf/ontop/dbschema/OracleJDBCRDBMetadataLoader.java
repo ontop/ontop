@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
@@ -12,7 +13,7 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
 
     private final String defaultTableOwner;
 
-    OracleJDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+    OracleJDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
         this.defaultTableOwner = getDefaultOwner();
     }
@@ -26,19 +27,22 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
     }
 
     @Override
-    public ImmutableList<RelationID> getRelationIDs() throws SQLException {
+    public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
         // Obtain the relational objects (i.e., tables and views)
-        ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(TABLE_LIST_QUERY)) {
+            ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
                 RelationID id = RelationID.createRelationIdFromDatabaseRecord(idFactory,
                         defaultTableOwner,
                         rs.getString("object_name"));
                 relationIds.add(id);
             }
+            return relationIds.build();
         }
-        return relationIds.build();
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 
     // filter out all irrelevant table and view names
@@ -57,15 +61,16 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
                 "   NOT view_name LIKE 'AQ$_%'";
 
-    private final String getDefaultOwner() throws SQLException {
+    private final String getDefaultOwner() throws MetadataExtractionException {
         // Obtain the table owner (i.e., schema name)
-        String loggedUser = "SYSTEM"; // default value
         try (Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
-            if (resultSet.next()) {
-                loggedUser = resultSet.getString("user");
-            }
+            return (resultSet.next())
+                    ? resultSet.getString("user").toUpperCase()
+                    : "SYSTEM"; // default value
         }
-        return loggedUser.toUpperCase();
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
     }
 }

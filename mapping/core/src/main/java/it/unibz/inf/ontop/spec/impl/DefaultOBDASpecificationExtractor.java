@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.spec.impl;
 
+import it.unibz.inf.ontop.exception.MappingIOException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
@@ -35,11 +37,15 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                specInput, dbMetadata, optionalOntology, executorRegistry);
-
-        return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+        try {
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                    specInput, dbMetadata, optionalOntology, executorRegistry);
+            return mappingTransformer.transform(
+                    mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+        }
+        catch (MetadataExtractionException e) {
+            throw new MappingIOException(e);
+        }
     }
 
     @Override
@@ -47,10 +53,15 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
-        MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
+        try {
+            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+                    ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
 
-        return mappingTransformer.transform(
-                mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+            return mappingTransformer.transform(
+                    mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
+        }
+        catch (MetadataExtractionException e) {
+            throw new MappingIOException(e);
+        }
     }
 }

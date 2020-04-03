@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
@@ -159,7 +160,7 @@ public class DirectMappingEngine {
 
             return new DefaultBootstrappingResults(newPPMapping, ontology);
 		}
-		catch (SQLException | MappingException | OWLOntologyCreationException e) {
+		catch (SQLException | MappingException | OWLOntologyCreationException | MetadataExtractionException e) {
 			throw new MappingBootstrappingException(e);
 		}
 	}
@@ -180,7 +181,7 @@ public class DirectMappingEngine {
 	 *
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
-	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping, String baseIRI) throws MappingException, SQLException {
+	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping, String baseIRI) throws MappingException, SQLException, MetadataExtractionException {
 
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
@@ -200,7 +201,7 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 */
 	private SQLPPMapping bootstrapMappings(SQLPPMapping ppMapping, String baseIRI0)
-			throws SQLException, DuplicateMappingException {
+			throws DuplicateMappingException, SQLException, MetadataExtractionException {
 		if (ppMapping == null) {
 			throw new IllegalArgumentException("Model should not be null");
 		}

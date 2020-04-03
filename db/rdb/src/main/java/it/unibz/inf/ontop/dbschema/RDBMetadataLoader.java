@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.sql.SQLException;
 
-public interface RDBMetadataLoader {
+public interface RDBMetadataLoader extends MetadataProvider {
 
-    ImmutableList<RelationID> getRelationIDs() throws SQLException;
+    ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException;
 
     RelationID getRelationCanonicalID(RelationID id);
 
@@ -16,7 +17,7 @@ public interface RDBMetadataLoader {
      * @param relationID
      * @return
      */
-    ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws SQLException;
+    ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws MetadataExtractionException;
 
-    void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws SQLException;
+    void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException;
 }

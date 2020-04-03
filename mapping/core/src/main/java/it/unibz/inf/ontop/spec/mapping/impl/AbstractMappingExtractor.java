@@ -36,7 +36,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+            throws MappingException, MetadataExtractionException {
 
         T1 ppMapping = extractPPMapping(specInput);
 
@@ -67,7 +67,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
                                         @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException {
+            throws MappingException, MetadataExtractionException {
 
         return convertPPMapping(castPPMapping(ppMapping), castDBMetadata(dbMetadata), specInput, ontology,
                 executorRegistry);
@@ -84,7 +84,7 @@ public abstract class AbstractMappingExtractor<T1 extends PreProcessedMapping, T
         }
     }
 
-    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
+    protected abstract MappingAndDBMetadata convertPPMapping(T1 ppMapping, Optional<T2> dbMetadata, OBDASpecInput specInput, Optional<Ontology> ontology, ExecutorRegistry executorRegistry) throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException, InvalidMappingSourceQueriesException, NullVariableInMappingException, UnknownDatatypeException;
 
     protected abstract Optional<T2> castDBMetadata(Optional<DBMetadata> dbMetadata);
 

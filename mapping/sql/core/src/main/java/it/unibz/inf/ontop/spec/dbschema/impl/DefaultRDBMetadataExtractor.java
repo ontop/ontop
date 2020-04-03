@@ -4,12 +4,12 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
-import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -51,20 +51,20 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
     @Override
     public BasicDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
-            throws DBMetadataExtractionException {
+            throws MetadataExtractionException {
         try {
             BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
+            throw new MetadataExtractionException(e.getMessage());
         }
     }
 
     @Override
     public BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
                                DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
-            throws DBMetadataExtractionException {
+            throws MetadataExtractionException {
 
         if (!(partiallyDefinedMetadata instanceof BasicDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
@@ -96,7 +96,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             return metadata;
         }
         catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
+            throw new MetadataExtractionException(e.getMessage());
         }
     }
 }
