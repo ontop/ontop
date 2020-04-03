@@ -5,9 +5,9 @@ import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.spec.dbschema.impl.BasicPreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,8 +25,8 @@ public class ImplicitDBConstraintsTest {
 	private BasicDBMetadata md;
 	private QuotedIDFactory idfac;
 
-	private static final PreProcessedImplicitRelationalDBConstraintExtractor CONSTRAINT_EXTRACTOR = Guice.createInjector()
-			.getInstance(BasicPreProcessedImplicitRelationalDBConstraintExtractor.class);
+	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
+			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
 	
 	@Before
 	public void setupMetadata(){

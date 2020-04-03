@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Optional;
 
-public interface PreProcessedImplicitRelationalDBConstraintExtractor {
+public interface ImplicitDBConstraintsProviderFactory {
 
     MetadataProvider extract(Optional<File> constraintFile, QuotedIDFactory idFactory)
             throws DBMetadataExtractionException;

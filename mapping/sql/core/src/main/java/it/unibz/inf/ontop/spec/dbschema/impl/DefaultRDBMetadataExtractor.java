@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
 
 import javax.annotation.Nullable;
@@ -37,12 +37,12 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
      *
      * Can be useful for eliminating self-joins
      */
-    private final PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor;
+    private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
     private final TypeFactory typeFactory;
 
     @Inject
     private DefaultRDBMetadataExtractor(OntopMappingSQLSettings settings,
-                                        PreProcessedImplicitRelationalDBConstraintExtractor implicitDBConstraintExtractor,
+                                        ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                         TypeFactory typeFactory) {
         this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;

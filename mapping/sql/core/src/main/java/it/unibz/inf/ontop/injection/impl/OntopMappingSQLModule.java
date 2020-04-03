@@ -4,7 +4,7 @@ package it.unibz.inf.ontop.injection.impl;
 import it.unibz.inf.ontop.injection.OntopMappingSQLConfiguration;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -27,7 +27,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromSettings(SQLPPMappingFactory.class);
         bindFromSettings(SQLMappingParser.class);
         bindFromSettings(SQLPPMappingConverter.class);
-        bindFromSettings(PreProcessedImplicitRelationalDBConstraintExtractor.class);
+        bindFromSettings(ImplicitDBConstraintsProviderFactory.class);
         bindFromSettings(MappingExtractor.class);
         bindFromSettings(RDBMetadataExtractor.class);
 

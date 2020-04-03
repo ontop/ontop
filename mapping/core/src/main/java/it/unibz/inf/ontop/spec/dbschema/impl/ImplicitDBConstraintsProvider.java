@@ -31,18 +31,18 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
     private final QuotedIDFactory idFactory;
 
     // List of two-element arrays: table id and a comma-separated list of columns
-    private final ImmutableList<String[]> ucs;
+    private final ImmutableList<String[]> uniqueConstraints;
 
     // List of four-element arrays: foreign key table id, comma-separated foreign key columns,
     //                              primary key (referred) table id, comma-separated primary key columns
-    private final ImmutableList<String[]> fks;
+    private final ImmutableList<String[]> foreignKeys;
 
     ImplicitDBConstraintsProvider(QuotedIDFactory idFactory,
                                   ImmutableList<String[]> uniqueConstraints,
                                   ImmutableList<String[]> foreignKeys) {
         this.idFactory = idFactory;
-        this.ucs = uniqueConstraints;
-        this.fks = foreignKeys;
+        this.uniqueConstraints = uniqueConstraints;
+        this.foreignKeys = foreignKeys;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
     public ImmutableList<RelationID> getRelationIDs() {
         Set<RelationID> referredTables = new HashSet<>();
 
-        for (String[] fk : fks) {
+        for (String[] fk : foreignKeys) {
             RelationID pkTableId = getRelationIDFromString(fk[2], idFactory);
             referredTables.add(pkTableId);
         }
@@ -74,88 +74,71 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      */
     @Override
     public void insertIntegrityConstraints(DBMetadata md) {
-        {
-            int counter = 0; // id of the generated constraint
+        int counter = 0; // id of the generated constraint
 
-            for (String[] uc : ucs) {
-                RelationID tableId = getRelationIDFromString(uc[0], idFactory);
-                DatabaseRelationDefinition td = md.getDatabaseRelation(tableId);
-
-                if (td == null) {
-                    log.warn("Error in user-supplied unique constraint: table " + tableId + " not found.");
-                    continue;
-                }
-                UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(td, td.getID().getTableName() + "_USER_UC_" + counter);
-                String[] attrs = uc[1].split(",");
-                for (String attr : attrs) {
-                    QuotedID attrId = idFactory.createAttributeID(attr);
-                    Attribute attribute = td.getAttribute(attrId);
-                    if (attribute == null) {
-                        log.warn("Error in user-supplied unique constraint: column " + attrId + " not found in table " + tableId + ".");
-                        builder = null;
-                        break;
-                    }
-                    builder.addDeterminant(attribute);
-                }
-                if (builder != null) // if all attributes have been identified
-                    td.addUniqueConstraint(builder.build());
-                counter++;
+        for (String[] constraint : uniqueConstraints) {
+            ConstraintDescriptor uc = getConstraintDescriptor(md, constraint[0],  constraint[1].split(","), idFactory);
+            if (constraint != null) { // if all attributes have been identified
+                UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
+                for (Attribute a : uc.attributes)
+                    builder.addDeterminant(a);
+                uc.table.addUniqueConstraint(builder.build());
             }
+            counter++;
         }
-        {
-            int counter = 0; // id of the generated constraint
-            for (String[] fk : fks) {
-                RelationID pkTableId = getRelationIDFromString(fk[2], idFactory);
-                DatabaseRelationDefinition pkTable = md.getDatabaseRelation(pkTableId);
-                if (pkTable == null) {
-                    log.warn("Error in user-supplied foreign key: table " + pkTableId + " not found.");
-                    continue;
-                }
-                RelationID fkTableId = getRelationIDFromString(fk[0], idFactory);
-                DatabaseRelationDefinition fkTable = md.getDatabaseRelation(fkTableId);
-                if (fkTable == null) {
-                    log.warn("Error in user-supplied foreign key: table " + fkTableId + " not found.");
-                    continue;
-                }
-                String[] pkAttrs = fk[3].split(",");
-                String[] fkAttrs = fk[1].split(",");
-                if (fkAttrs.length != pkAttrs.length) {
-                    log.warn("Error in user-supplied foreign key: foreign key refers to different number of columns " + fk + ".");
-                    continue;
-                }
+        for (String[] constraint : foreignKeys) {
+            String[] pkAttrs = constraint[3].split(",");
+            String[] fkAttrs = constraint[1].split(",");
+            if (fkAttrs.length != pkAttrs.length) {
+                log.warn("Error in user-supplied foreign key: foreign key refers to different number of columns " + constraint + ".");
+                continue;
+            }
 
-                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fkTable, pkTable);
+            ConstraintDescriptor pk = getConstraintDescriptor(md, constraint[2], pkAttrs, idFactory);
+            ConstraintDescriptor fk = getConstraintDescriptor(md, constraint[0], fkAttrs, idFactory);
+            if (pk != null && fk != null) { // if all attributes have been identified
+                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.table, pk.table);
                 for (int i = 0; i < pkAttrs.length; i++) {
-                    QuotedID pkAttrId = idFactory.createAttributeID(pkAttrs[i]);
-                    Attribute pkAttr = pkTable.getAttribute(pkAttrId);
-                    if (pkAttr == null) {
-                        log.warn("Error in user-supplied foreign key: column " + pkAttrId + " not found in in table " + pkTable + ".");
-                        builder = null;
-                        break;
-                    }
-                    QuotedID fkAttrId = idFactory.createAttributeID(fkAttrs[i]);
-                    Attribute fkAttr = fkTable.getAttribute(fkAttrId);
-                    if (fkAttr == null) {
-                        log.warn("Error in user-supplied foreign key: column " + fkAttrId + " not found in table " + fkTable + ".");
-                        builder = null;
-                        break;
-                    }
-
-                    builder.add(fkAttr, pkAttr);
+                    builder.add(fk.attributes[i], pk.attributes[i]);
                 }
-                if (builder != null) // if all attributes have been identified
-                    fkTable.addForeignKeyConstraint(
-                            builder.build(fkTable.getID().getTableName() + "_USER_FK_" + pkTable.getID().getTableName() + "_" + counter));
+                fk.table.addForeignKeyConstraint(
+                        builder.build(fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableName() + "_" + counter));
                 counter++;
             }
         }
     }
 
-    private static RelationID getRelationIDFromString(String name, QuotedIDFactory idfac) {
-        String[] names = name.split("\\.");
-        if (names.length == 1)
-            return idfac.createRelationID(null, name);
-        else
-            return idfac.createRelationID(names[0], names[1]);
+    private static final class ConstraintDescriptor {
+        DatabaseRelationDefinition table;
+        Attribute[] attributes;
+    }
+
+    private static ConstraintDescriptor getConstraintDescriptor(DBMetadata md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
+        ConstraintDescriptor result = new ConstraintDescriptor();
+
+        RelationID tableId = getRelationIDFromString(tableName, idFactory);
+        result.table = md.getDatabaseRelation(tableId);
+        if (result.table == null) {
+            log.warn("Error in user-supplied constraint: table " + tableId + " not found.");
+            return null;
+        }
+
+        result.attributes = new Attribute[attributeNames.length];
+        for (int i = 0; i < attributeNames.length; i++) {
+            QuotedID attrId = idFactory.createAttributeID(attributeNames[i]);
+            result.attributes[i] = result.table.getAttribute(attrId);
+            if (result.attributes[i] == null) {
+                log.warn("Error in user-supplied constraint: column " + attrId + " not found in table " + result.table.getID() + ".");
+                return null;
+            }
+        }
+        return result;
+    }
+
+    private static RelationID getRelationIDFromString(String tableName, QuotedIDFactory idFactory) {
+        String[] names = tableName.split("\\.");
+        return (names.length == 1)
+                ? idFactory.createRelationID(null, tableName)
+                : idFactory.createRelationID(names[0], names[1]);
     }
 }
