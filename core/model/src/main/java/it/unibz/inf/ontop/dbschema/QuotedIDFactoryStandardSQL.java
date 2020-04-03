@@ -33,14 +33,13 @@ package it.unibz.inf.ontop.dbschema;
 
 public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 
-	private final String quotationString; 
+	public static final String QUOTATION_STRING = "\"";
 	
 	/**
 	 * used only in DBMetadataExtractor
 	 */
 	
-	QuotedIDFactoryStandardSQL(String quotationString) {
-		this.quotationString = quotationString;
+	QuotedIDFactoryStandardSQL() {
 	}
 
 	@Override
@@ -57,21 +56,21 @@ public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
-		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+		if (s.startsWith("\"") && s.endsWith(QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
 		return new QuotedID(s.toUpperCase(), QuotedID.NO_QUOTATION);
 	}
 	
 	@Override
 	public String getIDQuotationString() {
-		return quotationString;
+		return QUOTATION_STRING;
 	}
 	
 }

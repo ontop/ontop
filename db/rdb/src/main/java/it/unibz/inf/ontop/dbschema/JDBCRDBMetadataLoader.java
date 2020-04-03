@@ -40,9 +40,7 @@ public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
     }
 
     @Override
-    public ImmutableList<RelationID> getRelationIDs(ImmutableList<RelationID> tables) {
-        return tables;
-    }
+    public RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
     public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID id) throws SQLException {

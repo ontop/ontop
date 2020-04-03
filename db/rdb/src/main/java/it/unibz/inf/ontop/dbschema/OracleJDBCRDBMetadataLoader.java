@@ -18,20 +18,11 @@ public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
     }
 
     @Override
-    public ImmutableList<RelationID> getRelationIDs(ImmutableList<RelationID> tables) {
-        ImmutableList.Builder<RelationID> builder = ImmutableList.builder();
-        for (RelationID table : tables) {
-            // DUAL is a special Oracle table
-            if (table.hasSchema() || table.getTableName().equals("DUAL"))
-                builder.add(table);
-            else {
-                RelationID qualifiedTableId = idFactory.createRelationID(
-                        defaultTableOwner,
-                        table.getTableNameSQLRendering());
-                builder.add(qualifiedTableId);
-            }
-        }
-        return builder.build();
+    public RelationID getRelationCanonicalID(RelationID id) {
+        // DUAL is a special Oracle table
+        return (id.hasSchema() || id.getTableName().equals("DUAL"))
+            ? id
+            : idFactory.createRelationID(defaultTableOwner, id.getTableNameSQLRendering());
     }
 
     @Override

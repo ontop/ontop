@@ -13,6 +13,6 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
     private DummyBasicDBMetadata(TypeFactory typeFactory) {
 
         super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL("\""), typeFactory.getDBTypeFactory());
+                new QuotedIDFactoryStandardSQL(), typeFactory.getDBTypeFactory());
     }
 }

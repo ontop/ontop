@@ -29,13 +29,20 @@ package it.unibz.inf.ontop.dbschema;
  *    - quoted identifiers are preserved
  *
  *
- * http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html
+ * https://dev.mysql.com/doc/refman/8.0/en/identifier-case-sensitivity.html
  *
  * How table and database names are stored on disk and used in MySQL is affected
  * by the lower_case_table_names system variable, which you can set when starting mysqld.
  *
  * Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases.
  *
+ * https://dev.mysql.com/doc/refman/8.0/en/identifiers.html
+ *
+ * The identifier quote character is the backtick (`):
+ * If the ANSI_QUOTES SQL mode is enabled, it is also permissible to quote identifiers
+ * within double quotation marks. The ANSI_QUOTES mode causes the server to interpret
+ * double-quoted strings as identifiers. Consequently, when this mode is enabled,
+ * string literals must be enclosed within single quotation marks.
  *
  * @author Roman Kontchakov
  *
@@ -43,15 +50,10 @@ package it.unibz.inf.ontop.dbschema;
 
 public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 
-	private final String quotationString;
+	private static final String QUOTATION_STRING = "`";
 	private final boolean caseSensitiveTableNames;
 	
-	/**
-	 * used only in DBMetadataExtractor
-	 */
-	
-	QuotedIDFactoryMySQL(boolean caseSensitiveTableNames, String quotationString) {
-		this.quotationString = quotationString;
+	QuotedIDFactoryMySQL(boolean caseSensitiveTableNames) {
 		this.caseSensitiveTableNames = caseSensitiveTableNames;
 	}
 
@@ -59,15 +61,12 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 	public QuotedID createAttributeID(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
-		
-		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, false);
-		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, false);
-		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, false);
-		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, false);
+
+		if (s.startsWith("`") && s.endsWith(QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
+
+		if (s.startsWith("\"") && s.endsWith(QuotedIDFactoryStandardSQL.QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION, false);
 	}
@@ -77,24 +76,21 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 		return new RelationID(createFromString(schema), createFromString(table));			
 	}
 
-	public QuotedID createFromString(String s) {
+	private QuotedID createFromString(String s) {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
-		
-		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
-		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
-		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
-		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString, caseSensitiveTableNames);
+
+		if (s.startsWith("`") && s.endsWith(QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, caseSensitiveTableNames);
+
+		if (s.startsWith("\"") && s.endsWith(QuotedIDFactoryStandardSQL.QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, caseSensitiveTableNames);
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION, caseSensitiveTableNames);
 	}
 	
 	@Override
 	public String getIDQuotationString() {
-		return quotationString;
+		return QUOTATION_STRING;
 	}	
 }

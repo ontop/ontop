@@ -9,22 +9,29 @@ import java.sql.Statement;
 
 public class MySQLDBMetadataLoader extends JDBCRDBMetadataLoader {
 
-    private final String catalog;
+    private final String defaultDatabase;
 
     MySQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
         super(connection, idFactory, dbTypeFactory);
 
         try (Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
-            catalog = (rs.next()) ? rs.getString(1) : null;
+            defaultDatabase = (rs.next()) ? rs.getString(1) : null;
         }
+    }
+
+    @Override
+    public RelationID getRelationCanonicalID(RelationID id) {
+        return (id.hasSchema())
+                ? id
+                : idFactory.createRelationID(defaultDatabase, id.getTableNameSQLRendering());
     }
 
     // WORKAROUND for MySQL connector >= 8.0:
     // <https://github.com/ontop/ontop/issues/270>
 
     @Override
-    protected String getRelationCatalog(RelationID relationID) { return catalog; }
+    protected String getRelationCatalog(RelationID relationID) { return relationID.getSchemaName(); }
 
     @Override
     protected RelationID getRelationID(ResultSet rs) throws SQLException {

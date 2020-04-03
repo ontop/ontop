@@ -45,7 +45,6 @@ public class QuotedID {
 	private final int hashCode;
 
 	public static final String NO_QUOTATION = "";
-//	public static final String QUOTATION = "\"";
 
 	public static final QuotedID EMPTY_ID = new QuotedID(null, NO_QUOTATION);
 
@@ -64,10 +63,7 @@ public class QuotedID {
 		this.quoteString = quoteString;
 		this.caseSensitive = caseSensitive;
 		// increases collisions but makes it possible to have case-insensitive ids (for MySQL)
-		if (id != null)
-			this.hashCode = id.toLowerCase().hashCode();
-		else
-			this.hashCode  = 0;
+		this.hashCode = (id != null) ? id.toLowerCase().hashCode() : 0;
 	}
 
 	/**
@@ -99,10 +95,7 @@ public class QuotedID {
 	 */
 
 	public String getSQLRendering() {
-		if (id == null)
-			return null;
-
-		return quoteString + id + quoteString;
+		return (id != null) ?  quoteString + id + quoteString : null;
 	}
 
 	@Override

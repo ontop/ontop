@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +92,6 @@ import java.util.*;
 
 public class RDBMetadataExtractionTools {
 
-	private static final boolean printouts = false;
-
 	private static Logger log = LoggerFactory.getLogger(RDBMetadataExtractionTools.class);
 
 	/**
@@ -107,24 +106,24 @@ public class RDBMetadataExtractionTools {
 
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
-		if (printouts) {
-			System.out.println("=================================\nDBMetadataExtractor REPORT: " + productName);
-			System.out.println("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
-			System.out.println("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
-			System.out.println("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
-			System.out.println("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
-			System.out.println("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
-			System.out.println("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
-			System.out.println("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
-			System.out.println("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
-			System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+
+		{
+			log.info("=================================\nDBMetadataExtractor REPORT: {}", productName);
+			log.info("storesLowerCaseIdentifiers: {}", md.storesLowerCaseIdentifiers());
+			log.info("storesUpperCaseIdentifiers: {}", md.storesUpperCaseIdentifiers());
+			log.info("storesMixedCaseIdentifiers: {}", md.storesMixedCaseIdentifiers());
+			log.info("supportsMixedCaseIdentifiers: {}", md.supportsMixedCaseIdentifiers());
+			log.info("storesLowerCaseQuotedIdentifiers: {}", md.storesLowerCaseQuotedIdentifiers());
+			log.info("storesUpperCaseQuotedIdentifiers: {}", md.storesUpperCaseQuotedIdentifiers());
+			log.info("storesMixedCaseQuotedIdentifiers: {}", md.storesMixedCaseQuotedIdentifiers());
+			log.info("supportsMixedCaseQuotedIdentifiers: {}", md.supportsMixedCaseQuotedIdentifiers());
+			log.info("getIdentifierQuoteString: {}", md.getIdentifierQuoteString());
 		}
 
 		QuotedIDFactory idfac;
 		//  MySQL
 		if (productName.contains("MySQL"))  {
-			//System.out.println("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
-			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers(), "`");
+			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers());
 		}
 		else if (md.storesMixedCaseIdentifiers()) {
 			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
@@ -137,7 +136,7 @@ public class RDBMetadataExtractionTools {
 				idfac = new QuotedIDFactoryLowerCase("\"");
 			else if (md.storesUpperCaseIdentifiers())
 				// Oracle, DB2, H2, HSQL
-				idfac = new QuotedIDFactoryStandardSQL("\"");
+				idfac = new QuotedIDFactoryStandardSQL();
 			else {
 				log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
 				log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
@@ -150,7 +149,7 @@ public class RDBMetadataExtractionTools {
 				log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
 				log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
 
-				idfac = new QuotedIDFactoryStandardSQL("\"");
+				idfac = new QuotedIDFactoryStandardSQL();
 			}
 		}
 
@@ -172,16 +171,11 @@ public class RDBMetadataExtractionTools {
 
 	public static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
 
-		if (printouts)
-			System.out.println("GETTING METADATA WITH " + conn + " ON " + realTables);
-
-		final DatabaseMetaData md = conn.getMetaData();
-		String productName = md.getDatabaseProductName();
-
 		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
 
 		RDBMetadataLoader metadataLoader;
+		String productName = metadata.getDBParameters().getDbmsProductName();
 		if (productName.contains("Oracle"))
 			metadataLoader = new OracleJDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
 		else if (productName.contains("DB2"))
@@ -193,9 +187,11 @@ public class RDBMetadataExtractionTools {
 		else
 			metadataLoader = new JDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
 
-		List<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
+		ImmutableList<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
 			? metadataLoader.getRelationIDs()
-			: metadataLoader.getRelationIDs(realTables);
+			: realTables.stream()
+				.map(metadataLoader::getRelationCanonicalID)
+				.collect(ImmutableCollectors.toList());
 
         List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
 		for (RelationID seedId : seedRelationIds) {
@@ -205,21 +201,7 @@ public class RDBMetadataExtractionTools {
 			}
 		}
 
-		for (DatabaseRelationDefinition relation : extractedRelations2)	{
+		for (DatabaseRelationDefinition relation : extractedRelations2)
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
-			if (printouts) {
-				System.out.println(relation + ";");
-				for (UniqueConstraint uc : relation.getUniqueConstraints())
-					System.out.println(uc + ";");
-				for (ForeignKeyConstraint fk : relation.getForeignKeys())
-					System.out.println(fk +  ";");
-				System.out.println("");
-			}
-		}
-
-		if (printouts) {
-			System.out.println("RESULTING METADATA:\n" + metadata);
-			System.out.println("DBMetadataExtractor END OF REPORT\n=================================");
-		}
 	}
 }
