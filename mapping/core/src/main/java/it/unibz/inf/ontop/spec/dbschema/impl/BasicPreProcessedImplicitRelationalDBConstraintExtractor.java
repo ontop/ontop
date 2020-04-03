@@ -4,14 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
+import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.io.*;
+import java.util.Optional;
 
 /**
  *
@@ -28,12 +28,16 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
     }
 
     @Override
-    public PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile, QuotedIDFactory idFactory)
-            throws ImplicitDBContraintException {
+    public MetadataProvider extract(Optional<File> constraintFile, QuotedIDFactory idFactory)
+            throws DBMetadataExtractionException {
+
+        if (!constraintFile.isPresent())
+            return new EmptyMetadataProvider();
+
         ImmutableList.Builder<String[]> ucBuilder = ImmutableList.builder();
         ImmutableList.Builder<String[]> fkBuilder = ImmutableList.builder();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(constraintFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(constraintFile.get()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
@@ -49,14 +53,14 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
             LOGGER.warn("Could not find file " + constraintFile + " in directory " + System.getenv().get("PWD"));
             String currentDir = System.getProperty("user.dir");
             LOGGER.warn("Current dir using System:" + currentDir);
-            throw new ImplicitDBContraintException("Constraint file " + constraintFile + " does not exist");
+            throw new DBMetadataExtractionException("Constraint file " + constraintFile + " does not exist");
         }
         catch (IOException e) {
             LOGGER.warn("Problem reading keys from the constraint file " + constraintFile);
             LOGGER.warn(e.getMessage());
-            throw new ImplicitDBContraintException(e);
+            throw new DBMetadataExtractionException(e);
         }
 
-        return new BasicPreProcessedImplicitRelationalDBConstraintSet(idFactory, ucBuilder.build(), fkBuilder.build());
+        return new ImplicitDBConstraintsProvider(idFactory, ucBuilder.build(), fkBuilder.build());
     }
 }

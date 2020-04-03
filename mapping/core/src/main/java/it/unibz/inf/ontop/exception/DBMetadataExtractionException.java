@@ -9,11 +9,11 @@ public class DBMetadataExtractionException extends OBDASpecificationException {
         super(message);
     }
 
-    protected DBMetadataExtractionException(Exception e) {
+    public DBMetadataExtractionException(Exception e) {
         super(e);
     }
 
-    protected DBMetadataExtractionException(String prefix, Exception e) {
+    public DBMetadataExtractionException(String prefix, Exception e) {
         super(prefix, e);
     }
 }

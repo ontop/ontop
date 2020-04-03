@@ -1,13 +1,14 @@
 package it.unibz.inf.ontop.spec.dbschema;
 
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
+import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.util.Optional;
 
 public interface PreProcessedImplicitRelationalDBConstraintExtractor {
 
-    PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile, QuotedIDFactory idFactory)
-            throws ImplicitDBContraintException;
+    MetadataProvider extract(Optional<File> constraintFile, QuotedIDFactory idFactory)
+            throws DBMetadataExtractionException;
 }

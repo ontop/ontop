@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
+import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -70,9 +70,8 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
-        Optional<PreProcessedImplicitRelationalDBConstraintSet> implicitConstraints = constraintFile.isPresent()
-                ? Optional.of(implicitDBConstraintExtractor.extract(constraintFile.get(), partiallyDefinedMetadata.getDBParameters().getQuotedIDFactory()))
-                : Optional.empty();
+        MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                constraintFile, partiallyDefinedMetadata.getDBParameters().getQuotedIDFactory());
 
         try {
             BasicDBMetadata metadata = (BasicDBMetadata) partiallyDefinedMetadata;
@@ -87,12 +86,12 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                 // Parse mappings. Just to get the table names in use
 
                 Set<RelationID> realTables = getRealTables(metadata.getDBParameters().getQuotedIDFactory(), ppMapping.getTripleMaps());
-                implicitConstraints.ifPresent(c -> realTables.addAll(c.getRelationIDs()));
+                realTables.addAll(implicitConstraints.getRelationIDs());
 
                 RDBMetadataExtractionTools.loadMetadataForRelations(metadata, connection, ImmutableList.copyOf(realTables));
             }
 
-            implicitConstraints.ifPresent(c -> c.insertIntegrityConstraints(metadata));
+            implicitConstraints.insertIntegrityConstraints(metadata);
 
             return metadata;
         }

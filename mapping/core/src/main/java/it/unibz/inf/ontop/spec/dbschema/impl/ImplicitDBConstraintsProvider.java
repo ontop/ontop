@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
+import it.unibz.inf.ontop.spec.dbschema.MetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +23,10 @@ import java.util.Set;
  *  Moved from ImplicitDBContraintsReader
  *
  */
-public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PreProcessedImplicitRelationalDBConstraintSet {
 
-    private static final Logger log = LoggerFactory.getLogger(BasicPreProcessedImplicitRelationalDBConstraintSet.class);
+public class ImplicitDBConstraintsProvider implements MetadataProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(ImplicitDBConstraintsProvider.class);
 
     private final QuotedIDFactory idFactory;
 
@@ -36,10 +37,9 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
     //                              primary key (referred) table id, comma-separated primary key columns
     private final ImmutableList<String[]> fks;
 
-
-    BasicPreProcessedImplicitRelationalDBConstraintSet(QuotedIDFactory idFactory,
-                                                       ImmutableList<String[]> uniqueConstraints,
-                                                       ImmutableList<String[]> foreignKeys) {
+    ImplicitDBConstraintsProvider(QuotedIDFactory idFactory,
+                                  ImmutableList<String[]> uniqueConstraints,
+                                  ImmutableList<String[]> foreignKeys) {
         this.idFactory = idFactory;
         this.ucs = uniqueConstraints;
         this.fks = foreignKeys;
@@ -63,12 +63,14 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
         return ImmutableList.copyOf(referredTables);
     }
 
+    @Override
+    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) {
+        return ImmutableList.of();
+    }
+
     /**
      *
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
-     *
-     * TODO: refactor into an immutable style
-     *
      */
     @Override
     public void insertIntegrityConstraints(DBMetadata md) {
@@ -102,7 +104,6 @@ public class BasicPreProcessedImplicitRelationalDBConstraintSet implements PrePr
         }
         {
             int counter = 0; // id of the generated constraint
-
             for (String[] fk : fks) {
                 RelationID pkTableId = getRelationIDFromString(fk[2], idFactory);
                 DatabaseRelationDefinition pkTable = md.getDatabaseRelation(pkTableId);
