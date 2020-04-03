@@ -33,7 +33,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
         ImmutableList.Builder<String[]> fkBuilder = ImmutableList.builder();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(constraintFile))) {
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(":");
                 if (parts.length == 2) { // Primary Key	/ Unique Constraint

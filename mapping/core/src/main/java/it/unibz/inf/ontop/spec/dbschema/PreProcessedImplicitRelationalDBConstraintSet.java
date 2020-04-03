@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * TODO: refactor these methods into an immutable style
  */
-public interface PreProcessedImplicitRelationalDBConstraintSet extends PreProcessedImplicitDBConstraintSet {
+public interface PreProcessedImplicitRelationalDBConstraintSet {
 
     /**
      * Extracts relation IDs for all relations referred to by the user supplied foreign keys

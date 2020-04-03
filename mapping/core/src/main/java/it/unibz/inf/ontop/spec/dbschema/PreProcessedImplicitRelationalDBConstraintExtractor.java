@@ -5,9 +5,8 @@ import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
 import javax.annotation.Nonnull;
 import java.io.File;
 
-public interface PreProcessedImplicitRelationalDBConstraintExtractor extends PreProcessedImplicitDBConstraintExtractor {
+public interface PreProcessedImplicitRelationalDBConstraintExtractor {
 
-    @Override
     PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile)
             throws ImplicitDBContraintException;
 }
