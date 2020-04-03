@@ -78,7 +78,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
 		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
 
-		RDBMetadataExtractionTools.loadMetadatMappingAssistantPanel.javaaForRelations(METADATA, conn,
+		RDBMetadataExtractionTools.loadMetadataForRelations(METADATA, conn,
 				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
 
 		tBook = METADATA.getDatabaseRelation(iBook);
