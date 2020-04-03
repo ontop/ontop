@@ -10,13 +10,13 @@ public class DB2RDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
-    DB2RDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, idFactory, dbTypeFactory);
+    DB2RDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
+        super(connection, dbParameters);
     }
     // select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
 
     @Override
-    protected boolean ignoreSchema(String schema) {
+    protected boolean isSchemaIgnored(String schema) {
         return ignoreSchema.contains(schema);
     }
 /*

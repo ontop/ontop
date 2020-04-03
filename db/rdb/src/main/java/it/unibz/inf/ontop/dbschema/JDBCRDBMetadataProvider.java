@@ -14,12 +14,14 @@ public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
     protected final Connection connection;
     protected final QuotedIDFactory idFactory;
     protected final DBTypeFactory dbTypeFactory;
+    protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
 
-    JDBCRDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    JDBCRDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
         this.connection = connection;
-        this.idFactory = idFactory;
-        this.dbTypeFactory = dbTypeFactory;
+        this.dbParameters = dbParameters;
+        this.idFactory = dbParameters.getQuotedIDFactory();
+        this.dbTypeFactory = dbParameters.getDBTypeFactory();
         try {
             this.metadata = connection.getMetaData();
         }
@@ -36,7 +38,7 @@ public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
                 // String catalog = rs.getString("TABLE_CAT"); // not used
                 String schema = rs.getString("TABLE_SCHEM");
                 String table = rs.getString("TABLE_NAME");
-                if (!ignoreSchema(schema)) {
+                if (!isSchemaIgnored(schema)) {
                     RelationID id = RelationID.createRelationIdFromDatabaseRecord(idFactory, schema, table);
                     builder.add(id);
                 }
@@ -93,6 +95,11 @@ public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
         insertPrimaryKey(r);
         insertUniqueAttributes(r);
         insertForeignKeys(r, dbMetadata);
+    }
+
+    @Override
+    public DBParameters getDBParameters() {
+        return dbParameters;
     }
 
     private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
@@ -228,7 +235,7 @@ public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
 
 
 
-    protected boolean ignoreSchema(String schema) {
+    protected boolean isSchemaIgnored(String schema) {
         return false;
     }
 

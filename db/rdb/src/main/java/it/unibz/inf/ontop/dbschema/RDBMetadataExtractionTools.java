@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -102,8 +103,8 @@ public class RDBMetadataExtractionTools {
 	 * @throws SQLException
 	 */
 
-	public static BasicDBMetadata createMetadata(Connection conn,
-											 DBTypeFactory dbTypeFactory) throws SQLException  {
+	public static DBParameters createDBParameters(Connection conn,
+											 DBTypeFactory dbTypeFactory) throws SQLException {
 
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -123,15 +124,13 @@ public class RDBMetadataExtractionTools {
 
 		QuotedIDFactory idfac;
 		//  MySQL
-		if (productName.contains("MySQL"))  {
+		if (productName.contains("MySQL")) {
 			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers());
-		}
-		else if (md.storesMixedCaseIdentifiers()) {
+		} else if (md.storesMixedCaseIdentifiers()) {
 			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
 			// "SQL Server" = MS SQL Server
 			idfac = new QuotedIDFactoryIdentity("\"");
-		}
-		else {
+		} else {
 			if (md.storesLowerCaseIdentifiers())
 				// PostgreSQL treats unquoted identifiers as lower-case
 				idfac = new QuotedIDFactoryLowerCase("\"");
@@ -154,30 +153,59 @@ public class RDBMetadataExtractionTools {
 			}
 		}
 
-		BasicDBMetadata metadata = new BasicDBMetadata(md.getDriverName(), md.getDriverVersion(),
-							productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
-		
-		return metadata;	
+		return new BasicDBParametersImpl(md.getDriverName(), md.getDriverVersion(),
+				productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
+	}
+
+	public static BasicDBMetadata createMetadata(DBParameters dbParameters)   {
+		return new BasicDBMetadata(dbParameters);
 	}
 
 	public static void loadFullMetadata0(BasicDBMetadata metadata, Connection conn) throws SQLException, MetadataExtractionException {
-		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, metadata.getDBParameters());
+		loadMetadata(metadata, metadataLoader, null);
 	}
 
 	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
-		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
+		BasicDBMetadata metadata = createMetadata(dbParameters);
+		loadMetadata(metadata, metadataLoader, null);
 		return metadata;
 	}
 
 	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
-		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
+		BasicDBMetadata metadata = createMetadata(dbParameters);
+		loadMetadata(metadata, metadataLoader, null);
 		return metadata.getDatabaseRelations();
 	}
 
+	public static BasicDBMetadata loadMetadataForRelations(DBParameters dbParameters, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
+		BasicDBMetadata metadata = createMetadata(dbParameters);
+		loadMetadata(metadata, metadataLoader, realTables);
+		return metadata;
+	}
+
 	public static void loadMetadataForRelations(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
-		loadMetadata(metadata, conn, realTables);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, metadata.getDBParameters());
+		loadMetadata(metadata, metadataLoader, realTables);
+	}
+
+	private static RDBMetadataProvider getMetadataProvider(Connection conn, DBParameters dbParameters) throws MetadataExtractionException {
+		String productName = dbParameters.getDbmsProductName();
+		if (productName.contains("Oracle"))
+			return new OracleJDBCRDBMetadataProvider(conn, dbParameters);
+		else if (productName.contains("DB2"))
+			return new DB2RDBMetadataProvider(conn, dbParameters);
+		else if (productName.contains("SQL Server"))
+			return new MSSQLDBMetadataProvider(conn, dbParameters);
+		else if (productName.contains("MySQL"))
+			return new MySQLDBMetadataProvider(conn, dbParameters);
+		else
+			return new JDBCRDBMetadataProvider(conn, dbParameters);
 	}
 
 	/**
@@ -190,23 +218,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	private static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws MetadataExtractionException {
-
-		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
-		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
-
-		RDBMetadataProvider metadataLoader;
-		String productName = metadata.getDBParameters().getDbmsProductName();
-		if (productName.contains("Oracle"))
-			metadataLoader = new OracleJDBCRDBMetadataProvider(conn, idfac, dbTypeFactory);
-		else if (productName.contains("DB2"))
-			metadataLoader = new DB2RDBMetadataProvider(conn, idfac, dbTypeFactory);
-		else if (productName.contains("SQL Server"))
-			metadataLoader = new MSSQLDBMetadataProvider(conn, idfac, dbTypeFactory);
-		else if (productName.contains("MySQL"))
-			metadataLoader = new MySQLDBMetadataProvider(conn, idfac, dbTypeFactory);
-		else
-			metadataLoader = new JDBCRDBMetadataProvider(conn, idfac, dbTypeFactory);
+	private static void loadMetadata(BasicDBMetadata metadata, RDBMetadataProvider metadataLoader, ImmutableList<RelationID> realTables) throws MetadataExtractionException {
 
 		ImmutableList<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
 			? metadataLoader.getRelationIDs()

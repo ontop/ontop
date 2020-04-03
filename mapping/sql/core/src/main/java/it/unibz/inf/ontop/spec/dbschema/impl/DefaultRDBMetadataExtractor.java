@@ -53,7 +53,8 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     public BasicDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws MetadataExtractionException {
         try {
-            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
+            DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
+            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {

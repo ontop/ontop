@@ -10,15 +10,15 @@ public class MSSQLDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
 
-    MSSQLDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, idFactory, dbTypeFactory);
+    MSSQLDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
+        super(connection, dbParameters);
     }
 
     // SELECT SCHEMA_NAME() would give default schema name
     // https://msdn.microsoft.com/en-us/library/ms175068.aspx
 
     @Override
-    protected boolean ignoreSchema(String schema) {
+    protected boolean isSchemaIgnored(String schema) {
         return ignoreSchema.contains(schema);
     }
 

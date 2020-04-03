@@ -21,12 +21,11 @@ public class BasicDBMetadata implements DBMetadata {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
-    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
+    protected BasicDBMetadata(DBParameters dbParameters) {
         this.tables = new HashMap<>();
         this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;
-        this.dbParameters = new BasicDBParametersImpl(driverName,  driverVersion,  databaseProductName, databaseVersion, idfac, dbTypeFactory);
+        this.dbParameters = dbParameters;
     }
 
     /**

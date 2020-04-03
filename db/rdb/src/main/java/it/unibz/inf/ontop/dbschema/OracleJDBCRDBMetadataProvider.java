@@ -13,8 +13,8 @@ public class OracleJDBCRDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final String defaultTableOwner;
 
-    OracleJDBCRDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, idFactory, dbTypeFactory);
+    OracleJDBCRDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
+        super(connection, dbParameters);
         this.defaultTableOwner = getDefaultOwner();
     }
 

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 
@@ -11,8 +12,7 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
 
     @Inject
     private DummyBasicDBMetadata(TypeFactory typeFactory) {
-
-        super("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL(), typeFactory.getDBTypeFactory());
+        super(new BasicDBParametersImpl("dummy class", null, null, "",
+                new QuotedIDFactoryStandardSQL(), typeFactory.getDBTypeFactory()));
     }
 }

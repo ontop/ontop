@@ -12,8 +12,8 @@ public class MySQLDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final String defaultDatabase;
 
-    MySQLDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, idFactory, dbTypeFactory);
+    MySQLDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
+        super(connection, dbParameters);
 
         try (Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
