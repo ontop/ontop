@@ -71,7 +71,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
         }
 
         Optional<PreProcessedImplicitRelationalDBConstraintSet> implicitConstraints = constraintFile.isPresent()
-                ? Optional.of(implicitDBConstraintExtractor.extract(constraintFile.get()))
+                ? Optional.of(implicitDBConstraintExtractor.extract(constraintFile.get(), partiallyDefinedMetadata.getDBParameters().getQuotedIDFactory()))
                 : Optional.empty();
 
         try {
@@ -82,30 +82,17 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                 RDBMetadataExtractionTools.loadFullMetadata0(metadata, connection);
             }
             else {
-                try {
-                    // This is the NEW way of obtaining part of the metadata
-                    // (the schema.table names) by parsing the mappings
+                // This is the NEW way of obtaining part of the metadata
+                // (the schema.table names) by parsing the mappings
+                // Parse mappings. Just to get the table names in use
 
-                    // Parse mappings. Just to get the table names in use
+                Set<RelationID> realTables = getRealTables(metadata.getDBParameters().getQuotedIDFactory(), ppMapping.getTripleMaps());
+                implicitConstraints.ifPresent(c -> realTables.addAll(c.getRelationIDs()));
 
-                    Set<RelationID> realTables = getRealTables(metadata.getDBParameters().getQuotedIDFactory(), ppMapping.getTripleMaps());
-                    implicitConstraints.ifPresent(c -> {
-                        // Add the tables referred to by user-supplied foreign keys
-                        Set<RelationID> referredTables = c.getReferredTables(metadata.getDBParameters().getQuotedIDFactory());
-                        realTables.addAll(referredTables);
-                    });
-
-                    RDBMetadataExtractionTools.loadMetadataForRelations(metadata, connection, ImmutableList.copyOf(realTables));
-                }
-                catch (SQLException e) {
-                    System.out.println("Error obtaining the metadata " + e);
-                }
+                RDBMetadataExtractionTools.loadMetadataForRelations(metadata, connection, ImmutableList.copyOf(realTables));
             }
 
-            implicitConstraints.ifPresent(c ->  {
-                c.insertUniqueConstraints(metadata);
-                c.insertForeignKeyConstraints(metadata);
-            });
+            implicitConstraints.ifPresent(c -> c.insertIntegrityConstraints(metadata));
 
             return metadata;
         }

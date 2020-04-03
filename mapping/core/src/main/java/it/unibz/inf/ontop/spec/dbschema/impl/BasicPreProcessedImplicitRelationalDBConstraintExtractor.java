@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.exception.ImplicitDBContraintException;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintExtractor;
 import it.unibz.inf.ontop.spec.dbschema.PreProcessedImplicitRelationalDBConstraintSet;
@@ -27,7 +28,7 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
     }
 
     @Override
-    public PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile)
+    public PreProcessedImplicitRelationalDBConstraintSet extract(@Nonnull File constraintFile, QuotedIDFactory idFactory)
             throws ImplicitDBContraintException {
         ImmutableList.Builder<String[]> ucBuilder = ImmutableList.builder();
         ImmutableList.Builder<String[]> fkBuilder = ImmutableList.builder();
@@ -56,6 +57,6 @@ public class BasicPreProcessedImplicitRelationalDBConstraintExtractor implements
             throw new ImplicitDBContraintException(e);
         }
 
-        return new BasicPreProcessedImplicitRelationalDBConstraintSet(ucBuilder.build(), fkBuilder.build());
+        return new BasicPreProcessedImplicitRelationalDBConstraintSet(idFactory, ucBuilder.build(), fkBuilder.build());
     }
 }
