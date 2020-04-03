@@ -19,8 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -31,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 public class RelationalExpressionTest {
 
-    private static RDBMetadata METADATA;
+    private static BasicDBMetadata METADATA;
     private static QuotedIDFactory MDFAC;
 
     private DataAtom<RelationPredicate> f1, f2;
@@ -45,8 +44,8 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        METADATA = createDummyMetadata();
-        MDFAC = METADATA.getQuotedIDFactory();
+        METADATA = DEFAULT_DUMMY_DB_METADATA;
+        MDFAC = METADATA.getDBParameters().getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
@@ -55,15 +54,13 @@ public class RelationalExpressionTest {
         attX = MDFAC.createAttributeID("A");
         attY = MDFAC.createAttributeID("B");
 
-        DBTermType dbInteger = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = METADATA.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition P = METADATA.createDatabaseRelation(table1);
-        P.addAttribute(attX, dbInteger.getName(), dbInteger, true);
-        P.addAttribute(attY, dbInteger.getName(), dbInteger, true);
+        DatabaseRelationDefinition P = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table1)
+            .addAttribute(attX, integerDBType, true)
+            .addAttribute(attY, integerDBType, true));
 
-        f1 = ATOM_FACTORY.getDataAtom(
-                new FakeRelationPredicate(P),
-                ImmutableList.of(x, y));
+        f1 = ATOM_FACTORY.getDataAtom(P.getAtomPredicate(), ImmutableList.of(x, y));
 
         qaTx = new QualifiedAttributeID(table1, attX);
         qaTy = new QualifiedAttributeID(table1, attY);
@@ -83,13 +80,11 @@ public class RelationalExpressionTest {
         QuotedID attu = MDFAC.createAttributeID("A");
         QuotedID attv = MDFAC.createAttributeID("C");
 
-        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(table2);
-        Q.addAttribute(attu, dbInteger.getName(), dbInteger, true);
-        Q.addAttribute(attv, dbInteger.getName(), dbInteger, true);
+        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table2)
+            .addAttribute(attu, integerDBType, true)
+            .addAttribute(attv, integerDBType, true));
 
-        f2 = ATOM_FACTORY.getDataAtom(
-                new FakeRelationPredicate(Q),
-                ImmutableList.of(u, v));
+        f2 = ATOM_FACTORY.getDataAtom(Q.getAtomPredicate(), ImmutableList.of(u, v));
 
         qaTu = new QualifiedAttributeID(table2, attu);
         qaTv = new QualifiedAttributeID(table2, attv);
@@ -106,9 +101,7 @@ public class RelationalExpressionTest {
         Variable w = TERM_FACTORY.getVariable("u");
         Variable z = TERM_FACTORY.getVariable("v");
 
-        DataAtom<RelationPredicate> f3 = ATOM_FACTORY.getDataAtom(
-                new FakeRelationPredicate(Q),
-                ImmutableList.of(w, z));
+        DataAtom<RelationPredicate> f3 = ATOM_FACTORY.getDataAtom(Q.getAtomPredicate(), ImmutableList.of(w, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");
         QuotedID attW = MDFAC.createAttributeID("A");
@@ -315,10 +308,10 @@ public class RelationalExpressionTest {
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaNx));
-        assertEquals(null, attrs.get(qaTx));
+        assertNull(attrs.get(qaTx));
         assertEquals(y, attrs.get(qaTy));
         assertEquals(y, attrs.get(qaNy));
-        assertEquals(null, attrs.get(qaTu));
+        assertNull(attrs.get(qaTu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
 
@@ -330,11 +323,11 @@ public class RelationalExpressionTest {
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = relationalExpression.getAttributes();
         assertEquals(x, attrs.get(qaTx));
-        assertEquals(null, attrs.get(qaNx));
+        assertNull(attrs.get(qaNx));
         assertEquals(y, attrs.get(qaTy));
         assertEquals(y, attrs.get(qaNy));
         assertEquals(u, attrs.get(qaTu));
-        assertEquals(null, attrs.get(qaNu));
+        assertNull(attrs.get(qaNu));
         assertEquals(v, attrs.get(qaTv));
         assertEquals(v, attrs.get(qaNv));
 

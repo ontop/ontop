@@ -182,6 +182,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     }
 
     @Override
+    public ImmutableSet<Variable> getNotInternallyRequiredVariables() {
+        return getVariables();
+    }
+
+    @Override
     public String toString() {
         return NATIVE_STRING + variables + "\n" + nativeQueryString;
     }

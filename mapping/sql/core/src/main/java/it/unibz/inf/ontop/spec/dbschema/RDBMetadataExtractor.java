@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.spec.dbschema;
 
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 import javax.annotation.Nullable;
@@ -21,10 +21,10 @@ import java.util.Optional;
  */
 public interface RDBMetadataExtractor {
 
-    RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection, Optional<File> constraintFile)
+    BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection, Optional<File> constraintFile)
             throws DBMetadataExtractionException;
 
-    RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection,
+    BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection,
                         DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
             throws DBMetadataExtractionException;
 }

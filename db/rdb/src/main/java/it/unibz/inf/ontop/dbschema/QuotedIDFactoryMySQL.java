@@ -22,16 +22,21 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
-
 /**
  * Creates QuotedIdentifiers following the rules of MySQL:<br>
  *    - unquoted table identifiers are preserved<br>
  *    - unquoted column identifiers are not case-sensitive<br>
  *    - quoted identifiers are preserved
- * 
+ *
+ *
+ * http://dev.mysql.com/doc/refman/5.0/en/identifier-case-sensitivity.html
+ *
+ * How table and database names are stored on disk and used in MySQL is affected
+ * by the lower_case_table_names system variable, which you can set when starting mysqld.
+ *
+ * Column, index, and stored routine names are not case sensitive on any platform, nor are column aliases.
+ *
+ *
  * @author Roman Kontchakov
  *
  */

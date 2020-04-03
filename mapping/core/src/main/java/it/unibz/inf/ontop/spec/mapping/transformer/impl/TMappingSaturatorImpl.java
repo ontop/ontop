@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.constraints.impl.DBLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.datalog.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
@@ -69,6 +70,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
     private final CoreUtilsFactory coreUtilsFactory;
+    private final CoreSingletons coreSingletons;
 
     @Inject
 	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
@@ -81,7 +83,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                                   IntermediateQueryFactory iqFactory,
                                   UnionBasedQueryMerger queryMerger,
                                   SubstitutionFactory substitutionFactory,
-                                  CoreUtilsFactory coreUtilsFactory) {
+                                  CoreUtilsFactory coreUtilsFactory, CoreSingletons coreSingletons) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
 		this.atomFactory = atomFactory;
 		this.termFactory = termFactory;
@@ -93,6 +95,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.queryMerger = queryMerger;
         this.substitutionFactory = substitutionFactory;
         this.coreUtilsFactory = coreUtilsFactory;
+        this.coreSingletons = coreSingletons;
     }
 
     @Override
@@ -111,7 +114,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .flatMap(a -> unionSplitter.splitUnion(unionNormalizer.optimize(a.getQuery()))
                         .map(IQ::normalizeForOptimization) // replaces join equalities
                         .map(q -> mappingCqcOptimizer.optimize(cqc, q))
-                        .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, atomFactory))))
+                        .map(q -> Maps.immutableEntry(a.getIndex(), new TMappingRule(q, termFactory, iqFactory))))
                 .collect(ImmutableCollectors.toMultimap()).asMap();
 
         ImmutableMap<MappingAssertionIndex, ImmutableList<TMappingRule>> saturated = original.keySet().stream()
@@ -144,7 +147,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 original.entrySet().stream()
                         .filter(e -> !saturated.containsKey(e.getKey()))
                         .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().stream()
-                                        .collect(TMappingEntry.toTMappingEntry(cqc, termFactory)))))
+                                        .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons)))))
                 .collect(ImmutableCollectors.toMap());
 
         return combined.entrySet().stream()
@@ -174,7 +177,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
                 .map(constructor)
                 .flatMap(t -> original.getOrDefault(t.indexOf(), ImmutableList.of()).stream()
                         .map(m -> new TMappingRule(t.getArguments(m.getHeadTerms(), iri), m)))
-                .collect(TMappingEntry.toTMappingEntry(cqc, termFactory));
+                .collect(TMappingEntry.toTMappingEntry(cqc, coreSingletons));
 
         return constructor.andThen(
                 t -> Maps.immutableEntry(

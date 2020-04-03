@@ -28,7 +28,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 1), x);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -51,7 +51,7 @@ public class NodeDeletionTest {
         /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
     }
 
@@ -64,7 +64,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -91,12 +91,12 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode viceRootNode = optimizedQuery.getFirstChild(optimizedQuery.getRootNode()).get();
         assertTrue(viceRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) viceRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR1.getName());
+        assertEquals(((ExtensionalDataNode) viceRootNode).getRelationDefinition(), TABLE1_AR1.getRelationDefinition());
         assertTrue(optimizedQuery.getChildren(viceRootNode).isEmpty());
     }
 
@@ -111,7 +111,7 @@ public class NodeDeletionTest {
 
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -157,12 +157,12 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode newRootNode = optimizedQuery.getRootNode();
         assertTrue(newRootNode instanceof ExtensionalDataNode);
-        assertEquals(((ExtensionalDataNode) newRootNode).getProjectionAtom().getPredicate().getName(), TABLE1_AR2.getName());
+        assertEquals(((ExtensionalDataNode) newRootNode).getRelationDefinition(), TABLE1_AR2.getRelationDefinition());
         assertTrue(optimizedQuery.getChildren(newRootNode).isEmpty());
     }
 
@@ -177,7 +177,7 @@ public class NodeDeletionTest {
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectedVariables);
 
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -224,7 +224,7 @@ public class NodeDeletionTest {
         /*
          * Should replace the left join node by table 1.
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.out.println("Optimized query : " + optimizedQuery.toString());
 
         QueryNode optimizedRootNode = optimizedQuery.getRootNode();
@@ -241,7 +241,7 @@ public class NodeDeletionTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate( 2), x, y);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, rootNode);
 
         DBConstant falseValue = TERM_FACTORY.getDBBooleanConstant(false);
@@ -266,10 +266,20 @@ public class NodeDeletionTest {
         IntermediateQuery initialQuery = queryBuilder.build();
         System.out.println("Initial query: " + initialQuery.toString());
 
-        /**
+        /*
          * Should throw the EmptyQueryException
          */
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery);
+        IntermediateQuery optimizedQuery = optimize(initialQuery);
         System.err.println("Optimized query (should have been rejected): " + optimizedQuery.toString());
+    }
+
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
+
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 }

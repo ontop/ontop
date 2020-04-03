@@ -24,10 +24,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -43,6 +47,8 @@ import java.util.List;
 public abstract class RelationDefinition {
 
 	private final RelationID id;
+	private final ImmutableList<Attribute> attributes;
+	private final ImmutableMap<QuotedID, Attribute> map;
 
 	/**
 	 * Lazy
@@ -50,8 +56,11 @@ public abstract class RelationDefinition {
 	@Nullable
 	private RelationPredicate predicate;
 
-	protected RelationDefinition(RelationID id) {
-		this.id = id;
+	protected RelationDefinition(AttributeListBuilder builder) {
+		this.id = builder.relationID;
+		this.attributes = builder.build(this);
+		this.map = attributes.stream()
+				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
 	}
 
 	@JsonProperty("name")
@@ -60,9 +69,31 @@ public abstract class RelationDefinition {
 		return id;
 	}
 
-	public abstract Attribute getAttribute(int index);
+	/**
+	 * gets the attribute with the specified position
+	 *
+	 * @param index is position <em>starting at 1</em>
+	 * @return attribute at the position
+	 */
 
-	public abstract List<Attribute> getAttributes();
+	public Attribute getAttribute(int index) { return attributes.get(index - 1); }
+
+	/**
+	 * gets the attribute with the specified ID
+	 *
+	 * @param id
+	 * @return
+	 */
+
+	public Attribute getAttribute(QuotedID id) { return map.get(id); }
+
+	/**
+	 * returns the list of attributes
+	 *
+	 * @return list of attributes
+	 */
+	@JsonProperty("columns")
+	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
 	/**
 	 * Call it only after having completely assigned the attributes!
@@ -78,7 +109,52 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
 
-	public abstract UniqueConstraint getPrimaryKey();
+	public abstract Optional<UniqueConstraint> getPrimaryKey();
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
+
+	private static class AttributeInfo {
+		private final QuotedID id;
+		private final int index;
+		private final DBTermType termType;
+		private final String typeName;
+		private final boolean isNullable;
+
+		AttributeInfo(QuotedID id, int index, DBTermType termType, String typeName, boolean isNullable) {
+			this.id = id;
+			this.index = index;
+			this.termType = termType;
+			this.typeName = typeName;
+			this.isNullable = isNullable;
+		}
+	}
+
+	public static class AttributeListBuilder {
+		private final List<AttributeInfo> list = new ArrayList<>();
+		private final RelationID relationID;
+
+		public AttributeListBuilder(RelationID relationID) {
+			this.relationID = relationID;
+		}
+
+		public RelationID getRelationID() {
+			return relationID;
+		}
+
+		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
+			list.add(new AttributeInfo(id, list.size() + 1, termType, typeName, isNullable));
+			return this;
+		}
+
+		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable) {
+			list.add(new AttributeInfo(id, list.size() + 1, termType, termType.getName(), isNullable));
+			return this;
+		}
+
+		public ImmutableList<Attribute> build(RelationDefinition relation) {
+			return list.stream()
+					.map(a -> new Attribute(relation, a.id, a.index, a.typeName, a.termType, a.isNullable))
+					.collect(ImmutableCollectors.toList());
+		}
+	}
 }

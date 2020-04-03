@@ -3,12 +3,10 @@ package it.unibz.inf.ontop.dbschema;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Foreign Key constraints<br>
@@ -40,8 +38,6 @@ public class ForeignKeyConstraint {
         public Attribute getReference() {
             return reference;
         }
-
-
     }
 
     public static final class Builder {
@@ -184,27 +180,19 @@ public class ForeignKeyConstraint {
         return relation;
     }
 
-
     @Override
     public String toString() {
-        List<String> columns = new ArrayList<>(components.size());
-        List<String> refColumns = new ArrayList<>(components.size());
-        for (Component c : components) {
-            columns.add(c.getAttribute().getID().toString());
-            refColumns.add(c.getReference().getID().toString());
-        }
-
-        StringBuilder bf = new StringBuilder();
-
-        bf.append("ALTER TABLE ").append(relation.getID().getSQLRendering())
-                .append(" ADD CONSTRAINT ").append(name).append(" FOREIGN KEY (");
-        Joiner.on(", ").appendTo(bf, columns);
-        bf.append(") REFERENCES ").append(referencedRelation.getID().getSQLRendering())
-                .append(" (");
-        Joiner.on(", ").appendTo(bf, refColumns);
-        bf.append(")");
-
-        return bf.toString();
+        return "ALTER TABLE " + relation.getID().getSQLRendering() +
+                " ADD CONSTRAINT " + name + " FOREIGN KEY (" +
+                components.stream()
+                        .map(c -> c.getAttribute().getID().toString())
+                        .collect(Collectors.joining(", ")) +
+                ") REFERENCES " + referencedRelation.getID().getSQLRendering() +
+                " (" +
+                components.stream()
+                        .map(c -> c.getReference().getID().toString())
+                        .collect(Collectors.joining(", ")) +
+                ")";
     }
 
     public static class ForeignKeyConstraintSerializer extends JsonSerializer<ForeignKeyConstraint> {

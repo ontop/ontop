@@ -2,64 +2,31 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Stream;
 
 public class BasicDBMetadata implements DBMetadata {
 
-
     private final Map<RelationID, DatabaseRelationDefinition> tables;
-
-    // relations include tables and views (views are only created for complex queries in mappings)
-    protected final Map<RelationID, RelationDefinition> relations;
-
+    // tables.values() can contain duplicates due to schemaless table names
     private final List<DatabaseRelationDefinition> listOfTables;
 
-    private final String driverName;
-    private final String driverVersion;
-    private final String databaseProductName;
-    private final String databaseVersion;
-
-    private final QuotedIDFactory idfac;
     private final DBParameters dbParameters;
     private boolean isStillMutable;
-
-    @Nullable
-    private ImmutableMultimap<RelationPredicate, ImmutableList<Integer>> uniqueConstraints;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
     protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              QuotedIDFactory idfac) {
-        this(driverName, driverVersion, databaseProductName, databaseVersion, new HashMap<>(),
-                new HashMap<>(), new LinkedList<>(), idfac);
-    }
-
-    protected BasicDBMetadata(String driverName, String driverVersion, String databaseProductName, String databaseVersion,
-                              Map<RelationID, DatabaseRelationDefinition> tables, Map<RelationID,
-            RelationDefinition> relations, List<DatabaseRelationDefinition> listOfTables,
-                              QuotedIDFactory idfac) {
-        this.driverName = driverName;
-        this.driverVersion = driverVersion;
-        this.databaseProductName = databaseProductName;
-        this.databaseVersion = databaseVersion;
-        this.idfac = idfac;
-        this.tables = tables;
-        this.relations = relations;
-        this.listOfTables = listOfTables;
+                              QuotedIDFactory idfac, DBTypeFactory dbTypeFactory) {
+        this.tables = new HashMap<>();
+        this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;
-        this.uniqueConstraints = null;
-        this.dbParameters = new BasicDBParametersImpl(idfac);
+        this.dbParameters = new BasicDBParametersImpl(driverName,  driverVersion,  databaseProductName, databaseVersion, idfac, dbTypeFactory);
     }
 
     /**
@@ -68,44 +35,30 @@ public class BasicDBMetadata implements DBMetadata {
      * to the lookup table (see getDatabaseRelation and getRelation) with
      * both the fully qualified id and the table name only id
      *
-     * @param id
+     * @param builder
      * @return
      */
-    public DatabaseRelationDefinition createDatabaseRelation(RelationID id) {
+    public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
         if (!isStillMutable) {
             throw new IllegalStateException("Too late, cannot create a DB relation");
         }
-        DatabaseRelationDefinition table = new DatabaseRelationDefinition(id);
-        add(table, tables);
-        add(table, relations);
-        listOfTables.add(table);
-        return table;
-    }
-
-    /**
-     * Inserts a new data definition to this metadata object.
-     *
-     * @param td
-     *            The data definition. It can be a {@link DatabaseRelationDefinition} or a
-     *            {@link ParserViewDefinition} object.
-     */
-    protected <T extends RelationDefinition> void add(T td, Map<RelationID, T> schema) {
-        if (!isStillMutable) {
-            throw new IllegalStateException("Too late, cannot add a schema");
-        }
-        schema.put(td.getID(), td);
-        if (td.getID().hasSchema()) {
-            RelationID noSchemaID = td.getID().getSchemalessID();
-            if (!schema.containsKey(noSchemaID)) {
-                schema.put(noSchemaID, td);
+        DatabaseRelationDefinition table = new DatabaseRelationDefinition(builder);
+        tables.put(table.getID(), table);
+        if (table.getID().hasSchema()) {
+            RelationID noSchemaID = table.getID().getSchemalessID();
+            if (!tables.containsKey(noSchemaID)) {
+                tables.put(noSchemaID, table);
             }
             else {
-                LOGGER.warn("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + td + "\nAND\n" + schema.get(noSchemaID));
+                LOGGER.warn("DUPLICATE TABLE NAMES, USE QUALIFIED NAMES:\n" + table + "\nAND\n" + tables.get(noSchemaID));
                 //schema.remove(noSchemaID);
                 // TODO (ROMAN 8 Oct 2015): think of a better way of resolving ambiguities
             }
         }
+        listOfTables.add(table);
+        return table;
     }
+
 
     @Override
     public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
@@ -116,116 +69,50 @@ public class BasicDBMetadata implements DBMetadata {
         return def;
     }
 
-    @Override
-    public RelationDefinition getRelation(RelationID name) {
-        RelationDefinition def = relations.get(name);
-        if (def == null && name.hasSchema()) {
-            def = relations.get(name.getSchemalessID());
-        }
-        return def;
-    }
-
     @JsonProperty("relations")
     @Override
     public Collection<DatabaseRelationDefinition> getDatabaseRelations() {
         return Collections.unmodifiableCollection(listOfTables);
     }
 
-    @Override
     public void freeze() {
         isStillMutable = false;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getDriverName() {
-        return driverName;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getDriverVersion() {
-        return driverVersion;
-    }
-
-    @Override
-    public String printKeys() {
-        StringBuilder builder = new StringBuilder();
-        Collection<DatabaseRelationDefinition> table_list = getDatabaseRelations();
-        // Prints all primary keys
-        builder.append("\n====== Unique constraints ==========\n");
-        for (DatabaseRelationDefinition dd : table_list) {
-            builder.append(dd + ";\n");
-            for (UniqueConstraint uc : dd.getUniqueConstraints())
-                builder.append(uc + ";\n");
-            builder.append("\n");
-        }
-        // Prints all foreign keys
-        builder.append("====== Foreign key constraints ==========\n");
-        for(DatabaseRelationDefinition dd : table_list) {
-            for (ForeignKeyConstraint fk : dd.getForeignKeys())
-                builder.append(fk + ";\n");
-        }
-        return builder.toString();
-    }
-
-    @JsonIgnore
-    @Override
-    public String getDbmsProductName() {
-        return databaseProductName;
-    }
-
-    @JsonIgnore
-    public String getDbmsVersion() {
-        return databaseVersion;
-    }
-
-    @JsonIgnore
-    public QuotedIDFactory getQuotedIDFactory() {
-        return idfac;
     }
 
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        for (RelationID key : relations.keySet()) {
-            bf.append(key);
-            bf.append("=");
-            bf.append(relations.get(key).toString());
+        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : tables.entrySet()) {
+            bf.append(e.getKey()).append("=").append(e.getValue()).append("\n");
+        }
+        // Prints all primary keys
+        bf.append("\n====== constraints ==========\n");
+        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : tables.entrySet()) {
+            for (UniqueConstraint uc : e.getValue().getUniqueConstraints())
+                bf.append(uc).append(";\n");
+            bf.append("\n");
+            for (ForeignKeyConstraint fk : e.getValue().getForeignKeys())
+                bf.append(fk).append(";\n");
             bf.append("\n");
         }
         return bf.toString();
-    }
-
-    protected Map<RelationID, DatabaseRelationDefinition> getTables() {
-        return tables;
-    }
-
-    @Deprecated
-    @Override
-    public BasicDBMetadata clone() {
-        return new BasicDBMetadata(driverName, driverVersion, databaseProductName, databaseVersion,
-                new HashMap<>(tables), new HashMap<>(relations), new LinkedList<>(listOfTables), idfac);
-    }
-
-    protected boolean isStillMutable() {
-        return isStillMutable;
-    }
-
-    @Override
-    public ImmutableMap<RelationID, DatabaseRelationDefinition> copyTables() {
-        return ImmutableMap.copyOf(tables);
-    }
-
-    @Override
-    public ImmutableMap<RelationID, RelationDefinition> copyRelations() {
-        return ImmutableMap.copyOf(relations);
     }
 
     @JsonIgnore
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
+    }
+
+    @JsonProperty("metadata")
+    Map<String, String> getMedadataForJsonExport() {
+        return ImmutableMap.of(
+                "dbmsProductName", getDBParameters().getDbmsProductName(),
+                "dbmsVersion", getDBParameters().getDbmsVersion(),
+                "driverName", getDBParameters().getDriverName(),
+                "driverVersion", getDBParameters().getDriverVersion(),
+                "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
+        );
     }
 
 }

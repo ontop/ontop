@@ -139,8 +139,15 @@ public interface IQTree {
     /**
      * NOT guaranteed to return all the unique constraints (MAY BE INCOMPLETE)
      *
-     * Set of sets of determinants
+     * Set of sets of determinants.
+     *
+     * Warning: some determinants may be nullable!
      */
     ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints();
+
+    /**
+     * Variables that are the tree proposes for removal if the ancestor trees do not need them.
+     */
+    ImmutableSet<Variable> getNotInternallyRequiredVariables();
 
 }

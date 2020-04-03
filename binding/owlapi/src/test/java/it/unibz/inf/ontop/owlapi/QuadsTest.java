@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static java.util.stream.Collectors.joining;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -43,28 +44,14 @@ public class QuadsTest {
 
   @Before
   public void setUp() throws Exception {
-
     conn = DriverManager.getConnection(URL, USER, PASSWORD);
-    Statement st = conn.createStatement();
-
-    String script = Files.lines(Paths.get(CREATE_SCRIPT)).collect(joining());
-    st.executeUpdate(script);
-    conn.commit();
+    executeFromFile(conn, CREATE_SCRIPT);
   }
 
   @After
   public void tearDown() throws Exception {
-    dropTables();
+    executeFromFile(conn, DROP_SCRIPT);
     conn.close();
-  }
-
-  private void dropTables() throws SQLException, IOException {
-
-    Statement st = conn.createStatement();
-    String script = Files.lines(Paths.get(DROP_SCRIPT)).collect(joining());
-    st.executeUpdate(script);
-    st.close();
-    conn.commit();
   }
 
   @Test

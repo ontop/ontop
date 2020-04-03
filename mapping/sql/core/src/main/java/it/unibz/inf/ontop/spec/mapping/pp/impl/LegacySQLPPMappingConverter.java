@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -38,7 +39,7 @@ import java.util.*;
 
 
 /**
- * SQLPPMapping -> MappingWithProvenance
+ * SQLPPMapping -> MappingAssertion
  */
 public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
@@ -63,24 +64,16 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, RDBMetadata dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, BasicDBMetadata dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
-        return convert(ppMapping.getTripleMaps(), dbMetadata);
-    }
+        int parserViewCounter = 0;
 
-
-    /**
-     * May also add views in the DBMetadata!
-     */
-
-    public ImmutableList<MappingAssertion> convert(Collection<SQLPPTriplesMap> triplesMaps,
-                                                   RDBMetadata metadata) throws InvalidMappingSourceQueriesException {
         List<MappingAssertion> mutableMap = new ArrayList<>();
 
         List<String> errorMessages = new ArrayList<>();
 
-        for (SQLPPTriplesMap mappingAxiom : triplesMaps) {
+        for (SQLPPTriplesMap mappingAxiom : ppMapping.getTripleMaps()) {
             try {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQLQuery();
 
@@ -89,7 +82,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(metadata, coreSingletons);
+                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, coreSingletons);
                     RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
@@ -97,9 +90,9 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                                         .reduce((a, b) -> termFactory.getConjunction(b, a));
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(metadata, termFactory)
+                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, termFactory)
                             .extract(sourceQuery);
-                    ParserViewDefinition view = metadata.createParserView(sourceQuery, attributes);
+                    ParserViewDefinition view = createParserView(dbMetadata.getDBParameters().getQuotedIDFactory(), dbMetadata.getDBParameters().getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
@@ -129,11 +122,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
                             ImmutableTerm t = atom.getSubstitution().get(v);
                             if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, metadata.getQuotedIDFactory()));
+                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory()));
                                 varBuilder2.add(v);
                             }
                             else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, metadata.getQuotedIDFactory());
+                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory());
                                 if (tt instanceof Variable) { // avoids Var -> Var
                                     Variable v2 = (Variable) tt;
                                     varBuilder2.add(v2);
@@ -223,4 +216,11 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
             super(message);
         }
     }
+
+    private ParserViewDefinition createParserView(QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory, String sql, ImmutableList<QuotedID> attributes, int parserViewCounter) {
+        RelationID id = idFactory.createRelationID(null, String.format("view_%s", parserViewCounter));
+
+        return new ParserViewDefinition(id, attributes, sql, dbTypeFactory);
+    }
+
 }

@@ -46,22 +46,16 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
 
-    private static final BasicDBMetadata DB_METADATA;
-
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("A"), integerDBType.getName(), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("B"), integerDBType.getName(), integerDBType, true);
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
+            .addAttribute(idFactory.createAttributeID("A"), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("B"), integerDBType, true));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
-
-        dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
 
         DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, W));

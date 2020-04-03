@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multiset;
 import com.google.inject.assistedinject.Assisted;
@@ -74,12 +75,12 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
 
         @Override
         public IQTree transformIntensionalData(IntensionalDataNode dn) {
-            return transformDataNode(dn);
+            return transformIntensionalDataNode(dn);
         }
 
         @Override
         public IQTree transformExtensionalData(ExtensionalDataNode dn) {
-            return transformDataNode(dn);
+            return transformExtensionalDataNode(dn);
         }
 
         @Override
@@ -183,8 +184,8 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                     ));
         }
 
-        private IQTree transformDataNode(DataNode dn) {
-            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn);
+        private IQTree transformIntensionalDataNode(IntensionalDataNode dn) {
+            ImmutableList<Optional<Variable>> replacementVars = getArgumentReplacement(dn.getProjectionAtom());
 
             if (empt(replacementVars))
                 return dn;
@@ -198,6 +199,25 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             dn.newAtom(atom))
             );
         }
+
+        private IQTree transformExtensionalDataNode(ExtensionalDataNode dn) {
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap = dn.getArgumentMap();
+            ImmutableMap<Integer, Variable> replacementVars = getArgumentReplacement(initialArgumentMap);
+
+            if (replacementVars.isEmpty())
+                return dn;
+
+            FilterNode filter = createFilter(initialArgumentMap, replacementVars);
+            ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = replaceVars(initialArgumentMap, replacementVars);
+            return iqFactory.createUnaryIQTree(
+                    iqFactory.createConstructionNode(dn.getVariables()),
+                    iqFactory.createUnaryIQTree(
+                            filter,
+                            iqFactory.createExtensionalDataNode(dn.getRelationDefinition(), newArgumentMap))
+            );
+        }
+
+
 
         private boolean empt(ImmutableList<Optional<Variable>> replacementVars) {
             return replacementVars.stream()
@@ -219,10 +239,20 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             );
         }
 
-        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataNode dn) {
+        private ImmutableMap<Integer, ? extends VariableOrGroundTerm> replaceVars(
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
+                ImmutableMap<Integer, Variable> replacements) {
+            return argumentMap.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> Optional.ofNullable((VariableOrGroundTerm)replacements.get(e.getKey()))
+                                    .orElseGet(e::getValue)));
+        }
+
+        private ImmutableList<Optional<Variable>> getArgumentReplacement(DataAtom dataAtom) {
             Set<Variable> vars = new HashSet<>();
             List<Optional<Variable>> replacements = new ArrayList<>();
-            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dn.getProjectionAtom().getArguments()) {
+            for (VariableOrGroundTerm term: (ImmutableList<VariableOrGroundTerm>) dataAtom.getArguments()) {
                 if (term instanceof GroundTerm) {
                     replacements.add(Optional.of(variableGenerator.generateNewVariable()));
                 } else if (term instanceof Variable) {
@@ -238,6 +268,26 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
             return ImmutableList.copyOf(replacements);
         }
 
+        private ImmutableMap<Integer, Variable> getArgumentReplacement(
+                ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap) {
+            Set<Variable> vars = new HashSet<>();
+            Map<Integer, Variable> replacementMap = new HashMap<>();
+            for (Map.Entry<Integer, ? extends VariableOrGroundTerm> entry : argumentMap.entrySet()) {
+                VariableOrGroundTerm term = entry.getValue();
+                if (term instanceof GroundTerm) {
+                    replacementMap.put(entry.getKey(), variableGenerator.generateNewVariable());
+                } else if (term instanceof Variable) {
+                    Variable var = (Variable) term;
+                    if (vars.contains(var)) {
+                        replacementMap.put(entry.getKey(), variableGenerator.generateNewVariableFromVar(var));
+                    } else {
+                        vars.add(var);
+                    }
+                }
+            }
+            return ImmutableMap.copyOf(replacementMap);
+        }
+
         private FilterNode createFilter(DataAtom da, ImmutableList<Optional<Variable>> replacementVars) {
             Iterator<Optional<Variable>> it = replacementVars.iterator();
             return iqFactory.createFilterNode(
@@ -246,6 +296,13 @@ public class ExplicitEqualityTransformerImpl implements ExplicitEqualityTransfor
                             .filter(e -> ((Optional) e).isPresent())
                             .map(e -> ((Optional) e).get())
                     ));
+        }
+
+        private FilterNode createFilter(ImmutableMap<Integer, ? extends VariableOrGroundTerm> initialArgumentMap,
+                                        ImmutableMap<Integer, Variable> replacementVars) {
+            return iqFactory.createFilterNode(
+                    getConjunction(replacementVars.entrySet().stream()
+                            .map(e -> termFactory.getStrictEquality(initialArgumentMap.get(e.getKey()), e.getValue()))));
         }
 
         private Optional<ImmutableExpression> getEquality(VariableOrGroundTerm t, Optional<Variable> replacement) {

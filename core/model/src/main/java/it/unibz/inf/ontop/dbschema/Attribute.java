@@ -27,13 +27,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
-import java.sql.Types;
-import java.util.Optional;
 
 /**
  * Represents an attribute (column) of a database relation (table or view) or a parser view
@@ -44,93 +39,64 @@ import java.util.Optional;
 
 public class Attribute {
 
-	private final RelationDefinition table; // reference to the relation or parser view
+	private final RelationDefinition relation;
 
-	private final QualifiedAttributeID id; // qualified id (table = tableId for database relation
-	                                       //               parser views, however, have properly qualified column names
+	private final QuotedID id;
 	private final int index;
-	@Nullable
 	private final DBTermType termType;
 	private final String typeName;
-	private final boolean canNull;
-	@Nullable
-	private final DBTermType abstractDBType;
+	private final boolean isNullable;
 
 	/**
 	 * With a term type
 	 */
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
-			  @Nonnull DBTermType termType, boolean canNull) {
-		this.table = relation;
+	Attribute(RelationDefinition relation, QuotedID id, int index, String typeName,
+			  DBTermType termType, boolean isNullable) {
+		this.relation = relation;
+		this.id = id;
 		this.index = index;
 		this.typeName = typeName;
-		this.id = id;
 		this.termType = termType;
-		this.canNull = canNull;
-		this.abstractDBType = null;
+		this.isNullable = isNullable;
 	}
 
-	/**
-	 * Without a term type
-	 */
-	Attribute(RelationDefinition relation, QualifiedAttributeID id, int index, String typeName,
-			  boolean canNull, DBTypeFactory dbTypeFactory) {
-		this.table = relation;
-		this.index = index;
-		this.typeName = typeName;
-		this.id = id;
-		this.termType = null;
-		this.canNull = canNull;
-		abstractDBType = dbTypeFactory.getAbstractRootDBType();
+	@JsonIgnore
+	public RelationDefinition getRelation() {
+		return relation;
 	}
 
 	@JsonProperty("name")
 	@JsonSerialize(using = QuotedID.QuotedIDSerializer.class)
 	public QuotedID getID() {
-		return id.getAttribute();
-	}
-
-	@JsonIgnore
-	public QualifiedAttributeID getQualifiedID() {
 		return id;
 	}
 
+	/**
+	 * @return the index (starting from 1)
+	 */
 	@JsonIgnore
-	public RelationDefinition getRelation() {
-		return table;
-	}
-
-	@JsonIgnore
-	public int getIndex() {
-		return index;
-	}
-
-//	public int getType() {
-//		return type;
-//	}
+	public int getIndex() { return index; }
 
 	@JsonProperty("isNullable")
-	public boolean canNull() {
-		return canNull;
-	}
+	public boolean isNullable() { return isNullable; }
 
-	/***
-	 * Returns the name of the SQL type associated with this attribute. Note, the name maybe not match
-	 * the integer SQL id. The integer SQL id comes from the {@link Types} class, and these are few. Often
-	 * databases match extra datatypes they may provide to the same ID, e.g., in MySQL YEAR (which doesn't
-	 * exists in standard SQL, is mapped to 91, the ID of DATE. This field helps in disambiguating this
-	 * cases.
-	 *
-	 * @return
+	/**
+	 * @return the name of the SQL type associated with this attribute.
 	 */
 	@JsonProperty("datatype")
 	public String getSQLTypeName() {
 		return typeName;
 	}
 
+	/**
+	 * @return the precise term type
+	 */
+	@JsonIgnore
+	public DBTermType getTermType() { return termType; }
+
 	@Override
 	public String toString() {
-		return id.getAttribute() + " " + typeName + (!canNull ? " NOT NULL" : "");
+		return id + " " + typeName + (isNullable ? "" : " NOT NULL");
 	}
 
 	@Override
@@ -140,8 +106,8 @@ public class Attribute {
 
 		if (obj instanceof Attribute) {
 			Attribute other = (Attribute)obj;
-			// the same reference(!) for the table
-			return this.id.equals(other.id) && (this.table == other.table);
+			// the same reference(!) for the relation
+			return this.id.equals(other.id) && (this.relation == other.relation);
 		}
 
 		return false;
@@ -149,26 +115,7 @@ public class Attribute {
 
 	@Override
 	public int hashCode() {
-		return id.hashCode();
-	}
-
-	/**
-	 * Returns the precise term type (if defined)
-	 */
-	@JsonIgnore
-	public Optional<DBTermType> getTermType() {
-		return Optional.ofNullable(termType);
-	}
-
-	/**
-	 * May be an abstract term type if no precise term type is defined.
-	 *
-	 * Intended to be used for VALIDATION ONLY, not for type inference.
-	 */
-	@JsonIgnore
-	public DBTermType getBaseTypeForValidation() {
-		return getTermType()
-				.orElse(abstractDBType);
+		return id.hashCode(); // never mix attributes from different relations
 	}
 
 	public static class AttributeSerializer extends JsonSerializer<Attribute> {

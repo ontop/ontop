@@ -56,22 +56,22 @@ public class AggregationNormalizerImpl implements AggregationNormalizer {
                                            VariableGenerator variableGenerator, IQProperties currentIQProperties) {
         IQProperties normalizedProperties = currentIQProperties.declareNormalizedForOptimization();
 
-        IQTree normalizedChild = child.normalizeForOptimization(variableGenerator);
+        IQTree shrunkChild = child.normalizeForOptimization(variableGenerator);
 
-        if (normalizedChild.isDeclaredAsEmpty()) {
+        if (shrunkChild.isDeclaredAsEmpty()) {
             return normalizeEmptyChild(aggregationNode, normalizedProperties);
         }
 
-        QueryNode rootNode = normalizedChild.getRootNode();
+        QueryNode rootNode = shrunkChild.getRootNode();
 
         // State after lifting the bindings
         AggregationNormalizationState stateAfterLiftingBindings = Optional.of(rootNode)
                 .filter(n -> n instanceof ConstructionNode)
                 .map(n -> (ConstructionNode) n)
                 .map(n -> normalizeWithChildConstructionNode(aggregationNode, n,
-                        ((UnaryIQTree) normalizedChild).getChild(), variableGenerator))
+                        ((UnaryIQTree) shrunkChild).getChild(), variableGenerator))
                 .orElseGet(() -> new AggregationNormalizationState(aggregationNode, null,
-                        normalizedChild, variableGenerator));
+                        shrunkChild, variableGenerator));
 
         AggregationNormalizationState finalState = stateAfterLiftingBindings.simplifyAggregationSubstitution();
         // TODO: consider filters

@@ -64,89 +64,80 @@ public class FunctionalDependencyTest {
     private final static DBConstant TWO = TERM_FACTORY.getDBConstant("2", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
-    private static final DBMetadata METADATA;
-
     static{
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         /*
          * Table 1: PK + non-unique functional constraint + 2 dependent fields + 1 independent
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T1 = table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T1 = table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T1 = table1Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        // Independent
-        table1Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col2T1)
-                .addDependent(col3T1)
-                .addDependent(col4T1)
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table1"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false));
+        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
+        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
+                .addDeterminant(table1Def.getAttribute(2))
+                .addDependent(table1Def.getAttribute(3))
+                .addDependent(table1Def.getAttribute(4))
                 .build());
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table2"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
+        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
          */
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T3 = table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T3 = table3Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        // Independent
-        Attribute col5T3 = table3Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col6"), integerDBType.getName(), integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col2T3)
-                .addDependent(col3T3)
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table3"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col6"), integerDBType, false));
+        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(table3Def.getAttribute(2))
+                .addDependent(table3Def.getAttribute(3))
                 .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col4T3)
-                .addDependent(col5T3)
+        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(table3Def.getAttribute(4))
+                .addDependent(table3Def.getAttribute(5))
                 .build());
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
          */
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T4 = table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T4 = table4Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        Attribute col4T4 = table4Def.addAttribute(idFactory.createAttributeID("col4"), integerDBType.getName(), integerDBType, false);
-        // Independent
-        table4Def.addAttribute(idFactory.createAttributeID("col5"), integerDBType.getName(), integerDBType, false);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col3T4)
-                .addDependent(col4T4)
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table4"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false));
+        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
+                .addDeterminant(table4Def.getAttribute(3))
+                .addDependent(table4Def.getAttribute(4))
                 .build());
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder()
-                .addDeterminant(col2T4)
-                .addDependent(col3T4)
-                .addDependent(col4T4)
+        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
+                .addDeterminant(table4Def.getAttribute(2))
+                .addDependent(table4Def.getAttribute(3))
+                .addDependent(table4Def.getAttribute(4))
                 .build());
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
-
-        dbMetadata.freeze();
-        METADATA = dbMetadata;
     }
 
     @Test
@@ -154,7 +145,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -173,7 +164,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -183,7 +174,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -192,7 +183,7 @@ public class FunctionalDependencyTest {
                 X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -211,7 +202,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -221,7 +212,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
@@ -230,7 +221,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -249,7 +240,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(Z, Y));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
@@ -264,14 +255,14 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
     public void testRedundantSelfJoin4() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -290,7 +281,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -300,14 +291,14 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
     public void testRedundantSelfJoin5() throws EmptyQueryException {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -326,7 +317,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -336,7 +327,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -344,7 +335,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -367,7 +358,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
@@ -377,7 +368,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -385,7 +376,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -412,7 +403,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -428,7 +419,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -436,7 +427,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -463,7 +454,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -479,7 +470,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -487,7 +478,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -514,7 +505,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
@@ -523,7 +514,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -531,7 +522,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -558,7 +549,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -578,7 +569,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
 
@@ -587,7 +578,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -606,7 +597,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -617,7 +608,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -625,7 +616,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -644,7 +635,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -655,7 +646,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     /**
@@ -666,7 +657,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -700,7 +691,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -708,7 +699,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -741,7 +732,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test(expected = EmptyQueryException.class)
@@ -749,7 +740,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -770,7 +761,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -779,7 +770,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -800,7 +791,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -809,7 +800,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -830,7 +821,7 @@ public class FunctionalDependencyTest {
 
         System.out.println("\nBefore optimization: \n" +  query);
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
+        IntermediateQuery optimizedQuery = optimize(query);
         System.err.println("\nUnexpected optimized query: \n" +  optimizedQuery);
     }
 
@@ -839,7 +830,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -858,7 +849,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -868,7 +859,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -876,7 +867,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -903,7 +894,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -920,7 +911,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Ignore("TODO: remove the redundant join")
@@ -929,7 +920,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -948,7 +939,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
@@ -959,7 +950,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -967,7 +958,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -986,7 +977,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -996,7 +987,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -1004,7 +995,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -1023,7 +1014,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
         ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
@@ -1033,7 +1024,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 
-        optimizeAndCompare(query, expectedQuery, joinNode);
+        optimizeAndCompare(query, expectedQuery);
     }
 
     @Test
@@ -1041,7 +1032,7 @@ public class FunctionalDependencyTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, distinctNode);
 
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -1067,7 +1058,7 @@ public class FunctionalDependencyTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
         expectedBuilder.init(projectionAtom, distinctNode);
         expectedBuilder.addChild(distinctNode, topConstructionNode);
         expectedBuilder.addChild(topConstructionNode, leftJoinNode);
@@ -1079,19 +1070,27 @@ public class FunctionalDependencyTest {
 
         expectedBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
 
-        optimizeAndCompare(query, expectedBuilder.build(), joinNode);
+        optimizeAndCompare(query, expectedBuilder.build());
     }
 
-    private static void optimizeAndCompare(IntermediateQuery query, IntermediateQuery expectedQuery,
-                                           InnerJoinNode joinNode)
-            throws EmptyQueryException {
+    private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
+        System.out.println("Initial query: "+ initialIQ);
+        System.out.println("Expected query: "+ expectedIQ);
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        System.out.println("Optimized query: "+ optimizedIQ);
+    }
 
-        System.out.println("\nBefore optimization: \n" +  query);
-        System.out.println("\n Expected query: \n" +  expectedQuery);
+    private static void optimizeAndCompare(IntermediateQuery initialQuery, IntermediateQuery expectedQuery) {
+        optimizeAndCompare(IQ_CONVERTER.convert(initialQuery), IQ_CONVERTER.convert(expectedQuery));
+    }
 
-        IntermediateQuery optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(query);
-        System.out.println("\n After optimization: \n" +  optimizedQuery);
+    private IntermediateQuery optimize(IntermediateQuery query) throws EmptyQueryException {
+        IQ initialIQ =  IQ_CONVERTER.convert(query);
 
-        assertTrue(IQSyntacticEquivalenceChecker.areEquivalent(optimizedQuery, expectedQuery));
+        IQ optimizedIQ = JOIN_LIKE_OPTIMIZER.optimize(initialIQ, EXECUTOR_REGISTRY);
+        if (optimizedIQ.getTree().isDeclaredAsEmpty())
+            throw new EmptyQueryException();
+
+        return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 }

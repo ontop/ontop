@@ -22,10 +22,6 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RelationID;
-
 /**
  * Creates QuotedIdentifiers following the rules of MS SQL Server:<br>
  *    - unquoted identifiers are preserved<br>

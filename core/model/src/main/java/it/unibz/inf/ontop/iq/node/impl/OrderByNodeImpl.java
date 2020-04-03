@@ -106,7 +106,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public boolean isDistinct(IQTree child) {
+    public boolean isDistinct(IQTree tree, IQTree child) {
         return child.isDistinct();
     }
 
@@ -142,6 +142,18 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints(IQTree child) {
         return child.inferUniqueConstraints();
+    }
+
+    /**
+     * Subtracts from the variables proposed by the child the one used for ordering
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        ImmutableSet<Variable> localVariables = getLocalVariables();
+
+        return child.getNotInternallyRequiredVariables().stream()
+                .filter(v -> !localVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

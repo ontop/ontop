@@ -2,10 +2,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -43,8 +40,6 @@ public class MappingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
-    private static final DBMetadata DB_METADATA;
-
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
     private static Variable C = TERM_FACTORY.getVariable("c");
@@ -59,38 +54,35 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerDBType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table1Def.addAttribute(idFactory.createAttributeID("col12"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
+            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("col12"), integerDBType, false));
         P1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col31"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p3"))
+            .addAttribute(idFactory.createAttributeID("col31"), integerDBType, false));
         P3_PREDICATE = table3Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p4"));
-        table4Def.addAttribute(idFactory.createAttributeID("col41"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p4"))
+            .addAttribute(idFactory.createAttributeID("col41"), integerDBType, false));
         P4_PREDICATE = table4Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "p5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col51"), integerDBType.getName(), integerDBType, false);
+        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p5"))
+            .addAttribute(idFactory.createAttributeID("col51"), integerDBType, false));
         P5_PREDICATE = table5Def.getAtomPredicate();
 
 
-        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(idFactory.createRelationID("DB2INST1", "brokerworksfor"));
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("broker"), integerDBType.getName(), integerDBType, false);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("company"), integerDBType.getName(), integerDBType, true);
-        tableBrokerDef.addAttribute(idFactory.createAttributeID("client"), integerDBType.getName(), integerDBType, true);
+        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID("DB2INST1", "brokerworksfor"))
+            .addAttribute(idFactory.createAttributeID("broker"), integerDBType, false)
+            .addAttribute(idFactory.createAttributeID("company"), integerDBType, true)
+            .addAttribute(idFactory.createAttributeID("client"), integerDBType, true));
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";
-
-        DB_METADATA = dbMetadata;
 
         PROP_1 = RDF_FACTORY.createIRI("http://example.org/voc#Prop1");
         PROP_2 = RDF_FACTORY.createIRI("http://example.org/voc#Prop2");
@@ -110,7 +102,7 @@ public class MappingTest {
 
         // Properties
         for (IRI propertyIri : propertyIris){
-            IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+            IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
             ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                     SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                             P, getConstantIRI(propertyIri),
@@ -128,7 +120,7 @@ public class MappingTest {
         }
 
         // Class
-        IntermediateQueryBuilder mappingBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder mappingBuilder = createQueryBuilder();
         ConstructionNode mappingRootNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, O),
                 SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                         P, getConstantIRI(RDF.TYPE),
@@ -207,7 +199,7 @@ public class MappingTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         queryBuilder.init(projectionAtom, constructionNode);
         queryBuilder.addChild(constructionNode, table1DataNode);
 

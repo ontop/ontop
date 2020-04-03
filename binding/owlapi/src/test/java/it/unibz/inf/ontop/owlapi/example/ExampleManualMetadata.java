@@ -54,43 +54,39 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private static void defMeasTable(RDBMetadata dbMetadata, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType().getName(), dbTypeFactory.getDBDateTimestampType(), false);
-	// NB: was numeric
-	tableDefinition.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
+		.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false)
+		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false)
+		.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defMessTable(RDBMetadata dbMetadata, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType().getName(), dbTypeFactory.getDBDateTimestampType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
+		.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType(), false)
+		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defStaticTable(RDBMetadata dbMetadata, String name) {
-	QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-	DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(idfac.createRelationID(null, name));
-	tableDefinition.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
-	tableDefinition.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType().getName(), dbTypeFactory.getDBDoubleType(), false);
+private static void defStaticTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
+	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
+		.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
 }
-private static RDBMetadata getMeta(){
+private static BasicDBMetadata getMeta(){
 	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 	Injector defaultInjector = defaultConfiguration.getInjector();
 
+	BasicDBMetadata dbMetadata = defaultInjector.getInstance(BasicDBMetadata.class);
+	DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
 
-	RDBMetadata dbMetadata = defaultInjector.getInstance(DummyRDBMetadata.class);
-
-	defMeasTable(dbMetadata, "burner");
-	defMessTable(dbMetadata, "events");
-	defStaticTable(dbMetadata, "a_static");
+	defMeasTable(dbMetadata, dbTypeFactory,"burner");
+	defMessTable(dbMetadata, dbTypeFactory,"events");
+	defStaticTable(dbMetadata, dbTypeFactory,"a_static");
 	return dbMetadata;
 }
 

@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.dbschema.tools.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -29,7 +29,7 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     public String extractAndSerialize() throws DBMetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory);
+            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory.getDBTypeFactory());
             RDBMetadataExtractionTools.loadMetadata(metadata, localConnection, null);
 
             ObjectMapper mapper = new ObjectMapper();

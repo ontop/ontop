@@ -24,14 +24,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
@@ -45,7 +48,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final TargetQueryParser targetParser;
 
-	private RDBMetadata md;
+	private BasicDBMetadata md;
 
 	public SQLPPMapping2DatalogConverterTest() {
 		targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(ImmutableMap.of(
@@ -54,31 +57,30 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
     }
 
 	public void setUp() {
-		md = DEFAULT_DUMMY_DB_METADATA.clone();
-		QuotedIDFactory idfac = md.getQuotedIDFactory();
-
-		DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+		md = DEFAULT_DUMMY_DB_METADATA;
+		QuotedIDFactory idfac = md.getDBParameters().getQuotedIDFactory();
+		DBTermType integerDBType = md.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
 
 		// Database schema
-		DatabaseRelationDefinition table1 = md.createDatabaseRelation(idfac.createRelationID(null, "Student"));
-		table1.addAttribute(idfac.createAttributeID("id"), integerType.getName(), integerType, false);
-		table1.addAttribute(idfac.createAttributeID("first_name"), stringType.getName(), stringType, false);
-		table1.addAttribute(idfac.createAttributeID("last_name"), stringType.getName(), stringType, false);
-		table1.addAttribute(idfac.createAttributeID("year"), integerType.getName(), integerType, false);
-		table1.addAttribute(idfac.createAttributeID("nationality"), stringType.getName(), stringType, false);
+		DatabaseRelationDefinition table1 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Student"))
+			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("first_name"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("last_name"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("year"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("nationality"), stringDBType, false));
 		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 
-		DatabaseRelationDefinition table2 = md.createDatabaseRelation(idfac.createRelationID(null, "Course"));
-		table2.addAttribute(idfac.createAttributeID("cid"), stringType.getName(), stringType, false);
-		table2.addAttribute(idfac.createAttributeID("title"), stringType.getName(), stringType, false);
-		table2.addAttribute(idfac.createAttributeID("credits"), integerType.getName(), integerType, false);
-		table2.addAttribute(idfac.createAttributeID("description"), stringType.getName(), stringType, false);
+		DatabaseRelationDefinition table2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Course"))
+			.addAttribute(idfac.createAttributeID("cid"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("title"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("credits"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("description"), stringDBType, false));
 		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 
-		DatabaseRelationDefinition table3 = md.createDatabaseRelation(idfac.createRelationID(null, "Enrollment"));
-		table3.addAttribute(idfac.createAttributeID("student_id"), integerType.getName(), integerType, false);
-		table3.addAttribute(idfac.createAttributeID("course_id"), stringType.getName(), stringType, false);
+		DatabaseRelationDefinition table3 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Enrollment"))
+			.addAttribute(idfac.createAttributeID("student_id"), integerDBType, false)
+			.addAttribute(idfac.createAttributeID("course_id"), stringDBType, false));
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
 				table3.getAttribute(idfac.createAttributeID("course_id"))));
 	}
@@ -87,7 +89,10 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
-		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(ImmutableList.of(mappingAxiom), md).stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
+		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
+				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
+						new SimplePrefixManager(ImmutableMap.of())), md, null)
+				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
 		assertNotNull(dp);
 		System.out.println(dp.toString());

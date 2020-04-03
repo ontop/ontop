@@ -41,7 +41,6 @@ public class SelectQueryParserTest {
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
-    private static final TermType ROOT_TERM_TYPE = TYPE_FACTORY.getAbstractAtomicTermType();
 
 
     @Test
@@ -419,12 +418,12 @@ public class SelectQueryParserTest {
     }
 
     private DataAtom<RelationPredicate> dataAtomOf(DBMetadata m, String predicateName, String var1, String var2) {
-        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName))),
+        return ATOM_FACTORY.getDataAtom(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName)).getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
     private DataAtom<RelationPredicate> dataAtomOf(DBMetadata m, String predicateName, String var1, String var2, String var3, String var4) {
-        return ATOM_FACTORY.getDataAtom(new FakeRelationPredicate(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName))),
+        return ATOM_FACTORY.getDataAtom(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName)).getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
@@ -435,27 +434,26 @@ public class SelectQueryParserTest {
 
 
     private DBMetadata createMetadata() {
-        RDBMetadata metadata = createDummyMetadata();
-        QuotedIDFactory idfac = metadata.getQuotedIDFactory();
-
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
+        BasicDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
+        DBTermType integerDBType = metadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition relation1 =
-                metadata.createDatabaseRelation(idfac.createRelationID(null, P));
-        relation1.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
-        relation1.addAttribute(idfac.createAttributeID("B"), integerType.getName(), integerType, false);
+                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))
+            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
+            .addAttribute(idfac.createAttributeID("B"), integerDBType, false));
 
         DatabaseRelationDefinition relation2 =
-                metadata.createDatabaseRelation(idfac.createRelationID(null, Q));
-        relation2.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
-        relation2.addAttribute(idfac.createAttributeID("C"), integerType.getName(), integerType, false);
+                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, Q))
+            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
+            .addAttribute(idfac.createAttributeID("C"), integerDBType, false));
 
         DatabaseRelationDefinition relation3 =
-                metadata.createDatabaseRelation(idfac.createRelationID(null, R));
-        relation3.addAttribute(idfac.createAttributeID("A"), integerType.getName(), integerType, false);
-        relation3.addAttribute(idfac.createAttributeID("B"), integerType.getName(), integerType, false);
-        relation3.addAttribute(idfac.createAttributeID("C"), integerType.getName(), integerType, false);
-        relation3.addAttribute(idfac.createAttributeID("D"), integerType.getName(), integerType, false);
+                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, R))
+            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
+            .addAttribute(idfac.createAttributeID("B"), integerDBType, false)
+            .addAttribute(idfac.createAttributeID("C"), integerDBType, false)
+            .addAttribute(idfac.createAttributeID("D"), integerDBType, false));
 
         return metadata;
     }

@@ -21,6 +21,9 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
     ImmutableSet<Variable> getVariables();
 
     @Nullable
+    ImmutableSet<Variable> getNotInternallyRequiredVariables();
+
+    @Nullable
     VariableNullability getVariableNullability();
 
     @Nullable
@@ -36,6 +39,11 @@ public interface ConcreteIQTreeCache extends IQTreeCache {
      * Can only be set ONCE!
      */
     void setVariables(@Nonnull ImmutableSet<Variable> variables);
+
+    /**
+     * Can only be set ONCE!
+     */
+    void setNotInternallyRequiredVariables(@Nonnull ImmutableSet<Variable> notInternallyRequiredVariables);
 
     /**
      * Can only be set ONCE!

@@ -69,18 +69,13 @@ public class BasicUniqueTermTypeExtractor implements UniqueTermTypeExtractor {
 
         @Override
         public Optional<TermType> visitExtensionalData(ExtensionalDataNode dataNode) {
-            DataAtom<RelationPredicate> projectionAtom = dataNode.getProjectionAtom();
-            RelationDefinition relationDefinition = projectionAtom.getPredicate().getRelationDefinition();
+            RelationDefinition relationDefinition = dataNode.getRelationDefinition();
 
-            ImmutableList<? extends VariableOrGroundTerm> arguments = projectionAtom.getArguments();
-
-            return IntStream.range(0, arguments.size())
-                    .filter(i -> arguments.get(i).equals(variable))
-                    .boxed()
-                    .map(i -> relationDefinition.getAttribute(i + 1))
+            return dataNode.getArgumentMap().entrySet().stream()
+                    .filter(e -> e.getValue().equals(variable))
+                    .map(e -> relationDefinition.getAttribute(e.getKey() + 1))
                     .map(Attribute::getTermType)
-                    .filter(Optional::isPresent)
-                    .map(o -> (TermType) o.get())
+                    .map(o -> (TermType) o)
                     .findAny();
         }
 

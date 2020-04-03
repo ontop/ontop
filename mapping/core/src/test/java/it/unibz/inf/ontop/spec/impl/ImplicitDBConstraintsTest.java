@@ -27,17 +27,17 @@ public class ImplicitDBConstraintsTest {
 	
 	@Before
 	public void setupMetadata(){
-		this.md = createDummyMetadata();
-		this.idfac = md.getQuotedIDFactory();
+		md = DEFAULT_DUMMY_DB_METADATA;
+		idfac = md.getDBParameters().getQuotedIDFactory();
 
-		DBTermType stringType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
+		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
 
-		DatabaseRelationDefinition td = md.createDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		td.addAttribute(idfac.createAttributeID("KEYNAME"), stringType.getName(), stringType, false); // from 1
+		DatabaseRelationDefinition td = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
+			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));
 
-		DatabaseRelationDefinition td2 = md.createDatabaseRelation(idfac.createRelationID(null, "TABLE2"));
-		td2.addAttribute(idfac.createAttributeID("KEY1"), stringType.getName(), stringType, false);  // from 1
-		td2.addAttribute(idfac.createAttributeID("KEY2"), stringType.getName(), stringType, false);
+		DatabaseRelationDefinition td2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
+			.addAttribute(idfac.createAttributeID("KEY1"), stringDBType, false)
+			.addAttribute(idfac.createAttributeID("KEY2"), stringDBType, false));
 	}
 	
 	@Test
@@ -105,6 +105,4 @@ public class ImplicitDBConstraintsTest {
 		assertEquals(ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))),
 						dd.getUniqueConstraints().get(0).getAttributes());
 	}
-
-	
 }

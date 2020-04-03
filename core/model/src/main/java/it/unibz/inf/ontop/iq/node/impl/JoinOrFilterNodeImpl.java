@@ -2,11 +2,14 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -101,6 +104,43 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
             throw new InvalidIntermediateQueryException("Expression " + expression + " of "
                     + expression + " uses unbound variables (" + unboundVariables +  ").\n" + this);
         }
+    }
+
+    protected ImmutableSet<Variable> computeNotInternallyRequiredVariables(ImmutableList<IQTree> children) {
+        ImmutableSet<Variable> conditionVariables = getLocallyRequiredVariables();
+
+        ImmutableSet<Variable> notInternallyRequiredByAtLeastAChild = children.stream()
+                .flatMap(c -> c.getNotInternallyRequiredVariables().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        // All variables are required
+        if (notInternallyRequiredByAtLeastAChild.isEmpty())
+            return notInternallyRequiredByAtLeastAChild;
+
+        ImmutableMultiset<Variable> childVariableMultiset = children.stream()
+                .flatMap(c -> c.getVariables().stream())
+                .collect(ImmutableCollectors.toMultiset());
+
+        return childVariableMultiset.entrySet().stream()
+                // Only coming from one child
+                .filter(e -> e.getCount() == 1)
+                .map(Multiset.Entry::getElement)
+                .filter(notInternallyRequiredByAtLeastAChild::contains)
+                .filter(v -> !conditionVariables.contains(v))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    protected boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {
+        if (children.stream().allMatch(IQTree::isDistinct))
+            return true;
+
+        ImmutableSet<ImmutableSet<Variable>> constraints = tree.inferUniqueConstraints();
+        if (constraints.isEmpty())
+            return false;
+
+        VariableNullability variableNullability = tree.getVariableNullability();
+        return constraints.stream()
+                .anyMatch(c -> c.stream().noneMatch(variableNullability::isPossiblyNullable));
     }
 
 }

@@ -28,10 +28,9 @@ import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.exception.InvalidMappingException;
@@ -131,8 +130,8 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
-		RDBMetadata dbMetadata = createDummyMetadata();
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
+		BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+		QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         /**
          * Problems found in the mapping file.

@@ -6,8 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.impl.GroundTermTools;
@@ -38,20 +36,23 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
     private final SubstitutionFactory substitutionFactory;
     private final ImmutableUnificationTools unificationTools;
+    private final TermFactory termFactory;
 
     @Inject
     private FunctionalDependencyUnificationExecutor(IntermediateQueryFactory iqFactory,
                                                     SubstitutionFactory substitutionFactory,
                                                     ImmutableUnificationTools unificationTools,
                                                     TermFactory termFactory) {
-        super(iqFactory,substitutionFactory, unificationTools, termFactory);
+        super(iqFactory,unificationTools, termFactory);
         this.substitutionFactory = substitutionFactory;
         this.unificationTools = unificationTools;
+        this.termFactory = termFactory;
+
     }
 
     @Override
     protected Optional<PredicateLevelProposal> proposePerPredicate(InnerJoinNode joinNode, ImmutableCollection<ExtensionalDataNode> initialNodes,
-                                                                   RelationPredicate predicate,
+                                                                   RelationDefinition relation,
                                                                    ImmutableList<Variable> priorityVariables,
                                                                    IntermediateQuery query)
             throws AtomUnificationException {
@@ -59,7 +60,6 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         if (initialNodes.size() < 2)
             return Optional.empty();
 
-        RelationDefinition relation = predicate.getRelationDefinition();
 
         /*
          * Does nothing
@@ -81,7 +81,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
         return (dependentUnifiers.isEmpty())
                 ? Optional.empty()
-                : Optional.of(new PredicateLevelProposal(dependentUnifiers, ImmutableSet.of(), isNotNullConjunction));
+                : Optional.of(new PredicateLevelProposal(dependentUnifiers, isNotNullConjunction));
     }
 
     /**
@@ -94,7 +94,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
             ImmutableCollection<Collection<ExtensionalDataNode>>> constraintNodeMap) throws AtomUnificationException {
 
         ImmutableSet<Integer> nullableIndexes = databaseRelation.getAttributes().stream()
-                .filter(Attribute::canNull)
+                .filter(Attribute::isNullable)
                 .map(a -> a.getIndex() - 1)
                 .collect(ImmutableCollectors.toSet());
 
@@ -116,17 +116,22 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
 
         ImmutableMultimap<ImmutableList<VariableOrGroundTerm>, ExtensionalDataNode> nodeMultiMap = initialNodes.stream()
                 .collect(ImmutableCollectors.toMultimap(
-                        n -> extractDeterminantArguments(n.getProjectionAtom(), constraintDeterminantIndexes),
+                        n -> extractDeterminantArguments(n, constraintDeterminantIndexes),
                         n -> n));
 
         return nodeMultiMap.asMap().values();
     }
 
-    private ImmutableList<VariableOrGroundTerm> extractDeterminantArguments(DataAtom dataAtom,
+    /**
+     * NB: creates fresh variables for not present arguments
+     */
+    private ImmutableList<VariableOrGroundTerm> extractDeterminantArguments(ExtensionalDataNode dataNode,
                                                                             ImmutableList<Integer> determinantIndexes) {
-        ImmutableList<? extends VariableOrGroundTerm> arguments = dataAtom.getArguments();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
         return determinantIndexes.stream()
-                .map(i -> arguments.get(i - 1))
+                .map(i -> Optional.ofNullable((VariableOrGroundTerm) argumentMap.get(i - 1))
+                        // Creates a fresh variable so as to keep it alone in its group
+                        .orElseGet(() -> termFactory.getVariable(UUID.randomUUID().toString())))
                 .collect(ImmutableCollectors.toList());
     }
 
@@ -168,7 +173,7 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
             if (currentDataNode == referenceDataNode)
                 continue;
 
-            unifyDependentTerms(referenceDataNode.getProjectionAtom(), currentDataNode.getProjectionAtom(),
+            unifyDependentTerms(referenceDataNode, currentDataNode,
                     dependentIndexes, nullableIndexes)
                     .ifPresent(substitutionCollection::add);
         }
@@ -183,29 +188,34 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
      * Throws an AtomUnificationException if unification is impossible
      */
     private Optional<ImmutableSubstitution<VariableOrGroundTerm>> unifyDependentTerms(
-            DataAtom leftAtom, DataAtom rightAtom, ImmutableList<Integer> dependentIndexes,
+            ExtensionalDataNode leftNode, ExtensionalDataNode rightNode, ImmutableList<Integer> dependentIndexes,
             ImmutableSet<Integer> nullableIndexes)
             throws AtomUnificationException {
+
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> leftArgumentMap = leftNode.getArgumentMap();
+        ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap = rightNode.getArgumentMap();
 
         // Non-final
         Optional<ImmutableSubstitution<VariableOrGroundTerm>> currentUnifier = Optional.empty();
 
         for (Integer dependentIndex : dependentIndexes) {
-            VariableOrGroundTerm leftArgument = leftAtom.getTerm(dependentIndex);
-            VariableOrGroundTerm rightArgument = rightAtom.getTerm(dependentIndex);
+            Optional<VariableOrGroundTerm> leftArgument = Optional.ofNullable(leftArgumentMap.get(dependentIndex));
+            Optional<VariableOrGroundTerm> rightArgument = Optional.ofNullable(rightArgumentMap.get(dependentIndex));
 
             /*
              * Throws an exception if the unification is not possible
              */
-            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = unificationTools.computeDirectedMGU(
-                    rightArgument, leftArgument)
+            ImmutableSubstitution<VariableOrGroundTerm> termUnifier = (leftArgument.isPresent() && rightArgument.isPresent())
+                    ? unificationTools.computeDirectedMGU(rightArgument.get(), leftArgument.get())
                     .map(ImmutableSubstitution::getImmutableMap)
                     .map(map -> map.entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     Map.Entry::getKey,
                                     e -> GroundTermTools.convertIntoVariableOrGroundTerm(e.getValue()))))
                     .map(substitutionFactory::getSubstitution)
-                    .orElseThrow(AtomUnificationException::new);
+                    .orElseThrow(AtomUnificationException::new)
+                    // Empty substitution if any of the argument is missing
+                    : substitutionFactory.getSubstitution();
 
             ImmutableSubstitution<VariableOrGroundTerm> candidateUnifier = currentUnifier.isPresent()
                     ? unificationTools.computeAtomMGUS(currentUnifier.get(), termUnifier)
@@ -227,20 +237,4 @@ public class FunctionalDependencyUnificationExecutor extends RedundantSelfJoinEx
         }
         return currentUnifier.filter(s -> !s.isEmpty());
     }
-
-
-
-    /**
-     * TODO: explain
-     */
-    private boolean isRemovable(ExtensionalDataNode node, ImmutableSet<Integer> independentIndexes,
-                                ImmutableSet<Variable> requiredAndCooccuringVariables) {
-        ImmutableList<? extends VariableOrGroundTerm> arguments = node.getProjectionAtom().getArguments();
-
-        return independentIndexes.stream()
-                .map(i -> arguments.get(i - 1))
-                .allMatch(t -> (t instanceof Variable) && (!requiredAndCooccuringVariables.contains(t)));
-    }
-
-
 }

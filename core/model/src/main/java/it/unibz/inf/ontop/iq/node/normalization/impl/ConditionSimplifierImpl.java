@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -16,6 +17,7 @@ import it.unibz.inf.ontop.substitution.impl.ImmutableSubstitutionTools;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -51,20 +53,13 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                        VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
-        Optional<ImmutableExpression.Evaluation> optionalEvaluationResults =
-                nonOptimizedExpression
-                        .map(expression -> expression.evaluate2VL(variableNullability));
+        if (nonOptimizedExpression.isPresent()) {
 
-        if (optionalEvaluationResults.isPresent()) {
-            ImmutableExpression.Evaluation results = optionalEvaluationResults.get();
-
-            if (results.isEffectiveFalse())
-                throw new UnsatisfiableConditionException();
-
-            Optional<ImmutableExpression> optionalExpression = results.getExpression();
+            Optional<ImmutableExpression> optionalExpression = evaluateCondition(nonOptimizedExpression.get(),
+                    variableNullability);
             if (optionalExpression.isPresent())
                 // May throw an exception if unification is rejected
-                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables);
+                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, variableNullability);
             else
                 return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
         }
@@ -73,17 +68,33 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     /**
+     * Empty means true
+     */
+    private Optional<ImmutableExpression> evaluateCondition(ImmutableExpression expression,
+                                                            VariableNullability variableNullability) throws UnsatisfiableConditionException {
+        ImmutableExpression.Evaluation results = expression.evaluate2VL(variableNullability);
+
+        if (results.isEffectiveFalse())
+            throw new UnsatisfiableConditionException();
+
+        return results.getExpression();
+    }
+
+
+    /**
      * TODO: explain
      *
      * Functional terms remain in the expression (never going into the substitution)
      *
      */
     private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                                                      ImmutableSet<Variable> nonLiftableVariables)
+                                                                           ImmutableSet<Variable> nonLiftableVariables,
+                                                                           VariableNullability variableNullability)
             throws UnsatisfiableConditionException {
 
         ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
                 .collect(ImmutableCollectors.toSet());
+
         ImmutableSet<ImmutableExpression> functionFreeEqualities = expressions.stream()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 // TODO: consider the fact that equalities might be n-ary
@@ -100,7 +111,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 (NonFunctionalTerm)args.get(1))),
                 nonLiftableVariables);
 
-        Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
+        Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
                         // Expressions that are not function-free equalities
                         expressions.stream()
@@ -114,9 +125,28 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue()))
                 ));
 
-        ImmutableSubstitution<NonFunctionalTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
-                normalizedUnifier.getImmutableMap().entrySet().stream()
-                        .filter(e -> !nonLiftableVariables.contains(e.getKey()))
+        Optional<ImmutableSubstitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
+                .flatMap(e -> extractGroundFunctionalSubstitution(e));
+
+
+        Optional<ImmutableExpression> newExpression;
+        if (groundFunctionalSubstitution.isPresent()) {
+            newExpression = evaluateCondition(
+                    groundFunctionalSubstitution.get().applyToBooleanExpression(partiallySimplifiedExpression.get()),
+                    variableNullability);
+        }
+        else
+            newExpression = partiallySimplifiedExpression;
+
+        ImmutableSubstitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.getSubstitution(
+                Stream.concat(
+                        normalizedUnifier.getImmutableMap().entrySet().stream()
+                                .filter(e -> !nonLiftableVariables.contains(e.getKey()))
+                                .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e),
+                        groundFunctionalSubstitution
+                                .map(s -> s.getImmutableMap().entrySet().stream()
+                                        .map(e -> (Map.Entry<Variable, VariableOrGroundTerm>)(Map.Entry<Variable, ?>)e))
+                                .orElseGet(Stream::empty))
                         .collect(ImmutableCollectors.toMap()));
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
@@ -166,6 +196,45 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         }
         else
             return conditionSimplificationResults.getOptionalExpression();
+    }
+
+
+    /**
+     * We can extract at most one equality ground-functional-term -> variable per variable.
+     *
+     * Treated differently from non-functional terms because functional terms are not robust to unification.
+     */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    private Optional<ImmutableSubstitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
+            ImmutableExpression expression) {
+        ImmutableMap<Variable, Collection<GroundFunctionalTerm>> map = expression.flattenAND()
+                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                // TODO: generalize it to non-binary equalities
+                .filter(e -> e.getArity() == 2)
+                .filter(e -> {
+                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
+                    return arguments.stream().anyMatch(t -> t instanceof Variable)
+                            && arguments.stream().anyMatch(t -> t instanceof GroundFunctionalTerm);
+                })
+                .collect(ImmutableCollectors.toMultimap(
+                        e -> e.getTerms().stream()
+                                .filter(t -> t instanceof Variable)
+                                .map(t -> (Variable) t)
+                                .findAny().get(),
+                        e -> e.getTerms().stream()
+                                .filter(t -> t instanceof GroundFunctionalTerm)
+                                .map(t -> (GroundFunctionalTerm) t)
+                                .findAny().get()))
+                .asMap();
+
+        return Optional.of(map)
+                .filter(m -> !m.isEmpty())
+                .map(m -> substitutionFactory.getSubstitution(
+                        m.entrySet().stream()
+                                .collect(ImmutableCollectors.toMap(
+                                        Map.Entry::getKey,
+                                        // Picks one of the ground functional term
+                                        e -> e.getValue().iterator().next()))));
     }
 
 

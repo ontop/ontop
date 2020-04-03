@@ -101,7 +101,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
 
     @Override
-    public boolean isDistinct(IQTree child) {
+    public boolean isDistinct(IQTree tree, IQTree child) {
         return true;
     }
 
@@ -246,6 +246,14 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                                 .filter(groupingVariables::containsAll),
                         Stream.of(getGroupingVariables()))
                   .collect(ImmutableCollectors.toSet());
+    }
+
+    /**
+     * Out of the projected variables, only the grouping variables are required
+     */
+    @Override
+    public ImmutableSet<Variable> computeNotInternallyRequiredVariables(IQTree child) {
+        return substitution.getImmutableMap().keySet();
     }
 
     @Override

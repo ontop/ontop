@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.dbschema.impl;
 
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
@@ -49,10 +50,10 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public RDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
+    public BasicDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
         try {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory);
+            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(connection, typeFactory.getDBTypeFactory());
             return extract(ppMapping, connection, metadata, constraintFile);
         }
         catch (SQLException e) {
@@ -61,11 +62,11 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public RDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
+    public BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
                                DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
             throws DBMetadataExtractionException {
 
-        if (!(partiallyDefinedMetadata instanceof RDBMetadata)) {
+        if (!(partiallyDefinedMetadata instanceof BasicDBMetadata)) {
             throw new IllegalArgumentException("Was expecting a DBMetadata");
         }
 
@@ -74,7 +75,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
                 : Optional.empty();
 
         try {
-            RDBMetadata metadata = (RDBMetadata) partiallyDefinedMetadata;
+            BasicDBMetadata metadata = (BasicDBMetadata) partiallyDefinedMetadata;
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
@@ -87,14 +88,14 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
 
                     // Parse mappings. Just to get the table names in use
 
-                    Set<RelationID> realTables = getRealTables(metadata.getQuotedIDFactory(), ppMapping.getTripleMaps());
+                    Set<RelationID> realTables = getRealTables(metadata.getDBParameters().getQuotedIDFactory(), ppMapping.getTripleMaps());
                     implicitConstraints.ifPresent(c -> {
                         // Add the tables referred to by user-supplied foreign keys
-                        Set<RelationID> referredTables = c.getReferredTables(metadata.getQuotedIDFactory());
+                        Set<RelationID> referredTables = c.getReferredTables(metadata.getDBParameters().getQuotedIDFactory());
                         realTables.addAll(referredTables);
                     });
 
-                    RDBMetadataExtractionTools.loadMetadata(metadata, connection, realTables);
+                    RDBMetadataExtractionTools.loadMetadata(metadata, connection, ImmutableList.copyOf(realTables));
                 }
                 catch (SQLException e) {
                     System.out.println("Error obtaining the metadata " + e);
@@ -107,7 +108,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             });
 
             return metadata;
-
         }
         catch (SQLException e) {
             throw new DBMetadataExtractionException(e.getMessage());

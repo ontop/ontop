@@ -20,64 +20,48 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStructuralAndSemanticIQOptimizerImpl.class);
     private final UnionAndBindingLiftOptimizer bindingLiftOptimizer;
     private final JoinLikeOptimizer joinLikeOptimizer;
-    private final FlattenUnionOptimizer flattenUnionOptimizer;
     private final IQConverter iqConverter;
     private final OrderBySimplifier orderBySimplifier;
     private final AggregationSimplifier aggregationSimplifier;
     private final IntermediateQueryFactory iqFactory;
-    private final ProjectionShrinkingOptimizer projectionShrinker;
 
     @Inject
     private GeneralStructuralAndSemanticIQOptimizerImpl(UnionAndBindingLiftOptimizer bindingLiftOptimizer,
                                                         JoinLikeOptimizer joinLikeOptimizer,
-                                                        FlattenUnionOptimizer flattenUnionOptimizer,
                                                         IQConverter iqConverter, OrderBySimplifier orderBySimplifier,
-                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory,
-                                                        ProjectionShrinkingOptimizer projectionShrinker) {
+                                                        AggregationSimplifier aggregationSimplifier, IntermediateQueryFactory iqFactory) {
         this.bindingLiftOptimizer = bindingLiftOptimizer;
         this.joinLikeOptimizer = joinLikeOptimizer;
-        this.flattenUnionOptimizer = flattenUnionOptimizer;
         this.iqConverter = iqConverter;
         this.orderBySimplifier = orderBySimplifier;
         this.aggregationSimplifier = aggregationSimplifier;
         this.iqFactory = iqFactory;
-        this.projectionShrinker = projectionShrinker;
     }
 
     @Override
     public IQ optimize(IQ query, ExecutorRegistry executorRegistry) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);
-        LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
 
-        try {
-            // Non-final
-            IntermediateQuery intermediateQuery = iqConverter.convert(liftedQuery, executorRegistry);
+        boolean isLogDebugEnabled = LOGGER.isDebugEnabled();
+        if (isLogDebugEnabled)
+            LOGGER.debug("New lifted query: \n" + liftedQuery.toString());
 
-            intermediateQuery = projectionShrinker.optimize(intermediateQuery);
+        long beginningJoinLike = System.currentTimeMillis();
+        IQ queryAfterJoinLikeOptimization = joinLikeOptimizer.optimize(liftedQuery, executorRegistry);
 
-            LOGGER.debug("After projection shrinking: \n" + intermediateQuery.toString());
-
-            long beginningJoinLike = System.currentTimeMillis();
-            intermediateQuery = joinLikeOptimizer.optimize(intermediateQuery);
-            LOGGER.debug(String.format(
-                    "New query after fixed point join optimization (%d ms): \n%s",
+        if (isLogDebugEnabled)
+            LOGGER.debug(String.format("New query after fixed point join optimization (%d ms): \n%s",
                     System.currentTimeMillis() - beginningJoinLike,
-                    intermediateQuery.toString()));
+                    queryAfterJoinLikeOptimization.toString()));
 
-            intermediateQuery = flattenUnionOptimizer.optimize(intermediateQuery);
-            LOGGER.debug("New query after flattening Unions: \n" + intermediateQuery.toString());
-
-            IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(iqConverter.convert(intermediateQuery));
+        IQ queryAfterAggregationSimplification = aggregationSimplifier.optimize(queryAfterJoinLikeOptimization);
+        if (isLogDebugEnabled)
             LOGGER.debug("New query after simplifying the aggregation node: \n" + queryAfterAggregationSimplification);
-            IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
+        IQ optimizedQuery = orderBySimplifier.optimize(queryAfterAggregationSimplification);
+        if (isLogDebugEnabled)
             LOGGER.debug("New query after simplifying the order by node: \n" + optimizedQuery);
 
-            return optimizedQuery;
-        } catch (EmptyQueryException e ) {
-            DistinctVariableOnlyDataAtom projectionAtom = query.getProjectionAtom();
-            return iqFactory.createIQ(projectionAtom,
-                    iqFactory.createEmptyNode(projectionAtom.getVariables()));
-        }
+        return optimizedQuery;
     }
 }

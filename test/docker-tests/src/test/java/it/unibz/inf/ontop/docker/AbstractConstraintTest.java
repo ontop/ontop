@@ -32,18 +32,18 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private RDBMetadata metadata;
+	private BasicDBMetadata metadata;
+	private QuotedIDFactory ID_FACTORY;
 	
-	private static final String TB_BOOK = "Book";
-	private static final String TB_WRITER = "Writer";
-	private static final String TB_EDITION = "Edition";
-	private static final String TB_BOOKWRITER = "BookWriter";
+	private static final String TB_BOOK = "\"Book\"";
+	private static final String TB_WRITER = "\"Writer\"";
+	private static final String TB_EDITION = "\"Edition\"";
+	private static final String TB_BOOKWRITER = "\"BookWriter\"";
 
 	private String propertyFile;
 	private Properties properties;
@@ -54,11 +54,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public AbstractConstraintTest(String method, String propertyFile) {
 		super(method);
 		this.propertyFile = propertyFile;
-
 	}
 	
 	@Override
-	public void setUp() throws Exception {
+	public void setUp() {
 		try {
 			InputStream pStream =this.getClass().getResourceAsStream(propertyFile);
 			properties = new Properties();
@@ -70,8 +69,9 @@ public abstract class AbstractConstraintTest extends TestCase {
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 			TypeFactory typeFactory = defaultConfiguration.getTypeFactory();
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory);
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+			ID_FACTORY = metadata.getDBParameters().getQuotedIDFactory();
 		}
 		catch (IOException e) {
 			log.error("IOException during setUp of propertyFile");
@@ -85,74 +85,89 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
-		
-		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-		for (DatabaseRelationDefinition t : tables) {
-			UniqueConstraint pkc = null;
-			List<UniqueConstraint> pks = t.getUniqueConstraints();
-			if (!pks.isEmpty())
-				pkc = pks.get(0);
-			if (checkName(t, TB_BOOK)) {
-				assertEquals(1, pkc.getAttributes().size());
-			} else if (checkName(t, TB_BOOKWRITER)) {
-				assertTrue(pkc == null);
-			} else if (checkName(t, TB_EDITION)) {
-				assertEquals(1, pkc.getAttributes().size());
-			} else if (checkName(t, TB_WRITER)) {
-				assertEquals(1, pkc.getAttributes().size());
-			}
-			if (pkc != null)
-				writeLog(t.getID().getSQLRendering(), pkc.getAttributes());
+
+		DatabaseRelationDefinition tBook = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK));
+		if (tBook != null) {
+			List<UniqueConstraint> ucs = tBook.getUniqueConstraints();
+			assertEquals(1, ucs.size());
+			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
-		log.info("\n");
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
+
+		DatabaseRelationDefinition tBookWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER));
+		if (tBookWriter != null) {
+			List<UniqueConstraint> ucs = tBookWriter.getUniqueConstraints();
+			assertEquals(0, ucs.size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+
+		DatabaseRelationDefinition tEdition = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION));
+		if (tEdition != null) {
+			List<UniqueConstraint> ucs = tEdition.getUniqueConstraints();
+			assertEquals(1, ucs.size());
+			assertEquals(1, ucs.get(0).getAttributes().size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
+
+		DatabaseRelationDefinition tWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER));
+		if (tWriter != null) {
+			List<UniqueConstraint> ucs = tWriter.getUniqueConstraints();
+			assertEquals(1, ucs.size());
+			assertEquals(1, ucs.get(0).getAttributes().size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_WRITER + " is not found");
 	}
 	
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
-		
-		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-		for (DatabaseRelationDefinition t : tables) {
-			List<ForeignKeyConstraint> fk =  t.getForeignKeys();
-			if (checkName(t, TB_BOOK)) {
-				assertEquals(0, fk.size());
-			} else if (checkName(t, TB_BOOKWRITER)) {
-				assertEquals(2, fk.size());
-			} else if (checkName(t, TB_EDITION)) {
-				assertEquals(1, fk.size());
-			} else if (checkName(t, TB_WRITER)) {
-				assertEquals(0, fk.size());
-			}
-			writeLog(t.getID().getSQLRendering(), fk);
+
+		DatabaseRelationDefinition tBook = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOK));
+		if (tBook != null) {
+			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
+			assertEquals(0, fks.size());
 		}
-		log.info("\n");
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
+
+		DatabaseRelationDefinition tBookWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_BOOKWRITER));
+		if (tBookWriter != null) {
+			List<ForeignKeyConstraint> fks =  tBookWriter.getForeignKeys();
+			assertEquals(2, fks.size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
+
+		DatabaseRelationDefinition tEdition = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_EDITION));
+		if (tEdition != null) {
+			List<ForeignKeyConstraint> fks =  tEdition.getForeignKeys();
+			assertEquals(1, fks.size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
+
+		DatabaseRelationDefinition tWriter = metadata.getDatabaseRelation(ID_FACTORY.createRelationID(null, TB_WRITER));
+		if (tWriter != null) {
+			List<ForeignKeyConstraint> fks =  tWriter.getForeignKeys();
+			assertEquals(0, fks.size());
+		}
+		else
+			System.out.println("AbstractConstraintTest: " + TB_WRITER + " is not found");
+
 	}
 	
-	private boolean checkName(DatabaseRelationDefinition table, String value) {
-		final String tableName = table.getID().getSQLRendering();
-		return tableName.equalsIgnoreCase(value);
-	}
-	
-	private void writeLog(String tableName, Object keys) {
-		log.info(String.format("%s(%s)", tableName, keys.toString()));
-	}
-
-
 	public String getConnectionPassword() {
 		return properties.getProperty("jdbc.password");
 	}
-
 
 	public String getConnectionString() {
 		return properties.getProperty("jdbc.url");
 	}
 
-
 	public String getConnectionUsername() {
 		return properties.getProperty("jdbc.user");
-	}
-
-
-	public String getDriverName() {
-		return properties.getProperty("jdbc.driver");
 	}
 }

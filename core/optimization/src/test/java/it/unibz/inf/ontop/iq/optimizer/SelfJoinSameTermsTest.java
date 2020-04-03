@@ -1,19 +1,17 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -26,16 +24,12 @@ public class SelfJoinSameTermsTest {
     public static RelationPredicate T1_AR3;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-
-        T1_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 3, true);
+        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        T1_AR3 = createStringRelationPredicate(dbMetadata, 1, 3, true);
     }
 
     @Test
-    public void testSelfJoinElimination1() throws EmptyQueryException {
+    public void testSelfJoinElimination1() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -57,24 +51,26 @@ public class SelfJoinSameTermsTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, B, 2, C));
+
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
-                        IQ_FACTORY.createUnaryIQTree(constructionNode,
                                 IQ_FACTORY.createUnaryIQTree(
                                         IQ_FACTORY.createFilterNode(
                                                 TERM_FACTORY.getConjunction(
                                                         TERM_FACTORY.getDBIsNotNull(B),
                                                         TERM_FACTORY.getDBIsNotNull(C))),
-                                        dataNode2
-                                ))));
+                                        newDataNode2
+                                )));
 
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Ignore("TODO: try to support this quite complex case")
     @Test
-    public void testSelfJoinElimination2() throws EmptyQueryException {
+    public void testSelfJoinElimination2() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -120,7 +116,7 @@ public class SelfJoinSameTermsTest {
     }
 
     @Test
-    public void testSelfJoinElimination3() throws EmptyQueryException {
+    public void testSelfJoinElimination3() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -145,24 +141,25 @@ public class SelfJoinSameTermsTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
+        ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, B, 2, C));
+
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
-                        IQ_FACTORY.createUnaryIQTree(
-                                constructionNode,
                                 IQ_FACTORY.createUnaryIQTree(
                                         IQ_FACTORY.createFilterNode(
                                                 TERM_FACTORY.getConjunction(
                                                         TERM_FACTORY.getDBIsNotNull(B),
                                                         TERM_FACTORY.getDBIsNotNull(C))),
-                                        dataNode3
-                                ))));
+                                        newDataNode3
+                                )));
 
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Test
-    public void testSelfJoinElimination4() throws EmptyQueryException {
+    public void testSelfJoinElimination4() {
 
         DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
 
@@ -190,21 +187,22 @@ public class SelfJoinSameTermsTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
+        ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, constant, 2, C));
+
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
-                        IQ_FACTORY.createUnaryIQTree(
-                                constructionNode,
                                 IQ_FACTORY.createUnaryIQTree(
                                         IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C)),
-                                        dataNode3
-                                ))));
+                                        newDataNode3
+                                )));
 
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Test
-    public void testSelfJoinElimination5() throws EmptyQueryException {
+    public void testSelfJoinElimination5() {
 
         DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
 
@@ -232,21 +230,22 @@ public class SelfJoinSameTermsTest {
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, constant, 2, C));
+
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
                 IQ_FACTORY.createUnaryIQTree(distinctNode,
-                        IQ_FACTORY.createUnaryIQTree(
-                                constructionNode,
                                 IQ_FACTORY.createUnaryIQTree(
                                         IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(C)),
-                                        dataNode2
-                                ))));
+                                        newDataNode2
+                                )));
 
         optimizeAndCompare(initialQuery, expectedQuery);
     }
 
     @Test
-    public void testSelfJoinElimination6() throws EmptyQueryException {
+    public void testSelfJoinElimination6() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -286,7 +285,7 @@ public class SelfJoinSameTermsTest {
 
     @Ignore("TODO: try to support this quite complex case")
     @Test
-    public void testSelfJoinElimination7() throws EmptyQueryException {
+    public void testSelfJoinElimination7() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
 
@@ -334,12 +333,10 @@ public class SelfJoinSameTermsTest {
      * No distinct, no optimization
      */
     @Test
-    public void testSelfJoinNonElimination1() throws EmptyQueryException {
+    public void testSelfJoinNonElimination1() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, C));
+                T1_AR3.getRelationDefinition(), ImmutableMap.of( 1, B, 2, C));
+        ExtensionalDataNode dataNode2 = dataNode1;
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -347,18 +344,15 @@ public class SelfJoinSameTermsTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
 
-        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        UnaryIQTree constructionTree = IQ_FACTORY.createUnaryIQTree(constructionNode, joinTree);
-
         IQ initialQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
-                constructionTree);
+                joinTree);
 
         optimizeAndCompare(initialQuery, initialQuery);
     }
 
     @Test
-    public void testSelfJoinNonElimination2() throws EmptyQueryException {
+    public void testSelfJoinNonElimination2() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom(T1_AR3, A, B, D));
 
@@ -380,17 +374,53 @@ public class SelfJoinSameTermsTest {
                 projectionAtom,
                 distinctTree);
 
+        ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1,B));
+
+        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(2,C));
+
+        NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(newDataNode1, newDataNode2));
+
+        UnaryIQTree newDistinctTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), newJoinTree);
+        IQ expectedQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                newDistinctTree);
+
+        optimizeAndCompare(initialQuery, expectedQuery);
+    }
+
+    @Test
+    public void testSelfJoinNonElimination2bis() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
+
+        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(1,B));
+
+        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(2,C));
+
+        NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
+                IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(dataNode1, dataNode2));
+
+        UnaryIQTree newDistinctTree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createDistinctNode(), joinTree);
+        IQ initialQuery = IQ_FACTORY.createIQ(
+                projectionAtom,
+                newDistinctTree);
 
         optimizeAndCompare(initialQuery, initialQuery);
     }
 
     @Test
-    public void testSelfJoinNonElimination3() throws EmptyQueryException {
+    public void testSelfJoinNonElimination3() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, D));
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(0, A, 1,B));
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, F, C));
+                T1_AR3.getRelationDefinition(), ImmutableMap.of(0, A, 2,C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -412,7 +442,7 @@ public class SelfJoinSameTermsTest {
     }
 
     @Test
-    public void testSelfJoinNonElimination4() throws EmptyQueryException {
+    public void testSelfJoinNonElimination4() {
 
         DBConstant constant1 = TERM_FACTORY.getDBStringConstant("cst1");
         DBConstant constant2 = TERM_FACTORY.getDBStringConstant("cst2");
@@ -439,11 +469,8 @@ public class SelfJoinSameTermsTest {
         optimizeAndCompare(initialQuery, initialQuery);
     }
 
-    private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) throws EmptyQueryException {
-        IQ optimizedQuery = IQ_CONVERTER.convert(
-                JOIN_LIKE_OPTIMIZER.optimize(
-                        IQ_CONVERTER.convert(initialQuery, EXECUTOR_REGISTRY)));
-
+    private void optimizeAndCompare(IQ initialQuery, IQ expectedQuery) {
+        IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery, EXECUTOR_REGISTRY);
         assertEquals(expectedQuery, optimizedQuery);
     }
 

@@ -20,12 +20,11 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents a complex sub-query created by the SQL parser (not a database view!)
@@ -35,9 +34,6 @@ import java.util.*;
 
 public class ParserViewDefinition extends RelationDefinition {
 
-	private final ImmutableList<Attribute> attributes;
-	private final ImmutableMap<QuotedID, Attribute> attributeMap;
-	
 	private final String statement;
 	
 	/**
@@ -47,21 +43,17 @@ public class ParserViewDefinition extends RelationDefinition {
 	
 	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement,
 								DBTypeFactory dbTypeFactory) {
-		super(name);
+		super(attributeListBuilder(name, attrs, dbTypeFactory));
 		this.statement = statement;
+	}
 
-		ImmutableList.Builder<Attribute> attributeBuilder = ImmutableList.builder();
-		ImmutableMap.Builder<QuotedID, Attribute> attributeMapBuilder = ImmutableMap.builder();
-		int c = 1;
+	private static AttributeListBuilder attributeListBuilder(RelationID name, ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
+		AttributeListBuilder builder = new AttributeListBuilder(name);
 		for (QuotedID id : attrs) {
-			Attribute att = new Attribute(this,
-					new QualifiedAttributeID(name, id), c, null, true, dbTypeFactory);
-			c++;
-			attributeMapBuilder.put(id, att);
-			attributeBuilder.add(att);
+			// TODO: infer types?
+			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
 		}
-		this.attributes = attributeBuilder.build();
-		this.attributeMap = attributeMapBuilder.build();
+		return builder;
 	}
 
 	/**
@@ -75,15 +67,6 @@ public class ParserViewDefinition extends RelationDefinition {
 	}
 
 	@Override
-	public Attribute getAttribute(int index) {
-		// positions start at 1
-		return attributes.get(index - 1);
-	}
-
-	@Override
-	public List<Attribute> getAttributes() { return attributes; }
-
-	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
 		return ImmutableList.of();
 	}
@@ -94,23 +77,18 @@ public class ParserViewDefinition extends RelationDefinition {
 	}
 
 	@Override
-	public UniqueConstraint getPrimaryKey() {
-		return null;
-	}
+	public Optional<UniqueConstraint> getPrimaryKey() { return Optional.empty(); }
 
 	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
 		return ImmutableList.of();
 	}
 
-
 	@Override
 	public String toString() {
-		StringBuilder bf = new StringBuilder();
-		bf.append(getID()).append(" [");
-		Joiner.on(", ").appendTo(bf, attributes);
-		bf.append("]").append(" (").append(statement).append(")");
-		return bf.toString();
+		return getID() + " [" + getAttributes().stream()
+				.map(Attribute::toString)
+				.collect(Collectors.joining(", ")) +
+				"]" + " (" + statement + ")";
 	}
-
 }

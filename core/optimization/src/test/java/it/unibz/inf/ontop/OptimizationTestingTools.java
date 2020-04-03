@@ -30,7 +30,6 @@ public class OptimizationTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final BindingLiftOptimizer BINDING_LIFT_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
@@ -48,7 +47,8 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
-    private static final DummyBasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+
+    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
     public static final Variable X;
     public static final Variable Y;
@@ -75,6 +75,7 @@ public class OptimizationTestingTools {
     public static final Variable F0F3;
     public static final Variable FF4;
     public static final Variable G;
+    public static final Variable GF1;
     public static final Variable H;
     public static final Variable I;
     public static final Variable IF7;
@@ -115,8 +116,6 @@ public class OptimizationTestingTools {
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
 
         DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
@@ -150,6 +149,7 @@ public class OptimizationTestingTools {
         F0F3 = TERM_FACTORY.getVariable("f0f3");
         FF4 = TERM_FACTORY.getVariable("ff4");
         G = TERM_FACTORY.getVariable("g");
+        GF1 = TERM_FACTORY.getVariable("gf1");
         H = TERM_FACTORY.getVariable("h");
         I = TERM_FACTORY.getVariable("i");
         IF7 = TERM_FACTORY.getVariable("if7");
@@ -169,11 +169,7 @@ public class OptimizationTestingTools {
         ANS1_AR5_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(5);
     }
 
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata metadata) {
+    public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
-    }
-
-    public static BasicDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
     }
 }

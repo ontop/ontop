@@ -30,7 +30,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
-import it.unibz.inf.ontop.iq.node.DataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -103,8 +102,8 @@ public class DummyRewriter implements QueryRewriter {
         }));
 	}
 
-	private <T extends DataNode<AtomPredicate>> ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<T> bgp) {
-        ArrayList<T> list = new ArrayList<>(bgp); // mutable copy
+	private ImmutableList<IQTree> removeRedundantAtoms(ImmutableList<IntensionalDataNode> bgp) {
+        ArrayList<IntensionalDataNode> list = new ArrayList<>(bgp); // mutable copy
         // this loop has to remain sequential (no streams)
         for (int i = 0; i < list.size(); i++) {
             DataAtom<RDFAtomPredicate> atom = (DataAtom)list.get(i).getProjectionAtom();
@@ -113,7 +112,7 @@ public class DummyRewriter implements QueryRewriter {
                 DataAtom<AtomPredicate> curr = list.get(j).getProjectionAtom();
                 if (j != i && derived.contains(curr)) {
                     ImmutableSet<Variable> variables = list.stream()
-                            .map(DataNode::getProjectionAtom)
+                            .map(IntensionalDataNode::getProjectionAtom)
                             .filter(a -> (a != curr))
                             .flatMap(a -> a.getVariables().stream())
                             .collect(ImmutableCollectors.toSet());

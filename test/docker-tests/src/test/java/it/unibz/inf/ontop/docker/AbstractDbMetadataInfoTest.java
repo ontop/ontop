@@ -20,7 +20,8 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import com.google.common.base.Joiner;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import junit.framework.TestCase;
@@ -34,7 +35,7 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private RDBMetadata metadata;
+	private BasicDBMetadata metadata;
 	private String propertyFile;
 	private Properties properties;
 
@@ -42,21 +43,20 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 
 	public AbstractDbMetadataInfoTest(String propertyFile) {
 		this.propertyFile = propertyFile;
-
 	}
 
 	@Override
-	public void setUp() throws Exception {
+	public void setUp() {
 		
 		try {
-			InputStream pStream =this.getClass().getResourceAsStream(propertyFile);
+			InputStream pStream = this.getClass().getResourceAsStream(propertyFile);
 			properties = new Properties();
 			properties.load(pStream);
 			Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
 			OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
-			metadata = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory());
+			metadata = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
 
 			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 		}
@@ -76,32 +76,24 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		DriverPropertyInfo[] propInfo = null;
 		try {
 			propInfo = driver.getPropertyInfo(getConnectionString(), null);
-		} catch (final RuntimeException err) {
+		}
+		catch (RuntimeException err) {
 			// Some drivers (Sun's ODBC-JDBC) throw null pointer exceptions ...
 			// Try again, but with an empty properties ...
 			try {
 				propInfo = driver.getPropertyInfo(getConnectionString(), new Properties());
-			} catch (final RuntimeException err2) {
+			}
+			catch (RuntimeException err2) {
 				// Okay, give up
 			}
 		}
 
-		for (final DriverPropertyInfo info : propInfo) {
-			StringBuilder choices = new StringBuilder();
-			if (info.choices != null) {
-				choices.append("[");
-				boolean needComma = false;
-				for (String opt : info.choices) {
-					if (needComma) {
-						choices.append(", ");
-					}
-					choices.append(opt);
-					needComma = true;
-				}
-				choices.append("]");
-			}
-			String msg = String.format("%s : %s : %s : %s : %s", info.name, info.value, choices.toString(), info.required, info.description);
-			log.info(msg);
+		for (DriverPropertyInfo info : propInfo) {
+			String choices = (info.choices == null)
+					? ""
+					: "[" + Joiner.on(", ").join(info.choices) + "]";
+
+			log.info("%s : %s : %s : %s : %s", info.name, info.value, choices, info.required, info.description);
 		}
 	}
 
@@ -109,16 +101,13 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		return properties.getProperty("jdbc.password");
 	}
 
-
 	public String getConnectionString() {
 		return properties.getProperty("jdbc.url");
 	}
 
-
 	public String getConnectionUsername() {
 		return properties.getProperty("jdbc.user");
 	}
-
 
 	public String getDriverName() {
 		return properties.getProperty("jdbc.driver");

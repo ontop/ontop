@@ -18,11 +18,9 @@ public class SQLMappingTestingTools {
 
     public static final ExecutorRegistry EXECUTOR_REGISTRY;
     public static final IntermediateQueryFactory IQ_FACTORY;
-    public static final DBMetadata EMPTY_METADATA;
 
     public static final TermFactory TERM_FACTORY;
     public static final AtomFactory ATOM_FACTORY;
-    public static final TypeFactory TYPE_FACTORY;
     public static final DBFunctionSymbolFactory DB_FS_FACTORY;
     public static final TargetAtomFactory TARGET_ATOM_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
@@ -32,7 +30,7 @@ public class SQLMappingTestingTools {
     public static final CoreSingletons CORE_SINGLETONS;
     public static final LegacySQLPPMappingConverter LEGACY_SQL_PP_MAPPING_CONVERTER;
 
-    public static final DummyRDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
 
     static {
@@ -51,26 +49,14 @@ public class SQLMappingTestingTools {
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
-        TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyRDBMetadata.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(LegacySQLPPMappingConverter.class);
-
-        EMPTY_METADATA = DEFAULT_DUMMY_DB_METADATA.clone();
-        EMPTY_METADATA.freeze();
-    }
-
-    public static IntermediateQueryBuilder createQueryBuilder(DBMetadata dbMetadata) {
-        return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
-    }
-
-    public static RDBMetadata createDummyMetadata() {
-        return DEFAULT_DUMMY_DB_METADATA.clone();
     }
 }

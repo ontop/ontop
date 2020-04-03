@@ -11,8 +11,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectA
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -197,10 +195,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLTable sqlTable) {
-            DataAtom<RelationPredicate> atom = sqlTable.getAtom();
 
             RelationID aliasId = generateFreshViewAlias();
-            RelationDefinition relationDefinition = atom.getPredicate().getRelationDefinition();
+            RelationDefinition relationDefinition = sqlTable.getRelationDefinition();
 
             String relationRendering = Optional.of(relationDefinition)
                     // Black-box view: we use the definition
@@ -213,12 +210,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
             return new QuerySerializationImpl(sqlSubString,
-                    atom.getArguments().stream()
-                            // Ground terms must have been already removed from atoms
-                            .map(a -> (Variable)a)
+                    sqlTable.getArgumentMap().entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
-                                    v -> v,
-                                    v -> createQualifiedAttributeId(aliasId, relationDefinition.getAttribute(atom.getArguments().indexOf(v) + 1).getID().getSQLRendering())
+                                    // Ground terms must have been already removed from atoms
+                                    e -> (Variable) e.getValue(),
+                                    e -> createQualifiedAttributeId(aliasId, relationDefinition.getAttribute(e.getKey() + 1).getID().getSQLRendering())
                             )));
         }
 

@@ -12,24 +12,20 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private final DBMetadata dbMetadata;
+    private static final BasicDBMetadata dbMetadata;
 
-    AbstractBasicMappingMistakeTest() {
-        RDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+    static {
+        dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
 
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-
-        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(
-                idFactory.createRelationID(null, "PERSON"));
-        Attribute personId = personTable.addAttribute(idFactory.createAttributeID("ID"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBLargeIntegerType(), false);
-        personTable.addAttribute(idFactory.createAttributeID("FNAME"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBStringType(), false);
-        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personId));
+        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
+                idFactory.createRelationID(null, "PERSON"))
+            .addAttribute(idFactory.createAttributeID("ID"), dbTypeFactory.getDBLargeIntegerType(), false)
+            .addAttribute(idFactory.createAttributeID("FNAME"), dbTypeFactory.getDBStringType(), false));
+        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
 
         dbMetadata.freeze();
-        this.dbMetadata = dbMetadata;
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {

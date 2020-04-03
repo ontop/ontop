@@ -20,17 +20,10 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.GraphOWLResultSet;
@@ -40,6 +33,8 @@ import junit.framework.TestCase;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle Mappings for
@@ -67,53 +62,14 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/lung-cancer3-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/lung-cancer3-create-h2.sql");
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-
-			dropTables();
-			conn.close();
-		
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/lung-cancer3-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/lung-cancer3-drop-h2.sql");
+		conn.close();
 	}
 
 	private void runTests() throws Exception {
