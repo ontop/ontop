@@ -108,18 +108,14 @@ public class URINamesH2Test {
 		BufferedReader in = new BufferedReader(reader);
 		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
 		runner.runScript(in);
-		
 
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			Statement s = sqlConnection.createStatement();
-			try {
+			try (Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}

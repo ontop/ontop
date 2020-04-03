@@ -11,21 +11,16 @@ import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -44,52 +39,18 @@ public class LeftJoinProfTest {
 
     @Before
     public void setUp() throws Exception {
-
         String url = "jdbc:h2:mem:professor";
         String username = "sa";
         String password = "sa";
 
         conn = DriverManager.getConnection(url, username, password);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, DROP_SCRIPT);
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(DROP_SCRIPT);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        st.close();
-        conn.commit();
     }
 
     @Test

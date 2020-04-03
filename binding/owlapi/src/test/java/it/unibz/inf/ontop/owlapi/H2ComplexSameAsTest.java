@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -60,33 +59,21 @@ public class H2ComplexSameAsTest {
 
 	@Before
 	public void setUp() throws Exception {
-
-			 sqlConnection= DriverManager.getConnection("jdbc:h2:mem:wellboresComplex","sa", "");
-			    java.sql.Statement s = sqlConnection.createStatement();
-			  
-//			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
-			    	s.execute(text);
-//			    	Server.startWebServer(sqlConnection);
-			    	 
-//			    } catch(SQLException sqle) {
-//			        System.out.println("Exception in creating db from script");
-//			    }
-			   
-			    s.close();
+		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:wellboresComplex","sa", "");
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			String text = new Scanner( new File("src/test/resources/sameAs/wellbore-complex-h2.sql") ).useDelimiter("\\A").next();
+			s.execute(text);
+		}
 	}
 
 
 	@After
 	public void tearDown() throws Exception{
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}

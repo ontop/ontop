@@ -13,13 +13,12 @@ import org.semanticweb.owlapi.model.OWLLiteral;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertTrue;
 
 public class WktTest {
@@ -41,21 +40,7 @@ public class WktTest {
         String password = "sa";
 
         conn = DriverManager.getConnection(url, username, password);
-        Statement st = conn.createStatement();
-
-        FileReader reader = new FileReader(CREATE_SCRIPT);
-
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
-        }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
@@ -107,9 +92,8 @@ public class WktTest {
                     i++;
                 }
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
