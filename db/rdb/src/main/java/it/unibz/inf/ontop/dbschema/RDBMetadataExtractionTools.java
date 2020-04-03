@@ -159,6 +159,26 @@ public class RDBMetadataExtractionTools {
 		return metadata;	
 	}
 
+	public static void loadFullMetadata0(BasicDBMetadata metadata, Connection conn) throws SQLException {
+		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+	}
+
+	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException {
+		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
+		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		return metadata;
+	}
+
+	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException {
+		BasicDBMetadata metadata = createMetadata(conn, dbTypeFactory);
+		RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
+		return metadata.getDatabaseRelations();
+	}
+
+	public static void loadMetadataForRelations(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
+		loadMetadata(metadata, conn, realTables);
+	}
+
 	/**
 	 * Retrieves the database metadata (table schema and database constraints)
 	 *
@@ -169,7 +189,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	public static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
+	private static void loadMetadata(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException {
 
 		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();

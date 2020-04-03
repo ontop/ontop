@@ -20,6 +20,7 @@ package it.unibz.inf.ontop.docker;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -38,6 +39,10 @@ import java.util.Properties;
 public abstract class AbstractConstraintTest extends TestCase {
 	
 	private BasicDBMetadata METADATA;
+	private DatabaseRelationDefinition tBook;
+	private DatabaseRelationDefinition tBookWriter;
+	private DatabaseRelationDefinition tEdition;
+	private DatabaseRelationDefinition tWriter;
 
 	private static final String TB_BOOK = "\"Book\"";
 	private static final String TB_WRITER = "\"Writer\"";
@@ -66,14 +71,24 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 		METADATA = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
-		RDBMetadataExtractionTools.loadMetadata(METADATA, conn, null);
+		QuotedIDFactory idFactory = METADATA.getDBParameters().getQuotedIDFactory();
+		RelationID iBook = idFactory.createRelationID(null, TB_BOOK);
+		RelationID iBookWriter = idFactory.createRelationID(null, TB_BOOKWRITER);
+		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
+		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
+
+		RDBMetadataExtractionTools.loadMetadataForRelations(METADATA, conn,
+				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
+
+		tBook = METADATA.getDatabaseRelation(iBook);
+		tBookWriter = METADATA.getDatabaseRelation(iBookWriter);
+		tEdition = METADATA.getDatabaseRelation(iEdition);
+		tWriter = METADATA.getDatabaseRelation(iWriter);
 	}
 	
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
-		QuotedIDFactory idFactory = METADATA.getDBParameters().getQuotedIDFactory();
 
-		DatabaseRelationDefinition tBook = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_BOOK));
 		if (tBook != null) {
 			List<UniqueConstraint> ucs = tBook.getUniqueConstraints();
 			assertEquals(1, ucs.size());
@@ -82,7 +97,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
 
-		DatabaseRelationDefinition tBookWriter = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_BOOKWRITER));
 		if (tBookWriter != null) {
 			List<UniqueConstraint> ucs = tBookWriter.getUniqueConstraints();
 			assertEquals(0, ucs.size());
@@ -90,7 +104,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
 
-		DatabaseRelationDefinition tEdition = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_EDITION));
 		if (tEdition != null) {
 			List<UniqueConstraint> ucs = tEdition.getUniqueConstraints();
 			assertEquals(1, ucs.size());
@@ -99,7 +112,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
 
-		DatabaseRelationDefinition tWriter = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_WRITER));
 		if (tWriter != null) {
 			List<UniqueConstraint> ucs = tWriter.getUniqueConstraints();
 			assertEquals(1, ucs.size());
@@ -111,9 +123,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
-		QuotedIDFactory idFactory = METADATA.getDBParameters().getQuotedIDFactory();
 
-		DatabaseRelationDefinition tBook = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_BOOK));
 		if (tBook != null) {
 			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
 			assertEquals(0, fks.size());
@@ -121,7 +131,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
 
-		DatabaseRelationDefinition tBookWriter = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_BOOKWRITER));
 		if (tBookWriter != null) {
 			List<ForeignKeyConstraint> fks =  tBookWriter.getForeignKeys();
 			assertEquals(2, fks.size());
@@ -129,7 +138,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
 
-		DatabaseRelationDefinition tEdition = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_EDITION));
 		if (tEdition != null) {
 			List<ForeignKeyConstraint> fks =  tEdition.getForeignKeys();
 			assertEquals(1, fks.size());
@@ -137,7 +145,6 @@ public abstract class AbstractConstraintTest extends TestCase {
 		else
 			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
 
-		DatabaseRelationDefinition tWriter = METADATA.getDatabaseRelation(idFactory.createRelationID(null, TB_WRITER));
 		if (tWriter != null) {
 			List<ForeignKeyConstraint> fks =  tWriter.getForeignKeys();
 			assertEquals(0, fks.size());

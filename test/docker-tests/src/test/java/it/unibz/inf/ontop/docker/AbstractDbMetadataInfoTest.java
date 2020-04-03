@@ -21,9 +21,6 @@ package it.unibz.inf.ontop.docker;
  */
 
 import com.google.common.base.Joiner;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +32,6 @@ import java.util.Properties;
 
 public abstract class AbstractDbMetadataInfoTest extends TestCase {
 	
-	private BasicDBMetadata METADATA;
 	private String propertyFile;
 	private Properties properties;
 
@@ -51,16 +47,12 @@ public abstract class AbstractDbMetadataInfoTest extends TestCase {
 		properties = new Properties();
 		properties.load(pStream);
 		Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
-
-		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		METADATA = RDBMetadataExtractionTools.createMetadata(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
-		RDBMetadataExtractionTools.loadMetadata(METADATA, conn, null);
 	}
 	
 	public void testPropertyInfo() throws SQLException {
 		final Driver driver = DriverManager.getDriver(getConnectionString());
 
-		DriverPropertyInfo[] propInfo = null;
+		DriverPropertyInfo[] propInfo;
 		try {
 			propInfo = driver.getPropertyInfo(getConnectionString(), null);
 		}

@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -40,14 +41,8 @@ public class BootstrapGenerator {
     private final OntopSQLOWLAPIConfiguration configuration;
     private final OBDAModel activeOBDAModel;
     private final OWLModelManager owlManager;
-    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-    private final TermFactory termFactory;
     private final TypeFactory typeFactory;
-    private final TargetAtomFactory targetAtomFactory;
-    private final RDF rdfFactory;
-    private int currentMappingIndex = 1;
     private final DirectMappingEngine directMappingEngine;
-    private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
                               OWLModelManager owlManager)
@@ -56,13 +51,9 @@ public class BootstrapGenerator {
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
         activeOBDAModel = obdaModelManager.getActiveOBDAModel();
-        termFactory = obdaModelManager.getTermFactory();
         typeFactory = obdaModelManager.getTypeFactory();
-        targetAtomFactory = obdaModelManager.getTargetAtomFactory();
         Injector injector = configuration.getInjector();
         directMappingEngine = injector.getInstance(DirectMappingEngine.class);
-        dbFunctionSymbolFactory = injector.getInstance(DBFunctionSymbolFactory.class);
-        rdfFactory = configuration.getRdfFactory();
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
@@ -92,8 +83,6 @@ public class BootstrapGenerator {
 
         List<SQLPPTriplesMap> newTriplesMap = new ArrayList<>();
 
-        currentMappingIndex = ppMapping.getTripleMaps().size() + 1;
-
         final Connection conn;
         try {
             conn = connManager.getConnection(configuration.getSettings());
@@ -102,10 +91,6 @@ public class BootstrapGenerator {
             throw new RuntimeException("JDBC connection is missing, have you setup Ontop Mapping properties?" +
                     " Message: " + e.getMessage());
         }
-        BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
-
-        // this operation is EXPENSIVE
-        RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
 
         if (baseURI == null || baseURI.isEmpty()) {
             baseURI = ppMapping.getPrefixManager().getDefaultPrefix();
@@ -113,10 +98,14 @@ public class BootstrapGenerator {
         else {
             baseURI = DirectMappingEngine.fixBaseURI(baseURI);
         }
-        Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
 
+        // this operation is EXPENSIVE
+        Collection<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadAllRelations(conn, typeFactory.getDBTypeFactory());
+
+        Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+        AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
         for (DatabaseRelationDefinition td : tables) {
-            newTriplesMap.addAll(getMapping(td, baseURI));
+            newTriplesMap.addAll(directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex));
         }
 
         //add to the current model the boostrapped triples map
@@ -127,26 +116,4 @@ public class BootstrapGenerator {
     }
 
 
-    private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri) {
-
-        DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory,
-                rdfFactory, dbFunctionSymbolFactory, typeFactory);
-
-        List<SQLPPTriplesMap> axioms = new ArrayList<>();
-        Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
-
-        axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,
-                SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)),
-                dmap.getCQ(table, bnodeTemplateMap)));
-        currentMappingIndex++;
-
-        Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
-        for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
-            OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
-            ImmutableList<TargetAtom> targetQuery = e.getValue();
-            axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
-            currentMappingIndex++;
-        }
-        return axioms;
-    }
 }

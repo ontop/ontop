@@ -64,10 +64,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -821,10 +819,9 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-            BasicDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory().getDBTypeFactory());
-			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
-			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
-			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
+            // this operation is EXPENSIVE -- only names are needed + a flag for table/view
+            Collection<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.loadAllRelations(conn, obdaModel.getTypeFactory().getDBTypeFactory());
+			for (DatabaseRelationDefinition relation : relations) {
 				relationList.addElement(relation);
 			}
 		}
