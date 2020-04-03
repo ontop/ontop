@@ -5,13 +5,12 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
-public class DB2RDBMetadataLoader extends JDBCRDBMetadataLoader {
+public class DB2RDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
-    DB2RDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    DB2RDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
     }
     // select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1

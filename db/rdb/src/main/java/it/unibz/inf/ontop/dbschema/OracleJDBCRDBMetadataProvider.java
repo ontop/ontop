@@ -9,11 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class OracleJDBCRDBMetadataLoader extends JDBCRDBMetadataLoader {
+public class OracleJDBCRDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final String defaultTableOwner;
 
-    OracleJDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    OracleJDBCRDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
         this.defaultTableOwner = getDefaultOwner();
     }

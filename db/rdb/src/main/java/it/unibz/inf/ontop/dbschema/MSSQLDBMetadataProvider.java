@@ -5,13 +5,12 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
-public class MSSQLDBMetadataLoader extends JDBCRDBMetadataLoader {
+public class MSSQLDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
 
-    MSSQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    MSSQLDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
     }
 

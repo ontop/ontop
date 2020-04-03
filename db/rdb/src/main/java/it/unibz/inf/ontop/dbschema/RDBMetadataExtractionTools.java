@@ -195,18 +195,18 @@ public class RDBMetadataExtractionTools {
 		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 		QuotedIDFactory idfac =  metadata.getDBParameters().getQuotedIDFactory();
 
-		RDBMetadataLoader metadataLoader;
+		RDBMetadataProvider metadataLoader;
 		String productName = metadata.getDBParameters().getDbmsProductName();
 		if (productName.contains("Oracle"))
-			metadataLoader = new OracleJDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
+			metadataLoader = new OracleJDBCRDBMetadataProvider(conn, idfac, dbTypeFactory);
 		else if (productName.contains("DB2"))
-			metadataLoader = new DB2RDBMetadataLoader(conn, idfac, dbTypeFactory);
+			metadataLoader = new DB2RDBMetadataProvider(conn, idfac, dbTypeFactory);
 		else if (productName.contains("SQL Server"))
-			metadataLoader = new MSSQLDBMetadataLoader(conn, idfac, dbTypeFactory);
+			metadataLoader = new MSSQLDBMetadataProvider(conn, idfac, dbTypeFactory);
 		else if (productName.contains("MySQL"))
-			metadataLoader = new MySQLDBMetadataLoader(conn, idfac, dbTypeFactory);
+			metadataLoader = new MySQLDBMetadataProvider(conn, idfac, dbTypeFactory);
 		else
-			metadataLoader = new JDBCRDBMetadataLoader(conn, idfac, dbTypeFactory);
+			metadataLoader = new JDBCRDBMetadataProvider(conn, idfac, dbTypeFactory);
 
 		ImmutableList<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
 			? metadataLoader.getRelationIDs()

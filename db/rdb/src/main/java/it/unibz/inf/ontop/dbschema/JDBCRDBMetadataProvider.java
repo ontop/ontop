@@ -9,14 +9,14 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JDBCRDBMetadataLoader implements RDBMetadataLoader {
+public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
 
     protected final Connection connection;
     protected final QuotedIDFactory idFactory;
     protected final DBTypeFactory dbTypeFactory;
     protected final DatabaseMetaData metadata;
 
-    JDBCRDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    JDBCRDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         this.connection = connection;
         this.idFactory = idFactory;
         this.dbTypeFactory = dbTypeFactory;

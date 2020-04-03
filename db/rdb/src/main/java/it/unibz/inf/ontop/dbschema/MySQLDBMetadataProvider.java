@@ -8,11 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class MySQLDBMetadataLoader extends JDBCRDBMetadataLoader {
+public class MySQLDBMetadataProvider extends JDBCRDBMetadataProvider {
 
     private final String defaultDatabase;
 
-    MySQLDBMetadataLoader(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+    MySQLDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, idFactory, dbTypeFactory);
 
         try (Statement statement = connection.createStatement();
