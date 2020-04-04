@@ -62,8 +62,6 @@ public class BindTest {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
     private static final String OWL_FILE = "src/test/resources/test/bind/sparqlBind.owl";
     private static final String OBDA_FILE = "src/test/resources/test/bind/sparqlBind.obda";
     private static final String PROPERTY_FILE = "src/test/resources/test/bind/sparqlBind.properties";

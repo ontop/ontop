@@ -132,7 +132,14 @@ public class MetaMappingExpander {
 				builder2.addAll(toBeExpanded.stream()
 						.map(target -> new Expansion(mapping.getId(), mapping.getSourceQuery(), target))
 						.iterator());
-				// TODO: add all other target atoms to builder1!!
+				if (toBeExpanded.size() != mapping.getTargetAtoms().size()) {
+					builder1.add(new OntopNativeSQLPPTriplesMap(
+							mapping.getId(),
+							mapping.getSourceQuery(),
+							mapping.getTargetAtoms().stream()
+									.filter(a -> !toBeExpanded.contains(a))
+									.collect(ImmutableCollectors.toList())));
+				}
 			}
 		}
 		nonExpandableMappings = builder1.build();
@@ -182,7 +189,7 @@ public class MetaMappingExpander {
 							.map(Object::toString)
 							.collect(Collectors.joining(", ",
 									"The placeholder(s) ",
-									" in the target do(es) not occur in the body of the mapping")));
+									" in the target do(es) not occur in the body of the mapping: " + m.source.getSQLQuery())));
 				}
 
 				String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
@@ -366,6 +373,7 @@ public class MetaMappingExpander {
 	 */
 	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac,
 																  ImmutableList<Variable> templateVariables) {
+		// TODO : case-insensitive
 		return templateVariables.stream()
 				.map(v -> QuotedID.createIdFromDatabaseRecord(idfac, v.getName()))
 				.collect(ImmutableCollectors.toList());

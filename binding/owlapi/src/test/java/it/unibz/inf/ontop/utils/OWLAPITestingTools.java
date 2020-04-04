@@ -34,7 +34,7 @@ public class OWLAPITestingTools {
         StringBuilder bf = new StringBuilder();
         String line = in.readLine();
         while (line != null) {
-            bf.append(line);
+            bf.append(line).append('\n');
             line = in.readLine();
         }
         in.close();

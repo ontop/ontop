@@ -65,17 +65,14 @@ public class MultiSchemaH2Test  {
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(url,username, password);
-		java.sql.Statement s = sqlConnection.createStatement();
 
-		try {
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
 			String text = new Scanner( new File("src/test/resources/multischema/stockexchange-h2Schema.sql") ).useDelimiter("\\A").next();
 			s.execute(text);
 		}
 		catch(SQLException sqle) {
 			System.out.println("Exception in creating db from script");
 		}
-
-		s.close();
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -113,13 +110,10 @@ public class MultiSchemaH2Test  {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -159,20 +153,11 @@ public class MultiSchemaH2Test  {
 	}
 
 	private void checkThereIsAtLeastOneResult(String query) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
