@@ -33,14 +33,11 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 public class PropertyCharacteristicTest extends TestCase {
 	
@@ -57,48 +54,17 @@ public class PropertyCharacteristicTest extends TestCase {
 	
 	@Override
 	public void setUp() throws Exception {
-		createTables();
-	}
-	
-	private String readSQLFile(String file) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		StringBuilder bf = new StringBuilder();
-		String line = reader.readLine();
-		while (line != null) {
-			bf.append(line + "\n");
-			line = reader.readLine();
-		}
-		return bf.toString();
-	}
-	
-	private void createTables() throws IOException, SQLException {
-		String createDDL = readSQLFile("src/test/resources/property-characteristics/sqlcreate.sql");
-		
-		// Initializing and H2 database with the stock exchange data
 		jdbcconn = DriverManager.getConnection(url, username, password);
-		Statement st = jdbcconn.createStatement();
-
-		st.executeUpdate(createDDL);
-		jdbcconn.commit();
+		executeFromFile(jdbcconn, "src/test/resources/property-characteristics/sqlcreate.sql");
 	}
-
+	
 	@Override
 	public void tearDown() throws Exception {
-	
-			dropTables();
-			conn.close();
-			jdbcconn.close();
-		
+		executeFromFile(jdbcconn, "src/test/resources/property-characteristics/drop.sql");
+		conn.close(); // ???
+		jdbcconn.close();
 	}
 
-	private void dropTables() throws SQLException, IOException {
-		String dropDDL = readSQLFile("src/test/resources/property-characteristics/drop.sql");
-		Statement st = jdbcconn.createStatement();
-		st.executeUpdate(dropDDL);
-		st.close();
-		jdbcconn.commit();
-	}
-	
 	public void testNoProperty() throws Exception {
 		final File owlFile = new File("src/test/resources/property-characteristics/noproperty.owl");
 		final File obdaFile = new File("src/test/resources/property-characteristics/noproperty.obda");

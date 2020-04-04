@@ -26,13 +26,11 @@ import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
 /***
  * A simple test that check if the system is able to handle mapping variants
@@ -55,40 +53,13 @@ public class OBDA2DatalogTest extends TestCase {
 	public void setUp() throws Exception {
 		// Initializing and H2 database with the stock exchange data
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/mappinganalyzer/create-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/mappinganalyzer/create-tables.sql");
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-			dropTables();
-			conn.close();
-		
-	}
-
-	private void dropTables() throws SQLException, IOException {
-		Statement st = conn.createStatement();
-		FileReader reader = new FileReader("src/test/resources/test/mappinganalyzer/drop-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/mappinganalyzer/drop-tables.sql");
+		conn.close();
 	}
 
 	private void runTests(String obdaFileName) throws Exception {

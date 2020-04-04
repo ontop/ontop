@@ -21,8 +21,6 @@ package it.unibz.inf.ontop.owlapi;
  */
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
-import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
@@ -34,16 +32,12 @@ import org.semanticweb.owlapi.model.OWLIndividual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import static it.unibz.inf.ontop.injection.OntopMappingSettings.OBTAIN_FULL_METADATA;
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -72,20 +66,8 @@ public class TMappingConcurrencyErrorFixTest{
 		String password = "";
 
 		connection = DriverManager.getConnection(url, username, password);
-		Statement st = connection.createStatement();
+		executeFromFile(connection, "src/test/resources/test/tmapping/create-tables.sql");
 
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/create-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		connection.commit();
-	
 		Properties p = new Properties();
 		p.put(OBTAIN_FULL_METADATA, false);
 		// Creating a new instance of the reasoner
@@ -107,31 +89,10 @@ public class TMappingConcurrencyErrorFixTest{
 
 	@After
 	public void tearDown() throws Exception{
-	
-			dropTables();
-			reasoner.dispose();
-			connection.close();
-			
-		
-		
-	}
-	
-	private void dropTables() throws SQLException, IOException {
+		reasoner.dispose();
 
-		Statement st = connection.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/tmapping/drop-tables.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-
-		st.executeUpdate(bf.toString());
-		st.close();
-		connection.commit();
+		executeFromFile(connection, "src/test/resources/test/tmapping/drop-tables.sql");
+		connection.close();
 	}
 	
 	private String runTests(String query) throws Exception {

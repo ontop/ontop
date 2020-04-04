@@ -68,18 +68,10 @@ public class H2SameAsTest {
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-			    java.sql.Statement s = sqlConnection.createStatement();
-			  
-//			    try {
-			    	String text = new Scanner( new File("src/test/resources/sameAs/wellbore-h2.sql") ).useDelimiter("\\A").next();
-			    	s.execute(text);
-			    	//Server.startWebServer(sqlConnection);
-			    	 
-//			    } catch(SQLException sqle) {
-//			        System.out.println("Exception in creating db from script");
-//			    }
-			   
-			    s.close();
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			String text = new Scanner(new File("src/test/resources/sameAs/wellbore-h2.sql")).useDelimiter("\\A").next();
+			s.execute(text);
+		}
 	}
 
 

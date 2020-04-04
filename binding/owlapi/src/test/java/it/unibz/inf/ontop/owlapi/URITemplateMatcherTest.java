@@ -73,9 +73,8 @@ public class URITemplateMatcherTest {
 		if (!sqlConnection.isClosed()) {
 			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}

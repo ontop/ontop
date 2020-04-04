@@ -45,6 +45,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -84,38 +85,13 @@ public class MetaMappingVirtualABoxTest {
 		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
 
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-        String sql = Joiner.on("\n").join(
-                CharStreams.readLines(new FileReader("src/test/resources/test/metamapping-create-h2.sql")));
-
-
-        st.executeUpdate(sql);
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/metamapping-create-h2.sql");
 	}
 
 	@After
     public void tearDown() throws Exception {
-			dropTables();
-			conn.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/metamapping-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/metamapping-drop-h2.sql");
+		conn.close();
 	}
 
 	private void runTests(Properties p) throws Exception {
