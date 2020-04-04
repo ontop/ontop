@@ -180,7 +180,8 @@ public class R2RMLImportAction extends ProtegeAction {
 		private void registerTripleMap(SQLPPTriplesMap tm) {
 			try{
 				obdaModelController.addTriplesMap(tm, false);
-			} catch (DuplicateMappingException dm) {
+			}
+			catch (DuplicateMappingException dm) {
 				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
 			}

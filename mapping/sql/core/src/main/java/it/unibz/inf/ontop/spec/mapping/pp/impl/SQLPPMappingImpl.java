@@ -34,87 +34,27 @@ public class SQLPPMappingImpl implements SQLPPMapping {
 
 	private final PrefixManager prefixManager;
 	private final ImmutableList<SQLPPTriplesMap> triplesMaps;
-    private final ImmutableMap<String, SQLPPTriplesMap> mappingIndexById;
 
     /**
      * Normal constructor. Used by the QuestComponentFactory.
      */
     public SQLPPMappingImpl(ImmutableList<SQLPPTriplesMap> newMappings,
-                            PrefixManager prefixManager) throws DuplicateMappingException {
+                            PrefixManager prefixManager) {
 
-        checkDuplicates(newMappings);
         this.triplesMaps = newMappings;
         this.prefixManager = prefixManager;
-        this.mappingIndexById = indexMappingsById(triplesMaps);
     }
 
-    /**
-     * No mapping should be duplicate among all the data sources.
-     */
-    private static void checkDuplicates(ImmutableList<SQLPPTriplesMap> mappings)
-            throws DuplicateMappingException {
-
-        Set<SQLPPTriplesMap> mappingSet = new HashSet<>(mappings);
-
-        int duplicateCount = mappings.size() - mappingSet.size();
-
-        /**
-         * If there are some triplesMaps, finds them
-         */
-        if (duplicateCount > 0) {
-            Set<String> duplicateIds = new HashSet<>();
-            int remaining = duplicateCount;
-            for (SQLPPTriplesMap mapping : mappings) {
-                if (mappingSet.contains(mapping)) {
-                    mappingSet.remove(mapping);
-                }
-                /**
-                 * Duplicate
-                 */
-                else {
-                    duplicateIds.add(mapping.getId());
-                    if (--remaining == 0)
-                        break;
-                }
-            }
-            //TODO: indicate the source
-            throw new DuplicateMappingException(String.format("Found %d duplicates in the following ids: %s",
-                    duplicateCount, duplicateIds.toString()));
-        }
-    }
-
-    private static ImmutableMap<String, SQLPPTriplesMap> indexMappingsById(ImmutableList<SQLPPTriplesMap> mappings)
-            throws IllegalArgumentException {
-        Map<String, SQLPPTriplesMap> mappingIndexById = new HashMap<>();
-        for (SQLPPTriplesMap axiom : mappings) {
-            String id = axiom.getId();
-            if (mappingIndexById.containsKey(id)) {
-                // Should have already been detected by checkDuplicates.
-                throw new IllegalArgumentException(String.format("Not unique mapping ID found : %s", id));
-            }
-            mappingIndexById.put(id, axiom);
-        }
-        return ImmutableMap.copyOf(mappingIndexById);
-    }
 
     @Override
     public SQLPPMapping clone() {
-        try {
-            return new SQLPPMappingImpl(triplesMaps, prefixManager);
-        } catch (DuplicateMappingException e) {
-            throw new RuntimeException("Unexpected error (inconsistent cloning): " + e.getMessage());
-        }
+        throw new IllegalArgumentException("NOT SUPPORTED");
     }
 
     @Override
     public PrefixManager getPrefixManager() {
 		return prefixManager;
 	}
-
-    @Override
-    public SQLPPTriplesMap getPPMappingAxiom(String axiomId) {
-        return mappingIndexById.get(axiomId);
-    }
 
 	@Override
 	public ImmutableList<SQLPPTriplesMap> getTripleMaps() {

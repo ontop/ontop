@@ -106,7 +106,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      *
      */
     @Override
-    public SQLPPMapping parse(File file) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public SQLPPMapping parse(File file) throws InvalidMappingException, MappingIOException {
         checkFile(file);
         try (Reader reader = new FileReader(file)) {
             return load(reader, specificationFactory, ppMappingFactory, file.getName());
@@ -116,12 +116,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     }
 
     @Override
-    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException {
         return load(reader, specificationFactory, ppMappingFactory, ".obda file");
     }
 
     @Override
-    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph)  {
         throw new IllegalArgumentException("The Ontop native mapping language has no RDF serialization. Passing a RDF graph" +
                 "to the OntopNativeMappingParser is thus invalid.");
     }
@@ -145,7 +145,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      */
 	private SQLPPMapping load(Reader reader, SpecificationFactory specificationFactory,
                                      SQLPPMappingFactory ppMappingFactory, String fileName)
-            throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingExceptionWithIndicator {
 
         final Map<String, String> prefixes = new HashMap<>();
         final List<SQLPPTriplesMap> mappings = new ArrayList<>();

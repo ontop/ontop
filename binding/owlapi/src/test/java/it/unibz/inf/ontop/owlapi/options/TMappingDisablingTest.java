@@ -97,8 +97,7 @@ public class TMappingDisablingTest extends TestCase {
 		in.close();
 	}
 		
-	public void testDisableTMappings() throws DuplicateMappingException, InvalidMappingException,
-			IOException, OWLOntologyCreationException {
+	public void testDisableTMappings() throws OWLOntologyCreationException {
 		
 		/*
 		 * Create the instance of Quest OWL reasoner.
@@ -141,8 +140,7 @@ public class TMappingDisablingTest extends TestCase {
 		reasoner.dispose();
 	}
 	
-	public void testDisableSelectedTMappings() throws DuplicateMappingException, InvalidMappingException,
-			IOException, OWLOntologyCreationException {
+	public void testDisableSelectedTMappings() throws IOException, OWLOntologyCreationException {
 		/*
 		 * Create the instance of Quest OWL reasoner.
 		 */

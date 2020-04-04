@@ -66,7 +66,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
 
     @Override
-    public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
+    public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException {
         try {
             LinkedHashModel rdf4jGraph = new LinkedHashModel();
             RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
@@ -76,23 +76,25 @@ public class R2RMLMappingParser implements SQLMappingParser {
             parser.setRDFHandler(collector);
             parser.parse(in, documentUrl.toString());
             return parse(new RDF4J().asGraph(rdf4jGraph));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new MappingIOException(e);
-        } catch (RDFParseException | RDFHandlerException e) {
+        }
+        catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
         }
     }
 
 
     @Override
-    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
+    public SQLPPMapping parse(Reader reader) {
         // TODO: support this
         throw new UnsupportedOperationException("The R2RMLMappingParser does not support" +
                 "yet the Reader interface.");
     }
 
     @Override
-    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException {
         try {
             ImmutableList<SQLPPTriplesMap> sourceMappings = extractPPTriplesMaps(mappingGraph);
 

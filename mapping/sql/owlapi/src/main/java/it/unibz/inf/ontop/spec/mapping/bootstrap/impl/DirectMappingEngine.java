@@ -160,7 +160,7 @@ public class DirectMappingEngine {
 
             return new DefaultBootstrappingResults(newPPMapping, ontology);
 		}
-		catch (SQLException | MappingException | OWLOntologyCreationException | MetadataExtractionException e) {
+		catch (SQLException | OWLOntologyCreationException | MetadataExtractionException e) {
 			throw new MappingBootstrappingException(e);
 		}
 	}
@@ -181,7 +181,7 @@ public class DirectMappingEngine {
 	 *
 	 * @return a new OBDA Model containing all the extracted mappings
 	 */
-	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping, String baseIRI) throws MappingException, SQLException, MetadataExtractionException {
+	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping, String baseIRI) throws SQLException, MetadataExtractionException {
 
         SQLPPMapping mapping;
 	    if (!ppMapping.isPresent()) {
@@ -201,7 +201,7 @@ public class DirectMappingEngine {
 	 * since mapping id is generated randomly and same id may occur
 	 */
 	private SQLPPMapping bootstrapMappings(SQLPPMapping ppMapping, String baseIRI0)
-			throws DuplicateMappingException, SQLException, MetadataExtractionException {
+			throws SQLException, MetadataExtractionException {
 		if (ppMapping == null) {
 			throw new IllegalArgumentException("Model should not be null");
 		}

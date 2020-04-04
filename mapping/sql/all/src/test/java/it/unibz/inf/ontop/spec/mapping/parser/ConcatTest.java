@@ -13,7 +13,7 @@ import org.junit.Test;
 public class ConcatTest {
 
 	@Test
-	public void testConcat() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+	public void testConcat() throws InvalidMappingException, MappingIOException {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()
 				.propertyFile("src/test/resources/format/obda/mapping-northwind.properties")
 				.build();

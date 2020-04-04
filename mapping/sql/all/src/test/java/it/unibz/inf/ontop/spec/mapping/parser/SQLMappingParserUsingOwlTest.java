@@ -63,12 +63,12 @@ public class SQLMappingParserUsingOwlTest {
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
     public void testLoadWithBlankMappingId()
-            throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+            throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile5.obda");
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankTargetQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+    public void testLoadWithBlankTargetQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile6.obda");
     }
 
@@ -78,7 +78,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBadTargetQuery() throws DuplicateMappingException, InvalidMappingException,
+    public void testLoadWithBadTargetQuery() throws InvalidMappingException,
             MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile8.obda");
     }
@@ -89,7 +89,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithAllMistakes() throws DuplicateMappingException, InvalidMappingException,
+    public void testLoadWithAllMistakes() throws InvalidMappingException,
             MappingIOException {
             loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile10.obda");
     }
@@ -126,7 +126,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     private SQLPPMapping loadObdaFile(String fileLocation) throws MappingIOException,
-            InvalidMappingException, DuplicateMappingException {
+            InvalidMappingException {
         // Load the OBDA model
         return mappingParser.parse(new File(fileLocation));
     }

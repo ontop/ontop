@@ -106,7 +106,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
 
     protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
-            throws DuplicateMappingException, MappingIOException, InvalidMappingException {
+            throws MappingIOException, InvalidMappingException {
 
         Optional<File> optionalMappingFile = specInput.getMappingFile();
         if (optionalMappingFile.isPresent())
@@ -179,13 +179,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         else
             expandedMappingAxioms = expander.getNonExpandableMappings();
 
-        try {
-            return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getPrefixManager());
-        }
-        catch (DuplicateMappingException e) {
-            // Internal bug
-            throw new IllegalStateException(e);
-        }
+        return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getPrefixManager());
     }
 
     /**

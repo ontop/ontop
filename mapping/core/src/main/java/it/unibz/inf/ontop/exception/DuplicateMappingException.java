@@ -20,7 +20,7 @@ package it.unibz.inf.ontop.exception;
  * #L%
  */
 
-public class DuplicateMappingException extends MappingException {
+public class DuplicateMappingException extends Exception {
 	
 	public DuplicateMappingException(String message) {
 		super(message);

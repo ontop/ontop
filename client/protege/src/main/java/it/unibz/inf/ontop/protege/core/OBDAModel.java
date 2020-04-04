@@ -124,17 +124,9 @@ public class OBDAModel {
     public SQLPPMapping generatePPMapping() {
         ImmutableList<SQLPPTriplesMap> triplesMaps = ImmutableList.copyOf(triplesMapMap.values());
 
-        try {
-            return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
-                    // TODO: give an immutable prefix manager!!
-                    prefixManager);
-            /**
-             * No mapping so should never happen
-             */
-        } catch(DuplicateMappingException e) {
-            throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
-                    "What is going on? Message: " + e.getMessage());
-        }
+        return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
+                // TODO: give an immutable prefix manager!!
+                prefixManager);
     }
 
 

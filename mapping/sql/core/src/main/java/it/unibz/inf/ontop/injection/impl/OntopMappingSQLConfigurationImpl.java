@@ -94,7 +94,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
 
     @Override
-    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException {
         return loadPPMapping(Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -104,7 +104,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     Optional<SQLPPMapping> loadPPMapping(Supplier<Optional<File>> mappingFileSupplier,
                                          Supplier<Optional<Reader>> mappingReaderSupplier,
                                          Supplier<Optional<Graph>> mappingGraphSupplier)
-            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingException {
 
         if (options.ppMapping.isPresent()) {
             return options.ppMapping;

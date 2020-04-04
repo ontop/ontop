@@ -53,7 +53,7 @@ public class OntopMappingSQLAllConfigurationImpl extends OntopMappingSQLConfigur
     }
 
     @Override
-    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException {
         return loadPPMapping(
                 () -> options.mappingFile,
                 () -> options.mappingReader,
