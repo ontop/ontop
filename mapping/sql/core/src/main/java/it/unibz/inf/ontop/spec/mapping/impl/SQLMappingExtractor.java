@@ -19,8 +19,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
@@ -49,16 +47,14 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
-    private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
-    private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
-    private final TypeFactory typeFactory;
-    private final RDF rdfFactory;
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final MetaMappingExpander expander;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
+
+    private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
@@ -75,12 +71,9 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
         this.canonicalTransformer = canonicalTransformer;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
-        this.rdfFactory = rdfFactory;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, typeFactory, rdfFactory);
     }
 
     @Override
@@ -143,9 +136,8 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         log.debug("DB Metadata: \n{}", dbMetadata);
 
-        SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
+        SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, dbMetadata);
 
-        // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
@@ -160,26 +152,6 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata.getDBParameters());
         // dbMetadata GOES NO FURTHER - no need to freeze it
-    }
-
-    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, DBMetadata dbMetadata)
-            throws MetaMappingExpansionException {
-
-        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), termFactory,
-                substitutionFactory, typeFactory, rdfFactory);
-        final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
-        if (expander.hasMappingsToBeExpanded()) {
-            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
-            }
-            catch (SQLException e) {
-                throw new MetaMappingExpansionException(e.getMessage());
-            }
-        }
-        else
-            expandedMappingAxioms = expander.getNonExpandableMappings();
-
-        return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getPrefixManager());
     }
 
     /**

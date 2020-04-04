@@ -30,6 +30,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -43,12 +44,15 @@ import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor2;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.Templates;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -65,6 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,8 +88,6 @@ public class MetaMappingExpander {
 
 	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final TermFactory termFactory;
-	private final ImmutableList<SQLPPTriplesMap> nonExpandableMappings;
-	private final ImmutableList<Expansion> mappingsToBeExpanded;
 	private final SubstitutionFactory substitutionFactory;
 	private final org.apache.commons.rdf.api.RDF rdfFactory;
 	private final TypeFactory typeFactory;
@@ -101,7 +104,7 @@ public class MetaMappingExpander {
 		}
 	}
 
-	public MetaMappingExpander(Collection<SQLPPTriplesMap> mappings, TermFactory termFactory,
+	public MetaMappingExpander(TermFactory termFactory,
 							   SubstitutionFactory substitutionFactory, TypeFactory typeFactory,
 							   org.apache.commons.rdf.api.RDF rdfFactory) {
 		this.termFactory = termFactory;
@@ -109,10 +112,22 @@ public class MetaMappingExpander {
 		this.typeFactory = typeFactory;
 		this.rdfFactory = rdfFactory;
 
+	}
+
+
+	/**
+	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
+	 *
+	 * @return
+	 * 		expanded normal mappings
+	 */
+	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, DBMetadata metadata)
+			throws MetaMappingExpansionException {
+
 		ImmutableList.Builder<SQLPPTriplesMap> builder1 = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
 
-		for (SQLPPTriplesMap mapping : mappings) {
+		for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
 
 			//search for non-grounded elements in the predicate of each mapping (positions 2 or 3)
 			ImmutableList<TargetAtom> toBeExpanded = mapping.getTargetAtoms().stream()
@@ -120,9 +135,9 @@ public class MetaMappingExpander {
 						ImmutableTerm propertyTerm = targetAtom.getSubstitutedTerm(1);
 						return // check if the class is grounded
 								isURIRDFType(propertyTerm, termFactory, typeFactory)
-							  	    && !targetAtom.getSubstitutedTerm(2).isGround()
-								|| !propertyTerm.isGround();
-						})
+										&& !targetAtom.getSubstitutedTerm(2).isGround()
+										|| !propertyTerm.isGround();
+					})
 					.collect(ImmutableCollectors.toList());
 
 			if (toBeExpanded.isEmpty()) {
@@ -142,100 +157,94 @@ public class MetaMappingExpander {
 				}
 			}
 		}
-		nonExpandableMappings = builder1.build();
-		mappingsToBeExpanded = builder2.build();
-	}
+		ImmutableList<SQLPPTriplesMap> nonExpandableMappings = builder1.build();
+		ImmutableList<Expansion> mappingsToBeExpanded = builder2.build();
 
-	public boolean hasMappingsToBeExpanded() { return !mappingsToBeExpanded.isEmpty(); }
+		if (mappingsToBeExpanded.isEmpty())
+			return ppMapping;
 
-	public ImmutableList<SQLPPTriplesMap> getNonExpandableMappings() { return nonExpandableMappings; }
+		try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+			List<String> errorMessages = new LinkedList<>();
 
-	/**
-	 * this method expand the input mappings, which may include meta mappings, to the concrete mappings
-	 *
-	 * @return
-	 * 		expanded normal mappings
-	 */
-	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(Connection connection, DBMetadata metadata)
-			throws MetaMappingExpansionException {
+			ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
+			builder.addAll(nonExpandableMappings);
 
-		List<String> errorMessages = new LinkedList<>();
-
-		ImmutableList.Builder<SQLPPTriplesMap> builder = ImmutableList.builder();
-		builder.addAll(nonExpandableMappings);
-
-		for (Expansion m : mappingsToBeExpanded) {
-			try {
-				boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1), termFactory, typeFactory);
-				// if isClass, then the template is the object;
-				// otherwise, it's a property and the template is the predicate
-				ImmutableFunctionalTerm templateAtom = (ImmutableFunctionalTerm)m.target.getSubstitutedTerm(isClass ? 2 : 1);
-
-				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateAtom);
-
-				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
-
-				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
-
-				List<SelectExpressionItem> templateColumns;
+			for (Expansion m : mappingsToBeExpanded) {
 				try {
-					templateColumns = templateColumnIds.stream()
-							.map(id -> queryColumns.get(id))
-							.collect(ImmutableCollectors.toList());
-				}
-				catch (NullPointerException e) {
-					throw new IllegalArgumentException(templateColumnIds.stream()
-							.filter(id -> !queryColumns.containsKey(id))
-							.map(Object::toString)
-							.collect(Collectors.joining(", ",
-									"The placeholder(s) ",
-									" in the target do(es) not occur in the body of the mapping: " + m.source.getSQLQuery())));
-				}
+					boolean isClass = isURIRDFType(m.target.getSubstitutedTerm(1), termFactory, typeFactory);
+					// if isClass, then the template is the object;
+					// otherwise, it's a property and the template is the predicate
+					ImmutableFunctionalTerm templateAtom = (ImmutableFunctionalTerm)m.target.getSubstitutedTerm(isClass ? 2 : 1);
 
-				String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
-				final int size = templateColumns.size();
-				try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
-					while (rs.next()) {
-						List<String> values = Lists.newArrayListWithCapacity(size);
-						for (int i = 1; i <= size; i++)
-							values.add(rs.getString(i));
+					ImmutableList<Variable> templateVariables = extractTemplateVariables(templateAtom);
 
-						// Cannot build an IRI out of nulls
-						if (values.contains(null))
-							continue;
+					List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
 
-						String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), templateColumns, values);
+					Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
 
-						IRIConstant predicateTerm = termFactory.getConstantIRI(
-								rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
+					List<SelectExpressionItem> templateColumns;
+					try {
+						templateColumns = templateColumnIds.stream()
+								.map(id -> queryColumns.get(id))
+								.collect(ImmutableCollectors.toList());
+					}
+					catch (NullPointerException e) {
+						throw new IllegalArgumentException(templateColumnIds.stream()
+								.filter(id -> !queryColumns.containsKey(id))
+								.map(Object::toString)
+								.collect(Collectors.joining(", ",
+										"The placeholder(s) ",
+										" in the target do(es) not occur in the body of the mapping: " + m.source.getSQLQuery())));
+					}
 
-						Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
-						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
-								.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+					String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
+					final int size = templateColumns.size();
+					try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
+						while (rs.next()) {
+							List<String> values = Lists.newArrayListWithCapacity(size);
+							for (int i = 1; i <= size; i++)
+								values.add(rs.getString(i));
 
-						TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
+							// Cannot build an IRI out of nulls
+							if (values.contains(null))
+								continue;
 
-						// TODO: see how to keep the provenance
-						SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
-								IDGenerator.getNextUniqueID(m.id + "#"),
-								MAPPING_FACTORY.getSQLQuery(newSourceQuery),
-								ImmutableList.of(newTarget));
+							String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), templateColumns, values);
 
-						builder.add(newMapping);
-						log.debug("Expanded Mapping: {}", newMapping);
+							IRIConstant predicateTerm = termFactory.getConstantIRI(
+									rdfFactory.createIRI(getPredicateName(templateAtom.getTerm(0), values)));
+
+							Variable predicateVariable = m.target.getProjectionAtom().getArguments().get(isClass ? 2 : 1);
+							ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
+									.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+
+							TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
+
+							// TODO: see how to keep the provenance
+							SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
+									IDGenerator.getNextUniqueID(m.id + "#"),
+									MAPPING_FACTORY.getSQLQuery(newSourceQuery),
+									ImmutableList.of(newTarget));
+
+							builder.add(newMapping);
+							log.debug("Expanded Mapping: {}", newMapping);
+						}
 					}
 				}
+				catch (Exception e) {
+					log.warn("Expanding meta-mappings exception: " + e.getMessage());
+					errorMessages.add(e.getMessage());
+				}
 			}
-			catch (Exception e) {
-				log.warn("Expanding meta-mappings exception: " + e.getMessage());
-				errorMessages.add(e.getMessage());
-			}
+
+			if (!errorMessages.isEmpty())
+				throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
+
+			return new SQLPPMappingImpl(builder.build(), ppMapping.getPrefixManager());
 		}
-
-		if (!errorMessages.isEmpty())
-			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
-
-		return builder.build();
+		catch (SQLException e) {
+			throw new MetaMappingExpansionException(e.getMessage());
+		}
 	}
 
 	private ImmutableList<Variable> extractTemplateVariables(ImmutableFunctionalTerm templateAtom) {
