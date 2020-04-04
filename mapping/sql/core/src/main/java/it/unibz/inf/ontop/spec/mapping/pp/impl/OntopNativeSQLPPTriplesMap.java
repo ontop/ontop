@@ -15,9 +15,8 @@ import java.util.Optional;
  */
 public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
 
+    private final Optional<String> targetString;
     private final OntopNativeSQLPPTriplesMapProvenance triplesMapProvenance;
-
-    private Optional<String> targetString = Optional.empty();
 
     public OntopNativeSQLPPTriplesMap(String id, OBDASQLQuery sqlQuery, @Nonnull String targetString, ImmutableList<TargetAtom> targetAtoms) {
         super(targetAtoms, sqlQuery, id);
@@ -27,14 +26,14 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
 
     public OntopNativeSQLPPTriplesMap(OBDASQLQuery sqlQuery, ImmutableList<TargetAtom> targetAtoms) {
         super(targetAtoms, sqlQuery);
-        //this.targetString = null;
+        this.targetString = Optional.empty();
         this.triplesMapProvenance = createProvenance(this);
     }
 
     public OntopNativeSQLPPTriplesMap(String id, OBDASQLQuery sqlQuery, ImmutableList<TargetAtom> targetAtoms) {
         super(targetAtoms, sqlQuery, id);
+        this.targetString = Optional.empty();
         this.triplesMapProvenance = createProvenance(this);
-
     }
 
     private static OntopNativeSQLPPTriplesMapProvenance createProvenance(OntopNativeSQLPPTriplesMap triplesMap) {

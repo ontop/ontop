@@ -31,12 +31,7 @@ public class SQLQueryImpl implements OBDASQLQuery {
 	}
 
 	@Override
-	public String getSQLQuery() {
-		if ((sqlQuery == null) || (sqlQuery.equals(""))) {
-			return "";
-		}
-		return sqlQuery;
-	}
+	public String getSQLQuery() { return sqlQuery; }
 	
 	@Override
 	public String toString() {
@@ -45,8 +40,7 @@ public class SQLQueryImpl implements OBDASQLQuery {
 
 	@Override
 	public SQLQueryImpl clone() {
-		SQLQueryImpl clone = new SQLQueryImpl(sqlQuery);
-		return clone;
+		throw new IllegalArgumentException();
 	}
 
 	@Override

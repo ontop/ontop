@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
@@ -61,7 +60,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
-                                SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory,
+                                SubstitutionFactory substitutionFactory, RDF rdfFactory,
                                 MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -73,7 +72,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
-        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, typeFactory, rdfFactory);
+        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory);
     }
 
     @Override
