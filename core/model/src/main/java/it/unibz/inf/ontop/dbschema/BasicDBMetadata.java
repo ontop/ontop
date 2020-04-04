@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.dbschema;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

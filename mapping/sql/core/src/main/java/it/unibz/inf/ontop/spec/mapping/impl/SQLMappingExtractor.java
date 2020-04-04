@@ -39,7 +39,7 @@ import java.util.Optional;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, BasicDBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
+public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, DBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
 
     private final SQLPPMappingConverter ppMappingConverter;
     private final RDBMetadataExtractor dbMetadataExtractor;
@@ -82,7 +82,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
      * During the conversion, data types are inferred and mapping assertions are validated
      * TODO: move this method to AbstractMappingExtractor
      */
-    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<BasicDBMetadata> optionalDBMetadata,
+    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
@@ -111,7 +111,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         // dbMetadata GOES NO FURTHER - no need to freeze it
     }
 
-    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, BasicDBMetadata dbMetadata)
+    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, DBMetadata dbMetadata)
             throws MetaMappingExpansionException {
 
         MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), termFactory,
@@ -141,7 +141,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     /**
      * Makes use of the DB connection
      */
-    private BasicDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<BasicDBMetadata> optionalDBMetadata,
+    private BasicDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
                                           OBDASpecInput specInput)
             throws MetadataExtractionException {
 
@@ -151,13 +151,11 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
          * Metadata extraction can be disabled when DBMetadata is already provided
          */
         if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
-            return optionalDBMetadata.get();
+            return (BasicDBMetadata)optionalDBMetadata.get();
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            return isDBMetadataProvided
-                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
-                    specInput.getConstraintFile())
-                    : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
+            return dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata,
+                    specInput.getConstraintFile());
         }
         /*
          * Problem while creating the connection
@@ -175,11 +173,12 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                 SQLPPMapping.class.getSimpleName());
     }
 
-    protected Optional<BasicDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
+
+    protected Optional<DBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
         if (optionalDBMetadata.isPresent()) {
             DBMetadata md = optionalDBMetadata.get();
             if (md instanceof BasicDBMetadata) {
-                return Optional.of((BasicDBMetadata) md);
+                return Optional.of(md);
             }
             throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
                     BasicDBMetadata.class.getSimpleName());

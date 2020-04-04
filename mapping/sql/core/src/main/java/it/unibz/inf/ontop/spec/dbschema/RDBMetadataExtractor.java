@@ -20,11 +20,7 @@ import java.util.Optional;
  *
  */
 public interface RDBMetadataExtractor {
-
-    BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection, Optional<File> constraintFile)
-            throws MetadataExtractionException;
-
     BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection dbConnection,
-                        DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
+                        Optional<DBMetadata> partiallyDefinedMetadata, Optional<File> constraintFile)
             throws MetadataExtractionException;
 }

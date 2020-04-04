@@ -29,7 +29,7 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     /**
      * If we have to parse the full metadata or just the table list in the mappings.
      */
-    private final Boolean obtainFullMetadata;
+    private final boolean obtainFullMetadata;
 
     /**
      * This represents user-supplied constraints, i.e. primary
@@ -50,32 +50,25 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
     }
 
     @Override
-    public BasicDBMetadata extract(SQLPPMapping ppMapping, Connection connection, Optional<File> constraintFile)
-            throws MetadataExtractionException {
-        try {
-            DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
-            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
-            return extract(ppMapping, connection, metadata, constraintFile);
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e.getMessage());
-        }
-    }
-
-    @Override
     public BasicDBMetadata extract(SQLPPMapping ppMapping, @Nullable Connection connection,
-                               DBMetadata partiallyDefinedMetadata, Optional<File> constraintFile)
+                               Optional<DBMetadata> optionalMetadata, Optional<File> constraintFile)
             throws MetadataExtractionException {
 
-        if (!(partiallyDefinedMetadata instanceof BasicDBMetadata)) {
-            throw new IllegalArgumentException("Was expecting a DBMetadata");
-        }
-
-        MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
-                constraintFile, partiallyDefinedMetadata.getDBParameters().getQuotedIDFactory());
-
         try {
-            BasicDBMetadata metadata = (BasicDBMetadata) partiallyDefinedMetadata;
+            BasicDBMetadata metadata;
+            if (!optionalMetadata.isPresent()) {
+                DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
+                metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
+            }
+            else {
+                if (!(optionalMetadata.get() instanceof BasicDBMetadata)) {
+                    throw new IllegalArgumentException("Was expecting a DBMetadata");
+                }
+                metadata = (BasicDBMetadata) optionalMetadata.get();
+            }
+
+            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                    constraintFile, metadata.getDBParameters().getQuotedIDFactory());
 
             // if we have to parse the full metadata or just the table list in the mappings
             if (obtainFullMetadata) {
@@ -93,7 +86,6 @@ public class DefaultRDBMetadataExtractor implements RDBMetadataExtractor {
             }
 
             implicitConstraints.insertIntegrityConstraints(metadata);
-
             return metadata;
         }
         catch (SQLException e) {

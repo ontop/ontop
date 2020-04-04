@@ -39,9 +39,7 @@ import java.util.function.Function;
  *   (a) relational tables and views<br>
  *   (b) and views created by the SQL parser for complex sub-queries
  *
- *
  * @author Roman Kontchakov
- *
  */
 
 public abstract class RelationDefinition {
