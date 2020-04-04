@@ -28,18 +28,21 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, DBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
+public class SQLMappingExtractor implements MappingExtractor {
 
     private final SQLPPMappingConverter ppMappingConverter;
     private final RDBMetadataExtractor dbMetadataExtractor;
@@ -54,6 +57,9 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
 
+    private final MappingOntologyComplianceValidator ontologyComplianceValidator;
+    private final SQLMappingParser mappingParser;
+
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
@@ -62,7 +68,8 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                 SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory,
                                 MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer) {
 
-        super(ontologyComplianceValidator, mappingParser);
+        this.ontologyComplianceValidator = ontologyComplianceValidator;
+        this.mappingParser = mappingParser;
         this.ppMappingConverter = ppMappingConverter;
         this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
@@ -76,11 +83,52 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
         this.mappingEqualityTransformer = mappingEqualityTransformer;
     }
 
+    @Override
+    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull ExecutorRegistry executorRegistry)
+            throws MappingException, MetadataExtractionException {
+
+        return convertPPMapping(extractPPMapping(specInput), dbMetadata, specInput, ontology, executorRegistry);
+    }
+
+    @Override
+    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
+                                        @Nonnull OBDASpecInput specInput,
+                                        @Nonnull Optional<DBMetadata> dbMetadata,
+                                        @Nonnull Optional<Ontology> ontology,
+                                        @Nonnull ExecutorRegistry executorRegistry)
+            throws MappingException, MetadataExtractionException {
+
+        return convertPPMapping((SQLPPMapping) ppMapping, dbMetadata, specInput, ontology, executorRegistry);
+    }
+
+
+    protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
+            throws DuplicateMappingException, MappingIOException, InvalidMappingException {
+
+        Optional<File> optionalMappingFile = specInput.getMappingFile();
+        if (optionalMappingFile.isPresent())
+            return mappingParser.parse(optionalMappingFile.get());
+
+        Optional<Reader> optionalMappingReader = specInput.getMappingReader();
+        if (optionalMappingReader.isPresent())
+            return mappingParser.parse(optionalMappingReader.get());
+
+        Optional<Graph> optionalMappingGraph = specInput.getMappingGraph();
+        if (optionalMappingGraph.isPresent())
+            return mappingParser.parse(optionalMappingGraph.get());
+
+        throw new IllegalArgumentException("Bad internal configuration: no mapping input provided in the OBDASpecInput!\n" +
+                " Should have been detected earlier (in case of an user mistake)");
+    }
+
+
     /**
      * Converts the PPMapping into a Mapping.
      * <p>
      * During the conversion, data types are inferred and mapping assertions are validated
-     * TODO: move this method to AbstractMappingExtractor
      */
     protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
                                                   OBDASpecInput specInput,
@@ -91,6 +139,7 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
 
         BasicDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
+        dbMetadata.freeze();
 
         log.debug("DB Metadata: \n{}", dbMetadata);
 
@@ -98,14 +147,16 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
 
         // NB: may also add views in the DBMetadata (for non-understood SQL queries)
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
-        dbMetadata.freeze();
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
         ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
 
-        validateMapping(optionalOntology, canonizedMapping);
+        // Validation: Mismatch between the ontology and the mapping
+        if (optionalOntology.isPresent()) {
+            ontologyComplianceValidator.validate(canonizedMapping, optionalOntology.get());
+        }
 
         return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata.getDBParameters());
         // dbMetadata GOES NO FURTHER - no need to freeze it
@@ -121,7 +172,6 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
             try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
                 expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
             }
-            // Problem while creating the connection
             catch (SQLException e) {
                 throw new MetaMappingExpansionException(e.getMessage());
             }
@@ -145,44 +195,18 @@ public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, 
                                           OBDASpecInput specInput)
             throws MetadataExtractionException {
 
-        boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
-
         /*
          * Metadata extraction can be disabled when DBMetadata is already provided
          */
-        if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
+        if (optionalDBMetadata.isPresent() && (!settings.isProvidedDBMetadataCompletionEnabled()))
             return (BasicDBMetadata)optionalDBMetadata.get();
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
             return dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata,
                     specInput.getConstraintFile());
         }
-        /*
-         * Problem while creating the connection
-         */
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());
         }
-    }
-
-    protected SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
-        if (ppMapping instanceof SQLPPMapping) {
-            return (SQLPPMapping) ppMapping;
-        }
-        throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
-                SQLPPMapping.class.getSimpleName());
-    }
-
-
-    protected Optional<DBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
-        if (optionalDBMetadata.isPresent()) {
-            DBMetadata md = optionalDBMetadata.get();
-            if (md instanceof BasicDBMetadata) {
-                return Optional.of(md);
-            }
-            throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
-                    BasicDBMetadata.class.getSimpleName());
-        }
-        return Optional.empty();
     }
 }

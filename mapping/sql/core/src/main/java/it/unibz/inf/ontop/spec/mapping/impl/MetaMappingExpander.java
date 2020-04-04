@@ -89,7 +89,6 @@ public class MetaMappingExpander {
 	private final org.apache.commons.rdf.api.RDF rdfFactory;
 	private final TypeFactory typeFactory;
 
-
 	private static final class Expansion {
 		private final String id;
 		private final OBDASQLQuery source;
@@ -115,20 +114,14 @@ public class MetaMappingExpander {
 
 		for (SQLPPTriplesMap mapping : mappings) {
 
-			//serach for not grounded elements in the predicate of each mapping (position 2 or 3)
+			//search for non-grounded elements in the predicate of each mapping (positions 2 or 3)
 			ImmutableList<TargetAtom> toBeExpanded = mapping.getTargetAtoms().stream()
 					.filter(targetAtom -> {
-
 						ImmutableTerm propertyTerm = targetAtom.getSubstitutedTerm(1);
-
-							if(isURIRDFType(propertyTerm,termFactory, typeFactory)){
-								//check if the class is grounded
-								return  !targetAtom.getSubstitutedTerm(2).isGround();
-							}
-							else{
-								return !propertyTerm.isGround();
-							}
-
+						return // check if the class is grounded
+								isURIRDFType(propertyTerm, termFactory, typeFactory)
+							  	    && !targetAtom.getSubstitutedTerm(2).isGround()
+								|| !propertyTerm.isGround();
 						})
 					.collect(ImmutableCollectors.toList());
 
@@ -139,6 +132,7 @@ public class MetaMappingExpander {
 				builder2.addAll(toBeExpanded.stream()
 						.map(target -> new Expansion(mapping.getId(), mapping.getSourceQuery(), target))
 						.iterator());
+				// TODO: add all other target atoms to builder1!!
 			}
 		}
 		nonExpandableMappings = builder1.build();
@@ -381,14 +375,16 @@ public class MetaMappingExpander {
 		if (lexicalTerm instanceof Variable) {
 			// Hacky!! TODO: clean this code
 			return values.get(0);
-		} else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
+		}
+		else if (lexicalTerm instanceof ImmutableFunctionalTerm) {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			FunctionSymbol functionSymbol = functionalLexicalTerm.getFunctionSymbol();
 			if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
 				String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
 						functionalLexicalTerm.getFunctionSymbol()).getTemplate();
 				return Templates.format(iriTemplate, values);
-			} else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
+			}
+			else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
 					&& ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
 				return getPredicateName(functionalLexicalTerm.getTerm(0), values);
 			}
