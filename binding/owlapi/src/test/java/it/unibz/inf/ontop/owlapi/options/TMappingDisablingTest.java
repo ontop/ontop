@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.owlapi.options;
 
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
@@ -9,7 +8,6 @@ import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.spec.mapping.TMappingExclusionConfig;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

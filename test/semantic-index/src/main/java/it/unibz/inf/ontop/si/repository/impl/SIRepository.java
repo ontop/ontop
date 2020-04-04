@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.si.repository.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;

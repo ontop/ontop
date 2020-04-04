@@ -20,9 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.converter;
  * #L%
  */
 
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingException;
-import it.unibz.inf.ontop.exception.InvalidMappingExceptionWithIndicator;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -60,7 +57,7 @@ public class OldSyntaxMappingConverter {
      *  Read the old Syntax obda mapping file and extract the data source information
      */
 
-    public OldSyntaxMappingConverter(Reader fileReader, String fileName) throws InvalidMappingExceptionWithIndicator, MappingIOException, DuplicateMappingException {
+    public OldSyntaxMappingConverter(Reader fileReader, String fileName) throws MappingIOException {
 
         outputReader = new StringReader(extractSourceDeclaration(fileReader, fileName).toString());
 
@@ -68,7 +65,7 @@ public class OldSyntaxMappingConverter {
 
     //return the extracted obda data source
 
-    public Optional<Properties> getOBDADataSourceProperties() throws InvalidMappingException, DuplicateMappingException, MappingIOException {
+    public Optional<Properties> getOBDADataSourceProperties()  {
 
         return Optional.ofNullable(dataSourceProperties);
 
@@ -81,7 +78,7 @@ public class OldSyntaxMappingConverter {
 
 
 	private  Writer extractSourceDeclaration(Reader reader, String fileName )
-            throws MappingIOException, InvalidMappingExceptionWithIndicator, DuplicateMappingException {
+            throws MappingIOException {
 		
 		String line;
         Writer fileWriter = new StringWriter();

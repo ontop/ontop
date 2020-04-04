@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
@@ -67,13 +66,11 @@ import java.util.stream.Collectors;
 public class OBDAModel {
 
     private final SQLPPMappingFactory ppMappingFactory;
-    private final SpecificationFactory specificationFactory;
     private Map<String, SQLPPTriplesMap> triplesMapMap;
     // Mutable
     private final OBDADataSource source;
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
-    private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
     // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
@@ -98,11 +95,9 @@ public class OBDAModel {
                      TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
                      RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory) {
-        this.specificationFactory = specificationFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
-        this.owlPrefixManager = owlPrefixManager;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;

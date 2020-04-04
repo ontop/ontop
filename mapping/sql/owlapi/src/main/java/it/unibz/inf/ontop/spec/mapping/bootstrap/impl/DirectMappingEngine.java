@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;

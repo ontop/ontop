@@ -1,30 +1,19 @@
 package it.unibz.inf.ontop.utils;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingEngine;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.bootstrap.impl.DirectMappingAxiomProducer;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OBDAModelManager;
 import it.unibz.inf.ontop.protege.utils.JDBCConnectionManager;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
-import org.apache.commons.rdf.api.RDF;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.*;
 

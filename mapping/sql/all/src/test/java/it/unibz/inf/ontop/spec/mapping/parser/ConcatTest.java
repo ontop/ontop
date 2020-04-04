@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;

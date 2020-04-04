@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.exception;
+package it.unibz.inf.ontop.protege.core;
 
 /*
  * #%L

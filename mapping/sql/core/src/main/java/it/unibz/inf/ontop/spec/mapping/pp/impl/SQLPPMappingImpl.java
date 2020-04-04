@@ -20,11 +20,7 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
  * #L%
  */
 
-import java.util.*;
-
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -32,23 +28,12 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 
 public class SQLPPMappingImpl implements SQLPPMapping {
 
-	private final PrefixManager prefixManager;
 	private final ImmutableList<SQLPPTriplesMap> triplesMaps;
+    private final PrefixManager prefixManager;
 
-    /**
-     * Normal constructor. Used by the QuestComponentFactory.
-     */
-    public SQLPPMappingImpl(ImmutableList<SQLPPTriplesMap> newMappings,
-                            PrefixManager prefixManager) {
-
+    public SQLPPMappingImpl(ImmutableList<SQLPPTriplesMap> newMappings, PrefixManager prefixManager) {
         this.triplesMaps = newMappings;
         this.prefixManager = prefixManager;
-    }
-
-
-    @Override
-    public SQLPPMapping clone() {
-        throw new IllegalArgumentException("NOT SUPPORTED");
     }
 
     @Override

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;

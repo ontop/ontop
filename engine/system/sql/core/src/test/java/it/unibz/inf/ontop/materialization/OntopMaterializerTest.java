@@ -25,13 +25,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopStandaloneSQLConfiguration;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -67,13 +65,18 @@ public class OntopMaterializerTest {
 	private static final String PREFIX = "http://example.com/vocab#";
 
 	private static final String driver = "org.h2.Driver";
-	private static String url = "jdbc:h2:mem:aboxdump";
-	private static String username = "sa";
-	private static String password = "";
+	private static final String url = "jdbc:h2:mem:aboxdump";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	private final SQLMappingFactory mappingFactory;
 	private final RDF rdfFactory;
 	private final RDFDatatype xsdStringDt;
+	private final TermFactory termFactory;
+	private final TypeFactory typeFactory;
+	private final TargetAtomFactory targetAtomFactory;
+	private final SpecificationFactory specificationFactory;
+	private final SQLPPMappingFactory ppMappingFactory;
 
 	private final ImmutableTerm type;
 	private final ImmutableTerm person;
@@ -89,13 +92,9 @@ public class OntopMaterializerTest {
 	private final IRI ageIRI;
 	private final IRI hasschoolIRI;
 	private final IRI schoolIRI;
-	
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(OntopMaterializerTest.class);
-	private final TermFactory termFactory;
-	private final TypeFactory typeFactory;
-	private final TargetAtomFactory targetAtomFactory;
-	AtomFactory atomFactory;
+
 	public OntopMaterializerTest() {
 
 		OntopModelConfiguration defaultConfiguration = createAndInitConfiguration()
@@ -104,9 +103,10 @@ public class OntopMaterializerTest {
 		Injector injector = defaultConfiguration.getInjector();
 		termFactory = injector.getInstance(TermFactory.class);
 		typeFactory = injector.getInstance(TypeFactory.class);
-		atomFactory = injector.getInstance(AtomFactory.class);
 		targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
 		rdfFactory = injector.getInstance(RDF.class);
+		specificationFactory = injector.getInstance(SpecificationFactory.class);
+		ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
 		mappingFactory = SQLMappingFactoryImpl.getInstance();
 		
@@ -123,7 +123,7 @@ public class OntopMaterializerTest {
 		person = termFactory.getConstantIRI(personIRI);
 		fn = termFactory.getConstantIRI(fnIRI);
 		ln = termFactory.getConstantIRI(lnIRI);
-		age =termFactory.getConstantIRI(ageIRI);
+		age = termFactory.getConstantIRI(ageIRI);
 		hasschool = termFactory.getConstantIRI(hasschoolIRI);
 		school = termFactory.getConstantIRI(schoolIRI);
     }
@@ -191,23 +191,11 @@ public class OntopMaterializerTest {
 		}
 
 		conn.close();
-
 	}
 
 
 
-	private SQLPPMapping createMapping() throws DuplicateMappingException {
-
-    	// TODO: we should not have to create an high-level configuration just for constructing these objects...
-		OntopStandaloneSQLConfiguration configuration = createAndInitConfiguration()
-				.build();
-		Injector injector = configuration.getInjector();
-		SpecificationFactory specificationFactory = injector.getInstance(SpecificationFactory.class);
-		SQLPPMappingFactory ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
-
-    			/*
-		 * Setting up the OBDA model and the mappings
-		 */
+	private SQLPPMapping createMapping()  {
 
 		String sql = "SELECT \"fn\", \"ln\", \"age\", \"schooluri\" FROM \"data\"";
 
@@ -221,16 +209,13 @@ public class OntopMaterializerTest {
 
 		RDFDatatype stringDatatype = xsdStringDt;
 
-		ImmutableList.Builder<TargetAtom> bodyBuilder = ImmutableList.builder();
-
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, type, person));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype)));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, hasschool, schoolTemplate));
-		bodyBuilder.add(getTripleTargetAtom(personTemplate, school, schoolTemplate));
-
-		ImmutableList<TargetAtom> body = bodyBuilder.build();
+		ImmutableList<TargetAtom> body =  ImmutableList.of(
+			targetAtomFactory.getTripleTargetAtom(personTemplate, type, person),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, fn, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("fn"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, ln, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("ln"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, age, termFactory.getRDFLiteralFunctionalTerm(termFactory.getVariable("age"), stringDatatype)),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, hasschool, schoolTemplate),
+			targetAtomFactory.getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
 		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
 
@@ -238,9 +223,6 @@ public class OntopMaterializerTest {
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
 	}
 
-	private TargetAtom getTripleTargetAtom(ImmutableTerm s, ImmutableTerm p, ImmutableTerm o) {
-		return targetAtomFactory.getTripleTargetAtom(s, p, o);
-	}
 
 //	public void testTwoSources() throws Exception {
 //        try{

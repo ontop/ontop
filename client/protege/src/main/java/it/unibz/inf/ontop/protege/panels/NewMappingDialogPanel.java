@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.panels;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;

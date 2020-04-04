@@ -73,7 +73,7 @@ public class SQLMappingParserUsingOwlTest {
     }
 
     @Test(expected=InvalidMappingExceptionWithIndicator.class)
-    public void testLoadWithBlankSourceQuery() throws DuplicateMappingException, InvalidMappingException, MappingIOException {
+    public void testLoadWithBlankSourceQuery() throws InvalidMappingException, MappingIOException {
         loadObdaFile("src/test/resources/it/unibz/inf/ontop/io/SchoolBadFile7.obda");
     }
 
