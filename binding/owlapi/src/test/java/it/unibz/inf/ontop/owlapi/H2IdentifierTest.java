@@ -32,12 +32,10 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLIndividual;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -48,24 +46,20 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class H2IdentifierTest {
 
-	static final String owlFile = "src/test/resources/identifiers/identifiers.owl";
-	static final String obdaFile = "src/test/resources/identifiers/identifiers-h2.obda";
-	static final String propertyFile = "src/test/resources/identifiers/identifiers-h2.properties";
+	private static final String owlFile = "src/test/resources/identifiers/identifiers.owl";
+	private static final String obdaFile = "src/test/resources/identifiers/identifiers-h2.obda";
+	private static final String propertyFile = "src/test/resources/identifiers/identifiers-h2.properties";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	Connection sqlConnection;
+	private Connection sqlConnection;
 
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection("jdbc:h2:mem:countries","sa", "");
-
-		try (java.sql.Statement s = sqlConnection.createStatement()) {
-			String text = new Scanner( new File("src/test/resources/identifiers/create-h2.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
+		executeFromFile(sqlConnection,"src/test/resources/identifiers/create-h2.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -74,11 +68,7 @@ public class H2IdentifierTest {
 				.enableTestMode()
 				.build();
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
 	}
@@ -152,19 +142,14 @@ public class H2IdentifierTest {
 		assertEquals("<http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#Country3-BladeRunner-2020-Constant>", val);
 	}
 
-	private String runQueryReturnIndividual(String query) throws OWLException, SQLException {
+	private String runQueryReturnIndividual(String query) throws OWLException {
 		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLIndividual ind1 = bindingSet.getOWLIndividual("x");
 			String retval = ind1.toString();
 			return retval;
-		}
-		finally {
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 

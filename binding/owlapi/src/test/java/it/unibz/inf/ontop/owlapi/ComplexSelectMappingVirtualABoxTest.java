@@ -50,8 +50,8 @@ import static org.junit.Assert.assertTrue;
 public class ComplexSelectMappingVirtualABoxTest  {
 	private Connection conn;
 
-	final String owlfile = "src/test/resources/test/complexmapping.owl";
-	final String obdafile = "src/test/resources/test/complexmapping.obda";
+	private static final String owlfile = "src/test/resources/test/complexmapping.owl";
+	private static final String obdafile = "src/test/resources/test/complexmapping.obda";
 
 	private static final String url = "jdbc:h2:mem:questjunitdb";
 	private static final String username = "sa";

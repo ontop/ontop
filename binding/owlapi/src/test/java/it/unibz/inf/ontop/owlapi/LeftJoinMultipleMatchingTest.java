@@ -28,8 +28,7 @@ import static org.junit.Assert.assertFalse;
 public class LeftJoinMultipleMatchingTest {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final String owlFile = "src/test/resources/ljoptional/rais-ontology.owl";
-
+    private static final String owlFile = "src/test/resources/ljoptional/rais-ontology.owl";
 
     private Connection sqlConnection;
     private OWLConnection conn;
@@ -51,8 +50,8 @@ public class LeftJoinMultipleMatchingTest {
         conn.close();
         reasoner.dispose();
         if (!sqlConnection.isClosed()) {
-                executeFromFile(sqlConnection, "src/test/resources/ljoptional/rais-drop-h2.sql");
-                sqlConnection.close();
+            executeFromFile(sqlConnection, "src/test/resources/ljoptional/rais-drop-h2.sql");
+            sqlConnection.close();
         }
     }
 
@@ -75,7 +74,6 @@ public class LeftJoinMultipleMatchingTest {
         // Now we are ready for querying
         conn = reasoner.getConnection();
         OWLStatement st = conn.createStatement();
-
 
         QueryController qc = new QueryController();
         QueryIOManager qman = new QueryIOManager(qc);

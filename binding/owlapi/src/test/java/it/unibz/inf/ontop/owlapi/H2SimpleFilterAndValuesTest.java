@@ -31,12 +31,11 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -45,26 +44,22 @@ import static junit.framework.TestCase.assertTrue;
  * and  use of FILTER (?sx = <http://www.safepec.org#Ship> )
  */
 public class H2SimpleFilterAndValuesTest {
-	final String owlFile = "src/test/resources/filter/datatypes.owl";
-	final String obdaFile = "src/test/resources/filter/filter-h2.obda";
+
+	private static final String owlFile = "src/test/resources/filter/datatypes.owl";
+	private static final String obdaFile = "src/test/resources/filter/filter-h2.obda";
 	private static final String JDBC_URL =  "jdbc:h2:mem:datatype";
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	Connection sqlConnection;
-
+	private Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-
-		try (java.sql.Statement s = sqlConnection.createStatement()) {
-			String text = new Scanner( new File("src/test/resources/filter/h2-datatypes.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
+		executeFromFile(sqlConnection, "src/test/resources/filter/h2-datatypes.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -75,11 +70,7 @@ public class H2SimpleFilterAndValuesTest {
 				.enableTestMode()
 				.build();
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
 	}
@@ -102,16 +93,11 @@ public class H2SimpleFilterAndValuesTest {
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
 		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("y");
 			String retval = ind1.toString();
 			return retval;
-		}
-		finally {
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 

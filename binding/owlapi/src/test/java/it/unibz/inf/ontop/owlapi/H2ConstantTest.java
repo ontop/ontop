@@ -30,11 +30,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -43,24 +42,22 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2ConstantTest {
 
-	private OWLConnection conn;
+	private static final String owlfile = "src/test/resources/constant/mappingConstants.owl";
+	private static final String obdafile = "src/test/resources/constant/mappingConstants.obda";
 
-	final String owlfile = "src/test/resources/constant/mappingConstants.owl";
-	final String obdafile = "src/test/resources/constant/mappingConstants.obda";
 	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
-	private final String url = "jdbc:h2:mem:questjunitdb";
-	private final String username = "sa";
-	private final String password = "";
+	private OWLConnection conn;
+
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection= DriverManager.getConnection(url,username, password);
-		try (java.sql.Statement s = sqlConnection.createStatement()) {
-			String text = new Scanner( new File("src/test/resources/constant/constantsDatabase-h2.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
+		executeFromFile(sqlConnection, "src/test/resources/constant/constantsDatabase-h2.sql");
 
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -73,11 +70,7 @@ public class H2ConstantTest {
 				.enableTestMode()
 				.build();
         reasoner = factory.createReasoner(config);
-
-		// Now we are ready for querying
 		conn = reasoner.getConnection();
-
-		
 	}
 
 
@@ -106,10 +99,6 @@ public class H2ConstantTest {
             OWLObject ind1 = bindingSet.getOWLObject("y")	 ;
 			String retval = ind1.toString();
 			return retval;
-		}
-		finally {
-			conn.close();
-			reasoner.dispose();
 		}
 	}
 

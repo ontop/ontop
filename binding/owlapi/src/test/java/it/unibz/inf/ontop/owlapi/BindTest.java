@@ -33,8 +33,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -68,9 +66,6 @@ public class BindTest {
 
     @Before
     public void setUp() throws Exception {
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
         // String driver = "org.h2.Driver";
         String url = "jdbc:h2:mem:questjunitdb";
         String username = "sa";
