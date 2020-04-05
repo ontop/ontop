@@ -22,7 +22,6 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -54,8 +53,10 @@ public class DirectMappingAxiomProducer {
 	public DirectMappingAxiomProducer(String baseIRI, TermFactory termFactory, TargetAtomFactory targetAtomFactory,
 									  org.apache.commons.rdf.api.RDF rdfFactory,
 									  DBFunctionSymbolFactory dbFunctionSymbolFactory, TypeFactory typeFactory) {
+
+		this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
+		
 		this.termFactory = termFactory;
-        this.baseIRI = Objects.requireNonNull(baseIRI, "Base IRI must not be null!");
 		this.targetAtomFactory = targetAtomFactory;
 		this.rdfFactory = rdfFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
@@ -67,15 +68,6 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public ImmutableList<Map.Entry<String, ImmutableList<TargetAtom>>> getRefAxioms(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition,
-			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
-
-		return table.getForeignKeys().stream()
-				.map(fk -> Maps.immutableEntry(getRefSQL(fk), getRefCQ(fk, bnodeTemplateMap)))
-				.collect(ImmutableCollectors.toList());
-	}
-
-
     /***
      * Definition reference triple: an RDF triple with:
      * <p/>
@@ -86,7 +78,7 @@ public class DirectMappingAxiomProducer {
      * @param fk
      * @return
      */
-    private String getRefSQL(ForeignKeyConstraint fk) {
+    public String getRefSQL(ForeignKeyConstraint fk) {
 
 		Set<Object> columns = new LinkedHashSet<>(); // Set avoids duplicated and LinkedHashSet keeps the insertion order
 		for (Attribute attr : getIdentifyingAttributes(fk.getRelation()))
@@ -101,7 +93,7 @@ public class DirectMappingAxiomProducer {
 		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) 
 			columns.add(getColumnNameWithAlias(attr));
 
-		final String tables = fk.getRelation().getID().getSQLRendering() + 
+		String tables = fk.getRelation().getID().getSQLRendering() +
 							", " + fk.getReferencedRelation().getID().getSQLRendering();
 		
 		return String.format("SELECT %s FROM %s WHERE %s",
@@ -161,7 +153,7 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	private ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk, Map<DatabaseRelationDefinition,
+	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk, Map<DatabaseRelationDefinition,
 			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true, bnodeTemplateMap);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true, bnodeTemplateMap);

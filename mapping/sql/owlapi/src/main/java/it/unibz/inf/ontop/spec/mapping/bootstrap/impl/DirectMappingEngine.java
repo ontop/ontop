@@ -208,7 +208,8 @@ public class DirectMappingEngine {
 
 		return Stream.concat(
 				Stream.of(Maps.immutableEntry(dmap.getSQL(table), dmap.getCQ(table, bnodeTemplateMap))),
-				dmap.getRefAxioms(table, bnodeTemplateMap).stream())
+				table.getForeignKeys().stream()
+						.map(fk -> Maps.immutableEntry(dmap.getRefSQL(fk), dmap.getRefCQ(fk, bnodeTemplateMap))))
 					.map(e -> new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(),
 						sourceQueryFactory.createSourceQuery(e.getKey()), e.getValue()))
 				.collect(ImmutableCollectors.toList());
