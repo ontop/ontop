@@ -38,9 +38,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFuncti
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -72,26 +70,6 @@ import java.util.stream.Stream;
  *
  */
 public class DirectMappingEngine {
-
-	public static class DefaultBootstrappingResults implements BootstrappingResults {
-		private final SQLPPMapping ppMapping;
-		private final OWLOntology ontology;
-
-		public DefaultBootstrappingResults(SQLPPMapping ppMapping, OWLOntology ontology) {
-			this.ppMapping = ppMapping;
-			this.ontology = ontology;
-		}
-
-		@Override
-		public SQLPPMapping getPPMapping() {
-			return ppMapping;
-		}
-
-		@Override
-		public OWLOntology getOntology() {
-			return ontology;
-		}
-	}
 
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final SpecificationFactory specificationFactory;
@@ -142,9 +120,9 @@ public class DirectMappingEngine {
 		try {
 			SQLPPMapping newPPMapping = extractPPMapping(inputPPMapping, fixBaseURI(baseIRI));
 
-			OWLOntology ontology = inputOntology.isPresent()
-                    ? inputOntology.get()
-                    : OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI));
+			// TODO: fixURI for the ontology too?
+			OWLOntology ontology = inputOntology
+					.orElse(OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI)));
 
             // update ontology
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
@@ -157,10 +135,45 @@ public class DirectMappingEngine {
 			);
             manager.addAxioms(ontology, declarationAxioms);
 
-            return new DefaultBootstrappingResults(newPPMapping, ontology);
+            return new 	BootstrappingResults() {
+				@Override
+				public SQLPPMapping getPPMapping() { return newPPMapping; }
+				@Override
+				public OWLOntology getOntology() { return ontology; }
+			};
 		}
 		catch (SQLException | OWLOntologyCreationException | MetadataExtractionException e) {
 			throw new MappingBootstrappingException(e);
+		}
+	}
+
+	/***
+	 * extract all the mappings from a datasource
+	 *
+	 * @return a new OBDA Model containing all the extracted mappings
+	 */
+	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> optionalMapping, String baseIRI0) throws SQLException, MetadataExtractionException {
+
+        SQLPPMapping mapping = optionalMapping
+				.orElse(ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
+						specificationFactory.createPrefixManager(ImmutableMap.of())));
+
+		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
+			// this operation is EXPENSIVE
+			Collection<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadAllRelations(conn, typeFactory.getDBTypeFactory());
+			String baseIRI = baseIRI0.isEmpty()
+					? mapping.getPrefixManager().getDefaultPrefix()
+					: baseIRI0;
+
+			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			AtomicInteger currentMappingIndex = new AtomicInteger(mapping.getTripleMaps().size() + 1);
+
+			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
+					mapping.getTripleMaps().stream(),
+					tables.stream().flatMap(td -> getMapping(td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
+					.collect(ImmutableCollectors.toList());
+
+			return ppMappingFactory.createSQLPreProcessedMapping(mappings, mapping.getPrefixManager());
 		}
 	}
 
@@ -171,55 +184,6 @@ public class DirectMappingEngine {
 			return prefix;
 		} else {
 			return prefix + "/";
-		}
-	}
-
-
-	/***
-	 * extract all the mappings from a datasource
-	 *
-	 * @return a new OBDA Model containing all the extracted mappings
-	 */
-	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping, String baseIRI) throws SQLException, MetadataExtractionException {
-
-        SQLPPMapping mapping;
-	    if (!ppMapping.isPresent()) {
-            PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), prefixManager);
-        }
-        else
-            mapping = ppMapping.get();
-
-		return bootstrapMappings(mapping, baseIRI);
-	}
-
-	/***
-	 * extract mappings from given datasource, and insert them into the pre-processed mapping
-	 *
-	 * Duplicate Exception may happen,
-	 * since mapping id is generated randomly and same id may occur
-	 */
-	private SQLPPMapping bootstrapMappings(SQLPPMapping ppMapping, String baseIRI0)
-			throws SQLException, MetadataExtractionException {
-		if (ppMapping == null) {
-			throw new IllegalArgumentException("Model should not be null");
-		}
-		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			// this operation is EXPENSIVE
-			Collection<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadAllRelations(conn, typeFactory.getDBTypeFactory());
-			String baseIRI = baseIRI0.isEmpty()
-					? ppMapping.getPrefixManager().getDefaultPrefix()
-					: baseIRI0;
-
-			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
-			AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
-
-			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
-					ppMapping.getTripleMaps().stream(),
-					tables.stream().flatMap(td -> getMapping(td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
-					.collect(ImmutableCollectors.toList());
-
-			return ppMappingFactory.createSQLPreProcessedMapping(mappings, ppMapping.getPrefixManager());
 		}
 	}
 

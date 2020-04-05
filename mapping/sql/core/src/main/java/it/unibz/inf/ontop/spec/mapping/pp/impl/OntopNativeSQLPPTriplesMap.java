@@ -30,7 +30,6 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
     }
 
     private class OntopNativeSQLPPTriplesMapProvenance implements PPTriplesMapProvenance {
-
         @Override
         public String getProvenanceInfo() {
             return "id: " + getId() +
@@ -39,7 +38,6 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
                         .collect(Collectors.joining(", ")) +
                     "\nsource query: " + getSourceQuery();
         }
-
         @Override
         public String toString() {
             return getProvenanceInfo();
@@ -56,7 +54,6 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
                         "\ntarget atom: " + targetAtom.toString() +
                         "\nsource query: " + getSourceQuery();
             }
-
             @Override
             public String toString() {
                 return getProvenanceInfo();
