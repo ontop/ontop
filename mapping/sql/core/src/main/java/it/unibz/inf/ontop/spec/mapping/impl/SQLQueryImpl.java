@@ -39,11 +39,6 @@ public class SQLQueryImpl implements OBDASQLQuery {
 	}
 
 	@Override
-	public SQLQueryImpl clone() {
-		throw new IllegalArgumentException();
-	}
-
-	@Override
 	public int hashCode() {
 		return this.toString().hashCode();
 	}

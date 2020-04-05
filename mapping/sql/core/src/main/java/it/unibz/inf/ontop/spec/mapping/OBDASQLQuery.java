@@ -24,5 +24,4 @@ public interface OBDASQLQuery {
 
 	String getSQLQuery();
 
-	OBDASQLQuery clone();
 }

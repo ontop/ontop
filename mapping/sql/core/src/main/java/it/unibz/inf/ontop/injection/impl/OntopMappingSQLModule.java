@@ -30,10 +30,5 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromSettings(ImplicitDBConstraintsProviderFactory.class);
         bindFromSettings(MappingExtractor.class);
         bindFromSettings(RDBMetadataExtractor.class);
-
-//        Module nativeQLFactoryModule = buildFactory(
-//                ImmutableList.of(RDBMetadataExtractor.class),
-//                NativeQueryLanguageComponentFactory.class);
-//        install(nativeQLFactoryModule);
     }
 }
