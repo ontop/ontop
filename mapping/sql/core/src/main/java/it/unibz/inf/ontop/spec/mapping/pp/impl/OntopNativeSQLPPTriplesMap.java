@@ -24,12 +24,6 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
         this.triplesMapProvenance = createProvenance(this);
     }
 
-    public OntopNativeSQLPPTriplesMap(OBDASQLQuery sqlQuery, ImmutableList<TargetAtom> targetAtoms) {
-        super(targetAtoms, sqlQuery);
-        this.targetString = Optional.empty();
-        this.triplesMapProvenance = createProvenance(this);
-    }
-
     public OntopNativeSQLPPTriplesMap(String id, OBDASQLQuery sqlQuery, ImmutableList<TargetAtom> targetAtoms) {
         super(targetAtoms, sqlQuery, id);
         this.targetString = Optional.empty();
@@ -58,11 +52,6 @@ public class OntopNativeSQLPPTriplesMap extends AbstractSQLPPTriplesMap {
     @Override
     public Optional<String> getOptionalTargetString() {
         return targetString;
-    }
-
-    @Override
-    public SQLPPTriplesMap extractPPMappingAssertion(TargetAtom atom) {
-        return new OntopNativeSQLPPTriplesMap(getSourceQuery(), ImmutableList.of(atom));
     }
 
     // currently only used for R2RML conversion, so it is not necessary to keep the targetString

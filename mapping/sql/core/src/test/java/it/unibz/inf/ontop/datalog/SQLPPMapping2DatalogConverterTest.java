@@ -35,6 +35,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
@@ -88,7 +89,9 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 	private void runAnalysis(String source, String targetString) throws Exception {
 		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
-		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
+		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
+				IDGenerator.getNextUniqueID("MAPID-"),
+				MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
 				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
 						new SimplePrefixManager(ImmutableMap.of())), md, null)

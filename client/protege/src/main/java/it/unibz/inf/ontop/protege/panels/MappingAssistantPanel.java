@@ -51,6 +51,7 @@ import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -533,7 +534,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			// Prepare the mapping source
 			String source = txtQueryEditor.getText();
-
 			if (source.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The SQL source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
@@ -546,13 +546,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			// Prepare the mapping target
 			List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
 			ImmutableList<TargetAtom> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
-
 			if (target.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			// Create the mapping axiom
-			SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
+			SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
+                    IDGenerator.getNextUniqueID("MAPID-"), MAPPING_FACTORY.getSQLQuery(source), target);
 			obdaModel.addTriplesMap(mappingAxiom, false);
 
 			final String targetString = TargetQueryRenderer.encode(target, prefixManager);
@@ -564,6 +564,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			// Clear the form afterwards
 			clearForm();
 		} catch (DuplicateMappingException e) {
+		    // TODO: how can we have duplicates if the IDs are generated?
 			DialogUtils.showQuickErrorDialog(null, e, "Duplicate mapping identification.");
 			return;
 		} catch (NullPointerException e) {

@@ -19,10 +19,6 @@ public abstract class AbstractSQLPPTriplesMap implements SQLPPTriplesMap {
         this.id = id;
     }
 
-    protected AbstractSQLPPTriplesMap(ImmutableList<TargetAtom> targetAtoms, OBDASQLQuery sqlQuery) {
-        this(targetAtoms, sqlQuery,IDGenerator.getNextUniqueID("MAPID-"));
-    }
-
     @Override
     public ImmutableList<TargetAtom> getTargetAtoms() {
         return targetAtoms;

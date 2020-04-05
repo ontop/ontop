@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -37,6 +38,7 @@ import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -789,10 +791,11 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
 						view.getId().getType1(), view.getId().getType2(), getUriMap());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);		
 			}
 		}
@@ -828,12 +831,12 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(dpe.getIRI()) ,
 						view.getId().getType1(), view.getId().getType2(), getUriMap());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery),
-						targetQuery);
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}
@@ -862,10 +865,11 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				String sourceQuery = view.getSELECT(intervalsSqlFilter);
+				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
-				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(sourceQuery), targetQuery);
+				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
+						IDGenerator.getNextUniqueID("MAPID-"), sourceQuery, targetQuery);
 				result.add(basicmapping);
 			}
 		}

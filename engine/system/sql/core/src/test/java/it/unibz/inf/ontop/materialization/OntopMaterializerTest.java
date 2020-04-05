@@ -44,6 +44,7 @@ import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.Assertion;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDF;
@@ -217,7 +218,7 @@ public class OntopMaterializerTest {
 			targetAtomFactory.getTripleTargetAtom(personTemplate, hasschool, schoolTemplate),
 			targetAtomFactory.getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
-		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(mappingFactory.getSQLQuery(sql), body);
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), mappingFactory.getSQLQuery(sql), body);
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);
