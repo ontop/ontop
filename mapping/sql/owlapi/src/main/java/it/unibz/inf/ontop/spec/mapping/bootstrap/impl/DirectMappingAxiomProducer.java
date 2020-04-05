@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -66,14 +67,12 @@ public class DirectMappingAxiomProducer {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
-	public Map<String, ImmutableList<TargetAtom>> getRefAxioms(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition,
+	public ImmutableList<Map.Entry<String, ImmutableList<TargetAtom>>> getRefAxioms(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition,
 			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
-		Map<String, ImmutableList<TargetAtom>> refAxioms = new HashMap<>();
-		for (ForeignKeyConstraint fk : table.getForeignKeys())
-			refAxioms.put(getRefSQL(fk), getRefCQ(fk, bnodeTemplateMap));
-		
-		return refAxioms;
+		return table.getForeignKeys().stream()
+				.map(fk -> Maps.immutableEntry(getRefSQL(fk), getRefCQ(fk, bnodeTemplateMap)))
+				.collect(ImmutableCollectors.toList());
 	}
 
 

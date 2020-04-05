@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
@@ -197,7 +198,7 @@ public class DirectMappingEngine {
 	 *  @param bnodeTemplateMap
 	 * @return a List of OBDAMappingAxiom-s
 	 */
-	public List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
+	public ImmutableList<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
 											String baseIRI,
 											Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
 											AtomicInteger mappingIndex) {
@@ -205,17 +206,11 @@ public class DirectMappingEngine {
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,
 				rdfFactory, dbFunctionSymbolFactory, typeFactory);
 
-		List<SQLPPTriplesMap> axioms = new ArrayList<>();
-		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(),
-				sourceQueryFactory.createSourceQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
-
-		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
-		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
-            SQLPPSourceQuery sqlQuery = sourceQueryFactory.createSourceQuery(e.getKey());
-			ImmutableList<TargetAtom> targetQuery = e.getValue();
-            axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(), sqlQuery, targetQuery));
-		}
-
-		return axioms;
+		return Stream.concat(
+				Stream.of(Maps.immutableEntry(dmap.getSQL(table), dmap.getCQ(table, bnodeTemplateMap))),
+				dmap.getRefAxioms(table, bnodeTemplateMap).stream())
+					.map(e -> new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(),
+						sourceQueryFactory.createSourceQuery(e.getKey()), e.getValue()))
+				.collect(ImmutableCollectors.toList());
 	}
 }
