@@ -24,12 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
@@ -46,7 +45,6 @@ import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 	private final TargetQueryParser targetParser;
 
 	private BasicDBMetadata md;
@@ -91,7 +89,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
 				IDGenerator.getNextUniqueID("MAPID-"),
-				MAPPING_FACTORY.getSQLQuery(source), targetAtoms);
+				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetAtoms);
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
 				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
 						new SimplePrefixManager(ImmutableMap.of())), md, null)

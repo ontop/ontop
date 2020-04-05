@@ -21,8 +21,8 @@ package it.unibz.inf.ontop.protege.utils;
  */
 
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.spec.mapping.serializer.SourceQueryRenderer;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
@@ -375,7 +375,7 @@ public class OBDAMappingListRenderer implements ListCellRenderer<SQLPPTriplesMap
 		//String trgQuery = map.getOptionalTargetString();
  		trgQueryTextPane.setText(trgQuery);
 
- 		OBDASQLQuery sourceQuery = map.getSourceQuery();
+ 		SQLPPSourceQuery sourceQuery = map.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		srcQueryTextPane.setText(srcQuery);
 

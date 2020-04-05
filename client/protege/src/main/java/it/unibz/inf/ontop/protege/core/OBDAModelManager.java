@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -115,6 +116,7 @@ public class OBDAModelManager implements Disposable {
 		TargetAtomFactory targetAtomFactory = defaultInjector.getInstance(TargetAtomFactory.class);
 		SubstitutionFactory substitutionFactory = defaultInjector.getInstance(SubstitutionFactory.class);
 		TargetQueryParserFactory targetQueryParserFactory = defaultInjector.getInstance(TargetQueryParserFactory.class);
+		SQLPPSourceQueryFactory sourceQueryFactory = defaultInjector.getInstance(SQLPPSourceQueryFactory.class);
 
 		lastKnownOntologyId = java.util.Optional.empty();
 
@@ -136,8 +138,8 @@ public class OBDAModelManager implements Disposable {
 		queryController = new QueryController();
 
 		PrefixDocumentFormat prefixFormat = PrefixUtilities.getPrefixOWLOntologyFormat(modelManager.getActiveOntology());
-		obdaModel = new OBDAModel(specificationFactory, ppMappingFactory, prefixFormat, atomFactory, termFactory,
-				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory);
+		obdaModel = new OBDAModel(ppMappingFactory, prefixFormat, atomFactory, termFactory,
+				typeFactory, targetAtomFactory, substitutionFactory, rdfFactory, targetQueryParserFactory, sourceQueryFactory);
 		obdaModel.addSourceListener(dlistener);
 		obdaModel.addMappingsListener(mlistener);
 		queryController.addListener(qlistener);
@@ -153,16 +155,8 @@ public class OBDAModelManager implements Disposable {
 		return configurationManager;
 	}
 
-	public TermFactory getTermFactory() {
-		return termFactory;
-	}
-
 	public TypeFactory getTypeFactory() {
 		return typeFactory;
-	}
-
-	public TargetAtomFactory getTargetAtomFactory() {
-		return targetAtomFactory;
 	}
 
 

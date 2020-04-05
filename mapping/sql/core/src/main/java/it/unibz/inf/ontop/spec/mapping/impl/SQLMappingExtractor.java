@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -61,7 +62,8 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
                                 SubstitutionFactory substitutionFactory, RDF rdfFactory,
-                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer) {
+                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
+                                SQLPPSourceQueryFactory sourceQueryFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
@@ -72,7 +74,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
-        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory);
+        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
     }
 
     @Override

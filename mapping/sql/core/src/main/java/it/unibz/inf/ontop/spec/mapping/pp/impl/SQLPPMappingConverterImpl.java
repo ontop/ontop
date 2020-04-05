@@ -25,7 +25,6 @@ import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -41,9 +40,9 @@ import java.util.*;
 /**
  * SQLPPMapping -> MappingAssertion
  */
-public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
+public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LegacySQLPPMappingConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMappingConverterImpl.class);
 
     private final TermFactory termFactory;
     private final NoNullValueEnforcer noNullValueEnforcer;
@@ -53,8 +52,8 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
     private final CoreSingletons coreSingletons;
 
     @Inject
-    private LegacySQLPPMappingConverter(NoNullValueEnforcer noNullValueEnforcer,
-                                        CoreSingletons coreSingletons) {
+    private SQLPPMappingConverterImpl(NoNullValueEnforcer noNullValueEnforcer,
+                                      CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = coreSingletons.getIQFactory();
@@ -75,7 +74,7 @@ public class LegacySQLPPMappingConverter implements SQLPPMappingConverter {
 
         for (SQLPPTriplesMap mappingAxiom : ppMapping.getTripleMaps()) {
             try {
-                String sourceQuery = mappingAxiom.getSourceQuery().getSQLQuery();
+                String sourceQuery = mappingAxiom.getSourceQuery().getSQL();
 
                 ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
                 Optional<ImmutableExpression> filter;

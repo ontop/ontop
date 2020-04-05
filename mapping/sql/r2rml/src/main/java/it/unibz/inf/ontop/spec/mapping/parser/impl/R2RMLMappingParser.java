@@ -17,8 +17,8 @@ import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -46,20 +46,23 @@ import java.util.stream.Stream;
 public class R2RMLMappingParser implements SQLMappingParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLMappingParser.class);
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final R2RMLParser r2rmlParser;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
-                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser) {
+                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser,
+                               SQLPPSourceQueryFactory sourceQueryFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.r2rmlParser = r2rmlParser;
+        this.sourceQueryFactory = sourceQueryFactory;
     }
 
 
@@ -161,7 +164,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 .filter(as -> !as.isEmpty())
                 // TODO: consider a R2RML-specific type of triples map
                 .map(as -> new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
-                        MAPPING_FACTORY.getSQLQuery(sourceQuery),  as));
+                        sourceQueryFactory.createSourceQuery(sourceQuery),  as));
     }
 
     private ImmutableList<TargetAtom> extractMappingTargetAtoms(TriplesMap tm) throws InvalidR2RMLMappingException {
@@ -249,7 +252,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
                 // TODO: use a R2RML-specific class	instead
                 SQLPPTriplesMap ppTriplesMap = new OntopNativeSQLPPTriplesMap("tm-join-"+robm.hashCode(),
-                        MAPPING_FACTORY.getSQLQuery(sourceQuery), targetAtoms);
+                        sourceQueryFactory.createSourceQuery(sourceQuery), targetAtoms);
                 LOGGER.info("Join \"triples map\" introduced: " + ppTriplesMap);
                 joinPPTriplesMapsBuilder.add(ppTriplesMap);
             }

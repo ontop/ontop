@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
-
 
     private final OntopMappingSQLSettings settings;
 
@@ -30,5 +30,6 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromSettings(ImplicitDBConstraintsProviderFactory.class);
         bindFromSettings(MappingExtractor.class);
         bindFromSettings(RDBMetadataExtractor.class);
+        bindFromSettings(SQLPPSourceQueryFactory.class);
     }
 }

@@ -44,7 +44,7 @@ public class SIRepository {
         this.typeFactory = loadingConfiguration.getTypeFactory();
         this.loadingConfiguration = loadingConfiguration;
         this.dataRepository = new RDBMSSIRepositoryManager(tbox, termFactory, typeFactory,
-            loadingConfiguration.getTargetAtomFactory());
+            loadingConfiguration.getTargetAtomFactory(), loadingConfiguration.getSourceQueryFactory());
 
         LOG.warn("Semantic index mode initializing: \nString operation over URI are not supported in this mode ");
     }
@@ -62,8 +62,6 @@ public class SIRepository {
     public int insertData(Connection connection, Iterator<Assertion> iterator) throws SQLException {
         return dataRepository.insertData(connection, iterator, 5000, 500);
     }
-
-    public SemanticIndexURIMap getUriMap() { return dataRepository.getUriMap(); }
 
     public Connection createConnection() throws SemanticIndexException {
 

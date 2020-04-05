@@ -38,8 +38,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -70,7 +69,7 @@ public class OntopMaterializerTest {
 	private static final String username = "sa";
 	private static final String password = "";
 
-	private final SQLMappingFactory mappingFactory;
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final RDF rdfFactory;
 	private final RDFDatatype xsdStringDt;
 	private final TermFactory termFactory;
@@ -109,7 +108,7 @@ public class OntopMaterializerTest {
 		specificationFactory = injector.getInstance(SpecificationFactory.class);
 		ppMappingFactory = injector.getInstance(SQLPPMappingFactory.class);
 
-		mappingFactory = SQLMappingFactoryImpl.getInstance();
+		sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
 		
 		personIRI = rdfFactory.createIRI(PREFIX + "Person");
 		fnIRI = rdfFactory.createIRI(PREFIX + "fn");
@@ -218,7 +217,7 @@ public class OntopMaterializerTest {
 			targetAtomFactory.getTripleTargetAtom(personTemplate, hasschool, schoolTemplate),
 			targetAtomFactory.getTripleTargetAtom(personTemplate, school, schoolTemplate));
 
-		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), mappingFactory.getSQLQuery(sql), body);
+		SQLPPTriplesMap map1 = new OntopNativeSQLPPTriplesMap(IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(sql), body);
 
 		PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(map1), prefixManager);

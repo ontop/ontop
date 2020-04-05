@@ -32,6 +32,7 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -39,8 +40,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionS
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor2;
@@ -86,17 +86,17 @@ public class MetaMappingExpander {
 
 	private static final Logger log = LoggerFactory.getLogger(MetaMappingExpander.class);
 
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final TermFactory termFactory;
 	private final SubstitutionFactory substitutionFactory;
 	private final org.apache.commons.rdf.api.RDF rdfFactory;
 
 	private static final class Expansion {
 		private final String id;
-		private final OBDASQLQuery source;
+		private final SQLPPSourceQuery source;
 		private final TargetAtom target;
 
-		Expansion(String id, OBDASQLQuery source, TargetAtom target) {
+		Expansion(String id, SQLPPSourceQuery source, TargetAtom target) {
 			this.id = id;
 			this.source = source;
 			this.target = target;
@@ -105,10 +105,12 @@ public class MetaMappingExpander {
 
 	public MetaMappingExpander(TermFactory termFactory,
 							   SubstitutionFactory substitutionFactory,
-							   org.apache.commons.rdf.api.RDF rdfFactory) {
+							   org.apache.commons.rdf.api.RDF rdfFactory,
+							   SQLPPSourceQueryFactory sourceQueryFactory) {
 		this.termFactory = termFactory;
 		this.substitutionFactory = substitutionFactory;
 		this.rdfFactory = rdfFactory;
+		this.sourceQueryFactory = sourceQueryFactory;
 	}
 
 
@@ -177,7 +179,7 @@ public class MetaMappingExpander {
 
 					List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
 
-					Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQLQuery());
+					Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
 
 					List<SelectExpressionItem> templateColumns;
 					try {
@@ -191,10 +193,10 @@ public class MetaMappingExpander {
 								.map(Object::toString)
 								.collect(Collectors.joining(", ",
 										"The placeholder(s) ",
-										" in the target do(es) not occur in the body of the mapping: " + m.source.getSQLQuery())));
+										" in the target do(es) not occur in the body of the mapping: " + m.source.getSQL())));
 					}
 
-					String query = getTemplateValuesQuery(m.source.getSQLQuery(), templateColumns);
+					String query = getTemplateValuesQuery(m.source.getSQL(), templateColumns);
 					final int size = templateColumns.size();
 					try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
 						while (rs.next()) {
@@ -206,7 +208,7 @@ public class MetaMappingExpander {
 							if (values.contains(null))
 								continue;
 
-							String newSourceQuery = getInstantiatedSQL(m.source.getSQLQuery(), templateColumns, values);
+							String newSourceQuery = getInstantiatedSQL(m.source.getSQL(), templateColumns, values);
 
 							IRIConstant predicateTerm = termFactory.getConstantIRI(
 									rdfFactory.createIRI(getPredicateName(templateTerm.getTerm(0), values)));
@@ -223,7 +225,7 @@ public class MetaMappingExpander {
 							// TODO: see how to keep the provenance
 							SQLPPTriplesMap newMapping = new OntopNativeSQLPPTriplesMap(
 									IDGenerator.getNextUniqueID(m.id + "#"),
-									MAPPING_FACTORY.getSQLQuery(newSourceQuery),
+									sourceQueryFactory.createSourceQuery(newSourceQuery),
 									ImmutableList.of(newTarget));
 
 							result.add(newMapping);

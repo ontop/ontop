@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.impl;
+package it.unibz.inf.ontop.spec.mapping;
 
 /*
  * #%L
@@ -20,26 +20,8 @@ package it.unibz.inf.ontop.spec.mapping.impl;
  * #L%
  */
 
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+public interface SQLPPSourceQuery {
 
-public class SQLQueryImpl implements OBDASQLQuery {
+	String getSQL();
 
-	private final String sqlQuery;
-
-	protected SQLQueryImpl(String sqlQuery) {
-		this.sqlQuery = sqlQuery.replaceAll("(?m)^[ \t]*\r?\n", "");
-	}
-
-	@Override
-	public String getSQLQuery() { return sqlQuery; }
-	
-	@Override
-	public String toString() {
-		return getSQLQuery();
-	}
-
-	@Override
-	public int hashCode() {
-		return this.toString().hashCode();
-	}
 }

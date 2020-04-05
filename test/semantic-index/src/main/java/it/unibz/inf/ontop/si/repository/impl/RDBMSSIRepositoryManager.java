@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.si.repository.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -33,8 +33,8 @@ import it.unibz.inf.ontop.model.term.functionsymbol.impl.Int2IRIStringFunctionSy
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.ontology.*;
@@ -57,7 +57,6 @@ public class RDBMSSIRepositoryManager {
 
 
 	private final static Logger log = LoggerFactory.getLogger(RDBMSSIRepositoryManager.class);
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	static final class TableDescription {
 		final String tableName;
@@ -253,12 +252,15 @@ public class RDBMSSIRepositoryManager {
 	private final TargetAtomFactory targetAtomFactory;
 	private final FunctionSymbol int2IRIStringFunctionSymbol;
 	private final RDFTermTypeConstant iriTypeConstant;
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 
 	public RDBMSSIRepositoryManager(ClassifiedTBox reasonerDag,
 									TermFactory termFactory, TypeFactory typeFactory,
-									TargetAtomFactory targetAtomFactory) {
+									TargetAtomFactory targetAtomFactory,
+									SQLPPSourceQueryFactory sourceQueryFactory) {
 		this.reasonerDag = reasonerDag;
 		this.termFactory = termFactory;
+		this.sourceQueryFactory = sourceQueryFactory;
 		views = new SemanticIndexViewsManager(typeFactory);
         cacheSI = new SemanticIndexCache(reasonerDag);
 		this.targetAtomFactory = targetAtomFactory;
@@ -791,7 +793,7 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(termFactory.getConstantIRI(ope.getIRI()),
 						view.getId().getType1(), view.getId().getType2(), getUriMap());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
@@ -831,7 +833,7 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(dpe.getIRI()) ,
 						view.getId().getType1(), view.getId().getType2(), getUriMap());
@@ -865,7 +867,7 @@ public class RDBMSSIRepositoryManager {
 				if (view.isEmptyForIntervals(intervals))
 					continue;
 				
-				OBDASQLQuery sourceQuery = MAPPING_FACTORY.getSQLQuery(view.getSELECT(intervalsSqlFilter));
+				SQLPPSourceQuery sourceQuery = sourceQueryFactory.createSourceQuery(view.getSELECT(intervalsSqlFilter));
 				ImmutableList<TargetAtom> targetQuery = constructTargetQuery(
 						termFactory.getConstantIRI(classNode.getIRI()), view.getId().getType1());
 				SQLPPTriplesMap basicmapping = new OntopNativeSQLPPTriplesMap(
@@ -891,10 +893,10 @@ public class RDBMSSIRepositoryManager {
 
 				// Computing the merged SQL 
 				StringBuilder newSQL = new StringBuilder();
-				newSQL.append(((OBDASQLQuery) currentMappings.get(0).getSourceQuery()).toString());
+				newSQL.append(((SQLPPSourceQuery) currentMappings.get(0).getSourceQuery()).toString());
 				for (int mapi = 1; mapi < currentMappings.size(); mapi++) {
 					newSQL.append(" UNION ALL ");
-					newSQL.append(((OBDASQLQuery) currentMappings.get(mapi).getSourceQuery()).toString());
+					newSQL.append(((SQLPPSourceQuery) currentMappings.get(mapi).getSourceQuery()).toString());
 				}
 
 				// Replacing the old mappings 

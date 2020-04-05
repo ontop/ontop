@@ -32,8 +32,8 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedTagException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnparsableTargetQueryException;
@@ -76,14 +76,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     public static final String END_COLLECTION_SYMBOL = "]]";
     protected static final String COMMENT_SYMBOL = ";";
 
-    private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
     private static final Logger LOG = LoggerFactory.getLogger(OntopNativeMappingParser.class);
 
     private final TargetQueryParserFactory targetQueryParserFactory;
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
-    private final TermFactory termFactory;
-    private final TypeFactory typeFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
     /**
      * Create an SQL Mapping Parser for generating an OBDA model.
@@ -92,12 +90,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      TargetQueryParserFactory targetQueryParserFactory,
                                      SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
-                                     TypeFactory typeFactory) {
+                                     TypeFactory typeFactory,
+                                     SQLPPSourceQueryFactory sourceQueryFactory) {
         this.targetQueryParserFactory = targetQueryParserFactory;
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
-        this.termFactory = termFactory;
-        this.typeFactory = typeFactory;
+        this.sourceQueryFactory = sourceQueryFactory;
     }
 
     /**
@@ -236,7 +234,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
      * @return The updated mapping set of the current source
      * @throws IOException
      */
-    private static List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
+    private List<SQLPPTriplesMap> readMappingDeclaration(LineNumberReader reader,
                                                                 List<TargetQueryParser> parsers,
                                                                 List<Indicator> invalidMappingIndicators)
             throws IOException {
@@ -376,12 +374,12 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 		return count;
 	}
 
-    private static List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
+    private List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
                                                        String targetString,
                                                        ImmutableList<TargetAtom> targetQuery,
                                                        List<SQLPPTriplesMap> currentSourceMappings) {
         SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
-                mappingId, SQL_MAPPING_FACTORY.getSQLQuery(sourceQuery), targetString, targetQuery);
+                mappingId, sourceQueryFactory.createSourceQuery(sourceQuery), targetString, targetQuery);
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

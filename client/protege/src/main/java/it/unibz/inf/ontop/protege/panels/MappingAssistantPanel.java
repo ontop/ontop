@@ -37,8 +37,7 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -90,14 +89,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private boolean isSubjectClassValid = true;
 
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-
 	private static final String EMPTY_TEXT = "";
 
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+
     private final TermFactory termFactory;
 	private final TargetAtomFactory targetAtomFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -107,6 +106,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		prefixManager = obdaModel.getMutablePrefixManager();
         termFactory = obdaModel.getTermFactory();
         targetAtomFactory = obdaModel.getTargetAtomFactory();
+        sourceQueryFactory = obdaModel.getSourceQueryFactory();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -552,7 +552,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			}
 			// Create the mapping axiom
 			SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
-                    IDGenerator.getNextUniqueID("MAPID-"), MAPPING_FACTORY.getSQLQuery(source), target);
+                    IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(source), target);
 			obdaModel.addTriplesMap(mappingAxiom, false);
 
 			final String targetString = TargetQueryRenderer.encode(target, prefixManager);

@@ -3,14 +3,13 @@ package it.unibz.inf.ontop.utils;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.*;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.LegacySQLPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import org.apache.commons.rdf.api.RDF;
 
@@ -28,7 +27,8 @@ public class SQLMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
-    public static final LegacySQLPPMappingConverter LEGACY_SQL_PP_MAPPING_CONVERTER;
+    public static final SQLPPMappingConverterImpl LEGACY_SQL_PP_MAPPING_CONVERTER;
+    public static final SQLPPSourceQueryFactory SOURCE_QUERY_FACTORY;
 
     public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
 
@@ -57,6 +57,7 @@ public class SQLMappingTestingTools {
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
-        LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(LegacySQLPPMappingConverter.class);
+        LEGACY_SQL_PP_MAPPING_CONVERTER = injector.getInstance(SQLPPMappingConverterImpl.class);
+        SOURCE_QUERY_FACTORY = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 }

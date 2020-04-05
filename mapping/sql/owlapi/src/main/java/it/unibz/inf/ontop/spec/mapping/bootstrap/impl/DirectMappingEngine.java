@@ -32,17 +32,15 @@ import it.unibz.inf.ontop.injection.OntopMappingSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -95,7 +93,7 @@ public class DirectMappingEngine {
 		}
 	}
 
-	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final SpecificationFactory specificationFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
 	private final TypeFactory typeFactory;
@@ -121,7 +119,8 @@ public class DirectMappingEngine {
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
 								RDF rdfFactory, TargetAtomFactory targetAtomFactory,
-								DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+								DBFunctionSymbolFactory dbFunctionSymbolFactory,
+								SQLPPSourceQueryFactory sourceQueryFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -130,6 +129,7 @@ public class DirectMappingEngine {
 		this.rdfFactory = rdfFactory;
 		this.targetAtomFactory = targetAtomFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.sourceQueryFactory = sourceQueryFactory;
 	}
 
 	/**
@@ -243,11 +243,11 @@ public class DirectMappingEngine {
 
 		List<SQLPPTriplesMap> axioms = new ArrayList<>();
 		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(),
-				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
+				sourceQueryFactory.createSourceQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
 
 		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
 		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
-            OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
+            SQLPPSourceQuery sqlQuery = sourceQueryFactory.createSourceQuery(e.getKey());
 			ImmutableList<TargetAtom> targetQuery = e.getValue();
             axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(), sqlQuery, targetQuery));
 		}

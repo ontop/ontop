@@ -23,7 +23,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
@@ -53,11 +53,11 @@ public class SQLTableNameExtractor {
 		Set<RelationID> tables = new HashSet<>();
 		for (SQLPPTriplesMap axiom : mappings) {
 			try {
-				if (!(axiom.getSourceQuery() instanceof OBDASQLQuery)) {
+				if (!(axiom.getSourceQuery() instanceof SQLPPSourceQuery)) {
 					throw new IllegalArgumentException("getRealTables() only works for SQL-* mappings");
 				}
 
-				OBDASQLQuery sourceQuery = axiom.getSourceQuery();
+				SQLPPSourceQuery sourceQuery = axiom.getSourceQuery();
 				net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sourceQuery.toString());
 				if (!(statement instanceof Select))
 					throw new JSQLParserException("The query is not a SELECT statement");

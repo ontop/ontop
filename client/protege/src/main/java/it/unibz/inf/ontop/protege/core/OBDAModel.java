@@ -15,10 +15,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -87,14 +84,15 @@ public class OBDAModel {
     private final TypeFactory typeFactory;
     private final RDF rdfFactory;
     private final TargetQueryParserFactory targetQueryParserFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
-    public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory,
+    public OBDAModel(SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
-                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory) {
+                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory,
+                     SQLPPSourceQueryFactory sourceQueryFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
@@ -104,6 +102,7 @@ public class OBDAModel {
         this.substitutionFactory = substitutionFactory;
         this.rdfFactory = rdfFactory;
         this.targetQueryParserFactory = targetQueryParserFactory;
+        this.sourceQueryFactory = sourceQueryFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -373,7 +372,7 @@ public class OBDAModel {
             fireMappingDeleted(dataSourceURI);
     }
 
-    public void updateMappingsSourceQuery(String triplesMapId, OBDASQLQuery sourceQuery) {
+    public void updateMappingsSourceQuery(String triplesMapId, SQLPPSourceQuery sourceQuery) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(triplesMapId);
 
         if (formerTriplesMap != null) {
@@ -478,6 +477,9 @@ public class OBDAModel {
         return rdfFactory;
     }
 
+    public SQLPPSourceQueryFactory getSourceQueryFactory() { return sourceQueryFactory; }
+
+
     public TargetQueryParser createTargetQueryParser() {
         return targetQueryParserFactory.createParser(getMutablePrefixManager().getPrefixMap());
     }
@@ -498,4 +500,5 @@ public class OBDAModel {
         this.explicitDefaultPrefixNamespace = Optional.of(ns);
         addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
+
 }

@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.protege.panels;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.TargetQueryParserException;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -31,10 +32,9 @@ import it.unibz.inf.ontop.protege.gui.IconLoader;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.gui.treemodels.ResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
@@ -69,7 +69,6 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 	private OBDAModel obdaModel;
 	private OBDADataSource dataSource;
 	private JDialog parent;
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
 
 	private PrefixManager prefixManager;
 
@@ -187,7 +186,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 				try {
 					OBDAModel mapcon = obdaModel;
 
-					OBDASQLQuery body = MAPPING_FACTORY.getSQLQuery(source.trim());
+					SQLPPSourceQuery body = obdaModel.getSourceQueryFactory().createSourceQuery(source.trim());
 
 					String newId = txtMappingID.getText().trim();
 					log.info("Insert Mapping: \n"+ target + "\n" + source);
@@ -623,7 +622,7 @@ public class NewMappingDialogPanel extends javax.swing.JPanel implements Datasou
 		cmdInsertMapping.setText("Update");
 		txtMappingID.setText(mapping.getId());
 
-		OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+		SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
 		String srcQuery = SourceQueryRenderer.encode(sourceQuery);
 		txtSourceQuery.setText(srcQuery);
 

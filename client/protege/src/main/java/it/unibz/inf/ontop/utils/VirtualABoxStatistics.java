@@ -21,11 +21,11 @@ package it.unibz.inf.ontop.utils;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.utils.ConnectionTools;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +132,7 @@ public class VirtualABoxStatistics {
 			String mappingId = mapping.getId();
 			int triplesCount = 0;
 			try {
-				OBDASQLQuery sourceQuery = mapping.getSourceQuery();
+				SQLPPSourceQuery sourceQuery = mapping.getSourceQuery();
 				int tuples = getTuplesCount(sourceQuery, source);
 
 				ImmutableList<TargetAtom> targetQuery = mapping.getTargetAtoms();
@@ -148,7 +148,7 @@ public class VirtualABoxStatistics {
 		statistics.put(source.getSourceID().toString(), mappingStat);
 	}
 
-	private int getTuplesCount(OBDASQLQuery query, OBDADataSource source)
+	private int getTuplesCount(SQLPPSourceQuery query, OBDADataSource source)
 			throws Exception {
 		Statement st = null;
 		ResultSet rs = null;
@@ -180,7 +180,7 @@ public class VirtualABoxStatistics {
 		return count;
 	}
 
-	private String getSelectionString(OBDASQLQuery query) throws Exception {
+	private String getSelectionString(SQLPPSourceQuery query) throws Exception {
 		final String originalSql = query.toString();
 
 		String sql = originalSql.toLowerCase(); // make it lower case to help identify a string.
