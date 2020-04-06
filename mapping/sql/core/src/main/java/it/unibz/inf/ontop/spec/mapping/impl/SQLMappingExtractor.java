@@ -156,8 +156,19 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
+        BasicDBMetadata dbMetadata;
+        if (optionalDBMetadata.isPresent()) {
+            if (!(optionalDBMetadata.get() instanceof BasicDBMetadata))
+                throw new IllegalArgumentException("Was expecting a DBMetadata");
 
-        BasicDBMetadata dbMetadata = extract(ppMapping, optionalDBMetadata, specInput.getConstraintFile());
+            // Metadata extraction can be disabled when DBMetadata is already provided
+            if (!settings.isProvidedDBMetadataCompletionEnabled())
+                dbMetadata = (BasicDBMetadata)optionalDBMetadata.get();
+            else
+                dbMetadata = extract(ppMapping, Optional.of(optionalDBMetadata.get().getDBParameters()), specInput.getConstraintFile());
+        }
+        else
+            dbMetadata = extract(ppMapping, Optional.empty(), specInput.getConstraintFile());
 
         SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, dbMetadata);
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
@@ -178,27 +189,14 @@ public class SQLMappingExtractor implements MappingExtractor {
 
 
     private BasicDBMetadata extract(SQLPPMapping ppMapping,
-                                    Optional<DBMetadata> optionalMetadata,
+                                    Optional<DBParameters> optionalDBParameters,
                                     Optional<File> constraintFile) throws MetadataExtractionException {
 
-        Connection connection;
         try {
-            DBParameters dbParameters;
-            if (!optionalMetadata.isPresent()) {
-                // Metadata extraction can be disabled when DBMetadata is already provided
-                if (!settings.isProvidedDBMetadataCompletionEnabled())
-                    return (BasicDBMetadata)optionalMetadata.get();
-
-                connection = LocalJDBCConnectionUtils.createConnection(settings);
-                dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
-            }
-            else {
-                if (!(optionalMetadata.get() instanceof BasicDBMetadata)) {
-                    throw new IllegalArgumentException("Was expecting a DBMetadata");
-                }
-                connection = LocalJDBCConnectionUtils.createConnection(settings);
-                dbParameters = optionalMetadata.get().getDBParameters();
-            }
+            Connection connection = LocalJDBCConnectionUtils.createConnection(settings);
+            DBParameters dbParameters = optionalDBParameters.isPresent()
+                    ? optionalDBParameters.get()
+                    : RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
 
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
