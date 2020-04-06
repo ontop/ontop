@@ -165,7 +165,7 @@ public class RDBMetadataExtractionTools {
 		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
 		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
 		BasicDBMetadata metadata = createMetadata(dbParameters);
-		loadMetadata(metadata, metadataLoader, null);
+		loadMetadata(metadata, metadataLoader, metadataLoader.getRelationIDs());
 		return metadata;
 	}
 
@@ -173,14 +173,16 @@ public class RDBMetadataExtractionTools {
 		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
 		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
 		BasicDBMetadata metadata = createMetadata(dbParameters);
-		loadMetadata(metadata, metadataLoader, null);
+		loadMetadata(metadata, metadataLoader, metadataLoader.getRelationIDs());
 		return metadata.getDatabaseRelations();
 	}
 
 	public static BasicDBMetadata loadMetadataForRelations(DBParameters dbParameters, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
 		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
 		BasicDBMetadata metadata = createMetadata(dbParameters);
-		loadMetadata(metadata, metadataLoader, realTables);
+		loadMetadata(metadata, metadataLoader,  realTables.stream()
+				.map(metadataLoader::getRelationCanonicalID)
+				.collect(ImmutableCollectors.toList()));
 		return metadata;
 	}
 
@@ -209,13 +211,7 @@ public class RDBMetadataExtractionTools {
 	 * @return The database metadata object.
 	 */
 
-	private static void loadMetadata(BasicDBMetadata metadata, RDBMetadataProvider metadataLoader, ImmutableList<RelationID> realTables) throws MetadataExtractionException {
-
-		ImmutableList<RelationID> seedRelationIds = (realTables == null || realTables.isEmpty())
-			? metadataLoader.getRelationIDs()
-			: realTables.stream()
-				.map(metadataLoader::getRelationCanonicalID)
-				.collect(ImmutableCollectors.toList());
+	private static void loadMetadata(BasicDBMetadata metadata, RDBMetadataProvider metadataLoader, ImmutableList<RelationID> seedRelationIds) throws MetadataExtractionException {
 
         List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
 		for (RelationID seedId : seedRelationIds) {
