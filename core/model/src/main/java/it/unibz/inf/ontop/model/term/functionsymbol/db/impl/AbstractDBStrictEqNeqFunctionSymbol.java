@@ -68,7 +68,12 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
             }
         }
         else if (nonNullTerms.size() == 1) {
-            return termFactory.getDBBooleanConstant(isEq);
+            ImmutableTerm nonNullTerm = nonNullTerms.iterator().next();
+            return isEq
+                    ? termFactory.getTrueOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNotNull(nonNullTerm)))
+                    .simplify(variableNullability)
+                    : termFactory.getFalseOrNullFunctionalTerm(ImmutableList.of(termFactory.getDBIsNull(nonNullTerm)))
+                    .simplify(variableNullability);
         }
         else {
             return simplifyNonNullTerms(ImmutableList.copyOf(nonNullTerms), termFactory, variableNullability);
@@ -145,6 +150,15 @@ public abstract class AbstractDBStrictEqNeqFunctionSymbol extends DBBooleanFunct
 
     @Override
     protected boolean tolerateNulls() {
-        return false;
+        return getArity() > 2;
+    }
+
+    @Override
+    public IncrementalEvaluation evaluateIsNotNull(ImmutableList<? extends ImmutableTerm> terms, TermFactory termFactory,
+                                                   VariableNullability variableNullability) {
+        if (getArity() <= 2)
+            return super.evaluateIsNotNull(terms, termFactory, variableNullability);
+        // TODO: try to simplify for higher arities
+        return IncrementalEvaluation.declareSameExpression();
     }
 }

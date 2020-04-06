@@ -391,12 +391,13 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
                     substitution.simplifyValues(shrunkChild.getVariableNullability()), projectedVariables);
 
-            IQTree newChild = normalization.updateChild(shrunkChild);
+            IQTree newChild = normalization.updateChild(shrunkChild)
+                    .normalizeForOptimization(variableGenerator);
             return normalization.generateTopConstructionNode()
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
                             currentIQProperties.declareNormalizedForOptimization()))
                     .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
-                            ? child
+                            ? newChild
                             : iqFactory.createUnaryIQTree(
                                     iqFactory.createConstructionNode(projectedVariables),
                                     newChild));
