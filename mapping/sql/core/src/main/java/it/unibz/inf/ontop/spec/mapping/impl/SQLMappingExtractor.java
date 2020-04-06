@@ -61,11 +61,6 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final SQLMappingParser mappingParser;
 
     /**
-     * If we have to parse the full metadata or just the table list in the mappings.
-     */
-    private final boolean obtainFullMetadata;
-
-    /**
      * This represents user-supplied constraints, i.e. primary
      * and foreign keys not present in the database metadata
      *
@@ -96,10 +91,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
-        this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
         this.typeFactory = typeFactory;
-
     }
 
     @Override
@@ -165,7 +158,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             if (!settings.isProvidedDBMetadataCompletionEnabled())
                 dbMetadata = (BasicDBMetadata)optionalDBMetadata.get();
             else
-                dbMetadata = extract(ppMapping, Optional.of(optionalDBMetadata.get().getDBParameters()), specInput.getConstraintFile());
+                dbMetadata = extract(ppMapping, optionalDBMetadata.map(DBMetadata::getDBParameters), specInput.getConstraintFile());
         }
         else
             dbMetadata = extract(ppMapping, Optional.empty(), specInput.getConstraintFile());
@@ -192,8 +185,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                     Optional<DBParameters> optionalDBParameters,
                                     Optional<File> constraintFile) throws MetadataExtractionException {
 
-        try {
-            Connection connection = LocalJDBCConnectionUtils.createConnection(settings);
+        try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
             DBParameters dbParameters = optionalDBParameters.isPresent()
                     ? optionalDBParameters.get()
                     : RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
@@ -206,7 +198,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
             // if we have to parse the full metadata or just the table list in the mappings
             ImmutableList<RelationID> seedRelationIds;
-            if (obtainFullMetadata) {
+            if (settings.isFullMetadataExtractionEnabled()) {
                 seedRelationIds = metadataLoader.getRelationIDs();
             }
             else {
