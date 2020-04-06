@@ -12,12 +12,12 @@ import java.util.Optional;
 
 public interface OBDASpecificationExtractor {
 
-    OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+    OBDASpecification extract(@Nonnull OBDASpecInput specInput,
                               @Nonnull Optional<Ontology> ontology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 
     OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
-                              @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> ontology,
+                              @Nonnull Optional<Ontology> ontology,
                               ExecutorRegistry executorRegistry)
             throws OBDASpecificationException;
 

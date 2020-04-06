@@ -31,14 +31,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 /***
@@ -53,10 +50,8 @@ public class URINamesH2Test {
 
 	private static OWLConnection conn;
 
-	static Logger log = LoggerFactory.getLogger(URINamesH2Test.class);
-
-	final static String owlfile = "src/test/resources/urinames/uri-names.owl";
-	final static String obdafile = "src/test/resources/urinames/uri-names.obda";
+	private final static String owlfile = "src/test/resources/urinames/uri-names.owl";
+	private final static String obdafile = "src/test/resources/urinames/uri-names.obda";
 	private static OntopOWLReasoner reasoner;
 
 	private static Connection sqlConnection;
@@ -69,36 +64,27 @@ public class URINamesH2Test {
 		 String password = "fish";
 
 
-		try {
+		sqlConnection = DriverManager
+				.getConnection(url, username, password);
 
-			sqlConnection = DriverManager
-					.getConnection(url, username, password);
-			
-			FileReader reader = new FileReader("src/test/resources/urinames/uri-names.sql");
-			BufferedReader in = new BufferedReader(reader);
-			SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
-			runner.runScript(in);
+		FileReader reader = new FileReader("src/test/resources/urinames/uri-names.sql");
+		BufferedReader in = new BufferedReader(reader);
+		SQLScriptRunner runner = new SQLScriptRunner(sqlConnection, true, false);
+		runner.runScript(in);
 
-		    // Creating a new instance of the reasoner
-	        OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-	        OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-					.nativeOntopMappingFile(obdafile)
-					.ontologyFile(owlfile)
-					.jdbcUrl(url)
-					.jdbcUser(username)
-					.jdbcPassword(password)
-					.enableFullMetadataExtraction(false)
-					.build();
-	        reasoner = factory.createReasoner(config);
-	        
-			// Now we are ready for querying
-			conn = reasoner.getConnection();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			log.error(e.getMessage(), e);
-			throw e;
-		}
+		// Creating a new instance of the reasoner
+		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
+		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.jdbcUrl(url)
+				.jdbcUser(username)
+				.jdbcPassword(password)
+				.build();
+		reasoner = factory.createReasoner(config);
 
+		// Now we are ready for querying
+		conn = reasoner.getConnection();
 	}
 
 	@AfterClass
@@ -123,8 +109,7 @@ public class URINamesH2Test {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			int count = 0;
@@ -136,15 +121,6 @@ public class URINamesH2Test {
 			}
 			Assert.assertTrue(count == numberOfResults);
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				Assert.assertTrue(false);
-			}
 		}
 	}
 

@@ -33,13 +33,13 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
     }
 
     @Override
-    public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull Optional<DBMetadata> dbMetadata,
+    public OBDASpecification extract(@Nonnull OBDASpecInput specInput,
                                      @Nonnull Optional<Ontology> optionalOntology, ExecutorRegistry executorRegistry)
             throws OBDASpecificationException {
 
         try {
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                    specInput, dbMetadata, optionalOntology, executorRegistry);
+                    specInput, optionalOntology, executorRegistry);
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
         }
@@ -50,12 +50,12 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
 
     @Override
     public OBDASpecification extract(@Nonnull OBDASpecInput specInput, @Nonnull PreProcessedMapping ppMapping,
-                                     @Nonnull Optional<DBMetadata> dbMetadata, @Nonnull Optional<Ontology> optionalOntology,
+                                     @Nonnull Optional<Ontology> optionalOntology,
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         try {
             MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
-                    ppMapping, specInput, dbMetadata, optionalOntology, executorRegistry);
+                    ppMapping, specInput, optionalOntology, executorRegistry);
 
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);

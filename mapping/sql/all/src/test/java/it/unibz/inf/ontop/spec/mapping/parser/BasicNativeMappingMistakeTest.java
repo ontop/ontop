@@ -50,12 +50,10 @@ public class BasicNativeMappingMistakeTest extends AbstractBasicMappingMistakeTe
     @Override
     protected OntopMappingSQLAllConfiguration createConfiguration(String obdaFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
-                .dbMetadata(getDBMetadata())
                 .nativeOntopMappingFile(getClass().getResource(obdaFile).getPath())
-                .jdbcUrl("jdbc:h2://localhost/fake")
+                .jdbcUrl("jdbc:h2:mem:questrepository")
                 .jdbcUser("fake_user")
                 .jdbcPassword("fake_password")
-                .enableProvidedDBMetadataCompletion(false)
                 .build();
     }
 

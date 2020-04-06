@@ -25,14 +25,12 @@ public interface MappingExtractor {
     }
 
     MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<DBMetadata> dbMetadata,
                                  @Nonnull Optional<Ontology> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException;
 
     MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                  @Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<DBMetadata> dbMetadata,
                                  @Nonnull Optional<Ontology> saturatedTBox,
                                  @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException;

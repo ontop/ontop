@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import net.sf.jsqlparser.JSQLParserException;
@@ -48,7 +49,7 @@ import java.util.*;
 public class SQLTableNameExtractor {
 
 
-	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPTriplesMap> mappings){
+	public static Set<RelationID> getRealTables(QuotedIDFactory idfac, Collection<SQLPPTriplesMap> mappings) throws InvalidMappingSourceQueriesException {
 		List<String> errorMessage = new LinkedList<>();
 		Set<RelationID> tables = new HashSet<>();
 		for (SQLPPTriplesMap axiom : mappings) {
@@ -68,7 +69,8 @@ public class SQLTableNameExtractor {
 
 				for (RelationID table : queryTables)
 					tables.add(table);
-			} catch (Exception e) {
+			}
+			catch (Exception | Error e) { // CCJSqlParserUtil throws an ERROR!
 				errorMessage.add("Error in mapping with id: " + axiom.getId() + " \n Description: "
 						+ ((e.getMessage()!= null) ? e.getMessage() : e.getCause())  + " \nMapping: [" + axiom.toString() + "]");
 
@@ -80,7 +82,7 @@ public class SQLTableNameExtractor {
 				errors.append(error + "\n");
 			}
 			final String msg = "There was an error parsing the following mappings. Please correct the issue(s) to continue.\n" + errors.toString();
-			throw new RuntimeException(msg);
+			throw new InvalidMappingSourceQueriesException(msg);
 		}
 		return tables;
 	}

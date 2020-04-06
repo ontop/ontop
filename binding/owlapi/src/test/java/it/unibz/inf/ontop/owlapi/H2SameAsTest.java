@@ -100,7 +100,6 @@ public class H2SameAsTest {
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)
 				.sameAsMappings(sameAs)
-				.enableFullMetadataExtraction(false)
 				.jdbcUrl(JDBC_URL)
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)

@@ -85,7 +85,6 @@ public class H2ComplexSameAsTest {
 				.ontologyFile(owlfile)
 				.propertyFile(propertyfile)
 				.sameAsMappings(sameAs)
-				.enableFullMetadataExtraction(false)
 				.enableTestMode()
 				.build();
 

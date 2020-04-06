@@ -35,12 +35,10 @@ public class BasicR2RMLMappingMistakeTest extends AbstractBasicMappingMistakeTes
     @Override
     protected OntopMappingSQLAllConfiguration createConfiguration(String mappingFile) {
         return OntopMappingSQLAllConfiguration.defaultBuilder()
-                .dbMetadata(getDBMetadata())
                 .r2rmlMappingFile(getClass().getResource(mappingFile).getPath())
-                .jdbcUrl("jdbc:h2://localhost/fake")
+                .jdbcUrl("jdbc:h2:mem:questrepository")
                 .jdbcUser("fake_user")
                 .jdbcPassword("fake_password")
-                .enableProvidedDBMetadataCompletion(false)
                 .build();
     }
 

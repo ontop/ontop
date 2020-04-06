@@ -97,23 +97,21 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException {
 
-        return convertPPMapping(extractPPMapping(specInput), dbMetadata, specInput, ontology, executorRegistry);
+        return convertPPMapping(extractPPMapping(specInput), specInput, ontology, executorRegistry);
     }
 
     @Override
     public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
                                         @Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<DBMetadata> dbMetadata,
                                         @Nonnull Optional<Ontology> ontology,
                                         @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException {
 
-        return convertPPMapping((SQLPPMapping) ppMapping, dbMetadata, specInput, ontology, executorRegistry);
+        return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology, executorRegistry);
     }
 
 
@@ -142,26 +140,14 @@ public class SQLMappingExtractor implements MappingExtractor {
      * <p>
      * During the conversion, data types are inferred and mapping assertions are validated
      */
-    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
+    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping,
                                                   OBDASpecInput specInput,
                                                   Optional<Ontology> optionalOntology,
                                                   ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        BasicDBMetadata dbMetadata;
-        if (optionalDBMetadata.isPresent()) {
-            if (!(optionalDBMetadata.get() instanceof BasicDBMetadata))
-                throw new IllegalArgumentException("Was expecting a DBMetadata");
-
-            // Metadata extraction can be disabled when DBMetadata is already provided
-            if (!settings.isProvidedDBMetadataCompletionEnabled())
-                dbMetadata = (BasicDBMetadata)optionalDBMetadata.get();
-            else
-                dbMetadata = extract(ppMapping, optionalDBMetadata.map(DBMetadata::getDBParameters), specInput.getConstraintFile());
-        }
-        else
-            dbMetadata = extract(ppMapping, Optional.empty(), specInput.getConstraintFile());
+        BasicDBMetadata dbMetadata = extract(ppMapping, Optional.empty(), specInput.getConstraintFile());
 
         SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, dbMetadata);
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
@@ -183,7 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     private BasicDBMetadata extract(SQLPPMapping ppMapping,
                                     Optional<DBParameters> optionalDBParameters,
-                                    Optional<File> constraintFile) throws MetadataExtractionException {
+                                    Optional<File> constraintFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
             DBParameters dbParameters = optionalDBParameters.isPresent()

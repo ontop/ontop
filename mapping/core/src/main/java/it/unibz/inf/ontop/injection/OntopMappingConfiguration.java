@@ -26,13 +26,7 @@ public interface OntopMappingConfiguration extends OntopOBDAConfiguration, Ontop
 
         B tMappingExclusionConfig(@Nonnull TMappingExclusionConfig config);
 
-        B enableFullMetadataExtraction(boolean obtainFullMetadata);
-
         B enableOntologyAnnotationQuerying(boolean queryingAnnotationsInOntology);
-
-        B enableProvidedDBMetadataCompletion(boolean dbMetadataCompletion);
-
-        B dbMetadata(@Nonnull DBMetadata dbMetadata);
 
         B enableDefaultDatatypeInference(boolean inferDefaultDatatype);
 
