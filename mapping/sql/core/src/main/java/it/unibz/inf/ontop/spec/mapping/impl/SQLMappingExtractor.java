@@ -2,14 +2,14 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
@@ -32,18 +33,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import static it.unibz.inf.ontop.spec.dbschema.impl.SQLTableNameExtractor.getRealTables;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SQLMappingExtractor implements MappingExtractor {
 
     private final SQLPPMappingConverter ppMappingConverter;
-    private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
@@ -54,27 +60,46 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
 
+    /**
+     * If we have to parse the full metadata or just the table list in the mappings.
+     */
+    private final boolean obtainFullMetadata;
+
+    /**
+     * This represents user-supplied constraints, i.e. primary
+     * and foreign keys not present in the database metadata
+     *
+     * Can be useful for eliminating self-joins
+     */
+    private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
+    private final TypeFactory typeFactory;
+
     private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
+                                OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
                                 SubstitutionFactory substitutionFactory, RDF rdfFactory,
                                 MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
-                                SQLPPSourceQueryFactory sourceQueryFactory) {
+                                SQLPPSourceQueryFactory sourceQueryFactory,
+                                ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
+                                TypeFactory typeFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
         this.ppMappingConverter = ppMappingConverter;
-        this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
+        this.obtainFullMetadata = settings.isFullMetadataExtractionEnabled();
+        this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
+        this.typeFactory = typeFactory;
+
     }
 
     @Override
@@ -132,13 +157,9 @@ public class SQLMappingExtractor implements MappingExtractor {
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
 
-        BasicDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
-        dbMetadata.freeze();
-
-        log.debug("DB Metadata: \n{}", dbMetadata);
+        BasicDBMetadata dbMetadata = extract(ppMapping, optionalDBMetadata, specInput.getConstraintFile());
 
         SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, dbMetadata);
-
         ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
@@ -155,22 +176,68 @@ public class SQLMappingExtractor implements MappingExtractor {
         // dbMetadata GOES NO FURTHER - no need to freeze it
     }
 
-    /**
-     * Makes use of the DB connection
-     */
-    private BasicDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<DBMetadata> optionalDBMetadata,
-                                          OBDASpecInput specInput)
-            throws MetadataExtractionException {
 
-        /*
-         * Metadata extraction can be disabled when DBMetadata is already provided
-         */
-        if (optionalDBMetadata.isPresent() && (!settings.isProvidedDBMetadataCompletionEnabled()))
-            return (BasicDBMetadata)optionalDBMetadata.get();
+    private BasicDBMetadata extract(SQLPPMapping ppMapping,
+                                    Optional<DBMetadata> optionalMetadata,
+                                    Optional<File> constraintFile) throws MetadataExtractionException {
 
-        try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            return dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata,
-                    specInput.getConstraintFile());
+        Connection connection;
+        try {
+            DBParameters dbParameters;
+            if (!optionalMetadata.isPresent()) {
+                // Metadata extraction can be disabled when DBMetadata is already provided
+                if (!settings.isProvidedDBMetadataCompletionEnabled())
+                    return (BasicDBMetadata)optionalMetadata.get();
+
+                connection = LocalJDBCConnectionUtils.createConnection(settings);
+                dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
+            }
+            else {
+                if (!(optionalMetadata.get() instanceof BasicDBMetadata)) {
+                    throw new IllegalArgumentException("Was expecting a DBMetadata");
+                }
+                connection = LocalJDBCConnectionUtils.createConnection(settings);
+                dbParameters = optionalMetadata.get().getDBParameters();
+            }
+
+            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                    constraintFile, dbParameters.getQuotedIDFactory());
+
+            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, dbParameters);
+            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
+
+            // if we have to parse the full metadata or just the table list in the mappings
+            ImmutableList<RelationID> seedRelationIds;
+            if (obtainFullMetadata) {
+                seedRelationIds = metadataLoader.getRelationIDs();
+            }
+            else {
+                // This is the NEW way of obtaining part of the metadata
+                // (the schema.table names) by parsing the mappings
+                // Parse mappings. Just to get the table names in use
+
+                Set<RelationID> realTables = getRealTables(dbParameters.getQuotedIDFactory(), ppMapping.getTripleMaps());
+                realTables.addAll(implicitConstraints.getRelationIDs());
+                seedRelationIds = realTables.stream()
+                        .map(metadataLoader::getRelationCanonicalID)
+                        .collect(ImmutableCollectors.toList());
+            }
+            List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
+            for (RelationID seedId : seedRelationIds) {
+                for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
+                    DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
+                    extractedRelations2.add(relation);
+                }
+            }
+
+            for (DatabaseRelationDefinition relation : extractedRelations2)
+                metadataLoader.insertIntegrityConstraints(relation, metadata);
+
+            implicitConstraints.insertIntegrityConstraints(metadata);
+            metadata.freeze();
+
+            log.debug("DB Metadata: \n{}", metadata);
+            return metadata;
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());
