@@ -396,7 +396,7 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                     .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, newChild,
                             currentIQProperties.declareNormalizedForOptimization()))
                     .orElseGet(() -> projectedVariables.equals(newChild.getVariables())
-                            ? child
+                            ? newChild
                             : iqFactory.createUnaryIQTree(
                                     iqFactory.createConstructionNode(projectedVariables),
                                     newChild));
