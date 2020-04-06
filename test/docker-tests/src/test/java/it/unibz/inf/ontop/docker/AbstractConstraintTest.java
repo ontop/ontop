@@ -69,14 +69,16 @@ public abstract class AbstractConstraintTest extends TestCase {
 		Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
-		QuotedIDFactory idFactory = dbParameters.getQuotedIDFactory();
+
+		RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
+		QuotedIDFactory idFactory = metadataLoader.getDBParameters().getQuotedIDFactory();
+
 		RelationID iBook = idFactory.createRelationID(null, TB_BOOK);
 		RelationID iBookWriter = idFactory.createRelationID(null, TB_BOOKWRITER);
 		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
 		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
 
-		BasicDBMetadata METADATA = RDBMetadataExtractionTools.loadMetadataForRelations(dbParameters, conn,
+		BasicDBMetadata METADATA = RDBMetadataExtractionTools.loadMetadataForRelations(metadataLoader,
 				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
 
 		tBook = METADATA.getDatabaseRelation(iBook);

@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
@@ -29,8 +28,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -67,8 +64,6 @@ public class SQLMappingExtractor implements MappingExtractor {
      */
     private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
     private final TypeFactory typeFactory;
-
-    private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
@@ -158,7 +153,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             ontologyComplianceValidator.validate(canonizedMapping, optionalOntology.get());
         }
 
-        return new MappingAndDBMetadataImpl(canonizedMapping, mm.getDBParameters());
+        return new MappingAndDBParametersImpl(canonizedMapping, mm.getDBParameters());
     }
 
 
@@ -167,12 +162,12 @@ public class SQLMappingExtractor implements MappingExtractor {
                                            ExecutorRegistry executorRegistry) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
 
+            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
+            DBParameters dbParameters = metadataLoader.getDBParameters();
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
-            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, dbParameters);
             BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
 
             // This is the NEW way of obtaining part of the metadata
@@ -192,7 +187,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                 }
             }
 
-            SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, metadata);
+            SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadata);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadata, executorRegistry);
 
             for (DatabaseRelationDefinition relation : extractedRelations2)
@@ -200,10 +195,33 @@ public class SQLMappingExtractor implements MappingExtractor {
 
             implicitConstraints.insertIntegrityConstraints(metadata);
 
-            return new MappingAndDBMetadataImpl(provMapping, dbParameters);
+            return new MappingAndDBParametersImpl(provMapping, dbParameters);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());
         }
     }
+
+
+
+    private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
+        private final ImmutableList<MappingAssertion> mapping;
+        private final DBParameters dbParameters;
+
+        public MappingAndDBParametersImpl(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters) {
+            this.mapping = mapping;
+            this.dbParameters = dbParameters;
+        }
+
+        @Override
+        public ImmutableList<MappingAssertion> getMapping() {
+            return mapping;
+        }
+
+        @Override
+        public DBParameters getDBParameters() {
+            return dbParameters;
+        }
+    }
+
 }

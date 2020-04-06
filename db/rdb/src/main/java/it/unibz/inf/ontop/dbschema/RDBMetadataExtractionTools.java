@@ -96,15 +96,7 @@ public class RDBMetadataExtractionTools {
 
 	private static Logger log = LoggerFactory.getLogger(RDBMetadataExtractionTools.class);
 
-	/**
-	 * Creates database metadata description (but does not load metadata)
-	 *
-	 * @return The database metadata object.
-	 * @throws SQLException
-	 */
-
-	public static DBParameters createDBParameters(Connection conn,
-											 DBTypeFactory dbTypeFactory) throws SQLException {
+	public static QuotedIDFactory createQuotedIDFactory(Connection conn) throws SQLException {
 
 		final DatabaseMetaData md = conn.getMetaData();
 		String productName = md.getDatabaseProductName();
@@ -122,64 +114,65 @@ public class RDBMetadataExtractionTools {
 			log.info("getIdentifierQuoteString: {}", md.getIdentifierQuoteString());
 		}
 
-		QuotedIDFactory idfac;
 		//  MySQL
 		if (productName.contains("MySQL")) {
-			idfac = new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers());
-		} else if (md.storesMixedCaseIdentifiers()) {
+			return new QuotedIDFactoryMySQL(md.storesMixedCaseIdentifiers());
+		}
+		else if (md.storesMixedCaseIdentifiers()) {
 			// treat Exareme as a case-sensitive DB engine (like MS SQL Server)
 			// "SQL Server" = MS SQL Server
-			idfac = new QuotedIDFactoryIdentity("\"");
-		} else {
-			if (md.storesLowerCaseIdentifiers())
-				// PostgreSQL treats unquoted identifiers as lower-case
-				idfac = new QuotedIDFactoryLowerCase("\"");
-			else if (md.storesUpperCaseIdentifiers())
-				// Oracle, DB2, H2, HSQL
-				idfac = new QuotedIDFactoryStandardSQL();
-			else {
-				log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
-				log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
-				log.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
-				log.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
-				log.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
-				log.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
-				log.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
-				log.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
-				log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
-				log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
-
-				idfac = new QuotedIDFactoryStandardSQL();
-			}
+			return new QuotedIDFactoryIdentity("\"");
 		}
+		else if (md.storesLowerCaseIdentifiers())
+			// PostgreSQL treats unquoted identifiers as lower-case
+			return new QuotedIDFactoryLowerCase("\"");
+		else if (md.storesUpperCaseIdentifiers())
+			// Oracle, DB2, H2, HSQL
+			return new QuotedIDFactoryStandardSQL();
+		else {
+			log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
+			log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
+			log.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
+			log.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+			log.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
+			log.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
+			log.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
+			log.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+			log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+			log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
 
-		return new BasicDBParametersImpl(md.getDriverName(), md.getDriverVersion(),
-				productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
+			return new QuotedIDFactoryStandardSQL();
+		}
 	}
+
+	/**
+	 * Creates database metadata description (but does not load metadata)
+	 *
+	 * @return The database metadata object.
+	 * @throws SQLException
+	 */
+
 
 	public static BasicDBMetadata createMetadata(DBParameters dbParameters)   {
 		return new BasicDBMetadata(dbParameters);
 	}
 
 	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
-		BasicDBMetadata metadata = createMetadata(dbParameters);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbTypeFactory);
+		BasicDBMetadata metadata = createMetadata(metadataLoader.getDBParameters());
 		loadMetadata(metadata, metadataLoader, metadataLoader.getRelationIDs());
 		return metadata;
 	}
 
 	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
-		BasicDBMetadata metadata = createMetadata(dbParameters);
+		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbTypeFactory);
+		BasicDBMetadata metadata = createMetadata(metadataLoader.getDBParameters());
 		loadMetadata(metadata, metadataLoader, metadataLoader.getRelationIDs());
 		return metadata.getDatabaseRelations();
 	}
 
-	public static BasicDBMetadata loadMetadataForRelations(DBParameters dbParameters, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
-		BasicDBMetadata metadata = createMetadata(dbParameters);
+	public static BasicDBMetadata loadMetadataForRelations(RDBMetadataProvider metadataLoader, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
+		BasicDBMetadata metadata = createMetadata(metadataLoader.getDBParameters());
 		loadMetadata(metadata, metadataLoader,  realTables.stream()
 				.map(metadataLoader::getRelationCanonicalID)
 				.collect(ImmutableCollectors.toList()));
@@ -187,18 +180,25 @@ public class RDBMetadataExtractionTools {
 	}
 
 
-	public static RDBMetadataProvider getMetadataProvider(Connection conn, DBParameters dbParameters) throws MetadataExtractionException {
-		String productName = dbParameters.getDbmsProductName();
+	public static RDBMetadataProvider getMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException, SQLException {
+
+		QuotedIDFactory idfac = createQuotedIDFactory(connection);
+
+		final DatabaseMetaData md = connection.getMetaData();
+		String productName = md.getDatabaseProductName();
+		DBParameters dbParameters = new BasicDBParametersImpl(md.getDriverName(), md.getDriverVersion(),
+				productName, md.getDatabaseProductVersion(), idfac, dbTypeFactory);
+
 		if (productName.contains("Oracle"))
-			return new OracleJDBCRDBMetadataProvider(conn, dbParameters);
+			return new OracleJDBCRDBMetadataProvider(connection, dbParameters);
 		else if (productName.contains("DB2"))
-			return new DB2RDBMetadataProvider(conn, dbParameters);
+			return new DB2RDBMetadataProvider(connection, dbParameters);
 		else if (productName.contains("SQL Server"))
-			return new MSSQLDBMetadataProvider(conn, dbParameters);
+			return new MSSQLDBMetadataProvider(connection, dbParameters);
 		else if (productName.contains("MySQL"))
-			return new MySQLDBMetadataProvider(conn, dbParameters);
+			return new MySQLDBMetadataProvider(connection, dbParameters);
 		else
-			return new JDBCRDBMetadataProvider(conn, dbParameters);
+			return new JDBCRDBMetadataProvider(connection, dbParameters);
 	}
 
 	/**
