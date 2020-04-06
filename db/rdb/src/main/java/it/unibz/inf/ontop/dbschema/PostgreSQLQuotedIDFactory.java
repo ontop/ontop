@@ -22,26 +22,42 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
+
+import static it.unibz.inf.ontop.dbschema.SQLStandardQuotedIDFactory.QUOTATION_STRING;
+
 /**
  * Creates QuotedIdentifiers following the rules of PostrgeSQL:<br>
  *    - unquoted identifiers are converted into lower case<br>
  *    - quoted identifiers are preserved
  * 
+ * PostgreSQL
+ * ----------
+ *
+ * http://www.postgresql.org/docs/9.1/static/sql-syntax-lexical.html
+ *
+ * Unquoted names are always folded to lower (!) case.
+ *
+ * Quoted identifier is formed by enclosing an arbitrary sequence of characters in double-quotes (").
+ * (To include a double quote, write two double quotes.)
+ *
+ * A variant of quoted identifiers allows including escaped Unicode characters identified by their code points.
+ * This variant starts with U& (upper or lower case U followed by ampersand) immediately before the opening
+ * double quote, without any spaces in between, for example U&"foo".
+ *
  * @author Roman Kontchakov
  *
  */
 
-public class QuotedIDFactoryLowerCase implements QuotedIDFactory {
+public class PostgreSQLQuotedIDFactory implements QuotedIDFactory {
 
-	private final String quotationString; 
-	
 	/**
 	 * used only in DBMetadataExtractor
 	 */
 	
-	QuotedIDFactoryLowerCase(String quotationString) {
-		this.quotationString = quotationString;
-	}
+	PostgreSQLQuotedIDFactory() { }
 
 	@Override
 	public QuotedID createAttributeID(String s) {
@@ -57,21 +73,15 @@ public class QuotedIDFactoryLowerCase implements QuotedIDFactory {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
-		if (s.startsWith("\"") && s.endsWith("\"")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
-		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
-		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
-		if (s.startsWith("'") && s.endsWith("'")) 
-			return new QuotedID(s.substring(1, s.length() - 1), quotationString);
+		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
 		return new QuotedID(s.toLowerCase(), QuotedID.NO_QUOTATION);
 	}
 
 	@Override
 	public String getIDQuotationString() {
-		return quotationString;
+		return QUOTATION_STRING;
 	}
 	
 }

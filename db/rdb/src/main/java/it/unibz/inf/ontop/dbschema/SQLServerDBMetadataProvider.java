@@ -6,12 +6,12 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
 
-public class MSSQLDBMetadataProvider extends JDBCRDBMetadataProvider {
+public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
 
-    MSSQLDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
-        super(connection, dbParameters);
+    SQLServerDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+        super(connection, dbTypeFactory);
     }
 
     // SELECT SCHEMA_NAME() would give default schema name

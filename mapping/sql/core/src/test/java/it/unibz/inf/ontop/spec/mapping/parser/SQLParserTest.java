@@ -960,20 +960,20 @@ public class SQLParserTest {
 	@Test(expected = UnsupportedSelectQueryException.class)
 	// due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function calls
 	public void test_2_p() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = sqp.parse("SELECT [ID] as \"KEYID\"\n" +
-				"      ,CONVERT(varchar(50), [DATETIME], 0) as \"DATETIMEH\"\n" +
-				"      ,[SCALE] as \"SCALE\"\n" +
-				"      ,[INTERVAL] as \"TEMPINTERVAL\"\n" +
-				"  FROM [CIM].[dbo].[TEMPERATURE_DEVIATION] where [INTERVAL] = '0-10'");
+		RAExpression re = sqp.parse("SELECT \"ID\" as \"KEYID\"\n" +
+				"      ,CONVERT(varchar(50), \"DATETIME\", 0) as \"DATETIMEH\"\n" +
+				"      ,\"SCALE\" as \"SCALE\"\n" +
+				"      ,\"INTERVAL\" as \"TEMPINTERVAL\"\n" +
+				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'");
 	}
 
 	@Test
 	public void test_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
-		RAExpression re = sqp.parse("SELECT [ID]\n" +
-				"      ,[DATETIME]\n" +
-				"      ,[SCALE]\n" +
-				"      ,[INTERVAL]\n" +
-				"  FROM [CIM].[dbo].[TEMPERATURE_DEVIATION] where [INTERVAL] = '0-10'");
+		RAExpression re = sqp.parse("SELECT \"ID\"\n" +
+				"      ,\"DATETIME\"\n" +
+				"      ,\"SCALE\"\n" +
+				"      ,\"INTERVAL\"\n" +
+				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'");
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(1, re.getFilterAtoms().size());
 		assertEquals(4, re.getAttributes().size());

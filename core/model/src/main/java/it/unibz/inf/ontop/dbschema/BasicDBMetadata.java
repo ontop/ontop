@@ -19,7 +19,7 @@ public class BasicDBMetadata implements DBMetadata {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
 
-    protected BasicDBMetadata(DBParameters dbParameters) {
+    public BasicDBMetadata(DBParameters dbParameters) {
         this.tables = new HashMap<>();
         this.listOfTables = new ArrayList<>();
         this.isStillMutable = true;

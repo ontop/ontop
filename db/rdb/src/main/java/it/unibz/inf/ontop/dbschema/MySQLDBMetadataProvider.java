@@ -8,16 +8,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class MySQLDBMetadataProvider extends JDBCRDBMetadataProvider {
+public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final String defaultDatabase;
 
-    MySQLDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
-        super(connection, dbParameters);
+    MySQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+        super(connection, getIDFactory(connection), dbTypeFactory);
 
         try (Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
             defaultDatabase = (rs.next()) ? rs.getString(1) : null;
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
+    private static QuotedIDFactory getIDFactory(Connection connection) throws MetadataExtractionException {
+        try {
+            return new MySQLQuotedIDFactory(connection.getMetaData().storesMixedCaseIdentifiers());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -168,7 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
-            BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
+            BasicDBMetadata metadata = new BasicDBMetadata(metadataLoader.getDBParameters());
 
             // This is the NEW way of obtaining part of the metadata
             // (the schema.table names) by parsing the mappings

@@ -1,15 +1,20 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
+public class DefaultDBMetadataProvider implements RDBMetadataProvider {
+
+    private static Logger log = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
 
     protected final Connection connection;
     protected final QuotedIDFactory idFactory;
@@ -17,17 +22,65 @@ public class JDBCRDBMetadataProvider implements RDBMetadataProvider {
     protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
 
-    JDBCRDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
+    DefaultDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         this.connection = connection;
-        this.dbParameters = dbParameters;
-        this.idFactory = dbParameters.getQuotedIDFactory();
-        this.dbTypeFactory = dbParameters.getDBTypeFactory();
+        this.dbTypeFactory = dbTypeFactory;
         try {
             this.metadata = connection.getMetaData();
+            this.idFactory = idFactory;
+            this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
+    }
+
+    DefaultDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+        this.connection = connection;
+        this.dbTypeFactory = dbTypeFactory;
+        try {
+            this.metadata = connection.getMetaData();
+            this.idFactory = getQuotedIDFactory(metadata);
+            this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
+    protected static DBParameters getDBParameters(DatabaseMetaData metadata, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
+        return new BasicDBParametersImpl(metadata.getDriverName(), metadata.getDriverVersion(),
+                metadata.getDatabaseProductName(), metadata.getDatabaseProductVersion(), idFactory, dbTypeFactory);
+    }
+
+    protected static QuotedIDFactory getQuotedIDFactory(DatabaseMetaData md) throws SQLException {
+
+        if (md.storesMixedCaseIdentifiers())
+            // treat Exareme as a case-sensitive DB engine (like MS SQL Server)
+            // "SQL Server" = MS SQL Server
+            return new SQLServerQuotedIDFactory();
+
+        else if (md.storesLowerCaseIdentifiers())
+            // PostgreSQL treats unquoted identifiers as lower-case
+            return new PostgreSQLQuotedIDFactory();
+
+        else if (md.storesUpperCaseIdentifiers())
+            // Oracle, DB2, H2, HSQL
+            return new SQLStandardQuotedIDFactory();
+
+        // UNKNOWN COMBINATION
+        log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
+        log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
+        log.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
+        log.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+        log.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
+        log.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
+        log.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
+        log.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+        log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+        log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+
+        return new SQLStandardQuotedIDFactory();
     }
 
     @Override

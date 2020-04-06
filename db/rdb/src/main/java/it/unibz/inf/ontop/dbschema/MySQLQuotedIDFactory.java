@@ -22,6 +22,11 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.SQLStandardQuotedIDFactory;
+
 /**
  * Creates QuotedIdentifiers following the rules of MySQL:<br>
  *    - unquoted table identifiers are preserved<br>
@@ -48,12 +53,12 @@ package it.unibz.inf.ontop.dbschema;
  *
  */
 
-public class QuotedIDFactoryMySQL implements QuotedIDFactory {
+public class MySQLQuotedIDFactory implements QuotedIDFactory {
 
-	private static final String QUOTATION_STRING = "`";
+	private static final String MY_SQL_QUOTATION_STRING = "`";
 	private final boolean caseSensitiveTableNames;
 	
-	QuotedIDFactoryMySQL(boolean caseSensitiveTableNames) {
+	MySQLQuotedIDFactory(boolean caseSensitiveTableNames) {
 		this.caseSensitiveTableNames = caseSensitiveTableNames;
 	}
 
@@ -62,11 +67,11 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 
-		if (s.startsWith("`") && s.endsWith(QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
+		if (s.startsWith(MY_SQL_QUOTATION_STRING) && s.endsWith(MY_SQL_QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
 
-		if (s.startsWith("\"") && s.endsWith(QuotedIDFactoryStandardSQL.QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, false);
+		if (s.startsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING) && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, false);
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION, false);
 	}
@@ -80,17 +85,17 @@ public class QuotedIDFactoryMySQL implements QuotedIDFactory {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 
-		if (s.startsWith("`") && s.endsWith(QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, caseSensitiveTableNames);
+		if (s.startsWith("`") && s.endsWith(MY_SQL_QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
 
-		if (s.startsWith("\"") && s.endsWith(QuotedIDFactoryStandardSQL.QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING, caseSensitiveTableNames);
+		if (s.startsWith("\"") && s.endsWith(SQLStandardQuotedIDFactory.QUOTATION_STRING))
+			return new QuotedID(s.substring(1, s.length() - 1), MY_SQL_QUOTATION_STRING, caseSensitiveTableNames);
 
 		return new QuotedID(s, QuotedID.NO_QUOTATION, caseSensitiveTableNames);
 	}
 	
 	@Override
 	public String getIDQuotationString() {
-		return QUOTATION_STRING;
+		return MY_SQL_QUOTATION_STRING;
 	}	
 }

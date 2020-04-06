@@ -22,31 +22,43 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
+
+import static it.unibz.inf.ontop.dbschema.SQLStandardQuotedIDFactory.QUOTATION_STRING;
+
 /**
- * Creates QuotedIdentifiers following the rules of SQL standard:<br>
- *    - unquoted identifiers are converted into upper case<br>
+ * Creates QuotedIdentifiers following the rules of MS SQL Server:<br>
+ *    - unquoted identifiers are preserved<br>
  *    - quoted identifiers are preserved
- * 
+ *
+ *  MS SQL Server
+ *  -------------
+ *
+ *  https://docs.microsoft.com/en-us/sql/connect/jdbc/reference/getidentifierquotestring-method-sqlserverdatabasemetadata?redirectedfrom=MSDN&view=sql-server-ver15
+ *
+ *  When using the Microsoft JDBC Driver with a SQL Server database,
+ *  getIdentifierQuoteString returns double quotation marks ("").
+ *
+ * https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers?view=sql-server-ver15
+ *
  * @author Roman Kontchakov
  *
  */
 
-public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
+public class SQLServerQuotedIDFactory implements QuotedIDFactory {
 
-	public static final String QUOTATION_STRING = "\"";
-	
 	/**
 	 * used only in DBMetadataExtractor
 	 */
-	
-	QuotedIDFactoryStandardSQL() {
-	}
+	SQLServerQuotedIDFactory() { }
 
 	@Override
 	public QuotedID createAttributeID(String s) {
 		return createFromString(s);
 	}
-	
+
 	@Override
 	public RelationID createRelationID(String schema, String table) {
 		return new RelationID(createFromString(schema), createFromString(table));			
@@ -56,21 +68,16 @@ public class QuotedIDFactoryStandardSQL implements QuotedIDFactory {
 		if (s == null)
 			return new QuotedID(s, QuotedID.NO_QUOTATION);
 		
-		if (s.startsWith("\"") && s.endsWith(QUOTATION_STRING))
+		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
 			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
-		if (s.startsWith("`") && s.endsWith("`")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
-		if (s.startsWith("[") && s.endsWith("]")) 
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
-		if (s.startsWith("'") && s.endsWith("'")) 
+		if (s.startsWith("[") && s.endsWith("]"))
 			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
-		return new QuotedID(s.toUpperCase(), QuotedID.NO_QUOTATION);
+		return new QuotedID(s, QuotedID.NO_QUOTATION);
 	}
-	
+
 	@Override
 	public String getIDQuotationString() {
 		return QUOTATION_STRING;
 	}
-	
 }

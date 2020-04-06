@@ -9,12 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class OracleJDBCRDBMetadataProvider extends JDBCRDBMetadataProvider {
+public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final String defaultTableOwner;
 
-    OracleJDBCRDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
-        super(connection, dbParameters);
+    OracleDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+        super(connection, dbTypeFactory);
         this.defaultTableOwner = getDefaultOwner();
     }
 

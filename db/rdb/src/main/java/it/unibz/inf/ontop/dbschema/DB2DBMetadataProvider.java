@@ -6,12 +6,12 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
 
-public class DB2RDBMetadataProvider extends JDBCRDBMetadataProvider {
+public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
-    DB2RDBMetadataProvider(Connection connection, DBParameters dbParameters) throws MetadataExtractionException {
-        super(connection, dbParameters);
+    DB2DBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+        super(connection, dbTypeFactory);
     }
     // select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
 

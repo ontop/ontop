@@ -13,6 +13,6 @@ public class DummyBasicDBMetadata extends BasicDBMetadata {
     @Inject
     private DummyBasicDBMetadata(TypeFactory typeFactory) {
         super(new BasicDBParametersImpl("dummy class", null, null, "",
-                new QuotedIDFactoryStandardSQL(), typeFactory.getDBTypeFactory()));
+                new SQLStandardQuotedIDFactory(), typeFactory.getDBTypeFactory()));
     }
 }
