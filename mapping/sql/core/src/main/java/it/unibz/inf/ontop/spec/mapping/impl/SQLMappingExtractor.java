@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
@@ -96,19 +95,19 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry)
+    public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology,
+                                          @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException {
 
         return convertPPMapping(extractPPMapping(specInput), specInput, ontology, executorRegistry);
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
-                                        @Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry)
+    public MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
+                                          @Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology,
+                                          @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException {
 
         return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology, executorRegistry);
@@ -140,19 +139,16 @@ public class SQLMappingExtractor implements MappingExtractor {
      * <p>
      * During the conversion, data types are inferred and mapping assertions are validated
      */
-    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping,
-                                                  OBDASpecInput specInput,
-                                                  Optional<Ontology> optionalOntology,
-                                                  ExecutorRegistry executorRegistry)
+    protected MappingAndDBParameters convertPPMapping(SQLPPMapping ppMapping,
+                                                      OBDASpecInput specInput,
+                                                      Optional<Ontology> optionalOntology,
+                                                      ExecutorRegistry executorRegistry)
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        BasicDBMetadata dbMetadata = extract(ppMapping, Optional.empty(), specInput.getConstraintFile());
+        MappingAndDBParameters mm = convert(ppMapping, specInput.getConstraintFile(), executorRegistry);
 
-        SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, dbMetadata);
-        ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
-
-        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
+        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
         ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
@@ -162,19 +158,16 @@ public class SQLMappingExtractor implements MappingExtractor {
             ontologyComplianceValidator.validate(canonizedMapping, optionalOntology.get());
         }
 
-        return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata.getDBParameters());
-        // dbMetadata GOES NO FURTHER - no need to freeze it
+        return new MappingAndDBMetadataImpl(canonizedMapping, mm.getDBParameters());
     }
 
 
-    private BasicDBMetadata extract(SQLPPMapping ppMapping,
-                                    Optional<DBParameters> optionalDBParameters,
-                                    Optional<File> constraintFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException {
+    private MappingAndDBParameters convert(SQLPPMapping ppMapping,
+                                           Optional<File> constraintFile,
+                                           ExecutorRegistry executorRegistry) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            DBParameters dbParameters = optionalDBParameters.isPresent()
-                    ? optionalDBParameters.get()
-                    : RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
+            DBParameters dbParameters = RDBMetadataExtractionTools.createDBParameters(connection, typeFactory.getDBTypeFactory());
 
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
@@ -182,22 +175,15 @@ public class SQLMappingExtractor implements MappingExtractor {
             RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, dbParameters);
             BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(dbParameters);
 
-            // if we have to parse the full metadata or just the table list in the mappings
-            ImmutableList<RelationID> seedRelationIds;
-            if (settings.isFullMetadataExtractionEnabled()) {
-                seedRelationIds = metadataLoader.getRelationIDs();
-            }
-            else {
-                // This is the NEW way of obtaining part of the metadata
-                // (the schema.table names) by parsing the mappings
-                // Parse mappings. Just to get the table names in use
+            // This is the NEW way of obtaining part of the metadata
+            // (the schema.table names) by parsing the mappings
+            // Parse mappings. Just to get the table names in use
+            Set<RelationID> realTables = getRealTables(dbParameters.getQuotedIDFactory(), ppMapping.getTripleMaps());
+            realTables.addAll(implicitConstraints.getRelationIDs());
+            ImmutableList<RelationID> seedRelationIds = realTables.stream()
+                    .map(metadataLoader::getRelationCanonicalID)
+                    .collect(ImmutableCollectors.toList());
 
-                Set<RelationID> realTables = getRealTables(dbParameters.getQuotedIDFactory(), ppMapping.getTripleMaps());
-                realTables.addAll(implicitConstraints.getRelationIDs());
-                seedRelationIds = realTables.stream()
-                        .map(metadataLoader::getRelationCanonicalID)
-                        .collect(ImmutableCollectors.toList());
-            }
             List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
             for (RelationID seedId : seedRelationIds) {
                 for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
@@ -206,14 +192,15 @@ public class SQLMappingExtractor implements MappingExtractor {
                 }
             }
 
+            SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, settings, metadata);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadata, executorRegistry);
+
             for (DatabaseRelationDefinition relation : extractedRelations2)
                 metadataLoader.insertIntegrityConstraints(relation, metadata);
 
             implicitConstraints.insertIntegrityConstraints(metadata);
-            metadata.freeze();
 
-            log.debug("DB Metadata: \n{}", metadata);
-            return metadata;
+            return new MappingAndDBMetadataImpl(provMapping, dbParameters);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());

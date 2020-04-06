@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -19,19 +18,19 @@ public interface MappingExtractor {
     /**
      * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
      */
-    interface MappingAndDBMetadata {
+    interface MappingAndDBParameters {
         ImmutableList<MappingAssertion> getMapping();
         DBParameters getDBParameters();
     }
 
-    MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<Ontology> saturatedTBox,
-                                 @Nonnull ExecutorRegistry executorRegistry)
+    MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
+                                   @Nonnull Optional<Ontology> saturatedTBox,
+                                   @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException;
 
-    MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
-                                 @Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<Ontology> saturatedTBox,
-                                 @Nonnull ExecutorRegistry executorRegistry)
+    MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
+                                   @Nonnull OBDASpecInput specInput,
+                                   @Nonnull Optional<Ontology> saturatedTBox,
+                                   @Nonnull ExecutorRegistry executorRegistry)
             throws MappingException, MetadataExtractionException;
 }

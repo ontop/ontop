@@ -3,13 +3,12 @@ package it.unibz.inf.ontop.spec.impl;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
-import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBMetadata;
+import it.unibz.inf.ontop.spec.mapping.MappingExtractor.MappingAndDBParameters;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingTransformer;
 import it.unibz.inf.ontop.spec.OBDASpecification;
@@ -38,7 +37,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws OBDASpecificationException {
 
         try {
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(
                     specInput, optionalOntology, executorRegistry);
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
@@ -54,7 +53,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         try {
-            MappingAndDBMetadata mappingAndDBMetadata = mappingExtractor.extract(
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(
                     ppMapping, specInput, optionalOntology, executorRegistry);
 
             return mappingTransformer.transform(

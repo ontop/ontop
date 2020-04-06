@@ -36,7 +36,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 
-import static it.unibz.inf.ontop.injection.OntopMappingSettings.OBTAIN_FULL_METADATA;
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -45,20 +44,16 @@ import static org.junit.Assert.assertTrue;
  * Tests that TMapping does not return error in case of symmetric properties.
  * Use to check that no concurrency error appears. 
  */
-public class TMappingConcurrencyErrorFixTest{
+public class TMappingConcurrencyErrorFixTest {
 	private OWLConnection conn;
 	private Connection connection;
-	
-
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
-	final String owlFileName = "src/test/resources/test/tmapping/exampleTMapping.owl";
-	final String obdaFileName = "src/test/resources/test/tmapping/exampleTMapping.obda";
 	private OntopOWLReasoner reasoner;
+
+	private static final String owlFileName = "src/test/resources/test/tmapping/exampleTMapping.owl";
+	private static final String obdaFileName = "src/test/resources/test/tmapping/exampleTMapping.obda";
 
 	@Before
 	public void setUp() throws Exception {
-		
 		
 		// String driver = "org.h2.Driver";
 		String url = "jdbc:h2:mem:questjunitdb;";
@@ -69,7 +64,6 @@ public class TMappingConcurrencyErrorFixTest{
 		executeFromFile(connection, "src/test/resources/test/tmapping/create-tables.sql");
 
 		Properties p = new Properties();
-		p.put(OBTAIN_FULL_METADATA, false);
 		// Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
@@ -96,9 +90,8 @@ public class TMappingConcurrencyErrorFixTest{
 	}
 	
 	private String runTests(String query) throws Exception {
-		OWLStatement st = conn.createStatement();
-		String retval=null;
-		try {
+		String retval;
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
@@ -110,16 +103,8 @@ public class TMappingConcurrencyErrorFixTest{
 			OWLIndividual ind2 =	bindingSet2.getOWLIndividual("y")	 ;
 			retval = ind2.toString();
 			assertEquals("<http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#112>", retval);
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
-			
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}
@@ -134,10 +119,5 @@ public class TMappingConcurrencyErrorFixTest{
 	public void test() throws Exception {
 		String query = "PREFIX  : <http://www.semanticweb.org/sarah/ontologies/2014/4/untitled-ontology-73#> SELECT ?y WHERE { ?y a :Man }";
 		String val = runTests(query);
-		
 	}
-	
-
-
-			
 }

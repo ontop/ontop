@@ -15,17 +15,17 @@ public class FakeMappingExtractor implements MappingExtractor {
     private static final String MESSAGE = "Using a FakeMappingExtractor! Please use a proper implementation instead";
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry) {
+    public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology,
+                                          @Nonnull ExecutorRegistry executorRegistry) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
-    public MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
-                                        @Nonnull OBDASpecInput specInput,
-                                        @Nonnull Optional<Ontology> ontology,
-                                        @Nonnull ExecutorRegistry executorRegistry) {
+    public MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
+                                          @Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology,
+                                          @Nonnull ExecutorRegistry executorRegistry) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 }

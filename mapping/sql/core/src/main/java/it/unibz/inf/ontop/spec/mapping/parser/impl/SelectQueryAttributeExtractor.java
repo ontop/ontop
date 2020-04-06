@@ -66,7 +66,7 @@ public class SelectQueryAttributeExtractor {
                     .map(id -> id.getAttribute())
                     .collect(ImmutableCollectors.toList());
         }
-        catch (Exception e) {
+        catch (Exception e) {   // TODO: throws an Error if lexer fails
 
             // COULD NOT PARSE - do a rough approximation
 

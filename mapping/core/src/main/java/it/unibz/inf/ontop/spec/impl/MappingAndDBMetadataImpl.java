@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 
-public class MappingAndDBMetadataImpl implements MappingExtractor.MappingAndDBMetadata {
+public class MappingAndDBMetadataImpl implements MappingExtractor.MappingAndDBParameters {
     private final ImmutableList<MappingAssertion> mapping;
     private final DBParameters dbParameters;
 

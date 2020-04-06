@@ -315,7 +315,7 @@ public class MetaMappingExpander {
 
 	private static String getTemplateValuesQuery(String sql, List<SelectExpressionItem> templateColumns) throws JSQLParserException {
 
-		Select select = (Select)CCJSqlParserUtil.parse(sql);
+		Select select = (Select)CCJSqlParserUtil.parse(sql); // TODO: throws an Error if lexer fails
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
 		plainSelect.setDistinct(new Distinct());
@@ -332,7 +332,7 @@ public class MetaMappingExpander {
 											 List<SelectExpressionItem> templateColumns,
 											 List<String> values) throws JSQLParserException {
 
-		Select select = (Select) CCJSqlParserUtil.parse(sql);
+		Select select = (Select) CCJSqlParserUtil.parse(sql);  // TODO: throws an Error if lexer fails
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
 		Expression where = plainSelect.getWhere();
