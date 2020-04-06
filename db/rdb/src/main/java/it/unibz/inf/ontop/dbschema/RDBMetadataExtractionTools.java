@@ -161,11 +161,6 @@ public class RDBMetadataExtractionTools {
 		return new BasicDBMetadata(dbParameters);
 	}
 
-	public static void loadFullMetadata0(BasicDBMetadata metadata, Connection conn) throws SQLException, MetadataExtractionException {
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, metadata.getDBParameters());
-		loadMetadata(metadata, metadataLoader, null);
-	}
-
 	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
 		DBParameters dbParameters = createDBParameters(conn, dbTypeFactory);
 		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbParameters);
@@ -189,12 +184,8 @@ public class RDBMetadataExtractionTools {
 		return metadata;
 	}
 
-	public static void loadMetadataForRelations(BasicDBMetadata metadata, Connection conn, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, metadata.getDBParameters());
-		loadMetadata(metadata, metadataLoader, realTables);
-	}
 
-	private static RDBMetadataProvider getMetadataProvider(Connection conn, DBParameters dbParameters) throws MetadataExtractionException {
+	public static RDBMetadataProvider getMetadataProvider(Connection conn, DBParameters dbParameters) throws MetadataExtractionException {
 		String productName = dbParameters.getDbmsProductName();
 		if (productName.contains("Oracle"))
 			return new OracleJDBCRDBMetadataProvider(conn, dbParameters);

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,6 @@ import java.util.Properties;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private BasicDBMetadata METADATA;
 	private DatabaseRelationDefinition tBook;
 	private DatabaseRelationDefinition tBookWriter;
 	private DatabaseRelationDefinition tEdition;
@@ -78,7 +76,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
 		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
 
-		METADATA = RDBMetadataExtractionTools.loadMetadataForRelations(dbParameters, conn,
+		BasicDBMetadata METADATA = RDBMetadataExtractionTools.loadMetadataForRelations(dbParameters, conn,
 				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
 
 		tBook = METADATA.getDatabaseRelation(iBook);
