@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -22,27 +23,28 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private DBMetadataBuilder md;
-	private QuotedIDFactory idfac;
+	private static BasicDBMetadataBuilder md;
+	private static QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
 
-	private DatabaseRelationDefinition TABLENAME, TABLE2;
+	private static DatabaseRelationDefinition TABLENAME, TABLE2;
 
-	@Before
-	public void setupMetadata(){
-		md = DEFAULT_DUMMY_DB_METADATA;
-		idfac = md.getDBParameters().getQuotedIDFactory();
+	static {
+		BasicDBMetadataBuilder md0 = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
+		idfac = md0.getDBParameters().getQuotedIDFactory();
 
-		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
+		DBTermType stringDBType = md0.getDBParameters().getDBTypeFactory().getDBStringType();
 
-		TABLENAME = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
+		TABLENAME = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
 			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));
 
-		TABLE2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
+		TABLE2 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
 			.addAttribute(idfac.createAttributeID("KEY1"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("KEY2"), stringDBType, false));
+
+		md = md0;
 	}
 	
 	@Test
@@ -66,7 +68,7 @@ public class ImplicitDBConstraintsTest {
 	public void testAddPrimaryKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "pkeys.lst")), idfac);
-		uc.insertIntegrityConstraints(md.build());
+		uc.insertIntegrityConstraints(md);
 		Attribute attr = TABLENAME.getAttribute(idfac.createAttributeID("KEYNAME"));
 		assertEquals(ImmutableList.of(attr), TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
@@ -85,7 +87,7 @@ public class ImplicitDBConstraintsTest {
 	public void testAddForeignKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "fkeys.lst")), idfac);
-		uc.insertIntegrityConstraints(md.build());
+		uc.insertIntegrityConstraints(md);
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();
@@ -97,7 +99,7 @@ public class ImplicitDBConstraintsTest {
 	public void testAddKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "keys.lst")), idfac);
-		uc.insertIntegrityConstraints(md.build());
+		uc.insertIntegrityConstraints(md);
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();

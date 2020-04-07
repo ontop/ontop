@@ -62,15 +62,6 @@ public class DummyDBMetadataBuilder implements DBMetadataBuilder {
 
 
     @Override
-    public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
-        DatabaseRelationDefinition def = tables.get(id);
-        if (def == null && id.hasSchema()) {
-            def = tables.get(id.getSchemalessID());
-        }
-        return def;
-    }
-
-    @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
         for (Map.Entry<RelationID, DatabaseRelationDefinition> e : tables.entrySet()) {

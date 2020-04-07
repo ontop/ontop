@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -73,16 +74,19 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(ImmutableDBMetadata md) {
+    public void insertIntegrityConstraints(BasicDBMetadataBuilder md) {
         int counter = 0; // id of the generated constraint
 
         for (String[] constraint : uniqueConstraints) {
             ConstraintDescriptor uc = getConstraintDescriptor(md, constraint[0],  constraint[1].split(","), idFactory);
-            if (constraint != null) { // if all attributes have been identified
+            if (uc != null) { // if all attributes have been identified
                 UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
                 for (Attribute a : uc.attributes)
                     builder.addDeterminant(a);
                 uc.table.addUniqueConstraint(builder.build());
+            }
+            else {
+                System.out.println("NOT FOUND: " + Arrays.toString(constraint)  + " in " + md);
             }
             counter++;
         }
@@ -113,7 +117,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         Attribute[] attributes;
     }
 
-    private static ConstraintDescriptor getConstraintDescriptor(ImmutableDBMetadata md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
+    private static ConstraintDescriptor getConstraintDescriptor(BasicDBMetadataBuilder md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
         ConstraintDescriptor result = new ConstraintDescriptor();
 
         RelationID tableId = getRelationIDFromString(tableName, idFactory);

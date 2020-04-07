@@ -56,7 +56,6 @@ public class BasicDBMetadataBuilder implements DBMetadataBuilder {
     }
 
 
-    @Override
     public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
         DatabaseRelationDefinition def = tables.get(id);
         if (def == null && id.hasSchema()) {

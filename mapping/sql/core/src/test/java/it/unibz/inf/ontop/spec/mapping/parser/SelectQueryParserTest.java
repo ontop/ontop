@@ -31,6 +31,8 @@ public class SelectQueryParserTest {
     private static final String Q = "Q";
     private static final String R = "R";
 
+    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
+
     private static final String A1 = "A1";
     private static final String A2 = "A2";
     private static final String A3 = "A3";
@@ -44,8 +46,7 @@ public class SelectQueryParserTest {
 
     @Test
     public void inner_join_on_same_table_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN  P p2 on p1.A = p2.A ");
         System.out.println(re);
 
@@ -53,14 +54,13 @@ public class SelectQueryParserTest {
 //        assertEquals(4, parse.getReferencedVariables().size());
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, P, A2, B2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getDataAtoms());
     }
 
 
     @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_ambiguity_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         // common column name "A" appears more than once in left table
         parser.parse("SELECT A, C FROM P INNER JOIN  Q on P.A =  Q.A NATURAL JOIN  R ");
     }
@@ -68,8 +68,7 @@ public class SelectQueryParserTest {
 
     @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_ambiguity2_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         // column reference "a" is ambiguous
         String sql = "SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;";
         RAExpression re = parser.parse(sql);
@@ -78,22 +77,20 @@ public class SelectQueryParserTest {
 
     @Test(expected = InvalidSelectQueryException.class)
     public void inner_join_on_inner_join_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         // common column name "A" appears more than once in left table
         parser.parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN  R on Q.C =  R.C;");
     }
 
     @Test
     public void subjoin_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(re);
 
         assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(A2, A3)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, R, A1, B1, C1, D1),
-                dataAtomOf(m, P, A2, B2), dataAtomOf(m, Q, A3, C3)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_R, A1, B1, C1, D1),
+                dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3)), re.getDataAtoms());
     }
 
     // -----------------------------------------------------
@@ -101,63 +98,57 @@ public class SelectQueryParserTest {
 
     @Test
     public void simple_join_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P, Q;");
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test
     public void natural_join_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
         System.out.println(re);
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test
     public void cross_join_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P CROSS JOIN  Q;");
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test
     public void join_on_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P JOIN  Q ON P.A = Q.A;");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test
     public void inner_join_on_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test
     public void join_using_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P JOIN  Q USING(A);");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     @Test(expected = UnsupportedSelectQueryException.class)
@@ -181,12 +172,11 @@ public class SelectQueryParserTest {
 
     @Test
     public void inner_join_using_test() throws Exception {
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q USING(A);");
 
         assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
     //end region
@@ -363,50 +353,46 @@ public class SelectQueryParserTest {
     @Test
     public void sub_select_one_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S;";
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
     }
 
     @Test
     public void sub_select_two_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM (SELECT * FROM P) AS T) AS S;";
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
     }
 
     @Test
     public void sub_select_one_simple_join_internal_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P, Q) AS S;";
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
 
     @Test
     public void sub_select_one_simple_join_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S, Q ;";
-        DBMetadataBuilder m = createMetadata();
-        SelectQueryParser parser = new SelectQueryParser(m, CORE_SINGLETONS);
+        SelectQueryParser parser = new SelectQueryParser(createMetadata(), CORE_SINGLETONS);
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
         assertMatches(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(m, P, A1, B1), dataAtomOf(m, Q, A2, C2)), re.getDataAtoms());
+        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
 
@@ -416,39 +402,36 @@ public class SelectQueryParserTest {
         return TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(DBMetadataBuilder m, String predicateName, String var1, String var2) {
-        return ATOM_FACTORY.getDataAtom(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName)).getAtomPredicate(),
+    private DataAtom<RelationPredicate> dataAtomOf(DatabaseRelationDefinition table, String var1, String var2) {
+        return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(DBMetadataBuilder m, String predicateName, String var1, String var2, String var3, String var4) {
-        return ATOM_FACTORY.getDataAtom(m.getDatabaseRelation(m.getDBParameters().getQuotedIDFactory().createRelationID(null, predicateName)).getAtomPredicate(),
+    private DataAtom<RelationPredicate> dataAtomOf(DatabaseRelationDefinition table, String var1, String var2, String var3, String var4) {
+        return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }
 
     private <T> void assertMatches(ImmutableList<T> list0, List<T> list) {
         assertEquals(list0.size(), list.size());
-        list0.forEach(a -> { assertTrue(list.contains(a)); });
+        list0.forEach(a -> assertTrue(list.contains(a)));
     }
 
 
-    private DBMetadataBuilder createMetadata() {
-        DBMetadataBuilder metadata = DEFAULT_DUMMY_DB_METADATA;
+    private BasicDBMetadataBuilder createMetadata() {
+        BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
         QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
         DBTermType integerDBType = metadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition relation1 =
-                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))
+        TABLE_P = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))
             .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
             .addAttribute(idfac.createAttributeID("B"), integerDBType, false));
 
-        DatabaseRelationDefinition relation2 =
-                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, Q))
+        TABLE_Q = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, Q))
             .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
             .addAttribute(idfac.createAttributeID("C"), integerDBType, false));
 
-        DatabaseRelationDefinition relation3 =
-                metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, R))
+        TABLE_R = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, R))
             .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
             .addAttribute(idfac.createAttributeID("B"), integerDBType, false)
             .addAttribute(idfac.createAttributeID("C"), integerDBType, false)

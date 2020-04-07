@@ -10,13 +10,12 @@ import org.junit.Test;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class SelectQueryAttributeExtractorTest {
 
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        BasicDBMetadataBuilder metadata = null; // DEFAULT_DUMMY_DB_METADATA;
+        BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
         QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
         DatabaseRelationDefinition r = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student")));
 

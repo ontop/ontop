@@ -37,12 +37,11 @@ import static org.junit.Assert.assertFalse;
 
 public class SQLParserTest {
 
-	private DBMetadataBuilder metadata;
 	private SelectQueryParser sqp;
 
 	@Before
 	public void beforeEachTest() {
-		metadata = DEFAULT_DUMMY_DB_METADATA;
+		BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
 		QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
 		DBTypeFactory dbTypeFactory = metadata.getDBParameters().getDBTypeFactory();
 

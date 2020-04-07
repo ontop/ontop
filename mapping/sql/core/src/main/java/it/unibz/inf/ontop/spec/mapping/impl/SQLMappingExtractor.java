@@ -194,7 +194,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             ImmutableDBMetadata md = metadata.build();
             for (DatabaseRelationDefinition relation : extractedRelations2)
                 metadataLoader.insertIntegrityConstraints(relation, md);
-            implicitConstraints.insertIntegrityConstraints(md);
+            implicitConstraints.insertIntegrityConstraints(metadata);
 
             return new MappingAndDBParametersImpl(provMapping, dbParameters);
         }

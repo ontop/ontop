@@ -25,5 +25,5 @@ public interface MetadataProvider {
      * Inserts the user-supplied primary keys, unique constraints and foreign keys
      * into the metadata object
      */
-    void insertIntegrityConstraints(ImmutableDBMetadata md) throws MetadataExtractionException;
+    void insertIntegrityConstraints(BasicDBMetadataBuilder md) throws MetadataExtractionException;
 }

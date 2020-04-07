@@ -41,7 +41,6 @@ import java.util.Set;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
-@Ignore
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private final TargetQueryParser targetParser;
@@ -55,7 +54,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
     }
 
 	public void setUp() {
-		md = null; // DEFAULT_DUMMY_DB_METADATA;
+		md = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
 		QuotedIDFactory idfac = md.getDBParameters().getQuotedIDFactory();
 		DBTermType integerDBType = md.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
