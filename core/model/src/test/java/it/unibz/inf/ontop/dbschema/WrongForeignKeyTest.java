@@ -16,15 +16,14 @@ public class WrongForeignKeyTest {
     static{
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         ID_FACTORY = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table1"))
-            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType, false));
+        table1Def = dbMetadata.createDatabaseRelation("table1",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false);
         table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
         table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
                 .addDeterminant(table1Def.getAttribute(2))
@@ -32,19 +31,19 @@ public class WrongForeignKeyTest {
                 .addDependent(table1Def.getAttribute(4))
                 .build());
 
-        table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table2"))
-            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType, false));
+        table2Def = dbMetadata.createDatabaseRelation("table2",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
 
-        table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID(null,"table3"))
-            .addAttribute(ID_FACTORY.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col3"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col4"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col5"), integerDBType, false)
-            .addAttribute(ID_FACTORY.createAttributeID("col6"), integerDBType, false));
+        table3Def = dbMetadata.createDatabaseRelation("table3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false,
+            "col6", integerDBType, false);
         table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
         table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(table3Def.getAttribute(2))
@@ -68,7 +67,6 @@ public class WrongForeignKeyTest {
         QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
         QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
         builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
-
     }
 
     //Add two foreign key constraints referring to two different tables
