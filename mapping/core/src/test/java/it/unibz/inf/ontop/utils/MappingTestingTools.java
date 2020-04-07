@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DummyBasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -37,7 +37,7 @@ public class MappingTestingTools {
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
@@ -78,7 +78,7 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilder.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
@@ -108,7 +108,7 @@ public class MappingTestingTools {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata,
+    private static RelationPredicate createRelationPredicate(DBMetadataBuilder dbMetadata,
                                                              int tableNumber, int arity) {
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType stringDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType();

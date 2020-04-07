@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -43,7 +43,7 @@ public class ExpressionParserTest {
 
     @Before
     public void beforeEachTest() {
-        DBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder metadata = DEFAULT_DUMMY_DB_METADATA;
         IDFAC = metadata.getDBParameters().getQuotedIDFactory();
         DB_TYPE_FACTORY = metadata.getDBParameters().getDBTypeFactory();
         dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();

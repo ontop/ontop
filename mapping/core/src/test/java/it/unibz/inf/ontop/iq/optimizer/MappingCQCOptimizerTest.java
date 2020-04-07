@@ -28,7 +28,7 @@ public class MappingCQCOptimizerTest {
     @Test
     public void test() {
 
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType integerType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 
@@ -96,7 +96,7 @@ public class MappingCQCOptimizerTest {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
 
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType integerType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 

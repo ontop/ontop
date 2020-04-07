@@ -28,7 +28,7 @@ import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import junit.framework.TestCase;
@@ -130,7 +130,7 @@ public class ParserFileTest extends TestCase {
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
 
-		BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+		DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
 		QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 
         /**

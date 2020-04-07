@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface MappingExtractor {
 
     /**
-     * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
+     * TODO: in a near future, drop DBMetadataBuilder and use Mapping instead of this interface
      */
     interface MappingAndDBParameters {
         ImmutableList<MappingAssertion> getMapping();

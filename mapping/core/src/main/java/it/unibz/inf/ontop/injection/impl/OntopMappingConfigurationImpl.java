@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.exception.MissingInputMappingException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -293,7 +292,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             super.declareOBDASpecificationAssigned();
 
             if (isDBMetadataDefined) {
-                throw new InvalidOntopConfigurationException("DBMetadata is already defined, " +
+                throw new InvalidOntopConfigurationException("DBMetadataBuilder is already defined, " +
                         "cannot assign the OBDA specification");
             }
             if (isMappingDefined()) {

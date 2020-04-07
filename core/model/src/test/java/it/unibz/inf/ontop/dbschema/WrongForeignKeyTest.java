@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema;
 
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
@@ -15,7 +14,7 @@ public class WrongForeignKeyTest {
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
     static{
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         ID_FACTORY = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();

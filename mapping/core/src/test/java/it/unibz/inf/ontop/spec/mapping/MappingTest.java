@@ -54,7 +54,7 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 

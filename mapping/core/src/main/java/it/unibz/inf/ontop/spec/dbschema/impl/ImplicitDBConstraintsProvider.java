@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +73,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(DBMetadata md) {
+    public void insertIntegrityConstraints(DBMetadataBuilder md) {
         int counter = 0; // id of the generated constraint
 
         for (String[] constraint : uniqueConstraints) {
@@ -113,7 +113,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         Attribute[] attributes;
     }
 
-    private static ConstraintDescriptor getConstraintDescriptor(DBMetadata md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
+    private static ConstraintDescriptor getConstraintDescriptor(DBMetadataBuilder md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
         ConstraintDescriptor result = new ConstraintDescriptor();
 
         RelationID tableId = getRelationIDFromString(tableName, idFactory);

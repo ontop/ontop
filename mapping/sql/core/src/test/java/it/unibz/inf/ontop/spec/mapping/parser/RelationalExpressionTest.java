@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 
 public class RelationalExpressionTest {
 
-    private static BasicDBMetadata METADATA;
+    private static DBMetadataBuilder METADATA;
     private static QuotedIDFactory MDFAC;
 
     private DataAtom<RelationPredicate> f1, f2;

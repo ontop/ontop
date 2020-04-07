@@ -53,7 +53,7 @@ private void setup()  throws Exception {
 	qst = connOWL.createStatement();
 }
 
-private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defMeasTable(BasicDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
@@ -62,7 +62,7 @@ private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTyp
 		.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defMessTable(BasicDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
@@ -70,17 +70,17 @@ private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTyp
 		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
 }
 
-private static void defStaticTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+private static void defStaticTable(BasicDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
 	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 		.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
 		.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
 }
-private static BasicDBMetadata getMeta(){
+private static BasicDBMetadataBuilder getMeta(){
 	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 	Injector defaultInjector = defaultConfiguration.getInjector();
 
-	BasicDBMetadata dbMetadata = defaultInjector.getInstance(BasicDBMetadata.class);
+	BasicDBMetadataBuilder dbMetadata = defaultInjector.getInstance(BasicDBMetadataBuilder.class);
 	DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
 
 	defMeasTable(dbMetadata, dbTypeFactory,"burner");

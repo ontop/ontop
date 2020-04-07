@@ -1,31 +1,37 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class BasicDBMetadata implements DBMetadata {
 
-    private final Map<RelationID, DatabaseRelationDefinition> tables;
+/**
+ * A dummy DBMetadataBuilder for tests only
+ */
+public class DummyDBMetadataBuilder implements DBMetadataBuilder {
+
+    private final Map<RelationID, DatabaseRelationDefinition> tables = new HashMap<>();
     // tables.values() can contain duplicates due to schemaless table names
-    private final List<DatabaseRelationDefinition> listOfTables;
+    private final List<DatabaseRelationDefinition> listOfTables = new ArrayList<>();
 
     private final DBParameters dbParameters;
-    private boolean isStillMutable;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadata.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadataBuilder.class);
 
-    public BasicDBMetadata(DBParameters dbParameters) {
-        this.tables = new HashMap<>();
-        this.listOfTables = new ArrayList<>();
-        this.isStillMutable = true;
-        this.dbParameters = dbParameters;
+    @Inject
+    private DummyDBMetadataBuilder(TypeFactory typeFactory) {
+        this.dbParameters = new BasicDBParametersImpl("dummy class", null, null, "",
+                new SQLStandardQuotedIDFactory(), typeFactory.getDBTypeFactory());
     }
+
 
     /**
      * creates a database table (which can also be a database view)
@@ -37,9 +43,6 @@ public class BasicDBMetadata implements DBMetadata {
      * @return
      */
     public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
-        if (!isStillMutable) {
-            throw new IllegalStateException("Too late, cannot create a DB relation");
-        }
         DatabaseRelationDefinition table = new DatabaseRelationDefinition(builder);
         tables.put(table.getID(), table);
         if (table.getID().hasSchema()) {
@@ -67,16 +70,6 @@ public class BasicDBMetadata implements DBMetadata {
         return def;
     }
 
-    @JsonProperty("relations")
-    @Override
-    public ImmutableList<DatabaseRelationDefinition> getDatabaseRelations() {
-        return ImmutableList.copyOf(listOfTables);
-    }
-
-    public void freeze() {
-        isStillMutable = false;
-    }
-
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
@@ -96,21 +89,14 @@ public class BasicDBMetadata implements DBMetadata {
         return bf.toString();
     }
 
-    @JsonIgnore
     @Override
     public DBParameters getDBParameters() {
         return dbParameters;
     }
 
-    @JsonProperty("metadata")
-    Map<String, String> getMedadataForJsonExport() {
-        return ImmutableMap.of(
-                "dbmsProductName", getDBParameters().getDbmsProductName(),
-                "dbmsVersion", getDBParameters().getDbmsVersion(),
-                "driverName", getDBParameters().getDriverName(),
-                "driverVersion", getDBParameters().getDriverVersion(),
-                "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
-        );
+    @Override
+    public ImmutableDBMetadata build() {
+        return new ImmutableDBMetadataImpl(dbParameters, ImmutableList.copyOf(listOfTables));
     }
 
 }

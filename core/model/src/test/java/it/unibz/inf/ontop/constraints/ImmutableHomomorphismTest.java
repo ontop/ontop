@@ -102,7 +102,7 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_negative() {
-        BasicDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder metadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = metadata.getDBParameters().getQuotedIDFactory();
         DBTermType stringDBType = metadata.getDBParameters().getDBTypeFactory().getDBStringType();
 

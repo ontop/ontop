@@ -12,7 +12,7 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private static final BasicDBMetadata dbMetadata;
+    private static final DBMetadataBuilder dbMetadata;
 
     static {
         dbMetadata = DEFAULT_DUMMY_DB_METADATA;
@@ -24,8 +24,6 @@ public abstract class AbstractBasicMappingMistakeTest {
             .addAttribute(idFactory.createAttributeID("ID"), dbTypeFactory.getDBLargeIntegerType(), false)
             .addAttribute(idFactory.createAttributeID("FNAME"), dbTypeFactory.getDBStringType(), false));
         personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
-
-        dbMetadata.freeze();
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {
@@ -40,7 +38,7 @@ public abstract class AbstractBasicMappingMistakeTest {
 
     protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
 
-    protected DBMetadata getDBMetadata() {
+    protected DBMetadataBuilder getDBMetadata() {
         return dbMetadata;
     }
 }

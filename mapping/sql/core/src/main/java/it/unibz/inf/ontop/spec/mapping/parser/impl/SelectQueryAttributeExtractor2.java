@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -20,20 +20,19 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
  */
 
 public class SelectQueryAttributeExtractor2 {
-    private final DBMetadata metadata;
+    private final DBMetadataBuilder metadata;
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(DBMetadata metadata, TermFactory termFactory) {
+    public SelectQueryAttributeExtractor2(DBMetadataBuilder metadata, TermFactory termFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         this.termFactory = termFactory;

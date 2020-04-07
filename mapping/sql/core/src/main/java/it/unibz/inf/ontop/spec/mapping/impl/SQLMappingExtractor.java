@@ -169,7 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
-            BasicDBMetadata metadata = new BasicDBMetadata(metadataLoader.getDBParameters());
+            BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(metadataLoader.getDBParameters());
 
             // This is the NEW way of obtaining part of the metadata
             // (the schema.table names) by parsing the mappings
@@ -192,7 +192,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadata, executorRegistry);
 
             for (DatabaseRelationDefinition relation : extractedRelations2)
-                metadataLoader.insertIntegrityConstraints(relation, metadata);
+                metadataLoader.insertIntegrityConstraints(relation, metadata.build());
 
             implicitConstraints.insertIntegrityConstraints(metadata);
 

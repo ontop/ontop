@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.DEFAULT_DUMMY_DB_METADATA;
-import static it.unibz.inf.ontop.OptimizationTestingTools.TYPE_FACTORY;
 
 public class DependencyTestDBMetadata {
 
@@ -31,7 +30,7 @@ public class DependencyTestDBMetadata {
 
     public static final RelationPredicate PK_TABLE7_AR4;
 
-    private static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata,
+    private static RelationPredicate createRelationPredicate(DBMetadataBuilder dbMetadata,
                                                              int tableNumber, int arity) {
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType stringDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType();
@@ -47,7 +46,7 @@ public class DependencyTestDBMetadata {
     }
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
 
         PK_TABLE1_AR1 = createRelationPredicate(dbMetadata, 1, 1);
         PK_TABLE2_AR1 = createRelationPredicate(dbMetadata, 2, 1);

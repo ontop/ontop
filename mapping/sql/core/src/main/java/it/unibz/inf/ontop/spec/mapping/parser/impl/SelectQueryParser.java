@@ -30,7 +30,7 @@ import java.util.Map;
  *
  */
 public class SelectQueryParser {
-    private final DBMetadata metadata;
+    private final DBMetadataBuilder metadata;
     private final QuotedIDFactory idfac;
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
@@ -38,7 +38,7 @@ public class SelectQueryParser {
 
     private int relationIndex = 0;
 
-    public SelectQueryParser(DBMetadata metadata, CoreSingletons coreSingletons) {
+    public SelectQueryParser(DBMetadataBuilder metadata, CoreSingletons coreSingletons) {
         this.metadata = metadata;
         this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         this.coreSingletons = coreSingletons;

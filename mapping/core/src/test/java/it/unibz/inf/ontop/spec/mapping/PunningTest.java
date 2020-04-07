@@ -2,9 +2,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
@@ -40,7 +37,7 @@ public class PunningTest {
     private static final IRI CLASS_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
         QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
         DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
 

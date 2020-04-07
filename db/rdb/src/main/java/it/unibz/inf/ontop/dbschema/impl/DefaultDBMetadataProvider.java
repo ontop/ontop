@@ -142,7 +142,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(DBMetadata md) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(DBMetadataBuilder md) throws MetadataExtractionException {
         // TODO:
     }
 

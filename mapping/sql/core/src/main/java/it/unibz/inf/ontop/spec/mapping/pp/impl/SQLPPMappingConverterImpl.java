@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -65,7 +64,7 @@ public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mappin
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, BasicDBMetadata dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, BasicDBMetadataBuilder dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         int parserViewCounter = 0;

@@ -37,7 +37,7 @@ import static org.junit.Assert.assertFalse;
 
 public class SQLParserTest {
 
-	private BasicDBMetadata metadata;
+	private DBMetadataBuilder metadata;
 	private SelectQueryParser sqp;
 
 	@Before

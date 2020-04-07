@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DummyBasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
@@ -25,7 +25,7 @@ public class SQLAllMappingTestingTools {
     public static final RDF RDF_FACTORY;
     public static final SpecificationFactory MAPPING_FACTORY;
 
-    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -42,6 +42,6 @@ public class SQLAllMappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilder.class);
     }
 }

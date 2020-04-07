@@ -19,6 +19,8 @@ public class PostgreSQLDBMetadataProvider extends DefaultDBMetadataProvider {
         this.defaultSchema = getDefaultSchema();
     }
 
+    // CAREFUL: PostgreSQL uses a chain of schemas and goes through the list until it finds the relevant object
+
     @Override
     public RelationID getRelationCanonicalID(RelationID id) {
         return id.extendWithDefaultSchemaID(defaultSchema);

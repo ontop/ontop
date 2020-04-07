@@ -22,7 +22,7 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private BasicDBMetadata md;
+	private DBMetadataBuilder md;
 	private QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()

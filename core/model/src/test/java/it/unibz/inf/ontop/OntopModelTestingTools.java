@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.impl.DummyBasicDBMetadata;
+import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
+import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilder;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -35,7 +35,7 @@ public class OntopModelTestingTools {
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    public static final BasicDBMetadata DEFAULT_DUMMY_DB_METADATA;
+    public static final DBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
@@ -48,7 +48,7 @@ public class OntopModelTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyBasicDBMetadata.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilder.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
