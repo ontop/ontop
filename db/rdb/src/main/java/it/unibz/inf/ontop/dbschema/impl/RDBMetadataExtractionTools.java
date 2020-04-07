@@ -39,21 +39,6 @@ import java.util.*;
 
 public class RDBMetadataExtractionTools {
 
-	public static ImmutableDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbTypeFactory);
-		BasicDBMetadata metadata = loadMetadata(metadataLoader, metadataLoader.getRelationIDs());
-		return metadata;
-	}
-
-	// single use in a test
-	public static BasicDBMetadata loadMetadataForRelations(RDBMetadataProvider metadataLoader, ImmutableList<RelationID> realTables) throws SQLException, MetadataExtractionException {
-		BasicDBMetadata metadata = loadMetadata(metadataLoader, realTables.stream()
-				.map(metadataLoader::getRelationCanonicalID)
-				.collect(ImmutableCollectors.toList()));
-		return metadata;
-	}
-
-
 	public static RDBMetadataProvider getMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
 		try {
 			DatabaseMetaData md = connection.getMetaData();
@@ -83,20 +68,23 @@ public class RDBMetadataExtractionTools {
 	 *    the connection metadata
 	 * @return
 	 */
+	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
+		return createImmutableMetadata(metadataLoader, metadataLoader.getRelationIDs());
+	}
 
-	private static BasicDBMetadata loadMetadata(RDBMetadataProvider metadataLoader, ImmutableList<RelationID> seedRelationIds) throws MetadataExtractionException {
+	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader, ImmutableList<RelationID> seedRelationIds) throws MetadataExtractionException {
 
-		BasicDBMetadata metadata = new BasicDBMetadata(metadataLoader.getDBParameters());
-
-		List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
+		ImmutableList.Builder<DatabaseRelationDefinition> extractedRelations = ImmutableList.builder();
 		for (RelationID seedId : seedRelationIds) {
 			for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
-				DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
-				extractedRelations2.add(relation);
+				DatabaseRelationDefinition table = new DatabaseRelationDefinition(r);
+				extractedRelations.add(table);
 			}
 		}
 
-		for (DatabaseRelationDefinition relation : extractedRelations2)
+		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
+
+		for (DatabaseRelationDefinition relation : metadata.getDatabaseRelations())
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
 
 		return metadata;

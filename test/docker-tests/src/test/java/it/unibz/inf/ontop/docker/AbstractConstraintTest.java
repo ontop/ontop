@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
@@ -74,18 +76,17 @@ public abstract class AbstractConstraintTest extends TestCase {
 		RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
 		QuotedIDFactory idFactory = metadataLoader.getDBParameters().getQuotedIDFactory();
 
-		RelationID iBook = idFactory.createRelationID(null, TB_BOOK);
-		RelationID iBookWriter = idFactory.createRelationID(null, TB_BOOKWRITER);
-		RelationID iEdition = idFactory.createRelationID(null, TB_EDITION);
-		RelationID iWriter = idFactory.createRelationID(null, TB_WRITER);
+		ImmutableList<RelationID> relations = Stream.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER)
+				.map(s -> idFactory.createRelationID(null, s))
+				.map(metadataLoader::getRelationCanonicalID)
+				.collect(ImmutableCollectors.toList());
 
-		BasicDBMetadata METADATA = RDBMetadataExtractionTools.loadMetadataForRelations(metadataLoader,
-				ImmutableList.of(iBook, iBookWriter, iEdition, iWriter));
+		ImmutableDBMetadata METADATA = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader, relations);
 
-		tBook = METADATA.getDatabaseRelation(iBook);
-		tBookWriter = METADATA.getDatabaseRelation(iBookWriter);
-		tEdition = METADATA.getDatabaseRelation(iEdition);
-		tWriter = METADATA.getDatabaseRelation(iWriter);
+		tBook = METADATA.getDatabaseRelation(relations.get(0));
+		tBookWriter = METADATA.getDatabaseRelation(relations.get(1));
+		tEdition = METADATA.getDatabaseRelation(relations.get(2));
+		tWriter = METADATA.getDatabaseRelation(relations.get(3));
 	}
 	
 	public void testPrimaryKey() {

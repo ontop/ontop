@@ -6,7 +6,7 @@ public interface RDBMetadataProvider extends MetadataProvider {
 
     RelationID getRelationCanonicalID(RelationID id);
 
-    void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException;
+    void insertIntegrityConstraints(RelationDefinition relation, ImmutableDBMetadata dbMetadata) throws MetadataExtractionException;
 
     DBParameters getDBParameters();
 }

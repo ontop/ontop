@@ -51,7 +51,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             throw new MetadataExtractionException(e);
         }
     }
-    
+
     protected static DBParameters getDBParameters(DatabaseMetaData metadata, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
         return new BasicDBParametersImpl(metadata.getDriverName(), metadata.getDriverVersion(),
                 metadata.getDatabaseProductName(), metadata.getDatabaseProductVersion(), idFactory, dbTypeFactory);
@@ -147,7 +147,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(RelationDefinition relation, ImmutableDBMetadata dbMetadata) throws MetadataExtractionException {
         DatabaseRelationDefinition r = (DatabaseRelationDefinition)relation;
         insertPrimaryKey(r);
         insertUniqueAttributes(r);
@@ -248,7 +248,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
         }
     }
 
-    private void insertForeignKeys(DatabaseRelationDefinition relation, DBMetadata dbMetadata) throws MetadataExtractionException {
+    private void insertForeignKeys(DatabaseRelationDefinition relation, ImmutableDBMetadata dbMetadata) throws MetadataExtractionException {
 
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {

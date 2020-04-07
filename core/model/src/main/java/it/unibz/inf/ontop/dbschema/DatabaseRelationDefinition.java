@@ -46,7 +46,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 *
 	 * @param builder
 	 */
-	protected DatabaseRelationDefinition(AttributeListBuilder builder) {
+    public DatabaseRelationDefinition(AttributeListBuilder builder) {
 		super(builder);
 	}
 

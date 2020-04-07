@@ -8,5 +8,12 @@ public interface ImmutableDBMetadata {
      */
     ImmutableList<DatabaseRelationDefinition> getDatabaseRelations();
 
+    /**
+     * Retrieves the data definition object based on its name.
+     *
+     * @param id
+     */
+    DatabaseRelationDefinition getDatabaseRelation(RelationID id);
+
     DBParameters getDBParameters();
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.ImmutableDBMetadata;
+import it.unibz.inf.ontop.dbschema.RDBMetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
@@ -29,15 +30,17 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     public String extractAndSerialize() throws MetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            ImmutableDBMetadata metadata = RDBMetadataExtractionTools.loadFullMetadata(localConnection, typeFactory.getDBTypeFactory());
+            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(localConnection, typeFactory.getDBTypeFactory());
+            ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader);
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
             return jsonString;
-
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             throw new MetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
-        } catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
             throw new MetadataExtractionException("problem with JSON processing.\n" + e);
         }
     }

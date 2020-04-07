@@ -92,11 +92,12 @@ public class BootstrapGenerator {
         }
 
         // this operation is EXPENSIVE
-        ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadFullMetadata(conn, typeFactory.getDBTypeFactory()).getDatabaseRelations();
+        RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+        ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
 
         Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
-        for (DatabaseRelationDefinition td : tables) {
+        for (DatabaseRelationDefinition td : relations) {
             newTriplesMap.addAll(directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex));
         }
 

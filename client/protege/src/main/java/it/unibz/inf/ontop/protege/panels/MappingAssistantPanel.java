@@ -823,7 +823,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
             // this operation is EXPENSIVE -- only names are needed + a flag for table/view
-            ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.loadFullMetadata(conn, obdaModel.getTypeFactory().getDBTypeFactory()).getDatabaseRelations();
+            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
+            ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
 			for (DatabaseRelationDefinition relation : relations) {
 				relationList.addElement(relation);
 			}
