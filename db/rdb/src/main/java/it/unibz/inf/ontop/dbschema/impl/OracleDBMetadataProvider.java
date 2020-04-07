@@ -1,7 +1,8 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -13,18 +14,19 @@ import java.sql.Statement;
 public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final String defaultTableOwner;
+    private final QuotedID defaultSchema;
 
     OracleDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
         this.defaultTableOwner = getDefaultOwner();
+        this.defaultSchema = rawIdFactory.createRelationID(defaultTableOwner, "DUMMY").getSchemaID();
     }
 
     @Override
     public RelationID getRelationCanonicalID(RelationID id) {
-        // DUAL is a special Oracle table
-        return (id.hasSchema() || id.getTableName().equals("DUAL"))
+        return (id.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
             ? id
-            : idFactory.createRelationID(defaultTableOwner, id.getTableNameSQLRendering());
+            : id.extendWithDefaultSchemaID(defaultSchema);
     }
 
     @Override
@@ -34,9 +36,8 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
              ResultSet rs = stmt.executeQuery(TABLE_LIST_QUERY)) {
             ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
-                RelationID id = RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
-                        defaultTableOwner,
-                        rs.getString("object_name"));
+                RelationID id = rawIdFactory.createRelationID(
+                        defaultTableOwner, rs.getString("object_name"));
                 relationIds.add(id);
             }
             return relationIds.build();

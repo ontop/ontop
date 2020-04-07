@@ -5,9 +5,6 @@ import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class FunctionalDependencyImpl implements FunctionalDependency {
 
     private final ImmutableSet<Attribute> determinants, dependents;

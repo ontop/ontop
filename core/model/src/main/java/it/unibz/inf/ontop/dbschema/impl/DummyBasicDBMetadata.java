@@ -1,7 +1,9 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
+import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 

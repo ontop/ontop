@@ -242,7 +242,7 @@ public class SelectQueryAttributeExtractor2 {
             // DEFAULT SCHEMA
             // TODO: to be improved
             if ((tableName.getAlias() == null) &&
-                    relation.getID().getSchemaName() != null &&
+                    relation.getID().hasSchema() &&
                     metadata.getDatabaseRelation(relation.getID().getSchemalessID()).equals(relation))
                 result = RAExpressionAttributes.create(attributes, alias, relation.getID().getSchemalessID());
             else

@@ -41,33 +41,29 @@ public interface RelationID {
 
 	/**
 	 *
+	 * @return the relation ID that has the same name but no schema name
+	 */
+	RelationID extendWithDefaultSchemaID(QuotedID defaultSchemaID);
+
+	/**
+	 *
 	 * @return true if the relation ID contains schema
 	 */
 	boolean hasSchema();
 
 	/**
 	 *
-	 * @return null if the schema name is empty or SQL rendering of the schema name (possibly in quotation marks)
+	 * @return the table component of the name
 	 */
-	String getSchemaSQLRendering();
+	QuotedID getTableID();
+
+	default String getTableName() { return getTableID().getName(); }
 
 	/**
 	 *
-	 * @return SQL rendering of the table name (possibly in quotation marks)
+	 * @return the schema component of the name
 	 */
-	String getTableNameSQLRendering();
-
-	/**
-	 *
-	 * @return null if the schema name is empty or the schema name (as is, without quotation marks)
-	 */
-	String getSchemaName();
-
-	/**
-	 *
-	 * @return table name (as is, without quotation marks)
-	 */
-	String getTableName();
+	QuotedID getSchemaID();
 
 	/**
 	 *

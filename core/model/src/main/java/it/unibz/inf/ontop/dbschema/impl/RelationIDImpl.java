@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.io.IOException;
@@ -21,23 +20,9 @@ public class RelationIDImpl implements RelationID {
      * @param table
      */
 
-    public RelationIDImpl(QuotedID schema, QuotedID table) {
+    RelationIDImpl(QuotedID schema, QuotedID table) {
         this.schema = schema;
         this.table = table;
-    }
-
-    /**
-     * creates relation id from the database record (as though it is quoted)
-     *
-     * @param schema as is in DB (possibly null)
-     * @param table as is in DB
-     * @return
-     */
-
-    public static RelationID createRelationIdFromDatabaseRecord(QuotedIDFactory idfac, String schema, String table) {
-        // both IDs are as though they are quoted -- DB stores names as is
-        return new RelationIDImpl(QuotedIDImpl.createIdFromDatabaseRecord(idfac, schema),
-                QuotedIDImpl.createIdFromDatabaseRecord(idfac, table));
     }
 
     /**
@@ -50,33 +35,24 @@ public class RelationIDImpl implements RelationID {
         return new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table);
     }
 
+    @JsonIgnore
+    @Override
+    public RelationID extendWithDefaultSchemaID(QuotedID defaultSchemaID) {
+        return (schema.getName() == null) ? new RelationIDImpl(defaultSchemaID, table) : this;
+    }
+
+
     /**
      *
      * @return true if the relation ID contains schema
      */
     @Override
-    public boolean hasSchema() {
-        return schema.getName() != null;
-    }
+    public boolean hasSchema() { return schema.getName() != null; }
 
-    /**
-     *
-     * @return null if the schema name is empty or SQL rendering of the schema name (possibly in quotation marks)
-     */
-    @JsonIgnore
+    @JsonProperty("name")
     @Override
-    public String getSchemaSQLRendering() {
-        return schema.getSQLRendering();
-    }
-
-    /**
-     *
-     * @return SQL rendering of the table name (possibly in quotation marks)
-     */
-    @JsonIgnore
-    @Override
-    public String getTableNameSQLRendering() {
-        return table.getSQLRendering();
+    public QuotedID getTableID() {
+        return table;
     }
 
     /**
@@ -85,25 +61,15 @@ public class RelationIDImpl implements RelationID {
      */
     @JsonProperty("schema")
     @Override
-    public String getSchemaName() {
-        return schema.getName();
-    }
-
-    /**
-     *
-     * @return table name (as is, without quotation marks)
-     */
-
-    @JsonProperty("name")
-    @Override
-    public String getTableName() {
-        return table.getName();
+    public QuotedID getSchemaID() {
+        return schema;
     }
 
     /**
      *
      * @return SQL rendering of the name (possibly with quotation marks)
      */
+    @JsonIgnore
     @Override
     public String getSQLRendering() {
         String s = schema.getSQLRendering();
@@ -143,5 +109,4 @@ public class RelationIDImpl implements RelationID {
             gen.writeString(value.getSQLRendering());
         }
     }
-
 }

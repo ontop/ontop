@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 
 /*
@@ -22,8 +22,9 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
+import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.RelationID;
 
 /**
  * Creates QuotedIdentifiers following the rules of SQL standard:<br>

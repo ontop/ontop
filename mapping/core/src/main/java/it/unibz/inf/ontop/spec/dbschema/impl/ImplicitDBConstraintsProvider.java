@@ -102,7 +102,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
                     builder.add(fk.attributes[i], pk.attributes[i]);
                 }
                 fk.table.addForeignKeyConstraint(
-                        builder.build(fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableName() + "_" + counter));
+                        builder.build(fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableID().getName() + "_" + counter));
                 counter++;
             }
         }

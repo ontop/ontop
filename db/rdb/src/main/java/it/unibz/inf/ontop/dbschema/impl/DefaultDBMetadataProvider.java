@@ -1,9 +1,7 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -24,12 +22,15 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     protected final DBParameters dbParameters;
     protected final DatabaseMetaData metadata;
 
+    protected final QuotedIDFactory rawIdFactory;
+
     DefaultDBMetadataProvider(Connection connection, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         this.connection = connection;
         this.dbTypeFactory = dbTypeFactory;
         try {
             this.metadata = connection.getMetaData();
             this.idFactory = idFactory;
+            this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
         }
         catch (SQLException e) {
@@ -43,13 +44,14 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
         try {
             this.metadata = connection.getMetaData();
             this.idFactory = getQuotedIDFactory(metadata);
+            this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.dbParameters = getDBParameters(metadata, idFactory, dbTypeFactory);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
     }
-
+    
     protected static DBParameters getDBParameters(DatabaseMetaData metadata, QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory) throws SQLException {
         return new BasicDBParametersImpl(metadata.getDriverName(), metadata.getDriverVersion(),
                 metadata.getDatabaseProductName(), metadata.getDatabaseProductVersion(), idFactory, dbTypeFactory);
@@ -94,7 +96,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 String schema = rs.getString("TABLE_SCHEM");
                 String table = rs.getString("TABLE_NAME");
                 if (!isSchemaIgnored(schema)) {
-                    RelationID id = RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory, schema, table);
+                    RelationID id = rawIdFactory.createRelationID(schema, table);
                     builder.add(id);
                 }
             }
@@ -123,7 +125,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     relations.add(currentRelation);
                 }
 
-                QuotedID attributeId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
+                QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                 // columnNoNulls, columnNullable, columnNullableUnknown
                 boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                 String typeName = rs.getString("TYPE_NAME");
@@ -177,7 +179,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 // use the KEY_SEQ values to restore the correct order of attributes in the PK
                 UniqueConstraint.BuilderImpl builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
                 for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
-                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, primaryKeyAttributes.get(i));
+                    QuotedID attrId = rawIdFactory.createAttributeID(primaryKeyAttributes.get(i));
                     builder.addDeterminant(relation.getAttribute(attrId));
                 }
                 relation.addUniqueConstraint(builder.build());
@@ -221,7 +223,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 }
 
                 if (builder != null) {
-                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
+                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                     // ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
                     //        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
                     // CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table;
@@ -232,7 +234,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     Attribute attr = relation.getAttribute(attrId);
                     if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
                         // strips off the quotation marks
-                        attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, "\"" + rs.getString("COLUMN_NAME") + "\"");
+                        attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
                         attr = relation.getAttribute(attrId);
                     }
                     builder.addDeterminant(attr);
@@ -273,8 +275,8 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     }
                 }
                 if (builder != null) {
-                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("FKCOLUMN_NAME"));
-                    QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("PKCOLUMN_NAME"));
+                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
+                    QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
                     builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
                 }
             }
@@ -297,20 +299,18 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaName(); }
+    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaID().getName(); }
 
-    protected String getRelationName(RelationID relationID) { return relationID.getTableName(); }
+    protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
-                rs.getString("TABLE_SCHEM"),
-                rs.getString("TABLE_NAME"));
+        return rawIdFactory.createRelationID(
+                rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
     }
 
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
-                rs.getString("PKTABLE_SCHEM"),
-                rs.getString("PKTABLE_NAME"));
+        return rawIdFactory.createRelationID(
+                rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
     }
 
 }

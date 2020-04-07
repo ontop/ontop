@@ -9,6 +9,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
+import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import org.junit.Test;
 
@@ -18,26 +19,27 @@ public class QuotedIdentifierTest {
 	@Test
 	public void test1() {
 		QuotedIDFactory fac = DEFAULT_DUMMY_DB_METADATA.getDBParameters().getQuotedIDFactory();
+		QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(fac);
 
-		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
+		assertEquals("\"A\"", rawIdFactory.createAttributeID("A").getSQLRendering());
 
-		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, "abc").getSQLRendering(), "\"abc\"");
+		assertEquals("\"abc\"", rawIdFactory.createAttributeID("abc").getSQLRendering());
 
-		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, null).getSQLRendering(), null);
+		assertEquals(null, rawIdFactory.createAttributeID(null).getSQLRendering());
 
-		assertEquals(fac.createAttributeID("A").getSQLRendering(), "A");
+		assertEquals("A", fac.createAttributeID("A").getSQLRendering());
 
-		assertEquals(fac.createAttributeID("a").getSQLRendering(), "A"); // convert to upper case
+		assertEquals("A", fac.createAttributeID("a").getSQLRendering()); // convert to upper case
 		
-		assertEquals(fac.createAttributeID("\"a\"").getSQLRendering(), "\"a\""); // leave as is
+		assertEquals("\"a\"", fac.createAttributeID("\"a\"").getSQLRendering()); // leave as is
 
-		assertEquals(fac.createAttributeID("\"A\"").getSQLRendering(), "\"A\"");
+		assertEquals("\"A\"", fac.createAttributeID("\"A\"").getSQLRendering());
 
-		assertEquals(fac.createAttributeID(null).getSQLRendering(), null);
+		assertEquals(null, fac.createAttributeID(null).getSQLRendering());
 
-		assertEquals(RelationIDImpl.createRelationIdFromDatabaseRecord(fac, null, "A").getSQLRendering(), "\"A\"");
+		assertEquals("\"A\"", rawIdFactory.createRelationID(null, "A").getSQLRendering());
 		
-		assertEquals(RelationIDImpl.createRelationIdFromDatabaseRecord(fac, "S", "A").getSQLRendering(), "\"S\".\"A\"");
+		assertEquals("\"S\".\"A\"", rawIdFactory.createRelationID( "S", "A").getSQLRendering());
 		
 		//assertEquals(fac.createRelationFromString("S.A").getSQLRendering(), "S.A");
 		

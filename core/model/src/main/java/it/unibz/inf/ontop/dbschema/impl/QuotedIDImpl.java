@@ -25,11 +25,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 
 import java.io.IOException;
 
-import static it.unibz.inf.ontop.dbschema.SQLStandardQuotedIDFactory.NO_QUOTATION;
+import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.NO_QUOTATION;
 
 /**
  * Database identifier used for schema names, table names and aliases
@@ -57,28 +56,16 @@ public class QuotedIDImpl implements QuotedID {
      * @param id can be null
      * @param quoteString cannot be null (the empty string stands for no quotation, as in getIdentifierQuoteString)
      */
-    public QuotedIDImpl(String id, String quoteString) {
+    QuotedIDImpl(String id, String quoteString) {
         this(id, quoteString, true);
     }
 
-    public QuotedIDImpl(String id, String quoteString, boolean caseSensitive) {
+    QuotedIDImpl(String id, String quoteString, boolean caseSensitive) {
         this.id = id;
         this.quoteString = quoteString;
         this.caseSensitive = caseSensitive;
         // increases collisions but makes it possible to have case-insensitive ids (for MySQL)
         this.hashCode = (id != null) ? id.toLowerCase().hashCode() : 0;
-    }
-
-    /**
-     * creates attribute ID from the database record (as though it is a quoted name)
-     *
-     * @param s
-     * @return
-     */
-
-    public static QuotedID createIdFromDatabaseRecord(QuotedIDFactory idfac, String s) {
-        // ID is as though it is quoted -- DB stores names as is
-        return new QuotedIDImpl(s, idfac.getIDQuotationString());
     }
 
     /**
@@ -140,9 +127,9 @@ public class QuotedIDImpl implements QuotedID {
         return hashCode;
     }
 
-    public static class QuotedIDSerializer extends JsonSerializer<it.unibz.inf.ontop.dbschema.QuotedID> {
+    public static class QuotedIDSerializer extends JsonSerializer<QuotedID> {
         @Override
-        public void serialize(it.unibz.inf.ontop.dbschema.QuotedID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(QuotedID value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             gen.writeString(value.getSQLRendering());
         }
     }

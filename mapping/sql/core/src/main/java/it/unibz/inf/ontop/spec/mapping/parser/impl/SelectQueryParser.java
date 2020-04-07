@@ -267,7 +267,7 @@ public class SelectQueryParser {
             // TODO: to be improved
             RAExpressionAttributes attrs;
             if ((tableName.getAlias() == null) &&
-                    relation.getID().getSchemaName() != null &&
+                    relation.getID().hasSchema() &&
                     metadata.getDatabaseRelation(relation.getID().getSchemalessID()).equals(relation))
                 attrs = RAExpressionAttributes.create(attributes.build(), alias, relation.getID().getSchemalessID());
             else

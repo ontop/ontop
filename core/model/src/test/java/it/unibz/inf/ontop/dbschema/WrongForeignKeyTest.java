@@ -66,8 +66,8 @@ public class WrongForeignKeyTest {
 
         ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
 
-        QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
-        QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
+        QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
+        QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
         builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 
     }
@@ -80,14 +80,14 @@ public class WrongForeignKeyTest {
 
         ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
 
-        QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
-        QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
+        QuotedID attrId = ID_FACTORY.createAttributeID("COL2");
+        QuotedID refAttrId = ID_FACTORY.createAttributeID("COL1");
         builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 
         DatabaseRelationDefinition relation2 = table3Def;
 
-        QuotedID attrId2 = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
-        QuotedID refAttrId2 = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
+        QuotedID attrId2 = ID_FACTORY.createAttributeID("COL2");
+        QuotedID refAttrId2 = ID_FACTORY.createAttributeID( "COL1");
         builder.add(relation2.getAttribute(attrId2), ref.getAttribute(refAttrId2));
     }
 }
