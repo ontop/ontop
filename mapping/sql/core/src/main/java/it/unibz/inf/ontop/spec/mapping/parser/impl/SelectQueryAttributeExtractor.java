@@ -22,10 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
@@ -51,7 +48,7 @@ public class SelectQueryAttributeExtractor {
 
     private final SelectQueryAttributeExtractor2 sqae;
 
-    public SelectQueryAttributeExtractor(DBMetadataBuilder metadata, TermFactory termFactory) {
+    public SelectQueryAttributeExtractor(BasicDBMetadataBuilder metadata, TermFactory termFactory) {
         this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
     }

@@ -26,13 +26,13 @@ import java.util.Map;
  */
 
 public class SelectQueryAttributeExtractor2 {
-    private final DBMetadataBuilder metadata;
+    private final BasicDBMetadataBuilder metadata;
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(DBMetadataBuilder metadata, TermFactory termFactory) {
+    public SelectQueryAttributeExtractor2(BasicDBMetadataBuilder metadata, TermFactory termFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getDBParameters().getQuotedIDFactory();
         this.termFactory = termFactory;

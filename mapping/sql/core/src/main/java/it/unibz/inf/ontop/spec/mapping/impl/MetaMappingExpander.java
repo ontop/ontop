@@ -24,10 +24,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
@@ -118,7 +115,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, Connection connection, DBMetadataBuilder metadata)
+	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, Connection connection, BasicDBMetadataBuilder metadata)
 			throws MetaMappingExpansionException {
 
 		ImmutableList.Builder<SQLPPTriplesMap> result = ImmutableList.builder();
@@ -264,7 +261,7 @@ public class MetaMappingExpander {
 	}
 
 
-	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(DBMetadataBuilder metadata, String sql)
+	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(BasicDBMetadataBuilder metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);

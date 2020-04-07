@@ -27,7 +27,9 @@ public class ImplicitDBConstraintsTest {
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
-	
+
+	private DatabaseRelationDefinition TABLENAME, TABLE2;
+
 	@Before
 	public void setupMetadata(){
 		md = DEFAULT_DUMMY_DB_METADATA;
@@ -35,10 +37,10 @@ public class ImplicitDBConstraintsTest {
 
 		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
 
-		DatabaseRelationDefinition td = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
+		TABLENAME = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
 			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));
 
-		DatabaseRelationDefinition td2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
+		TABLE2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
 			.addAttribute(idfac.createAttributeID("KEY1"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("KEY2"), stringDBType, false));
 	}
@@ -64,10 +66,9 @@ public class ImplicitDBConstraintsTest {
 	public void testAddPrimaryKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "pkeys.lst")), idfac);
-		uc.insertIntegrityConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		Attribute attr = dd.getAttribute(idfac.createAttributeID("KEYNAME"));
-		assertEquals(ImmutableList.of(attr), dd.getUniqueConstraints().get(0).getAttributes());
+		uc.insertIntegrityConstraints(md.build());
+		Attribute attr = TABLENAME.getAttribute(idfac.createAttributeID("KEYNAME"));
+		assertEquals(ImmutableList.of(attr), TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
 
 
@@ -84,9 +85,8 @@ public class ImplicitDBConstraintsTest {
 	public void testAddForeignKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "fkeys.lst")), idfac);
-		uc.insertIntegrityConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
+		uc.insertIntegrityConstraints(md.build());
+		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();
 		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
@@ -97,14 +97,13 @@ public class ImplicitDBConstraintsTest {
 	public void testAddKeys() throws MetadataExtractionException {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "keys.lst")), idfac);
-		uc.insertIntegrityConstraints(this.md);
-		DatabaseRelationDefinition dd = this.md.getDatabaseRelation(idfac.createRelationID(null, "TABLENAME"));
-		ForeignKeyConstraint fk = dd.getForeignKeys().get(0);
+		uc.insertIntegrityConstraints(md.build());
+		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();
 		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
 		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
-		assertEquals(ImmutableList.of(dd.getAttribute(idfac.createAttributeID("KEYNAME"))),
-						dd.getUniqueConstraints().get(0).getAttributes());
+		assertEquals(ImmutableList.of(TABLENAME.getAttribute(idfac.createAttributeID("KEYNAME"))),
+				TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
 }
