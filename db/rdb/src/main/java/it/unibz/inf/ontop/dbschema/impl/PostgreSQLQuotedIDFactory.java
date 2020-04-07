@@ -53,10 +53,6 @@ import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTAT
 
 public class PostgreSQLQuotedIDFactory implements QuotedIDFactory {
 
-	/**
-	 * used only in DBMetadataExtractor
-	 */
-	
 	PostgreSQLQuotedIDFactory() { }
 
 	@Override

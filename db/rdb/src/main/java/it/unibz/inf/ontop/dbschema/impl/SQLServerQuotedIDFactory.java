@@ -49,9 +49,6 @@ import static it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory.QUOTAT
 
 public class SQLServerQuotedIDFactory implements QuotedIDFactory {
 
-	/**
-	 * used only in DBMetadataExtractor
-	 */
 	SQLServerQuotedIDFactory() { }
 
 	@Override

@@ -81,12 +81,14 @@ public abstract class AbstractConstraintTest extends TestCase {
 				.map(metadataLoader::getRelationCanonicalID)
 				.collect(ImmutableCollectors.toList());
 
-		ImmutableDBMetadata METADATA = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader, relations);
+		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader, relations);
 
-		tBook = METADATA.getDatabaseRelation(relations.get(0));
-		tBookWriter = METADATA.getDatabaseRelation(relations.get(1));
-		tEdition = METADATA.getDatabaseRelation(relations.get(2));
-		tWriter = METADATA.getDatabaseRelation(relations.get(3));
+		tBook = metadata.getDatabaseRelation(relations.get(0));
+		tBookWriter = metadata.getDatabaseRelation(relations.get(1));
+		tEdition = metadata.getDatabaseRelation(relations.get(2));
+		tWriter = metadata.getDatabaseRelation(relations.get(3));
+
+		System.out.println(metadata);
 	}
 	
 	public void testPrimaryKey() {
