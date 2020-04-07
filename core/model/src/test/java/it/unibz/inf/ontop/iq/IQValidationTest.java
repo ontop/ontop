@@ -44,50 +44,48 @@ public class IQValidationTest {
 
     static {
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false));
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("TABLE1",
+            "col1", integerDBType, false);
         TABLE1 = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table11Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE11"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false));
+        DatabaseRelationDefinition table11Def = dbMetadata.createDatabaseRelation("TABLE11",
+            "col1", integerDBType, false);
         TABLE1_1 = table11Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table12Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE12"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false));
+        DatabaseRelationDefinition table12Def = dbMetadata.createDatabaseRelation("TABLE12",
+            "col1", integerDBType, false);
         TABLE1_2 = table12Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table13Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE13"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false));
+        DatabaseRelationDefinition table13Def = dbMetadata.createDatabaseRelation("TABLE13",
+            "col1", integerDBType, false);
         TABLE1_3 = table13Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
         TABLE2 = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table22Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE22"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
+        DatabaseRelationDefinition table22Def = dbMetadata.createDatabaseRelation("TABLE22",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
         TABLE2_2 = table22Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table23Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE22"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
+        DatabaseRelationDefinition table23Def = dbMetadata.createDatabaseRelation("TABLE22",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
         TABLE2_3 = table23Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE22"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false));
+        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation("TABLE22",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
         TABLE2_4 = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE3"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("TABLE3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
         TABLE3 = table3Def.getAtomPredicate();
     }
 

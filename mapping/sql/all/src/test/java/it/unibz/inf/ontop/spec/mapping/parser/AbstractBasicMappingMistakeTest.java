@@ -12,17 +12,13 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private static final DummyDBMetadataBuilder dbMetadata;
 
     static {
-        dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
+        DBTypeFactory dbTypeFactory = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
 
-        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
-                idFactory.createRelationID(null, "PERSON"))
-            .addAttribute(idFactory.createAttributeID("ID"), dbTypeFactory.getDBLargeIntegerType(), false)
-            .addAttribute(idFactory.createAttributeID("FNAME"), dbTypeFactory.getDBStringType(), false));
+        DatabaseRelationDefinition personTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PERSON",
+            "ID", dbTypeFactory.getDBLargeIntegerType(), false,
+            "FNAME", dbTypeFactory.getDBStringType(), false);
         personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
     }
 
@@ -30,15 +26,12 @@ public abstract class AbstractBasicMappingMistakeTest {
         try {
             OntopMappingSQLAllConfiguration configuration = createConfiguration(mappingFile);
             configuration.loadSpecification();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.info(e.toString());
             throw e;
         }
     }
 
     protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
-
-    protected DummyDBMetadataBuilder getDBMetadata() {
-        return dbMetadata;
-    }
 }

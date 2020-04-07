@@ -29,18 +29,17 @@ public class MappingCQCOptimizerTest {
     public void test() {
 
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
         DBTermType integerType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "company"))
-            .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("cmpShortName"), integerType, false));
+        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation("company",
+            "cmpNpdidCompany", integerType, false,
+            "cmpShortName", integerType, false);
         RelationPredicate company = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "company_reserves"))
-            .addAttribute(idFactory.createAttributeID("cmpShare"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("fldNpdidField"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType, false));
+        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("company_reserves",
+            "cmpShare", integerType, false,
+            "fldNpdidField", integerType, false,
+            "cmpNpdidCompany", integerType, false);
         RelationPredicate companyReserves = table3Def.getAtomPredicate();
 
         table3Def.addForeignKeyConstraint(
@@ -97,24 +96,23 @@ public class MappingCQCOptimizerTest {
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
 
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
         DBTermType integerType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition addressTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "address"))
-            .addAttribute(idFactory.createAttributeID("address_id"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("address"), integerType, false));
+        DatabaseRelationDefinition addressTable = dbMetadata.createDatabaseRelation("address",
+            "address_id", integerType, false,
+            "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "store"))
-            .addAttribute(idFactory.createAttributeID("store_id"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("manager_staff_id"), integerType, false));
+        DatabaseRelationDefinition storeTable = dbMetadata.createDatabaseRelation("store",
+            "store_id", integerType, false,
+            "address_id", integerType, false,
+            "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "staff"))
-            .addAttribute(idFactory.createAttributeID("staff_id"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), integerType, false)
-            .addAttribute(idFactory.createAttributeID("store_id"), integerType, false));
+        DatabaseRelationDefinition staffTable = dbMetadata.createDatabaseRelation("staff",
+            "staff_id", integerType, false,
+            "address_id", integerType, false,
+            "store_id", integerType, false);
         RelationPredicate staff = staffTable.getAtomPredicate();
 
         storeTable.addForeignKeyConstraint(

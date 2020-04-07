@@ -106,17 +106,17 @@ public class ImmutableHomomorphismTest {
         QuotedIDFactory idFactory = metadata.getQuotedIDFactory();
         DBTermType stringDBType = metadata.getDBTypeFactory().getDBStringType();
 
-        DatabaseRelationDefinition A = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "ADDRESS"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address"), stringDBType, false));
-        DatabaseRelationDefinition S = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STAFF"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("store_id"), stringDBType, false));
-        DatabaseRelationDefinition T = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STORE"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("staff_id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), stringDBType, false));
+        DatabaseRelationDefinition A = metadata.createDatabaseRelation("ADDRESS",
+            "id", stringDBType, false,
+            "address", stringDBType, false);
+        DatabaseRelationDefinition S = metadata.createDatabaseRelation("STAFF",
+            "id", stringDBType, false,
+            "address_id", stringDBType, false,
+            "store_id", stringDBType, false);
+        DatabaseRelationDefinition T = metadata.createDatabaseRelation( "STORE",
+            "id", stringDBType, false,
+            "staff_id", stringDBType, false,
+            "address_id", stringDBType, false);
 
         ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
         // ADDRESS(ADDRESS_ID0,ADDRESS3)

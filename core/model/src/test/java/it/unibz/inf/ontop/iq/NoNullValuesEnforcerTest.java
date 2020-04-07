@@ -48,13 +48,11 @@ public class NoNullValuesEnforcerTest {
 
     static {
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
-            .addAttribute(idFactory.createAttributeID("A"), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("B"), integerDBType, true));
+        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+            "A", integerDBType, true,
+            "B", integerDBType, true);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));

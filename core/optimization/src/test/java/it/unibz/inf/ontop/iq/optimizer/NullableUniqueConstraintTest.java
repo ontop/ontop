@@ -39,10 +39,10 @@ public class NullableUniqueConstraintTest {
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        TABLE1 = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE1"))
-                .addAttribute(idFactory.createAttributeID("col1"), integerDBType, true)
-                .addAttribute(idFactory.createAttributeID("col2"), integerDBType, true)
-                .addAttribute(idFactory.createAttributeID("col3"), integerDBType, true));
+        TABLE1 = dbMetadata.createDatabaseRelation("TABLE1",
+                "col1", integerDBType, true,
+                "col2", integerDBType, true,
+                "col3", integerDBType, true);
         TABLE1.addUniqueConstraint(UniqueConstraint.builder(TABLE1, "uc1")
                 .addDeterminant(TABLE1.getAttribute(1))
                 .build());
@@ -51,10 +51,10 @@ public class NullableUniqueConstraintTest {
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        TABLE2 = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "TABLE2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, true));
+        TABLE2 = dbMetadata.createDatabaseRelation("TABLE2",
+            "col1", integerDBType, true,
+            "col2", integerDBType, true,
+            "col3", integerDBType, true);
         TABLE2.addUniqueConstraint(UniqueConstraint.builder(TABLE2, "uc2")
                 .addDeterminant(TABLE2.getAttribute(1))
                 .build());

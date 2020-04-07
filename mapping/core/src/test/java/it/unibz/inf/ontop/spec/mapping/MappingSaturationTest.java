@@ -36,12 +36,11 @@ public class MappingSaturationTest {
 
     static {
         DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
         DBTermType largeIntDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
-            .addAttribute(idFactory.createAttributeID("col1"), largeIntDBType, false)
-            .addAttribute(idFactory.createAttributeID("col12"), largeIntDBType, false));
+        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("p1",
+            "col1", largeIntDBType, false,
+            "col12", largeIntDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";
