@@ -14,7 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 /***
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
+ * database stores URIs directly.
  *
  */
 public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
@@ -32,8 +32,14 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 
 	@BeforeClass
 	public static void before() throws OWLOntologyCreationException {
-		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-		CONNECTION = REASONER.getConnection();
+		try {
+			REASONER = createReasoner(owlfile, obdafile, propertiesfile);
+			CONNECTION = REASONER.getConnection();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
