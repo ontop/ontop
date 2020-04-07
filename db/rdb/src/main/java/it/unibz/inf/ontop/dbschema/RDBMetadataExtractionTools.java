@@ -38,16 +38,10 @@ import java.util.*;
 
 public class RDBMetadataExtractionTools {
 
-	public static BasicDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
+	public static ImmutableDBMetadata loadFullMetadata(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
 		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbTypeFactory);
 		BasicDBMetadata metadata = loadMetadata(metadataLoader, metadataLoader.getRelationIDs());
 		return metadata;
-	}
-
-	public static Collection<DatabaseRelationDefinition> loadAllRelations(Connection conn, DBTypeFactory dbTypeFactory) throws SQLException, MetadataExtractionException {
-		RDBMetadataProvider metadataLoader = getMetadataProvider(conn, dbTypeFactory);
-		BasicDBMetadata metadata = loadMetadata(metadataLoader, metadataLoader.getRelationIDs());
-		return metadata.getDatabaseRelations();
 	}
 
 	// single use in a test

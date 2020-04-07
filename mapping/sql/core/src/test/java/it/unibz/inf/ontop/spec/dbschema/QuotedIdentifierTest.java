@@ -8,6 +8,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import org.junit.Test;
 
 public class QuotedIdentifierTest {
@@ -17,11 +19,11 @@ public class QuotedIdentifierTest {
 	public void test1() {
 		QuotedIDFactory fac = DEFAULT_DUMMY_DB_METADATA.getDBParameters().getQuotedIDFactory();
 
-		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
+		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, "A").getSQLRendering(), "\"A\"");
 
-		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, "abc").getSQLRendering(), "\"abc\"");
+		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, "abc").getSQLRendering(), "\"abc\"");
 
-		assertEquals(QuotedID.createIdFromDatabaseRecord(fac, null).getSQLRendering(), null);
+		assertEquals(QuotedIDImpl.createIdFromDatabaseRecord(fac, null).getSQLRendering(), null);
 
 		assertEquals(fac.createAttributeID("A").getSQLRendering(), "A");
 
@@ -33,9 +35,9 @@ public class QuotedIdentifierTest {
 
 		assertEquals(fac.createAttributeID(null).getSQLRendering(), null);
 
-		assertEquals(RelationID.createRelationIdFromDatabaseRecord(fac, null, "A").getSQLRendering(), "\"A\"");
+		assertEquals(RelationIDImpl.createRelationIdFromDatabaseRecord(fac, null, "A").getSQLRendering(), "\"A\"");
 		
-		assertEquals(RelationID.createRelationIdFromDatabaseRecord(fac, "S", "A").getSQLRendering(), "\"S\".\"A\"");
+		assertEquals(RelationIDImpl.createRelationIdFromDatabaseRecord(fac, "S", "A").getSQLRendering(), "\"S\".\"A\"");
 		
 		//assertEquals(fac.createRelationFromString("S.A").getSQLRendering(), "S.A");
 		

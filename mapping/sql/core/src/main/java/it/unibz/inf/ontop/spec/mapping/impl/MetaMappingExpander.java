@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -348,7 +349,7 @@ public class MetaMappingExpander {
 																  ImmutableList<Variable> templateVariables) {
 		// TODO : case-insensitive
 		return templateVariables.stream()
-				.map(v -> QuotedID.createIdFromDatabaseRecord(idfac, v.getName()))
+				.map(v -> QuotedIDImpl.createIdFromDatabaseRecord(idfac, v.getName()))
 				.collect(ImmutableCollectors.toList());
 	}
 

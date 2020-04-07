@@ -25,6 +25,8 @@ package it.unibz.inf.ontop.dbschema;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 
 import static it.unibz.inf.ontop.dbschema.SQLStandardQuotedIDFactory.QUOTATION_STRING;
 
@@ -66,17 +68,17 @@ public class PostgreSQLQuotedIDFactory implements QuotedIDFactory {
 
 	@Override
 	public RelationID createRelationID(String schema, String table) {
-		return new RelationID(createFromString(schema), createFromString(table));			
+		return new RelationIDImpl(createFromString(schema), createFromString(table));
 	}
 	
 	public QuotedID createFromString(String s) {
 		if (s == null)
-			return new QuotedID(s, QuotedID.NO_QUOTATION);
+			return new QuotedIDImpl(s, SQLStandardQuotedIDFactory.NO_QUOTATION);
 		
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
-		return new QuotedID(s.toLowerCase(), QuotedID.NO_QUOTATION);
+		return new QuotedIDImpl(s.toLowerCase(), SQLStandardQuotedIDFactory.NO_QUOTATION);
 	}
 
 	@Override

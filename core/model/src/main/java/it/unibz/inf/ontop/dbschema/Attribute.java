@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 import java.io.IOException;
@@ -66,7 +67,7 @@ public class Attribute {
 	}
 
 	@JsonProperty("name")
-	@JsonSerialize(using = QuotedID.QuotedIDSerializer.class)
+	@JsonSerialize(using = QuotedIDImpl.QuotedIDSerializer.class)
 	public QuotedID getID() {
 		return id;
 	}

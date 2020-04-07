@@ -22,6 +22,9 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
+
 /**
  * Creates QuotedIdentifiers following the rules of SQL standard:<br>
  *    - unquoted identifiers are converted into upper case<br>
@@ -58,7 +61,8 @@ package it.unibz.inf.ontop.dbschema;
 public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 
 	public static final String QUOTATION_STRING = "\"";
-	
+	public static final String NO_QUOTATION = "";
+
 	SQLStandardQuotedIDFactory() { }
 
 	@Override
@@ -68,17 +72,17 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	
 	@Override
 	public RelationID createRelationID(String schema, String table) {
-		return new RelationID(createFromString(schema), createFromString(table));			
+		return new RelationIDImpl(createFromString(schema), createFromString(table));
 	}
 	
 	private QuotedID createFromString(String s) {
 		if (s == null)
-			return new QuotedID(s, QuotedID.NO_QUOTATION);
+			return new QuotedIDImpl(s, NO_QUOTATION);
 		
 		if (s.startsWith(QUOTATION_STRING) && s.endsWith(QUOTATION_STRING))
-			return new QuotedID(s.substring(1, s.length() - 1), QUOTATION_STRING);
+			return new QuotedIDImpl(s.substring(1, s.length() - 1), QUOTATION_STRING);
 
-		return new QuotedID(s.toUpperCase(), QuotedID.NO_QUOTATION);
+		return new QuotedIDImpl(s.toUpperCase(), NO_QUOTATION);
 	}
 	
 	@Override

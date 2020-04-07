@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -33,7 +34,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
              ResultSet rs = stmt.executeQuery(TABLE_LIST_QUERY)) {
             ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
-                RelationID id = RelationID.createRelationIdFromDatabaseRecord(idFactory,
+                RelationID id = RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
                         defaultTableOwner,
                         rs.getString("object_name"));
                 relationIds.add(id);

@@ -2,6 +2,8 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.impl.BasicDBParametersImpl;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -92,7 +94,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 String schema = rs.getString("TABLE_SCHEM");
                 String table = rs.getString("TABLE_NAME");
                 if (!isSchemaIgnored(schema)) {
-                    RelationID id = RelationID.createRelationIdFromDatabaseRecord(idFactory, schema, table);
+                    RelationID id = RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory, schema, table);
                     builder.add(id);
                 }
             }
@@ -121,7 +123,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     relations.add(currentRelation);
                 }
 
-                QuotedID attributeId = QuotedID.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
+                QuotedID attributeId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
                 // columnNoNulls, columnNullable, columnNullableUnknown
                 boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                 String typeName = rs.getString("TYPE_NAME");
@@ -175,7 +177,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 // use the KEY_SEQ values to restore the correct order of attributes in the PK
                 UniqueConstraint.BuilderImpl builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
                 for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
-                    QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idFactory, primaryKeyAttributes.get(i));
+                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, primaryKeyAttributes.get(i));
                     builder.addDeterminant(relation.getAttribute(attrId));
                 }
                 relation.addUniqueConstraint(builder.build());
@@ -219,7 +221,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 }
 
                 if (builder != null) {
-                    QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
+                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("COLUMN_NAME"));
                     // ASC_OR_DESC String => column sort sequence, "A" => ascending, "D" => descending,
                     //        may be null if sort sequence is not supported; null when TYPE is tableIndexStatistic
                     // CARDINALITY int => When TYPE is tableIndexStatistic, then this is the number of rows in the table;
@@ -230,7 +232,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     Attribute attr = relation.getAttribute(attrId);
                     if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
                         // strips off the quotation marks
-                        attrId = QuotedID.createIdFromDatabaseRecord(idFactory, "\"" + rs.getString("COLUMN_NAME") + "\"");
+                        attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, "\"" + rs.getString("COLUMN_NAME") + "\"");
                         attr = relation.getAttribute(attrId);
                     }
                     builder.addDeterminant(attr);
@@ -271,8 +273,8 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                     }
                 }
                 if (builder != null) {
-                    QuotedID attrId = QuotedID.createIdFromDatabaseRecord(idFactory, rs.getString("FKCOLUMN_NAME"));
-                    QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(idFactory, rs.getString("PKCOLUMN_NAME"));
+                    QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("FKCOLUMN_NAME"));
+                    QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(idFactory, rs.getString("PKCOLUMN_NAME"));
                     builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
                 }
             }
@@ -300,13 +302,13 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     protected String getRelationName(RelationID relationID) { return relationID.getTableName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
                 rs.getString("TABLE_SCHEM"),
                 rs.getString("TABLE_NAME"));
     }
 
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
                 rs.getString("PKTABLE_SCHEM"),
                 rs.getString("PKTABLE_NAME"));
     }

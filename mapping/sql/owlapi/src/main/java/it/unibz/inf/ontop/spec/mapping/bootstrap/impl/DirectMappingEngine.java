@@ -158,7 +158,7 @@ public class DirectMappingEngine {
 
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
-			Collection<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadAllRelations(conn, typeFactory.getDBTypeFactory());
+			ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadFullMetadata(conn, typeFactory.getDBTypeFactory()).getDatabaseRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -62,7 +63,7 @@ public abstract class RelationDefinition {
 	}
 
 	@JsonProperty("name")
-	@JsonSerialize(using = RelationID.RelationIDSerializer.class)
+	@JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
 	public RelationID getID() {
 		return id;
 	}

@@ -5,7 +5,7 @@ import java.util.Collection;
 /**
  * Common abstraction for all sorts of Database (relational, etc.)
  */
-public interface DBMetadata {
+public interface DBMetadata extends ImmutableDBMetadata {
 
     /**
      * Retrieves the data definition object based on its name. The
@@ -17,15 +17,4 @@ public interface DBMetadata {
      */
     DatabaseRelationDefinition getDatabaseRelation(RelationID id);
 
-    /**
-     * Retrieves the tables list form the metadata.
-     */
-    Collection<DatabaseRelationDefinition> getDatabaseRelations();
-
-    /**
-     * New-gen interface
-     *
-     * TODO: stop using the DBMetadata object in most of the code but DBParameters instead when needed
-     */
-    DBParameters getDBParameters();
 }

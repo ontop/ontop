@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.utils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
@@ -90,7 +91,7 @@ public class BootstrapGenerator {
         }
 
         // this operation is EXPENSIVE
-        Collection<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadAllRelations(conn, typeFactory.getDBTypeFactory());
+        ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.loadFullMetadata(conn, typeFactory.getDBTypeFactory()).getDatabaseRelations();
 
         Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);

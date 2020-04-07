@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,8 @@ public class BasicDBMetadata implements DBMetadata {
 
     @JsonProperty("relations")
     @Override
-    public Collection<DatabaseRelationDefinition> getDatabaseRelations() {
-        return Collections.unmodifiableCollection(listOfTables);
+    public ImmutableList<DatabaseRelationDefinition> getDatabaseRelations() {
+        return ImmutableList.copyOf(listOfTables);
     }
 
     public void freeze() {

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -48,13 +49,13 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
                 rs.getString("TABLE_CAT"),
                 rs.getString("TABLE_NAME"));
     }
 
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return RelationID.createRelationIdFromDatabaseRecord(idFactory,
+        return RelationIDImpl.createRelationIdFromDatabaseRecord(idFactory,
                 rs.getString("PKTABLE_CAT"),
                 rs.getString("PKTABLE_NAME"));
     }

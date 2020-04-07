@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -188,7 +189,7 @@ public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mappin
                 ImmutableTerm newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
 
                 if (newTerm == null) {
-                    QuotedID quotedAttribute = QuotedID.createIdFromDatabaseRecord(idfac, var.getName());
+                    QuotedID quotedAttribute = QuotedIDImpl.createIdFromDatabaseRecord(idfac, var.getName());
                     newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
 
                     if (newTerm == null)

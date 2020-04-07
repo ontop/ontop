@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
@@ -65,8 +66,8 @@ public class WrongForeignKeyTest {
 
         ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
 
-        QuotedID attrId = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
-        QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
+        QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
+        QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL4");
         builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 
     }
@@ -79,14 +80,14 @@ public class WrongForeignKeyTest {
 
         ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
 
-        QuotedID attrId = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
-        QuotedID refAttrId = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
+        QuotedID attrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
+        QuotedID refAttrId = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
         builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
 
         DatabaseRelationDefinition relation2 = table3Def;
 
-        QuotedID attrId2 = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
-        QuotedID refAttrId2 = QuotedID.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
+        QuotedID attrId2 = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL2");
+        QuotedID refAttrId2 = QuotedIDImpl.createIdFromDatabaseRecord(ID_FACTORY, "COL1");
         builder.add(relation2.getAttribute(attrId2), ref.getAttribute(refAttrId2));
     }
 }
