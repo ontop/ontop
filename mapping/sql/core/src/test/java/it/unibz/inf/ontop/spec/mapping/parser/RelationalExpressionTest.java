@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 
 public class RelationalExpressionTest {
 
-    private static DBMetadataBuilder METADATA;
+    private static DummyDBMetadataBuilder METADATA;
     private static QuotedIDFactory MDFAC;
 
     private DataAtom<RelationPredicate> f1, f2;
@@ -45,7 +45,7 @@ public class RelationalExpressionTest {
     @Before
     public void setupTest(){
         METADATA = DEFAULT_DUMMY_DB_METADATA;
-        MDFAC = METADATA.getDBParameters().getQuotedIDFactory();
+        MDFAC = METADATA.getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
@@ -54,7 +54,7 @@ public class RelationalExpressionTest {
         attX = MDFAC.createAttributeID("A");
         attY = MDFAC.createAttributeID("B");
 
-        DBTermType integerDBType = METADATA.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition P = METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(table1)
             .addAttribute(attX, integerDBType, true)

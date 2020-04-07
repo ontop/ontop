@@ -49,7 +49,7 @@ public class SelectQueryAttributeExtractor {
     private final SelectQueryAttributeExtractor2 sqae;
 
     public SelectQueryAttributeExtractor(BasicDBMetadataBuilder metadata, TermFactory termFactory) {
-        this.idfac = metadata.getDBParameters().getQuotedIDFactory();
+        idfac = metadata.getDBParameters().getQuotedIDFactory();
         sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
     }
 

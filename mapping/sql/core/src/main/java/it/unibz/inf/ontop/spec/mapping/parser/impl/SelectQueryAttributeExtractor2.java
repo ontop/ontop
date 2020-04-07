@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;

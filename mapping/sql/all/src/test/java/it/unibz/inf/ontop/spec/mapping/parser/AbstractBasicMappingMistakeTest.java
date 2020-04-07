@@ -12,12 +12,12 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private static final DBMetadataBuilder dbMetadata;
+    private static final DummyDBMetadataBuilder dbMetadata;
 
     static {
         dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
 
         DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
                 idFactory.createRelationID(null, "PERSON"))
@@ -38,7 +38,7 @@ public abstract class AbstractBasicMappingMistakeTest {
 
     protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
 
-    protected DBMetadataBuilder getDBMetadata() {
+    protected DummyDBMetadataBuilder getDBMetadata() {
         return dbMetadata;
     }
 }

@@ -23,28 +23,26 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private static BasicDBMetadataBuilder md;
-	private static QuotedIDFactory idfac;
+	private static final BasicDBMetadataBuilder md;
+	private static final QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
 
-	private static DatabaseRelationDefinition TABLENAME, TABLE2;
+	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
 
 	static {
-		BasicDBMetadataBuilder md0 = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
-		idfac = md0.getDBParameters().getQuotedIDFactory();
+		md = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
+		idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
-		DBTermType stringDBType = md0.getDBParameters().getDBTypeFactory().getDBStringType();
+		DBTermType stringDBType = md.getDBParameters().getDBTypeFactory().getDBStringType();
 
-		TABLENAME = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
+		TABLENAME = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
 			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));
 
-		TABLE2 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
+		TABLE2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
 			.addAttribute(idfac.createAttributeID("KEY1"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("KEY2"), stringDBType, false));
-
-		md = md0;
 	}
 	
 	@Test

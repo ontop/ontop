@@ -31,9 +31,9 @@ public class NullableUniqueConstraintTest {
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
 
     static {
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         /*

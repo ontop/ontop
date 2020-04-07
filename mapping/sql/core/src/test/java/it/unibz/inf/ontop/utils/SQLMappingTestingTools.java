@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.utils;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilder;
+import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilderImpl;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -31,7 +31,7 @@ public class SQLMappingTestingTools {
     public static final SQLPPMappingConverterImpl LEGACY_SQL_PP_MAPPING_CONVERTER;
     public static final SQLPPSourceQueryFactory SOURCE_QUERY_FACTORY;
 
-    public static final DBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
+    public static final DummyDBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
 
     static {
@@ -53,7 +53,7 @@ public class SQLMappingTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         DB_FS_FACTORY = injector.getInstance(DBFunctionSymbolFactory.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilder.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilderImpl.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
 
         TARGET_QUERY_PARSER_FACTORY = injector.getInstance(TargetQueryParserFactory.class);

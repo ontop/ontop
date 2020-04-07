@@ -63,9 +63,9 @@ public class FunctionalDependencyTest {
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static{
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         /*

@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -18,7 +17,6 @@ public class RelationPredicateImpl extends AtomPredicateImpl implements Relation
         this.relation = relation;
     }
 
-    @JsonIgnore
     @Override
     public RelationDefinition getRelationDefinition() {
         return relation;

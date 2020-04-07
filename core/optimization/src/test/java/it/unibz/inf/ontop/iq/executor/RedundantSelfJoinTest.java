@@ -76,9 +76,9 @@ public class RedundantSelfJoinTest {
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
 
     static{
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         /*

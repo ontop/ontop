@@ -30,10 +30,10 @@ public class DependencyTestDBMetadata {
 
     public static final RelationPredicate PK_TABLE7_AR4;
 
-    private static RelationPredicate createRelationPredicate(DBMetadataBuilder dbMetadata,
+    private static RelationPredicate createRelationPredicate(DummyDBMetadataBuilder dbMetadata,
                                                              int tableNumber, int arity) {
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTermType stringDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType();
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTermType stringDBType = dbMetadata.getDBTypeFactory().getDBStringType();
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
                 "PK_TABLE" + tableNumber + "AR" + arity));
         for (int i = 1; i <= arity; i++) {
@@ -46,7 +46,7 @@ public class DependencyTestDBMetadata {
     }
 
     static {
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
 
         PK_TABLE1_AR1 = createRelationPredicate(dbMetadata, 1, 1);
         PK_TABLE2_AR1 = createRelationPredicate(dbMetadata, 2, 1);

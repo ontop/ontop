@@ -54,9 +54,9 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
             .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)

@@ -42,7 +42,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	private UniqueConstraint pk;
 
 	/**
-	 * used only in DBMetadataBuilder
+	 * used only in DummyDBMetadataBuilder
 	 *
 	 * @param builder
 	 */

@@ -7,21 +7,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class BasicDBMetadataBuilder implements DBMetadataBuilder {
+public class BasicDBMetadataBuilder {
 
     private final Map<RelationID, DatabaseRelationDefinition> tables;
     // tables.values() can contain duplicates due to schemaless table names
     private final List<DatabaseRelationDefinition> listOfTables;
 
     private final DBParameters dbParameters;
-    private boolean isStillMutable;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicDBMetadataBuilder.class);
 
     public BasicDBMetadataBuilder(DBParameters dbParameters) {
         this.tables = new HashMap<>();
         this.listOfTables = new ArrayList<>();
-        this.isStillMutable = true;
         this.dbParameters = dbParameters;
     }
 
@@ -35,9 +33,6 @@ public class BasicDBMetadataBuilder implements DBMetadataBuilder {
      * @return
      */
     public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
-        if (!isStillMutable) {
-            throw new IllegalStateException("Too late, cannot create a DB relation");
-        }
         DatabaseRelationDefinition table = new DatabaseRelationDefinition(builder);
         tables.put(table.getID(), table);
         if (table.getID().hasSchema()) {
@@ -64,10 +59,6 @@ public class BasicDBMetadataBuilder implements DBMetadataBuilder {
         return def;
     }
 
-    public void freeze() {
-        isStillMutable = false;
-    }
-
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
@@ -87,13 +78,11 @@ public class BasicDBMetadataBuilder implements DBMetadataBuilder {
         return bf.toString();
     }
 
-    @Override
     public DBParameters getDBParameters() {
         return dbParameters;
     }
 
 
-    @Override
     public ImmutableDBMetadata build() {
         return new ImmutableDBMetadataImpl(dbParameters, ImmutableList.copyOf(listOfTables));
     }

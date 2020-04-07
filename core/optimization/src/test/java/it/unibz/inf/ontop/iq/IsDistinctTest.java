@@ -22,12 +22,11 @@ public class IsDistinctTest {
     public static final RelationDefinition NULLABLE_UC_TABLE1_AR1;
     public static final RelationDefinition NULLABLE_UC_TABLE2_AR2;
 
-    private static RelationDefinition createUCRelation(DBMetadataBuilder dbMetadata,
-                                                       int tableNumber, int arity, boolean canNull) {
+    private static RelationDefinition createUCRelation(int tableNumber, int arity, boolean canNull) {
         if (arity < 1)
             throw new IllegalArgumentException();
 
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
+        QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
         RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
                 "UC_TABLE" + tableNumber + "AR" + arity));
@@ -38,7 +37,7 @@ public class IsDistinctTest {
             builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
         }
 
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(builder);
+        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
 
         tableDef.addUniqueConstraint(Objects.requireNonNull(UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                 .addDeterminant(tableDef.getAttribute(1))
@@ -47,9 +46,8 @@ public class IsDistinctTest {
     }
 
     static {
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        NULLABLE_UC_TABLE1_AR1 = createUCRelation(dbMetadata,  1, 1, true);
-        NULLABLE_UC_TABLE2_AR2 = createUCRelation(dbMetadata,  2, 2, true);
+        NULLABLE_UC_TABLE1_AR1 = createUCRelation( 1, 1, true);
+        NULLABLE_UC_TABLE2_AR2 = createUCRelation( 2, 2, true);
     }
 
     @Test

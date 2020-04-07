@@ -420,8 +420,8 @@ public class SelectQueryParserTest {
 
     private BasicDBMetadataBuilder createMetadata() {
         BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
-        QuotedIDFactory idfac = metadata.getDBParameters().getQuotedIDFactory();
-        DBTermType integerDBType = metadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+        QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE_P = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))
             .addAttribute(idfac.createAttributeID("A"), integerDBType, false)

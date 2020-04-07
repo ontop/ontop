@@ -14,9 +14,9 @@ public class WrongForeignKeyTest {
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
     static{
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        ID_FACTORY = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
+        ID_FACTORY = dbMetadata.getQuotedIDFactory();
+        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
         DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
 
         table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(ID_FACTORY.createRelationID("schema1","table1"))

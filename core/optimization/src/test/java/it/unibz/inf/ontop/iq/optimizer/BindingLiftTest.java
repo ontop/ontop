@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.DBMetadataBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -2369,10 +2368,8 @@ public class BindingLiftTest {
 
     @Test
     public void testProvenanceVariableAndProjection1() {
-        DBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-
-        RelationPredicate table1Ar2 = createStringRelationPredicate(dbMetadata, 1, 2, true);
-        RelationPredicate table2Ar2 = createStringRelationPredicate(dbMetadata, 2, 2, true);
+        RelationPredicate table1Ar2 = createStringRelationPredicate(1, 2, true);
+        RelationPredicate table2Ar2 = createStringRelationPredicate(2, 2, true);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(table1Ar2.getRelationDefinition(),
                 ImmutableMap.of(0, A));

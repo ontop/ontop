@@ -292,7 +292,7 @@ public class OntopMappingConfigurationImpl extends OntopOBDAConfigurationImpl im
             super.declareOBDASpecificationAssigned();
 
             if (isDBMetadataDefined) {
-                throw new InvalidOntopConfigurationException("DBMetadataBuilder is already defined, " +
+                throw new InvalidOntopConfigurationException("DummyDBMetadataBuilder is already defined, " +
                         "cannot assign the OBDA specification");
             }
             if (isMappingDefined()) {

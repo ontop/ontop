@@ -23,23 +23,17 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 	// into OWL and repeat everything taking form OWL
 
 
-	static final String owlfile = "/db2/schema/multischemadb2.owl";
-	static final String obdafile = "/db2/schema/multischemadb2.obda";
-	static final String propertiesfile = "/db2/db2-stock.properties";
+	private static final String owlfile = "/db2/schema/multischemadb2.owl";
+	private static final String obdafile = "/db2/schema/multischemadb2.obda";
+	private static final String propertiesfile = "/db2/db2-stock.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;
 
 	@BeforeClass
 	public static void before() throws OWLOntologyCreationException {
-		try {
-			REASONER = createReasoner(owlfile, obdafile, propertiesfile);
-			CONNECTION = REASONER.getConnection();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+		REASONER = createReasoner(owlfile, obdafile, propertiesfile);
+		CONNECTION = REASONER.getConnection();
 	}
 
 	@Override
@@ -86,6 +80,4 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
-		
 }
