@@ -21,7 +21,9 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
     public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
         this.dbParameters = dbParameters;
         this.relations = relations;
-        this.map = relations.stream().collect(ImmutableCollectors.toMap(RelationDefinition::getID, Function.identity()));
+        this.map = relations.stream()
+                .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().entrySet().stream()
+        .collect(ImmutableCollectors.toMap(e -> e.getKey(), e -> e.getValue().iterator().next()));
     }
 
     @Override
