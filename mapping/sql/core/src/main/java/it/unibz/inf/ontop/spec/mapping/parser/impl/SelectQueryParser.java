@@ -24,6 +24,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -267,7 +268,7 @@ public class SelectQueryParser {
             RAExpressionAttributes attrs;
             if ((tableName.getAlias() == null) &&
                     relation.getID().hasSchema() &&
-                    metadata.getRelation(relation.getID().getSchemalessID()).get().equals(relation))
+                    metadata.getRelation(relation.getID().getSchemalessID()).equals(Optional.of(relation)))
                 attrs = RAExpressionAttributes.create(attributes.build(), alias, relation.getID().getSchemalessID());
             else
                 attrs = RAExpressionAttributes.create(attributes.build(), alias);

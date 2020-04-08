@@ -19,6 +19,7 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
@@ -240,7 +241,7 @@ public class SelectQueryAttributeExtractor2 {
             // TODO: to be improved
             if ((tableName.getAlias() == null) &&
                     relation.getID().hasSchema() &&
-                    metadata.getRelation(relation.getID().getSchemalessID()).get().equals(relation))
+                    metadata.getRelation(relation.getID().getSchemalessID()).equals(Optional.of(relation)))
                 result = RAExpressionAttributes.create(attributes, alias, relation.getID().getSchemalessID());
             else
                 result = RAExpressionAttributes.create(attributes, alias);
