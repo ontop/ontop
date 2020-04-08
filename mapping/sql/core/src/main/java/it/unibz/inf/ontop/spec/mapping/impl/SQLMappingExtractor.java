@@ -169,7 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
-            BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(metadataLoader.getDBParameters());
+            BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder();
 
             // This is the NEW way of obtaining part of the metadata
             // (the schema.table names) by parsing the mappings
