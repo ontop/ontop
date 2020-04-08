@@ -69,18 +69,11 @@ public class RDBMetadataExtractionTools {
 	 * @return
 	 */
 	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
-		return createImmutableMetadata(metadataLoader, metadataLoader.getRelationIDs());
-	}
-
-	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader, ImmutableList<RelationID> seedRelationIds) throws MetadataExtractionException {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
-		for (RelationID seedId : seedRelationIds) {
-			for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
-				DatabaseRelationDefinition table = new DatabaseRelationDefinition(r);
-				extractedRelations.add(table);
-			}
-		}
+		for (RelationID id : metadataLoader.getRelationIDs())
+			for (RelationDefinition.AttributeListBuilder ab : metadataLoader.getRelationAttributes(id))
+				extractedRelations.add(new DatabaseRelationDefinition(ab));
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 		metadataLoader.insertIntegrityConstraints(metadata);

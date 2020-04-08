@@ -22,6 +22,10 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
         this.dbParameters = dbParameters;
         this.relations = relations;
         // TODO: this needs FIXING
+        System.out.println("MULTIMAP: " + relations.stream()
+                .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .collect(ImmutableCollectors.toMultimap()));
         this.map = relations.stream()
                 .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().entrySet().stream()
         .collect(ImmutableCollectors.toMap(e -> e.getKey(), e -> e.getValue().iterator().next()));
