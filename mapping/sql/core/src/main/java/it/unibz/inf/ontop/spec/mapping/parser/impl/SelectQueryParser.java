@@ -263,6 +263,7 @@ public class SelectQueryParser {
             // create an atom for a particular table
             DataAtom<RelationPredicate> atom = atomFactory.getDataAtom(relation.getAtomPredicate(), terms.build());
 
+            // TODO: merge?!
             RAExpressionAttributes attrs;
             if (tableName.getAlias() == null) {
                 if (relation.getID().hasSchema())

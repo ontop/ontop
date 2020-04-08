@@ -35,12 +35,8 @@ import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import static it.unibz.inf.ontop.spec.dbschema.impl.SQLTableNameExtractor.getRealTables;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -169,33 +165,13 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
-            /*
-            BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder();
-
-            // This is the NEW way of obtaining part of the metadata
-            // (the schema.table names) by parsing the mappings
-            // Parse mappings. Just to get the table names in use
-            Set<RelationID> realTables = getRealTables(dbParameters.getQuotedIDFactory(), ppMapping.getTripleMaps());
-            realTables.addAll(implicitConstraints.getRelationIDs());
-            ImmutableList<RelationID> seedRelationIds = realTables.stream()
-                    .map(metadataLoader::getRelationCanonicalID)
-                    .collect(ImmutableCollectors.toList());
-
-            List<DatabaseRelationDefinition> extractedRelations2 = new ArrayList<>();
-            for (RelationID seedId : seedRelationIds) {
-                for (RelationDefinition.AttributeListBuilder r : metadataLoader.getRelationAttributes(seedId)) {
-                    DatabaseRelationDefinition relation = metadata.createDatabaseRelation(r);
-                    extractedRelations2.add(relation);
-                }
-            }
-            */
-
             DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(metadataLoader);
 
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            for (RelationDefinition relation : ImmutableList.copyOf(metadataLookup.getAllRelations()))
+            // TODO: freeze before these two - make sure new relations are not inserted
+            for (RelationDefinition relation : metadataLookup.getAllRelations())
                 metadataLoader.insertIntegrityConstraints(relation, metadataLookup);
             implicitConstraints.insertIntegrityConstraints(metadataLookup);
 

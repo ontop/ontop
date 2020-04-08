@@ -18,27 +18,19 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
     @Override
     public Optional<RelationDefinition> getRelation(RelationID id) {
-        //System.out.println("GET: " + id);
         RelationID canonicalId = provider.getRelationCanonicalID(id);
         RelationDefinition def = map.get(canonicalId);
-        boolean quiet = id.toString().endsWith("_ASSERTION");
 
         if (def == null) {
             try {
-                if (!quiet)
-                    System.out.println("RETRIEVE: " + canonicalId);
                 ImmutableList<RelationDefinition.AttributeListBuilder> builders = provider.getRelationAttributes(canonicalId);
                 for (RelationDefinition.AttributeListBuilder builder : builders) {
                     RelationDefinition table = new DatabaseRelationDefinition(builder);
                     if (map.containsKey(table.getID())) {
-                        if (!quiet)
-                            System.out.println("OVERWRITTEN " + table.getID());
                         table = map.get(table.getID());
                     }
                     else
                         list.add(table);
-                    if (!quiet)
-                        System.out.println("ADD " + table.getID());
                     map.put(table.getID(), table);
                     if (def == null) // CATCH THE FIRST
                         def = table;
@@ -46,14 +38,11 @@ public class DynamicMetadataLookup implements MetadataLookup {
                         RelationID noSchemaID = table.getID().getSchemalessID();
                         if (!map.containsKey(noSchemaID)) {
                             map.put(noSchemaID, table);
-                            if (!quiet)
-                                System.out.println("ADD " + table.getID() + " AT " + noSchemaID);
                         }
                     }
                 }
             }
             catch (MetadataExtractionException e) {
-                System.out.println("METADATAEXTRACTION: " + e + " ON " + id);
                 return Optional.empty();
             }
         }
@@ -61,5 +50,5 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return Optional.ofNullable(def);
     }
 
-    public List<RelationDefinition> getAllRelations() { return list; }
+    public List<RelationDefinition> getAllRelations() { return  ImmutableList.copyOf(list); }
 }

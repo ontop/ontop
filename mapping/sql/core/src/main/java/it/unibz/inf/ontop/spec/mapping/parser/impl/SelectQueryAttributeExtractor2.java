@@ -237,6 +237,7 @@ public class SelectQueryAttributeExtractor2 {
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
+            // TODO: merge?!
             if (tableName.getAlias() == null) {
                 if (relation.getID().hasSchema())
                     result = RAExpressionAttributes.create(attributes, relation.getID(), relation.getID().getSchemalessID());
