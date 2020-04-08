@@ -45,7 +45,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private final TargetQueryParser targetParser;
 
-	private BasicDBMetadataBuilder md;
+	private MetadataLookup md;
 
 	public SQLPPMapping2DatalogConverterTest() {
 		targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(ImmutableMap.of(
@@ -54,13 +54,13 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
     }
 
 	public void setUp() {
-		md = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
+		BasicDBMetadataBuilder md0 = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
 		QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 		DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
 		// Database schema
-		DatabaseRelationDefinition table1 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Student"))
+		DatabaseRelationDefinition table1 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Student"))
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("first_name"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("last_name"), stringDBType, false)
@@ -68,18 +68,20 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 			.addAttribute(idfac.createAttributeID("nationality"), stringDBType, false));
 		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
 
-		DatabaseRelationDefinition table2 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Course"))
+		DatabaseRelationDefinition table2 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Course"))
 			.addAttribute(idfac.createAttributeID("cid"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("title"), stringDBType, false)
 			.addAttribute(idfac.createAttributeID("credits"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("description"), stringDBType, false));
 		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
 
-		DatabaseRelationDefinition table3 = md.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Enrollment"))
+		DatabaseRelationDefinition table3 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Enrollment"))
 			.addAttribute(idfac.createAttributeID("student_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("course_id"), stringDBType, false));
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
 				table3.getAttribute(idfac.createAttributeID("course_id"))));
+
+		md = md0.getMetadataLookup();
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {

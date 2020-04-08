@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +51,29 @@ public class BasicDBMetadataBuilder {
         return table;
     }
 
+    public MetadataLookup getMetadataLookup() {
+        return new MetadataLookup() {
+            @Override
+            public DatabaseRelationDefinition get(RelationID id) throws RelationNotFoundException {
+                DatabaseRelationDefinition def = tables.get(id);
+                if (def == null && id.hasSchema()) {
+                    def = tables.get(id.getSchemalessID());
+                }
+                if (def != null)
+                    return def;
+                throw new RelationNotFoundException(id);
+            }
 
-    public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
-        DatabaseRelationDefinition def = tables.get(id);
-        if (def == null && id.hasSchema()) {
-            def = tables.get(id.getSchemalessID());
-        }
-        return def;
+            @Override
+            public QuotedIDFactory getQuotedIDFactory() {
+                return dbParameters.getQuotedIDFactory();
+            }
+
+            @Override
+            public DBTypeFactory getDBTypeFactory() {
+                return dbParameters.getDBTypeFactory();
+            }
+        };
     }
 
     @Override

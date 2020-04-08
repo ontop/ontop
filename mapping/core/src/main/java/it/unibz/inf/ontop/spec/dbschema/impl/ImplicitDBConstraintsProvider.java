@@ -73,7 +73,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(BasicDBMetadataBuilder md) {
+    public void insertIntegrityConstraints(MetadataLookup md) {
         int counter = 0; // id of the generated constraint
 
         for (String[] constraint : uniqueConstraints) {
@@ -116,12 +116,14 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         Attribute[] attributes;
     }
 
-    private static ConstraintDescriptor getConstraintDescriptor(BasicDBMetadataBuilder md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
+    private static ConstraintDescriptor getConstraintDescriptor(MetadataLookup md, String tableName, String[] attributeNames, QuotedIDFactory idFactory) {
         ConstraintDescriptor result = new ConstraintDescriptor();
 
         RelationID tableId = getRelationIDFromString(tableName, idFactory);
-        result.table = md.getDatabaseRelation(tableId);
-        if (result.table == null) {
+        try {
+            result.table = md.get(tableId);
+        }
+        catch (RelationNotFoundException e) {
             log.warn("Error in user-supplied constraint: table " + tableId + " not found.");
             return null;
         }

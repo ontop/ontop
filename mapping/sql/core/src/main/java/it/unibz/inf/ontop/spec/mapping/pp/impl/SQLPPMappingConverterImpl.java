@@ -26,6 +26,7 @@ import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
@@ -41,7 +42,7 @@ import java.util.*;
 /**
  * SQLPPMapping -> MappingAssertion
  */
-public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter {
+public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMappingConverterImpl.class);
 
@@ -64,7 +65,7 @@ public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mappin
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, BasicDBMetadataBuilder dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, MetadataLookup dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         int parserViewCounter = 0;
@@ -92,7 +93,7 @@ public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mappin
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, termFactory)
                             .extract(sourceQuery);
-                    ParserViewDefinition view = createParserView(dbMetadata.getDBParameters().getQuotedIDFactory(), dbMetadata.getDBParameters().getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
+                    ParserViewDefinition view = createParserView(dbMetadata.getQuotedIDFactory(), dbMetadata.getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
@@ -122,11 +123,11 @@ public class SQLPPMappingConverterImpl implements it.unibz.inf.ontop.spec.mappin
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
                             ImmutableTerm t = atom.getSubstitution().get(v);
                             if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory()));
+                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getQuotedIDFactory()));
                                 varBuilder2.add(v);
                             }
                             else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getDBParameters().getQuotedIDFactory());
+                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getQuotedIDFactory());
                                 if (tt instanceof Variable) { // avoids Var -> Var
                                     Variable v2 = (Variable) tt;
                                     varBuilder2.add(v2);

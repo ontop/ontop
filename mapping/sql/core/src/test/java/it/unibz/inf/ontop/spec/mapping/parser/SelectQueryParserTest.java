@@ -418,7 +418,7 @@ public class SelectQueryParserTest {
     }
 
 
-    private BasicDBMetadataBuilder createMetadata() {
+    private MetadataLookup createMetadata() {
         BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
         QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
         DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
@@ -437,6 +437,6 @@ public class SelectQueryParserTest {
             .addAttribute(idfac.createAttributeID("C"), integerDBType, false)
             .addAttribute(idfac.createAttributeID("D"), integerDBType, false));
 
-        return metadata;
+        return metadata.getMetadataLookup();
     }
 }

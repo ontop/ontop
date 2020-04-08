@@ -180,7 +180,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
 
-		sqp = new SelectQueryParser(metadata, CORE_SINGLETONS);
+		sqp = new SelectQueryParser(metadata.getMetadataLookup(), CORE_SINGLETONS);
 	}
 
 	@Test

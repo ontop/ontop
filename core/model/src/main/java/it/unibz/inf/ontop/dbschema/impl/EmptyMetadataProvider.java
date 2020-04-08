@@ -16,6 +16,6 @@ public class EmptyMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(BasicDBMetadataBuilder md) {
+    public void insertIntegrityConstraints(MetadataLookup md) {
     }
 }

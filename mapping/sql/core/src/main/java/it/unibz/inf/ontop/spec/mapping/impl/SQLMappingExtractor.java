@@ -189,12 +189,12 @@ public class SQLMappingExtractor implements MappingExtractor {
             }
 
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadata);
-            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadata, executorRegistry);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadata.getMetadataLookup(), executorRegistry);
 
             ImmutableDBMetadata md = metadata.build();
             for (DatabaseRelationDefinition relation : extractedRelations2)
                 metadataLoader.insertIntegrityConstraints(relation, md);
-            implicitConstraints.insertIntegrityConstraints(metadata);
+            implicitConstraints.insertIntegrityConstraints(metadata.getMetadataLookup());
 
             return new MappingAndDBParametersImpl(provMapping, dbParameters);
         }

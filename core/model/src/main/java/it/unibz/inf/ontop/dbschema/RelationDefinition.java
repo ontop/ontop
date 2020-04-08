@@ -112,6 +112,10 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
+	// TODO: implement equals!!
+
+
+
 	private static class AttributeInfo {
 		private final QuotedID id;
 		private final int index;

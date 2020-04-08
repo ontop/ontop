@@ -173,7 +173,7 @@ public class MetaMappingExpander {
 
 				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
 
-				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
+				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata.getMetadataLookup(), m.source.getSQL());
 
 				List<SelectExpressionItem> templateColumns;
 				try {
@@ -261,7 +261,7 @@ public class MetaMappingExpander {
 	}
 
 
-	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(BasicDBMetadataBuilder metadata, String sql)
+	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
 		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
