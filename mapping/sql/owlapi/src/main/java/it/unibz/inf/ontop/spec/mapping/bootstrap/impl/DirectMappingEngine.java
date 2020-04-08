@@ -160,7 +160,7 @@ public class DirectMappingEngine {
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
 			RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
-			ImmutableList<RelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
+			ImmutableList<RelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;

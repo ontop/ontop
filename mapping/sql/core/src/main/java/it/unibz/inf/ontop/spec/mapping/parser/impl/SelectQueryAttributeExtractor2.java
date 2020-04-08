@@ -31,9 +31,9 @@ public class SelectQueryAttributeExtractor2 {
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(MetadataLookup metadata, TermFactory termFactory) {
+    public SelectQueryAttributeExtractor2(MetadataLookup metadata, QuotedIDFactory idFactory, TermFactory termFactory) {
         this.metadata = metadata;
-        this.idfac = metadata.getQuotedIDFactory();
+        this.idfac = idFactory;
         this.termFactory = termFactory;
     }
 
@@ -224,13 +224,8 @@ public class SelectQueryAttributeExtractor2 {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // construct the predicate using the table name
-            RelationDefinition relation;
-            try {
-                relation = metadata.get(id);
-            }
-            catch (RelationNotFoundException e) {
-                throw new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName);
-            }
+            RelationDefinition relation = metadata.getRelation(id)
+                    .orElseThrow(() -> new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName));
             relationIndex++;
 
             RelationID alias = (tableName.getAlias() != null)
@@ -241,19 +236,14 @@ public class SelectQueryAttributeExtractor2 {
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
-            try {
-                // DEFAULT SCHEMA
-                // TODO: to be improved
-                if ((tableName.getAlias() == null) &&
-                        relation.getID().hasSchema() &&
-                        metadata.get(relation.getID().getSchemalessID()).equals(relation))
-                    result = RAExpressionAttributes.create(attributes, alias, relation.getID().getSchemalessID());
-                else
-                    result = RAExpressionAttributes.create(attributes, alias);
-            }
-            catch (RelationNotFoundException e) {
-                // TODO: SHOULD NEVER HAPPEN?!
-            }
+            // DEFAULT SCHEMA
+            // TODO: to be improved
+            if ((tableName.getAlias() == null) &&
+                    relation.getID().hasSchema() &&
+                    metadata.getRelation(relation.getID().getSchemalessID()).get().equals(relation))
+                result = RAExpressionAttributes.create(attributes, alias, relation.getID().getSchemalessID());
+            else
+                result = RAExpressionAttributes.create(attributes, alias);
         }
 
 

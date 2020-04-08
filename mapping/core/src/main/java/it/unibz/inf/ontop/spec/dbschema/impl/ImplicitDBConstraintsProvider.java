@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -23,6 +24,8 @@ import java.util.Set;
  *  Moved from ImplicitDBContraintsReader
  *
  */
+
+// TODO: START USING EXCEPTIONS!
 
 public class ImplicitDBConstraintsProvider implements MetadataProvider {
 
@@ -120,14 +123,13 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         ConstraintDescriptor result = new ConstraintDescriptor();
 
         RelationID tableId = getRelationIDFromString(tableName, idFactory);
-        try {
-            result.table = (DatabaseRelationDefinition)md.get(tableId);
-        }
-        catch (RelationNotFoundException e) {
+        Optional<RelationDefinition> table = md.getRelation(tableId);
+        if (!table.isPresent()) {
             log.warn("Error in user-supplied constraint: table " + tableId + " not found.");
             return null;
         }
 
+        result.table = (DatabaseRelationDefinition)table.get();
         result.attributes = new Attribute[attributeNames.length];
         for (int i = 0; i < attributeNames.length; i++) {
             QuotedID attrId = idFactory.createAttributeID(attributeNames[i]);

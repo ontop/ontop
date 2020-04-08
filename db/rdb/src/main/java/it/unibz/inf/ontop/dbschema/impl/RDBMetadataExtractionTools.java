@@ -25,10 +25,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.sql.*;
-import java.util.*;
 
 /**
  * Retrieves the database metadata (table schema and database constraints)
@@ -86,7 +84,7 @@ public class RDBMetadataExtractionTools {
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 
-		for (RelationDefinition relation : metadata.getDatabaseRelations())
+		for (RelationDefinition relation : metadata.getAllRelations())
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
 
 		return metadata;

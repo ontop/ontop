@@ -41,10 +41,7 @@ public interface DummyDBMetadataBuilder {
                                                       String attribute5, DBTermType type5, boolean isNullable5,
                                                       String attribute6, DBTermType type6, boolean isNullable6);
 
-
     QuotedIDFactory getQuotedIDFactory();
 
     DBTypeFactory getDBTypeFactory();
-
-    DBParameters getDBParameters();
 }

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class DefaultDBMetadataProvider implements RDBMetadataProvider {
 
@@ -147,11 +148,11 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, ImmutableDBMetadata dbMetadata) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         DatabaseRelationDefinition r = (DatabaseRelationDefinition)relation;
         insertPrimaryKey(r);
         insertUniqueAttributes(r);
-        insertForeignKeys(r, dbMetadata);
+        insertForeignKeys(r, metadataLookup);
     }
 
     @Override
@@ -248,7 +249,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
         }
     }
 
-    private void insertForeignKeys(DatabaseRelationDefinition relation, ImmutableDBMetadata dbMetadata) throws MetadataExtractionException {
+    private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException {
 
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
@@ -256,7 +257,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             String currentName = null;
             while (rs.next()) {
                 RelationID refId = getPKRelationID(rs);
-                DatabaseRelationDefinition ref = (DatabaseRelationDefinition)dbMetadata.getRelation(refId);
+                Optional<RelationDefinition> ref = dbMetadata.getRelation(refId);
                 // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
                 int seq = rs.getShort("KEY_SEQ");
                 if (seq == 1) {
@@ -265,8 +266,8 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
 
                     currentName = rs.getString("FK_NAME"); // String => foreign key name (may be null)
 
-                    if (ref != null) {
-                        builder = new ForeignKeyConstraint.Builder(relation, ref);
+                    if (ref.isPresent()) {
+                        builder = new ForeignKeyConstraint.Builder(relation, (DatabaseRelationDefinition) ref.get());
                     }
                     else {
                         builder = null; // do not add this foreign key
@@ -277,7 +278,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 if (builder != null) {
                     QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
                     QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
-                    builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
+                    builder.add(relation.getAttribute(attrId), ref.get().getAttribute(refAttrId));
                 }
             }
             if (builder != null)

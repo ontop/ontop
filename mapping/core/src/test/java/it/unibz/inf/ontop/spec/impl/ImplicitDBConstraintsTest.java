@@ -44,8 +44,7 @@ public class ImplicitDBConstraintsTest {
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
-				ImmutableList.of(TABLENAME, TABLE2));
+		md = new ImmutableMetadataLookup(ImmutableList.of(TABLENAME, TABLE2));
 	}
 	
 	@Test

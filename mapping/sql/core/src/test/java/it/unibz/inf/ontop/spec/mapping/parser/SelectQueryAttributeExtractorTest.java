@@ -15,10 +15,10 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        ImmutableMetadataLookup metadataLookup = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(), ImmutableList.of());
-        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        ImmutableMetadataLookup metadataLookup = new ImmutableMetadataLookup(ImmutableList.of());
+        QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
-        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
+        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), TERM_FACTORY);
 
         ImmutableList<QuotedID> res = aex.extract("SELECT ALMAES001.IDART,\n"+
 //                "     ALMAES001.CODART,\n"+

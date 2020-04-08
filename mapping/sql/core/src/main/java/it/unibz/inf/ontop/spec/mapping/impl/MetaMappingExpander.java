@@ -115,7 +115,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, Connection connection, BasicDBMetadataBuilder metadata)
+	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata, QuotedIDFactory idFactory)
 			throws MetaMappingExpansionException {
 
 		ImmutableList.Builder<SQLPPTriplesMap> result = ImmutableList.builder();
@@ -171,9 +171,9 @@ public class MetaMappingExpander {
 
 				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateTerm);
 
-				List<QuotedID> templateColumnIds = getTemplateColumnNames(metadata.getDBParameters().getQuotedIDFactory(), templateVariables);
+				List<QuotedID> templateColumnIds = getTemplateColumnNames(idFactory, templateVariables);
 
-				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata.getMetadataLookup(), m.source.getSQL());
+				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, idFactory, m.source.getSQL());
 
 				List<SelectExpressionItem> templateColumns;
 				try {
@@ -261,10 +261,10 @@ public class MetaMappingExpander {
 	}
 
 
-	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
+	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, QuotedIDFactory idFactory, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
-		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, idFactory, termFactory);
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
 		ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = sqae.getQueryBodyAttributes(plainSelect);
 

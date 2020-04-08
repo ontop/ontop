@@ -38,9 +38,9 @@ public class SelectQueryParser {
 
     private int relationIndex = 0;
 
-    public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
+    public SelectQueryParser(MetadataLookup metadata, QuotedIDFactory idFactory, CoreSingletons coreSingletons) {
         this.metadata = metadata;
-        this.idfac = metadata.getQuotedIDFactory();
+        this.idfac = idFactory;
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
@@ -242,13 +242,8 @@ public class SelectQueryParser {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // construct the predicate using the table name
-            RelationDefinition relation;
-            try {
-                relation = metadata.get(id);
-            }
-            catch (RelationNotFoundException e) {
-                throw new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName);
-            }
+            RelationDefinition relation = metadata.getRelation(id)
+                    .orElseThrow(() -> new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName));
             relationIndex++;
 
             RelationID alias = (tableName.getAlias() != null)
@@ -269,20 +264,15 @@ public class SelectQueryParser {
 
             // DEFAULT SCHEMA
             // TODO: to be improved
-            try {
-                RAExpressionAttributes attrs;
-                if ((tableName.getAlias() == null) &&
-                        relation.getID().hasSchema() &&
-                        metadata.get(relation.getID().getSchemalessID()).equals(relation))
-                    attrs = RAExpressionAttributes.create(attributes.build(), alias, relation.getID().getSchemalessID());
-                else
-                    attrs = RAExpressionAttributes.create(attributes.build(), alias);
+            RAExpressionAttributes attrs;
+            if ((tableName.getAlias() == null) &&
+                    relation.getID().hasSchema() &&
+                    metadata.getRelation(relation.getID().getSchemalessID()).get().equals(relation))
+                attrs = RAExpressionAttributes.create(attributes.build(), alias, relation.getID().getSchemalessID());
+            else
+                attrs = RAExpressionAttributes.create(attributes.build(), alias);
 
-                result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
-            }
-            catch (RelationNotFoundException e) {
-                // TODO: should never happen
-            }
+            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
         }
 
 

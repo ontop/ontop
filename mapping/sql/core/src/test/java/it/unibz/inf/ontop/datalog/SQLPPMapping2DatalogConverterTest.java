@@ -80,8 +80,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2)));
 
-		md = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
-				ImmutableList.of(table1, table2, table3));
+		md = new ImmutableMetadataLookup(ImmutableList.of(table1, table2, table3));
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {
@@ -92,7 +91,10 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetAtoms);
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
 				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
-						new SimplePrefixManager(ImmutableMap.of())), md, null)
+						new SimplePrefixManager(ImmutableMap.of())),
+				md,
+				DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(),
+				null)
 				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
 		assertNotNull(dp);

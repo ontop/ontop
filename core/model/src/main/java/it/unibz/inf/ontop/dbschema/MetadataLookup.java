@@ -1,11 +1,15 @@
 package it.unibz.inf.ontop.dbschema;
 
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import java.util.Optional;
 
 public interface MetadataLookup {
-    RelationDefinition get(RelationID id) throws RelationNotFoundException;
 
-    QuotedIDFactory getQuotedIDFactory();
+    /**
+     * Retrieves the data definition object based on its name.
+     *
+     * @param id
+     */
 
-    DBTypeFactory getDBTypeFactory();
+    Optional<RelationDefinition> getRelation(RelationID id);
+
 }

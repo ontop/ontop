@@ -48,9 +48,9 @@ public class SelectQueryAttributeExtractor {
 
     private final SelectQueryAttributeExtractor2 sqae;
 
-    public SelectQueryAttributeExtractor(MetadataLookup metadata, TermFactory termFactory) {
-        idfac = metadata.getQuotedIDFactory();
-        sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
+    public SelectQueryAttributeExtractor(MetadataLookup metadata, QuotedIDFactory idFactory, TermFactory termFactory) {
+        idfac = idFactory;
+        sqae = new SelectQueryAttributeExtractor2(metadata, idfac, termFactory);
     }
 
     public ImmutableList<QuotedID> extract(String sql) throws InvalidSelectQueryException {

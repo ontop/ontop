@@ -53,27 +53,12 @@ public class BasicDBMetadataBuilder {
     }
 
     public MetadataLookup getMetadataLookup() {
-        return new MetadataLookup() {
-            @Override
-            public DatabaseRelationDefinition get(RelationID id) throws RelationNotFoundException {
-                DatabaseRelationDefinition def = tables.get(id);
-                if (def == null && id.hasSchema()) {
-                    def = tables.get(id.getSchemalessID());
-                }
-                if (def != null)
-                    return def;
-                throw new RelationNotFoundException(id);
-            }
+        return id -> {
+            DatabaseRelationDefinition def = tables.get(id);
+            if (def == null && id.hasSchema())
+                def = tables.get(id.getSchemalessID());
 
-            @Override
-            public QuotedIDFactory getQuotedIDFactory() {
-                return dbParameters.getQuotedIDFactory();
-            }
-
-            @Override
-            public DBTypeFactory getDBTypeFactory() {
-                return dbParameters.getDBTypeFactory();
-            }
+            return Optional.ofNullable(def);
         };
     }
 

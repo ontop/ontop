@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
@@ -16,7 +17,6 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
     private final ImmutableList<RelationDefinition> relations;
 
     private final DBParameters dbParameters;
-
 
     public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<RelationDefinition> relations) {
         this.dbParameters = dbParameters;
@@ -28,13 +28,13 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
     }
 
     @Override
-    public RelationDefinition getRelation(RelationID id) {
-        return map.get(id);
+    public Optional<RelationDefinition> getRelation(RelationID id) {
+        return Optional.ofNullable(map.get(id));
     }
 
     @JsonProperty("relations")
     @Override
-    public ImmutableList<RelationDefinition> getDatabaseRelations() {
+    public ImmutableList<RelationDefinition> getAllRelations() {
         return relations;
     }
 

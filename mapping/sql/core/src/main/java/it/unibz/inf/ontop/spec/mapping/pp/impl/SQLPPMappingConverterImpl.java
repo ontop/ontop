@@ -52,6 +52,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
     private final CoreSingletons coreSingletons;
+    private final DBTypeFactory dbTypeFactory;
 
     @Inject
     private SQLPPMappingConverterImpl(NoNullValueEnforcer noNullValueEnforcer,
@@ -62,10 +63,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         this.atomFactory = coreSingletons.getAtomFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.coreSingletons = coreSingletons;
+        this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, MetadataLookup dbMetadata,
+    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, MetadataLookup dbMetadata, QuotedIDFactory idFactory,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         int parserViewCounter = 0;
@@ -83,7 +85,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
 
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, coreSingletons);
+                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, idFactory, coreSingletons);
                     RAExpression re = sqp.parse(sourceQuery);
                     lookupTable = re.getAttributes();
                     dataAtoms = re.getDataAtoms();
@@ -91,9 +93,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                         .reduce((a, b) -> termFactory.getConjunction(b, a));
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, termFactory)
+                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, idFactory, termFactory)
                             .extract(sourceQuery);
-                    ParserViewDefinition view = createParserView(dbMetadata.getQuotedIDFactory(), dbMetadata.getDBTypeFactory(), sourceQuery, attributes, parserViewCounter++);
+                    ParserViewDefinition view = createParserView(idFactory, dbTypeFactory, sourceQuery, attributes, parserViewCounter++);
 
                     // this is required to preserve the order of the variables
                     ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
@@ -123,11 +125,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                         for (Variable v : atom.getProjectionAtom().getArguments()) {
                             ImmutableTerm t = atom.getSubstitution().get(v);
                             if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, dbMetadata.getQuotedIDFactory()));
+                                builder.put(v, renameVariables(t, lookupTable, idFactory));
                                 varBuilder2.add(v);
                             }
                             else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, dbMetadata.getQuotedIDFactory());
+                                ImmutableTerm tt = renameVariables(v, lookupTable, idFactory);
                                 if (tt instanceof Variable) { // avoids Var -> Var
                                     Variable v2 = (Variable) tt;
                                     varBuilder2.add(v2);

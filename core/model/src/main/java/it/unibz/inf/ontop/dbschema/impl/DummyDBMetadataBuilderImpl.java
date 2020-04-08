@@ -92,8 +92,4 @@ public class DummyDBMetadataBuilderImpl implements DummyDBMetadataBuilder {
     public DBTypeFactory getDBTypeFactory() {
         return dbTypeFactory;
     }
-
-    @Override
-    public DBParameters getDBParameters() { return new BasicDBParametersImpl(null, null, null, null, idFactory, dbTypeFactory); }
-
 }

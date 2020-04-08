@@ -183,9 +183,9 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		MetadataLookup metadataLookup = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(), relations.build());
+		MetadataLookup metadataLookup = new ImmutableMetadataLookup(relations.build());
 
-		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
+		sqp = new SelectQueryParser(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), CORE_SINGLETONS);
 	}
 
 	@Test

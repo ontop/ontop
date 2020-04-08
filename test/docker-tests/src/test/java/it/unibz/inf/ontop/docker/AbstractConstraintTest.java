@@ -36,15 +36,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private RelationDefinition tBook;
-	private RelationDefinition tBookWriter;
-	private RelationDefinition tEdition;
-	private RelationDefinition tWriter;
+	private Optional<RelationDefinition> tBook, tBookWriter, tEdition, tWriter;
 
 	private static final String TB_BOOK = "\"Book\"";
 	private static final String TB_WRITER = "\"Writer\"";
@@ -54,8 +52,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 	private String propertyFile;
 	private Properties properties;
 
-	
-	private static Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
+	private static final Logger log = LoggerFactory.getLogger(AbstractConstraintTest.class);
 	
 	public AbstractConstraintTest(String method, String propertyFile) {
 		super(method);
@@ -94,31 +91,31 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testPrimaryKey() {
 		log.info("==== PRIMARY KEY ====");
 
-		if (tBook != null) {
-			List<UniqueConstraint> ucs = tBook.getUniqueConstraints();
+		if (tBook.isPresent()) {
+			List<UniqueConstraint> ucs = tBook.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
 
-		if (tBookWriter != null) {
-			List<UniqueConstraint> ucs = tBookWriter.getUniqueConstraints();
+		if (tBookWriter.isPresent()) {
+			List<UniqueConstraint> ucs = tBookWriter.get().getUniqueConstraints();
 			assertEquals(0, ucs.size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
 
-		if (tEdition != null) {
-			List<UniqueConstraint> ucs = tEdition.getUniqueConstraints();
+		if (tEdition.isPresent()) {
+			List<UniqueConstraint> ucs = tEdition.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
 
-		if (tWriter != null) {
-			List<UniqueConstraint> ucs = tWriter.getUniqueConstraints();
+		if (tWriter.isPresent()) {
+			List<UniqueConstraint> ucs = tWriter.get().getUniqueConstraints();
 			assertEquals(1, ucs.size());
 			assertEquals(1, ucs.get(0).getAttributes().size());
 		}
@@ -129,29 +126,29 @@ public abstract class AbstractConstraintTest extends TestCase {
 	public void testForeignKey() {
 		log.info("==== FOREIGN KEY ====");
 
-		if (tBook != null) {
-			List<ForeignKeyConstraint> fks =  tBook.getForeignKeys();
+		if (tBook.isPresent()) {
+			List<ForeignKeyConstraint> fks =  tBook.get().getForeignKeys();
 			assertEquals(0, fks.size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOK + " is not found");
 
-		if (tBookWriter != null) {
-			List<ForeignKeyConstraint> fks =  tBookWriter.getForeignKeys();
+		if (tBookWriter.isPresent()) {
+			List<ForeignKeyConstraint> fks =  tBookWriter.get().getForeignKeys();
 			assertEquals(2, fks.size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_BOOKWRITER + " is not found");
 
-		if (tEdition != null) {
-			List<ForeignKeyConstraint> fks =  tEdition.getForeignKeys();
+		if (tEdition.isPresent()) {
+			List<ForeignKeyConstraint> fks =  tEdition.get().getForeignKeys();
 			assertEquals(1, fks.size());
 		}
 		else
 			System.out.println("AbstractConstraintTest: " + TB_EDITION + " is not found");
 
-		if (tWriter != null) {
-			List<ForeignKeyConstraint> fks =  tWriter.getForeignKeys();
+		if (tWriter.isPresent()) {
+			List<ForeignKeyConstraint> fks =  tWriter.get().getForeignKeys();
 			assertEquals(0, fks.size());
 		}
 		else
