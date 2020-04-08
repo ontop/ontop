@@ -47,10 +47,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 	
 	private Optional<RelationDefinition> tBook, tBookWriter, tEdition, tWriter;
 
-	private static final String TB_BOOK = "\"Book\"";
-	private static final String TB_WRITER = "\"Writer\"";
-	private static final String TB_EDITION = "\"Edition\"";
-	private static final String TB_BOOKWRITER = "\"BookWriter\"";
+	private static final String TB_BOOK = "BOOK";
+	private static final String TB_WRITER = "WRITER";
+	private static final String TB_EDITION = "EDITION";
+	private static final String TB_BOOKWRITER = "BOOKWRITER";
 
 	private String propertyFile;
 	private Properties properties;
@@ -79,7 +79,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 			@Override
 			public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
 				return provider.getRelationIDs().stream()
-						.filter(r -> ImmutableSet.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER).contains(r.getTableName()))
+						.filter(r -> ImmutableSet.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER).contains(r.getTableName().toUpperCase()))
 						.collect(ImmutableCollectors.toList());
 			}
 		};
@@ -87,7 +87,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(filteredMetadataLoader);
 
 		ImmutableMap<String, RelationDefinition> map = metadata.getAllRelations().stream()
-				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableName(), Function.identity()));
+				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableName().toUpperCase(), Function.identity()));
 
 		tBook = Optional.ofNullable(map.get(TB_BOOK));
 		tBookWriter = Optional.ofNullable(map.get(TB_BOOKWRITER));
