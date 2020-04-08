@@ -263,11 +263,13 @@ public class SelectQueryParser {
             // create an atom for a particular table
             DataAtom<RelationPredicate> atom = atomFactory.getDataAtom(relation.getAtomPredicate(), terms.build());
 
-            // DEFAULT SCHEMA
-            // TODO: to be improved
             RAExpressionAttributes attrs;
-            if (tableName.getAlias() == null)
-                attrs = RAExpressionAttributes.create(attributes.build(), relation.getID().getSchemalessID());
+            if (tableName.getAlias() == null) {
+                if (relation.getID().hasSchema())
+                    attrs = RAExpressionAttributes.create(attributes.build(), relation.getID(), relation.getID().getSchemalessID());
+                else
+                    attrs = RAExpressionAttributes.create(attributes.build(), relation.getID().getSchemalessID());
+            }
             else
                 attrs = RAExpressionAttributes.create(attributes.build(), alias);
 

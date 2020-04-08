@@ -237,10 +237,12 @@ public class SelectQueryAttributeExtractor2 {
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
-            // DEFAULT SCHEMA
-            // TODO: to be improved
-            if (tableName.getAlias() == null)
-                result = RAExpressionAttributes.create(attributes, relation.getID().getSchemalessID());
+            if (tableName.getAlias() == null) {
+                if (relation.getID().hasSchema())
+                    result = RAExpressionAttributes.create(attributes, relation.getID(), relation.getID().getSchemalessID());
+                else
+                    result = RAExpressionAttributes.create(attributes, relation.getID().getSchemalessID());
+            }
             else
                 result = RAExpressionAttributes.create(attributes, alias);
         }
