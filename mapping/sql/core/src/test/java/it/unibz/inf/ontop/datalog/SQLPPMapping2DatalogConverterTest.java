@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
@@ -33,10 +32,8 @@ import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
-import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
-import org.junit.Ignore;
 
 import java.util.Set;
 
@@ -44,17 +41,7 @@ import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
-	private final TargetQueryParser targetParser;
-
-	private MetadataLookup md;
-
-	public SQLPPMapping2DatalogConverterTest() {
-		targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(ImmutableMap.of(
-				":", "http://www.example.org/university#"
-		));
-    }
-
-	public void setUp() {
+	private MetadataLookup getMetadataLookup() {
 		DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
@@ -80,24 +67,25 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2)));
 
-		md = new ImmutableMetadataLookup(ImmutableList.of(table1, table2, table3));
+		return new ImmutableMetadataLookup(ImmutableList.of(table1, table2, table3));
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {
-		ImmutableList<TargetAtom> targetAtoms = targetParser.parse(targetString);
 
-		SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
-				IDGenerator.getNextUniqueID("MAPID-"),
-				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetAtoms);
+		TargetQueryParser targetParser = TARGET_QUERY_PARSER_FACTORY.createParser(
+				ImmutableMap.of(":", "http://www.example.org/university#"));
+
+		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
+				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
+
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
-				new SQLPPMappingImpl(ImmutableList.of(mappingAxiom),
-						new SimplePrefixManager(ImmutableMap.of())),
-				md,
+				new SQLPPMappingImpl(ImmutableList.of(mapping), new SimplePrefixManager(ImmutableMap.of())),
+				getMetadataLookup(),
 				DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(),
 				null)
 				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
-		assertNotNull(dp);
+		assertFalse(dp.isEmpty());
 		System.out.println(dp.toString());
 	}
 
@@ -282,6 +270,4 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
                 "select lower(id) as lid from Student",
                 ":S_{lid} a :Student .");
     }
-
-
 }

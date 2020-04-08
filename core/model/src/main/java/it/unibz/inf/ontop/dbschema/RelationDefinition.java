@@ -31,7 +31,6 @@ import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
@@ -49,18 +48,14 @@ public abstract class RelationDefinition {
 	private final RelationID id;
 	private final ImmutableList<Attribute> attributes;
 	private final ImmutableMap<QuotedID, Attribute> map;
-
-	/**
-	 * Lazy
-	 */
-	@Nullable
-	private RelationPredicate predicate;
+	private final RelationPredicate predicate;
 
 	protected RelationDefinition(AttributeListBuilder builder) {
 		this.id = builder.relationID;
 		this.attributes = builder.build(this);
 		this.map = attributes.stream()
 				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
+		this.predicate = new RelationPredicateImpl();
 	}
 
 	@JsonProperty("name")
@@ -99,12 +94,7 @@ public abstract class RelationDefinition {
 	 * Call it only after having completely assigned the attributes!
 	 */
 	@JsonIgnore
-	public RelationPredicate getAtomPredicate() {
-		if (predicate == null)
-			predicate = new RelationPredicateImpl();
-
-		return predicate;
-	}
+	public RelationPredicate getAtomPredicate() { return predicate;  }
 
 	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
 
@@ -114,15 +104,13 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
-	// TODO: implement equals!!
-
 
 
 	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
 
 		RelationPredicateImpl() {
-			super(getID().getSQLRendering(),
-					getAttributes().stream()
+			super(id.getSQLRendering(),
+					attributes.stream()
 							.map(Attribute::getTermType)
 							.collect(ImmutableCollectors.toList()));
 		}
