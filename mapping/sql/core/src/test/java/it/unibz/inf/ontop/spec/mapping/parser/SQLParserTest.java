@@ -53,7 +53,7 @@ public class SQLParserTest {
 		DBTermType varchar10DBType = dbTypeFactory.getDBTermType("VARCHAR", 10);
 		DBTermType varchar8DBType = dbTypeFactory.getDBTermType("VARCHAR", 8);
 
-		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
+		ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
 
 		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student"))
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)

@@ -41,10 +41,10 @@ import java.util.stream.Stream;
 
 public abstract class AbstractConstraintTest extends TestCase {
 	
-	private DatabaseRelationDefinition tBook;
-	private DatabaseRelationDefinition tBookWriter;
-	private DatabaseRelationDefinition tEdition;
-	private DatabaseRelationDefinition tWriter;
+	private RelationDefinition tBook;
+	private RelationDefinition tBookWriter;
+	private RelationDefinition tEdition;
+	private RelationDefinition tWriter;
 
 	private static final String TB_BOOK = "\"Book\"";
 	private static final String TB_WRITER = "\"Writer\"";
@@ -83,10 +83,10 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader, relations);
 
-		tBook = metadata.getDatabaseRelation(relations.get(0));
-		tBookWriter = metadata.getDatabaseRelation(relations.get(1));
-		tEdition = metadata.getDatabaseRelation(relations.get(2));
-		tWriter = metadata.getDatabaseRelation(relations.get(3));
+		tBook = metadata.getRelation(relations.get(0));
+		tBookWriter = metadata.getRelation(relations.get(1));
+		tEdition = metadata.getRelation(relations.get(2));
+		tWriter = metadata.getRelation(relations.get(3));
 
 		System.out.println(metadata);
 	}

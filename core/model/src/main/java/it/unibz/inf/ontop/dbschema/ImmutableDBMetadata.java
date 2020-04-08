@@ -6,14 +6,14 @@ public interface ImmutableDBMetadata {
     /**
      * Retrieves the tables list form the metadata.
      */
-    ImmutableList<DatabaseRelationDefinition> getDatabaseRelations();
+    ImmutableList<RelationDefinition> getDatabaseRelations();
 
     /**
      * Retrieves the data definition object based on its name.
      *
      * @param id
      */
-    DatabaseRelationDefinition getDatabaseRelation(RelationID id);
+    RelationDefinition getRelation(RelationID id);
 
     DBParameters getDBParameters();
 }

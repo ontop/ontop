@@ -256,7 +256,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             String currentName = null;
             while (rs.next()) {
                 RelationID refId = getPKRelationID(rs);
-                DatabaseRelationDefinition ref = dbMetadata.getDatabaseRelation(refId);
+                DatabaseRelationDefinition ref = (DatabaseRelationDefinition)dbMetadata.getRelation(refId);
                 // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
                 int seq = rs.getShort("KEY_SEQ");
                 if (seq == 1) {

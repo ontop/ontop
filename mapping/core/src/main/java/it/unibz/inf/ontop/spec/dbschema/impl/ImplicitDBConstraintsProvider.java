@@ -121,7 +121,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
 
         RelationID tableId = getRelationIDFromString(tableName, idFactory);
         try {
-            result.table = md.get(tableId);
+            result.table = (DatabaseRelationDefinition)md.get(tableId);
         }
         catch (RelationNotFoundException e) {
             log.warn("Error in user-supplied constraint: table " + tableId + " not found.");

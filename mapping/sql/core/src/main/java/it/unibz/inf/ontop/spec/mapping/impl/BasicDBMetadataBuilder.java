@@ -1,6 +1,7 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;

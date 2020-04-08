@@ -15,11 +15,11 @@ import java.util.stream.Stream;
 
 
 public class ImmutableMetadataLookup implements MetadataLookup {
-    private final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
+    private final ImmutableMap<RelationID, RelationDefinition> map;
     private final QuotedIDFactory idFactory;
     private final DBTypeFactory dbTypeFactory;
 
-    public ImmutableMetadataLookup(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> list) {
+    public ImmutableMetadataLookup(DBParameters dbParameters, ImmutableList<RelationDefinition> list) {
         map = Stream.concat(
                 list.stream()
                         .map(r -> Maps.immutableEntry(r.getID(), r)),
@@ -32,8 +32,8 @@ public class ImmutableMetadataLookup implements MetadataLookup {
     }
 
     @Override
-    public DatabaseRelationDefinition get(RelationID id) throws RelationNotFoundException {
-        DatabaseRelationDefinition relation = map.get(id);
+    public RelationDefinition get(RelationID id) throws RelationNotFoundException {
+        RelationDefinition relation = map.get(id);
         if (relation != null)
             return relation;
         relation = map.get(id.getSchemalessID());

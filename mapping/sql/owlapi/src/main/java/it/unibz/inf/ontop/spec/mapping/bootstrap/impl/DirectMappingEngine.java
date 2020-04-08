@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.RDBMetadataProvider;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -159,7 +160,7 @@ public class DirectMappingEngine {
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
 			RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
-			ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
+			ImmutableList<RelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;
@@ -169,7 +170,7 @@ public class DirectMappingEngine {
 
 			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
 					mapping.getTripleMaps().stream(),
-					tables.stream().flatMap(td -> getMapping(td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
+					tables.stream().flatMap(td -> getMapping((DatabaseRelationDefinition)td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
 					.collect(ImmutableCollectors.toList());
 
 			return ppMappingFactory.createSQLPreProcessedMapping(mappings, mapping.getPrefixManager());

@@ -12,13 +12,13 @@ import java.util.function.Function;
 
 public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
 
-    private final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
-    private final ImmutableList<DatabaseRelationDefinition> relations;
+    private final ImmutableMap<RelationID, RelationDefinition> map;
+    private final ImmutableList<RelationDefinition> relations;
 
     private final DBParameters dbParameters;
 
 
-    public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<DatabaseRelationDefinition> relations) {
+    public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<RelationDefinition> relations) {
         this.dbParameters = dbParameters;
         this.relations = relations;
         // TODO: this needs FIXING
@@ -28,25 +28,25 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
     }
 
     @Override
-    public DatabaseRelationDefinition getDatabaseRelation(RelationID id) {
+    public RelationDefinition getRelation(RelationID id) {
         return map.get(id);
     }
 
     @JsonProperty("relations")
     @Override
-    public ImmutableList<DatabaseRelationDefinition> getDatabaseRelations() {
+    public ImmutableList<RelationDefinition> getDatabaseRelations() {
         return relations;
     }
 
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : map.entrySet()) {
+        for (Map.Entry<RelationID, RelationDefinition> e : map.entrySet()) {
             bf.append(e.getKey()).append("=").append(e.getValue()).append("\n");
         }
         // Prints all primary keys
         bf.append("\n====== constraints ==========\n");
-        for (Map.Entry<RelationID, DatabaseRelationDefinition> e : map.entrySet()) {
+        for (Map.Entry<RelationID, RelationDefinition> e : map.entrySet()) {
             for (UniqueConstraint uc : e.getValue().getUniqueConstraints())
                 bf.append(uc).append(";\n");
             bf.append("\n");

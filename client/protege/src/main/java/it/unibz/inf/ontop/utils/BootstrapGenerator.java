@@ -93,12 +93,12 @@ public class BootstrapGenerator {
 
         // this operation is EXPENSIVE
         RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
-        ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
+        ImmutableList<RelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getDatabaseRelations();
 
         Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
-        for (DatabaseRelationDefinition td : relations) {
-            newTriplesMap.addAll(directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex));
+        for (RelationDefinition td : relations) {
+            newTriplesMap.addAll(directMappingEngine.getMapping((DatabaseRelationDefinition)td, baseURI, bnodeTemplateMap, currentMappingIndex));
         }
 
         //add to the current model the boostrapped triples map

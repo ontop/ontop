@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -100,7 +101,8 @@ public abstract class RelationDefinition {
 	@JsonIgnore
 	public RelationPredicate getAtomPredicate() {
 		if (predicate == null)
-			predicate = new RelationPredicateImpl(this);
+			predicate = new RelationPredicateImpl();
+
 		return predicate;
 	}
 
@@ -114,6 +116,22 @@ public abstract class RelationDefinition {
 
 	// TODO: implement equals!!
 
+
+
+	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
+
+		RelationPredicateImpl() {
+			super(getID().getSQLRendering(),
+					getAttributes().stream()
+							.map(Attribute::getTermType)
+							.collect(ImmutableCollectors.toList()));
+		}
+
+		@Override
+		public RelationDefinition getRelationDefinition() {
+			return RelationDefinition.this;
+		}
+	}
 
 
 	private static class AttributeInfo {

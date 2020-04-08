@@ -224,7 +224,7 @@ public class SelectQueryAttributeExtractor2 {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // construct the predicate using the table name
-            DatabaseRelationDefinition relation;
+            RelationDefinition relation;
             try {
                 relation = metadata.get(id);
             }
