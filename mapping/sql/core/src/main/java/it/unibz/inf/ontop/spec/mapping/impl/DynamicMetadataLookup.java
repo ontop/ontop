@@ -53,14 +53,14 @@ public class DynamicMetadataLookup implements MetadataLookup {
     }
 
     public ImmutableDBMetadata getImmutableDBMetadata() {
-        return new ImmutableDBMetadataImpl();
+        return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 
-    private final class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
+    private final class ImmutableDBMetadataImpl2 implements ImmutableDBMetadata {
         private final ImmutableList<RelationDefinition> immutableRelations;
         private final ImmutableMap<RelationID, RelationDefinition> immutableMap;
 
-        ImmutableDBMetadataImpl() {
+        ImmutableDBMetadataImpl2() {
             this.immutableRelations = ImmutableList.copyOf(list);
             this.immutableMap = ImmutableMap.copyOf(map);
         }
