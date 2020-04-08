@@ -20,7 +20,9 @@ package it.unibz.inf.ontop.spec.mapping.parser;
  * #L%
  */
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -41,7 +43,6 @@ public class SQLParserTest {
 
 	@Before
 	public void beforeEachTest() {
-		BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
 		QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 		DBTypeFactory dbTypeFactory = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
 
@@ -52,7 +53,9 @@ public class SQLParserTest {
 		DBTermType varchar10DBType = dbTypeFactory.getDBTermType("VARCHAR", 10);
 		DBTermType varchar8DBType = dbTypeFactory.getDBTermType("VARCHAR", 8);
 
-		DatabaseRelationDefinition r = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student"))
+		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
+
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student"))
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -61,31 +64,31 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("nationality"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("address"), varchar20DBType, false));
+			.addAttribute(idfac.createAttributeID("address"), varchar20DBType, false)));
 
-		DatabaseRelationDefinition r2 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "QUEST_DATA_PROPERTY_LITERAL_ASSERTION"))
-			.addAttribute(idfac.createAttributeID("URI"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("ISBNODE"), booleanDBType, false)
-			.addAttribute(idfac.createAttributeID("IDX"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("VALUE"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("LANG"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+			"URI", varchar20DBType, false,
+			"ISBNODE", booleanDBType, false,
+			"IDX", integerDBType, false,
+			"VALUE", varchar20DBType, false,
+			"LANG", varchar20DBType, false));
 
-		DatabaseRelationDefinition r5 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "QUEST_OBJECT_PROPERTY_ASSERTION"))
-			.addAttribute(idfac.createAttributeID("URI1"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("URI2"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("ISBNODE"), booleanDBType, false)
-			.addAttribute(idfac.createAttributeID("ISBNODE2"), booleanDBType, false)
-			.addAttribute(idfac.createAttributeID("IDX"), integerDBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("QUEST_OBJECT_PROPERTY_ASSERTION",
+			"URI1", varchar20DBType, false,
+			"URI2", varchar20DBType, false,
+			"ISBNODE", booleanDBType, false,
+			"ISBNODE2", booleanDBType, false,
+			"IDX", integerDBType, false));
 
-		DatabaseRelationDefinition r3 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "table1"))
-			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("value"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+			"id", integerDBType, false,
+			"name", varchar20DBType, false,
+			"value", varchar20DBType, false));
 
-		DatabaseRelationDefinition r4 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("HR", "REGIONS"))
-			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("HR", "REGIONS"))
+			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false)));
 
-		DatabaseRelationDefinition r6 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "tableName"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "tableName"))
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -100,9 +103,9 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("row"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("rows"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("value"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false));
+			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false)));
 
-		DatabaseRelationDefinition r7 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "grade"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "grade"))
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -110,56 +113,56 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("course"), varchar10DBType, false)
 			.addAttribute(idfac.createAttributeID("mark"), varchar10DBType, false)
 			.addAttribute(idfac.createAttributeID("pass"), booleanDBType, false)
-			.addAttribute(idfac.createAttributeID("sm_id"), integerDBType, false));
+			.addAttribute(idfac.createAttributeID("sm_id"), integerDBType, false)));
 
-		DatabaseRelationDefinition r9 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "semester"))
-			.addAttribute(idfac.createAttributeID("id"), integerDBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("semester",
+			"id", integerDBType, false));
 
-		DatabaseRelationDefinition r8 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "tax"))
-			.addAttribute(idfac.createAttributeID("payee"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("amount"), integerDBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("tax",
+			"payee", varchar20DBType, false,
+			"amount", integerDBType, false));
 
-		DatabaseRelationDefinition r10 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "all_tables"))
-			.addAttribute(idfac.createAttributeID("table_name"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("owner"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("all_tables",
+			"table_name", varchar20DBType, false,
+			"owner", varchar20DBType, false));
 
-		DatabaseRelationDefinition r11 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "all_views"))
-			.addAttribute(idfac.createAttributeID("owner"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("all_views",
+			"owner", varchar20DBType, false));
 
-		DatabaseRelationDefinition r12 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "people"))
-			.addAttribute(idfac.createAttributeID("\"id\""), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("\"nick2\""), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("people",
+			"\"id\"", varchar20DBType, false,
+			"\"nick2\"", varchar20DBType, false));
 
-		DatabaseRelationDefinition r13 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "pet"))
-			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("testcol"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("pet",
+			"name", varchar20DBType, false,
+			"testcol", varchar20DBType, false));
 
-		DatabaseRelationDefinition r14 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "despatch"))
-			.addAttribute(idfac.createAttributeID("des_date"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("des_amount"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("ord_amount"), integerDBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("despatch",
+			"des_date", varchar20DBType, false,
+			"des_amount", integerDBType, false,
+			"ord_amount", integerDBType, false));
 
-		DatabaseRelationDefinition r15 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Product"))
-			.addAttribute(idfac.createAttributeID("maker"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("type"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("model"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Product",
+			"maker", varchar20DBType, false,
+			"type", varchar20DBType, false,
+			"model", varchar20DBType, false));
 
-		DatabaseRelationDefinition r16 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "PC"))
-			.addAttribute(idfac.createAttributeID("model"), varchar20DBType, false));
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PC",
+			"model", varchar20DBType, false));
 
-		DatabaseRelationDefinition r17 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("dbo", "TEMPERATURE_DEVIATION"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("dbo", "TEMPERATURE_DEVIATION"))
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false));
+			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false)));
 
-		DatabaseRelationDefinition r18 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("northwind", "Suppliers"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("northwind", "Suppliers"))
 			.addAttribute(idfac.createAttributeID("Region"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("PostalCode"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Address"), varchar20DBType, false)
-			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false));
+			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false)));
 
-		DatabaseRelationDefinition r19 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("oreda", "pm_maint_items"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("oreda", "pm_maint_items"))
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -168,9 +171,9 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("su_code"), varchar10DBType, false)
 			.addAttribute(idfac.createAttributeID("mc_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
-			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
+			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		DatabaseRelationDefinition r20 = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("oreda", "pm_program"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("oreda", "pm_program"))
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -178,9 +181,11 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("su_code"), varchar10DBType, false)
 			.addAttribute(idfac.createAttributeID("mc_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
-			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
+			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		sqp = new SelectQueryParser(metadata.getMetadataLookup(), CORE_SINGLETONS);
+		MetadataLookup metadataLookup = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(), relations.build());
+
+		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
 	}
 
 	@Test

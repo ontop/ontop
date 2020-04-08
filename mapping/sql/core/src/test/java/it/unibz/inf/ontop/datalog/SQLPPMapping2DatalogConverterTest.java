@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.datalog;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -54,34 +55,33 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
     }
 
 	public void setUp() {
-		BasicDBMetadataBuilder md0 = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
-		QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 		DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
 		// Database schema
-		DatabaseRelationDefinition table1 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Student"))
-			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("first_name"), stringDBType, false)
-			.addAttribute(idfac.createAttributeID("last_name"), stringDBType, false)
-			.addAttribute(idfac.createAttributeID("year"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("nationality"), stringDBType, false));
-		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(idfac.createAttributeID("id"))));
+		DatabaseRelationDefinition table1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Student",
+			"id", integerDBType, false,
+			"first_name", stringDBType, false,
+			"last_name", stringDBType, false,
+			"year", integerDBType, false,
+			"nationality", stringDBType, false);
+		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(1)));
 
-		DatabaseRelationDefinition table2 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Course"))
-			.addAttribute(idfac.createAttributeID("cid"), stringDBType, false)
-			.addAttribute(idfac.createAttributeID("title"), stringDBType, false)
-			.addAttribute(idfac.createAttributeID("credits"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("description"), stringDBType, false));
-		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(idfac.createAttributeID("cid"))));
+		DatabaseRelationDefinition table2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "Course",
+			"cid", stringDBType, false,
+			"title", stringDBType, false,
+			"credits", integerDBType, false,
+			"description", stringDBType, false);
+		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(1)));
 
-		DatabaseRelationDefinition table3 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "Enrollment"))
-			.addAttribute(idfac.createAttributeID("student_id"), integerDBType, false)
-			.addAttribute(idfac.createAttributeID("course_id"), stringDBType, false));
-		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(idfac.createAttributeID("student_id")),
-				table3.getAttribute(idfac.createAttributeID("course_id"))));
+		DatabaseRelationDefinition table3 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Enrollment",
+			"student_id", integerDBType, false,
+			"course_id", stringDBType, false);
+		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
+				table3.getAttribute(2)));
 
-		md = md0.getMetadataLookup();
+		md = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
+				ImmutableList.of(table1, table2, table3));
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {

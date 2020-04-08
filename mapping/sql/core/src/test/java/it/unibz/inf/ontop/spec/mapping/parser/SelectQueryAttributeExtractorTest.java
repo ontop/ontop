@@ -2,9 +2,9 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
@@ -15,11 +15,10 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
-        QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DatabaseRelationDefinition r = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student")));
+        ImmutableMetadataLookup metadataLookup = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(), ImmutableList.of());
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
 
-        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadata.getMetadataLookup(), TERM_FACTORY);
+        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
 
         ImmutableList<QuotedID> res = aex.extract("SELECT ALMAES001.IDART,\n"+
 //                "     ALMAES001.CODART,\n"+
@@ -48,7 +47,7 @@ public class SelectQueryAttributeExtractorTest {
                 "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART" +
                 ""
         );
-        assertEquals(res, ImmutableList.of(
+        assertEquals(ImmutableList.of(
                 idfac.createAttributeID("IDART"),
 //                idfac.createAttributeID("CODART"),
 //                idfac.createAttributeID("IDFAMI"),
@@ -74,6 +73,6 @@ public class SelectQueryAttributeExtractorTest {
 //                idfac.createAttributeID("UBICACION"),
 //                idfac.createAttributeID("IDCTACOMPRA"),
 //                idfac.createAttributeID("IDCTAVENTA"),
-                idfac.createAttributeID("PRECIOFINAL")));
+                idfac.createAttributeID("PRECIOFINAL")), res);
     }
 }

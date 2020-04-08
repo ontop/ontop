@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -26,10 +27,6 @@ import static org.junit.Assert.assertTrue;
  * -
  */
 public class SelectQueryParserTest {
-
-    private static final String P = "P";
-    private static final String Q = "Q";
-    private static final String R = "R";
 
     private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
 
@@ -417,26 +414,24 @@ public class SelectQueryParserTest {
         list0.forEach(a -> assertTrue(list.contains(a)));
     }
 
-
     private MetadataLookup createMetadata() {
-        BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
-        QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
         DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        TABLE_P = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, P))
-            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
-            .addAttribute(idfac.createAttributeID("B"), integerDBType, false));
+        TABLE_P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
+            "A", integerDBType, false,
+            "B", integerDBType, false);
 
-        TABLE_Q = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, Q))
-            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
-            .addAttribute(idfac.createAttributeID("C"), integerDBType, false));
+        TABLE_Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+            "A", integerDBType, false,
+            "C", integerDBType, false);
 
-        TABLE_R = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, R))
-            .addAttribute(idfac.createAttributeID("A"), integerDBType, false)
-            .addAttribute(idfac.createAttributeID("B"), integerDBType, false)
-            .addAttribute(idfac.createAttributeID("C"), integerDBType, false)
-            .addAttribute(idfac.createAttributeID("D"), integerDBType, false));
+        TABLE_R = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("R",
+            "A", integerDBType, false,
+            "B", integerDBType, false,
+            "C", integerDBType, false,
+            "D", integerDBType, false);
 
-        return metadata.getMetadataLookup();
+        return new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
+                ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
     }
 }

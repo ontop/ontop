@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
@@ -32,19 +33,19 @@ public class ImplicitDBConstraintsTest {
 	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
 
 	static {
-		BasicDBMetadataBuilder md0 = new BasicDBMetadataBuilder(DEFAULT_DUMMY_DB_METADATA.getDBParameters());
 		idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
-		DBTermType stringDBType = md0.getDBParameters().getDBTypeFactory().getDBStringType();
+		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
-		TABLENAME = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLENAME"))
-			.addAttribute(idfac.createAttributeID("KEYNAME"), stringDBType, false));
+		TABLENAME = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLENAME",
+			"KEYNAME", stringDBType, false);
 
-		TABLE2 = md0.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "TABLE2"))
-			.addAttribute(idfac.createAttributeID("KEY1"), stringDBType, false)
-			.addAttribute(idfac.createAttributeID("KEY2"), stringDBType, false));
+		TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "TABLE2",
+			"KEY1", stringDBType, false,
+			"KEY2", stringDBType, false);
 
-		md = md0.getMetadataLookup();
+		md = new ImmutableMetadataLookup(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
+				ImmutableList.of(TABLENAME, TABLE2));
 	}
 	
 	@Test
