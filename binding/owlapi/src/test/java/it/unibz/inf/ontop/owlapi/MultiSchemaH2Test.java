@@ -35,6 +35,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertTrue;
 
 /***
@@ -47,32 +48,24 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class MultiSchemaH2Test  {
 
-
-    static final String owlFile =
-            "src/test/resources/multischema/multischemah2.owl";
-    static final String obdaFile =
-            "src/test/resources/multischema/multischemah2.obda";
+    private static final String owlFile = "src/test/resources/multischema/multischemah2.owl";
+    private static final String obdaFile = "src/test/resources/multischema/multischemah2.obda";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	private String url = "jdbc:h2:mem:questrepository";
-	private String username =  "fish";
-	private String password = "fish";
+	private Connection sqlConnection;
 
-	Connection sqlConnection;
+	private static final String url = "jdbc:h2:mem:questrepository";
+	private static final String username =  "fish";
+	private static final String password = "fish";
+
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(url,username, password);
 
-		try (java.sql.Statement s = sqlConnection.createStatement()) {
-			String text = new Scanner( new File("src/test/resources/multischema/stockexchange-h2Schema.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
-		catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
-		}
+		executeFromFile(sqlConnection, "src/test/resources/multischema/stockexchange-h2Schema.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -90,19 +83,12 @@ public class MultiSchemaH2Test  {
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-
-
-
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+		dropTables();
+		conn.close();
 	}
 
 	private void dropTables() throws Exception {

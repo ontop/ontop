@@ -169,6 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, dbParameters.getQuotedIDFactory());
 
+            /*
             BasicDBMetadataBuilder metadata = new BasicDBMetadataBuilder();
 
             // This is the NEW way of obtaining part of the metadata
@@ -187,13 +188,14 @@ public class SQLMappingExtractor implements MappingExtractor {
                     extractedRelations2.add(relation);
                 }
             }
+            */
 
-            MetadataLookup metadataLookup = metadata.getMetadataLookup();
+            DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(metadataLoader);
 
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            for (DatabaseRelationDefinition relation : extractedRelations2)
+            for (RelationDefinition relation : ImmutableList.copyOf(metadataLookup.getAllRelations()))
                 metadataLoader.insertIntegrityConstraints(relation, metadataLookup);
             implicitConstraints.insertIntegrityConstraints(metadataLookup);
 
