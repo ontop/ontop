@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class DefaultDBMetadataProvider implements RDBMetadataProvider {
 
-    private static Logger log = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
 
     protected final Connection connection;
     protected final QuotedIDFactory idFactory;
@@ -74,16 +74,16 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             return new SQLStandardQuotedIDFactory();
 
         // UNKNOWN COMBINATION
-        log.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
-        log.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
-        log.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
-        log.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
-        log.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
-        log.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
-        log.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
-        log.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
-        log.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
-        log.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
+        LOGGER.warn("Unknown combination of identifier handling rules: " + md.getDatabaseProductName());
+        LOGGER.warn("storesLowerCaseIdentifiers: " + md.storesLowerCaseIdentifiers());
+        LOGGER.warn("storesUpperCaseIdentifiers: " + md.storesUpperCaseIdentifiers());
+        LOGGER.warn("storesMixedCaseIdentifiers: " + md.storesMixedCaseIdentifiers());
+        LOGGER.warn("supportsMixedCaseIdentifiers: " + md.supportsMixedCaseIdentifiers());
+        LOGGER.warn("storesLowerCaseQuotedIdentifiers: " + md.storesLowerCaseQuotedIdentifiers());
+        LOGGER.warn("storesUpperCaseQuotedIdentifiers: " + md.storesUpperCaseQuotedIdentifiers());
+        LOGGER.warn("storesMixedCaseQuotedIdentifiers: " + md.storesMixedCaseQuotedIdentifiers());
+        LOGGER.warn("supportsMixedCaseQuotedIdentifiers: " + md.supportsMixedCaseQuotedIdentifiers());
+        LOGGER.warn("getIdentifierQuoteString: " + md.getIdentifierQuoteString());
 
         return new SQLStandardQuotedIDFactory();
     }
@@ -143,16 +143,17 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(MetadataLookup md) throws MetadataExtractionException {
-        // TODO:
-    }
-
-    @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        DatabaseRelationDefinition r = (DatabaseRelationDefinition)relation;
-        insertPrimaryKey(r);
-        insertUniqueAttributes(r);
-        insertForeignKeys(r, metadataLookup);
+    public void insertIntegrityConstraints(ImmutableDBMetadata metadata) throws MetadataExtractionException {
+        for (RelationDefinition relation : metadata.getAllRelations()) {
+            if (relation instanceof  DatabaseRelationDefinition) {
+                DatabaseRelationDefinition r = (DatabaseRelationDefinition) relation;
+                insertPrimaryKey(r);
+                insertUniqueAttributes(r);
+                insertForeignKeys(r, metadata);
+            }
+            else
+                LOGGER.warn("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
+        }
     }
 
     @Override

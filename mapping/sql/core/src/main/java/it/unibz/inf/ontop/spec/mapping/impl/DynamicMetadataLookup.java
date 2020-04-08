@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.*;
@@ -50,5 +52,32 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return Optional.ofNullable(def);
     }
 
-    public List<RelationDefinition> getAllRelations() { return  ImmutableList.copyOf(list); }
+    public ImmutableDBMetadata getImmutableDBMetadata() {
+        return new ImmutableDBMetadataImpl();
+    }
+
+    private final class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
+        private final ImmutableList<RelationDefinition> immutableRelations;
+        private final ImmutableMap<RelationID, RelationDefinition> immutableMap;
+
+        ImmutableDBMetadataImpl() {
+            this.immutableRelations = ImmutableList.copyOf(list);
+            this.immutableMap = ImmutableMap.copyOf(map);
+        }
+
+        @Override
+        public ImmutableList<RelationDefinition> getAllRelations() {
+            return immutableRelations;
+        }
+
+        @Override
+        public Optional<RelationDefinition> getRelation(RelationID id) {
+            return Optional.ofNullable(immutableMap.get(id));
+        }
+
+        @Override
+        public DBParameters getDBParameters() {
+            return provider.getDBParameters();
+        }
+    }
 }

@@ -161,19 +161,18 @@ public class SQLMappingExtractor implements MappingExtractor {
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
             RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
-            DBParameters dbParameters = metadataLoader.getDBParameters();
-            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
-                    constraintFile, dbParameters.getQuotedIDFactory());
-
             DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(metadataLoader);
 
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            // TODO: freeze before these two - make sure new relations are not inserted
-            for (RelationDefinition relation : metadataLookup.getAllRelations())
-                metadataLoader.insertIntegrityConstraints(relation, metadataLookup);
-            implicitConstraints.insertIntegrityConstraints(metadataLookup);
+            ImmutableDBMetadata metadata = metadataLookup.getImmutableDBMetadata();
+            metadataLoader.insertIntegrityConstraints(metadata);
+
+            DBParameters dbParameters = metadataLoader.getDBParameters();
+            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                    constraintFile, dbParameters.getQuotedIDFactory());
+            implicitConstraints.insertIntegrityConstraints(metadata);
 
             return new MappingAndDBParametersImpl(provMapping, dbParameters);
         }

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -24,7 +25,7 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private static final MetadataLookup md;
+	private static final ImmutableDBMetadata md;
 	private static final QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
@@ -44,7 +45,7 @@ public class ImplicitDBConstraintsTest {
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = new ImmutableMetadataLookup(ImmutableList.of(TABLENAME, TABLE2));
+		md = new ImmutableDBMetadataImpl(null, ImmutableList.of(TABLENAME, TABLE2));
 	}
 	
 	@Test

@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 /**
  */
+
 public interface MetadataProvider {
 
     /**
@@ -25,5 +26,5 @@ public interface MetadataProvider {
      * Inserts the user-supplied primary keys, unique constraints and foreign keys
      * into the metadata object
      */
-    void insertIntegrityConstraints(MetadataLookup md) throws MetadataExtractionException;
+    void insertIntegrityConstraints(ImmutableDBMetadata md) throws MetadataExtractionException;
 }
