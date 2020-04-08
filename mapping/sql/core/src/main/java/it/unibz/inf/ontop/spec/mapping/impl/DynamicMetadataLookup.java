@@ -8,32 +8,37 @@ import java.util.*;
 
 public class DynamicMetadataLookup implements MetadataLookup {
 
-    private final MetadataProvider provider;
+    private final RDBMetadataProvider provider;
     private final Map<RelationID, RelationDefinition> map = new HashMap<>();
     private final List<RelationDefinition> list = new ArrayList<>();
 
-    public DynamicMetadataLookup(MetadataProvider provider) {
+    public DynamicMetadataLookup(RDBMetadataProvider provider) {
         this.provider = provider;
     }
 
     @Override
     public Optional<RelationDefinition> getRelation(RelationID id) {
         //System.out.println("GET: " + id);
-        RelationDefinition def = map.get(id);
+        RelationID canonicalId = provider.getRelationCanonicalID(id);
+        RelationDefinition def = map.get(canonicalId);
+        boolean quiet = id.toString().endsWith("_ASSERTION");
 
         if (def == null) {
             try {
-                System.out.println("RETRIEVE: " + id);
-                ImmutableList<RelationDefinition.AttributeListBuilder> builders = provider.getRelationAttributes(id);
+                if (!quiet)
+                    System.out.println("RETRIEVE: " + canonicalId);
+                ImmutableList<RelationDefinition.AttributeListBuilder> builders = provider.getRelationAttributes(canonicalId);
                 for (RelationDefinition.AttributeListBuilder builder : builders) {
                     RelationDefinition table = new DatabaseRelationDefinition(builder);
                     if (map.containsKey(table.getID())) {
-                        System.out.println("OVERWRITTEN " + table.getID());
+                        if (!quiet)
+                            System.out.println("OVERWRITTEN " + table.getID());
                         table = map.get(table.getID());
                     }
                     else
                         list.add(table);
-                    System.out.println("ADD " + table.getID());
+                    if (!quiet)
+                        System.out.println("ADD " + table.getID());
                     map.put(table.getID(), table);
                     if (def == null) // CATCH THE FIRST
                         def = table;
@@ -41,7 +46,8 @@ public class DynamicMetadataLookup implements MetadataLookup {
                         RelationID noSchemaID = table.getID().getSchemalessID();
                         if (!map.containsKey(noSchemaID)) {
                             map.put(noSchemaID, table);
-                            System.out.println("ADD " + table.getID() + " AT " + noSchemaID);
+                            if (!quiet)
+                                System.out.println("ADD " + table.getID() + " AT " + noSchemaID);
                         }
                     }
                 }
