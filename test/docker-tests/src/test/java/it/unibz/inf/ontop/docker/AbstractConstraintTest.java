@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.docker;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -38,6 +40,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public abstract class AbstractConstraintTest extends TestCase {
@@ -71,19 +74,25 @@ public abstract class AbstractConstraintTest extends TestCase {
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
 		RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
-		QuotedIDFactory idFactory = metadataLoader.getDBParameters().getQuotedIDFactory();
 
-		ImmutableList<RelationID> relations = Stream.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER)
-				.map(s -> idFactory.createRelationID(null, s))
-				.map(metadataLoader::getRelationCanonicalID)
-				.collect(ImmutableCollectors.toList());
+		RDBMetadataProvider filteredMetadataLoader = new DelegatingRDBMetadataProvider(metadataLoader) {
+			@Override
+			public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
+				return provider.getRelationIDs().stream()
+						.filter(r -> ImmutableSet.of(TB_BOOK, TB_BOOKWRITER, TB_EDITION, TB_WRITER).contains(r.getTableName()))
+						.collect(ImmutableCollectors.toList());
+			}
+		};
 
-		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader, relations);
+		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(filteredMetadataLoader);
 
-		tBook = metadata.getRelation(relations.get(0));
-		tBookWriter = metadata.getRelation(relations.get(1));
-		tEdition = metadata.getRelation(relations.get(2));
-		tWriter = metadata.getRelation(relations.get(3));
+		ImmutableMap<String, RelationDefinition> map = metadata.getAllRelations().stream()
+				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableName(), Function.identity()));
+
+		tBook = Optional.ofNullable(map.get(TB_BOOK));
+		tBookWriter = Optional.ofNullable(map.get(TB_BOOKWRITER));
+		tEdition = Optional.ofNullable(map.get(TB_EDITION));
+		tWriter = Optional.ofNullable(map.get(TB_WRITER));
 
 		System.out.println(metadata);
 	}
