@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 /**
  * A dummy DummyDBMetadataBuilder for tests only
  */
+
 public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     private final DBTypeFactory dbTypeFactory;

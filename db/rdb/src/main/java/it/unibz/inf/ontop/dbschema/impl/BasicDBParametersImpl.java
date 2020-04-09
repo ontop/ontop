@@ -14,10 +14,7 @@ public class BasicDBParametersImpl implements DBParameters {
     private final String databaseProductName;
     private final String databaseVersion;
 
-    /**
-     * TODO: make it protected
-     */
-    public BasicDBParametersImpl(String driverName,
+    BasicDBParametersImpl(String driverName,
                                  String driverVersion,
                                  String databaseProductName,
                                  String databaseVersion,

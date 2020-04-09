@@ -5,37 +5,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class ImmutableMetadataImpl implements MetadataProvider {
+public class ImmutableMetadataProvider extends ImmutableMetadataLookup implements MetadataProvider {
 
     private final DBParameters dbParameters;
-
-    private final ImmutableMap<RelationID, RelationDefinition> map;
     private final ImmutableList<RelationDefinition> relations;
 
-    public ImmutableMetadataImpl(DBParameters dbParameters, ImmutableMap<RelationID, RelationDefinition> map) {
+    public ImmutableMetadataProvider(DBParameters dbParameters, ImmutableMap<RelationID, RelationDefinition> map) {
+        super(map);
         this.dbParameters = dbParameters;
-        this.map = map;
+        // the list contains no repetitions (based on full relation ids)
         this.relations = map.values().stream()
                 .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().values().stream()
                 .map(s -> s.iterator().next())
                 .collect(ImmutableCollectors.toList());
     }
 
-
-    @Override
-    public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        RelationDefinition relation = map.get(id);
-        if (relation == null)
-            throw new MetadataExtractionException("Relation " + id + " not found");
-
-        return relation;
-    }
 
     @JsonProperty("relations")
     public ImmutableList<RelationDefinition> getAllRelations() {

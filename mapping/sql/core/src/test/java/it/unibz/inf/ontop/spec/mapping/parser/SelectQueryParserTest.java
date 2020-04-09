@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.atom.DataAtom;
@@ -39,7 +40,6 @@ public class SelectQueryParserTest {
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
-
 
     @Test
     public void inner_join_on_same_table_test() throws Exception {
@@ -431,7 +431,11 @@ public class SelectQueryParserTest {
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = new ImmutableMetadataLookup(ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
+        MetadataLookup metadataLookup = new ImmutableMetadataLookup(ImmutableMap.of(
+                TABLE_P.getID(), TABLE_P,
+                TABLE_Q.getID(), TABLE_Q,
+                TABLE_R.getID(), TABLE_R));
+
         return new SelectQueryParser(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), CORE_SINGLETONS);
     }
 }

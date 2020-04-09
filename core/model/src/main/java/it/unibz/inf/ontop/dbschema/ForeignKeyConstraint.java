@@ -41,6 +41,7 @@ public class ForeignKeyConstraint {
     }
 
     public static final class Builder {
+        private final String name;
         private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
         private final DatabaseRelationDefinition relation, referencedRelation;
 
@@ -51,7 +52,8 @@ public class ForeignKeyConstraint {
          * @param referencedRelation
          */
 
-        public Builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        public Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+            this.name = name;
             this.relation = relation;
             this.referencedRelation = referencedRelation;
         }
@@ -81,14 +83,16 @@ public class ForeignKeyConstraint {
             return this;
         }
 
-        /**
-         * builds a FOREIGN KEY constraint
-         *
-         * @param name
-         * @return null if the list of components is empty
-         */
+        public Builder add(QuotedID attributeId, QuotedID referencedAttributeId) {
+            return add(relation.getAttribute(attributeId), referencedRelation.getAttribute(referencedAttributeId));
+        }
+            /**
+             * builds a FOREIGN KEY constraint
+             *
+             * @return null if the list of components is empty
+             */
 
-        public ForeignKeyConstraint build(String name) {
+        public ForeignKeyConstraint build() {
             ImmutableList<Component> components = builder.build();
             if (components.isEmpty())
                 return null;
@@ -100,13 +104,14 @@ public class ForeignKeyConstraint {
     /**
      * creates a FOREIGN KEY builder
      *
+     * @param name
      * @param relation
      * @param referencedRelation
      * @return
      */
 
-    public static Builder builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
-        return new Builder(relation, referencedRelation);
+    public static Builder builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        return new Builder(name, relation, referencedRelation);
     }
 
     /**
@@ -118,9 +123,9 @@ public class ForeignKeyConstraint {
      * @return
      */
     public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
-        return new Builder((DatabaseRelationDefinition) attribute.getRelation(),
+        return new Builder(name, (DatabaseRelationDefinition) attribute.getRelation(),
                 (DatabaseRelationDefinition) reference.getRelation())
-                .add(attribute, reference).build(name);
+                .add(attribute, reference).build();
     }
 
     private final String name;

@@ -9,16 +9,16 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.DEFAULT_DUMMY_DB_METADAT
 /**
  * Test that we correctly output exceptions in case we try to insert an incorrect foreign key (missing values)
  */
+
 public class WrongForeignKeyTest {
     private static final QuotedIDFactory ID_FACTORY;
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
-    static{
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        ID_FACTORY = dbMetadata.getQuotedIDFactory();
-        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+    static {
+        ID_FACTORY = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        table1Def = dbMetadata.createDatabaseRelation("table1",
+        table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -31,13 +31,13 @@ public class WrongForeignKeyTest {
                 .addDependent(table1Def.getAttribute(4))
                 .build());
 
-        table2Def = dbMetadata.createDatabaseRelation("table2",
+        table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
         table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
 
-        table3Def = dbMetadata.createDatabaseRelation("table3",
+        table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -62,7 +62,7 @@ public class WrongForeignKeyTest {
         DatabaseRelationDefinition relation = table1Def;
         DatabaseRelationDefinition ref = table2Def;
 
-        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
+        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder("", relation, ref);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
         QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
@@ -75,7 +75,7 @@ public class WrongForeignKeyTest {
         DatabaseRelationDefinition relation = table1Def;
         DatabaseRelationDefinition ref = table2Def;
 
-        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder(relation, ref);
+        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder("", relation, ref);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL2");
         QuotedID refAttrId = ID_FACTORY.createAttributeID("COL1");

@@ -270,34 +270,34 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
-            String currentName = null;
             while (rs.next()) {
-                // TODO : do not retrieve ref every time!
-                RelationID refId = getPKRelationID(rs);
                 try {
-                    RelationDefinition ref = dbMetadata.getRelation(refId);
-                    // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
                     int seq = rs.getShort("KEY_SEQ");
                     if (seq == 1) {
                         if (builder != null)
-                            relation.addForeignKeyConstraint(builder.build(currentName));
+                            relation.addForeignKeyConstraint(builder.build());
 
-                        currentName = rs.getString("FK_NAME"); // String => foreign key name (may be null)
+                        String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
 
-                        builder = new ForeignKeyConstraint.Builder(relation, (DatabaseRelationDefinition) ref);
+                        RelationDefinition ref = dbMetadata.getRelation(getPKRelationID(rs));
+
+                        // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
+                        builder = new ForeignKeyConstraint.Builder(name, relation, (DatabaseRelationDefinition) ref);
                     }
-                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
-                    QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
-                    builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
+                    if (builder != null) {
+                        QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
+                        QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
+                        builder.add(attrId, refAttrId);
+                    }
                 }
                 catch (MetadataExtractionException e) {
-                        builder = null; // do not add this foreign key
-                        // because there is no table it refers to
-                        System.out.println("Cannot find table: " + refId + " for FK " + rs.getString("FK_NAME"));
+                    builder = null; // do not add this foreign key
+                    // because there is no table it refers to
+                    System.out.println("Cannot find table: " + getPKRelationID(rs) + " for FK " + rs.getString("FK_NAME"));
                 }
             }
             if (builder != null)
-                relation.addForeignKeyConstraint(builder.build(currentName));
+                relation.addForeignKeyConstraint(builder.build());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

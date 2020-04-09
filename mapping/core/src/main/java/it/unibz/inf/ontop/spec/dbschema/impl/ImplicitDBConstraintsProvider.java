@@ -79,12 +79,12 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 if (!fk.table.getID().equals(relation.getID()))
                     continue;
                 ConstraintDescriptor pk = getConstraintDescriptor(metadataLookup, constraint[2], pkAttrs);
-                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.table, pk.table);
+                String name = fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableID().getName() + "_" + counter;
+                ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, fk.table, pk.table);
                 for (int i = 0; i < pkAttrs.length; i++)
                     builder.add(fk.attributes[i], pk.attributes[i]);
 
-                fk.table.addForeignKeyConstraint(
-                        builder.build(fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableID().getName() + "_" + counter));
+                fk.table.addForeignKeyConstraint(builder.build());
                 counter++;
             }
             catch (MetadataExtractionException e) {

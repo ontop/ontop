@@ -68,7 +68,7 @@ public class RDBMetadataExtractionTools {
 	 *    the connection metadata
 	 * @return
 	 */
-	public static ImmutableMetadataImpl createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
+	public static ImmutableMetadataProvider createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableMap.Builder<RelationID, RelationDefinition> map = ImmutableMap.builder();
 		for (RelationID id : metadataLoader.getRelationIDs()) {
@@ -76,7 +76,7 @@ public class RDBMetadataExtractionTools {
 			map.put(relation.getID(), relation);
 		}
 
-		ImmutableMetadataImpl metadata = new ImmutableMetadataImpl(metadataLoader.getDBParameters(), map.build());
+		ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(metadataLoader.getDBParameters(), map.build());
 		for (RelationDefinition relation : metadata.getAllRelations())
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
 		return metadata;

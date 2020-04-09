@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.spec.mapping.parser;
  */
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -30,8 +31,11 @@ import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryExcept
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -55,7 +59,7 @@ public class SQLParserTest {
 
 		ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, "student"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("\"public\"", "student"))
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -150,7 +154,7 @@ public class SQLParserTest {
 		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PC",
 			"model", varchar20DBType, false));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("dbo", "TEMPERATURE_DEVIATION"))
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("\"dbo\"", "TEMPERATURE_DEVIATION"))
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
@@ -183,7 +187,15 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		MetadataLookup metadataLookup = new ImmutableMetadataLookup(relations.build());
+		ImmutableList<RelationDefinition> list = relations.build();
+
+		MetadataLookup metadataLookup = new ImmutableMetadataLookup(Stream.concat(
+				list.stream()
+						.map(r -> Maps.immutableEntry(r.getID(), r)),
+				list.stream()
+						.filter(r -> r.getID().hasSchema())
+						.map(r -> Maps.immutableEntry(r.getID().getSchemalessID(), r)))
+				.collect(ImmutableCollectors.toMap()));
 
 		sqp = new SelectQueryParser(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), CORE_SINGLETONS);
 	}

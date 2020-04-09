@@ -28,24 +28,23 @@ public class MappingCQCOptimizerTest {
     @Test
     public void test() {
 
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation("company",
+        DatabaseRelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company",
             "cmpNpdidCompany", integerType, false,
             "cmpShortName", integerType, false);
         RelationPredicate company = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("company_reserves",
+        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company_reserves",
             "cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
         RelationPredicate companyReserves = table3Def.getAtomPredicate();
 
         table3Def.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(table3Def, table24Def)
+                ForeignKeyConstraint.builder("FK", table3Def, table24Def)
                         .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
-                        .build("FK"));
+                        .build());
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
         final Variable fldNpdidField1 = TERM_FACTORY.getVariable("fldNpdidField1");
@@ -95,43 +94,42 @@ public class MappingCQCOptimizerTest {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
 
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition addressTable = dbMetadata.createDatabaseRelation("address",
+        DatabaseRelationDefinition addressTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("address",
             "address_id", integerType, false,
             "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = dbMetadata.createDatabaseRelation("store",
+        DatabaseRelationDefinition storeTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("store",
             "store_id", integerType, false,
             "address_id", integerType, false,
             "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = dbMetadata.createDatabaseRelation("staff",
+        DatabaseRelationDefinition staffTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("staff",
             "staff_id", integerType, false,
             "address_id", integerType, false,
             "store_id", integerType, false);
         RelationPredicate staff = staffTable.getAtomPredicate();
 
         storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(storeTable, addressTable)
+                ForeignKeyConstraint.builder("FK", storeTable, addressTable)
                         .add(storeTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build("FK"));
+                        .build());
         storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(storeTable, staffTable)
+                ForeignKeyConstraint.builder("FK", storeTable, staffTable)
                         .add(storeTable.getAttribute(3), staffTable.getAttribute(1))
-                        .build("FK"));
+                        .build());
 
         staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(staffTable, addressTable)
+                ForeignKeyConstraint.builder("FK", staffTable, addressTable)
                         .add(staffTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build("FK"));
+                        .build());
         staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder(staffTable, storeTable)
+                ForeignKeyConstraint.builder("FK", staffTable, storeTable)
                         .add(staffTable.getAttribute(3), storeTable.getAttribute(1))
-                        .build("FK"));
+                        .build());
 
         final Variable staffId1 = TERM_FACTORY.getVariable("staff_id2");
         final Variable addressId1 = TERM_FACTORY.getVariable("address_id2");
@@ -191,6 +189,5 @@ public class MappingCQCOptimizerTest {
                         .filter(ImmutableHomomorphismIterator::hasNext)
                         .map(ImmutableHomomorphismIterator::next);
         System.out.println(from.get());
-
     }
 }
