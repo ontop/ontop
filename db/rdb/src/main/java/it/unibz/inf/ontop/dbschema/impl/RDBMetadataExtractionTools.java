@@ -76,7 +76,8 @@ public class RDBMetadataExtractionTools {
 			extractedRelations.add(metadataLoader.getRelation(id));
 
 		ImmutableDBMetadataImpl metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
-		metadataLoader.insertIntegrityConstraints(metadata);
+		for (RelationDefinition relation : metadata.getAllRelations())
+			metadataLoader.insertIntegrityConstraints(relation, metadata);
 		return metadata;
 	}
 }

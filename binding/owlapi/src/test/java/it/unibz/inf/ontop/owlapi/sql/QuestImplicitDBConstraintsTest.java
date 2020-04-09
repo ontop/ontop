@@ -27,15 +27,15 @@ import static org.junit.Assert.assertTrue;
 public class QuestImplicitDBConstraintsTest {
 
 	private static final String RESOURCE_DIR = "src/test/resources/userconstraints/";
-	static String uc_owlfile = RESOURCE_DIR + "uc.owl";
-	static String uc_obdafile = RESOURCE_DIR + "uc.obda";
-	static String uc_keyfile = RESOURCE_DIR + "keys.lst";
-	static String uc_create = RESOURCE_DIR + "create.sql";
+	private static final String uc_owlfile = RESOURCE_DIR + "uc.owl";
+	private static final String uc_obdafile = RESOURCE_DIR + "uc.obda";
+	private static final String uc_keyfile = RESOURCE_DIR + "keys.lst";
+	private static final String uc_create = RESOURCE_DIR + "create.sql";
 	
-	static String fk_owlfile = RESOURCE_DIR + "uc.owl";
-	static String fk_obdafile = RESOURCE_DIR + "fk.obda";
-	static String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
-	static String fk_create = RESOURCE_DIR + "fk-create.sql";
+	private static final String fk_owlfile = RESOURCE_DIR + "uc.owl";
+	private static final String fk_obdafile = RESOURCE_DIR + "fk.obda";
+	private static final String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
+	private static final String fk_create = RESOURCE_DIR + "fk-create.sql";
 
 	private static final String URL = "jdbc:h2:mem:countries";
 	private static final String USER = "sa";
@@ -47,30 +47,12 @@ public class QuestImplicitDBConstraintsTest {
 	private Connection sqlConnection;
 
 	
-	public void prepareDB(String sqlfile)  {
-		try {
-			sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
-			java.sql.Statement s = sqlConnection.createStatement();
-
-			try {
-				String text = new Scanner( new File(sqlfile) ).useDelimiter("\\A").next();
-				s.execute(text);
-				//Server.startWebServer(sqlConnection);
-
-			} catch(SQLException sqle) {
-				System.out.println("Exception in creating db from script");
-			}
-
-			s.close();
-
-		} catch (Exception exc) {
-			try {
-				tearDown();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}	
-
+	public void prepareDB(String sqlfile) throws Exception {
+		sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			String text = new Scanner( new File(sqlfile) ).useDelimiter("\\A").next();
+			s.execute(text);
+		}
 	}
 
 
@@ -259,6 +241,7 @@ public class QuestImplicitDBConstraintsTest {
 		OntopOWLStatement st = conn.createStatement();
 
 		String queryString = st.getExecutableQuery(query).toString();
+		System.out.println(queryString);
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
 	}

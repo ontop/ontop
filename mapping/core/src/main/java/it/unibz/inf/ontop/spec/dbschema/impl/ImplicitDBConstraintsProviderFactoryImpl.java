@@ -3,8 +3,6 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.impl.EmptyMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
@@ -28,10 +26,10 @@ public class ImplicitDBConstraintsProviderFactoryImpl implements ImplicitDBConst
     }
 
     @Override
-    public MetadataProvider extract(Optional<File> constraintFile, QuotedIDFactory idFactory) throws MetadataExtractionException {
+    public MetadataProvider extract(Optional<File> constraintFile, MetadataProvider baseMetadataProvider) throws MetadataExtractionException {
 
         if (!constraintFile.isPresent())
-            return new EmptyMetadataProvider();
+            return baseMetadataProvider;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(constraintFile.get()))) {
             ImmutableList.Builder<String[]> ucBuilder = ImmutableList.builder();
@@ -47,7 +45,7 @@ public class ImplicitDBConstraintsProviderFactoryImpl implements ImplicitDBConst
                     fkBuilder.add(parts);
                 }
             }
-            return new ImplicitDBConstraintsProvider(idFactory, ucBuilder.build(), fkBuilder.build());
+            return new ImplicitDBConstraintsProvider(baseMetadataProvider, ucBuilder.build(), fkBuilder.build());
         }
         catch (FileNotFoundException e) {
             LOGGER.warn("Could not find file {} in directory {}\nCurrent dir using System:{}",

@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -161,20 +162,17 @@ public class SQLMappingExtractor implements MappingExtractor {
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
             MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
-            DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(metadataLoader);
+            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                    constraintFile, metadataLoader);
 
+            DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(implicitConstraints);
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            MetadataProvider metadata = metadataLookup.getImmutableDBMetadata();
-            metadataLoader.insertIntegrityConstraints(metadata);
-
-            DBParameters dbParameters = metadataLoader.getDBParameters();
-            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
-                    constraintFile, dbParameters.getQuotedIDFactory());
-            implicitConstraints.insertIntegrityConstraints(metadata);
-
-            return new MappingAndDBParametersImpl(provMapping, dbParameters);
+            ImmutableDBMetadataImpl metadata = metadataLookup.getImmutableDBMetadata();
+            for (RelationDefinition relation : metadata.getAllRelations())
+                implicitConstraints.insertIntegrityConstraints(relation, metadata);
+            return new MappingAndDBParametersImpl(provMapping, metadata.getDBParameters());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());

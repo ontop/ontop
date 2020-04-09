@@ -160,18 +160,15 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(MetadataProvider metadata) throws MetadataExtractionException {
-        for (RelationID id : metadata.getRelationIDs()) {
-            RelationDefinition relation = metadata.getRelation(id);
-            if (relation instanceof  DatabaseRelationDefinition) {
-                DatabaseRelationDefinition r = (DatabaseRelationDefinition) relation;
-                insertPrimaryKey(r);
-                insertUniqueAttributes(r);
-                insertForeignKeys(r, metadata);
-            }
-            else
-                LOGGER.warn("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
+    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+        if (relation instanceof  DatabaseRelationDefinition) {
+            DatabaseRelationDefinition r = (DatabaseRelationDefinition) relation;
+            insertPrimaryKey(r);
+            insertUniqueAttributes(r);
+            insertForeignKeys(r, metadataLookup);
         }
+        else
+            LOGGER.warn("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
     }
 
     @Override

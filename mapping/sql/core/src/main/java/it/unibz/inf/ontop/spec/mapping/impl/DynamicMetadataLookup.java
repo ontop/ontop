@@ -33,7 +33,7 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return def;
     }
 
-    public MetadataProvider getImmutableDBMetadata() {
+    public ImmutableDBMetadataImpl getImmutableDBMetadata() {
         return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 

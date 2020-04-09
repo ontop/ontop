@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.spec.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.DelegatingRDBMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +24,7 @@ import java.util.Set;
  *
  */
 
-public class ImplicitDBConstraintsProvider implements MetadataProvider {
+public class ImplicitDBConstraintsProvider extends DelegatingRDBMetadataProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImplicitDBConstraintsProvider.class);
 
@@ -35,35 +37,13 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
     //                              primary key (referred) table id, comma-separated primary key columns
     private final ImmutableList<String[]> foreignKeys;
 
-    ImplicitDBConstraintsProvider(QuotedIDFactory idFactory,
+    ImplicitDBConstraintsProvider(MetadataProvider provider,
                                   ImmutableList<String[]> uniqueConstraints,
                                   ImmutableList<String[]> foreignKeys) {
-        this.idFactory = idFactory;
+        super(provider);
+        this.idFactory = provider.getDBParameters().getQuotedIDFactory();
         this.uniqueConstraints = uniqueConstraints;
         this.foreignKeys = foreignKeys;
-    }
-
-    /**
-     * Extracts relation IDs for all relations referred to by the user supplied foreign keys
-     * (but not the relations of the foreign keys)
-     *
-     * @return relation ids that are referred to by foreign keys
-     */
-    @Override
-    public ImmutableList<RelationID> getRelationIDs() {
-        Set<RelationID> referredTables = new HashSet<>();
-
-        for (String[] fk : foreignKeys) {
-            RelationID pkTableId = getRelationIDFromString(fk[2]);
-            referredTables.add(pkTableId);
-        }
-
-        return ImmutableList.copyOf(referredTables);
-    }
-
-    @Override
-    public RelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
-        throw new MetadataExtractionException("Relation not found: " + relationId);
     }
 
     /**
@@ -71,13 +51,15 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(MetadataProvider md) {
+    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) {
 
         int counter = 0; // id of the generated constraint
 
         for (String[] constraint : uniqueConstraints) {
             try {
-                ConstraintDescriptor uc = getConstraintDescriptor(md, constraint[0], constraint[1].split(","));
+                ConstraintDescriptor uc = getConstraintDescriptor(metadataLookup, constraint[0], constraint[1].split(","));
+                if (!uc.table.getID().equals(relation.getID()))
+                    continue;
                 UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
                 for (Attribute a : uc.attributes)
                     builder.addDeterminant(a);
@@ -94,10 +76,12 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
                 String[] fkAttrs = constraint[1].split(",");
                 String[] pkAttrs = constraint[3].split(",");
                 if (fkAttrs.length != pkAttrs.length)
-                    throw new MetadataExtractionException("Different number of columns in " + constraint);
+                    throw new MetadataExtractionException("Different number of columns in " + Arrays.toString(constraint));
 
-                ConstraintDescriptor fk = getConstraintDescriptor(md, constraint[0], fkAttrs);
-                ConstraintDescriptor pk = getConstraintDescriptor(md, constraint[2], pkAttrs);
+                ConstraintDescriptor fk = getConstraintDescriptor(metadataLookup, constraint[0], fkAttrs);
+                if (!fk.table.getID().equals(relation.getID()))
+                    continue;
+                ConstraintDescriptor pk = getConstraintDescriptor(metadataLookup, constraint[2], pkAttrs);
                 ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(fk.table, pk.table);
                 for (int i = 0; i < pkAttrs.length; i++)
                     builder.add(fk.attributes[i], pk.attributes[i]);
@@ -112,21 +96,17 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         }
     }
 
-    @Override
-    public DBParameters getDBParameters() {
-        return null;
-    }
 
     private static final class ConstraintDescriptor {
         DatabaseRelationDefinition table;
         Attribute[] attributes;
     }
 
-    private ConstraintDescriptor getConstraintDescriptor(MetadataLookup md, String tableName, String[] attributeNames) throws MetadataExtractionException {
+    private ConstraintDescriptor getConstraintDescriptor(MetadataLookup metadataLookup, String tableName, String[] attributeNames) throws MetadataExtractionException {
         ConstraintDescriptor result = new ConstraintDescriptor();
 
         RelationID relationId = getRelationIDFromString(tableName);
-        RelationDefinition relation = md.getRelation(relationId);
+        RelationDefinition relation = metadataLookup.getRelation(relationId);
 
         if (!(relation instanceof DatabaseRelationDefinition))
             throw new MetadataExtractionException("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());

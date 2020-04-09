@@ -1,6 +1,7 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 public class DelegatingRDBMetadataProvider implements MetadataProvider {
@@ -26,7 +27,7 @@ public class DelegatingRDBMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(MetadataProvider md) throws MetadataExtractionException {
-        provider.insertIntegrityConstraints(md);
+    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+        provider.insertIntegrityConstraints(relation, metadataLookup);
     }
 }

@@ -92,7 +92,7 @@ public class ImmutableDBMetadataImpl implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(MetadataProvider md) {
+    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) {
         throw new IllegalStateException("immutable metadata");
     }
 }

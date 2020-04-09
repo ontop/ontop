@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface ImplicitDBConstraintsProviderFactory {
 
-    MetadataProvider extract(Optional<File> constraintFile, QuotedIDFactory idFactory)
+    MetadataProvider extract(Optional<File> constraintFile, MetadataProvider baseMetadataProvider)
             throws MetadataExtractionException;
 }
