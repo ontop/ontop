@@ -19,12 +19,11 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
     @Override
     public Optional<RelationDefinition> getRelation(RelationID id) {
-        RelationID canonicalId = provider.getRelationCanonicalID(id);
-        RelationDefinition def = map.get(canonicalId);
+        RelationDefinition def = map.get(id);
 
         if (def == null) {
             try {
-                Optional<RelationDefinition> relation = provider.getRelation(canonicalId);
+                Optional<RelationDefinition> relation = provider.getRelation(id);
                 if (relation.isPresent()) {
                     RelationID retrievedId = relation.get().getID();
                     def = map.computeIfAbsent(retrievedId, i -> relation.get());

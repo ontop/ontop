@@ -13,11 +13,6 @@ public class DelegatingRDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public RelationID getRelationCanonicalID(RelationID id) {
-        return provider.getRelationCanonicalID(id);
-    }
-
-    @Override
     public DBParameters getDBParameters() {
         return provider.getDBParameters();
     }

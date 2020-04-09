@@ -108,12 +108,12 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
         }
     }
 
-    @Override
-    public RelationID getRelationCanonicalID(RelationID id) {  return id; }
+    protected RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public Optional<RelationDefinition> getRelation(RelationID id) throws MetadataExtractionException {
+    public Optional<RelationDefinition> getRelation(RelationID id0) throws MetadataExtractionException {
 
+        RelationID id = getRelationCanonicalID(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
             RelationDefinition.AttributeListBuilder currentRelation = null;

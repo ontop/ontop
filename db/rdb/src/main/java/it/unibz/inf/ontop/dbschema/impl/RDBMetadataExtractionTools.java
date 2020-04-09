@@ -73,11 +73,9 @@ public class RDBMetadataExtractionTools {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
 		for (RelationID id : metadataLoader.getRelationIDs()) {
-			Optional<RelationDefinition> r = metadataLoader.getRelation(id);
-			if (r.isPresent())
-				extractedRelations.add(r.get());
-			else
-				System.out.println("CANNOT FIND " + id);
+			RelationDefinition r = metadataLoader.getRelation(id)
+					.orElseThrow(() -> new MetadataExtractionException(new IllegalArgumentException()));
+			extractedRelations.add(r);
 		}
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
