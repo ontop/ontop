@@ -18,19 +18,26 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
     @Override
     public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        RelationDefinition def = map.get(id);
+        RelationDefinition relation = map.get(id);
+        if (relation != null)
+            return relation;
 
-        if (def == null) {
-            RelationDefinition relation = provider.getRelation(id);
-            RelationID retrievedId = relation.getID();
-            def = map.computeIfAbsent(retrievedId, i -> relation);
+        RelationDefinition retrievedRelation = provider.getRelation(id);
+        RelationID retrievedId = retrievedRelation.getID();
+        if (map.containsKey(retrievedId))
+            return map.get(retrievedId); // discard retrievedRelation
 
-            if (!id.hasSchema() && retrievedId.hasSchema()) {
-                map.putIfAbsent(retrievedId.getSchemalessID(), def);
-            }
+        map.put(retrievedId, retrievedRelation);
+
+        if (!id.hasSchema() && retrievedId.hasSchema()) {
+            RelationID schemalessId = retrievedId.getSchemalessID();
+            if (map.containsKey(schemalessId))
+                throw new MetadataExtractionException("Clashing schemaless IDs: " + retrievedId + " and " + map.get(schemalessId).getID());
+
+            map.put(schemalessId, retrievedRelation);
         }
 
-        return def;
+        return retrievedRelation;
     }
 
     public ImmutableMetadataProvider getImmutableDBMetadata() {
