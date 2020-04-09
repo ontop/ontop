@@ -25,7 +25,7 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private static final ImmutableDBMetadata md;
+	private static final RDBMetadataProvider md;
 	private static final QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()

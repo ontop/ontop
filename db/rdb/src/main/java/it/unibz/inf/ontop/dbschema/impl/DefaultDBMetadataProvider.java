@@ -161,8 +161,9 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(ImmutableDBMetadata metadata) throws MetadataExtractionException {
-        for (RelationDefinition relation : metadata.getAllRelations()) {
+    public void insertIntegrityConstraints(MetadataProvider metadata) throws MetadataExtractionException {
+        for (RelationID id : metadata.getRelationIDs()) {
+            RelationDefinition relation = metadata.getRelation(id);
             if (relation instanceof  DatabaseRelationDefinition) {
                 DatabaseRelationDefinition r = (DatabaseRelationDefinition) relation;
                 insertPrimaryKey(r);

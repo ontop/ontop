@@ -69,13 +69,13 @@ public class RDBMetadataExtractionTools {
 	 *    the connection metadata
 	 * @return
 	 */
-	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
+	public static ImmutableDBMetadataImpl createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
 		for (RelationID id : metadataLoader.getRelationIDs())
 			extractedRelations.add(metadataLoader.getRelation(id));
 
-		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
+		ImmutableDBMetadataImpl metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 		metadataLoader.insertIntegrityConstraints(metadata);
 		return metadata;
 	}

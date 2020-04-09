@@ -18,6 +18,6 @@ public class EmptyMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(ImmutableDBMetadata md) {
+    public void insertIntegrityConstraints(MetadataProvider md) {
     }
 }

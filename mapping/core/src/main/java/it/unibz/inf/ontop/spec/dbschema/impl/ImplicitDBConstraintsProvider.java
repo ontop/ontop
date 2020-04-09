@@ -71,7 +71,7 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(ImmutableDBMetadata md) {
+    public void insertIntegrityConstraints(MetadataProvider md) {
 
         int counter = 0; // id of the generated constraint
 

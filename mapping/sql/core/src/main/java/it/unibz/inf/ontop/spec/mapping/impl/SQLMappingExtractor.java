@@ -166,7 +166,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            ImmutableDBMetadata metadata = metadataLookup.getImmutableDBMetadata();
+            RDBMetadataProvider metadata = metadataLookup.getImmutableDBMetadata();
             metadataLoader.insertIntegrityConstraints(metadata);
 
             DBParameters dbParameters = metadataLoader.getDBParameters();

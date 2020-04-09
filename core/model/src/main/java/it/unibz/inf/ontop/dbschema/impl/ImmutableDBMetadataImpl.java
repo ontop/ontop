@@ -9,10 +9,9 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
-public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
+public class ImmutableDBMetadataImpl implements RDBMetadataProvider {
 
     private final DBParameters dbParameters;
 
@@ -46,7 +45,6 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
     }
 
     @JsonProperty("relations")
-    @Override
     public ImmutableList<RelationDefinition> getAllRelations() {
         return relations;
     }
@@ -85,5 +83,16 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
                 "driverVersion", getDBParameters().getDriverVersion(),
                 "quotationString", getDBParameters().getQuotedIDFactory().getIDQuotationString()
         );
+    }
+
+    @JsonIgnore
+    @Override
+    public ImmutableList<RelationID> getRelationIDs()  {
+        return relations.stream().map(RelationDefinition::getID).collect(ImmutableCollectors.toList());
+    }
+
+    @Override
+    public void insertIntegrityConstraints(MetadataProvider md) {
+        throw new IllegalStateException("immutable metadata");
     }
 }

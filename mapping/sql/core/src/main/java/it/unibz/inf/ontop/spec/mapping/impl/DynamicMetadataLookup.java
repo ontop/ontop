@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
@@ -34,7 +33,7 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return def;
     }
 
-    public ImmutableDBMetadata getImmutableDBMetadata() {
+    public RDBMetadataProvider getImmutableDBMetadata() {
         return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 

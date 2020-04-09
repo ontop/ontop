@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
@@ -84,7 +85,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 			}
 		};
 
-		ImmutableDBMetadata metadata = RDBMetadataExtractionTools.createImmutableMetadata(filteredMetadataLoader);
+		ImmutableDBMetadataImpl metadata = RDBMetadataExtractionTools.createImmutableMetadata(filteredMetadataLoader);
 
 		ImmutableMap<String, RelationDefinition> map = metadata.getAllRelations().stream()
 				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableName().toUpperCase(), Function.identity()));
