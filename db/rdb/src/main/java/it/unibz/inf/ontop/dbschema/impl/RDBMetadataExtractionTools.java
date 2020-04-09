@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.*;
+import java.util.Optional;
 
 /**
  * Retrieves the database metadata (table schema and database constraints)
@@ -71,9 +72,13 @@ public class RDBMetadataExtractionTools {
 	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
-		for (RelationID id : metadataLoader.getRelationIDs())
-			for (RelationDefinition r : metadataLoader.getRelations(id))
-				extractedRelations.add(r);
+		for (RelationID id : metadataLoader.getRelationIDs()) {
+			Optional<RelationDefinition> r = metadataLoader.getRelation(id);
+			if (r.isPresent())
+				extractedRelations.add(r.get());
+			else
+				System.out.println("CANNOT FIND " + id);
+		}
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 		metadataLoader.insertIntegrityConstraints(metadata);

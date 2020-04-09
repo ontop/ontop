@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.Optional;
+
 public class DelegatingRDBMetadataProvider implements RDBMetadataProvider {
     protected final RDBMetadataProvider provider;
 
@@ -26,8 +28,8 @@ public class DelegatingRDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelations(RelationID relationID) throws MetadataExtractionException {
-        return provider.getRelations(relationID);
+    public Optional<RelationDefinition> getRelation(RelationID relationId) throws MetadataExtractionException {
+        return provider.getRelation(relationId);
     }
 
     @Override

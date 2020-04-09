@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -60,8 +61,8 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
     }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelations(RelationID relationID) {
-        return ImmutableList.of();
+    public Optional<RelationDefinition> getRelation(RelationID relationID) {
+        return Optional.empty();
     }
 
     /**

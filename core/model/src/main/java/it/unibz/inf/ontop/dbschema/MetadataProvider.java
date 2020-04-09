@@ -3,6 +3,8 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import java.util.Optional;
+
 /**
  */
 
@@ -14,13 +16,12 @@ public interface MetadataProvider {
      */
     ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException;
 
-    /**
-     * relationID can be mapped to many tables (if, for example, it has no schema)
+    /*
      *
      * @param relationID
      * @return
      */
-    ImmutableList<RelationDefinition> getRelations(RelationID relationID) throws MetadataExtractionException;
+    Optional<RelationDefinition> getRelation(RelationID relationId) throws MetadataExtractionException;
 
     /**
      * Inserts the user-supplied primary keys, unique constraints and foreign keys

@@ -24,16 +24,13 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
         if (def == null) {
             try {
-                ImmutableList<RelationDefinition> relations = provider.getRelations(canonicalId);
-                for (RelationDefinition r : relations) {
-                    RelationID retrievedId = r.getID();
-                    RelationDefinition table = map.computeIfAbsent(retrievedId, i -> r);
-
-                    if (def == null) // CATCH THE FIRST
-                        def = table;
+                Optional<RelationDefinition> relation = provider.getRelation(canonicalId);
+                if (relation.isPresent()) {
+                    RelationID retrievedId = relation.get().getID();
+                    def = map.computeIfAbsent(retrievedId, i -> relation.get());
 
                     if (!id.hasSchema() && retrievedId.hasSchema()) {
-                        map.putIfAbsent(retrievedId.getSchemalessID(), table);
+                        map.putIfAbsent(retrievedId.getSchemalessID(), def);
                     }
                 }
             }

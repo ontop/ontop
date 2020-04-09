@@ -112,7 +112,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     public RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public ImmutableList<RelationDefinition> getRelations(RelationID id) throws MetadataExtractionException {
+    public Optional<RelationDefinition> getRelation(RelationID id) throws MetadataExtractionException {
 
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
@@ -140,7 +140,19 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             if (currentRelation != null)
                 relations.add(new DatabaseRelationDefinition(currentRelation));
 
-            return relations.build();
+            ImmutableList<RelationDefinition> list = relations.build();
+            if (list.size() == 0)
+                return Optional.empty();
+            else if (list.size() == 1)
+                return Optional.of(list.get(0));
+            else {
+                RelationID canonicalId = getRelationCanonicalID(id);
+                for (RelationDefinition r : list)
+                    if (r.getID().equals(canonicalId))
+                        return Optional.of(r);
+            }
+            throw new MetadataExtractionException(
+                    new IllegalArgumentException("Cannot resolve ambigous relation id: " + id));
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
