@@ -2,10 +2,8 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -15,10 +13,10 @@ import java.util.function.Function;
 
 public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
 
+    private final DBParameters dbParameters;
+
     private final ImmutableMap<RelationID, RelationDefinition> map;
     private final ImmutableList<RelationDefinition> relations;
-
-    private final DBParameters dbParameters;
 
     public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<RelationDefinition> relations) {
         this.dbParameters = dbParameters;
@@ -31,9 +29,8 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
         this.dbParameters = dbParameters;
         this.map = map;
         this.relations = map.values().stream()
-                .map(r -> Maps.immutableEntry(r.getID(), r))
-                .collect(ImmutableCollectors.toMultimap()).asMap().values().stream()
-                .map(r -> r.iterator().next())
+                .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().values().stream()
+                .map(s -> s.iterator().next())
                 .collect(ImmutableCollectors.toList());
     }
 

@@ -12,7 +12,6 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
     private final RDBMetadataProvider provider;
     private final Map<RelationID, RelationDefinition> map = new HashMap<>();
-    private final List<RelationDefinition> list = new ArrayList<>();
 
     public DynamicMetadataLookup(RDBMetadataProvider provider) {
         this.provider = provider;
@@ -27,21 +26,15 @@ public class DynamicMetadataLookup implements MetadataLookup {
             try {
                 ImmutableList<RelationDefinition.AttributeListBuilder> builders = provider.getRelationAttributes(canonicalId);
                 for (RelationDefinition.AttributeListBuilder builder : builders) {
-                    RelationDefinition table = new DatabaseRelationDefinition(builder);
-                    if (map.containsKey(table.getID())) {
-                        table = map.get(table.getID());
-                    }
-                    else
-                        list.add(table);
-                    map.put(table.getID(), table);
+                    RelationID retrievedId = builder.getRelationID();
+                    RelationDefinition table = map.computeIfAbsent(retrievedId,
+                            i -> new DatabaseRelationDefinition(builder));
+
                     if (def == null) // CATCH THE FIRST
                         def = table;
-                    if (!id.hasSchema() && table.getID().hasSchema()) {
-                        RelationID noSchemaID = table.getID().getSchemalessID();
-                        if (!map.containsKey(noSchemaID)) {
-                            map.put(noSchemaID, table);
-                        }
-                    }
+
+                    if (!id.hasSchema() && retrievedId.hasSchema())
+                        map.putIfAbsent(retrievedId.getSchemalessID(), table);
                 }
             }
             catch (MetadataExtractionException e) {
@@ -56,28 +49,4 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 
-    private final class ImmutableDBMetadataImpl2 implements ImmutableDBMetadata {
-        private final ImmutableList<RelationDefinition> immutableRelations;
-        private final ImmutableMap<RelationID, RelationDefinition> immutableMap;
-
-        ImmutableDBMetadataImpl2() {
-            this.immutableRelations = ImmutableList.copyOf(list);
-            this.immutableMap = ImmutableMap.copyOf(map);
-        }
-
-        @Override
-        public ImmutableList<RelationDefinition> getAllRelations() {
-            return immutableRelations;
-        }
-
-        @Override
-        public Optional<RelationDefinition> getRelation(RelationID id) {
-            return Optional.ofNullable(immutableMap.get(id));
-        }
-
-        @Override
-        public DBParameters getDBParameters() {
-            return provider.getDBParameters();
-        }
-    }
 }
