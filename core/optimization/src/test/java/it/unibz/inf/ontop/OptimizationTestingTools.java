@@ -3,7 +3,7 @@ package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
@@ -116,7 +116,7 @@ public class OptimizationTestingTools {
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilderImpl.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
 
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 

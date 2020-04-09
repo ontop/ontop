@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -78,7 +78,7 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilderImpl.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);

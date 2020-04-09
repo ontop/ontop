@@ -1,18 +1,16 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.spec.dbschema.impl.ImplicitDBConstraintsProviderFactoryImpl;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -46,20 +44,8 @@ public class ImplicitDBConstraintsTest {
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = new ImmutableDBMetadataImpl(new DBParameters() {
-					@Override
-					public QuotedIDFactory getQuotedIDFactory() { return DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(); }
-					@Override
-					public DBTypeFactory getDBTypeFactory() { return null; }
-					@Override
-					public String getDriverName() { return null; }
-					@Override
-					public String getDriverVersion() { return null; }
-					@Override
-					public String getDbmsProductName() { return null; }
-					@Override
-					public String getDbmsVersion() { return null; }
-				}, ImmutableList.of(TABLENAME, TABLE2));
+		md = new ImmutableMetadataImpl(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
+				ImmutableMap.of(TABLENAME.getID(), TABLENAME, TABLE2.getID(), TABLE2));
 	}
 	
 	@Test

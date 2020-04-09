@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 import java.util.*;
@@ -33,8 +33,8 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return def;
     }
 
-    public ImmutableDBMetadataImpl getImmutableDBMetadata() {
-        return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
+    public ImmutableMetadataImpl getImmutableDBMetadata() {
+        return new ImmutableMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 
 }

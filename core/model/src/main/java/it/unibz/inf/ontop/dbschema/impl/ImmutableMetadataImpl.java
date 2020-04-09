@@ -11,21 +11,14 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ImmutableDBMetadataImpl implements MetadataProvider {
+public class ImmutableMetadataImpl implements MetadataProvider {
 
     private final DBParameters dbParameters;
 
     private final ImmutableMap<RelationID, RelationDefinition> map;
     private final ImmutableList<RelationDefinition> relations;
 
-    public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableList<RelationDefinition> relations) {
-        this.dbParameters = dbParameters;
-        this.relations = relations;
-        this.map = relations.stream()
-                .collect(ImmutableCollectors.toMap(RelationDefinition::getID, Function.identity()));
-    }
-
-    public ImmutableDBMetadataImpl(DBParameters dbParameters, ImmutableMap<RelationID, RelationDefinition> map) {
+    public ImmutableMetadataImpl(DBParameters dbParameters, ImmutableMap<RelationID, RelationDefinition> map) {
         this.dbParameters = dbParameters;
         this.map = map;
         this.relations = map.values().stream()
@@ -95,4 +88,5 @@ public class ImmutableDBMetadataImpl implements MetadataProvider {
     public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) {
         throw new IllegalStateException("immutable metadata");
     }
+
 }

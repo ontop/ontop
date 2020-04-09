@@ -4,10 +4,11 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
-public class DelegatingRDBMetadataProvider implements MetadataProvider {
+public class DelegatingMetadataProvider implements MetadataProvider {
+
     protected final MetadataProvider provider;
 
-    public DelegatingRDBMetadataProvider(MetadataProvider provider) {
+    public DelegatingMetadataProvider(MetadataProvider provider) {
         this.provider = provider;
     }
 

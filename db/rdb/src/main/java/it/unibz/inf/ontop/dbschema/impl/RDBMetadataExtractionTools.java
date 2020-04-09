@@ -21,13 +21,12 @@ package it.unibz.inf.ontop.dbschema.impl;
 */
 
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.*;
-import java.util.Optional;
 
 /**
  * Retrieves the database metadata (table schema and database constraints)
@@ -69,13 +68,15 @@ public class RDBMetadataExtractionTools {
 	 *    the connection metadata
 	 * @return
 	 */
-	public static ImmutableDBMetadataImpl createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
+	public static ImmutableMetadataImpl createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
 
-		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
-		for (RelationID id : metadataLoader.getRelationIDs())
-			extractedRelations.add(metadataLoader.getRelation(id));
+		ImmutableMap.Builder<RelationID, RelationDefinition> map = ImmutableMap.builder();
+		for (RelationID id : metadataLoader.getRelationIDs()) {
+			RelationDefinition relation = metadataLoader.getRelation(id);
+			map.put(relation.getID(), relation);
+		}
 
-		ImmutableDBMetadataImpl metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
+		ImmutableMetadataImpl metadata = new ImmutableMetadataImpl(metadataLoader.getDBParameters(), map.build());
 		for (RelationDefinition relation : metadata.getAllRelations())
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
 		return metadata;

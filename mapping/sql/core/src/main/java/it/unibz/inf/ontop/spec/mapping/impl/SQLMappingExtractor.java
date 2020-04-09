@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableDBMetadataImpl;
+import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataImpl;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -26,7 +26,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
@@ -169,7 +168,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            ImmutableDBMetadataImpl metadata = metadataLookup.getImmutableDBMetadata();
+            ImmutableMetadataImpl metadata = metadataLookup.getImmutableDBMetadata();
             for (RelationDefinition relation : metadata.getAllRelations())
                 implicitConstraints.insertIntegrityConstraints(relation, metadata);
             return new MappingAndDBParametersImpl(provMapping, metadata.getDBParameters());

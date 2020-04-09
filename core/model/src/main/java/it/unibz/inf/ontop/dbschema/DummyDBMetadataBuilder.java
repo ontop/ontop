@@ -44,4 +44,6 @@ public interface DummyDBMetadataBuilder {
     QuotedIDFactory getQuotedIDFactory();
 
     DBTypeFactory getDBTypeFactory();
+
+    DBParameters getDBParameters();
 }

@@ -2,7 +2,7 @@ package it.unibz.inf.ontop;
 
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.DummyDBMetadataBuilder;
-import it.unibz.inf.ontop.dbschema.impl.DummyDBMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
@@ -48,7 +48,7 @@ public class OntopModelTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyDBMetadataBuilderImpl.class);
+        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);

@@ -10,13 +10,13 @@ import it.unibz.inf.ontop.model.type.TypeFactory;
 /**
  * A dummy DummyDBMetadataBuilder for tests only
  */
-public class DummyDBMetadataBuilderImpl implements DummyDBMetadataBuilder {
+public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     private final DBTypeFactory dbTypeFactory;
     private final QuotedIDFactory idFactory;
 
     @Inject
-    private DummyDBMetadataBuilderImpl(TypeFactory typeFactory) {
+    private DummyMetadataBuilderImpl(TypeFactory typeFactory) {
         this.idFactory = new SQLStandardQuotedIDFactory();
         this.dbTypeFactory = typeFactory.getDBTypeFactory();
     }
@@ -91,5 +91,40 @@ public class DummyDBMetadataBuilderImpl implements DummyDBMetadataBuilder {
     @Override
     public DBTypeFactory getDBTypeFactory() {
         return dbTypeFactory;
+    }
+
+    @Override
+    public DBParameters getDBParameters() {
+        return new DBParameters() {
+            @Override
+            public QuotedIDFactory getQuotedIDFactory() {
+                return idFactory;
+            }
+
+            @Override
+            public DBTypeFactory getDBTypeFactory() {
+                return dbTypeFactory;
+            }
+
+            @Override
+            public String getDriverName() {
+                return null;
+            }
+
+            @Override
+            public String getDriverVersion() {
+                return null;
+            }
+
+            @Override
+            public String getDbmsProductName() {
+                return null;
+            }
+
+            @Override
+            public String getDbmsVersion() {
+                return null;
+            }
+        };
     }
 }
