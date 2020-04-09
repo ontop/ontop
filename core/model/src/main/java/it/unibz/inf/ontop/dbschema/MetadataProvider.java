@@ -20,7 +20,7 @@ public interface MetadataProvider {
      * @param relationID
      * @return
      */
-    ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws MetadataExtractionException;
+    ImmutableList<RelationDefinition> getRelations(RelationID relationID) throws MetadataExtractionException;
 
     /**
      * Inserts the user-supplied primary keys, unique constraints and foreign keys

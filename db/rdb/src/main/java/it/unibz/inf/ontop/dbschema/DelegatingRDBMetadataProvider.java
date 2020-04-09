@@ -26,8 +26,8 @@ public class DelegatingRDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) throws MetadataExtractionException {
-        return provider.getRelationAttributes(relationID);
+    public ImmutableList<RelationDefinition> getRelations(RelationID relationID) throws MetadataExtractionException {
+        return provider.getRelations(relationID);
     }
 
     @Override

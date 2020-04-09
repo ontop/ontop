@@ -112,18 +112,20 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     public RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID id) throws MetadataExtractionException {
+    public ImmutableList<RelationDefinition> getRelations(RelationID id) throws MetadataExtractionException {
 
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
-            ImmutableList.Builder<RelationDefinition.AttributeListBuilder> relations = ImmutableList.builder();
+            ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
             RelationDefinition.AttributeListBuilder currentRelation = null;
 
             while (rs.next()) {
                 RelationID relationId = getRelationID(rs);
                 if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
                     // switch to the next database relation
+                    if (currentRelation != null)
+                        relations.add(new DatabaseRelationDefinition(currentRelation));
+
                     currentRelation = new RelationDefinition.AttributeListBuilder(relationId);
-                    relations.add(currentRelation);
                 }
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
@@ -135,6 +137,9 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
 
                 currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
             }
+            if (currentRelation != null)
+                relations.add(new DatabaseRelationDefinition(currentRelation));
+
             return relations.build();
         }
         catch (SQLException e) {

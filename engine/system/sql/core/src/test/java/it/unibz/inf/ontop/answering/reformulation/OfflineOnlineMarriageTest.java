@@ -24,11 +24,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.joining;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 
@@ -63,20 +66,11 @@ public class OfflineOnlineMarriageTest {
 
         CONN = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
 
-        Statement st = CONN.createStatement();
-
-        FileReader reader = new FileReader(CREATE_DB_FILE);
-        BufferedReader in = new BufferedReader(reader);
-        StringBuilder bf = new StringBuilder();
-        String line = in.readLine();
-        while (line != null) {
-            bf.append(line);
-            line = in.readLine();
+        try (Statement st = CONN.createStatement()) {
+            String s = Files.lines(Paths.get(CREATE_DB_FILE)).collect(joining());
+            st.executeUpdate(s);
+            CONN.commit();
         }
-        in.close();
-
-        st.executeUpdate(bf.toString());
-        CONN.commit();
     }
 
     @AfterClass

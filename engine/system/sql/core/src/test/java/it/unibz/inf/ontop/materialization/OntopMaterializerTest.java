@@ -53,11 +53,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static org.junit.Assert.assertEquals;
 
 public class OntopMaterializerTest {
@@ -153,20 +156,12 @@ public class OntopMaterializerTest {
 		// source.setParameter(RDBMSourceParameterConstants.USE_DATASOURCE_FOR_ABOXDUMP, "true");
 
 		Connection conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
 
-		FileReader reader = new FileReader("src/test/resources/mapping-test-db.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
+		try (Statement st = conn.createStatement()) {
+			String s = Files.lines(Paths.get("src/test/resources/mapping-test-db.sql")).collect(joining());
+			st.executeUpdate(s);
+			conn.commit();
 		}
-		in.close();
-
-		st.executeUpdate(bf.toString());
-		conn.commit();
 
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());

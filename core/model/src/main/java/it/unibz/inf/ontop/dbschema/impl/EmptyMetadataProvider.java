@@ -11,7 +11,7 @@ public class EmptyMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public ImmutableList<RelationDefinition.AttributeListBuilder> getRelationAttributes(RelationID relationID) {
+    public ImmutableList<RelationDefinition> getRelations(RelationID relationID) {
         return ImmutableList.of();
     }
 

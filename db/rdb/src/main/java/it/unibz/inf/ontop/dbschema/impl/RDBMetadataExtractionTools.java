@@ -72,8 +72,8 @@ public class RDBMetadataExtractionTools {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
 		for (RelationID id : metadataLoader.getRelationIDs())
-			for (RelationDefinition.AttributeListBuilder ab : metadataLoader.getRelationAttributes(id))
-				extractedRelations.add(new DatabaseRelationDefinition(ab));
+			for (RelationDefinition r : metadataLoader.getRelations(id))
+				extractedRelations.add(r);
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 		metadataLoader.insertIntegrityConstraints(metadata);
