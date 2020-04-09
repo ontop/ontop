@@ -40,8 +40,10 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return retrievedRelation;
     }
 
-    public ImmutableMetadataProvider getImmutableDBMetadata() {
-        return new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
+    public void insertIntegrityConstraints() throws MetadataExtractionException {
+        ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
+        for (RelationDefinition relation : metadata.getAllRelations())
+            provider.insertIntegrityConstraints(relation, metadata);
     }
 
 }
