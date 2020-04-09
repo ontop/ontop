@@ -38,7 +38,7 @@ import java.util.Optional;
 
 public class RDBMetadataExtractionTools {
 
-	public static RDBMetadataProvider getMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
+	public static MetadataProvider getMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
 		try {
 			DatabaseMetaData md = connection.getMetaData();
 			String productName = md.getDatabaseProductName();
@@ -69,7 +69,7 @@ public class RDBMetadataExtractionTools {
 	 *    the connection metadata
 	 * @return
 	 */
-	public static ImmutableDBMetadataImpl createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
+	public static ImmutableDBMetadataImpl createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
 		for (RelationID id : metadataLoader.getRelationIDs())

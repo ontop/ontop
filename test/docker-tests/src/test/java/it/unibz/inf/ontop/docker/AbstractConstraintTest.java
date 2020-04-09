@@ -74,9 +74,9 @@ public abstract class AbstractConstraintTest extends TestCase {
 
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
 
-		RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
+		MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
 
-		RDBMetadataProvider filteredMetadataLoader = new DelegatingRDBMetadataProvider(metadataLoader) {
+		MetadataProvider filteredMetadataLoader = new DelegatingRDBMetadataProvider(metadataLoader) {
 			@Override
 			public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
 				return provider.getRelationIDs().stream()

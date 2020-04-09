@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ImmutableDBMetadataImpl implements RDBMetadataProvider {
+public class ImmutableDBMetadataImpl implements MetadataProvider {
 
     private final DBParameters dbParameters;
 

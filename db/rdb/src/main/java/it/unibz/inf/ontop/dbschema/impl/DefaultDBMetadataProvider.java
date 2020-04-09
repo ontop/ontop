@@ -11,9 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public class DefaultDBMetadataProvider implements RDBMetadataProvider {
+public class DefaultDBMetadataProvider implements MetadataProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDBMetadataProvider.class);
 

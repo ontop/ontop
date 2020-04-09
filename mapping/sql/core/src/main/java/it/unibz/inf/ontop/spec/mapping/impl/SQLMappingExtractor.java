@@ -160,13 +160,13 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
-            RDBMetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
+            MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
             DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(metadataLoader);
 
             SQLPPMapping expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
 
-            RDBMetadataProvider metadata = metadataLookup.getImmutableDBMetadata();
+            MetadataProvider metadata = metadataLookup.getImmutableDBMetadata();
             metadataLoader.insertIntegrityConstraints(metadata);
 
             DBParameters dbParameters = metadataLoader.getDBParameters();

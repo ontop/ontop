@@ -112,6 +112,11 @@ public class ImplicitDBConstraintsProvider implements MetadataProvider {
         }
     }
 
+    @Override
+    public DBParameters getDBParameters() {
+        return null;
+    }
+
     private static final class ConstraintDescriptor {
         DatabaseRelationDefinition table;
         Attribute[] attributes;

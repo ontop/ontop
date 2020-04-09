@@ -19,4 +19,6 @@ public interface MetadataProvider extends MetadataLookup {
      * into the metadata object
      */
     void insertIntegrityConstraints(MetadataProvider md) throws MetadataExtractionException;
+
+    DBParameters getDBParameters();
 }

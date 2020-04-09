@@ -9,10 +9,10 @@ import java.util.*;
 
 public class DynamicMetadataLookup implements MetadataLookup {
 
-    private final RDBMetadataProvider provider;
+    private final MetadataProvider provider;
     private final Map<RelationID, RelationDefinition> map = new HashMap<>();
 
-    public DynamicMetadataLookup(RDBMetadataProvider provider) {
+    public DynamicMetadataLookup(MetadataProvider provider) {
         this.provider = provider;
     }
 
@@ -33,7 +33,7 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return def;
     }
 
-    public RDBMetadataProvider getImmutableDBMetadata() {
+    public MetadataProvider getImmutableDBMetadata() {
         return new ImmutableDBMetadataImpl(provider.getDBParameters(), ImmutableMap.copyOf(map));
     }
 

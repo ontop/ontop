@@ -20,4 +20,9 @@ public class EmptyMetadataProvider implements MetadataProvider {
     @Override
     public void insertIntegrityConstraints(MetadataProvider md) {
     }
+
+    @Override
+    public DBParameters getDBParameters() {
+        return null;
+    }
 }
