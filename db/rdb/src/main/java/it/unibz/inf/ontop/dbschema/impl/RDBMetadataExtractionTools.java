@@ -72,11 +72,8 @@ public class RDBMetadataExtractionTools {
 	public static ImmutableDBMetadata createImmutableMetadata(RDBMetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableList.Builder<RelationDefinition> extractedRelations = ImmutableList.builder();
-		for (RelationID id : metadataLoader.getRelationIDs()) {
-			RelationDefinition r = metadataLoader.getRelation(id)
-					.orElseThrow(() -> new MetadataExtractionException(new IllegalArgumentException()));
-			extractedRelations.add(r);
-		}
+		for (RelationID id : metadataLoader.getRelationIDs())
+			extractedRelations.add(metadataLoader.getRelation(id));
 
 		ImmutableDBMetadata metadata = new ImmutableDBMetadataImpl(metadataLoader.getDBParameters(), extractedRelations.build());
 		metadataLoader.insertIntegrityConstraints(metadata);

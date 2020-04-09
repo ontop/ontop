@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.parser.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -225,8 +226,13 @@ public class SelectQueryAttributeExtractor2 {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // construct the predicate using the table name
-            RelationDefinition relation = metadata.getRelation(id)
-                    .orElseThrow(() -> new InvalidSelectQueryRuntimeException("Table " + id + " not found in metadata", tableName));
+            RelationDefinition relation;
+            try {
+                relation = metadata.getRelation(id);
+            }
+            catch (MetadataExtractionException e) {
+                throw  new InvalidSelectQueryRuntimeException(e.getMessage(), id);
+            }
             relationIndex++;
 
             RelationID alias = (tableName.getAlias() != null)

@@ -111,7 +111,7 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
     protected RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public Optional<RelationDefinition> getRelation(RelationID id0) throws MetadataExtractionException {
+    public RelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
 
         RelationID id = getRelationCanonicalID(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
@@ -141,18 +141,19 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
                 relations.add(new DatabaseRelationDefinition(currentRelation));
 
             ImmutableList<RelationDefinition> list = relations.build();
-            if (list.size() == 0)
-                return Optional.empty();
-            else if (list.size() == 1)
-                return Optional.of(list.get(0));
+            if (list.size() == 0) {
+                throw new MetadataExtractionException("Cannot find relation id: " + id);
+            }
+            else if (list.size() == 1) {
+                return list.get(0);
+            }
             else {
                 RelationID canonicalId = getRelationCanonicalID(id);
                 for (RelationDefinition r : list)
                     if (r.getID().equals(canonicalId))
-                        return Optional.of(r);
+                        return r;
             }
-            throw new MetadataExtractionException(
-                    new IllegalArgumentException("Cannot resolve ambigous relation id: " + id));
+            throw new MetadataExtractionException("Cannot resolve ambigous relation id: " + id);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -274,29 +275,28 @@ public class DefaultDBMetadataProvider implements RDBMetadataProvider {
             ForeignKeyConstraint.Builder builder = null;
             String currentName = null;
             while (rs.next()) {
+                // TODO : do not retrieve ref every time!
                 RelationID refId = getPKRelationID(rs);
-                Optional<RelationDefinition> ref = dbMetadata.getRelation(refId);
-                // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
-                int seq = rs.getShort("KEY_SEQ");
-                if (seq == 1) {
-                    if (builder != null)
-                        relation.addForeignKeyConstraint(builder.build(currentName));
+                try {
+                    RelationDefinition ref = dbMetadata.getRelation(refId);
+                    // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
+                    int seq = rs.getShort("KEY_SEQ");
+                    if (seq == 1) {
+                        if (builder != null)
+                            relation.addForeignKeyConstraint(builder.build(currentName));
 
-                    currentName = rs.getString("FK_NAME"); // String => foreign key name (may be null)
+                        currentName = rs.getString("FK_NAME"); // String => foreign key name (may be null)
 
-                    if (ref.isPresent()) {
-                        builder = new ForeignKeyConstraint.Builder(relation, (DatabaseRelationDefinition) ref.get());
+                        builder = new ForeignKeyConstraint.Builder(relation, (DatabaseRelationDefinition) ref);
                     }
-                    else {
-                        builder = null; // do not add this foreign key
-                        // because there is no table it refers to
-                        System.out.println("Cannot find table: " + refId + " for FK " + currentName);
-                    }
-                }
-                if (builder != null) {
                     QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
                     QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
-                    builder.add(relation.getAttribute(attrId), ref.get().getAttribute(refAttrId));
+                    builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
+                }
+                catch (MetadataExtractionException e) {
+                        builder = null; // do not add this foreign key
+                        // because there is no table it refers to
+                        System.out.println("Cannot find table: " + refId + " for FK " + rs.getString("FK_NAME"));
                 }
             }
             if (builder != null)

@@ -18,27 +18,20 @@ public class DynamicMetadataLookup implements MetadataLookup {
     }
 
     @Override
-    public Optional<RelationDefinition> getRelation(RelationID id) {
+    public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
         RelationDefinition def = map.get(id);
 
         if (def == null) {
-            try {
-                Optional<RelationDefinition> relation = provider.getRelation(id);
-                if (relation.isPresent()) {
-                    RelationID retrievedId = relation.get().getID();
-                    def = map.computeIfAbsent(retrievedId, i -> relation.get());
+            RelationDefinition relation = provider.getRelation(id);
+            RelationID retrievedId = relation.getID();
+            def = map.computeIfAbsent(retrievedId, i -> relation);
 
-                    if (!id.hasSchema() && retrievedId.hasSchema()) {
-                        map.putIfAbsent(retrievedId.getSchemalessID(), def);
-                    }
-                }
-            }
-            catch (MetadataExtractionException e) {
-                return Optional.empty();
+            if (!id.hasSchema() && retrievedId.hasSchema()) {
+                map.putIfAbsent(retrievedId.getSchemalessID(), def);
             }
         }
 
-        return Optional.ofNullable(def);
+        return def;
     }
 
     public ImmutableDBMetadata getImmutableDBMetadata() {

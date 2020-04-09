@@ -23,7 +23,7 @@ public class DelegatingRDBMetadataProvider implements RDBMetadataProvider {
     }
 
     @Override
-    public Optional<RelationDefinition> getRelation(RelationID relationId) throws MetadataExtractionException {
+    public RelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
         return provider.getRelation(relationId);
     }
 

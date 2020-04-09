@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
-import java.util.Optional;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 public interface MetadataLookup {
 
@@ -8,8 +8,9 @@ public interface MetadataLookup {
      * Retrieves the data definition object based on its name.
      *
      * @param id
+     * @throws MetadataExtractionException if the relation is not found
      */
 
-    Optional<RelationDefinition> getRelation(RelationID id);
+    RelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
 }

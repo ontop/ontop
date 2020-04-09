@@ -8,20 +8,13 @@ import java.util.Optional;
 /**
  */
 
-public interface MetadataProvider {
+public interface MetadataProvider extends MetadataLookup {
 
     /**
      * Extracts relation IDs for all relations
      * @return relation IDs
      */
     ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException;
-
-    /*
-     *
-     * @param relationID
-     * @return
-     */
-    Optional<RelationDefinition> getRelation(RelationID relationId) throws MetadataExtractionException;
 
     /**
      * Inserts the user-supplied primary keys, unique constraints and foreign keys

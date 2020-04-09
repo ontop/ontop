@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
@@ -36,8 +37,12 @@ public class ImmutableDBMetadataImpl implements ImmutableDBMetadata {
 
 
     @Override
-    public Optional<RelationDefinition> getRelation(RelationID id) {
-        return Optional.ofNullable(map.get(id));
+    public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+        RelationDefinition relation = map.get(id);
+        if (relation == null)
+            throw new MetadataExtractionException("Relation " + id + " not found");
+
+        return relation;
     }
 
     @JsonProperty("relations")
