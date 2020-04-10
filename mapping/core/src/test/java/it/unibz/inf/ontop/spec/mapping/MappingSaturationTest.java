@@ -35,10 +35,9 @@ public class MappingSaturationTest {
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType largeIntDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType largeIntDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("p1",
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
             "col1", largeIntDBType, false,
             "col12", largeIntDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();

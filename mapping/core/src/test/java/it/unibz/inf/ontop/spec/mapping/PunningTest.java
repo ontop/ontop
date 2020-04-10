@@ -39,7 +39,7 @@ public class PunningTest {
     static {
         DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "company",
+        RelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "company",
             "cmpNpdidCompany", integerDBType, false,
             "cmpShortName", integerDBType, false);
         company = table24Def.getAtomPredicate();

@@ -50,8 +50,8 @@ public class UniqueConstraint implements FunctionalDependency {
 		protected final DatabaseRelationDefinition relation;
 		protected final String name;
 
-		private UniqueConstraintBuilder(RelationDefinition relation, String name) {
-			this.relation = (DatabaseRelationDefinition)relation;
+		private UniqueConstraintBuilder(DatabaseRelationDefinition relation, String name) {
+			this.relation = relation;
 			this.name = name;
 		}
 
@@ -93,7 +93,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 	public static class PrimaryKeyBuilder extends UniqueConstraintBuilder {
 
-		private PrimaryKeyBuilder(RelationDefinition relation, String name) {
+		private PrimaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
 			super(relation, name);
 		}
 
@@ -129,7 +129,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 
 	public static void primaryKeyOf(Attribute attribute) {
-		primaryKeyBuilder(attribute.getRelation(), getRelationPrimaryKeyName(attribute.getRelation()))
+		primaryKeyBuilder((DatabaseRelationDefinition)attribute.getRelation(), getRelationPrimaryKeyName(attribute.getRelation()))
 				.addDeterminant(attribute.getIndex()).build();
 	}
 
@@ -137,7 +137,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		if (attribute1.getRelation() != attribute2.getRelation())
 			throw new IllegalArgumentException();
 
-		primaryKeyBuilder(attribute1.getRelation(), getRelationPrimaryKeyName(attribute1.getRelation()))
+		primaryKeyBuilder((DatabaseRelationDefinition)attribute1.getRelation(), getRelationPrimaryKeyName(attribute1.getRelation()))
 				.addDeterminant(attribute1.getIndex())
 				.addDeterminant(attribute1.getIndex()).build();
 	}
@@ -152,7 +152,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static Builder builder(RelationDefinition relation, String name) {
+	public static Builder builder(DatabaseRelationDefinition relation, String name) {
 		return new UniqueConstraintBuilder(relation, name);
 	}
 
@@ -164,7 +164,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static Builder primaryKeyBuilder(RelationDefinition relation, String name) {
+	public static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
 		return new PrimaryKeyBuilder(relation, name);
 	}
 

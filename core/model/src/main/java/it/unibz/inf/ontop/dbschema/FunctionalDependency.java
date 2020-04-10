@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.impl.FunctionalDependencyImpl;
 /**
  * A functional dependency
  */
+
 public interface FunctionalDependency {
 
     ImmutableSet<Attribute> getDeterminants();

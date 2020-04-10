@@ -40,21 +40,18 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static ExtensionalDataNode DATA_NODE_2;
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("TABLE1",
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
                 "col1", integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
                 "col1", integerDBType, false,
                 "col2", integerDBType, false);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("TABLE3",
+        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);

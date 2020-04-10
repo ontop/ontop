@@ -47,10 +47,9 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_3;
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
             "A", integerDBType, true,
             "B", integerDBType, true);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();

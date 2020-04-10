@@ -52,10 +52,10 @@ public class ForeignKeyConstraint {
          * @param referencedRelation
          */
 
-        private Builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
+        private Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
             this.name = name;
-            this.relation = (DatabaseRelationDefinition)relation;
-            this.referencedRelation = (DatabaseRelationDefinition)referencedRelation;
+            this.relation = relation;
+            this.referencedRelation = referencedRelation;
         }
 
         /**
@@ -100,7 +100,7 @@ public class ForeignKeyConstraint {
      * @return
      */
 
-    public static Builder builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
+    public static Builder builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
         return new Builder(name, relation, referencedRelation);
     }
 
@@ -114,7 +114,7 @@ public class ForeignKeyConstraint {
      */
 
     public static void of(String name, Attribute attribute, Attribute reference) {
-        builder(name, attribute.getRelation(), reference.getRelation())
+        builder(name, (DatabaseRelationDefinition)attribute.getRelation(), (DatabaseRelationDefinition)reference.getRelation())
                 .add(attribute.getIndex(), reference.getIndex()).build();
     }
 

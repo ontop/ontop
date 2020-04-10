@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 public class DatabaseRelationDefinition extends RelationDefinition {
 
-	private final List<UniqueConstraint> ucs = new LinkedList<>();
-	private final List<ForeignKeyConstraint> fks = new LinkedList<>();
+	private UniqueConstraint primaryKey; // nullable
+	private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
-	private UniqueConstraint pk;
+	private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
 
 	/**
 	 * used only in DummyDBMetadataBuilder
@@ -58,11 +58,11 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 
 	public void addUniqueConstraint(UniqueConstraint uc) {
 		if (uc.isPrimaryKey()) {
-			if (pk != null)
-				throw new IllegalArgumentException("Duplicate PK " + pk + " " + uc);
-			pk = uc;
+			if (primaryKey != null)
+				throw new IllegalArgumentException("Duplicate PK " + primaryKey + " " + uc);
+			primaryKey = uc;
 		}
-		ucs.add(uc);
+		uniqueConstraints.add(uc);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
-		return ImmutableList.copyOf(ucs);
+		return ImmutableList.copyOf(uniqueConstraints);
 	}
 
 	public void addFunctionalDependency(FunctionalDependency constraint) {
@@ -93,7 +93,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	@JsonIgnore
 	@Override
 	public Optional<UniqueConstraint> getPrimaryKey() {
-		return Optional.ofNullable(pk);
+		return Optional.ofNullable(primaryKey);
 	}
 
 
@@ -104,7 +104,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 */
 
 	public void addForeignKeyConstraint(ForeignKeyConstraint fk) {
-		fks.add(fk);
+		foreignKeys.add(fk);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	@JsonSerialize(contentUsing = ForeignKeyConstraint.ForeignKeyConstraintSerializer.class)
 	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
-		return ImmutableList.copyOf(fks);
+		return ImmutableList.copyOf(foreignKeys);
 	}
 
 	@Override

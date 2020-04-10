@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class SelectQueryParserTest {
 
-    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
+    private RelationDefinition TABLE_P, TABLE_Q, TABLE_R;
 
     private static final String A1 = "A1";
     private static final String A2 = "A2";
@@ -399,12 +399,12 @@ public class SelectQueryParserTest {
         return TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(DatabaseRelationDefinition table, String var1, String var2) {
+    private DataAtom<RelationPredicate> dataAtomOf(RelationDefinition table, String var1, String var2) {
         return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(DatabaseRelationDefinition table, String var1, String var2, String var3, String var4) {
+    private DataAtom<RelationPredicate> dataAtomOf(RelationDefinition table, String var1, String var2, String var3, String var4) {
         return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
                 ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
     }

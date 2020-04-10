@@ -31,15 +31,12 @@ public class NullableUniqueConstraintTest {
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        TABLE1 = dbMetadata.createDatabaseRelation("TABLE1",
+        TABLE1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
                 "col1", integerDBType, true,
                 "col2", integerDBType, true,
                 "col3", integerDBType, true);
@@ -51,7 +48,7 @@ public class NullableUniqueConstraintTest {
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        TABLE2 = dbMetadata.createDatabaseRelation("TABLE2",
+        TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
             "col1", integerDBType, true,
             "col2", integerDBType, true,
             "col3", integerDBType, true);

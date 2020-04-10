@@ -30,10 +30,9 @@ import static org.junit.Assert.*;
 
 public class RelationalExpressionTest {
 
-    private static DummyDBMetadataBuilder METADATA;
     private static QuotedIDFactory MDFAC;
 
-    private DatabaseRelationDefinition P;
+    private RelationDefinition P;
 
     private DataAtom<RelationPredicate> f1, f2;
     private ImmutableFunctionalTerm eq;
@@ -45,15 +44,14 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        METADATA = DEFAULT_DUMMY_DB_METADATA;
-        MDFAC = METADATA.getQuotedIDFactory();
+        MDFAC = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
 
-        DBTermType integerDBType = METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        P = METADATA.createDatabaseRelation("P",
+        P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
            "A", integerDBType, true,
             "B", integerDBType, true);
 
@@ -76,7 +74,7 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        DatabaseRelationDefinition Q = METADATA.createDatabaseRelation("Q",
+        RelationDefinition Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
             "A", integerDBType, true,
             "C", integerDBType, true);
 

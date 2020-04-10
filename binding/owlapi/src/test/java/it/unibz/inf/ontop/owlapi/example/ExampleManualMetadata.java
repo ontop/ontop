@@ -57,7 +57,7 @@ public class ExampleManualMetadata {
 
 	private static void defMeasTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 				.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
 				.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false)
 				.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false)
@@ -66,7 +66,7 @@ public class ExampleManualMetadata {
 
 	private static void defMessTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 				.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
 				.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType(), false)
 				.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
@@ -74,7 +74,7 @@ public class ExampleManualMetadata {
 
 	private static void defStaticTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
 		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
 				.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
 				.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
 	}

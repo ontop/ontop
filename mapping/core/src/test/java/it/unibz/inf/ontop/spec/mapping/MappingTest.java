@@ -54,27 +54,26 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("p1",
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
             "col1", integerDBType, false,
             "col12", integerDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("p3",
+        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p3",
             "col31", integerDBType, false);
         P3_PREDICATE = table3Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation("p4",
+        RelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p4",
             "col41", integerDBType, false);
         P4_PREDICATE = table4Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation("p5",
+        RelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p5",
             "col51", integerDBType, false);
         P5_PREDICATE = table5Def.getAtomPredicate();
 
-        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation("brokerworksfor",
+        RelationDefinition tableBrokerDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("brokerworksfor",
             "broker", integerDBType, false,
             "company", integerDBType, true,
             "client", integerDBType, true);

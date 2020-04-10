@@ -43,46 +43,45 @@ public class IQValidationTest {
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getStrictEquality(X, Y);
 
     static {
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerDBType = dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("TABLE1",
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
             "col1", integerDBType, false);
         TABLE1 = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table11Def = dbMetadata.createDatabaseRelation("TABLE11",
+        RelationDefinition table11Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE11",
             "col1", integerDBType, false);
         TABLE1_1 = table11Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table12Def = dbMetadata.createDatabaseRelation("TABLE12",
+        RelationDefinition table12Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE12",
             "col1", integerDBType, false);
         TABLE1_2 = table12Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table13Def = dbMetadata.createDatabaseRelation("TABLE13",
+        RelationDefinition table13Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE13",
             "col1", integerDBType, false);
         TABLE1_3 = table13Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2 = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table22Def = dbMetadata.createDatabaseRelation("TABLE22",
+        RelationDefinition table22Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_2 = table22Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table23Def = dbMetadata.createDatabaseRelation("TABLE22",
+        RelationDefinition table23Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_3 = table23Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation("TABLE22",
+        RelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_4 = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("TABLE3",
+        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
