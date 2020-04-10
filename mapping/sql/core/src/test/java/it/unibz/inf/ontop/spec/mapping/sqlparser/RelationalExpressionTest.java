@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -8,10 +8,10 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.IllegalJoinException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.ExpressionParser;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpressionAttributes;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;

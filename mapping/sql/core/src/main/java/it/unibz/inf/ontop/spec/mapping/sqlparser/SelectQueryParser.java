@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
@@ -25,7 +25,6 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.

@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 /*
  * #%L

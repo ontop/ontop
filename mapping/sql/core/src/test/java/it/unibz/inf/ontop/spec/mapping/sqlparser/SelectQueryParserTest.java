@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -8,10 +8,10 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryParser;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import org.junit.Test;

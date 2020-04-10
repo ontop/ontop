@@ -55,7 +55,6 @@ public class MappingTestingTools {
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
-
     public static final RelationPredicate TABLE1_AR2;
     public static final RelationPredicate TABLE2_AR2;
     public static final RelationPredicate TABLE1_AR3;

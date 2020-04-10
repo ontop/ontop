@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.*;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
@@ -20,7 +20,6 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.

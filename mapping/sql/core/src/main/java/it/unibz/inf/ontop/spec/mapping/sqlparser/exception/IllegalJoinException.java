@@ -1,6 +1,6 @@
-package it.unibz.inf.ontop.spec.mapping.parser.exception;
+package it.unibz.inf.ontop.spec.mapping.sqlparser.exception;
 
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpressionAttributes;
 
 /**
  * Created by Roman Kontchakov on 10/12/2016.

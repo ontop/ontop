@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -10,9 +10,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.ExpressionParser;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.ExpressionParser;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;

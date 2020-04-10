@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.exception;
+package it.unibz.inf.ontop.spec.mapping.sqlparser.exception;
 
 /**
  * Created by Roman Kontchakov on 28/01/2017.

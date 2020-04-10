@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 /*
  * #%L
@@ -27,10 +27,10 @@ import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Before;
 import org.junit.Test;

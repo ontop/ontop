@@ -1,11 +1,11 @@
-package it.unibz.inf.ontop.spec.mapping.parser;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;

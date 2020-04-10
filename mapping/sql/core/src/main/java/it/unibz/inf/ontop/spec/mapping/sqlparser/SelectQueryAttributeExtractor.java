@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.parser.impl;
+package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 /*
  * #%L
@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.regex.Matcher;

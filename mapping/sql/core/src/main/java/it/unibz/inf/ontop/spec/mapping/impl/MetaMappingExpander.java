@@ -38,9 +38,9 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunct
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor2;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor2;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
