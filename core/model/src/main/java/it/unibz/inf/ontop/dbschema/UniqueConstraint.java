@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -129,7 +128,8 @@ public class UniqueConstraint implements FunctionalDependency {
 
 
 	public static void primaryKeyOf(Attribute attribute) {
-		primaryKeyBuilder((DatabaseRelationDefinition)attribute.getRelation(), getRelationPrimaryKeyName(attribute.getRelation()))
+		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute.getRelation();
+		primaryKeyBuilder(relation, getRelationPrimaryKeyName(relation))
 				.addDeterminant(attribute.getIndex()).build();
 	}
 
@@ -137,12 +137,14 @@ public class UniqueConstraint implements FunctionalDependency {
 		if (attribute1.getRelation() != attribute2.getRelation())
 			throw new IllegalArgumentException();
 
-		primaryKeyBuilder((DatabaseRelationDefinition)attribute1.getRelation(), getRelationPrimaryKeyName(attribute1.getRelation()))
+		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute1.getRelation();
+
+		primaryKeyBuilder(relation, getRelationPrimaryKeyName(relation))
 				.addDeterminant(attribute1.getIndex())
 				.addDeterminant(attribute1.getIndex()).build();
 	}
 
-	private static String getRelationPrimaryKeyName(RelationDefinition relation) { return "PK_" + relation.getID().getTableName(); }
+	private static String getRelationPrimaryKeyName(DatabaseRelationDefinition relation) { return "PK_" + relation.getID().getTableName(); }
 
 	/**
 	 * creates a UNIQUE constraint builder
@@ -234,7 +236,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 	@Override
 	public String toString() {
-		return "ALTER TABLE " + attributes.get(0).getRelation().getID() +
+		return "ALTER TABLE " + ((DatabaseRelationDefinition)attributes.get(0).getRelation()).getID() +
 				" ADD CONSTRAINT " + name + (isPrimaryKey ? " PRIMARY KEY " : " UNIQUE ") +
 				"(" +
 				attributes.stream()

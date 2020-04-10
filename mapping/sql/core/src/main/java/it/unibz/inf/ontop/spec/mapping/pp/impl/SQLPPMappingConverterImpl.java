@@ -222,9 +222,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     private ParserViewDefinition createParserView(QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory, String sql, ImmutableList<QuotedID> attributes, int parserViewCounter) {
-        RelationID id = idFactory.createRelationID(null, String.format("view_%s", parserViewCounter));
-
-        return new ParserViewDefinition(id, attributes, sql, dbTypeFactory);
+        return new ParserViewDefinition(attributes, sql, dbTypeFactory);
     }
 
 }

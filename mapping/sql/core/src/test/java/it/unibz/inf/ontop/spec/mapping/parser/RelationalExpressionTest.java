@@ -32,7 +32,7 @@ public class RelationalExpressionTest {
 
     private static QuotedIDFactory MDFAC;
 
-    private RelationDefinition P;
+    private DatabaseRelationDefinition P;
 
     private DataAtom<RelationPredicate> f1, f2;
     private ImmutableFunctionalTerm eq;
@@ -74,7 +74,7 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        RelationDefinition Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+        DatabaseRelationDefinition Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
             "A", integerDBType, true,
             "C", integerDBType, true);
 

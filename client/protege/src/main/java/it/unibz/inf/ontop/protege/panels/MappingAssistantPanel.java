@@ -405,7 +405,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			RelationDefinition dd = (RelationDefinition) cb.getSelectedItem();
+			DatabaseRelationDefinition dd = (DatabaseRelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -754,7 +754,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(RelationDefinition table) {
+	private String generateSQLString(DatabaseRelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -944,19 +944,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {
-					if (value instanceof DatabaseRelationDefinition) {
-						DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
-						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
-						label.setIcon(icon);
-						label.setText(td.getID().getSQLRendering());
-					} else if (value instanceof ParserViewDefinition) {
-						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are
-						// created by SQLQueryParser for complex queries that cannot be parsed
-						ParserViewDefinition vd = (ParserViewDefinition) value;
-						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
-						label.setIcon(icon);
-						label.setText(vd.getID().getSQLRendering());
-					}
+                    if (value instanceof DatabaseRelationDefinition) {
+                        DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
+                        ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
+                        label.setIcon(icon);
+                        label.setText(td.getID().getSQLRendering());
+                    }
+                    //else if (value instanceof ParserViewDefinition) {
+                    //	ParserViewDefinition vd = (ParserViewDefinition) value;
+                    //	ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
+                    //	label.setIcon(icon);
+                    //	label.setText(vd.getID().getSQLRendering());
+                    // }
 					return label;
 				}
 			}

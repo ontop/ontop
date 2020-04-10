@@ -20,7 +20,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
         this.dbParameters = dbParameters;
         // the list contains no repetitions (based on full relation ids)
         this.relations = map.values().stream()
-                .collect(ImmutableCollectors.toMultimap(RelationDefinition::getID, Function.identity())).asMap().values().stream()
+                .collect(ImmutableCollectors.toMultimap(DatabaseRelationDefinition::getID, Function.identity())).asMap().values().stream()
                 .map(s -> s.iterator().next())
                 .collect(ImmutableCollectors.toList());
     }
@@ -70,7 +70,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     @JsonIgnore
     @Override
     public ImmutableList<RelationID> getRelationIDs()  {
-        return relations.stream().map(RelationDefinition::getID).collect(ImmutableCollectors.toList());
+        return relations.stream().map(DatabaseRelationDefinition::getID).collect(ImmutableCollectors.toList());
     }
 
     @Override

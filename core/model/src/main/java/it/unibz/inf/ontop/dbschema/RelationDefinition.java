@@ -45,23 +45,13 @@ import java.util.function.Function;
 
 public abstract class RelationDefinition {
 
-	private final RelationID id;
 	private final ImmutableList<Attribute> attributes;
 	private final ImmutableMap<QuotedID, Attribute> map;
-	private final RelationPredicate predicate;
 
-	protected RelationDefinition(RelationID id, AttributeListBuilder builder) {
-		this.id = id;
+	protected RelationDefinition(AttributeListBuilder builder) {
 		this.attributes = builder.build(this);
 		this.map = attributes.stream()
 				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
-		this.predicate = new RelationPredicateImpl();
-	}
-
-	@JsonProperty("name")
-	@JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
-	public RelationID getID() {
-		return id;
 	}
 
 	/**
@@ -96,8 +86,7 @@ public abstract class RelationDefinition {
 	@JsonProperty("columns")
 	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
-	@JsonIgnore
-	public RelationPredicate getAtomPredicate() { return predicate;  }
+	public abstract RelationPredicate getAtomPredicate();
 
 	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
 
@@ -106,6 +95,23 @@ public abstract class RelationDefinition {
 	public abstract Optional<UniqueConstraint> getPrimaryKey();
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
+
+
+
+	protected class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
+
+		RelationPredicateImpl(String name) {
+			super(name,
+					getAttributes().stream()
+							.map(Attribute::getTermType)
+							.collect(ImmutableCollectors.toList()));
+		}
+
+		@Override
+		public RelationDefinition getRelationDefinition() {
+			return RelationDefinition.this;
+		}
+	}
 
 
 	public class AttributeNotFoundException extends Exception {
@@ -118,21 +124,6 @@ public abstract class RelationDefinition {
 		public RelationDefinition getRelation() { return RelationDefinition.this; }
 	}
 
-
-	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
-
-		RelationPredicateImpl() {
-			super(id.getSQLRendering(),
-					attributes.stream()
-							.map(Attribute::getTermType)
-							.collect(ImmutableCollectors.toList()));
-		}
-
-		@Override
-		public RelationDefinition getRelationDefinition() {
-			return RelationDefinition.this;
-		}
-	}
 
 
 	private static class AttributeInfo {

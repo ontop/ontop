@@ -198,15 +198,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             RelationID aliasId = generateFreshViewAlias();
             RelationDefinition relationDefinition = sqlTable.getRelationDefinition();
-
-            String relationRendering = Optional.of(relationDefinition)
-                    // Black-box view: we use the definition
-                    .filter(r -> r instanceof ParserViewDefinition)
-                    .map(r -> ((ParserViewDefinition) r).getStatement())
-                    .map(s -> String.format("(%s)", s))
-                    // For regular relations, their ID is known by the DB so we use it
-                    .orElseGet(() -> relationDefinition.getID().getSQLRendering());
-
+            String relationRendering = relationDefinition.getAtomPredicate().getName();
             String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
             return new QuerySerializationImpl(sqlSubString,

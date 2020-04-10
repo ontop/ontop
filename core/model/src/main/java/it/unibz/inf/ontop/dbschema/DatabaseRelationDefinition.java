@@ -21,8 +21,11 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
+import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +39,9 @@ import java.util.stream.Collectors;
 
 public class DatabaseRelationDefinition extends RelationDefinition {
 
+	private final RelationID id;
+	private final RelationPredicate predicate;
+
 	private UniqueConstraint primaryKey; // nullable
 	private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
 	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
@@ -48,8 +54,24 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @param builder
 	 */
     public DatabaseRelationDefinition(RelationID id, AttributeListBuilder builder) {
-		super(id, builder);
+    	super(builder);
+    	this.id = id;
+		this.predicate = new RelationPredicateImpl(id.getSQLRendering());
 	}
+
+	@JsonProperty("name")
+	@JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
+	public RelationID getID() {
+		return id;
+	}
+
+
+	@JsonIgnore
+	@Override
+	public RelationPredicate getAtomPredicate() { return predicate;  }
+
+
+
 
 	/**
 	 * adds a unique constraint (a primary key or a unique constraint proper)

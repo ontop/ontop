@@ -108,11 +108,11 @@ public class DirectMappingAxiomProducer {
 	
 	private static String getColumnNameWithAlias(Attribute attr) {
 		 return getColumnName(attr) + 
-				 " AS " + attr.getRelation().getID().getTableName() + "_" + attr.getID().getName();
+				 " AS " + ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableName() + "_" + attr.getID().getName();
 	}
 	
 	private static String getColumnName(Attribute attr) {
-		 return new QualifiedAttributeID(attr.getRelation().getID(), attr.getID()).getSQLRendering();
+		 return new QualifiedAttributeID(((DatabaseRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
 	}
 
 
@@ -187,7 +187,7 @@ public class DirectMappingAxiomProducer {
      *   - the percent-encoded form of the column name.
      */
     private IRI getLiteralPropertyIRI(Attribute attr) {
-        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(attr.getRelation().getID().getTableName())
+        return rdfFactory.createIRI(baseIRI + R2RMLIRISafeEncoder.encode(((DatabaseRelationDefinition)attr.getRelation()).getID().getTableName())
                 + "#" + R2RMLIRISafeEncoder.encode(attr.getID().getName()));
     }
 

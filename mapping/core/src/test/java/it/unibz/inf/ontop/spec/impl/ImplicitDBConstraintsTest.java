@@ -91,8 +91,8 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();
-		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
-		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
+		assertEquals(idfac.createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(idfac.createAttributeID("KEY1"), ref.getID());
 	}
 
 	@Test
@@ -103,8 +103,8 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReference();
-		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
-		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
+		assertEquals(idfac.createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(idfac.createAttributeID("KEY1"), ref.getID());
 		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
 				TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
