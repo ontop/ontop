@@ -22,10 +22,8 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -47,11 +45,13 @@ public abstract class RelationDefinition {
 
 	private final ImmutableList<Attribute> attributes;
 	private final ImmutableMap<QuotedID, Attribute> map;
+	private final RelationPredicate predicate;
 
-	protected RelationDefinition(AttributeListBuilder builder) {
+	protected RelationDefinition(String predicateName, AttributeListBuilder builder) {
 		this.attributes = builder.build(this);
 		this.map = attributes.stream()
 				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
+		this.predicate = new RelationPredicateImpl(predicateName);
 	}
 
 	/**
@@ -86,7 +86,10 @@ public abstract class RelationDefinition {
 	@JsonProperty("columns")
 	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
-	public abstract RelationPredicate getAtomPredicate();
+	@JsonIgnore
+	public RelationPredicate getAtomPredicate() { return predicate; }
+
+
 
 	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
 
@@ -98,9 +101,9 @@ public abstract class RelationDefinition {
 
 
 
-	protected class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
+	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
 
-		RelationPredicateImpl(String name) {
+		public RelationPredicateImpl(String name) {
 			super(name,
 					getAttributes().stream()
 							.map(Attribute::getTermType)

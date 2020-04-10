@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.dbschema;
+package it.unibz.inf.ontop.spec.mapping.parser.impl;
 
 /*
  * #%L
@@ -21,6 +21,7 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -35,17 +36,12 @@ import java.util.stream.Collectors;
 
 public class ParserViewDefinition extends RelationDefinition {
 
-	private final String statement;
-	private final RelationPredicate predicate;
-	
 	/**
 	 * @param statement
 	 */
 	
 	public ParserViewDefinition(ImmutableList<QuotedID> attrs, String statement, DBTypeFactory dbTypeFactory) {
-		super(attributeListBuilder(attrs, dbTypeFactory));
-		this.statement = statement;
-		this.predicate = new RelationPredicateImpl("(" + statement + ")");
+		super("(" + statement + ")", attributeListBuilder(attrs, dbTypeFactory));
 	}
 
 	private static AttributeListBuilder attributeListBuilder(ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
@@ -57,18 +53,6 @@ public class ParserViewDefinition extends RelationDefinition {
 		return builder;
 	}
 
-	@Override
-	public RelationPredicate getAtomPredicate() { return predicate;  }
-
-	/**
-	 * returns the SQL definition of the sub-query
-	 *  
-	 * @return
-	 */
-	
-	public String getStatement() {
-		return statement;
-	}
 
 	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
@@ -90,9 +74,8 @@ public class ParserViewDefinition extends RelationDefinition {
 
 	@Override
 	public String toString() {
-		return " [" + getAttributes().stream()
+		return getAtomPredicate().getName() + "[" + getAttributes().stream()
 				.map(Attribute::toString)
-				.collect(Collectors.joining(", ")) +
-				"]" + " (" + statement + ")";
+				.collect(Collectors.joining(", ")) + "]";
 	}
 }

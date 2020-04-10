@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class DatabaseRelationDefinition extends RelationDefinition {
 
 	private final RelationID id;
-	private final RelationPredicate predicate;
 
 	private UniqueConstraint primaryKey; // nullable
 	private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
@@ -54,9 +53,8 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @param builder
 	 */
     public DatabaseRelationDefinition(RelationID id, AttributeListBuilder builder) {
-    	super(builder);
+    	super(id.getSQLRendering(), builder);
     	this.id = id;
-		this.predicate = new RelationPredicateImpl(id.getSQLRendering());
 	}
 
 	@JsonProperty("name")
@@ -64,13 +62,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	public RelationID getID() {
 		return id;
 	}
-
-
-	@JsonIgnore
-	@Override
-	public RelationPredicate getAtomPredicate() { return predicate;  }
-
-
 
 
 	/**

@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.parser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.mapping.parser.impl.ParserViewDefinition;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.RAExpression;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.impl.SelectQueryParser;
