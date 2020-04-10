@@ -61,19 +61,13 @@ public class ForeignKeyConstraint {
         /**
          * adds a pair (attribute, referenced attribute) to the FK constraint
          *
-         * @param attribute
-         * @param referencedAttribute
+         * @param attributeIndex
+         * @param referencedAttributeIndex
          * @return
          */
 
-        public Builder add(Attribute attribute, Attribute referencedAttribute) {
-            if (relation != attribute.getRelation())
-                throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
-
-            if (referencedRelation != referencedAttribute.getRelation())
-                throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: " + relation + " -> " + referencedRelation + " (attribute " + referencedAttribute.getRelation().getID() + "." + referencedAttribute + ")");
-
-            builder.add(new Component(attribute, referencedAttribute));
+        public Builder add(int attributeIndex, int referencedAttributeIndex) {
+            builder.add(new Component(relation.getAttribute(attributeIndex), referencedRelation.getAttribute(referencedAttributeIndex)));
             return this;
         }
 
@@ -121,7 +115,7 @@ public class ForeignKeyConstraint {
 
     public static void of(String name, Attribute attribute, Attribute reference) {
         builder(name, attribute.getRelation(), reference.getRelation())
-                .add(attribute, reference).build();
+                .add(attribute.getIndex(), reference.getIndex()).build();
     }
 
     private final String name;

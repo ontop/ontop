@@ -56,11 +56,8 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(Attribute attribute) {
-			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
-
-			builder.add(attribute);
+		public Builder addDeterminant(int determinantIndex) {
+			builder.add(relation.getAttribute(determinantIndex));
 			return this;
 		}
 
@@ -71,7 +68,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDependent(Attribute dependent) {
+		public Builder addDependent(int dependentIndex) {
 			throw new IllegalArgumentException("No dependents");
 		}
 
@@ -101,11 +98,13 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(Attribute attribute) {
+		public Builder addDeterminant(int determinantIndex) {
+			Attribute attribute = relation.getAttribute(determinantIndex);
 			if (attribute.isNullable())
 				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
 
-			return super.addDeterminant(attribute);
+			builder.add(attribute);
+			return this;
 		}
 
 		@Override
@@ -129,15 +128,18 @@ public class UniqueConstraint implements FunctionalDependency {
 	}
 
 
-	public static void primaryKeyOf(Attribute att) {
-		primaryKeyBuilder(att.getRelation(), getRelationPrimaryKeyName(att.getRelation()))
-				.addDeterminant(att).build();
+	public static void primaryKeyOf(Attribute attribute) {
+		primaryKeyBuilder(attribute.getRelation(), getRelationPrimaryKeyName(attribute.getRelation()))
+				.addDeterminant(attribute.getIndex()).build();
 	}
 
-	public static void primaryKeyOf(Attribute att1, Attribute att2) {
-		primaryKeyBuilder(att1.getRelation(), getRelationPrimaryKeyName(att1.getRelation()))
-				.addDeterminant(att1)
-				.addDeterminant(att2).build();
+	public static void primaryKeyOf(Attribute attribute1, Attribute attribute2) {
+		if (attribute1.getRelation() != attribute2.getRelation())
+			throw new IllegalArgumentException();
+
+		primaryKeyBuilder(attribute1.getRelation(), getRelationPrimaryKeyName(attribute1.getRelation()))
+				.addDeterminant(attribute1.getIndex())
+				.addDeterminant(attribute1.getIndex()).build();
 	}
 
 	private static String getRelationPrimaryKeyName(RelationDefinition relation) { return "PK_" + relation.getID().getTableName(); }

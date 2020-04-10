@@ -117,8 +117,8 @@ public class LeftJoinOptimizationTest {
             "col3", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table2aDef.getAttribute(1));
         ForeignKeyConstraint.builder("composite-fk", table2aDef, table1aDef)
-            .add(table2aDef.getAttribute(2), table1aDef.getAttribute(1))
-            .add(table2aDef.getAttribute(3), table1aDef.getAttribute(2))
+            .add(2, 1)
+            .add(3, 2)
             .build();
         TABLE2a_PREDICATE = table2aDef.getAtomPredicate();
 
@@ -140,7 +140,7 @@ public class LeftJoinOptimizationTest {
             "col1", integerDBType, true,
             "col2", integerDBType, false);
         UniqueConstraint.builder(table5Def, "uc5")
-                    .addDeterminant(table5Def.getAttribute(1))
+                    .addDeterminant(1)
                     .build();
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
     }

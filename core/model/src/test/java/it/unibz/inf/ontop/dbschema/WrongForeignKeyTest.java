@@ -26,9 +26,9 @@ public class WrongForeignKeyTest {
             "col5", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
         FunctionalDependency.defaultBuilder(table1Def)
-                .addDeterminant(table1Def.getAttribute(2))
-                .addDependent(table1Def.getAttribute(3))
-                .addDependent(table1Def.getAttribute(4))
+                .addDeterminant(2)
+                .addDependent(3)
+                .addDependent(4)
                 .build();
 
         table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
@@ -46,12 +46,12 @@ public class WrongForeignKeyTest {
             "col6", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
         FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(table3Def.getAttribute(2))
-                .addDependent(table3Def.getAttribute(3))
+                .addDeterminant(2)
+                .addDependent(3)
                 .build();
         FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(table3Def.getAttribute(4))
-                .addDependent(table3Def.getAttribute(5))
+                .addDeterminant(4)
+                .addDependent(5)
                 .build();
     }
 
@@ -59,32 +59,11 @@ public class WrongForeignKeyTest {
     //Add a foreign key constraint where a column is missing in the referring table
     @Test(expected = RelationDefinition.AttributeNotFoundException.class)
     public void testMissingColumnPK(){
-        DatabaseRelationDefinition relation = table1Def;
-        DatabaseRelationDefinition ref = table2Def;
-
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", relation, ref);
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", table1Def, table2Def);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
         QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
-        builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
+        builder.add(attrId, refAttrId);
     }
 
-    //Add two foreign key constraints referring to two different tables
-    @Test(expected = IllegalArgumentException.class)
-    public void testFKonDifferentTables(){
-        DatabaseRelationDefinition relation = table1Def;
-        DatabaseRelationDefinition ref = table2Def;
-
-        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", relation, ref);
-
-        QuotedID attrId = ID_FACTORY.createAttributeID("COL2");
-        QuotedID refAttrId = ID_FACTORY.createAttributeID("COL1");
-        builder.add(relation.getAttribute(attrId), ref.getAttribute(refAttrId));
-
-        DatabaseRelationDefinition relation2 = table3Def;
-
-        QuotedID attrId2 = ID_FACTORY.createAttributeID("COL2");
-        QuotedID refAttrId2 = ID_FACTORY.createAttributeID( "COL1");
-        builder.add(relation2.getAttribute(attrId2), ref.getAttribute(refAttrId2));
-    }
 }

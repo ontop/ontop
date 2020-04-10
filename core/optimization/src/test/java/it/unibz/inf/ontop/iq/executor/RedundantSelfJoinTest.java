@@ -136,7 +136,7 @@ public class RedundantSelfJoinTest {
             "col3", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table6Def.getAttribute(1));
         UniqueConstraint.builder(table6Def, "table6-uc3")
-                .addDeterminant(table6Def.getAttribute(3))
+                .addDeterminant(3)
                 .build();
         TABLE6_PREDICATE = table6Def.getAtomPredicate();
     }

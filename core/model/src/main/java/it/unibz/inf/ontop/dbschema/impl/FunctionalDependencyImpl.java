@@ -39,11 +39,8 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         }
 
         @Override
-        public Builder addDeterminant(Attribute determinant) {
-            if (determinant.getRelation() != relation)
-                throw new IllegalArgumentException("Relation does not match");
-
-            determinants.add(determinant);
+        public Builder addDeterminant(int determinantIndex) {
+            determinants.add(relation.getAttribute(determinantIndex));
             return this;
         }
 
@@ -54,11 +51,8 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         }
 
         @Override
-        public Builder addDependent(Attribute dependent) {
-            if (dependent.getRelation() != relation)
-                throw new IllegalArgumentException("Relation does not match");
-
-            dependents.add(dependent);
+        public Builder addDependent(int dependentIndex) {
+            dependents.add(relation.getAttribute(dependentIndex));
             return this;
         }
 

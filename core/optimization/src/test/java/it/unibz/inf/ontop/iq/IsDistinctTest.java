@@ -38,7 +38,7 @@ public class IsDistinctTest {
 
         DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
         UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
-                .addDeterminant(tableDef.getAttribute(1))
+                .addDeterminant(1)
                 .build();
         return tableDef;
     }

@@ -13,10 +13,10 @@ public interface FunctionalDependency {
     ImmutableSet<Attribute> getDependents();
 
     interface Builder {
-        Builder addDeterminant(Attribute determinant);
+        Builder addDeterminant(int determinantIndex);
         Builder addDeterminant(QuotedID determinantId);
 
-        Builder addDependent(Attribute dependent);
+        Builder addDependent(int dependentIndex);
         Builder addDependent(QuotedID dependentId);
 
         void build();

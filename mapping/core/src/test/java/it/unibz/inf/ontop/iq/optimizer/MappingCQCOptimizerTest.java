@@ -41,7 +41,7 @@ public class MappingCQCOptimizerTest {
             "cmpNpdidCompany", integerType, false);
         RelationPredicate companyReserves = table3Def.getAtomPredicate();
         ForeignKeyConstraint.builder("FK", table3Def, table24Def)
-                .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
+                .add(3, 1)
                 .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");

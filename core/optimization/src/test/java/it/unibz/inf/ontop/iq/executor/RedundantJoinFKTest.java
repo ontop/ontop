@@ -75,8 +75,8 @@ public class RedundantJoinFKTest {
             "col2", integerDBType, false,
             "col3", integerDBType, false);
         ForeignKeyConstraint.builder("fk2-1", table4Def, table3Def)
-                .add(table4Def.getAttribute(2), table3Def.getAttribute(1))
-                .add(table4Def.getAttribute(3), table3Def.getAttribute(2))
+                .add(2, 1)
+                .add(3, 2)
                 .build();
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
     }
