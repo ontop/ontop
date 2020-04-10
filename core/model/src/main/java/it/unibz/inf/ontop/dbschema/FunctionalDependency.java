@@ -15,10 +15,10 @@ public interface FunctionalDependency {
 
     interface Builder {
         Builder addDeterminant(int determinantIndex);
-        Builder addDeterminant(QuotedID determinantId);
+        Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException;
 
         Builder addDependent(int dependentIndex);
-        Builder addDependent(QuotedID dependentId);
+        Builder addDependent(QuotedID dependentId) throws RelationDefinition.AttributeNotFoundException;
 
         void build();
     }

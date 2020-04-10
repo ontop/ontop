@@ -69,7 +69,7 @@ public class ImplicitDBConstraintsTest {
 		MetadataProvider uc = CONSTRAINT_EXTRACTOR.extract(
 				Optional.of(new File(DIR + "pkeys.lst")), md);
 		uc.insertIntegrityConstraints(TABLENAME, uc);
-		Attribute attr = TABLENAME.getAttribute(idfac.createAttributeID("KEYNAME"));
+		Attribute attr = TABLENAME.getAttribute(1);
 		assertEquals(ImmutableList.of(attr), TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
 
@@ -105,7 +105,7 @@ public class ImplicitDBConstraintsTest {
 		Attribute ref = fk.getComponents().get(0).getReference();
 		assertEquals(ref.getRelation().getID(), idfac.createRelationID(null, "TABLE2"));
 		assertEquals(ref.getID(), idfac.createAttributeID("KEY1"));
-		assertEquals(ImmutableList.of(TABLENAME.getAttribute(idfac.createAttributeID("KEYNAME"))),
+		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
 				TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}
 }

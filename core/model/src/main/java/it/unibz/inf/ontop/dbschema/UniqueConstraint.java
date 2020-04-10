@@ -62,7 +62,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(QuotedID determinantId) {
+		public Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException {
 			builder.add(relation.getAttribute(determinantId));
 			return this;
 		}
@@ -108,7 +108,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(QuotedID determinantId) {
+		public Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException {
 			Attribute attribute = relation.getAttribute(determinantId);
 			if (attribute.isNullable())
 				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");

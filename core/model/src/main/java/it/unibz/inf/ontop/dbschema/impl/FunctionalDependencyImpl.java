@@ -45,7 +45,7 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         }
 
         @Override
-        public Builder addDeterminant(QuotedID determinantId) {
+        public Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException {
             determinants.add(relation.getAttribute(determinantId));
             return this;
         }
@@ -57,7 +57,7 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         }
 
         @Override
-        public Builder addDependent(QuotedID dependentId) {
+        public Builder addDependent(QuotedID dependentId) throws RelationDefinition.AttributeNotFoundException {
             dependents.add(relation.getAttribute(dependentId));
             return this;
         }

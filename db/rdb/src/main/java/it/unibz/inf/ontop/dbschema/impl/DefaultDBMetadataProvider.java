@@ -193,11 +193,16 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 }
             }
             if (!primaryKeyAttributes.isEmpty()) {
-                // use the KEY_SEQ values to restore the correct order of attributes in the PK
-                UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
-                for (int i = 1; i <= primaryKeyAttributes.size(); i++)
-                    builder.addDeterminant(primaryKeyAttributes.get(i));
-                builder.build();
+                try {
+                    // use the KEY_SEQ values to restore the correct order of attributes in the PK
+                    UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
+                    for (int i = 1; i <= primaryKeyAttributes.size(); i++)
+                        builder.addDeterminant(primaryKeyAttributes.get(i));
+                    builder.build();
+                }
+                catch (RelationDefinition.AttributeNotFoundException e) {
+                    throw new MetadataExtractionException(e);
+                }
             }
         }
         catch (SQLException e) {
@@ -250,9 +255,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                         builder.addDeterminant(attrId);
                     }
                     catch (RelationDefinition.AttributeNotFoundException e) {
-                        // bug in PostgreSQL JBDC driver: it strips off the quotation marks
-                        attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
-                        builder.addDeterminant(attrId);
+                        try {
+                            // bug in PostgreSQL JBDC driver: it strips off the quotation marks
+                            attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
+                            builder.addDeterminant(attrId);
+                        }
+                        catch (RelationDefinition.AttributeNotFoundException ex) {
+                           throw new MetadataExtractionException(e);
+                        }
                     }
                 }
             }
@@ -283,9 +293,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                         builder = ForeignKeyConstraint.builder(name, relation, ref);
                     }
                     if (builder != null) {
-                        QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
-                        QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
-                        builder.add(attrId, refAttrId);
+                        try {
+                            QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
+                            QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
+                            builder.add(attrId, refAttrId);
+                        }
+                        catch (RelationDefinition.AttributeNotFoundException e) {
+                            throw new MetadataExtractionException(e);
+                        }
                     }
                 }
                 catch (MetadataExtractionException e) {

@@ -80,7 +80,7 @@ public abstract class RelationDefinition {
 	 * @return
 	 */
 
-	public Attribute getAttribute(QuotedID id) {
+	public Attribute getAttribute(QuotedID id) throws AttributeNotFoundException {
 		Attribute attribute = map.get(id);
 		if (attribute == null)
 			throw new AttributeNotFoundException(id);
@@ -108,7 +108,7 @@ public abstract class RelationDefinition {
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
 
-	public class AttributeNotFoundException extends RuntimeException {
+	public class AttributeNotFoundException extends Exception {
 		private final QuotedID attributeId;
 
 		public AttributeNotFoundException(QuotedID attributeId) { this.attributeId = attributeId;  }
