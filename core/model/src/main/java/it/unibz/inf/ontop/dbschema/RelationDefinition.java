@@ -50,8 +50,8 @@ public abstract class RelationDefinition {
 	private final ImmutableMap<QuotedID, Attribute> map;
 	private final RelationPredicate predicate;
 
-	protected RelationDefinition(AttributeListBuilder builder) {
-		this.id = builder.relationID;
+	protected RelationDefinition(RelationID id, AttributeListBuilder builder) {
+		this.id = id;
 		this.attributes = builder.build(this);
 		this.map = attributes.stream()
 				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
@@ -153,15 +153,6 @@ public abstract class RelationDefinition {
 
 	public static class AttributeListBuilder {
 		private final List<AttributeInfo> list = new ArrayList<>();
-		private final RelationID relationID;
-
-		public AttributeListBuilder(RelationID relationID) {
-			this.relationID = relationID;
-		}
-
-		public RelationID getRelationID() {
-			return relationID;
-		}
 
 		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
 			list.add(new AttributeInfo(id, list.size() + 1, termType, typeName, isNullable));

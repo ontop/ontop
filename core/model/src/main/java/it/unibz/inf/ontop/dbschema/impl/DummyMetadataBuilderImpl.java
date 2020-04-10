@@ -23,29 +23,29 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
     }
 
     @Override
-    public DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder) {
-        return new DatabaseRelationDefinition(builder);
+    public DatabaseRelationDefinition createDatabaseRelation(RelationID id, RelationDefinition.AttributeListBuilder builder) {
+        return new DatabaseRelationDefinition(id, builder);
     }
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                 .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1));
     }
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2));
     }
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
                         .addAttribute(idFactory.createAttributeID(attribute3), type3, isNullable3));
@@ -53,8 +53,8 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
                         .addAttribute(idFactory.createAttributeID(attribute3), type3, isNullable3)
@@ -63,8 +63,8 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
                         .addAttribute(idFactory.createAttributeID(attribute3), type3, isNullable3)
@@ -74,8 +74,8 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5, String attribute6, DBTermType type6, boolean isNullable6) {
-        return new DatabaseRelationDefinition(
-                new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, relation))
+        return new DatabaseRelationDefinition(idFactory.createRelationID(null, relation),
+                new RelationDefinition.AttributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
                         .addAttribute(idFactory.createAttributeID(attribute3), type3, isNullable3)

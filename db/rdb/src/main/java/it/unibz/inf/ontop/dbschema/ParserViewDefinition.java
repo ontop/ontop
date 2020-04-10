@@ -43,12 +43,12 @@ public class ParserViewDefinition extends RelationDefinition {
 	
 	public ParserViewDefinition(RelationID name, ImmutableList<QuotedID> attrs, String statement,
 								DBTypeFactory dbTypeFactory) {
-		super(attributeListBuilder(name, attrs, dbTypeFactory));
+		super(name, attributeListBuilder(attrs, dbTypeFactory));
 		this.statement = statement;
 	}
 
-	private static AttributeListBuilder attributeListBuilder(RelationID name, ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
-		AttributeListBuilder builder = new AttributeListBuilder(name);
+	private static AttributeListBuilder attributeListBuilder(ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
+		AttributeListBuilder builder = new AttributeListBuilder();
 		for (QuotedID id : attrs) {
 			// TODO: infer types?
 			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);

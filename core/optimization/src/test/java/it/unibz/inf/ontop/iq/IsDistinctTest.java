@@ -28,15 +28,15 @@ public class IsDistinctTest {
 
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
 
-        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
-                "UC_TABLE" + tableNumber + "AR" + arity));
+        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder();
 
         DBTermType dbStringTermType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
         for (int i=1 ; i <= arity; i++)
             builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
 
-        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
+        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
+                idFactory.createRelationID(null, "UC_TABLE" + tableNumber + "AR" + arity), builder);
         UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                 .addDeterminant(1)
                 .build();

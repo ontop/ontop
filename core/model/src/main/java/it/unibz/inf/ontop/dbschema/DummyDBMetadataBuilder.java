@@ -6,7 +6,8 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 public interface DummyDBMetadataBuilder {
 
-    DatabaseRelationDefinition createDatabaseRelation(RelationDefinition.AttributeListBuilder builder);
+    DatabaseRelationDefinition createDatabaseRelation(RelationID id,
+                                                      RelationDefinition.AttributeListBuilder builder);
 
     DatabaseRelationDefinition createDatabaseRelation(String relation,
                                                       String attribute1, DBTermType type1, boolean isNullable1);

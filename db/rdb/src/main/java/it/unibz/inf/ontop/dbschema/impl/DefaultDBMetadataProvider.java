@@ -114,18 +114,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
         RelationID id = getRelationCanonicalID(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
-            ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
-            RelationDefinition.AttributeListBuilder currentRelation = null;
+            Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
                 RelationID relationId = getRelationID(rs);
-                if (currentRelation == null || !currentRelation.getRelationID().equals(relationId)) {
-                    // switch to the next database relation
-                    if (currentRelation != null)
-                        relations.add(new DatabaseRelationDefinition(currentRelation));
-
-                    currentRelation = new RelationDefinition.AttributeListBuilder(relationId);
-                }
+                RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(relationId,
+                        i -> new RelationDefinition.AttributeListBuilder());
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                 // columnNoNulls, columnNullable, columnNullableUnknown
@@ -134,23 +128,21 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 int columnSize = rs.getInt("COLUMN_SIZE");
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
-                currentRelation.addAttribute(attributeId, termType, typeName, isNullable);
+                builder.addAttribute(attributeId, termType, typeName, isNullable);
             }
-            if (currentRelation != null)
-                relations.add(new DatabaseRelationDefinition(currentRelation));
 
-            ImmutableList<DatabaseRelationDefinition> list = relations.build();
-            if (list.size() == 0) {
+            if (relations.isEmpty()) {
                 throw new MetadataExtractionException("Cannot find relation id: " + id);
             }
-            else if (list.size() == 1) {
-                return list.get(0);
+            else if (relations.keySet().size() == 1) {
+                Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
+                return new DatabaseRelationDefinition(r.getKey(), r.getValue());
             }
             else {
                 RelationID canonicalId = getRelationCanonicalID(id);
-                for (DatabaseRelationDefinition r : list)
-                    if (r.getID().equals(canonicalId))
-                        return r;
+                for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
+                    if (r.getKey().equals(canonicalId))
+                        return new DatabaseRelationDefinition(r.getKey(), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }

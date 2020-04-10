@@ -44,10 +44,11 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	/**
 	 * used only in DummyDBMetadataBuilder
 	 *
+	 * @param id
 	 * @param builder
 	 */
-    public DatabaseRelationDefinition(AttributeListBuilder builder) {
-		super(builder);
+    public DatabaseRelationDefinition(RelationID id, AttributeListBuilder builder) {
+		super(id, builder);
 	}
 
 	/**

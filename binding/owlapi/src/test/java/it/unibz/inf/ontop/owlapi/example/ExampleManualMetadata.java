@@ -56,27 +56,24 @@ public class ExampleManualMetadata {
 	}
 
 	private static void defMeasTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-				.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
-				.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false)
-				.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false)
-				.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType(), false));
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
+				"value", dbTypeFactory.getDBDoubleType(), false,
+				"assembly", dbTypeFactory.getDBDoubleType(), false,
+				"sensor", dbTypeFactory.getDBDoubleType(), false);
 	}
 
 	private static void defMessTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-				.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
-				.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType(), false)
-				.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
+				"eventtext", dbTypeFactory.getDBDoubleType(), false,
+				"assembly", dbTypeFactory.getDBDoubleType(), false);
 	}
 
 	private static void defStaticTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-		QuotedIDFactory idfac = dbMetadata.getQuotedIDFactory();
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-				.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
-				.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"domain", dbTypeFactory.getDBDoubleType(), false,
+				"range", dbTypeFactory.getDBDoubleType(), false);
 	}
 
 	private static DummyDBMetadataBuilder getMeta(){

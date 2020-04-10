@@ -56,12 +56,12 @@ public class NoDependencyTestDBMetadata {
                                                             boolean canBeNull) {
 
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        RelationDefinition.AttributeListBuilder builder =  new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
-                prefix + "TABLE" + tableNumber + "AR" + arity));
+        RelationDefinition.AttributeListBuilder builder =  new RelationDefinition.AttributeListBuilder();
         for (int i = 1; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
         }
-        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
+        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
+                idFactory.createRelationID(null, prefix + "TABLE" + tableNumber + "AR" + arity), builder);
         return tableDef.getAtomPredicate();
     }
 

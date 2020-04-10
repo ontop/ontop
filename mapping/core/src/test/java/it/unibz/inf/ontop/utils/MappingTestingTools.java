@@ -112,12 +112,12 @@ public class MappingTestingTools {
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
         DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
-        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(
-                null, "TABLE" + tableNumber + "AR" + arity));
-
+        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder();
         for (int i = 1 ; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
         }
-        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder).getAtomPredicate();
+        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
+                idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity), builder)
+                .getAtomPredicate();
     }
 }
