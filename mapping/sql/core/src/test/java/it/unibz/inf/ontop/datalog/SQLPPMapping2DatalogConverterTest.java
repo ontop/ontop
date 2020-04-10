@@ -52,20 +52,20 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 			"last_name", stringDBType, false,
 			"year", integerDBType, false,
 			"nationality", stringDBType, false);
-		table1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1.getAttribute(1)));
+		UniqueConstraint.primaryKeyOf(table1.getAttribute(1));
 
 		DatabaseRelationDefinition table2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "Course",
 			"cid", stringDBType, false,
 			"title", stringDBType, false,
 			"credits", integerDBType, false,
 			"description", stringDBType, false);
-		table2.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2.getAttribute(1)));
+		UniqueConstraint.primaryKeyOf(table2.getAttribute(1));
 
 		DatabaseRelationDefinition table3 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Enrollment",
 			"student_id", integerDBType, false,
 			"course_id", stringDBType, false);
-		table3.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
-				table3.getAttribute(2)));
+		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
+				table3.getAttribute(2));
 
 		return new ImmutableMetadataLookup(ImmutableMap.of(
 				table1.getID(), table1,

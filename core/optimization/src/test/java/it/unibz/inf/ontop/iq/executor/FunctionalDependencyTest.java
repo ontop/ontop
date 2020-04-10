@@ -75,12 +75,12 @@ public class FunctionalDependencyTest {
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
+        UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table1Def)
                 .addDeterminant(table1Def.getAttribute(2))
                 .addDependent(table1Def.getAttribute(3))
                 .addDependent(table1Def.getAttribute(4))
-                .build());
+                .build();
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
@@ -90,7 +90,7 @@ public class FunctionalDependencyTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
@@ -103,15 +103,15 @@ public class FunctionalDependencyTest {
             "col4", integerDBType, false,
             "col5", integerDBType, false,
             "col6", integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(table3Def.getAttribute(2))
                 .addDependent(table3Def.getAttribute(3))
-                .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+                .build();
+        FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(table3Def.getAttribute(4))
                 .addDependent(table3Def.getAttribute(5))
-                .build());
+                .build();
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
@@ -123,16 +123,16 @@ public class FunctionalDependencyTest {
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
+        UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table4Def)
                 .addDeterminant(table4Def.getAttribute(3))
                 .addDependent(table4Def.getAttribute(4))
-                .build());
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
+                .build();
+        FunctionalDependency.defaultBuilder(table4Def)
                 .addDeterminant(table4Def.getAttribute(2))
                 .addDependent(table4Def.getAttribute(3))
                 .addDependent(table4Def.getAttribute(4))
-                .build());
+                .build();
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
     }
 

@@ -43,9 +43,9 @@ public class NullableUniqueConstraintTest {
                 "col1", integerDBType, true,
                 "col2", integerDBType, true,
                 "col3", integerDBType, true);
-        TABLE1.addUniqueConstraint(UniqueConstraint.builder(TABLE1, "uc1")
+        UniqueConstraint.builder(TABLE1, "uc1")
                 .addDeterminant(TABLE1.getAttribute(1))
-                .build());
+                .build();
         TABLE1_PREDICATE = TABLE1.getAtomPredicate();
 
         /*
@@ -55,9 +55,9 @@ public class NullableUniqueConstraintTest {
             "col1", integerDBType, true,
             "col2", integerDBType, true,
             "col3", integerDBType, true);
-        TABLE2.addUniqueConstraint(UniqueConstraint.builder(TABLE2, "uc2")
+        UniqueConstraint.builder(TABLE2, "uc2")
                 .addDeterminant(TABLE2.getAttribute(1))
-                .build());
+                .build();
         TABLE2_PREDICATE = TABLE2.getAtomPredicate();
     }
 

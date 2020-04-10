@@ -33,15 +33,13 @@ public class IsDistinctTest {
 
         DBTermType dbStringTermType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
 
-        for (int i=1 ; i <= arity; i++) {
+        for (int i=1 ; i <= arity; i++)
             builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
-        }
 
         DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
-
-        tableDef.addUniqueConstraint(Objects.requireNonNull(UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
+        UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
                 .addDeterminant(tableDef.getAttribute(1))
-                .build()));
+                .build();
         return tableDef;
     }
 

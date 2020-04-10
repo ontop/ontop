@@ -5,10 +5,12 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  *
@@ -57,11 +59,14 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 ConstraintDescriptor uc = getConstraintDescriptor(metadataLookup, constraint[0], constraint[1].split(","));
                 if (!uc.table.getID().equals(relation.getID()))
                     continue;
-                UniqueConstraint.BuilderImpl builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
-                for (Attribute a : uc.attributes)
+                UniqueConstraint.Builder builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
+                for (QuotedID a : uc.attributeIds)
                     builder.addDeterminant(a);
-                uc.table.addUniqueConstraint(builder.build());
+                builder.build();
                 counter++;
+            }
+            catch (RelationDefinition.AttributeNotFoundException e) {
+                LOGGER.warn("Error in user-supplied foreign key constraints: {} not found in {}.", e.getAttributeID(), e.getRelation());
             }
             catch (MetadataExtractionException e) {
                 LOGGER.warn("Error in user-supplied unique constraints: {}.", e.getMessage());
@@ -82,10 +87,13 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 String name = fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableID().getName() + "_" + counter;
                 ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, fk.table, pk.table);
                 for (int i = 0; i < pkAttrs.length; i++)
-                    builder.add(fk.attributes[i], pk.attributes[i]);
+                    builder.add(fk.attributeIds.get(i), pk.attributeIds.get(i));
 
-                fk.table.addForeignKeyConstraint(builder.build());
+                builder.build();
                 counter++;
+            }
+            catch (RelationDefinition.AttributeNotFoundException e) {
+                LOGGER.warn("Error in user-supplied foreign key constraints: {} not found in {}.", e.getAttributeID(), e.getRelation());
             }
             catch (MetadataExtractionException e) {
                 LOGGER.warn("Error in user-supplied foreign key constraints: {}.", e.getMessage());
@@ -95,28 +103,26 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
 
     private static final class ConstraintDescriptor {
-        DatabaseRelationDefinition table;
-        Attribute[] attributes;
+        final DatabaseRelationDefinition table;
+        final ImmutableList<QuotedID> attributeIds;
+
+        ConstraintDescriptor(DatabaseRelationDefinition table, ImmutableList<QuotedID> attributeIds) {
+            this.table = table;
+            this.attributeIds = attributeIds;
+        }
     }
 
     private ConstraintDescriptor getConstraintDescriptor(MetadataLookup metadataLookup, String tableName, String[] attributeNames) throws MetadataExtractionException {
-        ConstraintDescriptor result = new ConstraintDescriptor();
 
-        RelationID relationId = getRelationIDFromString(tableName);
-        RelationDefinition relation = metadataLookup.getRelation(relationId);
-
+        RelationDefinition relation = metadataLookup.getRelation(getRelationIDFromString(tableName));
         if (!(relation instanceof DatabaseRelationDefinition))
             throw new MetadataExtractionException("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
 
-        result.table = (DatabaseRelationDefinition)relation;
-        result.attributes = new Attribute[attributeNames.length];
-        for (int i = 0; i < attributeNames.length; i++) {
-            QuotedID attributeId = idFactory.createAttributeID(attributeNames[i]);
-            result.attributes[i] = result.table.getAttribute(attributeId);
-            if (result.attributes[i] == null)
-                throw new MetadataExtractionException("Attribute " + attributeId + " not found in " + relationId);
-        }
-        return result;
+        return new ConstraintDescriptor(
+                (DatabaseRelationDefinition)relation,
+                Stream.of(attributeNames)
+                    .map(idFactory::createAttributeID)
+                    .collect(ImmutableCollectors.toList()));
     }
 
     private RelationID getRelationIDFromString(String tableName) {

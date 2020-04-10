@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 public class UniqueConstraint implements FunctionalDependency {
 
 	public static final class BuilderImpl implements FunctionalDependency.Builder {
-		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
+		private final ImmutableList.Builder<Attribute> builder = ImmutableList.builder();
 		private final DatabaseRelationDefinition relation;
 		private final String name;
 		private boolean isPK;
@@ -56,38 +57,59 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public BuilderImpl addDeterminant(Attribute attribute) {
+		public Builder addDeterminant(Attribute attribute) {
+
 			if (relation != attribute.getRelation())
 				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
+
+			if (isPK && attribute.isNullable())
+				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
 
 			builder.add(attribute);
 			return this;
 		}
 
 		@Override
-		public BuilderImpl addDependent(Attribute dependent) {
+		public Builder addDeterminant(QuotedID determinantId) {
+			Attribute attribute = relation.getAttribute(determinantId);
+
+			if (isPK && attribute.isNullable())
+				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
+
+			builder.add(attribute);
+			return this;
+		}
+
+		@Override
+		public Builder addDependent(Attribute dependent) {
 			throw new IllegalArgumentException("No dependents");
 		}
 
 		@Override
-		public UniqueConstraint build() {
+		public Builder addDependent(QuotedID dependentId) {
+			throw new IllegalArgumentException("No dependents");
+		}
+
+		@Override
+		public void build() {
 			ImmutableList<Attribute> attributes = builder.build();
 			if (attributes.isEmpty())
 				throw new IllegalArgumentException("UC cannot have no attributes");
-			return new UniqueConstraint(name, isPK, attributes);
+
+			relation.addUniqueConstraint(new UniqueConstraint(name, isPK, attributes));
 		}
 	}
 
-	public static UniqueConstraint primaryKeyOf(Attribute att) {
-		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att.getRelation(),
+	public static void primaryKeyOf(Attribute att) {
+		Builder builder = primaryKeyBuilder((DatabaseRelationDefinition)att.getRelation(),
 				"PK_" + att.getRelation().getID().getTableName());
-		return builder.addDeterminant(att).build();
+		builder.addDeterminant(att).build();
 	}
 
-	public static UniqueConstraint primaryKeyOf(Attribute att1, Attribute att2) {
-		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att1.getRelation(),
+	public static void primaryKeyOf(Attribute att1, Attribute att2) {
+		Builder builder = primaryKeyBuilder((DatabaseRelationDefinition)att1.getRelation(),
 				"PK_" + att1.getRelation().getID().getTableName());
-		return builder.addDeterminant(att1).addDeterminant(att2).build();
+		builder.addDeterminant(att1).addDeterminant(att2).build();
 	}
 
 	/**
@@ -98,7 +120,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static BuilderImpl builder(DatabaseRelationDefinition relation, String name) {
+	public static Builder builder(DatabaseRelationDefinition relation, String name) {
 		return new BuilderImpl(relation, name, false);
 	}
 
@@ -110,7 +132,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static BuilderImpl primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+	public static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
 		return new BuilderImpl(relation, name, true);
 	}
 
@@ -138,16 +160,6 @@ public class UniqueConstraint implements FunctionalDependency {
 	 */
 	public String getName() {
 		return name;
-	}
-
-	/**
-	 * return the database relation for the unique constraint
-	 *
-	 * @return
-	 */
-	@JsonIgnore
-	public DatabaseRelationDefinition getRelation() {
-		return (DatabaseRelationDefinition)attributes.get(0).getRelation();
 	}
 
 	/**
@@ -180,7 +192,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	@JsonIgnore
 	@Override
 	public ImmutableSet<Attribute> getDependents() {
-		return getRelation().getAttributes().stream()
+		return attributes.get(0).getRelation().getAttributes().stream()
 				.filter(a -> !attributes.contains(a))
 				.collect(ImmutableCollectors.toSet());
 	}

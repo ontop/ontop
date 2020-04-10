@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.FunctionalDependency;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.*;
+
+import java.util.Objects;
 
 public class FunctionalDependencyImpl implements FunctionalDependency {
 
@@ -32,9 +32,9 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
                 determinants = ImmutableSet.builder(),
                 dependents = ImmutableSet.builder();
 
-        private final RelationDefinition relation;
+        private final DatabaseRelationDefinition relation;
 
-        public BuilderImpl(RelationDefinition relation) {
+        public BuilderImpl(DatabaseRelationDefinition relation) {
             this.relation = relation;
         }
 
@@ -42,7 +42,14 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         public Builder addDeterminant(Attribute determinant) {
             if (determinant.getRelation() != relation)
                 throw new IllegalArgumentException("Relation does not match");
+
             determinants.add(determinant);
+            return this;
+        }
+
+        @Override
+        public Builder addDeterminant(QuotedID determinantId) {
+            determinants.add(relation.getAttribute(determinantId));
             return this;
         }
 
@@ -50,13 +57,20 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         public Builder addDependent(Attribute dependent) {
             if (dependent.getRelation() != relation)
                 throw new IllegalArgumentException("Relation does not match");
+
             dependents.add(dependent);
             return this;
         }
 
         @Override
-        public FunctionalDependency build() {
-            return new FunctionalDependencyImpl(determinants.build(), dependents.build());
+        public Builder addDependent(QuotedID dependentId) {
+            dependents.add(relation.getAttribute(dependentId));
+            return this;
+        }
+
+        @Override
+        public void build() {
+            relation.addFunctionalDependency(new FunctionalDependencyImpl(determinants.build(), dependents.build()));
         }
     }
 }

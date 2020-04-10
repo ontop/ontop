@@ -80,7 +80,13 @@ public abstract class RelationDefinition {
 	 * @return
 	 */
 
-	public Attribute getAttribute(QuotedID id) { return map.get(id); }
+	public Attribute getAttribute(QuotedID id) {
+		Attribute attribute = map.get(id);
+		if (attribute == null)
+			throw new AttributeNotFoundException(id);
+
+		return attribute;
+	}
 
 	/**
 	 * returns the list of attributes
@@ -104,6 +110,17 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
+	public class AttributeNotFoundException extends RuntimeException {
+		private final QuotedID attributeId;
+
+		public AttributeNotFoundException(QuotedID attributeId) {
+			this.attributeId = attributeId;
+		}
+
+		public QuotedID getAttributeID() { return attributeId; }
+
+		public RelationDefinition getRelation() { return RelationDefinition.this; }
+	}
 
 
 	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {

@@ -180,26 +180,24 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         RelationID id = relation.getID();
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
-            Map<Integer, String> primaryKeyAttributes = new HashMap<>();
+            Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentName = null;
             while (rs.next()) {
                 // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
                 RelationID id2 = getRelationID(rs);
                 if (id2.equals(id)) {
                     currentName = rs.getString("PK_NAME"); // may be null
-                    String attr = rs.getString("COLUMN_NAME");
+                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                     int seq = rs.getShort("KEY_SEQ");
-                    primaryKeyAttributes.put(seq, attr);
+                    primaryKeyAttributes.put(seq, attrId);
                 }
             }
             if (!primaryKeyAttributes.isEmpty()) {
                 // use the KEY_SEQ values to restore the correct order of attributes in the PK
-                UniqueConstraint.BuilderImpl builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
-                for (int i = 1; i <= primaryKeyAttributes.size(); i++) {
-                    QuotedID attrId = rawIdFactory.createAttributeID(primaryKeyAttributes.get(i));
-                    builder.addDeterminant(relation.getAttribute(attrId));
-                }
-                relation.addUniqueConstraint(builder.build());
+                UniqueConstraint.Builder builder = UniqueConstraint.primaryKeyBuilder(relation, currentName);
+                for (int i = 1; i <= primaryKeyAttributes.size(); i++)
+                    builder.addDeterminant(primaryKeyAttributes.get(i));
+                builder.build();
             }
         }
         catch (SQLException e) {
@@ -211,7 +209,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         RelationID id = relation.getID();
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
-            UniqueConstraint.BuilderImpl builder = null;
+            UniqueConstraint.Builder builder = null;
             while (rs.next()) {
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
@@ -219,14 +217,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 //       tableIndexOther (all are static final int in DatabaseMetaData)
                 if (rs.getShort("TYPE") == DatabaseMetaData.tableIndexStatistic) {
                     if (builder != null)
-                        relation.addUniqueConstraint(builder.build());
+                        builder.build();
 
                     builder = null;
                     continue;
                 }
                 if (rs.getShort("ORDINAL_POSITION") == 1) {
                     if (builder != null)
-                        relation.addUniqueConstraint(builder.build());
+                        builder.build();
 
                     // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
                     // and so, no need to check whether TABLE_SCHEM and TABLE_NAME match
@@ -248,17 +246,18 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     // PAGES int => When TYPE is tableIndexStatisic then this is the number of pages used for the table,
                     //                    otherwise it is the number of pages used for the current index.
                     // FILTER_CONDITION String => Filter condition, if any. (may be null)
-                    Attribute attr = relation.getAttribute(attrId);
-                    if (attr == null) { // Compensate for the bug in PostgreSQL JBDC driver that
-                        // strips off the quotation marks
-                        attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
-                        attr = relation.getAttribute(attrId);
+                    try {
+                        builder.addDeterminant(attrId);
                     }
-                    builder.addDeterminant(attr);
+                    catch (RelationDefinition.AttributeNotFoundException e) {
+                        // bug in PostgreSQL JBDC driver: it strips off the quotation marks
+                        attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
+                        builder.addDeterminant(attrId);
+                    }
                 }
             }
             if (builder != null)
-                relation.addUniqueConstraint(builder.build());
+                builder.build();
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -275,14 +274,13 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     int seq = rs.getShort("KEY_SEQ");
                     if (seq == 1) {
                         if (builder != null)
-                            relation.addForeignKeyConstraint(builder.build());
+                            builder.build();
 
                         String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-
-                        RelationDefinition ref = dbMetadata.getRelation(getPKRelationID(rs));
+                        DatabaseRelationDefinition ref = (DatabaseRelationDefinition) dbMetadata.getRelation(getPKRelationID(rs));
 
                         // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
-                        builder = new ForeignKeyConstraint.Builder(name, relation, (DatabaseRelationDefinition) ref);
+                        builder = ForeignKeyConstraint.builder(name, relation, ref);
                     }
                     if (builder != null) {
                         QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("FKCOLUMN_NAME"));
@@ -297,7 +295,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 }
             }
             if (builder != null)
-                relation.addForeignKeyConstraint(builder.build());
+                builder.build();
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

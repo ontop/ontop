@@ -61,7 +61,7 @@ public class RedundantJoinFKTest {
         DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
-        table2Def.addForeignKeyConstraint(ForeignKeyConstraint.of("fk2-1", table2Def.getAttribute(2), table1Def.getAttribute(1)));
+        ForeignKeyConstraint.of("fk2-1", table2Def.getAttribute(2), table1Def.getAttribute(1));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("TABLE3",
@@ -74,11 +74,10 @@ public class RedundantJoinFKTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-
-        table4Def.addForeignKeyConstraint(new ForeignKeyConstraint.Builder("fk2-1", table4Def, table3Def)
+        ForeignKeyConstraint.builder("fk2-1", table4Def, table3Def)
                 .add(table4Def.getAttribute(2), table3Def.getAttribute(1))
                 .add(table4Def.getAttribute(3), table3Def.getAttribute(2))
-                .build());
+                .build();
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
     }
 

@@ -40,7 +40,7 @@ public class DependencyTestDBMetadata {
         }
         DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(builder);
 
-        tableDef.addUniqueConstraint(UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1)));
+        UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1));
         return tableDef.getAtomPredicate();
     }
 

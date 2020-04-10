@@ -14,12 +14,15 @@ public interface FunctionalDependency {
 
     interface Builder {
         Builder addDeterminant(Attribute determinant);
-        Builder addDependent(Attribute dependent);
+        Builder addDeterminant(QuotedID determinantId);
 
-        FunctionalDependency build();
+        Builder addDependent(Attribute dependent);
+        Builder addDependent(QuotedID dependentId);
+
+        void build();
     }
 
-    static Builder defaultBuilder(RelationDefinition relation) {
+    static Builder defaultBuilder(DatabaseRelationDefinition relation) {
         return new FunctionalDependencyImpl.BuilderImpl(relation);
     }
 }

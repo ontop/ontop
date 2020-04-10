@@ -19,7 +19,7 @@ public abstract class AbstractBasicMappingMistakeTest {
         DatabaseRelationDefinition personTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PERSON",
             "ID", dbTypeFactory.getDBLargeIntegerType(), false,
             "FNAME", dbTypeFactory.getDBStringType(), false);
-        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
+        UniqueConstraint.primaryKeyOf(personTable.getAttribute(1));
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {

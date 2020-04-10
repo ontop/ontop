@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -42,7 +43,7 @@ public class ForeignKeyConstraint {
 
     public static final class Builder {
         private final String name;
-        private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<Component> builder = ImmutableList.builder();
         private final DatabaseRelationDefinition relation, referencedRelation;
 
         /**
@@ -52,7 +53,7 @@ public class ForeignKeyConstraint {
          * @param referencedRelation
          */
 
-        public Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        private Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
             this.name = name;
             this.relation = relation;
             this.referencedRelation = referencedRelation;
@@ -67,12 +68,7 @@ public class ForeignKeyConstraint {
          */
 
         public Builder add(Attribute attribute, Attribute referencedAttribute) {
-            if (attribute == null) {
-                throw new IllegalArgumentException("Missing Foreign Key column for table " + relation.getID() + " referring to primary key " + attribute + "  in table " + referencedRelation.getID());
-            }
-            if (referencedAttribute == null) {
-                throw new IllegalArgumentException("Missing Primary Key column for table " + referencedRelation.getID() + " referring to foreign key " + attribute + " in table " + relation.getID());
-            }
+
             if (relation != attribute.getRelation())
                 throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
 
@@ -84,20 +80,21 @@ public class ForeignKeyConstraint {
         }
 
         public Builder add(QuotedID attributeId, QuotedID referencedAttributeId) {
-            return add(relation.getAttribute(attributeId), referencedRelation.getAttribute(referencedAttributeId));
+            builder.add(new Component(relation.getAttribute(attributeId), referencedRelation.getAttribute(referencedAttributeId)));
+            return this;
         }
-            /**
-             * builds a FOREIGN KEY constraint
-             *
-             * @return null if the list of components is empty
-             */
 
-        public ForeignKeyConstraint build() {
+        /**
+         * builds a FOREIGN KEY constraint
+         *
+         * @throws IllegalArgumentException if the list of components is empty
+         */
+        public void build() {
             ImmutableList<Component> components = builder.build();
             if (components.isEmpty())
-                return null;
+                throw new IllegalArgumentException("No attributes in a foreign key");
 
-            return new ForeignKeyConstraint(name, components);
+            relation.addForeignKeyConstraint(new ForeignKeyConstraint(name, components));
         }
     }
 
@@ -122,8 +119,8 @@ public class ForeignKeyConstraint {
      * @param reference
      * @return
      */
-    public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
-        return new Builder(name, (DatabaseRelationDefinition) attribute.getRelation(),
+    public static void of(String name, Attribute attribute, Attribute reference) {
+        builder(name, (DatabaseRelationDefinition) attribute.getRelation(),
                 (DatabaseRelationDefinition) reference.getRelation())
                 .add(attribute, reference).build();
     }

@@ -24,18 +24,18 @@ public class WrongForeignKeyTest {
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false);
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
+        UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table1Def)
                 .addDeterminant(table1Def.getAttribute(2))
                 .addDependent(table1Def.getAttribute(3))
                 .addDependent(table1Def.getAttribute(4))
-                .build());
+                .build();
 
         table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
 
         table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
             "col1", integerDBType, false,
@@ -44,25 +44,25 @@ public class WrongForeignKeyTest {
             "col4", integerDBType, false,
             "col5", integerDBType, false,
             "col6", integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(table3Def.getAttribute(2))
                 .addDependent(table3Def.getAttribute(3))
-                .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
+                .build();
+        FunctionalDependency.defaultBuilder(table3Def)
                 .addDeterminant(table3Def.getAttribute(4))
                 .addDependent(table3Def.getAttribute(5))
-                .build());
+                .build();
     }
 
 
     //Add a foreign key constraint where a column is missing in the referring table
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = RelationDefinition.AttributeNotFoundException.class)
     public void testMissingColumnPK(){
         DatabaseRelationDefinition relation = table1Def;
         DatabaseRelationDefinition ref = table2Def;
 
-        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder("", relation, ref);
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", relation, ref);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL4");
         QuotedID refAttrId = ID_FACTORY.createAttributeID( "COL4");
@@ -75,7 +75,7 @@ public class WrongForeignKeyTest {
         DatabaseRelationDefinition relation = table1Def;
         DatabaseRelationDefinition ref = table2Def;
 
-        ForeignKeyConstraint.Builder builder = new ForeignKeyConstraint.Builder("", relation, ref);
+        ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", relation, ref);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL2");
         QuotedID refAttrId = ID_FACTORY.createAttributeID("COL1");

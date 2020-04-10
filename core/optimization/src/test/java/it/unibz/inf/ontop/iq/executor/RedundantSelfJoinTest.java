@@ -86,7 +86,7 @@ public class RedundantSelfJoinTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        TABLE_1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(TABLE_1.getAttribute(1)));
+        UniqueConstraint.primaryKeyOf(TABLE_1.getAttribute(1));
         TABLE1_PREDICATE = TABLE_1.getAtomPredicate();
 
         /*
@@ -96,7 +96,7 @@ public class RedundantSelfJoinTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
@@ -106,7 +106,7 @@ public class RedundantSelfJoinTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1), table3Def.getAttribute(2)));
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1), table3Def.getAttribute(2));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
@@ -115,7 +115,7 @@ public class RedundantSelfJoinTest {
         DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation("table4",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
+        UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         /*
@@ -124,7 +124,7 @@ public class RedundantSelfJoinTest {
         DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation("table5",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
-        table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table5Def.getAttribute(2)));
+        UniqueConstraint.primaryKeyOf(table5Def.getAttribute(2));
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
         /*
@@ -134,10 +134,10 @@ public class RedundantSelfJoinTest {
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table6Def.getAttribute(1)));
-        table6Def.addUniqueConstraint(UniqueConstraint.builder(table6Def, "table6-uc3")
+        UniqueConstraint.primaryKeyOf(table6Def.getAttribute(1));
+        UniqueConstraint.builder(table6Def, "table6-uc3")
                 .addDeterminant(table6Def.getAttribute(3))
-                .build());
+                .build();
         TABLE6_PREDICATE = table6Def.getAtomPredicate();
     }
 

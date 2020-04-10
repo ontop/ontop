@@ -40,11 +40,9 @@ public class MappingCQCOptimizerTest {
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
         RelationPredicate companyReserves = table3Def.getAtomPredicate();
-
-        table3Def.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder("FK", table3Def, table24Def)
-                        .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
-                        .build());
+        ForeignKeyConstraint.builder("FK", table3Def, table24Def)
+                .add(table3Def.getAttribute(3), table24Def.getAttribute(1))
+                .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
         final Variable fldNpdidField1 = TERM_FACTORY.getVariable("fldNpdidField1");
@@ -113,23 +111,10 @@ public class MappingCQCOptimizerTest {
             "store_id", integerType, false);
         RelationPredicate staff = staffTable.getAtomPredicate();
 
-        storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder("FK", storeTable, addressTable)
-                        .add(storeTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build());
-        storeTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder("FK", storeTable, staffTable)
-                        .add(storeTable.getAttribute(3), staffTable.getAttribute(1))
-                        .build());
-
-        staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder("FK", staffTable, addressTable)
-                        .add(staffTable.getAttribute(2), addressTable.getAttribute(1))
-                        .build());
-        staffTable.addForeignKeyConstraint(
-                ForeignKeyConstraint.builder("FK", staffTable, storeTable)
-                        .add(staffTable.getAttribute(3), storeTable.getAttribute(1))
-                        .build());
+        ForeignKeyConstraint.of("FK", storeTable.getAttribute(2), addressTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", storeTable.getAttribute(3), staffTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", staffTable.getAttribute(2), addressTable.getAttribute(1));
+        ForeignKeyConstraint.of("FK", staffTable.getAttribute(3), storeTable.getAttribute(1));
 
         final Variable staffId1 = TERM_FACTORY.getVariable("staff_id2");
         final Variable addressId1 = TERM_FACTORY.getVariable("address_id2");
