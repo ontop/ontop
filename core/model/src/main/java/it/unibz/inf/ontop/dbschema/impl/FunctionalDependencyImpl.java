@@ -34,8 +34,8 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
 
         private final DatabaseRelationDefinition relation;
 
-        public BuilderImpl(DatabaseRelationDefinition relation) {
-            this.relation = relation;
+        public BuilderImpl(RelationDefinition relation) {
+            this.relation = (DatabaseRelationDefinition)relation;
         }
 
         @Override

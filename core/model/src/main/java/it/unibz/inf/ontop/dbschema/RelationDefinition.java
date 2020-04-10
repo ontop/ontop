@@ -89,16 +89,13 @@ public abstract class RelationDefinition {
 	}
 
 	/**
-	 * returns the list of attributes
+	 * the list of attributes
 	 *
 	 * @return list of attributes
 	 */
 	@JsonProperty("columns")
 	public ImmutableList<Attribute> getAttributes() { return attributes; }
 
-	/**
-	 * Call it only after having completely assigned the attributes!
-	 */
 	@JsonIgnore
 	public RelationPredicate getAtomPredicate() { return predicate;  }
 
@@ -110,12 +107,11 @@ public abstract class RelationDefinition {
 
 	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
+
 	public class AttributeNotFoundException extends RuntimeException {
 		private final QuotedID attributeId;
 
-		public AttributeNotFoundException(QuotedID attributeId) {
-			this.attributeId = attributeId;
-		}
+		public AttributeNotFoundException(QuotedID attributeId) { this.attributeId = attributeId;  }
 
 		public QuotedID getAttributeID() { return attributeId; }
 

@@ -62,12 +62,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 				throw new IllegalArgumentException("Duplicate PK " + pk + " " + uc);
 			pk = uc;
 		}
-		else {
-			if (pk != null)
-				if (uc.getAttributes().equals(pk.getAttributes()))
-					// ignore the unique index created for the primary key
-					return;
-		}
 		ucs.add(uc);
 	}
 

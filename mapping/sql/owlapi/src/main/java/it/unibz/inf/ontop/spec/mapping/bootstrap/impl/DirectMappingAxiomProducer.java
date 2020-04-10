@@ -64,7 +64,7 @@ public class DirectMappingAxiomProducer {
 	}
 
 
-	public String getSQL(DatabaseRelationDefinition table) {
+	public String getSQL(RelationDefinition table) {
 		return String.format("SELECT * FROM %s", table.getID().getSQLRendering());
 	}
 
@@ -100,7 +100,7 @@ public class DirectMappingAxiomProducer {
 				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
 	}
 
-	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
+	private static ImmutableList<Attribute> getIdentifyingAttributes(RelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());
@@ -123,7 +123,7 @@ public class DirectMappingAxiomProducer {
      *   - a literal triple for each column in a table where the column value is non-NULL.
      *
      */
-    public ImmutableList<TargetAtom> getCQ(DatabaseRelationDefinition table, Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    public ImmutableList<TargetAtom> getCQ(RelationDefinition table, Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 
 		ImmutableList.Builder<TargetAtom> atoms = ImmutableList.builder();
 
@@ -153,7 +153,7 @@ public class DirectMappingAxiomProducer {
      * - a reference triple for each <column name list> in a table's foreign keys where none of the column values is NULL.
      *
      */
-	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk, Map<DatabaseRelationDefinition,
+	public ImmutableList<TargetAtom> getRefCQ(ForeignKeyConstraint fk, Map<RelationDefinition,
 			BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
         ImmutableTerm sub = generateSubject(fk.getRelation(), true, bnodeTemplateMap);
 		ImmutableTerm obj = generateSubject(fk.getReferencedRelation(), true, bnodeTemplateMap);
@@ -225,8 +225,8 @@ public class DirectMappingAxiomProducer {
      * @param bnodeTemplateMap
 	 * @return
      */
-    private ImmutableTerm generateSubject(DatabaseRelationDefinition td, boolean ref,
-										  Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+    private ImmutableTerm generateSubject(RelationDefinition td, boolean ref,
+										  Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
 		
 		String varNamePrefix = ref ? td.getID().getTableName() + "_" : "";
 

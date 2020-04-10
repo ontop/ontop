@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 public class BootstrapGenerator {
 
-
     private final JDBCConnectionManager connManager;
     private final OntopSQLOWLAPIConfiguration configuration;
     private final OBDAModel activeOBDAModel;
@@ -37,8 +36,8 @@ public class BootstrapGenerator {
     private final DirectMappingEngine directMappingEngine;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
-                              OWLModelManager owlManager)
-            throws DuplicateMappingException, SQLException, MetadataExtractionException {
+                              OWLModelManager owlManager) throws DuplicateMappingException, MetadataExtractionException {
+
         connManager = JDBCConnectionManager.getJDBCConnectionManager();
         this.owlManager =  owlManager;
         configuration = obdaModelManager.getConfigurationManager().buildOntopSQLOWLAPIConfiguration(owlManager.getActiveOntology());
@@ -50,7 +49,7 @@ public class BootstrapGenerator {
         bootstrapMappingAndOntologyProtege(baseUri);
     }
 
-    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, SQLException, MetadataExtractionException {
+    private void bootstrapMappingAndOntologyProtege(String baseUri) throws DuplicateMappingException, MetadataExtractionException {
 
         List<SQLPPTriplesMap> sqlppTriplesMaps = bootstrapMapping(activeOBDAModel.generatePPMapping(), baseUri);
 
@@ -61,8 +60,8 @@ public class BootstrapGenerator {
                 sqlppTriplesMaps.stream()
                         .flatMap(ax -> ax.getTargetAtoms().stream()),
                 typeFactory,
-                true
-        );
+                true);
+
         List<AddAxiom> addAxioms = declarationAxioms.stream()
                 .map(ax -> new AddAxiom(owlManager.getActiveOntology(), ax))
                 .collect(Collectors.toList());
@@ -70,10 +69,8 @@ public class BootstrapGenerator {
         owlManager.applyChanges(addAxioms);
     }
 
-    private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI)
-            throws DuplicateMappingException, MetadataExtractionException, SQLException {
-
-        List<SQLPPTriplesMap> newTriplesMap = new ArrayList<>();
+    private List<SQLPPTriplesMap> bootstrapMapping(SQLPPMapping ppMapping, String baseURI0)
+            throws DuplicateMappingException, MetadataExtractionException {
 
         final Connection conn;
         try {
@@ -84,29 +81,25 @@ public class BootstrapGenerator {
                     " Message: " + e.getMessage());
         }
 
-        if (baseURI == null || baseURI.isEmpty()) {
-            baseURI = ppMapping.getPrefixManager().getDefaultPrefix();
-        }
-        else {
-            baseURI = DirectMappingEngine.fixBaseURI(baseURI);
-        }
+        final String baseURI = (baseURI0 == null || baseURI0.isEmpty())
+            ? ppMapping.getPrefixManager().getDefaultPrefix()
+            : DirectMappingEngine.fixBaseURI(baseURI0);
 
-        // this operation is EXPENSIVE
         MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+        // this operation is EXPENSIVE
         ImmutableList<RelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
 
-        Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+        Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
-        for (RelationDefinition td : relations) {
-            newTriplesMap.addAll(directMappingEngine.getMapping((DatabaseRelationDefinition)td, baseURI, bnodeTemplateMap, currentMappingIndex));
-        }
 
-        //add to the current model the boostrapped triples map
-        for (SQLPPTriplesMap triplesMap: newTriplesMap) {
+        ImmutableList<SQLPPTriplesMap> newTriplesMap = relations.stream()
+                .flatMap(td -> directMappingEngine.getMapping(td, baseURI, bnodeTemplateMap, currentMappingIndex).stream())
+                .collect(ImmutableCollectors.toList());
+
+        // add to the current model the boostrapped triples map
+        for (SQLPPTriplesMap triplesMap: newTriplesMap)
             activeOBDAModel.addTriplesMap(triplesMap, true);
-        }
+
         return newTriplesMap;
     }
-
-
 }

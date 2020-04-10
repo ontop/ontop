@@ -165,7 +165,7 @@ public class DirectMappingEngine {
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;
 
-			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
 			AtomicInteger currentMappingIndex = new AtomicInteger(mapping.getTripleMaps().size() + 1);
 
 			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
@@ -197,9 +197,9 @@ public class DirectMappingEngine {
 	 *  @param bnodeTemplateMap
 	 * @return a List of OBDAMappingAxiom-s
 	 */
-	public ImmutableList<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
+	public ImmutableList<SQLPPTriplesMap> getMapping(RelationDefinition table,
 											String baseIRI,
-											Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
+											Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
 											AtomicInteger mappingIndex) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,

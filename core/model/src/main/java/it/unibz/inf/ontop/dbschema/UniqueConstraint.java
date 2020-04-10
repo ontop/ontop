@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -44,26 +45,20 @@ import java.util.stream.Collectors;
 
 public class UniqueConstraint implements FunctionalDependency {
 
-	public static final class BuilderImpl implements FunctionalDependency.Builder {
-		private final ImmutableList.Builder<Attribute> builder = ImmutableList.builder();
-		private final DatabaseRelationDefinition relation;
-		private final String name;
-		private boolean isPK;
+	public static class UniqueConstraintBuilder implements FunctionalDependency.Builder {
+		protected final ImmutableList.Builder<Attribute> builder = ImmutableList.builder();
+		protected final DatabaseRelationDefinition relation;
+		protected final String name;
 
-		private BuilderImpl(DatabaseRelationDefinition relation, String name, boolean isPK) {
-			this.relation = relation;
+		private UniqueConstraintBuilder(RelationDefinition relation, String name) {
+			this.relation = (DatabaseRelationDefinition)relation;
 			this.name = name;
-			this.isPK = isPK;
 		}
 
 		@Override
 		public Builder addDeterminant(Attribute attribute) {
-
 			if (relation != attribute.getRelation())
 				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
-
-			if (isPK && attribute.isNullable())
-				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
 
 			builder.add(attribute);
 			return this;
@@ -71,12 +66,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 		@Override
 		public Builder addDeterminant(QuotedID determinantId) {
-			Attribute attribute = relation.getAttribute(determinantId);
-
-			if (isPK && attribute.isNullable())
-				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
-
-			builder.add(attribute);
+			builder.add(relation.getAttribute(determinantId));
 			return this;
 		}
 
@@ -96,21 +86,61 @@ public class UniqueConstraint implements FunctionalDependency {
 			if (attributes.isEmpty())
 				throw new IllegalArgumentException("UC cannot have no attributes");
 
-			relation.addUniqueConstraint(new UniqueConstraint(name, isPK, attributes));
+			Optional<UniqueConstraint> pk = relation.getPrimaryKey();
+			if (pk.isPresent() && pk.get().getAttributes().equals(attributes))
+				return; // ignore a unique constraint with the same attributes as the primary key
+
+			relation.addUniqueConstraint(new UniqueConstraint(name, false, attributes));
 		}
 	}
 
+	public static class PrimaryKeyBuilder extends UniqueConstraintBuilder {
+
+		private PrimaryKeyBuilder(RelationDefinition relation, String name) {
+			super(relation, name);
+		}
+
+		@Override
+		public Builder addDeterminant(Attribute attribute) {
+			if (attribute.isNullable())
+				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
+
+			return super.addDeterminant(attribute);
+		}
+
+		@Override
+		public Builder addDeterminant(QuotedID determinantId) {
+			Attribute attribute = relation.getAttribute(determinantId);
+			if (attribute.isNullable())
+				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
+
+			builder.add(attribute);
+			return this;
+		}
+
+		@Override
+		public void build() {
+			ImmutableList<Attribute> attributes = builder.build();
+			if (attributes.isEmpty())
+				throw new IllegalArgumentException("PK cannot have no attributes");
+
+			relation.addUniqueConstraint(new UniqueConstraint(name, true, attributes));
+		}
+	}
+
+
 	public static void primaryKeyOf(Attribute att) {
-		Builder builder = primaryKeyBuilder((DatabaseRelationDefinition)att.getRelation(),
-				"PK_" + att.getRelation().getID().getTableName());
-		builder.addDeterminant(att).build();
+		primaryKeyBuilder(att.getRelation(), getRelationPrimaryKeyName(att.getRelation()))
+				.addDeterminant(att).build();
 	}
 
 	public static void primaryKeyOf(Attribute att1, Attribute att2) {
-		Builder builder = primaryKeyBuilder((DatabaseRelationDefinition)att1.getRelation(),
-				"PK_" + att1.getRelation().getID().getTableName());
-		builder.addDeterminant(att1).addDeterminant(att2).build();
+		primaryKeyBuilder(att1.getRelation(), getRelationPrimaryKeyName(att1.getRelation()))
+				.addDeterminant(att1)
+				.addDeterminant(att2).build();
 	}
+
+	private static String getRelationPrimaryKeyName(RelationDefinition relation) { return "PK_" + relation.getID().getTableName(); }
 
 	/**
 	 * creates a UNIQUE constraint builder
@@ -120,8 +150,8 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static Builder builder(DatabaseRelationDefinition relation, String name) {
-		return new BuilderImpl(relation, name, false);
+	public static Builder builder(RelationDefinition relation, String name) {
+		return new UniqueConstraintBuilder(relation, name);
 	}
 
 	/**
@@ -132,13 +162,13 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
-		return new BuilderImpl(relation, name, true);
+	public static Builder primaryKeyBuilder(RelationDefinition relation, String name) {
+		return new PrimaryKeyBuilder(relation, name);
 	}
 
 	private final String name;
 	private final ImmutableList<Attribute> attributes;
-	private final boolean isPK; // primary key
+	private final boolean isPrimaryKey;
 
 	/**
 	 * private constructor (use Builder instead)
@@ -147,9 +177,9 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @param attributes
 	 */
 
-	private UniqueConstraint(String name, boolean isPK, ImmutableList<Attribute> attributes) {
+	private UniqueConstraint(String name, boolean isPrimaryKey, ImmutableList<Attribute> attributes) {
 		this.name = name;
-		this.isPK = isPK;
+		this.isPrimaryKey = isPrimaryKey;
 		this.attributes = attributes;
 	}
 
@@ -158,6 +188,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 *
 	 * @return name
 	 */
+
 	public String getName() {
 		return name;
 	}
@@ -167,9 +198,10 @@ public class UniqueConstraint implements FunctionalDependency {
 	 *
 	 * @return true if it is a primary key constraint (false otherwise)
 	 */
+
 	@JsonProperty("isPrimaryKey")
 	public boolean isPrimaryKey() {
-		return isPK;
+		return isPrimaryKey;
 	}
 
 	/**
@@ -177,6 +209,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 *
 	 * @return list of attributes
 	 */
+
 	@JsonProperty("determinants")
 	@JsonSerialize(contentUsing = Attribute.AttributeSerializer.class)
 	public ImmutableList<Attribute> getAttributes() {
@@ -200,7 +233,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	@Override
 	public String toString() {
 		return "ALTER TABLE " + attributes.get(0).getRelation().getID() +
-				" ADD CONSTRAINT " + name + (isPK ? " PRIMARY KEY " : " UNIQUE ") +
+				" ADD CONSTRAINT " + name + (isPrimaryKey ? " PRIMARY KEY " : " UNIQUE ") +
 				"(" +
 				attributes.stream()
 						.map(Attribute::getID)

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -53,10 +52,10 @@ public class ForeignKeyConstraint {
          * @param referencedRelation
          */
 
-        private Builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        private Builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
             this.name = name;
-            this.relation = relation;
-            this.referencedRelation = referencedRelation;
+            this.relation = (DatabaseRelationDefinition)relation;
+            this.referencedRelation = (DatabaseRelationDefinition)referencedRelation;
         }
 
         /**
@@ -68,7 +67,6 @@ public class ForeignKeyConstraint {
          */
 
         public Builder add(Attribute attribute, Attribute referencedAttribute) {
-
             if (relation != attribute.getRelation())
                 throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
 
@@ -89,6 +87,7 @@ public class ForeignKeyConstraint {
          *
          * @throws IllegalArgumentException if the list of components is empty
          */
+
         public void build() {
             ImmutableList<Component> components = builder.build();
             if (components.isEmpty())
@@ -107,7 +106,7 @@ public class ForeignKeyConstraint {
      * @return
      */
 
-    public static Builder builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+    public static Builder builder(String name, RelationDefinition relation, RelationDefinition referencedRelation) {
         return new Builder(name, relation, referencedRelation);
     }
 
@@ -119,15 +118,15 @@ public class ForeignKeyConstraint {
      * @param reference
      * @return
      */
+
     public static void of(String name, Attribute attribute, Attribute reference) {
-        builder(name, (DatabaseRelationDefinition) attribute.getRelation(),
-                (DatabaseRelationDefinition) reference.getRelation())
+        builder(name, attribute.getRelation(), reference.getRelation())
                 .add(attribute, reference).build();
     }
 
     private final String name;
     private final ImmutableList<Component> components;
-    private final DatabaseRelationDefinition relation, referencedRelation;
+    private final RelationDefinition relation, referencedRelation;
 
     /**
      * private constructor (use Builder instead)
@@ -139,8 +138,8 @@ public class ForeignKeyConstraint {
     private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
         this.name = name;
         this.components = components;
-        this.relation = (DatabaseRelationDefinition) components.get(0).getAttribute().getRelation();
-        this.referencedRelation = (DatabaseRelationDefinition) components.get(0).getReference().getRelation();
+        this.relation = components.get(0).getAttribute().getRelation();
+        this.referencedRelation = components.get(0).getReference().getRelation();
     }
 
     /**
@@ -148,6 +147,7 @@ public class ForeignKeyConstraint {
      *
      * @return name
      */
+
     public String getName() {
         return name;
     }
@@ -159,6 +159,7 @@ public class ForeignKeyConstraint {
      *
      * @return
      */
+
     public ImmutableList<Component> getComponents() {
         return components;
     }
@@ -168,7 +169,8 @@ public class ForeignKeyConstraint {
      *
      * @return referenced relation
      */
-    public DatabaseRelationDefinition getReferencedRelation() {
+
+    public RelationDefinition getReferencedRelation() {
         return referencedRelation;
     }
 
@@ -178,7 +180,7 @@ public class ForeignKeyConstraint {
      * @return relation
      */
 
-    public DatabaseRelationDefinition getRelation() {
+    public RelationDefinition getRelation() {
         return relation;
     }
 
