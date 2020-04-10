@@ -100,7 +100,7 @@ public class DirectMappingAxiomProducer {
 				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
 	}
 
-	private static ImmutableList<Attribute> getIdentifyingAttributes(RelationDefinition table) {
+	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
 		Optional<UniqueConstraint> pk = table.getPrimaryKey();
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());

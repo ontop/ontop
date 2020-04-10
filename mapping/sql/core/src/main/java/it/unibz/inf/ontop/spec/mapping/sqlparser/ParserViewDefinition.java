@@ -22,6 +22,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * @author Roman Kontchakov
 */
 
-public class ParserViewDefinition extends RelationDefinition {
+public class ParserViewDefinition extends AbstractRelationDefinition {
 
 	/**
 	 * @param statement
@@ -45,7 +46,7 @@ public class ParserViewDefinition extends RelationDefinition {
 	}
 
 	private static AttributeListBuilder attributeListBuilder(ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
-		AttributeListBuilder builder = new AttributeListBuilder();
+		AttributeListBuilder builder = attributeListBuilder();
 		for (QuotedID id : attrs) {
 			// TODO: infer types?
 			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
@@ -63,9 +64,6 @@ public class ParserViewDefinition extends RelationDefinition {
 	public ImmutableList<FunctionalDependency> getOtherFunctionalDependencies() {
 		return ImmutableList.of();
 	}
-
-	@Override
-	public Optional<UniqueConstraint> getPrimaryKey() { return Optional.empty(); }
 
 	@Override
 	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {

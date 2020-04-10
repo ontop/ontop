@@ -65,7 +65,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 builder.build();
                 counter++;
             }
-            catch (RelationDefinition.AttributeNotFoundException e) {
+            catch (AttributeNotFoundException e) {
                 LOGGER.warn("Error in user-supplied foreign key constraints: {} not found in {}.", e.getAttributeID(), e.getRelation());
             }
             catch (MetadataExtractionException e) {
@@ -92,7 +92,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 builder.build();
                 counter++;
             }
-            catch (RelationDefinition.AttributeNotFoundException e) {
+            catch (AttributeNotFoundException e) {
                 LOGGER.warn("Error in user-supplied foreign key constraints: {} not found in {}.", e.getAttributeID(), e.getRelation());
             }
             catch (MetadataExtractionException e) {

@@ -55,10 +55,9 @@ public class WrongForeignKeyTest {
                 .build();
     }
 
-
     //Add a foreign key constraint where a column is missing in the referring table
-    @Test(expected = RelationDefinition.AttributeNotFoundException.class)
-    public void testMissingColumnPK() throws RelationDefinition.AttributeNotFoundException {
+    @Test(expected = AttributeNotFoundException.class)
+    public void testMissingColumnPK() throws AttributeNotFoundException {
         ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder("", table1Def, table2Def);
 
         QuotedID attrId = ID_FACTORY.createAttributeID("COL4");

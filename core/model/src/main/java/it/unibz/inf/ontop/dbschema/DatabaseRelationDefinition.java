@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
  *
  */
 
-public class DatabaseRelationDefinition extends RelationDefinition {
+public class DatabaseRelationDefinition extends AbstractRelationDefinition {
 
 	private final RelationID id;
 
@@ -105,7 +106,6 @@ public class DatabaseRelationDefinition extends RelationDefinition {
 	 * @return primary key
 	 */
 	@JsonIgnore
-	@Override
 	public Optional<UniqueConstraint> getPrimaryKey() {
 		return Optional.ofNullable(primaryKey);
 	}

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class QuadPredicateImpl extends RDFAtomPredicateImpl implements QuadPredicate {
 
-    private static int NAMED_GRAPH_INDEX = 3;
+    private static final int NAMED_GRAPH_INDEX = 3;
 
     protected QuadPredicateImpl(ImmutableList<TermType> expectedBaseTypes, RDFTermTypeConstant iriType,
                                 RDF rdfFactory) {

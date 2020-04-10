@@ -20,17 +20,9 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.*;
-import java.util.function.Function;
 
 
 /**
@@ -41,18 +33,8 @@ import java.util.function.Function;
  * @author Roman Kontchakov
  */
 
-public abstract class RelationDefinition {
+public interface RelationDefinition {
 
-	private final ImmutableList<Attribute> attributes;
-	private final ImmutableMap<QuotedID, Attribute> map;
-	private final RelationPredicate predicate;
-
-	protected RelationDefinition(String predicateName, AttributeListBuilder builder) {
-		this.attributes = builder.build(this);
-		this.map = attributes.stream()
-				.collect(ImmutableCollectors.toMap(Attribute::getID, Function.identity()));
-		this.predicate = new RelationPredicateImpl(predicateName);
-	}
 
 	/**
 	 * gets the attribute with the specified position
@@ -61,7 +43,7 @@ public abstract class RelationDefinition {
 	 * @return attribute at the position
 	 */
 
-	public Attribute getAttribute(int index) { return attributes.get(index - 1); }
+	Attribute getAttribute(int index);
 
 	/**
 	 * gets the attribute with the specified ID
@@ -70,98 +52,30 @@ public abstract class RelationDefinition {
 	 * @return
 	 */
 
-	public Attribute getAttribute(QuotedID id) throws AttributeNotFoundException {
-		Attribute attribute = map.get(id);
-		if (attribute == null)
-			throw new AttributeNotFoundException(id);
-
-		return attribute;
-	}
+	Attribute getAttribute(QuotedID id) throws AttributeNotFoundException;
 
 	/**
 	 * the list of attributes
 	 *
 	 * @return list of attributes
 	 */
-	@JsonProperty("columns")
-	public ImmutableList<Attribute> getAttributes() { return attributes; }
+	ImmutableList<Attribute> getAttributes();
 
-	@JsonIgnore
-	public RelationPredicate getAtomPredicate() { return predicate; }
+	RelationPredicate getAtomPredicate();
 
+	ImmutableList<UniqueConstraint> getUniqueConstraints();
 
+	ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
 
-	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
-
-	public abstract ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
-
-	public abstract Optional<UniqueConstraint> getPrimaryKey();
-
-	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
+	ImmutableList<ForeignKeyConstraint> getForeignKeys();
 
 
+	interface AttributeListBuilder {
 
-	private class RelationPredicateImpl extends AtomPredicateImpl implements RelationPredicate {
+		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable);
 
-		public RelationPredicateImpl(String name) {
-			super(name,
-					getAttributes().stream()
-							.map(Attribute::getTermType)
-							.collect(ImmutableCollectors.toList()));
-		}
+		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable);
 
-		@Override
-		public RelationDefinition getRelationDefinition() {
-			return RelationDefinition.this;
-		}
-	}
-
-
-	public class AttributeNotFoundException extends Exception {
-		private final QuotedID attributeId;
-
-		public AttributeNotFoundException(QuotedID attributeId) { this.attributeId = attributeId;  }
-
-		public QuotedID getAttributeID() { return attributeId; }
-
-		public RelationDefinition getRelation() { return RelationDefinition.this; }
-	}
-
-
-
-	private static class AttributeInfo {
-		private final QuotedID id;
-		private final int index;
-		private final DBTermType termType;
-		private final String typeName;
-		private final boolean isNullable;
-
-		AttributeInfo(QuotedID id, int index, DBTermType termType, String typeName, boolean isNullable) {
-			this.id = id;
-			this.index = index;
-			this.termType = termType;
-			this.typeName = typeName;
-			this.isNullable = isNullable;
-		}
-	}
-
-	public static class AttributeListBuilder {
-		private final List<AttributeInfo> list = new ArrayList<>();
-
-		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
-			list.add(new AttributeInfo(id, list.size() + 1, termType, typeName, isNullable));
-			return this;
-		}
-
-		public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable) {
-			list.add(new AttributeInfo(id, list.size() + 1, termType, termType.getName(), isNullable));
-			return this;
-		}
-
-		public ImmutableList<Attribute> build(RelationDefinition relation) {
-			return list.stream()
-					.map(a -> new Attribute(relation, a.id, a.index, a.typeName, a.termType, a.isNullable))
-					.collect(ImmutableCollectors.toList());
-		}
+		ImmutableList<Attribute> build(RelationDefinition relation);
 	}
 }

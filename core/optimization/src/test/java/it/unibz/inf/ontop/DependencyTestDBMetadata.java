@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop;
 
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -33,7 +34,7 @@ public class DependencyTestDBMetadata {
     private static RelationPredicate createRelationPredicate(int tableNumber, int arity) {
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
         DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
-        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder();
+        RelationDefinition.AttributeListBuilder builder = DatabaseRelationDefinition.attributeListBuilder();
         for (int i = 1; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
         }

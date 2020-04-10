@@ -71,7 +71,7 @@ public class ForeignKeyConstraint {
             return this;
         }
 
-        public Builder add(QuotedID attributeId, QuotedID referencedAttributeId) throws RelationDefinition.AttributeNotFoundException {
+        public Builder add(QuotedID attributeId, QuotedID referencedAttributeId) throws AttributeNotFoundException {
             builder.add(new Component(relation.getAttribute(attributeId), referencedRelation.getAttribute(referencedAttributeId)));
             return this;
         }

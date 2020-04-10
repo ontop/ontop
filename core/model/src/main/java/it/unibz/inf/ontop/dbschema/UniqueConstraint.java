@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.impl.AttributeImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException {
+		public Builder addDeterminant(QuotedID determinantId) throws AttributeNotFoundException {
 			builder.add(relation.getAttribute(determinantId));
 			return this;
 		}
@@ -107,7 +108,7 @@ public class UniqueConstraint implements FunctionalDependency {
 		}
 
 		@Override
-		public Builder addDeterminant(QuotedID determinantId) throws RelationDefinition.AttributeNotFoundException {
+		public Builder addDeterminant(QuotedID determinantId) throws AttributeNotFoundException {
 			Attribute attribute = relation.getAttribute(determinantId);
 			if (attribute.isNullable())
 				throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be in a PK");
@@ -215,7 +216,7 @@ public class UniqueConstraint implements FunctionalDependency {
 	 */
 
 	@JsonProperty("determinants")
-	@JsonSerialize(contentUsing = Attribute.AttributeSerializer.class)
+	@JsonSerialize(contentUsing = AttributeImpl.AttributeSerializer.class)
 	public ImmutableList<Attribute> getAttributes() {
 		return attributes;
 	}

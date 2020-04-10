@@ -119,7 +119,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             while (rs.next()) {
                 RelationID relationId = getRelationID(rs);
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(relationId,
-                        i -> new RelationDefinition.AttributeListBuilder());
+                        i -> DatabaseRelationDefinition.attributeListBuilder());
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                 // columnNoNulls, columnNullable, columnNullableUnknown
@@ -187,7 +187,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                         builder.addDeterminant(primaryKeyAttributes.get(i));
                     builder.build();
                 }
-                catch (RelationDefinition.AttributeNotFoundException e) {
+                catch (AttributeNotFoundException e) {
                     throw new MetadataExtractionException(e);
                 }
             }
@@ -241,13 +241,13 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     try {
                         builder.addDeterminant(attrId);
                     }
-                    catch (RelationDefinition.AttributeNotFoundException e) {
+                    catch (AttributeNotFoundException e) {
                         try {
                             // bug in PostgreSQL JBDC driver: it strips off the quotation marks
                             attrId = rawIdFactory.createAttributeID("\"" + rs.getString("COLUMN_NAME") + "\"");
                             builder.addDeterminant(attrId);
                         }
-                        catch (RelationDefinition.AttributeNotFoundException ex) {
+                        catch (AttributeNotFoundException ex) {
                            throw new MetadataExtractionException(e);
                         }
                     }
@@ -285,7 +285,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                             QuotedID refAttrId = rawIdFactory.createAttributeID(rs.getString("PKCOLUMN_NAME"));
                             builder.add(attrId, refAttrId);
                         }
-                        catch (RelationDefinition.AttributeNotFoundException e) {
+                        catch (AttributeNotFoundException e) {
                             throw new MetadataExtractionException(e);
                         }
                     }

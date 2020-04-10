@@ -27,11 +27,9 @@ public class IsDistinctTest {
             throw new IllegalArgumentException();
 
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        DBTermType dbStringTermType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
-        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder();
-
-        DBTermType dbStringTermType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
-
+        RelationDefinition.AttributeListBuilder builder = DatabaseRelationDefinition.attributeListBuilder();
         for (int i=1 ; i <= arity; i++)
             builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
 
