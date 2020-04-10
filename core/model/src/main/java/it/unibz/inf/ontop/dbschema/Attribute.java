@@ -97,7 +97,7 @@ public class Attribute {
 
 	@Override
 	public String toString() {
-		return id + " " + typeName + (isNullable ? "" : " NOT NULL");
+		return id + (typeName == null ? "" : " " + typeName) + (isNullable ? "" : " NOT NULL");
 	}
 
 	@Override

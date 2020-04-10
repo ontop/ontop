@@ -201,9 +201,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String relationRendering = relationDefinition.getAtomPredicate().getName();
             String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
 
-            if (!(relationDefinition instanceof DatabaseRelationDefinition))
-                System.out.println("PARSER VIEW " + relationDefinition + " PRODUCES " + sqlSubString);
-
             return new QuerySerializationImpl(sqlSubString,
                     sqlTable.getArgumentMap().entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
