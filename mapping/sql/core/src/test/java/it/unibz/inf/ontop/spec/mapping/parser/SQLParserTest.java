@@ -57,7 +57,7 @@ public class SQLParserTest {
 		DBTermType varchar10DBType = dbTypeFactory.getDBTermType("VARCHAR", 10);
 		DBTermType varchar8DBType = dbTypeFactory.getDBTermType("VARCHAR", 8);
 
-		ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
+		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
 
 		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID("\"public\"", "student"))
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
@@ -187,7 +187,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		ImmutableList<RelationDefinition> list = relations.build();
+		ImmutableList<DatabaseRelationDefinition> list = relations.build();
 
 		MetadataLookup metadataLookup = new ImmutableMetadataLookup(Stream.concat(
 				list.stream()

@@ -7,15 +7,15 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 public class ImmutableMetadataLookup implements MetadataLookup {
 
-    protected final ImmutableMap<RelationID, RelationDefinition> map;
+    protected final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
 
-    public ImmutableMetadataLookup(ImmutableMap<RelationID, RelationDefinition> map) {
+    public ImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
         this.map = map;
     }
 
     @Override
-    public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        RelationDefinition relation = map.get(id);
+    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+        DatabaseRelationDefinition relation = map.get(id);
         if (relation == null)
             throw new MetadataExtractionException("Relation " + id + " not found");
 

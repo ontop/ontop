@@ -11,6 +11,6 @@ public interface MetadataLookup {
      * @throws MetadataExtractionException if the relation is not found
      */
 
-    RelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
+    DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
 }

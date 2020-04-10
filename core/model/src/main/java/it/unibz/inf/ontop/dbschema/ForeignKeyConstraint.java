@@ -120,7 +120,7 @@ public class ForeignKeyConstraint {
 
     private final String name;
     private final ImmutableList<Component> components;
-    private final RelationDefinition relation, referencedRelation;
+    private final DatabaseRelationDefinition relation, referencedRelation;
 
     /**
      * private constructor (use Builder instead)
@@ -132,8 +132,8 @@ public class ForeignKeyConstraint {
     private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
         this.name = name;
         this.components = components;
-        this.relation = components.get(0).getAttribute().getRelation();
-        this.referencedRelation = components.get(0).getReference().getRelation();
+        this.relation = (DatabaseRelationDefinition)components.get(0).getAttribute().getRelation();
+        this.referencedRelation = (DatabaseRelationDefinition)components.get(0).getReference().getRelation();
     }
 
     /**
@@ -164,7 +164,7 @@ public class ForeignKeyConstraint {
      * @return referenced relation
      */
 
-    public RelationDefinition getReferencedRelation() {
+    public DatabaseRelationDefinition getReferencedRelation() {
         return referencedRelation;
     }
 
@@ -174,7 +174,7 @@ public class ForeignKeyConstraint {
      * @return relation
      */
 
-    public RelationDefinition getRelation() {
+    public DatabaseRelationDefinition getRelation() {
         return relation;
     }
 

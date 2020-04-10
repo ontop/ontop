@@ -50,7 +50,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
      * Inserts the user-supplied primary keys / unique constraints columns into the metadata object
      */
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) {
+    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) {
 
         int counter = 0; // id of the generated constraint
 
@@ -114,12 +114,9 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     private ConstraintDescriptor getConstraintDescriptor(MetadataLookup metadataLookup, String tableName, String[] attributeNames) throws MetadataExtractionException {
 
-        RelationDefinition relation = metadataLookup.getRelation(getRelationIDFromString(tableName));
-        if (!(relation instanceof DatabaseRelationDefinition))
-            throw new MetadataExtractionException("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
-
+        DatabaseRelationDefinition relation = metadataLookup.getRelation(getRelationIDFromString(tableName));
         return new ConstraintDescriptor(
-                (DatabaseRelationDefinition)relation,
+               relation,
                 Stream.of(attributeNames)
                     .map(idFactory::createAttributeID)
                     .collect(ImmutableCollectors.toList()));

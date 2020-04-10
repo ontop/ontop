@@ -10,19 +10,19 @@ import java.util.*;
 public class DynamicMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
-    private final Map<RelationID, RelationDefinition> map = new HashMap<>();
+    private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
 
     public DynamicMetadataLookup(MetadataProvider provider) {
         this.provider = provider;
     }
 
     @Override
-    public RelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        RelationDefinition relation = map.get(id);
+    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+        DatabaseRelationDefinition relation = map.get(id);
         if (relation != null)
             return relation;
 
-        RelationDefinition retrievedRelation = provider.getRelation(id);
+        DatabaseRelationDefinition retrievedRelation = provider.getRelation(id);
         RelationID retrievedId = retrievedRelation.getID();
         if (map.containsKey(retrievedId))
             return map.get(retrievedId); // discard retrievedRelation
@@ -42,7 +42,7 @@ public class DynamicMetadataLookup implements MetadataLookup {
 
     public void insertIntegrityConstraints() throws MetadataExtractionException {
         ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
-        for (RelationDefinition relation : metadata.getAllRelations())
+        for (DatabaseRelationDefinition relation : metadata.getAllRelations())
             provider.insertIntegrityConstraints(relation, metadata);
     }
 

@@ -29,7 +29,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class SelectQueryParserTest {
 
-    private RelationDefinition TABLE_P, TABLE_Q, TABLE_R;
+    private DatabaseRelationDefinition TABLE_P, TABLE_Q, TABLE_R;
 
     private static final String A1 = "A1";
     private static final String A2 = "A2";

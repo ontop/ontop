@@ -18,7 +18,7 @@ public interface MetadataProvider extends MetadataLookup {
      * Inserts the user-supplied primary keys, unique constraints and foreign keys
      * into the metadata object
      */
-    void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException;
+    void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException;
 
     DBParameters getDBParameters();
 }

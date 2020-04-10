@@ -87,9 +87,9 @@ public class BootstrapGenerator {
 
         MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
         // this operation is EXPENSIVE
-        ImmutableList<RelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
+        ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
 
-        Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+        Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);
 
         ImmutableList<SQLPPTriplesMap> newTriplesMap = relations.stream()

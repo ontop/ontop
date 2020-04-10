@@ -23,12 +23,12 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public RelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
+    public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
         return provider.getRelation(relationId);
     }
 
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         provider.insertIntegrityConstraints(relation, metadataLookup);
     }
 }

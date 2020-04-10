@@ -110,11 +110,11 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     protected RelationID getRelationCanonicalID(RelationID id) {  return id; }
 
     @Override
-    public RelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
+    public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
 
         RelationID id = getRelationCanonicalID(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
-            ImmutableList.Builder<RelationDefinition> relations = ImmutableList.builder();
+            ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
             RelationDefinition.AttributeListBuilder currentRelation = null;
 
             while (rs.next()) {
@@ -139,7 +139,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             if (currentRelation != null)
                 relations.add(new DatabaseRelationDefinition(currentRelation));
 
-            ImmutableList<RelationDefinition> list = relations.build();
+            ImmutableList<DatabaseRelationDefinition> list = relations.build();
             if (list.size() == 0) {
                 throw new MetadataExtractionException("Cannot find relation id: " + id);
             }
@@ -148,11 +148,11 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else {
                 RelationID canonicalId = getRelationCanonicalID(id);
-                for (RelationDefinition r : list)
+                for (DatabaseRelationDefinition r : list)
                     if (r.getID().equals(canonicalId))
                         return r;
             }
-            throw new MetadataExtractionException("Cannot resolve ambigous relation id: " + id);
+            throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -160,15 +160,10 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public void insertIntegrityConstraints(RelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
-        if (relation instanceof  DatabaseRelationDefinition) {
-            DatabaseRelationDefinition r = (DatabaseRelationDefinition) relation;
-            insertPrimaryKey(r);
-            insertUniqueAttributes(r);
-            insertForeignKeys(r, metadataLookup);
-        }
-        else
-            LOGGER.warn("Relation " + relation + " is not a " + DatabaseRelationDefinition.class.getName());
+    public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+        insertPrimaryKey(relation);
+        insertUniqueAttributes(relation);
+        insertForeignKeys(relation, metadataLookup);
     }
 
     @Override

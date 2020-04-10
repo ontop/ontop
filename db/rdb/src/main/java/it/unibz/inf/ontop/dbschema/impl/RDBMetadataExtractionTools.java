@@ -70,14 +70,14 @@ public class RDBMetadataExtractionTools {
 	 */
 	public static ImmutableMetadataProvider createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
 
-		ImmutableMap.Builder<RelationID, RelationDefinition> map = ImmutableMap.builder();
+		ImmutableMap.Builder<RelationID, DatabaseRelationDefinition> map = ImmutableMap.builder();
 		for (RelationID id : metadataLoader.getRelationIDs()) {
-			RelationDefinition relation = metadataLoader.getRelation(id);
+			DatabaseRelationDefinition relation = metadataLoader.getRelation(id);
 			map.put(relation.getID(), relation);
 		}
 
 		ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(metadataLoader.getDBParameters(), map.build());
-		for (RelationDefinition relation : metadata.getAllRelations())
+		for (DatabaseRelationDefinition relation : metadata.getAllRelations())
 			metadataLoader.insertIntegrityConstraints(relation, metadata);
 		return metadata;
 	}

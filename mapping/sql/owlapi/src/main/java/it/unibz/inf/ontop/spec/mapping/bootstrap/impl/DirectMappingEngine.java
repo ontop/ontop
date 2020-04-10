@@ -160,17 +160,17 @@ public class DirectMappingEngine {
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
 			MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
-			ImmutableList<RelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
+			ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;
 
-			Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
 			AtomicInteger currentMappingIndex = new AtomicInteger(mapping.getTripleMaps().size() + 1);
 
 			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
 					mapping.getTripleMaps().stream(),
-					tables.stream().flatMap(td -> getMapping((DatabaseRelationDefinition)td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
+					tables.stream().flatMap(td -> getMapping(td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
 					.collect(ImmutableCollectors.toList());
 
 			return ppMappingFactory.createSQLPreProcessedMapping(mappings, mapping.getPrefixManager());
@@ -197,9 +197,9 @@ public class DirectMappingEngine {
 	 *  @param bnodeTemplateMap
 	 * @return a List of OBDAMappingAxiom-s
 	 */
-	public ImmutableList<SQLPPTriplesMap> getMapping(RelationDefinition table,
+	public ImmutableList<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
 											String baseIRI,
-											Map<RelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
+											Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
 											AtomicInteger mappingIndex) {
 
 		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,
