@@ -82,7 +82,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
 
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
-				new SQLPPMappingImpl(ImmutableList.of(mapping), new SimplePrefixManager(ImmutableMap.of())),
+				ImmutableList.of(mapping),
 				getMetadataLookup(),
 				DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(),
 				null)

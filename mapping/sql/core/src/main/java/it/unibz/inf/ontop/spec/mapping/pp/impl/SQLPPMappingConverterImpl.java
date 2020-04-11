@@ -68,14 +68,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, MetadataLookup dbMetadata, QuotedIDFactory idFactory,
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata, QuotedIDFactory idFactory,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         List<MappingAssertion> assertionsList = new ArrayList<>();
 
         List<String> errorMessages = new ArrayList<>();
 
-        for (SQLPPTriplesMap mappingAxiom : ppMapping.getTripleMaps()) {
+        for (SQLPPTriplesMap mappingAxiom : mappingAssertions) {
             try {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQL();
                 RAExpression re;

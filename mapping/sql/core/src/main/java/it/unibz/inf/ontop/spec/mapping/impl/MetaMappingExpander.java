@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -36,7 +35,6 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
@@ -45,7 +43,6 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor2;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
@@ -69,7 +66,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderLookup;
 
@@ -118,7 +114,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public SQLPPMapping getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata, QuotedIDFactory idFactory)
+	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata, QuotedIDFactory idFactory)
 			throws MetaMappingExpansionException {
 
 		ImmutableList.Builder<SQLPPTriplesMap> result = ImmutableList.builder();
@@ -158,7 +154,7 @@ public class MetaMappingExpander {
 		ImmutableList<Expansion> expansions = builder2.build();
 
 		if (expansions.isEmpty())
-			return ppMapping;
+			return ppMapping.getTripleMaps();
 
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
@@ -237,7 +233,7 @@ public class MetaMappingExpander {
 		if (!errorMessages.isEmpty())
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
-		return new SQLPPMappingImpl(result.build(), ppMapping.getPrefixManager());
+		return result.build();
 	}
 
 
