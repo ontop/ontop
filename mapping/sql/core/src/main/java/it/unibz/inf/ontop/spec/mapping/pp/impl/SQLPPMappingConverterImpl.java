@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
@@ -71,9 +72,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     public ImmutableList<MappingAssertion> convert(SQLPPMapping ppMapping, MetadataLookup dbMetadata, QuotedIDFactory idFactory,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
-        int parserViewCounter = 0;
-
-        List<MappingAssertion> mutableMap = new ArrayList<>();
+        List<MappingAssertion> assertionsList = new ArrayList<>();
 
         List<String> errorMessages = new ArrayList<>();
 
@@ -83,12 +82,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
                 ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
                 Optional<ImmutableExpression> filter;
-                ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable;
+                ImmutableMap<QuotedID, ImmutableTerm> lookupTable;
 
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(dbMetadata, idFactory, coreSingletons);
                     RAExpression re = sqp.parse(sourceQuery);
-                    lookupTable = re.getAttributes();
+                    lookupTable = re.getAttributes().entrySet().stream()
+                        .filter(e -> e.getKey().getRelation() == null)
+                        .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
                     dataAtoms = re.getDataAtoms();
                     filter = re.getFilterAtoms().reverse().stream()
                                         .reduce((a, b) -> termFactory.getConjunction(b, a));
@@ -96,13 +97,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 catch (UnsupportedSelectQueryException e) {
                     ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, idFactory, termFactory)
                             .extract(sourceQuery);
-                    ParserViewDefinition view = createParserView(idFactory, dbTypeFactory, sourceQuery, attributes, parserViewCounter++);
+                    ParserViewDefinition view = createParserView(dbTypeFactory, sourceQuery, attributes);
 
                     // this is required to preserve the order of the variables
-                    ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
-                            .map(att -> new AbstractMap.SimpleEntry<>(
-                                    new QualifiedAttributeID(null, att.getID()), // strip off the ParserViewDefinitionName
-                                    termFactory.getVariable(att.getID().getName())))
+                    ImmutableList<Map.Entry<QuotedID, Variable>> list = view.getAttributes().stream()
+                            .map(att -> Maps.immutableEntry(att.getID(), termFactory.getVariable(att.getID().getName())))
                             .collect(ImmutableCollectors.toList());
 
                     lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -151,7 +150,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0).normalizeForOptimization();
 
-                        mutableMap.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq), iq,  provenance));
+                        assertionsList.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq), iq,  provenance));
                         //if (previous != null)
                         //    LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
@@ -172,9 +171,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         if (!errorMessages.isEmpty())
             throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
 
-        LOGGER.debug("Original mapping size: {}", mutableMap.size());
+        LOGGER.debug("Original mapping size: {}", assertionsList.size());
 
-        return ImmutableList.copyOf(mutableMap);
+        return ImmutableList.copyOf(assertionsList);
     }
 
 
@@ -184,18 +183,18 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
      *  according to the {@code attributes} lookup table
      */
     private ImmutableTerm renameVariables(ImmutableTerm term,
-                                          ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+                                          ImmutableMap<QuotedID, ImmutableTerm> attributes,
                                           QuotedIDFactory idfac) throws AttributeNotFoundException {
 
             if (term instanceof Variable) {
                 Variable var = (Variable) term;
                 QuotedID attribute = idfac.createAttributeID(var.getName());
-                ImmutableTerm newTerm = attributes.get(new QualifiedAttributeID(null, attribute));
+                ImmutableTerm newTerm = attributes.get(attribute);
 
                 if (newTerm == null) {
                     QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idfac);
                     QuotedID quotedAttribute = rawIdFactory.createAttributeID(var.getName());
-                    newTerm = attributes.get(new QualifiedAttributeID(null, quotedAttribute));
+                    newTerm = attributes.get(quotedAttribute);
 
                     if (newTerm == null)
                         throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
@@ -222,7 +221,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         }
     }
 
-    private ParserViewDefinition createParserView(QuotedIDFactory idFactory, DBTypeFactory dbTypeFactory, String sql, ImmutableList<QuotedID> attributes, int parserViewCounter) {
+    private ParserViewDefinition createParserView(DBTypeFactory dbTypeFactory, String sql, ImmutableList<QuotedID> attributes) {
         return new ParserViewDefinition(attributes, sql, dbTypeFactory);
     }
 
