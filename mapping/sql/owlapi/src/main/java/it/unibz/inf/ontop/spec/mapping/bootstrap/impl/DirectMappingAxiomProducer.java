@@ -80,15 +80,13 @@ public class DirectMappingAxiomProducer {
      */
     public String getRefSQL(ForeignKeyConstraint fk) {
 
-		Set<String> columns = new LinkedHashSet<>(); // Set avoids duplicated and LinkedHashSet keeps the insertion order
+		List<String> columns = new ArrayList<>();
 		for (Attribute attr : getIdentifyingAttributes(fk.getRelation()))
 			columns.add(getColumnNameWithAlias(attr));
 
 		List<String> conditions = new ArrayList<>(fk.getComponents().size());
-		for (ForeignKeyConstraint.Component comp : fk.getComponents()) {
-			columns.add(getColumnNameWithAlias(comp.getReference()));	
-			conditions.add(getColumnName(comp.getAttribute()) + " = " + getColumnName(comp.getReference()));
-		}
+		for (ForeignKeyConstraint.Component comp : fk.getComponents())
+			conditions.add(getQualifiedColumnName(comp.getAttribute()) + " = " + getQualifiedColumnName(comp.getReference()));
 		
 		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) 
 			columns.add(getColumnNameWithAlias(attr));
@@ -111,11 +109,11 @@ public class DirectMappingAxiomProducer {
 	}
 	
 	private static String getColumnNameWithAlias(Attribute attr) {
-		 return getColumnName(attr) + 
+		 return getQualifiedColumnName(attr) +
 				 " AS " + ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableID().getName() + "_" + attr.getID().getName();
 	}
 	
-	private static String getColumnName(Attribute attr) {
+	private static String getQualifiedColumnName(Attribute attr) {
 		 return new QualifiedAttributeID(((DatabaseRelationDefinition)attr.getRelation()).getID(), attr.getID()).getSQLRendering();
 	}
 
@@ -166,6 +164,8 @@ public class DirectMappingAxiomProducer {
 				fk.getReferencedRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
 
 		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
+		System.out.println("DMA: " + atom);
+
 		return ImmutableList.of(atom);
 	}
 

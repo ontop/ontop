@@ -23,7 +23,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
@@ -242,11 +241,11 @@ public class RDB2RDFTest {
 		return params;
 	}
 
-	private static URL url(String path) throws IOException {
+	private static URL url(String path)  {
 		return path == null ? null : RDB2RDFTest.class.getResource(path);
 	}
 
-	private static InputStream stream(String path) throws IOException {
+	private static InputStream stream(String path) {
 		return RDB2RDFTest.class.getResourceAsStream(path);
 	}
 
@@ -355,7 +354,7 @@ public class RDB2RDFTest {
 				.build();
 	}
 
-	protected static void clearDB() throws Exception {
+	protected static void clearDB()  {
         try (java.sql.Statement s = SQL_CONN.createStatement()) {
             s.execute("DROP ALL OBJECTS DELETE FILES");
         } catch (SQLException sqle) {
