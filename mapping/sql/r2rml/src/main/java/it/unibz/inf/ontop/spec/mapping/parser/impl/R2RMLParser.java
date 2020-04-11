@@ -7,7 +7,6 @@ import eu.optique.r2rml.api.model.*;
 import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
@@ -61,10 +60,6 @@ public class R2RMLParser {
 		return subjectMap.getClasses().stream();
 	}
 
-	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap) {
-		return extractSubjectTerm(subjectMap, "");
-	}
-
 	public ImmutableList<NonVariableTerm> extractGraphTerms(SubjectMap subjectMap) {
 		List<GraphMap> graphMaps = subjectMap.getGraphMaps();
 
@@ -73,12 +68,12 @@ public class R2RMLParser {
 				throw new R2RMLParsingBugException("The graph map must be an IRI, not " + graphMap.getTermType());
 		}
 		return graphMaps.stream()
-				.map(g -> extractIRIorBnodeTerm(g, ""))
+				.map(this::extractIRIorBnodeTerm)
 				.collect(ImmutableCollectors.toList());
 	}
 
-	private ImmutableTerm extractSubjectTerm(SubjectMap subjectMap, String joinCond) {
-		return extractIRIorBnodeTerm(subjectMap, joinCond);
+	public ImmutableTerm extractSubjectTerm(SubjectMap subjectMap) {
+		return extractIRIorBnodeTerm(subjectMap);
 	}
 
 	public ImmutableList<NonVariableTerm> extractPredicateTerms(PredicateObjectMap pom) {
@@ -90,10 +85,11 @@ public class R2RMLParser {
 	private NonVariableTerm extractIRITerm(TermMap termMap) {
 		if (!termMap.getTermType().equals(R2RMLVocabulary.iri))
 			throw new R2RMLParsingBugException("The term map must be an IRI, not " + termMap.getTermType());
-		return extractIRIorBnodeTerm(termMap, "");
+
+		return extractIRIorBnodeTerm(termMap);
 	}
 
-	private NonVariableTerm extractIRIorBnodeTerm(TermMap termMap, String joinCond) {
+	private NonVariableTerm extractIRIorBnodeTerm(TermMap termMap) {
 		IRI termTypeIRI = termMap.getTermType();
 
 		boolean isIRI = termTypeIRI.equals(R2RMLVocabulary.iri);
@@ -114,15 +110,15 @@ public class R2RMLParser {
 				// TODO: should we use the Template object instead?
 				.map(Template::toString)
 				.map(s -> isIRI
-						? extractTemplateLexicalTerm(s, RDFCategory.IRI, joinCond)
-						: extractTemplateLexicalTerm(s, RDFCategory.BNODE, joinCond))
+						? extractTemplateLexicalTerm(s, RDFCategory.IRI)
+						: extractTemplateLexicalTerm(s, RDFCategory.BNODE))
 				.map(l -> termFactory.getRDFFunctionalTerm(l,
 						termFactory.getRDFTermTypeConstant(isIRI
 								? typeFactory.getIRITermType()
 								: typeFactory.getBlankNodeType())))
 				// COLUMN case
 				.orElseGet(() -> Optional.ofNullable(termMap.getColumn())
-						.map(column -> termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(column)))
+						.map(this::getVariable)
 						.map(lex -> termFactory.getRDFFunctionalTerm(
 								lex,
 								termFactory.getRDFTermTypeConstant(
@@ -132,30 +128,27 @@ public class R2RMLParser {
 	}
 
 
-	public ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom) {
-		return extractRegularObjectTerms(pom, "");
-	}
-
 	/**
 	 * Extracts the object terms, they can be constants, columns or templates
 	 *
 	 */
-	private ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom, String joinCond) {
+
+	public ImmutableList<NonVariableTerm> extractRegularObjectTerms(PredicateObjectMap pom) {
 		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
 		for (ObjectMap om : pom.getObjectMaps()) {
-			termListBuilder.add(extractRegularObjectTerm(om, joinCond));
+			termListBuilder.add(extractRegularObjectTerm(om));
 		}
 		return termListBuilder.build();
 	}
 
-	private NonVariableTerm extractRegularObjectTerm(ObjectMap om, String joinCond) {
+	private NonVariableTerm extractRegularObjectTerm(ObjectMap om) {
 		return om.getTermType().equals(R2RMLVocabulary.literal)
-				? extractLiteral(om, joinCond)
-				: extractIRIorBnodeTerm(om, joinCond);
+				? extractLiteral(om)
+				: extractIRIorBnodeTerm(om);
 	}
 
-	private NonVariableTerm extractLiteral(ObjectMap om, String joinCond) {
-		NonVariableTerm lexicalTerm = extractLiteralLexicalTerm(om, joinCond);
+	private NonVariableTerm extractLiteral(ObjectMap om) {
+		NonVariableTerm lexicalTerm = extractLiteralLexicalTerm(om);
 
 		// Datatype -> first try: language tag
 		RDFDatatype datatype =  Optional.ofNullable(om.getLanguageTag())
@@ -176,7 +169,7 @@ public class R2RMLParser {
 	}
 
 
-	private NonVariableTerm extractLiteralLexicalTerm(ObjectMap om, String joinCond) {
+	private NonVariableTerm extractLiteralLexicalTerm(ObjectMap om) {
 
 		// CONSTANT
 		RDFTerm constantObj = om.getConstant();
@@ -191,13 +184,13 @@ public class R2RMLParser {
 		// COLUMN
 		String col = om.getColumn();
 		if (col != null) {
-			return getVariable(col, joinCond);
+			return getVariable(col);
 		}
 
 		// TEMPLATE
 		Template t = om.getTemplate();
 		if (t != null) {
-			return extractTemplateLexicalTerm(t.toString(), RDFCategory.LITERAL, joinCond);
+			return extractTemplateLexicalTerm(t.toString(), RDFCategory.LITERAL);
 		}
 		throw new R2RMLParsingBugException("Was expecting a Constant/Column/Template");
 	}
@@ -219,12 +212,10 @@ public class R2RMLParser {
 	 *
 	 * @param templateString
 	 * @param type
-	 *            IRI, BNODE, LITERAL
-	 * @param joinCond
-	 *            - CHILD_ or PARENT_ prefix for variables
+	 *            IRI, BNODE, LITERAL§
 	 * @return the constructed Function atom
 	 */
-	private NonVariableTerm extractTemplateLexicalTerm(String templateString, RDFCategory type, String joinCond) {
+	private NonVariableTerm extractTemplateLexicalTerm(String templateString, RDFCategory type) {
 
 		// Non-final
 		String string = templateString;
@@ -260,7 +251,7 @@ public class R2RMLParser {
 			int end = string.indexOf("}");
 			int begin = string.lastIndexOf("{", end);
 			String var = string.substring(begin + 1, end);
-			termListBuilder.add(getVariable(var, joinCond));
+			termListBuilder.add(getVariable(var));
 
 			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
 		}
@@ -313,8 +304,8 @@ public class R2RMLParser {
 		return string;
 	}
 
-	private ImmutableFunctionalTerm getVariable(String variableName, String joinCond) {
-		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(joinCond + trim(variableName)));
+	private ImmutableFunctionalTerm getVariable(String variableName) {
+		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
 	}
 
 	/**
