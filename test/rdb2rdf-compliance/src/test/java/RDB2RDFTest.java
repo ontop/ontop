@@ -77,7 +77,7 @@ public class RDB2RDFTest {
 	 */
 	private static final Set<String> IGNORE = ImmutableSet.of(
 			// Column appearing in the template: {Name} is not equivalent to {\"Name\"} and should be therefore not accepted
-			"tc0002f",
+			//"tc0002f",
 			// Should reject an undefined SQL version
 			"tc0003a",
 			// Should create duplicate blank nodes

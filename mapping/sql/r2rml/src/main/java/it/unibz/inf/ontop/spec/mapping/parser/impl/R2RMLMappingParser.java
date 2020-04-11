@@ -16,12 +16,10 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLPPSourceQueryFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.substitution.Var2VarSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
@@ -109,7 +107,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 
             return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, prefixManager);
-        } catch (InvalidR2RMLMappingException e) {
+        }
+        catch (InvalidR2RMLMappingException e) {
             throw new InvalidMappingException(e.getMessage());
         }
     }
@@ -147,7 +146,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
             ppTriplesMaps.addAll(extractJoinPPTriplesMaps(tm, subjectTermMap));
         }
 
-
         return ImmutableList.copyOf(ppTriplesMaps);
     }
 
@@ -168,8 +166,7 @@ public class R2RMLMappingParser implements SQLMappingParser {
         }
         return Optional.of(targetAtoms)
                 .filter(as -> !as.isEmpty())
-                // TODO: consider a R2RML-specific type of triples map
-                .map(as -> new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
+                .map(as -> new R2RMLSQLPPtriplesMap("mapping-" + tm.hashCode(),
                         sourceQueryFactory.createSourceQuery(sourceQuery),  as));
     }
 
@@ -225,7 +222,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
     private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm,
                                                            ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap)  {
 
-
         ImmutableList.Builder<SQLPPTriplesMap> joinPPTriplesMapsBuilder = ImmutableList.builder();
         for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 
@@ -253,7 +249,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
             for (RefObjectMap robm : refObjectMaps) {
 
                 TriplesMap parent = robm.getParentMap();
-
                 if (robm.getJoinConditions().isEmpty() &&
                         !parent.getLogicalTable().getSQLQuery().equals(tm.getLogicalTable().getSQLQuery()))
                     throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
@@ -301,7 +296,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
                                     .map(e -> parentPrefix + "." + e.getKey() + " AS " + e.getValue()))
                                 .collect(Collectors.joining(", ")) +
                         " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + childPrefix +
-
                         (robm.getJoinConditions().isEmpty()
                                 ? ""
                                 :
@@ -311,12 +305,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
                                         " = " + parentPrefix + "." + j.getParent())
                                 .collect(Collectors.joining(",")));
 
-                System.out.println("PARENT-CHILD: " + sourceQuery);
-
-                //finally, create mapping and add it to the list
-                //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-                // TODO: use a R2RML-specific class	instead
-                SQLPPTriplesMap ppTriplesMap = new OntopNativeSQLPPTriplesMap("tm-join-"+robm.hashCode(),
+                // use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
+                SQLPPTriplesMap ppTriplesMap = new R2RMLSQLPPtriplesMap("tm-join-" + robm.hashCode(),
                         sourceQueryFactory.createSourceQuery(sourceQuery), targetAtoms.build());
                 LOGGER.info("Join \"triples map\" introduced: " + ppTriplesMap);
                 joinPPTriplesMapsBuilder.add(ppTriplesMap);

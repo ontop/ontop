@@ -65,9 +65,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderLookup;
+import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderResolver;
 
 
 /**
@@ -156,6 +157,8 @@ public class MetaMappingExpander {
 		if (expansions.isEmpty())
 			return ppMapping.getTripleMaps();
 
+		BiFunction<Map<QuotedID, SelectExpressionItem>, Variable, SelectExpressionItem> resolver = placeholderResolver(ppMapping.getTripleMaps().iterator().next(), idFactory);
+
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
 			try {
@@ -175,12 +178,12 @@ public class MetaMappingExpander {
 				ImmutableList<SelectExpressionItem> templateColumns;
 				try {
 					templateColumns = templateVariables.stream()
-							.map(v -> placeholderLookup(queryColumns, v, idFactory))
+							.map(v -> resolver.apply(queryColumns, v))
 							.collect(ImmutableCollectors.toList());
 				}
 				catch (NullPointerException e) {
 					throw new IllegalArgumentException(templateVariables.stream()
-							.filter(v -> placeholderLookup(queryColumns, v, idFactory) == null)
+							.filter(v -> resolver.apply(queryColumns, v) == null)
 							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
 									"The placeholder(s) ",

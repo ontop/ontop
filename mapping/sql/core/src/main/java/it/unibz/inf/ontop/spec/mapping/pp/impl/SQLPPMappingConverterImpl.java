@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import sun.misc.REException;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 
@@ -100,6 +101,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                 .reduce((a, b) -> termFactory.getConjunction(b, a)),
                         iqFactory);
 
+                BiFunction<Map<QuotedID, ImmutableTerm>, Variable, ImmutableTerm> resolver = placeholderResolver(mappingAxiom, idFactory);
+
                 for (TargetAtom target : mappingAxiom.getTargetAtoms()) {
 
                     ImmutableSet<Variable> placeholders = target.getSubstitutedTerms().stream()
@@ -110,7 +113,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     try {
                         ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
                                 placeholders.stream()
-                                    .map(v -> Maps.immutableEntry(v, placeholderLookup(lookupTable2, v, idFactory)))
+                                    .map(v -> Maps.immutableEntry(v, resolver.apply(lookupTable2, v)))
                                     .filter(e -> !e.getKey().equals(e.getValue()))
                                     .collect(ImmutableCollectors.toMap()));
 
@@ -146,16 +149,24 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return ImmutableList.copyOf(assertionsList);
     }
 
-    public static <T> T placeholderLookup(Map<QuotedID, T> map, Variable placeholder, QuotedIDFactory idFactory) {
-        QuotedID attribute1 = idFactory.createAttributeID(placeholder.getName());
-        T item1 = map.get(attribute1);
-        if (item1 != null)
-            return item1;
+    public static <T> BiFunction<Map<QuotedID, T>, Variable, T> placeholderResolver(SQLPPTriplesMap triplesMap, QuotedIDFactory idFactory) {
+        if (triplesMap instanceof OntopNativeSQLPPTriplesMap) {
+            QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
+            return (map, placeholder) -> {
+                String name = placeholder.getName();
+                QuotedID attribute1 = idFactory.createAttributeID(name);
+                T item1 = map.get(attribute1);
+                if (item1 != null)
+                    return item1;
 
-        // TODO: to disable
-        QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
-        QuotedID attribute2 = rawIdFactory.createAttributeID(placeholder.getName());
-        return map.get(attribute2);
+                QuotedID attribute2 = rawIdFactory.createAttributeID(name);
+                return map.get(attribute2);
+            };
+        }
+        else
+            return (map, placeholder) -> {
+                return map.get( idFactory.createAttributeID(placeholder.getName()));
+        };
     }
 
     private RAExpression createParserView(ImmutableList<QuotedID> attributes,  String sql) {
