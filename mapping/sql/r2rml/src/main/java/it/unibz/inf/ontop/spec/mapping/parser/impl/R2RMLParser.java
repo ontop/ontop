@@ -195,18 +195,6 @@ public class R2RMLParser {
 		throw new R2RMLParsingBugException("Was expecting a Constant/Column/Template");
 	}
 
-	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{"
-	private int getIndexOfCurlyB(String str){
-		int i = str.indexOf("{");
-		int j = str.indexOf("\\{");
-
-		while ((i-1 == j) && (j != -1)) {
-			i = str.indexOf("{",i + 1);
-			j = str.indexOf("\\{",j + 1);
-		}
-		return i;
-	}
-
 	/**
 	 * gets the lexical term of a template-valued term map
 	 *
@@ -219,14 +207,15 @@ public class R2RMLParser {
 
 		// Non-final
 		String string = templateString;
-		if (!string.contains("{")) {
+		if (!templateString.contains("{")) {
 			return termFactory.getDBStringConstant(templateString);
 		}
+
 		if (type == RDFCategory.IRI) {
-			string = R2RMLVocabulary.prefixUri(string);
+			string = R2RMLVocabulary.prefixUri(templateString);
 		}
 
-		String str = string; // literal case
+		String suffix = string; // literal case
 
 		string = string.replace("\\{", "[");
 		string = string.replace("\\}", "]");
@@ -237,14 +226,21 @@ public class R2RMLParser {
 
 			// Literal: if there is constant string in template, adds it to the term list
 			if (type == RDFCategory.LITERAL) {
-				int i = getIndexOfCurlyB(str);
+				int i = suffix.indexOf("{");
+				int j = suffix.indexOf("\\{");
+
+				while ((i - 1 == j) && (j != -1)) {
+					i = suffix.indexOf("{",i + 1);
+					j = suffix.indexOf("\\{",j + 1);
+				}
+
 				if (i > 0) {
-					String cons = str.substring(0, i);
+					String cons = suffix.substring(0, i);
 					termListBuilder.add(termFactory.getDBStringConstant(cons));
-					str = str.substring(str.indexOf("}", i) + 1);
+					suffix = suffix.substring(suffix.indexOf("}", i) + 1);
 				}
 				else {
-					str = str.substring(str.indexOf("}") + 1);
+					suffix = suffix.substring(suffix.indexOf("}") + 1);
 				}
 			}
 
@@ -255,8 +251,8 @@ public class R2RMLParser {
 
 			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
 		}
-		if (type == RDFCategory.LITERAL && !str.isEmpty()) {
-			termListBuilder.add(termFactory.getDBStringConstant(str));
+		if (type == RDFCategory.LITERAL && !suffix.isEmpty()) {
+			termListBuilder.add(termFactory.getDBStringConstant(suffix));
 		}
 
 		string = string.replace("[", "{");
@@ -287,22 +283,6 @@ public class R2RMLParser {
 		}
 	}
 
-	/**
-	 * method that trims a string of all its double apostrophes from beginning
-	 * and end
-	 *
-	 * @param string
-	 *            - to be trimmed
-	 * @return the string without any quotes
-	 */
-	private String trim(String string) {
-
-		while (string.startsWith("\"") && string.endsWith("\"")) {
-
-			string = string.substring(1, string.length() - 1);
-		}
-		return string;
-	}
 
 	private ImmutableFunctionalTerm getVariable(String variableName) {
 		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(variableName));
