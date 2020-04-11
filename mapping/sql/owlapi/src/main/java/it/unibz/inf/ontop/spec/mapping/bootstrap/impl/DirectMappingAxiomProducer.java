@@ -38,6 +38,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class DirectMappingAxiomProducer {
@@ -80,26 +81,20 @@ public class DirectMappingAxiomProducer {
      */
     public String getRefSQL(ForeignKeyConstraint fk) {
 
-		List<String> columns = new ArrayList<>();
-		for (Attribute attr : getIdentifyingAttributes(fk.getRelation()))
-			columns.add(getColumnNameWithAlias(attr));
-
-		List<String> conditions = new ArrayList<>(fk.getComponents().size());
-		for (ForeignKeyConstraint.Component comp : fk.getComponents())
-			conditions.add(getQualifiedColumnName(comp.getAttribute()) + " = " + getQualifiedColumnName(comp.getReference()));
-		
-		for (Attribute attr : getIdentifyingAttributes(fk.getReferencedRelation())) 
-			columns.add(getColumnNameWithAlias(attr));
+    	String columns = Stream.concat(
+    				getIdentifyingAttributes(fk.getRelation()).stream(),
+					getIdentifyingAttributes(fk.getReferencedRelation()).stream())
+				.map(a -> getQualifiedColumnName(a) + " AS " + getColumnAlias(a))
+				.collect(Collectors.joining(", "));
 
 		String tables = fk.getRelation().getID().getSQLRendering() +
-							", " + fk.getReferencedRelation().getID().getSQLRendering();
-		
-		String result = String.format("SELECT %s FROM %s WHERE %s",
-				Joiner.on(", ").join(columns), tables, Joiner.on(" AND ").join(conditions));
+				", " + fk.getReferencedRelation().getID().getSQLRendering();
 
-		System.out.println("DM: " + result);
+		String conditions = fk.getComponents().stream()
+				.map(c -> getQualifiedColumnName(c.getAttribute()) + " = " + getQualifiedColumnName(c.getReference()))
+				.collect(Collectors.joining(" AND "));
 
-		return result;
+		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);
 	}
 
 	private static ImmutableList<Attribute> getIdentifyingAttributes(DatabaseRelationDefinition table) {
@@ -107,10 +102,11 @@ public class DirectMappingAxiomProducer {
 		return pk.map(UniqueConstraint::getAttributes)
 				.orElse(table.getAttributes());
 	}
-	
-	private static String getColumnNameWithAlias(Attribute attr) {
-		 return getQualifiedColumnName(attr) +
-				 " AS " + ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableID().getName() + "_" + attr.getID().getName();
+
+	// TODO: use quotation marks here and for variables names too
+
+	private static String getColumnAlias(Attribute attr) {
+		 return ((DatabaseRelationDefinition)attr.getRelation()).getID().getTableID().getName() + "_" + attr.getID().getName();
 	}
 	
 	private static String getQualifiedColumnName(Attribute attr) {
@@ -164,8 +160,6 @@ public class DirectMappingAxiomProducer {
 				fk.getReferencedRelation().getID().getTableID().getName() + "_", bnodeTemplateMap);
 
 		TargetAtom atom = getAtom(getReferencePropertyIRI(fk), sub, obj);
-		System.out.println("DMA: " + atom);
-
 		return ImmutableList.of(atom);
 	}
 
