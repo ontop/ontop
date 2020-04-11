@@ -59,7 +59,7 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 ConstraintDescriptor uc = getConstraintDescriptor(metadataLookup, constraint[0], constraint[1].split(","));
                 if (!uc.table.getID().equals(relation.getID()))
                     continue;
-                UniqueConstraint.Builder builder = UniqueConstraint.builder(uc.table, uc.table.getID().getTableName() + "_USER_UC_" + counter);
+                UniqueConstraint.Builder builder = UniqueConstraint.builder(uc.table, getTableName(uc.table) + "_USER_UC_" + counter);
                 for (QuotedID a : uc.attributeIds)
                     builder.addDeterminant(a);
                 builder.build();
@@ -84,11 +84,10 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                 if (!fk.table.getID().equals(relation.getID()))
                     continue;
                 ConstraintDescriptor pk = getConstraintDescriptor(metadataLookup, constraint[2], pkAttrs);
-                String name = fk.table.getID().getTableName() + "_USER_FK_" + pk.table.getID().getTableID().getName() + "_" + counter;
+                String name = getTableName(fk.table) + "_USER_FK_" + getTableName(pk.table) + "_" + counter;
                 ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, fk.table, pk.table);
                 for (int i = 0; i < pkAttrs.length; i++)
                     builder.add(fk.attributeIds.get(i), pk.attributeIds.get(i));
-
                 builder.build();
                 counter++;
             }
@@ -101,6 +100,9 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         }
     }
 
+    private String getTableName(DatabaseRelationDefinition relation) {
+        return relation.getID().getTableID().getName();
+    }
 
     private static final class ConstraintDescriptor {
         final DatabaseRelationDefinition table;

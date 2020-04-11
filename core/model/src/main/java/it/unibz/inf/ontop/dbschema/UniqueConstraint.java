@@ -130,7 +130,7 @@ public class UniqueConstraint implements FunctionalDependency {
 
 	public static void primaryKeyOf(Attribute attribute) {
 		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute.getRelation();
-		primaryKeyBuilder(relation, getRelationPrimaryKeyName(relation))
+		primaryKeyBuilder(relation, "PK")
 				.addDeterminant(attribute.getIndex()).build();
 	}
 
@@ -140,12 +140,10 @@ public class UniqueConstraint implements FunctionalDependency {
 
 		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute1.getRelation();
 
-		primaryKeyBuilder(relation, getRelationPrimaryKeyName(relation))
+		primaryKeyBuilder(relation, "PK")
 				.addDeterminant(attribute1.getIndex())
 				.addDeterminant(attribute1.getIndex()).build();
 	}
-
-	private static String getRelationPrimaryKeyName(DatabaseRelationDefinition relation) { return "PK_" + relation.getID().getTableName(); }
 
 	/**
 	 * creates a UNIQUE constraint builder

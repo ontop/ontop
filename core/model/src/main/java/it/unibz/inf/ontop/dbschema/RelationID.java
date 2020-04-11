@@ -58,8 +58,6 @@ public interface RelationID {
 	 */
 	QuotedID getTableID();
 
-	default String getTableName() { return getTableID().getName(); }
-
 	/**
 	 *
 	 * @return the schema component of the name
