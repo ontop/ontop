@@ -20,12 +20,9 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
+import it.unibz.inf.ontop.spec.mapping.sqlparser.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.ParserViewDefinition;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
@@ -37,6 +34,7 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.REException;
 
 import java.util.*;
 import java.util.function.Function;
@@ -80,53 +78,35 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         for (SQLPPTriplesMap mappingAxiom : ppMapping.getTripleMaps()) {
             try {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQL();
-
-                ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
-                Optional<ImmutableExpression> filter;
-                ImmutableMap<QuotedID, ImmutableTerm> lookupTable;
-
+                RAExpression re;
                 try {
                     SelectQueryParser sqp = new SelectQueryParser(dbMetadata, idFactory, coreSingletons);
-                    RAExpression re = sqp.parse(sourceQuery);
-                    lookupTable = re.getAttributes().entrySet().stream()
-                        .filter(e -> e.getKey().getRelation() == null)
-                        .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
-                    dataAtoms = re.getDataAtoms();
-                    filter = re.getFilterAtoms().reverse().stream()
-                                        .reduce((a, b) -> termFactory.getConjunction(b, a));
+                    re = sqp.parse(sourceQuery);
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    ImmutableList<QuotedID> attributes = new SelectQueryAttributeExtractor(dbMetadata, idFactory, termFactory)
-                            .extract(sourceQuery);
-                    ParserViewDefinition view = createParserView(dbTypeFactory, sourceQuery, attributes);
-
-                    // this is required to preserve the order of the variables
-                    ImmutableList<Map.Entry<QuotedID, Variable>> list = view.getAttributes().stream()
-                            .map(att -> Maps.immutableEntry(att.getID(), termFactory.getVariable(att.getID().getName())))
-                            .collect(ImmutableCollectors.toList());
-
-                    lookupTable = list.stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-                    ImmutableList<Variable> arguments = list.stream().map(Map.Entry::getValue).collect(ImmutableCollectors.toList());
-
-                    dataAtoms = ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments));
-                    filter = Optional.empty();
+                    SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(dbMetadata, idFactory, termFactory);
+                    re = createParserView(sqae.extract(sourceQuery), sourceQuery);
                 }
 
-                ImmutableMap<QuotedID, ImmutableTerm> lookupTable2 = lookupTable;
+                ImmutableMap<QuotedID, ImmutableTerm> lookupTable2 =  re.getAttributes().entrySet().stream()
+                        .filter(e -> e.getKey().getRelation() == null)
+                        .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));;
 
-                final IQTree tree = IQ2CQ.toIQTree(dataAtoms.stream()
+                IQTree tree = IQ2CQ.toIQTree(
+                        re.getDataAtoms().stream()
                                 .map(iqFactory::createExtensionalDataNode)
                                 .collect(ImmutableCollectors.toList()),
-                        filter, iqFactory);
+                        re.getFilterAtoms().reverse().stream()
+                                .reduce((a, b) -> termFactory.getConjunction(b, a)),
+                        iqFactory);
 
-                for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
+                for (TargetAtom target : mappingAxiom.getTargetAtoms()) {
 
-                    ImmutableSet<Variable> placeholders = atom.getSubstitutedTerms().stream()
+                    ImmutableSet<Variable> placeholders = target.getSubstitutedTerms().stream()
                             .flatMap(ImmutableTerm::getVariableStream)
                             .collect(ImmutableCollectors.toSet());
 
-                    PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
+                    PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(target);
                     try {
                         ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
                                 placeholders.stream()
@@ -134,17 +114,15 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     .filter(e -> !e.getKey().equals(e.getValue()))
                                     .collect(ImmutableCollectors.toMap()));
 
-                        IQ iq0 = iqFactory.createIQ(atom.getProjectionAtom(), iqFactory.createUnaryIQTree(
-                                            iqFactory.createConstructionNode(atom.getProjectionAtom().getVariables(),
-                                                    substitutionFactory.getSubstitution(atom.getSubstitution().getImmutableMap().entrySet().stream()
+                        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), iqFactory.createUnaryIQTree(
+                                            iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
+                                                    substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
                                                             .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
                                                                     e -> sub.apply(e.getValue()))))), tree));
 
                         IQ iq = noNullValueEnforcer.transform(iq0).normalizeForOptimization();
 
                         assertionsList.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq), iq,  provenance));
-                        //if (previous != null)
-                        //    LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
                     catch (NullPointerException e) {
                         errorMessages.add("Error: " + e.getMessage()
@@ -180,52 +158,23 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return map.get(attribute2);
     }
 
+    private RAExpression createParserView(ImmutableList<QuotedID> attributes,  String sql) {
+        ParserViewDefinition view = new ParserViewDefinition(attributes, sql, dbTypeFactory);
 
-    /**
-     * Returns a new function by renaming variables occurring in the {@code function}
-     *  according to the {@code attributes} lookup table
-     */
-    private ImmutableTerm renameVariables(ImmutableTerm term,
-                                          ImmutableMap<QuotedID, ImmutableTerm> attributes,
-                                          QuotedIDFactory idfac) throws AttributeNotFoundException {
+        // this is required to preserve the order of the variables
+        ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
+                .map(att -> Maps.immutableEntry(new QualifiedAttributeID(null, att.getID()), termFactory.getVariable(att.getID().getName())))
+                .collect(ImmutableCollectors.toList());
 
-            if (term instanceof Variable) {
-                Variable var = (Variable) term;
-                QuotedID attribute = idfac.createAttributeID(var.getName());
-                ImmutableTerm newTerm = attributes.get(attribute);
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable = list.stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                if (newTerm == null) {
-                    QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idfac);
-                    QuotedID quotedAttribute = rawIdFactory.createAttributeID(var.getName());
-                    newTerm = attributes.get(quotedAttribute);
+        ImmutableList<Variable> arguments = list.stream()
+                .map(Map.Entry::getValue)
+                .collect(ImmutableCollectors.toList());
 
-                    if (newTerm == null)
-                        throw new AttributeNotFoundException("The source query does not provide the attribute " + attribute
-                                + " (variable " + var.getName() + ") required by the target atom.");
-                }
-                return newTerm;
-            }
-            else if (term instanceof ImmutableFunctionalTerm) {
-                ImmutableFunctionalTerm f = (ImmutableFunctionalTerm)term;
-                ImmutableList.Builder<ImmutableTerm> builder = ImmutableList.builder();
-                for (ImmutableTerm t : f.getTerms()) // for exception handling
-                    builder.add(renameVariables(t, attributes, idfac));
-                return termFactory.getImmutableFunctionalTerm(f.getFunctionSymbol(), builder.build());
-            }
-            else if (term instanceof Constant)
-                return term;
-            else
-                throw new RuntimeException("Unknown term type: " + term);
-    }
-
-    private static class AttributeNotFoundException extends Exception {
-        AttributeNotFoundException(String message) {
-            super(message);
-        }
-    }
-
-    private ParserViewDefinition createParserView(DBTypeFactory dbTypeFactory, String sql, ImmutableList<QuotedID> attributes) {
-        return new ParserViewDefinition(attributes, sql, dbTypeFactory);
+        return new RAExpression(ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments)),
+                ImmutableList.of(), new RAExpressionAttributes(lookupTable, null));
     }
 
 }
