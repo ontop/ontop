@@ -60,8 +60,7 @@ public class R2RMLParser {
 		return subjectMap.getClasses().stream();
 	}
 
-	public ImmutableList<NonVariableTerm> extractGraphTerms(SubjectMap subjectMap) {
-		List<GraphMap> graphMaps = subjectMap.getGraphMaps();
+	public ImmutableList<NonVariableTerm> extractGraphTerms(List<GraphMap> graphMaps) {
 
 		for (GraphMap graphMap : graphMaps) {
 			if (!graphMap.getTermType().equals(R2RMLVocabulary.iri))
