@@ -9,12 +9,9 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -194,11 +191,7 @@ public class R2RMLParser {
 		// COLUMN
 		String col = om.getColumn();
 		if (col != null) {
-			col = trim(col);
-			if (!joinCond.isEmpty()) {
-				col = joinCond + col;
-			}
-			return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(col));
+			return getVariable(col, joinCond);
 		}
 
 		// TEMPLATE
@@ -211,14 +204,12 @@ public class R2RMLParser {
 
 	//this function distinguishes curly bracket with back slash "\{" from curly bracket "{"
 	private int getIndexOfCurlyB(String str){
-		int i;
-		int j;
-		i = str.indexOf("{");
-		j = str.indexOf("\\{");
+		int i = str.indexOf("{");
+		int j = str.indexOf("\\{");
 
-		while((i-1 == j) && (j != -1)){
-			i = str.indexOf("{",i+1);
-			j = str.indexOf("\\{",j+1);
+		while ((i-1 == j) && (j != -1)) {
+			i = str.indexOf("{",i + 1);
+			j = str.indexOf("\\{",j + 1);
 		}
 		return i;
 	}
@@ -250,37 +241,31 @@ public class R2RMLParser {
 		string = string.replace("\\}", "]");
 
 		ImmutableList.Builder<NonVariableTerm> termListBuilder = ImmutableList.builder();
-		String cons;
-		int i;
+
 		while (string.contains("{")) {
-			int end = string.indexOf("}");
-			int begin = string.lastIndexOf("{", end);
 
 			// Literal: if there is constant string in template, adds it to the term list
-			if (type == RDFCategory.LITERAL){
-				if ((i = getIndexOfCurlyB(str)) > 0){
-					cons = str.substring(0, i);
-					str = str.substring(str.indexOf("}", i)+1);
+			if (type == RDFCategory.LITERAL) {
+				int i = getIndexOfCurlyB(str);
+				if (i > 0) {
+					String cons = str.substring(0, i);
 					termListBuilder.add(termFactory.getDBStringConstant(cons));
-				}else{
-					str = str.substring(str.indexOf("}")+1);
+					str = str.substring(str.indexOf("}", i) + 1);
+				}
+				else {
+					str = str.substring(str.indexOf("}") + 1);
 				}
 			}
 
-			String var = trim(string.substring(begin + 1, end));
+			int end = string.indexOf("}");
+			int begin = string.lastIndexOf("{", end);
+			String var = string.substring(begin + 1, end);
+			termListBuilder.add(getVariable(var, joinCond));
 
-			// trim for making variable
-			termListBuilder.add(termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(joinCond + (var))));
-
-			string = string.replaceFirst("\\{\"" + var + "\"\\}", "[]");
-			string = string.replaceFirst("\\{" + var + "\\}", "[]");
-
+			string = string.substring(0, begin) + "[]" + string.substring(end + 1);
 		}
-		if(type == RDFCategory.LITERAL){
-			if (!str.equals("")){
-				cons = str;
-				termListBuilder.add(termFactory.getDBStringConstant(cons));
-			}
+		if (type == RDFCategory.LITERAL && !str.isEmpty()) {
+			termListBuilder.add(termFactory.getDBStringConstant(str));
 		}
 
 		string = string.replace("[", "{");
@@ -290,8 +275,9 @@ public class R2RMLParser {
 
 		switch (type) {
 			case IRI:
-				FunctionSymbol templateFunctionSymbol = dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(string);
-				return termFactory.getImmutableFunctionalTerm(templateFunctionSymbol, terms);
+				return termFactory.getImmutableFunctionalTerm(
+						dbFunctionSymbolFactory.getIRIStringTemplateFunctionSymbol(string),
+						terms);
 			case BNODE:
 				return termFactory.getImmutableFunctionalTerm(
 						dbFunctionSymbolFactory.getBnodeStringTemplateFunctionSymbol(string),
@@ -303,7 +289,7 @@ public class R2RMLParser {
 					case 1:
 						return terms.get(0);
 					default:
-					return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
+						return termFactory.getNullRejectingDBConcatFunctionalTerm(terms);
 				}
 			default:
 				throw new R2RMLParsingBugException("Unexpected type code: " + type);
@@ -325,6 +311,10 @@ public class R2RMLParser {
 			string = string.substring(1, string.length() - 1);
 		}
 		return string;
+	}
+
+	private ImmutableFunctionalTerm getVariable(String variableName, String joinCond) {
+		return termFactory.getPartiallyDefinedToStringCast(termFactory.getVariable(joinCond + trim(variableName)));
 	}
 
 	/**

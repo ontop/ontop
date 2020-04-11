@@ -38,7 +38,6 @@ public class RepeatedColumnNameTest {
     private Connection conn;
 
 
-
     @Before
     public void setUp() throws Exception {
         conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -63,7 +62,6 @@ public class RepeatedColumnNameTest {
                 "SELECT * {\n" +
                 "?p a :Professor.\n" +
                 "}";
-
 
         List<String> expectedValues = new ArrayList<>();
         expectedValues.add("<http://www.semanticweb.org/user/ontologies/2016/8/untitled-ontology-84#professor/1/1>");
@@ -114,9 +112,8 @@ public class RepeatedColumnNameTest {
                 java.lang.System.out.println(ind1);
                 i++;
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }
