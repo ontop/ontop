@@ -171,20 +171,18 @@ public class MetaMappingExpander {
 
 				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateTerm);
 
-				List<QuotedID> templateColumnIds = getTemplateColumnNames(idFactory, templateVariables);
-
 				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, idFactory, m.source.getSQL());
 
 				List<SelectExpressionItem> templateColumns;
 				try {
-					templateColumns = templateColumnIds.stream()
-							.map(id -> queryColumns.get(id))
+					templateColumns = templateVariables.stream()
+							.map(v -> lookupQueryColumns(queryColumns, v.getName(), idFactory))
 							.collect(ImmutableCollectors.toList());
 				}
 				catch (NullPointerException e) {
-					throw new IllegalArgumentException(templateColumnIds.stream()
-							.filter(id -> !queryColumns.containsKey(id))
-							.map(Object::toString)
+					throw new IllegalArgumentException(templateVariables.stream()
+							.filter(v -> lookupQueryColumns(queryColumns, v.getName(), idFactory) == null)
+							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
 									"The placeholder(s) ",
 									" in the target do(es) not occur in the body of the mapping: " + m.source.getSQL())));
@@ -237,6 +235,18 @@ public class MetaMappingExpander {
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
 		return new SQLPPMappingImpl(result.build(), ppMapping.getPrefixManager());
+	}
+
+	private SelectExpressionItem lookupQueryColumns(Map<QuotedID, SelectExpressionItem> map, String name, QuotedIDFactory idFactory) {
+		QuotedID attribute1 = idFactory.createAttributeID(name);
+		SelectExpressionItem item1 = map.get(attribute1);
+		if (item1 != null)
+			return item1;
+
+		// TODO: to disable
+		QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
+		QuotedID attribute2 = rawIdFactory.createAttributeID(name);
+		return map.get(attribute2);
 	}
 
 	private ImmutableList<Variable> extractTemplateVariables(ImmutableFunctionalTerm templateAtom) {

@@ -254,12 +254,18 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
                 TriplesMap parent = robm.getParentMap();
 
+                if (robm.getJoinConditions().isEmpty() &&
+                        !parent.getLogicalTable().getSQLQuery().equals(tm.getLogicalTable().getSQLQuery()))
+                    throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
+                            tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
+
                 ImmutableTerm childSubject = Optional.ofNullable(subjectTermMap.get(tm))
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
 
+                String childPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD";
                 ImmutableMap<Variable, Variable> childMap = childSubject.getVariableStream()
                         .collect(ImmutableCollectors.toMap(Function.identity(),
-                                v -> prefixAttributeName("CHILD_", v)));
+                                v -> prefixAttributeName(childPrefix + "_", v)));
 
                 ImmutableTerm childSubject2 = substitutionFactory
                         .getVar2VarSubstitution(childMap).apply(childSubject);
@@ -270,9 +276,10 @@ public class R2RMLMappingParser implements SQLMappingParser {
                 ImmutableTerm parentSubject = Optional.ofNullable(subjectTermMap.get(parent))
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
 
+                String parentPrefix =  robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
                 ImmutableMap<Variable, Variable> parentMap = parentSubject.getVariableStream()
                         .collect(ImmutableCollectors.toMap(Function.identity(),
-                                v -> prefixAttributeName("PARENT_", v)));
+                                v -> prefixAttributeName(parentPrefix + "_", v)));
 
                 ImmutableTerm parentSubject2 = substitutionFactory
                         .getVar2VarSubstitution(parentMap).apply(parentSubject);
@@ -286,19 +293,22 @@ public class R2RMLMappingParser implements SQLMappingParser {
                     }
                 }
 
-                String sourceQuery = "SELECT " +
-                        childMap.entrySet().stream()
-                                .map(e -> "CHILD." + e.getKey() + " AS " + e.getValue())
-                                .collect(Collectors.joining(", ")) + ", " +
-                        parentMap.entrySet().stream()
-                                .map(e -> "PARENT." + e.getKey() + " AS " + e.getValue())
-                                .collect(Collectors.joining(", ")) + " FROM (" +
-                        tm.getLogicalTable().getSQLQuery() + ") CHILD, (" +
-                        parent.getLogicalTable().getSQLQuery() + ") PARENT" +
+                String sourceQuery =
+                        "SELECT " + Stream.concat(
+                                childMap.entrySet().stream()
+                                    .map(e -> childPrefix + "." + e.getKey() + " AS " + e.getValue()),
+                                parentMap.entrySet().stream()
+                                    .map(e -> parentPrefix + "." + e.getKey() + " AS " + e.getValue()))
+                                .collect(Collectors.joining(", ")) +
+                        " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + childPrefix +
+
                         (robm.getJoinConditions().isEmpty()
-                            ? ""
-                            : " WHERE " + robm.getJoinConditions().stream()
-                                .map(j -> "CHILD." + j.getChild() + " = PARENT." + j.getParent())
+                                ? ""
+                                :
+                        ", (" + parent.getLogicalTable().getSQLQuery() + ") " + parentPrefix +
+                        " WHERE " + robm.getJoinConditions().stream()
+                                .map(j -> childPrefix + "." + j.getChild() +
+                                        " = " + parentPrefix + "." + j.getParent())
                                 .collect(Collectors.joining(",")));
 
                 System.out.println("PARENT-CHILD: " + sourceQuery);

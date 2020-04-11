@@ -104,12 +104,12 @@ public class RDB2RDFTest {
 			"tc0012a",
 			// Modified (different XSD.DOUBLE lexical form)
 			"tc0012e",
-			// TODO: check why
-			"dg0014",
-			// TODO: check why
-			"tc0014b",
-			// Less results than expected. TODO: check why
-			"tc0014c",
+			//
+			//"dg0014",
+			//
+			//"tc0014b",
+			// Less results than expected.
+			// "tc0014c",
 			// Should reject an invalid language tag
 			"tc0015b",
 			// Double + timezone was not expected to be added. Same for milliseconds.
@@ -408,9 +408,7 @@ public class RDB2RDFTest {
 		}
 
 
-		RepositoryConnection con = null;
-		try {
-			con = dataRep.getConnection();
+		try (RepositoryConnection con = dataRep.getConnection()) {
 			String tripleQuery = "CONSTRUCT {?s ?p ?o} WHERE {?s ?p ?o}";
 			GraphQuery gquery = con.prepareGraphQuery(QueryLanguage.SPARQL, tripleQuery);
 			Set<Statement> triples = QueryResults.asSet(gquery.evaluate());
@@ -446,9 +444,6 @@ public class RDB2RDFTest {
 			}
 		}
 		finally {
-			if (con != null) {
-				con.close();
-			}
 			dataRep.shutDown();
 		}
 	}
