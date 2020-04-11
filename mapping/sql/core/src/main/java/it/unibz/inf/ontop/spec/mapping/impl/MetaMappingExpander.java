@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
@@ -69,6 +70,8 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderLookup;
 
 
 /**
@@ -169,19 +172,19 @@ public class MetaMappingExpander {
 						? (ImmutableFunctionalTerm)predicate.getObject(m.target.getSubstitutedTerms())
 						: (ImmutableFunctionalTerm)predicate.getProperty(m.target.getSubstitutedTerms());
 
-				ImmutableList<Variable> templateVariables = extractTemplateVariables(templateTerm);
+				ImmutableSet<Variable> templateVariables = templateTerm.getVariables();
 
-				Map<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, idFactory, m.source.getSQL());
+				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, idFactory, m.source.getSQL());
 
-				List<SelectExpressionItem> templateColumns;
+				ImmutableList<SelectExpressionItem> templateColumns;
 				try {
 					templateColumns = templateVariables.stream()
-							.map(v -> lookupQueryColumns(queryColumns, v.getName(), idFactory))
+							.map(v -> placeholderLookup(queryColumns, v, idFactory))
 							.collect(ImmutableCollectors.toList());
 				}
 				catch (NullPointerException e) {
 					throw new IllegalArgumentException(templateVariables.stream()
-							.filter(v -> lookupQueryColumns(queryColumns, v.getName(), idFactory) == null)
+							.filter(v -> placeholderLookup(queryColumns, v, idFactory) == null)
 							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
 									"The placeholder(s) ",
@@ -235,39 +238,6 @@ public class MetaMappingExpander {
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
 		return new SQLPPMappingImpl(result.build(), ppMapping.getPrefixManager());
-	}
-
-	private SelectExpressionItem lookupQueryColumns(Map<QuotedID, SelectExpressionItem> map, String name, QuotedIDFactory idFactory) {
-		QuotedID attribute1 = idFactory.createAttributeID(name);
-		SelectExpressionItem item1 = map.get(attribute1);
-		if (item1 != null)
-			return item1;
-
-		// TODO: to disable
-		QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
-		QuotedID attribute2 = rawIdFactory.createAttributeID(name);
-		return map.get(attribute2);
-	}
-
-	private ImmutableList<Variable> extractTemplateVariables(ImmutableFunctionalTerm templateAtom) {
-		return Optional.of(templateAtom)
-				.filter(a -> a.getFunctionSymbol() instanceof RDFTermFunctionSymbol)
-				.map(a -> a.getTerm(0))
-				.map(l -> (l instanceof ImmutableFunctionalTerm)
-						&& (((ImmutableFunctionalTerm) l).getFunctionSymbol() instanceof ObjectStringTemplateFunctionSymbol)
-						? ((ImmutableFunctionalTerm) l).getTerms().stream()
-						: Stream.of(l))
-				.map(s -> s
-						// Unwrap CASTs
-						.map(t -> (t instanceof ImmutableFunctionalTerm)
-								&& (((ImmutableFunctionalTerm) t).getFunctionSymbol() instanceof DBTypeConversionFunctionSymbol)
-								? ((ImmutableFunctionalTerm) t).getTerm(0)
-								: t)
-						.filter(t -> t instanceof Variable)
-						.map(t -> (Variable) t)
-						.collect(ImmutableCollectors.toList()))
-				.orElseThrow(() -> new MinorOntopInternalBugException(
-						String.format("Unexpected template atom %s: was expected to a RDF functional term", templateAtom)));
 	}
 
 
@@ -348,15 +318,6 @@ public class MetaMappingExpander {
 		return select.toString();
 	}
 
-
-	private static ImmutableList<QuotedID> getTemplateColumnNames(QuotedIDFactory idfac,
-																  ImmutableList<Variable> templateVariables) {
-		// TODO : case-insensitive
-		QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idfac);
-		return templateVariables.stream()
-				.map(v -> rawIdFactory.createAttributeID(v.getName()))
-				.collect(ImmutableCollectors.toList());
-	}
 
 	private static String getPredicateName(ImmutableTerm lexicalTerm, List<String> values) {
 		if (lexicalTerm instanceof Variable) {

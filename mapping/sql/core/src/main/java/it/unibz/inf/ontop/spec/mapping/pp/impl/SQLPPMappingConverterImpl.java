@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -112,41 +113,32 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     filter = Optional.empty();
                 }
 
+                ImmutableMap<QuotedID, ImmutableTerm> lookupTable2 = lookupTable;
+
                 final IQTree tree = IQ2CQ.toIQTree(dataAtoms.stream()
                                 .map(iqFactory::createExtensionalDataNode)
                                 .collect(ImmutableCollectors.toList()),
                         filter, iqFactory);
 
                 for (TargetAtom atom : mappingAxiom.getTargetAtoms()) {
+
+                    ImmutableSet<Variable> placeholders = atom.getSubstitutedTerms().stream()
+                            .flatMap(ImmutableTerm::getVariableStream)
+                            .collect(ImmutableCollectors.toSet());
+
                     PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(atom);
                     try {
-                        ImmutableMap.Builder<Variable, ImmutableTerm> builder = ImmutableMap.builder();
-                        ImmutableList.Builder<Variable> varBuilder2 = ImmutableList.builder();
-                        for (Variable v : atom.getProjectionAtom().getArguments()) {
-                            ImmutableTerm t = atom.getSubstitution().get(v);
-                            if (t != null) {
-                                builder.put(v, renameVariables(t, lookupTable, idFactory));
-                                varBuilder2.add(v);
-                            }
-                            else {
-                                ImmutableTerm tt = renameVariables(v, lookupTable, idFactory);
-                                if (tt instanceof Variable) { // avoids Var -> Var
-                                    Variable v2 = (Variable) tt;
-                                    varBuilder2.add(v2);
-                                }
-                                else {
-                                    builder.put(v, tt);
-                                    varBuilder2.add(v);
-                                }
-                            }
-                        }
-                        ImmutableList<Variable> varList = varBuilder2.build();
-                        ImmutableSubstitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(builder.build());
+                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
+                                placeholders.stream()
+                                    .map(v -> Maps.immutableEntry(v, placeholderLookup(lookupTable2, v, idFactory)))
+                                    .filter(e -> !e.getKey().equals(e.getValue()))
+                                    .collect(ImmutableCollectors.toMap()));
 
-                        IQ iq0 = iqFactory.createIQ(
-                                    atomFactory.getDistinctVariableOnlyDataAtom(atom.getProjectionAtom().getPredicate(), varList),
-                                    iqFactory.createUnaryIQTree(
-                                            iqFactory.createConstructionNode(ImmutableSet.copyOf(varList), substitution), tree));
+                        IQ iq0 = iqFactory.createIQ(atom.getProjectionAtom(), iqFactory.createUnaryIQTree(
+                                            iqFactory.createConstructionNode(atom.getProjectionAtom().getVariables(),
+                                                    substitutionFactory.getSubstitution(atom.getSubstitution().getImmutableMap().entrySet().stream()
+                                                            .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
+                                                                    e -> sub.apply(e.getValue()))))), tree));
 
                         IQ iq = noNullValueEnforcer.transform(iq0).normalizeForOptimization();
 
@@ -154,7 +146,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                         //if (previous != null)
                         //    LOGGER.warn("Redundant triples maps: \n" + provenance + "\n and \n" + previous);
                     }
-                    catch (AttributeNotFoundException e) {
+                    catch (NullPointerException e) {
                         errorMessages.add("Error: " + e.getMessage()
                                 + " \nProblem location: source query of the mapping assertion \n["
                                 + provenance.getProvenanceInfo() + "]");
@@ -176,6 +168,17 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return ImmutableList.copyOf(assertionsList);
     }
 
+    public static <T> T placeholderLookup(Map<QuotedID, T> map, Variable placeholder, QuotedIDFactory idFactory) {
+        QuotedID attribute1 = idFactory.createAttributeID(placeholder.getName());
+        T item1 = map.get(attribute1);
+        if (item1 != null)
+            return item1;
+
+        // TODO: to disable
+        QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
+        QuotedID attribute2 = rawIdFactory.createAttributeID(placeholder.getName());
+        return map.get(attribute2);
+    }
 
 
     /**
