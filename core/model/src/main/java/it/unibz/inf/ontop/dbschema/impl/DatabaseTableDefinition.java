@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
@@ -16,8 +15,7 @@ public class DatabaseTableDefinition extends AbstractDatabaseRelationDefinition 
      * @param builder
      */
     DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
-        super(allIds.get(0), ImmutableSet.copyOf(allIds), builder);
-        System.out.println("NEW-TABLE: " + allIds);
+        super(allIds, builder);
     }
 
     @Override

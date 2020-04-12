@@ -22,12 +22,10 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
     private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
     private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
 
-    AbstractDatabaseRelationDefinition(RelationID id, ImmutableSet<RelationID> allIds, AttributeListBuilder builder) {
-        super(id.getSQLRendering(), builder);
-        this.id = id;
-        this.allIds = allIds;
-        if (!allIds.contains(id))
-            throw new IllegalArgumentException("AllIds " + allIds + " must include " + id);
+    AbstractDatabaseRelationDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
+        super(allIds.get(0).getSQLRendering(), builder);
+        this.id = allIds.get(0);
+        this.allIds =  ImmutableSet.copyOf(allIds);
     }
 
 

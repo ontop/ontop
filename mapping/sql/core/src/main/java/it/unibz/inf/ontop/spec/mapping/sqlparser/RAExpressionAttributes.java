@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -164,23 +165,27 @@ public class RAExpressionAttributes {
     public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes,
                                                 ImmutableSet<RelationID> aliases) {
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes =
                 unqualifiedAttributes.entrySet().stream()
-                        .flatMap(e -> Stream.concat(aliases.stream(),
-                                aliases.stream().filter(RelationID::hasSchema).map(RelationID::getSchemalessID)).distinct()
-                        .map(a -> Maps.immutableEntry(new QualifiedAttributeID(a, e.getKey()), e.getValue())))
-                        .collect(ImmutableCollectors.toMap()),
-
-                unqualifiedAttributes.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue))
-        );
+                        .flatMap(e -> createQualifiedID(aliases, e.getKey())
+                                        .map(i -> Maps.immutableEntry(i, e.getValue())))
+                        .collect(ImmutableCollectors.toMap());
 
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 unqualifiedAttributes.keySet().stream()
                         .collect(ImmutableCollectors.toMap(identity(), id -> aliases));
 
         return new RAExpressionAttributes(attributes, attributeOccurrences);
+    }
+
+    private static Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
+        return Stream.concat(Stream.of(new QualifiedAttributeID(null, attributeId)),
+                Stream.concat(aliases.stream(),
+                        aliases.stream()
+                                .filter(RelationID::hasSchema)
+                                .map(RelationID::getSchemalessID))
+                        .distinct()
+                        .map(a -> new QualifiedAttributeID(a, attributeId)));
     }
 
 
@@ -209,11 +214,6 @@ public class RAExpressionAttributes {
         return ImmutableMap.<QualifiedAttributeID, ImmutableTerm>builder().putAll(attrs1).putAll(attrs2).build();
     }
 
-    private static ImmutableMap<QualifiedAttributeID, ImmutableTerm> merge(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs1,
-                                                                      ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs2,
-                                                                      ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs3) {
-        return ImmutableMap.<QualifiedAttributeID, ImmutableTerm>builder().putAll(attrs1).putAll(attrs2).putAll(attrs3).build();
-    }
 
     /**
      * treats null values as empty sets
@@ -237,7 +237,7 @@ public class RAExpressionAttributes {
         if (s2 == null)
             return s1;
 
-        return ImmutableSet.<RelationID>builder().addAll(s1).addAll(s2).build();
+        return Stream.concat(s1.stream(), s2.stream()).collect(ImmutableCollectors.toSet());
     }
 
     private ImmutableMap<QualifiedAttributeID, ImmutableTerm> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
@@ -253,12 +253,10 @@ public class RAExpressionAttributes {
                             RAExpressionAttributes re2,
                             java.util.function.Function<QuotedID, ImmutableSet<RelationID>> collector) {
 
-        ImmutableSet<QuotedID> keys = ImmutableSet.<QuotedID>builder()
-                .addAll(re1.attributeOccurrences.keySet())
-                .addAll(re2.attributeOccurrences.keySet())
-                .build();
-
-        return keys.stream()
+        return Stream.concat(
+                re1.attributeOccurrences.keySet().stream(),
+                re2.attributeOccurrences.keySet().stream())
+                .distinct()
                 .collect(ImmutableCollectors.toMap(identity(), collector));
     }
 
