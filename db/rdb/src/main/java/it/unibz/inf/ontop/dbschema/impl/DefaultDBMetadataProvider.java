@@ -226,6 +226,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
         }
         catch (SQLException e) {
+            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
             e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
@@ -291,6 +292,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 builder.build();
         }
         catch (SQLException e) {
+            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
             e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
@@ -335,6 +337,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 builder.build();
         }
         catch (SQLException e) {
+            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
             e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
