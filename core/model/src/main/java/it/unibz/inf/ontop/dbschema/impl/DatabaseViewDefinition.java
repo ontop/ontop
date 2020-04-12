@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.Attribute;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
@@ -15,8 +16,8 @@ public class DatabaseViewDefinition extends AbstractDatabaseRelationDefinition {
      * @param id
      * @param builder
      */
-    DatabaseViewDefinition(RelationID id, AttributeListBuilder builder, String body) {
-        super(id, builder);
+    DatabaseViewDefinition(RelationID id, ImmutableSet<RelationID> allIds, AttributeListBuilder builder, String body) {
+        super(id, allIds, builder);
         this.body = body;
     }
 

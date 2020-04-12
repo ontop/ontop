@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -107,7 +108,30 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         }
     }
 
-    protected RelationID getRelationCanonicalID(RelationID id) {  return id; }
+    protected QuotedID getDefaultSchema() { return null; }
+
+    protected RelationID getRelationCanonicalID(RelationID id) {
+        return id.extendWithDefaultSchemaID(getDefaultSchema());
+    }
+
+    protected ImmutableSet<RelationID> getRelationAllIDs(RelationID id) {
+        if (id.getSchemaID() == null || id.getSchemaID().equals(getDefaultSchema()))
+            return ImmutableSet.of(id, id.getSchemalessID());
+
+        return ImmutableSet.of(id);
+    }
+
+    protected final QuotedID retriveDefaultSchema(String sql) throws MetadataExtractionException {
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            rs.next();
+            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException(e);
+        }
+    }
+
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
@@ -136,13 +160,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else if (relations.keySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(r.getKey(), r.getValue());
+                return new DatabaseTableDefinition(r.getKey(), getRelationAllIDs(r.getKey()), r.getValue());
             }
             else {
-                RelationID canonicalId = getRelationCanonicalID(id);
                 for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
-                    if (r.getKey().equals(canonicalId))
-                        return new DatabaseTableDefinition(r.getKey(), r.getValue());
+                    if (r.getKey().equals(id))
+                        return new DatabaseTableDefinition(r.getKey(), getRelationAllIDs(r.getKey()), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }

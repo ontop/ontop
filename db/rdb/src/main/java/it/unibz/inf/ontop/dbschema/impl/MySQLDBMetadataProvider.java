@@ -17,15 +17,7 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     MySQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, getIDFactory(connection), dbTypeFactory);
-
-        try (Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery("SELECT DATABASE()")) {
-            defaultDatabase = rawIdFactory.createRelationID(
-                    rs.next() ? rs.getString(1) : null, "DUMMY").getSchemaID();
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
+        defaultDatabase = retriveDefaultSchema("SELECT DATABASE()");
     }
 
     private static QuotedIDFactory getIDFactory(Connection connection) throws MetadataExtractionException {
@@ -38,9 +30,10 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    public RelationID getRelationCanonicalID(RelationID id) {
-        return id.extendWithDefaultSchemaID(defaultDatabase);
+    public QuotedID getDefaultSchema() {
+        return defaultDatabase;
     }
+
 
     // WORKAROUND for MySQL connector >= 8.0:
     // <https://github.com/ontop/ontop/issues/270>

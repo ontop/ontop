@@ -21,6 +21,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Optional;
 
 /**
@@ -33,6 +35,8 @@ import java.util.Optional;
 public interface DatabaseRelationDefinition extends RelationDefinition {
 
 	RelationID getID();
+
+	ImmutableSet<RelationID> getAllIDs();
 
 	Optional<UniqueConstraint> getPrimaryKey();
 

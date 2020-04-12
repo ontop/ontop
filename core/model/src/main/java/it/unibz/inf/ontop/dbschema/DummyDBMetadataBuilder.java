@@ -2,12 +2,13 @@ package it.unibz.inf.ontop.dbschema;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 public interface DummyDBMetadataBuilder {
 
-    DatabaseRelationDefinition createDatabaseRelation(RelationID id,
+    DatabaseRelationDefinition createDatabaseRelation(RelationID id, ImmutableSet<RelationID> allIds,
                                                       RelationDefinition.AttributeListBuilder builder);
 
     DatabaseRelationDefinition createDatabaseRelation(String relation,

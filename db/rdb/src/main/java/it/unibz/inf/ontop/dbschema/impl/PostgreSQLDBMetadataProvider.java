@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -16,27 +15,14 @@ public class PostgreSQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     PostgreSQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
-        this.defaultSchema = getDefaultSchema();
+        // default schema name
+        // https://www.postgresql.org/docs/9.3/functions-info.html
+        this.defaultSchema = retriveDefaultSchema("SELECT current_schema");
     }
 
     // CAREFUL: PostgreSQL uses a chain of schemas and goes through the list until it finds the relevant object
-
     @Override
-    public RelationID getRelationCanonicalID(RelationID id) {
-        return id.extendWithDefaultSchemaID(defaultSchema);
+    protected QuotedID getDefaultSchema() {
+        return defaultSchema;
     }
-
-    private final QuotedID getDefaultSchema() throws MetadataExtractionException {
-        // default schema name
-        // https://www.postgresql.org/docs/9.3/functions-info.html
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT current_schema AS S")) {
-            rs.next();
-            return rawIdFactory.createRelationID(rs.getString("S"), "DUMMY").getSchemaID();
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
-
 }

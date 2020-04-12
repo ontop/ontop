@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 
 import java.util.ArrayList;
@@ -14,15 +15,19 @@ import java.util.Optional;
 public abstract class AbstractDatabaseRelationDefinition extends AbstractRelationDefinition implements DatabaseRelationDefinition {
 
     private final RelationID id;
+    private final ImmutableSet<RelationID> allIds;
 
     private UniqueConstraint primaryKey; // nullable
     private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
     private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
     private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
 
-    AbstractDatabaseRelationDefinition(RelationID id, AttributeListBuilder builder) {
+    AbstractDatabaseRelationDefinition(RelationID id, ImmutableSet<RelationID> allIds, AttributeListBuilder builder) {
         super(id.getSQLRendering(), builder);
         this.id = id;
+        this.allIds = allIds;
+        if (!allIds.contains(id))
+            throw new IllegalArgumentException("AllIds " + allIds + " must include " + id);
     }
 
 
@@ -31,6 +36,12 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
     @Override
     public RelationID getID() {
         return id;
+    }
+
+    @JsonIgnore
+    @Override
+    public ImmutableSet<RelationID> getAllIDs() {
+        return allIds;
     }
 
 

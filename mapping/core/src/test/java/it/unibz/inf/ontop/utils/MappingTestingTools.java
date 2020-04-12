@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -116,8 +117,7 @@ public class MappingTestingTools {
         for (int i = 1 ; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
         }
-        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
-                idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity), builder)
-                .getAtomPredicate();
+        RelationID id = idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity);
+        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(id, ImmutableSet.of(id), builder).getAtomPredicate();
     }
 }

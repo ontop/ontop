@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -10,10 +11,18 @@ public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final ImmutableSet<String> ignoreSchema = ImmutableSet.of("SYSTOOLS", "SYSCAT", "SYSIBM", "SYSIBMADM", "SYSSTAT");
 
+    private final QuotedID defaultSchema;
+
     DB2DBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
+
+        defaultSchema = retriveDefaultSchema("select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1");
     }
-    // select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1
+
+    @Override
+    public QuotedID getDefaultSchema() {
+        return defaultSchema;
+    }
 
     @Override
     protected boolean isSchemaIgnored(String schema) {

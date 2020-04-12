@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
+import javax.management.relation.Relation;
 import java.util.*;
 
 public class DynamicMetadataLookup implements MetadataLookup {
@@ -17,26 +18,17 @@ public class DynamicMetadataLookup implements MetadataLookup {
     }
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
-        DatabaseRelationDefinition relation = map.get(id);
+    public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {
+        DatabaseRelationDefinition relation = map.get(relationId);
         if (relation != null)
             return relation;
 
-        DatabaseRelationDefinition retrievedRelation = provider.getRelation(id);
-        RelationID retrievedId = retrievedRelation.getID();
-        if (map.containsKey(retrievedId))
-            return map.get(retrievedId); // discard retrievedRelation
-
-        map.put(retrievedId, retrievedRelation);
-
-        if (!id.hasSchema() && retrievedId.hasSchema()) {
-            RelationID schemalessId = retrievedId.getSchemalessID();
-            if (map.containsKey(schemalessId))
-                throw new MetadataExtractionException("Clashing schemaless IDs: " + retrievedId + " and " + map.get(schemalessId).getID());
-
-            map.put(schemalessId, retrievedRelation);
+        DatabaseRelationDefinition retrievedRelation = provider.getRelation(relationId);
+        for (RelationID retrievedId : retrievedRelation.getAllIDs()) {
+            DatabaseRelationDefinition prev = map.put(retrievedId, retrievedRelation);
+            if (prev != null)
+                throw new MetadataExtractionException("Clashing schemaless IDs: " + retrievedId + " and " + relationId);
         }
-
         return retrievedRelation;
     }
 

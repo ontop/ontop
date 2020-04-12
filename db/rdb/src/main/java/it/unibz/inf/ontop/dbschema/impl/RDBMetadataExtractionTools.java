@@ -52,6 +52,8 @@ public class RDBMetadataExtractionTools {
 				return new MySQLDBMetadataProvider(connection, dbTypeFactory);
 			else if (productName.contains("PostgreSQL"))
 				return new PostgreSQLDBMetadataProvider(connection, dbTypeFactory);
+			else if (productName.contains("H2"))
+				return new H2DBMetadataProvider(connection, dbTypeFactory);
 			else
 				return new DefaultDBMetadataProvider(connection, dbTypeFactory);
 		}
