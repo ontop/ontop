@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -24,11 +23,17 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    public RelationID getRelationCanonicalID(RelationID id) {
-        return (id.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
-            ? id.getSchemalessID()
-            : id.extendWithDefaultSchemaID(defaultSchema);
+    protected String getRelationSchema(RelationID relationID) {
+        if (relationID.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
+                return null;
+
+        QuotedID schemaID = relationID.getSchemaID();
+        if (schemaID != null)
+            return schemaID.getName();
+
+        return defaultTableOwner;
     }
+
 
     @Override
     public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {

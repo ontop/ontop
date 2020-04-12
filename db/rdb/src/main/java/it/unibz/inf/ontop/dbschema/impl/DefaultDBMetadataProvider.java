@@ -111,10 +111,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     protected QuotedID getDefaultSchema() { return null; }
 
-    protected RelationID getRelationCanonicalID(RelationID id) {
-        return id.extendWithDefaultSchemaID(getDefaultSchema());
-    }
-
     protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         if (id.getSchemaID() == null)
             return ImmutableList.of(id);
@@ -138,9 +134,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
 
     @Override
-    public DatabaseRelationDefinition getRelation(RelationID id0) throws MetadataExtractionException {
+    public DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
 
-        RelationID id = getRelationCanonicalID(id0);
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
@@ -196,7 +191,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
-        RelationID id = getRelationCanonicalID(relation.getID());
+        RelationID id = relation.getID();
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
@@ -204,11 +199,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             while (rs.next()) {
                 // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
                 RelationID id2 = getRelationID(rs);
-                if (id2.equals(id)) {
+                if (id2.equals(id.extendWithDefaultSchemaID(getDefaultSchema()))) {
                     currentName = rs.getString("PK_NAME"); // may be null
                     QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                     int seq = rs.getShort("KEY_SEQ");
                     primaryKeyAttributes.put(seq, attrId);
+                }
+                else {
+                    System.out.println("ID FUN: " + id + " v " + id2);
                 }
             }
             if (!primaryKeyAttributes.isEmpty()) {
@@ -230,7 +228,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException {
-        RelationID id = getRelationCanonicalID(relation.getID());
+        RelationID id = relation.getID();
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
@@ -295,7 +293,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException {
 
-        RelationID id = getRelationCanonicalID(relation.getID());
+        RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {
@@ -347,7 +345,17 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return relationID.getSchemaID().getName(); }
+    protected String getRelationSchema(RelationID relationID) {
+        QuotedID schemaId = relationID.getSchemaID();
+        if (schemaId != null)
+            return schemaId.getName();
+
+        QuotedID defaultSchemaId = getDefaultSchema();
+        if (defaultSchemaId != null)
+            return defaultSchemaId.getName();
+
+        return null;
+    }
 
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
