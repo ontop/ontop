@@ -14,7 +14,6 @@ public class H2DBMetadataProvider extends  DefaultDBMetadataProvider {
         super(connection, dbTypeFactory);
 
         defaultSchema = retriveDefaultSchema("SELECT SCHEMA()");
-        System.out.println("DEF " + defaultSchema);
     }
 
     @Override

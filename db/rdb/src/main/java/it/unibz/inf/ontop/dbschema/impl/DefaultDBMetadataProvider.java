@@ -160,12 +160,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else if (relations.keySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(r.getKey(), getRelationAllIDs(r.getKey()), r.getValue());
+                return new DatabaseTableDefinition(getRelationCanonicalID(r.getKey()), getRelationAllIDs(r.getKey()), r.getValue());
             }
             else {
                 for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
                     if (r.getKey().equals(id))
-                        return new DatabaseTableDefinition(r.getKey(), getRelationAllIDs(r.getKey()), r.getValue());
+                        return new DatabaseTableDefinition(getRelationCanonicalID(r.getKey()), getRelationAllIDs(r.getKey()), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }
