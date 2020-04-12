@@ -73,9 +73,11 @@ public class RDBMetadataExtractionTools {
 	public static ImmutableMetadataProvider createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
 
 		ImmutableMap.Builder<RelationID, DatabaseRelationDefinition> map = ImmutableMap.builder();
+		// TODO: use cached metadata lookup instead
 		for (RelationID id : metadataLoader.getRelationIDs()) {
 			DatabaseRelationDefinition relation = metadataLoader.getRelation(id);
-			map.put(relation.getID(), relation);
+			for (RelationID i : relation.getAllIDs())
+				map.put(i, relation);
 		}
 
 		ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(metadataLoader.getDBParameters(), map.build());

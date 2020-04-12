@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import org.junit.Test;
@@ -14,7 +13,7 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of());
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableList.of());
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
 
         SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);

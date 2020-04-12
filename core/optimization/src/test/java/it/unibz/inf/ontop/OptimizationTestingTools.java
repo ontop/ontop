@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop;
 
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -187,7 +187,7 @@ public class OptimizationTestingTools {
             builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
         }
         RelationID id = idFactory.createRelationID(null, prefix + "TABLE" + tableNumber + "AR" + arity);
-        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(id, ImmutableSet.of(id), builder);
+        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(id), builder);
     }
 
     public static RelationPredicate createRelationPredicate(int tableNumber, int arity, DBTermType termType, String prefix, boolean canBeNull) {

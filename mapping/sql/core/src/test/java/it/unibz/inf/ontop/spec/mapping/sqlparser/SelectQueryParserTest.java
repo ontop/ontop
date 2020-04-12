@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -429,10 +427,8 @@ public class SelectQueryParserTest {
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of(
-                TABLE_P.getID(), TABLE_P,
-                TABLE_Q.getID(), TABLE_Q,
-                TABLE_R.getID(), TABLE_R));
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(
+                ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
 
         return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
     }

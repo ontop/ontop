@@ -31,14 +31,14 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    public ImmutableSet<RelationID> getRelationAllIDs(RelationID id) {
+    public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         if (id.getTableID().getName().equals("DUAL"))
-            return ImmutableSet.of(id.getSchemalessID());
+            return ImmutableList.of(id.getSchemalessID());
 
         if (defaultSchema.equals(id.getSchemaID()))
-            return ImmutableSet.of(id, id.getSchemalessID());
+            return ImmutableList.of(id.getSchemalessID(), id);
 
-        return ImmutableSet.of(id);
+        return ImmutableList.of(id);
     }
 
 

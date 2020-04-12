@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.relation.Relation;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,11 +115,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         return id.extendWithDefaultSchemaID(getDefaultSchema());
     }
 
-    protected ImmutableSet<RelationID> getRelationAllIDs(RelationID id) {
-        if (id.getSchemaID() == null || id.getSchemaID().equals(getDefaultSchema()))
-            return ImmutableSet.of(id, id.getSchemalessID());
+    protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
+        if (id.getSchemaID() == null)
+            return ImmutableList.of(id);
 
-        return ImmutableSet.of(id);
+        if (id.getSchemaID().equals(getDefaultSchema()))
+            return ImmutableList.of(id.getSchemalessID(), id);
+
+        return ImmutableList.of(id);
     }
 
     protected final QuotedID retriveDefaultSchema(String sql) throws MetadataExtractionException {
@@ -160,12 +164,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else if (relations.keySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(getRelationCanonicalID(r.getKey()), getRelationAllIDs(r.getKey()), r.getValue());
+                return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
             }
             else {
                 for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
                     if (r.getKey().equals(id))
-                        return new DatabaseTableDefinition(getRelationCanonicalID(r.getKey()), getRelationAllIDs(r.getKey()), r.getValue());
+                        return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }
@@ -192,7 +196,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
-        RelationID id = relation.getID();
+        RelationID id = getRelationCanonicalID(relation.getID());
         // Retrieves a description of the given table's primary key columns. They are ordered by COLUMN_NAME (sic!)
         try (ResultSet rs = metadata.getPrimaryKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
@@ -226,7 +230,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     private void insertUniqueAttributes(DatabaseRelationDefinition relation) throws MetadataExtractionException {
-        RelationID id = relation.getID();
+        RelationID id = getRelationCanonicalID(relation.getID());
         // extracting unique
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
@@ -291,7 +295,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException {
 
-        RelationID id = relation.getID();
+        RelationID id = getRelationCanonicalID(relation.getID());
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {

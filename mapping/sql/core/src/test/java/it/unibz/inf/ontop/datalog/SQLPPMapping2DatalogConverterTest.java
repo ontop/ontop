@@ -65,10 +65,8 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2));
 
-		return DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of(
-				table1.getID(), table1,
-				table2.getID(), table2,
-				table3.getID(), table3));
+		return DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(
+				ImmutableList.of(table1, table2, table3));
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {

@@ -1,12 +1,13 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 
 /**
@@ -25,22 +26,20 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
     }
 
     @Override
-    public DatabaseRelationDefinition createDatabaseRelation(RelationID id, ImmutableSet<RelationID> allIds, RelationDefinition.AttributeListBuilder builder) {
-        return new DatabaseTableDefinition(id, allIds, builder);
+    public DatabaseRelationDefinition createDatabaseRelation(ImmutableList<RelationID> allIds, RelationDefinition.AttributeListBuilder builder) {
+        return new DatabaseTableDefinition(allIds, builder);
     }
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                 .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1));
     }
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2));
@@ -48,8 +47,7 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -58,8 +56,7 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -69,8 +66,7 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -81,8 +77,7 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
 
     @Override
     public DatabaseRelationDefinition createDatabaseRelation(String relation, String attribute1, DBTermType type1, boolean isNullable1, String attribute2, DBTermType type2, boolean isNullable2, String attribute3, DBTermType type3, boolean isNullable3, String attribute4, DBTermType type4, boolean isNullable4, String attribute5, DBTermType type5, boolean isNullable5, String attribute6, DBTermType type6, boolean isNullable6) {
-        RelationID id = idFactory.createRelationID(null, relation);
-        return new DatabaseTableDefinition(id, ImmutableSet.of(id),
+        return new DatabaseTableDefinition(ImmutableList.of(idFactory.createRelationID(null, relation)),
                 DatabaseTableDefinition.attributeListBuilder()
                         .addAttribute(idFactory.createAttributeID(attribute1), type1, isNullable1)
                         .addAttribute(idFactory.createAttributeID(attribute2), type2, isNullable2)
@@ -93,8 +88,10 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
     }
 
     @Override
-    public MetadataLookup getImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
-        return new ImmutableMetadataLookup(map, idFactory);
+    public MetadataLookup getImmutableMetadataLookup(ImmutableList<DatabaseRelationDefinition> list) {
+        return new ImmutableMetadataLookup(list.stream()
+                .flatMap(r -> r.getAllIDs().stream().map(i -> Maps.immutableEntry(i, r)))
+                .collect(ImmutableCollectors.toMap()), idFactory);
     }
 
     @Override

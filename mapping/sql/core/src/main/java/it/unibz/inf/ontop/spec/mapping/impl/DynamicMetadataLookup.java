@@ -27,7 +27,7 @@ public class DynamicMetadataLookup implements MetadataLookup {
         for (RelationID retrievedId : retrievedRelation.getAllIDs()) {
             DatabaseRelationDefinition prev = map.put(retrievedId, retrievedRelation);
             if (prev != null)
-                throw new MetadataExtractionException("Clashing schemaless IDs: " + retrievedId + " and " + relationId);
+                throw new MetadataExtractionException("Clashing relation IDs: " + retrievedId + " and " + relationId);
         }
         return retrievedRelation;
     }

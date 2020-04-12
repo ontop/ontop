@@ -21,21 +21,16 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
  */
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.assertEquals;
@@ -60,7 +55,7 @@ public class SQLParserTest {
 		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
 
 		RelationID studentId = idfac.createRelationID("\"public\"", "student");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(studentId, ImmutableSet.of(studentId, studentId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(studentId.getSchemalessID(), studentId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -91,11 +86,11 @@ public class SQLParserTest {
 			"value", varchar20DBType, false));
 
 		RelationID regionId = idfac.createRelationID("HR", "REGIONS");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(regionId, ImmutableSet.of(regionId, regionId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(regionId.getSchemalessID(), regionId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false)));
 
 		RelationID tableId = idfac.createRelationID(null, "tableName");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(tableId, ImmutableSet.of(tableId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(tableId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -113,7 +108,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false)));
 
 		RelationID gradeId = idfac.createRelationID(null, "grade");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(gradeId, ImmutableSet.of(gradeId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(gradeId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -159,21 +154,21 @@ public class SQLParserTest {
 			"model", varchar20DBType, false));
 
 		RelationID tempId = idfac.createRelationID("\"dbo\"", "TEMPERATURE_DEVIATION");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(tempId, ImmutableSet.of(tempId, tempId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(tempId.getSchemalessID(), tempId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false)));
 
 		RelationID suppliersId = idfac.createRelationID("northwind", "Suppliers");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(suppliersId, ImmutableSet.of(suppliersId, suppliersId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(suppliersId.getSchemalessID(), suppliersId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("Region"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("PostalCode"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Address"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false)));
 
 		RelationID maintId = idfac.createRelationID("oreda", "pm_maint_items");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(maintId, ImmutableSet.of(maintId, maintId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(maintId.getSchemalessID(), maintId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -185,7 +180,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
 		RelationID progId = idfac.createRelationID("oreda", "pm_program");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(progId, ImmutableSet.of(progId, progId.getSchemalessID()), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(progId.getSchemalessID(), progId), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -195,16 +190,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		ImmutableList<DatabaseRelationDefinition> list = relations.build();
-
-		MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(Stream.concat(
-				list.stream()
-						.map(r -> Maps.immutableEntry(r.getID(), r)),
-				list.stream()
-						.filter(r -> r.getID().hasSchema())
-						.map(r -> Maps.immutableEntry(r.getID().getSchemalessID(), r)))
-				.collect(ImmutableCollectors.toMap()));
-
+		MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(relations.build());
 		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
 	}
 
@@ -215,7 +201,6 @@ public class SQLParserTest {
 		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(9, re.getAttributes().size());
 	}
-
 
 	@Test
 	public void test_1_1_2() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
