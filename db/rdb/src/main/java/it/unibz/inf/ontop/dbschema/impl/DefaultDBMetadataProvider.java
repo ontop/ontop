@@ -139,17 +139,17 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         }
     }
 
-    protected boolean sameRelationID(ResultSet rs, RelationID id) throws SQLException {
+    protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
         // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-        String schemaNameR = getRelationSchema(id);
-        String schemaNameS = rs.getString("TABLE_SCHEM");
-        if (schemaNameR == null) {
-            if (schemaNameS == null)
+        String givenSchemaName = getRelationSchema(givenId);
+        String extractedSchemaName = extractedId.getSchemaID().getName();
+        if (givenSchemaName == null) {
+            if (extractedSchemaName == null)
                 return true;
         }
-        else if (schemaNameR.equals(schemaNameS))
+        else if (givenSchemaName.equals(extractedSchemaName))
             return true;
-        System.out.println("MD-EXTRACTION: " + id + " v " + getRelationID(rs));
+        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId);
         return false;
     }
 
@@ -162,10 +162,10 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
-                if (!sameRelationID(rs, id))
+                RelationID extractedId = getRelationID(rs);
+                if (!sameRelationID(extractedId, id))
                     continue;
-                RelationID relationId = getRelationID(rs);
-                RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(relationId,
+                RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
@@ -217,7 +217,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentName = null;
             while (rs.next()) {
-                if (!sameRelationID(rs, id))
+                RelationID extractedId = getRelationID(rs);
+                if (!sameRelationID(extractedId, id))
                     continue;
                 currentName = rs.getString("PK_NAME"); // may be null
                 QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
@@ -250,7 +251,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
             while (rs.next()) {
-                if (!sameRelationID(rs, id))
+                RelationID extractedId = getRelationID(rs);
+                if (!sameRelationID(extractedId, id))
                     continue;
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
@@ -318,6 +320,10 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {
+                RelationID extractedId = getFKRelationID(rs);
+                if (!sameRelationID(extractedId, id))
+                    continue;
+
                 try {
                     int seq = rs.getShort("KEY_SEQ");
                     if (seq == 1) {
@@ -327,7 +333,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                         String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
                         DatabaseRelationDefinition ref = dbMetadata.getRelation(getPKRelationID(rs));
 
-                        // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
                         builder = ForeignKeyConstraint.builder(name, relation, ref);
                     }
                     if (builder != null) {
@@ -386,6 +391,11 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
         return rawIdFactory.createRelationID(
                 rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
+    }
+
+    protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
+        return rawIdFactory.createRelationID(
+                rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
     }
 
 }

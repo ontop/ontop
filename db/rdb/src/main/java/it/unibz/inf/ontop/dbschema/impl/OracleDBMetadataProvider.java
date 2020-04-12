@@ -34,9 +34,16 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    protected QuotedID getDefaultSchema() {
-        return defaultSchema;
+    protected QuotedID getDefaultSchema() { return defaultSchema; }
+
+    @Override
+    protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
+        if (extractedId.getTableID().getName().equals("DUAL"))
+            return true;
+
+        return super.sameRelationID(extractedId, givenId);
     }
+
 
 
     @Override
