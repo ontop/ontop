@@ -89,6 +89,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         return new SQLStandardQuotedIDFactory();
     }
 
+    protected boolean isSchemaIgnored(String schema) { return false; }
+
     @Override
     public ImmutableList<RelationID> getRelationIDs() throws MetadataExtractionException {
         try (ResultSet rs = metadata.getTables(null, null, null, new String[] { "TABLE", "VIEW" })) {
@@ -110,7 +112,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         }
     }
 
-    protected QuotedID getDefaultSchema() { return null; }
+
 
     protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         if (id.getSchemaID() == null)
@@ -122,17 +124,35 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         return ImmutableList.of(id);
     }
 
-    protected final QuotedID retriveDefaultSchema(String sql) throws MetadataExtractionException {
+
+    protected QuotedID getDefaultSchema() { return null; }
+
+
+    protected final QuotedID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
             return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
         }
         catch (SQLException e) {
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
+
+    protected boolean sameRelationID(ResultSet rs, RelationID id) throws SQLException {
+        // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
+        String schemaNameR = getRelationSchema(id);
+        String schemaNameS = rs.getString("TABLE_SCHEM");
+        if (schemaNameR == null) {
+            if (schemaNameS == null)
+                return true;
+        }
+        else if (schemaNameR.equals(schemaNameS))
+            return true;
+        System.out.println("MD-EXTRACTION: " + id + " v " + getRelationID(rs));
+        return false;
+    }
+
 
 
     @Override
@@ -142,6 +162,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
             while (rs.next()) {
+                if (!sameRelationID(rs, id))
+                    continue;
                 RelationID relationId = getRelationID(rs);
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(relationId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
@@ -159,14 +181,9 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             if (relations.isEmpty()) {
                 throw new MetadataExtractionException("Cannot find relation id: " + id);
             }
-            else if (relations.keySet().size() == 1) {
+            else if (relations.entrySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                 return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
-            }
-            else {
-                for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
-                    if (r.getKey().equals(id.extendWithDefaultSchemaID(getDefaultSchema())))
-                        return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
@@ -200,17 +217,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             Map<Integer, QuotedID> primaryKeyAttributes = new HashMap<>();
             String currentName = null;
             while (rs.next()) {
-                // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-                RelationID id2 = getRelationID(rs);
-                if (id2.equals(id.extendWithDefaultSchemaID(getDefaultSchema()))) {
-                    currentName = rs.getString("PK_NAME"); // may be null
-                    QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                    int seq = rs.getShort("KEY_SEQ");
-                    primaryKeyAttributes.put(seq, attrId);
-                }
-                else {
-                    System.out.println("ID FUN: " + id + " v " + id2 + " v " + id.extendWithDefaultSchemaID(getDefaultSchema()));
-                }
+                if (!sameRelationID(rs, id))
+                    continue;
+                currentName = rs.getString("PK_NAME"); // may be null
+                QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
+                int seq = rs.getShort("KEY_SEQ");
+                primaryKeyAttributes.put(seq, attrId);
             }
             if (!primaryKeyAttributes.isEmpty()) {
                 try {
@@ -238,6 +250,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         try (ResultSet rs = metadata.getIndexInfo(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), true, true)) {
             UniqueConstraint.Builder builder = null;
             while (rs.next()) {
+                if (!sameRelationID(rs, id))
+                    continue;
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
                 //       tableIndexHashed - this is a hashed index
@@ -347,9 +361,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
 
 
-    protected boolean isSchemaIgnored(String schema) {
-        return false;
-    }
 
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }

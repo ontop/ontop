@@ -16,7 +16,7 @@ public class DB2DBMetadataProvider extends DefaultDBMetadataProvider {
     DB2DBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
 
-        defaultSchema = retriveDefaultSchema("select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1");
+        defaultSchema = retrieveDefaultSchema("select CURRENT SCHEMA  from  SYSIBM.SYSDUMMY1");
     }
 
     @Override

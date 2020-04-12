@@ -5,9 +5,6 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class PostgreSQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
@@ -17,7 +14,7 @@ public class PostgreSQLDBMetadataProvider extends DefaultDBMetadataProvider {
         super(connection, dbTypeFactory);
         // default schema name
         // https://www.postgresql.org/docs/9.3/functions-info.html
-        this.defaultSchema = retriveDefaultSchema("SELECT current_schema");
+        this.defaultSchema = retrieveDefaultSchema("SELECT current_schema");
     }
 
     // CAREFUL: PostgreSQL uses a chain of schemas and goes through the list until it finds the relevant object

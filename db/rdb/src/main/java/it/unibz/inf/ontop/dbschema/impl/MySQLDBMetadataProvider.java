@@ -16,7 +16,7 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     MySQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, getIDFactory(connection), dbTypeFactory);
-        defaultDatabase = retriveDefaultSchema("SELECT DATABASE()");
+        defaultDatabase = retrieveDefaultSchema("SELECT DATABASE()");
     }
 
     private static QuotedIDFactory getIDFactory(Connection connection) throws MetadataExtractionException {

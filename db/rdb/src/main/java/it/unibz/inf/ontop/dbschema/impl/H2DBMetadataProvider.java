@@ -13,7 +13,7 @@ public class H2DBMetadataProvider extends  DefaultDBMetadataProvider {
     H2DBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
 
-        defaultSchema = retriveDefaultSchema("SELECT SCHEMA()");
+        defaultSchema = retrieveDefaultSchema("SELECT SCHEMA()");
     }
 
     @Override
