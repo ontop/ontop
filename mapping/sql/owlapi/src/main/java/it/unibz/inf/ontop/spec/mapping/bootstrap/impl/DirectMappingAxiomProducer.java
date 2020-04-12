@@ -20,7 +20,6 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
  * #L%
  */
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -91,7 +90,7 @@ public class DirectMappingAxiomProducer {
 				", " + fk.getReferencedRelation().getID().getSQLRendering();
 
 		String conditions = fk.getComponents().stream()
-				.map(c -> getQualifiedColumnName(c.getAttribute()) + " = " + getQualifiedColumnName(c.getReference()))
+				.map(c -> getQualifiedColumnName(c.getAttribute()) + " = " + getQualifiedColumnName(c.getReferencedAttribute()))
 				.collect(Collectors.joining(" AND "));
 
 		return String.format("SELECT %s FROM %s WHERE %s", columns, tables, conditions);

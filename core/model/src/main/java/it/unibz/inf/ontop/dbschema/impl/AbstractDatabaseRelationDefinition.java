@@ -25,12 +25,13 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
         this.id = id;
     }
 
+
     @JsonProperty("name")
     @JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
+    @Override
     public RelationID getID() {
         return id;
     }
-
 
 
     /**
@@ -43,6 +44,7 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
         return ImmutableList.copyOf(uniqueConstraints);
     }
 
+    @Override
     public void addFunctionalDependency(FunctionalDependency constraint) {
         if (constraint instanceof UniqueConstraint) {
             UniqueConstraint uc = (UniqueConstraint) constraint;
@@ -66,6 +68,7 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
      * @return primary key
      */
     @JsonIgnore
+    @Override
     public Optional<UniqueConstraint> getPrimaryKey() {
         return Optional.ofNullable(primaryKey);
     }

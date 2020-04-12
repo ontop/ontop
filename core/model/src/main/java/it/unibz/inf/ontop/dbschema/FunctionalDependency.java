@@ -24,6 +24,6 @@ public interface FunctionalDependency {
     }
 
     static Builder defaultBuilder(DatabaseRelationDefinition relation) {
-        return new FunctionalDependencyImpl.BuilderImpl(relation);
+        return FunctionalDependencyImpl.builder(relation);
     }
 }

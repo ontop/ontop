@@ -274,7 +274,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                             builder.build();
 
                         String name = rs.getString("FK_NAME"); // String => foreign key name (may be null)
-                        DatabaseRelationDefinition ref = (DatabaseRelationDefinition) dbMetadata.getRelation(getPKRelationID(rs));
+                        DatabaseRelationDefinition ref = dbMetadata.getRelation(getPKRelationID(rs));
 
                         // FKTABLE_SCHEM and FKTABLE_NAME are ignored for now
                         builder = ForeignKeyConstraint.builder(name, relation, ref);

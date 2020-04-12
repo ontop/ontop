@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
 
-    public static final class ComponentImpl implements Component {
+    private static final class ComponentImpl implements Component {
         private final Attribute attribute, referencedAttribute;
 
         private ComponentImpl(Attribute attribute, Attribute referencedAttribute) {
@@ -25,7 +25,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
         }
 
         @Override
-        public Attribute getReference() {
+        public Attribute getReferencedAttribute() {
             return referencedAttribute;
         }
     }
@@ -102,7 +102,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
         this.name = name;
         this.components = components;
         this.relation = (DatabaseRelationDefinition)components.get(0).getAttribute().getRelation();
-        this.referencedRelation = (DatabaseRelationDefinition)components.get(0).getReference().getRelation();
+        this.referencedRelation = (DatabaseRelationDefinition)components.get(0).getReferencedAttribute().getRelation();
     }
 
     /**
@@ -161,7 +161,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
                 ") REFERENCES " + referencedRelation.getID().getSQLRendering() +
                 " (" +
                 components.stream()
-                        .map(c -> c.getReference().getID().toString())
+                        .map(c -> c.getReferencedAttribute().getID().toString())
                         .collect(Collectors.joining(", ")) +
                 ")";
     }
@@ -193,7 +193,7 @@ public class ForeignKeyConstraintImpl implements ForeignKeyConstraint {
                     {
                         gen.writeArrayFieldStart("columns");
                         for (Component component : value.getComponents()) {
-                            gen.writeString(component.getReference().getID().getSQLRendering());
+                            gen.writeString(component.getReferencedAttribute().getID().getSQLRendering());
                         }
                         gen.writeEndArray();
                     }

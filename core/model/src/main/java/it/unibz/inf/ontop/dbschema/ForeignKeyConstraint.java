@@ -21,7 +21,7 @@ public interface ForeignKeyConstraint {
 
     interface Component {
         Attribute getAttribute();
-        Attribute getReference();
+        Attribute getReferencedAttribute();
     }
 
 

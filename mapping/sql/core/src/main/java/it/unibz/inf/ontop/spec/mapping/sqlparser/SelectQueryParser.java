@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -25,6 +23,7 @@ import net.sf.jsqlparser.statement.select.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -69,30 +68,6 @@ public class SelectQueryParser {
             throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
         }
     }
-
-    public RAExpression parse(String sql, IntermediateQueryBuilder queryBuilder) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
-        try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
-
-            RAExpression re = select(((Select) statement).getSelectBody());
-            return re;
-        }
-        catch (JSQLParserException e) {
-            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
-        }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
-        }
-        catch (UnsupportedSelectQueryRuntimeException e) {
-            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
-        }
-        catch (TokenMgrError e) {
-            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
-        }
-    }
-
 
 
     private RAExpression select(SelectBody selectBody) {
@@ -165,11 +140,11 @@ public class SelectQueryParser {
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
             throw new InvalidSelectQueryRuntimeException(
-                    "Duplicate column names " + Joiner.on(", ").join(
-                            duplicates.entrySet().stream()
-                                    .filter(d -> d.getValue() > 1)
-                                    .map(d -> d.getKey())
-                                    .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", selectBody);
+                    "Duplicate column names " + duplicates.entrySet().stream()
+                            .filter(d -> d.getValue() > 1)
+                            .map(Map.Entry::getKey)
+                            .map(QualifiedAttributeID::getSQLRendering)
+                            .collect(Collectors.joining(", ")) + " in the SELECT clause: ", selectBody);
         }
 
         return new RAExpression(current.getDataAtoms(),

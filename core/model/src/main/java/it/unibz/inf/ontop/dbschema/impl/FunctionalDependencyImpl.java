@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 
-import java.util.Objects;
 
 public class FunctionalDependencyImpl implements FunctionalDependency {
 
@@ -25,8 +24,12 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         return dependents;
     }
 
+    public static Builder builder(DatabaseRelationDefinition relation) {
+        return new BuilderImpl(relation);
+    }
 
-    public static class BuilderImpl implements Builder {
+
+    private static class BuilderImpl implements Builder {
 
         private final ImmutableSet.Builder<Attribute>
                 determinants = ImmutableSet.builder(),
@@ -34,7 +37,7 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
 
         private final DatabaseRelationDefinition relation;
 
-        public BuilderImpl(DatabaseRelationDefinition relation) {
+        private BuilderImpl(DatabaseRelationDefinition relation) {
             this.relation = relation;
         }
 
