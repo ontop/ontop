@@ -33,6 +33,11 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         return defaultTableOwner;
     }
 
+    @Override
+    protected QuotedID getDefaultSchema() {
+        return defaultSchema;
+    }
+
 
     @Override
     public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
