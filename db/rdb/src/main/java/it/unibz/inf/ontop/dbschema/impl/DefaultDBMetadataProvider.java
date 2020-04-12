@@ -355,9 +355,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
     protected String getRelationSchema(RelationID relationID) {
-        QuotedID schemaId = relationID.getSchemaID();
-        if (schemaId != null)
-            return schemaId.getName();
+        if (relationID.hasSchema())
+            return relationID.getSchemaID().getName();
 
         QuotedID defaultSchemaId = getDefaultSchema();
         if (defaultSchemaId != null)
