@@ -27,9 +27,8 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         if (relationID.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
                 return null;
 
-        QuotedID schemaID = relationID.getSchemaID();
-        if (schemaID != null)
-            return schemaID.getName();
+        if (relationID.hasSchema())
+            return relationID.getSchemaID().getName();
 
         return defaultTableOwner;
     }
