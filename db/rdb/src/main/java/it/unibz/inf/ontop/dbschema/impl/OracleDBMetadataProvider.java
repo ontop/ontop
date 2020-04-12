@@ -86,7 +86,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
         try (Statement stmt = connection.createStatement();
              ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
             return (resultSet.next())
-                    ? resultSet.getString("user").toUpperCase()
+                    ? resultSet.getString(1).toUpperCase()
                     : "SYSTEM"; // default value
         }
         catch (SQLException e) {

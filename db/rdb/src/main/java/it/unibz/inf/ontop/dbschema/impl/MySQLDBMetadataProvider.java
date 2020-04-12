@@ -41,6 +41,9 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     protected String getRelationCatalog(RelationID relationID) { return super.getRelationSchema(relationID); }
 
     @Override
+    protected String getRelationSchema(RelationID relationID) { return null; }
+
+    @Override
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
         return rawIdFactory.createRelationID(
                 rs.getString("TABLE_CAT"), rs.getString("TABLE_NAME"));

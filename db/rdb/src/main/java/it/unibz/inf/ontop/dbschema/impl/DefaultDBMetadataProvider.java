@@ -105,6 +105,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             return builder.build();
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -128,6 +129,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -169,6 +171,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -206,7 +209,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     primaryKeyAttributes.put(seq, attrId);
                 }
                 else {
-                    System.out.println("ID FUN: " + id + " v " + id2);
+                    System.out.println("ID FUN: " + id + " v " + id2 + " v " + id.extendWithDefaultSchemaID(getDefaultSchema()));
                 }
             }
             if (!primaryKeyAttributes.isEmpty()) {
@@ -223,6 +226,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -287,6 +291,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 builder.build();
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -330,6 +335,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 builder.build();
         }
         catch (SQLException e) {
+            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
