@@ -141,7 +141,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
         // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-        String givenSchemaName = getRelationSchema(givenId);
+        String givenSchemaName = getEffectiveRelationSchema(givenId);
         String extractedSchemaName = extractedId.getSchemaID().getName();
         if (givenSchemaName == null) {
             if (extractedSchemaName == null)
