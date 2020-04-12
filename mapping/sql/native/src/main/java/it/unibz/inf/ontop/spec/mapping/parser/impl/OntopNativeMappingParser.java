@@ -89,8 +89,7 @@ public class OntopNativeMappingParser implements SQLMappingParser {
     @Inject
     private OntopNativeMappingParser(SpecificationFactory specificationFactory,
                                      TargetQueryParserFactory targetQueryParserFactory,
-                                     SQLPPMappingFactory ppMappingFactory, TermFactory termFactory,
-                                     TypeFactory typeFactory,
+                                     SQLPPMappingFactory ppMappingFactory,
                                      SQLPPSourceQueryFactory sourceQueryFactory) {
         this.targetQueryParserFactory = targetQueryParserFactory;
         this.ppMappingFactory = ppMappingFactory;
@@ -363,23 +362,14 @@ public class OntopNativeMappingParser implements SQLMappingParser {
 		throw new UnparsableTargetQueryException(exceptions);
     }
 
-	private static int getSeparatorLength(String input, int beginIndex) {
-		int count = 0;
-		for (int i = beginIndex; i < input.length(); i++) {
-			if (input.charAt(i) != '\u0009' || input.charAt(i) != '\t') { // a tab
-				break;
-			}
-			count++;
-		}
-		return count;
-	}
-
     private List<SQLPPTriplesMap> addNewMapping(String mappingId, String sourceQuery,
                                                        String targetString,
                                                        ImmutableList<TargetAtom> targetQuery,
                                                        List<SQLPPTriplesMap> currentSourceMappings) {
         SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap(
                 mappingId, sourceQueryFactory.createSourceQuery(sourceQuery), targetString, targetQuery);
+
+        // TODO (ROMAN, 12/04/20): the contains test is useless because OntopNativeSQLPPTriplesMap does not override equals
         if (!currentSourceMappings.contains(mapping)) {
             currentSourceMappings.add(mapping);
         }

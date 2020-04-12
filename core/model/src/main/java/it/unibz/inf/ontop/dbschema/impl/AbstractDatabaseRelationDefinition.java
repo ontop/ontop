@@ -87,7 +87,7 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
      *
      * @return list of foreign keys
      */
-    @JsonSerialize(contentUsing = ForeignKeyConstraint.ForeignKeyConstraintSerializer.class)
+    @JsonSerialize(contentUsing = ForeignKeyConstraintImpl.ForeignKeyConstraintSerializer.class)
     @Override
     public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
         return ImmutableList.copyOf(foreignKeys);
