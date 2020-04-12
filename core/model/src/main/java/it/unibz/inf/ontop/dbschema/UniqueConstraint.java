@@ -87,7 +87,7 @@ public class UniqueConstraint implements FunctionalDependency {
 			if (pk.isPresent() && pk.get().getAttributes().equals(attributes))
 				return; // ignore a unique constraint with the same attributes as the primary key
 
-			relation.addUniqueConstraint(new UniqueConstraint(name, false, attributes));
+			relation.addFunctionalDependency(new UniqueConstraint(name, false, attributes));
 		}
 	}
 
@@ -123,7 +123,7 @@ public class UniqueConstraint implements FunctionalDependency {
 			if (attributes.isEmpty())
 				throw new IllegalArgumentException("PK cannot have no attributes");
 
-			relation.addUniqueConstraint(new UniqueConstraint(name, true, attributes));
+			relation.addFunctionalDependency(new UniqueConstraint(name, true, attributes));
 		}
 	}
 

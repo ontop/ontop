@@ -20,16 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 /**
  * Represents a database relation (either a table or a view)
@@ -38,106 +30,14 @@ import java.util.stream.Collectors;
  *
  */
 
-public class DatabaseRelationDefinition extends AbstractRelationDefinition {
+public interface DatabaseRelationDefinition extends RelationDefinition {
 
-	private final RelationID id;
+	RelationID getID();
 
-	private UniqueConstraint primaryKey; // nullable
-	private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
-	private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
-	private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
-
-	/**
-	 * used only in DummyDBMetadataBuilder
-	 *
-	 * @param id
-	 * @param builder
-	 */
-    public DatabaseRelationDefinition(RelationID id, AttributeListBuilder builder) {
-    	super(id.getSQLRendering(), builder);
-    	this.id = id;
-	}
-
-	@JsonProperty("name")
-	@JsonSerialize(using = RelationIDImpl.RelationIDSerializer.class)
-	public RelationID getID() {
-		return id;
-	}
+	Optional<UniqueConstraint> getPrimaryKey();
 
 
-	/**
-	 * adds a unique constraint (a primary key or a unique constraint proper)
-	 *
-	 * @param uc
-	 */
+	void addFunctionalDependency(FunctionalDependency constraint);
 
-	public void addUniqueConstraint(UniqueConstraint uc) {
-		if (uc.isPrimaryKey()) {
-			if (primaryKey != null)
-				throw new IllegalArgumentException("Duplicate PK " + primaryKey + " " + uc);
-			primaryKey = uc;
-		}
-		uniqueConstraints.add(uc);
-	}
-
-	/**
-	 * returns the list of unique constraints (including the primary key if present)
-	 *
-	 * @return
-	 */
-	@Override
-	public ImmutableList<UniqueConstraint> getUniqueConstraints() {
-		return ImmutableList.copyOf(uniqueConstraints);
-	}
-
-	public void addFunctionalDependency(FunctionalDependency constraint) {
-		if (constraint instanceof UniqueConstraint)
-			addUniqueConstraint((UniqueConstraint) constraint);
-		else
-			otherFunctionalDependencies.add(constraint);
-	}
-
-	@Override
-	public ImmutableList<FunctionalDependency> getOtherFunctionalDependencies() {
-		return ImmutableList.copyOf(otherFunctionalDependencies);
-	}
-
-	/**
-	 * @return primary key
-	 */
-	@JsonIgnore
-	public Optional<UniqueConstraint> getPrimaryKey() {
-		return Optional.ofNullable(primaryKey);
-	}
-
-
-	/**
-	 * adds a foreign key constraints
-	 *
-	 * @param fk a foreign key
-	 */
-
-	public void addForeignKeyConstraint(ForeignKeyConstraint fk) {
-		foreignKeys.add(fk);
-	}
-
-	/**
-	 * returns the list of foreign key constraints
-	 *
-	 * @return list of foreign keys
-	 */
-	@JsonSerialize(contentUsing = ForeignKeyConstraint.ForeignKeyConstraintSerializer.class)
-	@Override
-	public ImmutableList<ForeignKeyConstraint> getForeignKeys() {
-		return ImmutableList.copyOf(foreignKeys);
-	}
-
-	@Override
-	public String toString() {
-		return "CREATE TABLE " + getID() + " (\n   " +
-				getAttributes().stream()
-						.map(Attribute::toString)
-						.collect(Collectors.joining(",\n   ")) +
-				"\n)";
-	}
+	void addForeignKeyConstraint(ForeignKeyConstraint fk);
 }

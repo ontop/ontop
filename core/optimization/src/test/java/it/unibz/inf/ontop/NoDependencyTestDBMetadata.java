@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop;
 
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -57,7 +57,7 @@ public class NoDependencyTestDBMetadata {
                                                             boolean canBeNull) {
 
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        RelationDefinition.AttributeListBuilder builder =  DatabaseRelationDefinition.attributeListBuilder();
+        RelationDefinition.AttributeListBuilder builder =  DatabaseTableDefinition.attributeListBuilder();
         for (int i = 1; i <= arity; i++) {
             builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
         }

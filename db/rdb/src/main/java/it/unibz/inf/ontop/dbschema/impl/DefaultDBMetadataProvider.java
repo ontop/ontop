@@ -119,7 +119,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             while (rs.next()) {
                 RelationID relationId = getRelationID(rs);
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(relationId,
-                        i -> DatabaseRelationDefinition.attributeListBuilder());
+                        i -> DatabaseTableDefinition.attributeListBuilder());
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                 // columnNoNulls, columnNullable, columnNullableUnknown
@@ -136,13 +136,13 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else if (relations.keySet().size() == 1) {
                 Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseRelationDefinition(r.getKey(), r.getValue());
+                return new DatabaseTableDefinition(r.getKey(), r.getValue());
             }
             else {
                 RelationID canonicalId = getRelationCanonicalID(id);
                 for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
                     if (r.getKey().equals(canonicalId))
-                        return new DatabaseRelationDefinition(r.getKey(), r.getValue());
+                        return new DatabaseTableDefinition(r.getKey(), r.getValue());
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
         }

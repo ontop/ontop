@@ -25,6 +25,8 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseViewDefinition;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -930,8 +932,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Renderer class to present the table list.
 	 */
-	private class DataSetItemRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = 1L;
+	private static class DataSetItemRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -944,18 +945,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {
-                    if (value instanceof DatabaseRelationDefinition) {
-                        DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
+                    if (value instanceof DatabaseTableDefinition) {
+                        DatabaseTableDefinition td = (DatabaseTableDefinition) value;
                         ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
                         label.setIcon(icon);
                         label.setText(td.getID().getSQLRendering());
                     }
-                    //else if (value instanceof ParserViewDefinition) {
-                    //	ParserViewDefinition vd = (ParserViewDefinition) value;
-                    //	ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
-                    //	label.setIcon(icon);
-                    //	label.setText(vd.getID().getSQLRendering());
-                    // }
+                    else if (value instanceof DatabaseViewDefinition) {
+                        DatabaseViewDefinition vd = (DatabaseViewDefinition) value;
+                    	ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
+                    	label.setIcon(icon);
+                    	label.setText(vd.getID().getSQLRendering());
+                     }
 					return label;
 				}
 			}
@@ -965,8 +966,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Renderer class to present the table list.
 	 */
-	private class ClassListCellRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = 1L;
+	private static class ClassListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

@@ -23,14 +23,13 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryParser;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +58,7 @@ public class SQLParserTest {
 
 		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("\"public\"", "student"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("\"public\"", "student"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -89,10 +88,10 @@ public class SQLParserTest {
 			"name", varchar20DBType, false,
 			"value", varchar20DBType, false));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("HR", "REGIONS"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("HR", "REGIONS"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false)));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID(null, "tableName"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID(null, "tableName"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -109,7 +108,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("value"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false)));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID(null, "grade"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID(null, "grade"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -154,19 +153,19 @@ public class SQLParserTest {
 		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PC",
 			"model", varchar20DBType, false));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false)));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("northwind", "Suppliers"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("northwind", "Suppliers"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("Region"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("PostalCode"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Address"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false)));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("oreda", "pm_maint_items"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("oreda", "pm_maint_items"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -177,7 +176,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("oreda", "pm_program"), DatabaseRelationDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(idfac.createRelationID("oreda", "pm_program"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)

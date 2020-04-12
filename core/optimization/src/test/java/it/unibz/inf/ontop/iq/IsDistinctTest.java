@@ -3,11 +3,10 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
-
-import java.util.Objects;
 
 import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR1;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -29,7 +28,7 @@ public class IsDistinctTest {
         QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
         DBTermType dbStringTermType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
-        RelationDefinition.AttributeListBuilder builder = DatabaseRelationDefinition.attributeListBuilder();
+        RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
         for (int i=1 ; i <= arity; i++)
             builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
 
