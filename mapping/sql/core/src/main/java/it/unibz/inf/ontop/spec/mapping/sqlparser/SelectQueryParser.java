@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -227,10 +228,6 @@ public class SelectQueryParser {
             }
             relationIndex++;
 
-            RelationID alias = (tableName.getAlias() != null)
-                    ? idfac.createRelationID(null, tableName.getAlias().getName())
-                    : relation.getID();
-
             ImmutableList.Builder<Variable> terms = ImmutableList.builder();
             ImmutableMap.Builder<QuotedID, ImmutableTerm> attributes = ImmutableMap.builder();
             // the order in the loop is important
@@ -243,16 +240,14 @@ public class SelectQueryParser {
             // create an atom for a particular table
             DataAtom<RelationPredicate> atom = atomFactory.getDataAtom(relation.getAtomPredicate(), terms.build());
 
-            // TODO: merge?!
             RAExpressionAttributes attrs;
             if (tableName.getAlias() == null) {
-                if (relation.getID().hasSchema())
-                    attrs = RAExpressionAttributes.create(attributes.build(), relation.getID(), relation.getID().getSchemalessID());
-                else
-                    attrs = RAExpressionAttributes.create(attributes.build(), relation.getID().getSchemalessID());
+                attrs = RAExpressionAttributes.create(attributes.build(), relation.getAllIDs());
             }
-            else
-                attrs = RAExpressionAttributes.create(attributes.build(), alias);
+            else {
+                RelationID alias = idfac.createRelationID(null, tableName.getAlias().getName());
+                attrs = RAExpressionAttributes.create(attributes.build(), ImmutableSet.of(alias));
+            }
 
             result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
         }

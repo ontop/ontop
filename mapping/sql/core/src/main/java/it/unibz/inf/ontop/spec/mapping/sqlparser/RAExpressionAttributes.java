@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -12,6 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 
@@ -155,17 +157,19 @@ public class RAExpressionAttributes {
     /**
      *
      * @param unqualifiedAttributes a {@link ImmutableMap}<{@link QuotedID}, {@link Variable}>
-     * @param alias a {@link RelationID}
+     * @param aliases a {@link RelationID}
      * @return a {@link RAExpressionAttributes}
      */
 
     public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes,
-                                                RelationID alias) {
+                                                ImmutableSet<RelationID> aliases) {
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = merge(
                 unqualifiedAttributes.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
+                        .flatMap(e -> Stream.concat(aliases.stream(),
+                                aliases.stream().filter(RelationID::hasSchema).map(RelationID::getSchemalessID)).distinct()
+                        .map(a -> Maps.immutableEntry(new QualifiedAttributeID(a, e.getKey()), e.getValue())))
+                        .collect(ImmutableCollectors.toMap()),
 
                 unqualifiedAttributes.entrySet().stream()
                         .collect(ImmutableCollectors.toMap(
@@ -174,34 +178,11 @@ public class RAExpressionAttributes {
 
         ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
                 unqualifiedAttributes.keySet().stream()
-                        .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
+                        .collect(ImmutableCollectors.toMap(identity(), id -> aliases));
 
         return new RAExpressionAttributes(attributes, attributeOccurrences);
     }
 
-    public static RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes,
-                                                RelationID alias, RelationID schemalessId) {
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = merge(
-                unqualifiedAttributes.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(alias, e.getKey()), Map.Entry::getValue)),
-
-                unqualifiedAttributes.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(schemalessId, e.getKey()), Map.Entry::getValue)),
-
-                unqualifiedAttributes.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue))
-        );
-
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> attributeOccurrences =
-                unqualifiedAttributes.keySet().stream()
-                        .collect(ImmutableCollectors.toMap(identity(), id -> ImmutableSet.of(alias)));
-
-        return new RAExpressionAttributes(attributes, attributeOccurrences);
-    }
 
     /**
      * (relational expression) AS A
@@ -219,7 +200,7 @@ public class RAExpressionAttributes {
                         .collect(ImmutableCollectors.toMap(
                                 e -> e.getKey().getAttribute(), Map.Entry::getValue));
 
-        return create(unqualifiedAttributes, alias);
+        return create(unqualifiedAttributes, ImmutableSet.of(alias));
     }
 
 

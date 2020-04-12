@@ -9,9 +9,6 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.ExpressionParser;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpressionAttributes;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -69,7 +66,7 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 new RAExpressionAttributes(
                         ImmutableMap.of(qaTx, x, qaTy, y, qaNx, x, qaNy, y),
-                        ImmutableMap.of(attX, ImmutableSet.of(P.getID()), attY, ImmutableSet.of(P.getID()))));
+                        ImmutableMap.of(attX, ImmutableSet.of(P.getID()), attY, P.getAllIDs())));
 
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
@@ -109,7 +106,7 @@ public class RelationalExpressionTest {
         re3 = new RAExpression(
                 ImmutableList.of(f3),
                 ImmutableList.of(),
-                RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), table3));
+                RAExpressionAttributes.create(ImmutableMap.of(attW, w, attZ, z), ImmutableSet.of(table3)));
 
         eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
@@ -122,7 +119,7 @@ public class RelationalExpressionTest {
         // "cross join" and "join on" and "natural join"
         re1_1 = new RAExpression(ImmutableList.of(f2),
                 ImmutableList.of(),
-                RAExpressionAttributes.create(ImmutableMap.of(attX, x), P.getID()));
+                RAExpressionAttributes.create(ImmutableMap.of(attX, x), P.getAllIDs()));
 
         System.out.println("****************************************************");
     }
@@ -240,7 +237,7 @@ public class RelationalExpressionTest {
                 ImmutableList.of(),
                 RAExpressionAttributes.create(
                         ImmutableMap.of(MDFAC.createAttributeID("C"), u,  MDFAC.createAttributeID("D"), v),
-                        MDFAC.createRelationID(null, "Q")));
+                        ImmutableSet.of(MDFAC.createRelationID(null, "Q"))));
 
         System.out.println(re1);
         System.out.println(re2);
@@ -286,7 +283,7 @@ public class RelationalExpressionTest {
     public void  create_test(){
         RAExpression actual = new RAExpression(re1.getDataAtoms(),
                 re1.getFilterAtoms(),
-                RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getID()));
+                RAExpressionAttributes.create(ImmutableMap.of(attX, x, attY, y), P.getAllIDs()));
         System.out.println(actual);
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = actual.getAttributes();

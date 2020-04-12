@@ -29,11 +29,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertTrue;
@@ -87,12 +84,6 @@ public class MultiSchemaH2Test  {
 
 	@After
 	public void tearDown() throws Exception {
-		dropTables();
-		conn.close();
-	}
-
-	private void dropTables() throws Exception {
-
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {

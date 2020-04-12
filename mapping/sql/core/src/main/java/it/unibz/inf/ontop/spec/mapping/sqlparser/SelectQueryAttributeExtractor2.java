@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -234,23 +235,17 @@ public class SelectQueryAttributeExtractor2 {
             }
             relationIndex++;
 
-            RelationID alias = (tableName.getAlias() != null)
-                    ? idfac.createRelationID(null, tableName.getAlias().getName())
-                    : relation.getID();
-
             ImmutableMap<QuotedID, ImmutableTerm> attributes = relation.getAttributes().stream()
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
-            // TODO: merge?!
             if (tableName.getAlias() == null) {
-                if (relation.getID().hasSchema())
-                    result = RAExpressionAttributes.create(attributes, relation.getID(), relation.getID().getSchemalessID());
-                else
-                    result = RAExpressionAttributes.create(attributes, relation.getID().getSchemalessID());
+                result = RAExpressionAttributes.create(attributes, relation.getAllIDs());
             }
-            else
-                result = RAExpressionAttributes.create(attributes, alias);
+            else {
+                RelationID alias = idfac.createRelationID(null, tableName.getAlias().getName());
+                result = RAExpressionAttributes.create(attributes, ImmutableSet.of(alias));
+            }
         }
 
 
