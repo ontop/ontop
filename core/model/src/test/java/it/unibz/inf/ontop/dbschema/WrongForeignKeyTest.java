@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema;
 
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.DEFAULT_DUMMY_DB_METADATA;

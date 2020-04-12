@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
@@ -16,10 +14,10 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        ImmutableMetadataLookup metadataLookup = new ImmutableMetadataLookup(ImmutableMap.of());
-        QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of());
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
 
-        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, idfac, TERM_FACTORY);
+        SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
 
         ImmutableList<QuotedID> res = aex.extract("SELECT ALMAES001.IDART,\n"+
 //                "     ALMAES001.CODART,\n"+

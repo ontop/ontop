@@ -20,12 +20,6 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-
-import java.io.IOException;
-
 /**
  * Database identifier used for schema names, table names and aliases
  * <p>

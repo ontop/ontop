@@ -115,7 +115,7 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata, QuotedIDFactory idFactory)
+	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata)
 			throws MetaMappingExpansionException {
 
 		ImmutableList.Builder<SQLPPTriplesMap> result = ImmutableList.builder();
@@ -157,7 +157,9 @@ public class MetaMappingExpander {
 		if (expansions.isEmpty())
 			return ppMapping.getTripleMaps();
 
-		BiFunction<Map<QuotedID, SelectExpressionItem>, Variable, SelectExpressionItem> resolver = placeholderResolver(ppMapping.getTripleMaps().iterator().next(), idFactory);
+		BiFunction<Map<QuotedID, SelectExpressionItem>, Variable, SelectExpressionItem> resolver =
+				placeholderResolver(ppMapping.getTripleMaps().iterator().next(),
+						metadata.getQuotedIDFactory());
 
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
@@ -173,7 +175,7 @@ public class MetaMappingExpander {
 
 				ImmutableSet<Variable> templateVariables = templateTerm.getVariables();
 
-				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, idFactory, m.source.getSQL());
+				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
 
 				ImmutableList<SelectExpressionItem> templateColumns;
 				try {
@@ -240,10 +242,10 @@ public class MetaMappingExpander {
 	}
 
 
-	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, QuotedIDFactory idFactory, String sql)
+	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
-		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, idFactory, termFactory);
+		SelectQueryAttributeExtractor2 sqae = new SelectQueryAttributeExtractor2(metadata, termFactory);
 		PlainSelect plainSelect = sqae.getParsedSql(sql);
 		ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = sqae.getQueryBodyAttributes(plainSelect);
 

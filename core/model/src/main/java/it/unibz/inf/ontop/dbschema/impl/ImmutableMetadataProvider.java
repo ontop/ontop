@@ -16,7 +16,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
     private final ImmutableList<DatabaseRelationDefinition> relations;
 
     public ImmutableMetadataProvider(DBParameters dbParameters, ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
-        super(map);
+        super(map, dbParameters.getQuotedIDFactory());
         this.dbParameters = dbParameters;
         // the list contains no repetitions (based on full relation ids)
         this.relations = map.values().stream()

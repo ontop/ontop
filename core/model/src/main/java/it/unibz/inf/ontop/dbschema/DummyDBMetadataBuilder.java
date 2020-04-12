@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
@@ -47,4 +48,6 @@ public interface DummyDBMetadataBuilder {
     DBTypeFactory getDBTypeFactory();
 
     DBParameters getDBParameters();
+
+    MetadataLookup getImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map);
 }

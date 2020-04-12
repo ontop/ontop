@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop;
 
-import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.type.DBTermType;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.DEFAULT_DUMMY_DB_METADATA;
+import static it.unibz.inf.ontop.OptimizationTestingTools.createRelationPredicate;
 
 public class NoDependencyTestDBMetadata {
 
@@ -51,19 +49,6 @@ public class NoDependencyTestDBMetadata {
 
     public static RelationPredicate createIntRelationPredicate(int tableNumber, int arity) {
         return createIntRelationPredicate(tableNumber, arity, false);
-    }
-
-    public static RelationPredicate createRelationPredicate(int tableNumber, int arity, DBTermType termType, String prefix,
-                                                            boolean canBeNull) {
-
-        QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        RelationDefinition.AttributeListBuilder builder =  DatabaseTableDefinition.attributeListBuilder();
-        for (int i = 1; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
-        }
-        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
-                idFactory.createRelationID(null, prefix + "TABLE" + tableNumber + "AR" + arity), builder);
-        return tableDef.getAtomPredicate();
     }
 
     static {

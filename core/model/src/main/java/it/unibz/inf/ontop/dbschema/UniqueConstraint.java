@@ -20,17 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.impl.AttributeImpl;
 import it.unibz.inf.ontop.dbschema.impl.UniqueConstraintImpl;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Primary key or a unique constraint
@@ -112,6 +103,4 @@ public interface UniqueConstraint extends FunctionalDependency {
 				.addDeterminant(attribute1.getIndex())
 				.addDeterminant(attribute1.getIndex()).build();
 	}
-
-
 }

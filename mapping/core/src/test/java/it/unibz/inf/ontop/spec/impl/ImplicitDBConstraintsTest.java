@@ -23,7 +23,7 @@ public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
 
-	private static MetadataProvider md;
+	private static final MetadataProvider md;
 	private static final QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
@@ -32,8 +32,6 @@ public class ImplicitDBConstraintsTest {
 	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
 
 	static {
-		idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-
 		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
 		TABLENAME = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLENAME",
@@ -45,6 +43,8 @@ public class ImplicitDBConstraintsTest {
 
 		md = new ImmutableMetadataProvider(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
 				ImmutableMap.of(TABLENAME.getID(), TABLENAME, TABLE2.getID(), TABLE2));
+
+		idfac = md.getQuotedIDFactory();
 	}
 	
 	@Test

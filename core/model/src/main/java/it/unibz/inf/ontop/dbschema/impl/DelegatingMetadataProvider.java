@@ -28,6 +28,11 @@ public class DelegatingMetadataProvider implements MetadataProvider {
     }
 
     @Override
+    public QuotedIDFactory getQuotedIDFactory() {
+        return provider.getQuotedIDFactory();
+    }
+
+    @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         provider.insertIntegrityConstraints(relation, metadataLookup);
     }

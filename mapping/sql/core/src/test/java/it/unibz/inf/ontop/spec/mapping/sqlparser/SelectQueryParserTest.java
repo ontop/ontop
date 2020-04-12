@@ -8,8 +8,6 @@ import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.RAExpression;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryParser;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -431,11 +429,11 @@ public class SelectQueryParserTest {
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = new ImmutableMetadataLookup(ImmutableMap.of(
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of(
                 TABLE_P.getID(), TABLE_P,
                 TABLE_Q.getID(), TABLE_Q,
                 TABLE_R.getID(), TABLE_R));
 
-        return new SelectQueryParser(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), CORE_SINGLETONS);
+        return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
     }
 }

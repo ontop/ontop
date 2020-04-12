@@ -27,11 +27,9 @@ import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataLookup;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.impl.SimplePrefixManager;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 
@@ -67,7 +65,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2));
 
-		return new ImmutableMetadataLookup(ImmutableMap.of(
+		return DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableMap.of(
 				table1.getID(), table1,
 				table2.getID(), table2,
 				table3.getID(), table3));
@@ -84,7 +82,6 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
 				ImmutableList.of(mapping),
 				getMetadataLookup(),
-				DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(),
 				null)
 				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		

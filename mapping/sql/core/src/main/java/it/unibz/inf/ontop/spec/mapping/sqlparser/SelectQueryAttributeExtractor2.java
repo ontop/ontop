@@ -32,9 +32,9 @@ public class SelectQueryAttributeExtractor2 {
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(MetadataLookup metadata, QuotedIDFactory idFactory, TermFactory termFactory) {
+    public SelectQueryAttributeExtractor2(MetadataLookup metadata, TermFactory termFactory) {
         this.metadata = metadata;
-        this.idfac = idFactory;
+        this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = termFactory;
     }
 

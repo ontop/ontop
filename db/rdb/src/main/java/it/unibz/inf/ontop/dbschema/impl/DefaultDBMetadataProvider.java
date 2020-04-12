@@ -152,6 +152,11 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     @Override
+    public QuotedIDFactory getQuotedIDFactory() {
+        return dbParameters.getQuotedIDFactory();
+    }
+
+    @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         insertPrimaryKey(relation);
         insertUniqueAttributes(relation);

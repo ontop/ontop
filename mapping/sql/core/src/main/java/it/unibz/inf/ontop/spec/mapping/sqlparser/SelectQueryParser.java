@@ -38,9 +38,9 @@ public class SelectQueryParser {
 
     private int relationIndex = 0;
 
-    public SelectQueryParser(MetadataLookup metadata, QuotedIDFactory idFactory, CoreSingletons coreSingletons) {
+    public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         this.metadata = metadata;
-        this.idfac = idFactory;
+        this.idfac = metadata.getQuotedIDFactory();
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.atomFactory = coreSingletons.getAtomFactory();

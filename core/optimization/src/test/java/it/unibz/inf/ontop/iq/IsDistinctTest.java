@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR1;
@@ -21,24 +19,6 @@ public class IsDistinctTest {
     public static final RelationDefinition NULLABLE_UC_TABLE1_AR1;
     public static final RelationDefinition NULLABLE_UC_TABLE2_AR2;
 
-    private static RelationDefinition createUCRelation(int tableNumber, int arity, boolean canNull) {
-        if (arity < 1)
-            throw new IllegalArgumentException();
-
-        QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DBTermType dbStringTermType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
-
-        RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
-        for (int i=1 ; i <= arity; i++)
-            builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
-
-        DatabaseRelationDefinition tableDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(
-                idFactory.createRelationID(null, "UC_TABLE" + tableNumber + "AR" + arity), builder);
-        UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
-                .addDeterminant(1)
-                .build();
-        return tableDef;
-    }
 
     static {
         NULLABLE_UC_TABLE1_AR1 = createUCRelation( 1, 1, true);

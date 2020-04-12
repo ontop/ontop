@@ -20,16 +20,7 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.model.type.DBTermType;
-
-import java.io.IOException;
 
 /**
  * Represents an attribute (column) of a database relation (table or view) or a parser view

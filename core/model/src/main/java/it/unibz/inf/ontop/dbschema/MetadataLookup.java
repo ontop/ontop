@@ -13,4 +13,5 @@ public interface MetadataLookup {
 
     DatabaseRelationDefinition getRelation(RelationID id) throws MetadataExtractionException;
 
+    QuotedIDFactory getQuotedIDFactory();
 }

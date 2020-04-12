@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
@@ -34,11 +33,9 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.REException;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 
 /**
@@ -69,7 +66,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata, QuotedIDFactory idFactory,
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata,
                                          ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
 
         List<MappingAssertion> assertionsList = new ArrayList<>();
@@ -81,11 +78,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 String sourceQuery = mappingAxiom.getSourceQuery().getSQL();
                 RAExpression re;
                 try {
-                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, idFactory, coreSingletons);
+                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, coreSingletons);
                     re = sqp.parse(sourceQuery);
                 }
                 catch (UnsupportedSelectQueryException e) {
-                    SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(dbMetadata, idFactory, termFactory);
+                    SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(dbMetadata, termFactory);
                     re = createParserView(sqae.extract(sourceQuery), sourceQuery);
                 }
 
@@ -101,7 +98,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                 .reduce((a, b) -> termFactory.getConjunction(b, a)),
                         iqFactory);
 
-                BiFunction<Map<QuotedID, ImmutableTerm>, Variable, ImmutableTerm> resolver = placeholderResolver(mappingAxiom, idFactory);
+                BiFunction<Map<QuotedID, ImmutableTerm>, Variable, ImmutableTerm> resolver = placeholderResolver(mappingAxiom, dbMetadata.getQuotedIDFactory());
 
                 for (TargetAtom target : mappingAxiom.getTargetAtoms()) {
 
@@ -164,9 +161,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
             };
         }
         else
-            return (map, placeholder) -> {
-                return map.get( idFactory.createAttributeID(placeholder.getName()));
-        };
+            return (map, placeholder) -> map.get(idFactory.createAttributeID(placeholder.getName()));
     }
 
     private RAExpression createParserView(ImmutableList<QuotedID> attributes,  String sql) {

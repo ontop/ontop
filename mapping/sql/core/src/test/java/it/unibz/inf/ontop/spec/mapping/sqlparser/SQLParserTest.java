@@ -188,7 +188,7 @@ public class SQLParserTest {
 
 		ImmutableList<DatabaseRelationDefinition> list = relations.build();
 
-		MetadataLookup metadataLookup = new ImmutableMetadataLookup(Stream.concat(
+		MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(Stream.concat(
 				list.stream()
 						.map(r -> Maps.immutableEntry(r.getID(), r)),
 				list.stream()
@@ -196,7 +196,7 @@ public class SQLParserTest {
 						.map(r -> Maps.immutableEntry(r.getID().getSchemalessID(), r)))
 				.collect(ImmutableCollectors.toMap()));
 
-		sqp = new SelectQueryParser(metadataLookup, DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory(), CORE_SINGLETONS);
+		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
 	}
 
 	@Test

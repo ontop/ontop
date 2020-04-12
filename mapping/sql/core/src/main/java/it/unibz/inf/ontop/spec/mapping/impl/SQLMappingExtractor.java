@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -166,8 +165,8 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(implicitConstraints);
-            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory());
-            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, metadataLoader.getDBParameters().getQuotedIDFactory(), executorRegistry);
+            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, executorRegistry);
 
             metadataLookup.insertIntegrityConstraints();
 

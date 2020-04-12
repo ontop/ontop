@@ -40,6 +40,11 @@ public class DynamicMetadataLookup implements MetadataLookup {
         return retrievedRelation;
     }
 
+    @Override
+    public QuotedIDFactory getQuotedIDFactory() {
+        return provider.getQuotedIDFactory();
+    }
+
     public void insertIntegrityConstraints() throws MetadataExtractionException {
         ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
         for (DatabaseRelationDefinition relation : metadata.getAllRelations())

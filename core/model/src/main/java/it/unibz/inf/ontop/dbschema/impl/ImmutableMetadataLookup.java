@@ -8,9 +8,12 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 public class ImmutableMetadataLookup implements MetadataLookup {
 
     protected final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
+    protected final QuotedIDFactory idFactory;
 
-    public ImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
+    ImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map,
+                                   QuotedIDFactory idFactory) {
         this.map = map;
+        this.idFactory = idFactory;
     }
 
     @Override
@@ -20,5 +23,10 @@ public class ImmutableMetadataLookup implements MetadataLookup {
             throw new MetadataExtractionException("Relation " + id + " not found");
 
         return relation;
+    }
+
+    @Override
+    public QuotedIDFactory getQuotedIDFactory() {
+        return idFactory;
     }
 }

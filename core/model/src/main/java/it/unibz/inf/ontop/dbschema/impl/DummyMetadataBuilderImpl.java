@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -82,6 +83,11 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
                         .addAttribute(idFactory.createAttributeID(attribute4), type4, isNullable4)
                         .addAttribute(idFactory.createAttributeID(attribute5), type5, isNullable5)
                         .addAttribute(idFactory.createAttributeID(attribute6), type6, isNullable6));
+    }
+
+    @Override
+    public MetadataLookup getImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
+        return new ImmutableMetadataLookup(map, idFactory);
     }
 
     @Override
