@@ -163,10 +163,10 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
             else {
                 for (Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r : relations.entrySet())
-                    if (r.getKey().equals(id))
+                    if (r.getKey().equals(id.extendWithDefaultSchemaID(getDefaultSchema())))
                         return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
             }
-            throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id);
+            throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);

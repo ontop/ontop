@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
@@ -30,7 +29,7 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    public QuotedID getDefaultSchema() {
+    protected QuotedID getDefaultSchema() {
         return defaultDatabase;
     }
 
