@@ -363,14 +363,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
 
-
-
-
-
-    // catalog is ignored for now (rs.getString("TABLE_CAT"))
-    protected String getRelationCatalog(RelationID relationID) { return null; }
-
-    protected String getRelationSchema(RelationID relationID) {
+    protected String getEffectiveRelationSchema(RelationID relationID) {
         if (relationID.hasSchema())
             return relationID.getSchemaID().getName();
 
@@ -380,6 +373,15 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
         return null;
     }
+
+
+
+
+
+    // catalog is ignored for now (rs.getString("TABLE_CAT"))
+    protected String getRelationCatalog(RelationID relationID) { return null; }
+
+    protected String getRelationSchema(RelationID relationID) { return getEffectiveRelationSchema(relationID); }
 
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 

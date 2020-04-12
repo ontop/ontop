@@ -23,14 +23,11 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    protected String getRelationSchema(RelationID relationID) {
+    protected String getEffectiveRelationSchema(RelationID relationID) {
         if (relationID.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
                 return null;
 
-        if (relationID.hasSchema())
-            return relationID.getSchemaID().getName();
-
-        return defaultTableOwner;
+        return super.getEffectiveRelationSchema(relationID);
     }
 
     @Override
