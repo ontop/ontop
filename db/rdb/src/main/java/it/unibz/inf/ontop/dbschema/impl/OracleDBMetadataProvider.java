@@ -26,7 +26,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     @Override
     public RelationID getRelationCanonicalID(RelationID id) {
         return (id.getTableID().getName().equals("DUAL")) // DUAL is a special Oracle table
-            ? id
+            ? id.getSchemalessID()
             : id.extendWithDefaultSchemaID(defaultSchema);
     }
 
