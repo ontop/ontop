@@ -54,4 +54,9 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
                 rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_NAME"));
     }
 
+    protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
+        return rawIdFactory.createRelationID(
+                rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_NAME"));
+    }
+
 }

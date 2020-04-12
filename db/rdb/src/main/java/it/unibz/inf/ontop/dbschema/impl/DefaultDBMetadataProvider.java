@@ -149,7 +149,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         }
         else if (givenSchemaName.equals(extractedSchemaName))
             return true;
-        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId);
+        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaName + " v " + extractedSchemaName + ")");
         return false;
     }
 
