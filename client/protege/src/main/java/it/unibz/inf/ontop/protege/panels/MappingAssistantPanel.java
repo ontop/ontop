@@ -28,6 +28,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseViewDefinition;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -824,9 +825,15 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-            // this operation is EXPENSIVE -- only names are needed + a flag for table/view
-            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
-            ImmutableList<DatabaseRelationDefinition> relations = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader).getAllRelations();
+            MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
+            // this operation is less EXPENSIVE -- only attributes are retrieved
+            MetadataProvider metadataProviderWithoutIntegrityConstraints = new DelegatingMetadataProvider(metadataProvider) {
+                @Override
+                public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+                    // NO-OP
+                }
+            };
+            ImmutableList<DatabaseRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProviderWithoutIntegrityConstraints).getAllRelations();
 			for (RelationDefinition relation : relations) {
 				relationList.addElement(relation);
 			}

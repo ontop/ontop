@@ -169,7 +169,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, executorRegistry);
 
-            metadataLookup.insertIntegrityConstraints();
+            metadataLookup.extractImmutableMetadata();
 
             return new MappingAndDBParametersImpl(provMapping, implicitConstraints.getDBParameters());
         }

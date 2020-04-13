@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -34,12 +35,14 @@ public class CachingMetadataLookup implements MetadataLookup {
     }
 
 
+    public ImmutableMetadata extractImmutableMetadata() throws MetadataExtractionException {
 
-    public ImmutableMetadataProvider insertIntegrityConstraints() throws MetadataExtractionException {
-        ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
-        for (DatabaseRelationDefinition relation : metadata.getAllRelations())
-            provider.insertIntegrityConstraints(relation, metadata);
-        return metadata;
+        ImmutableMetadataLookup lookup = new ImmutableMetadataLookup(getQuotedIDFactory(), ImmutableMap.copyOf(map));
+        ImmutableList<DatabaseRelationDefinition> list = lookup.getRelations();
+
+        for (DatabaseRelationDefinition relation : list)
+            provider.insertIntegrityConstraints(relation, lookup);
+
+        return new ImmutableMetadataImpl(provider.getDBParameters(), list);
     }
-
 }

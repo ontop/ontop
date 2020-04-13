@@ -85,9 +85,9 @@ public class BootstrapGenerator {
             ? ppMapping.getPrefixManager().getDefaultPrefix()
             : DirectMappingEngine.fixBaseURI(baseURI0);
 
-        MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+        MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
         // this operation is EXPENSIVE
-        ImmutableList<DatabaseRelationDefinition> relations = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader).getAllRelations();
+        ImmutableList<DatabaseRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 
         Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);

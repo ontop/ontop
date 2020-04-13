@@ -85,7 +85,7 @@ public abstract class AbstractConstraintTest extends TestCase {
 			}
 		};
 
-		ImmutableMetadataProvider metadata = MetadataProvider.getAllRelationsWithIntegrityConstraints(filteredMetadataLoader);
+		ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(filteredMetadataLoader);
 
 		ImmutableMap<String, RelationDefinition> map = metadata.getAllRelations().stream()
 				.collect(ImmutableCollectors.toMap(r -> r.getID().getTableID().getName().toUpperCase(), Function.identity()));
