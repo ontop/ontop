@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -27,9 +28,9 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     private static final String DUAL = "DUAL"; // DUAL is a special Oracle table
 
     @Override
-    protected String getEffectiveRelationSchema(RelationID relationID) {
+    protected QuotedID getEffectiveRelationSchema(RelationID relationID) {
         if (relationID.getTableID().getName().equals(DUAL))
-                return null;
+                return QuotedIDImpl.EMPTY_ID;
 
         return super.getEffectiveRelationSchema(relationID);
     }

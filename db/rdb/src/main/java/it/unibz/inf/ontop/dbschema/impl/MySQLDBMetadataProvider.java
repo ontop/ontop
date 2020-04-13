@@ -37,7 +37,7 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     // <https://github.com/ontop/ontop/issues/270>
 
     @Override
-    protected String getRelationCatalog(RelationID relationID) { return getEffectiveRelationSchema(relationID); }
+    protected String getRelationCatalog(RelationID relationID) { return getEffectiveRelationSchema(relationID).getName(); }
 
     @Override
     protected String getRelationSchema(RelationID relationID) { return null; }

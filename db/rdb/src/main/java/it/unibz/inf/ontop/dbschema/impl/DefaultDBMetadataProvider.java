@@ -135,9 +135,12 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     protected String getDefaultSchema() { return null; }
 
-    protected String getEffectiveRelationSchema(RelationID id) {
-        String schemaName = id.getSchemaID().getName(); // getSchemaID() always non-null
-        return schemaName != null ? schemaName : getDefaultSchema();
+    protected QuotedID getEffectiveRelationSchema(RelationID id) {
+        QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
+        if (schemaId.getName() != null)
+            return schemaId;
+
+        return idFactory.createRelationID(getDefaultSchema(), "DUMMY").getSchemaID();
     }
 
 
@@ -154,15 +157,11 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
         // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-        String givenSchemaName = getEffectiveRelationSchema(givenId);
-        String extractedSchemaName = extractedId.getSchemaID().getName();
-        if (givenSchemaName == null) {
-            if (extractedSchemaName == null)
-                return true;
-        }
-        else if (givenSchemaName.equals(extractedSchemaName))
+        QuotedID givenSchemaId = getEffectiveRelationSchema(givenId);
+        QuotedID extractedSchemaId = extractedId.getSchemaID();
+        if (givenSchemaId.equals(extractedSchemaId))
             return true;
-        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaName + " v " + extractedSchemaName + ")");
+        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
         return false;
     }
 
@@ -369,7 +368,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     // catalog is ignored for now (rs.getString("TABLE_CAT"))
     protected String getRelationCatalog(RelationID relationID) { return null; }
 
-    protected String getRelationSchema(RelationID relationID) { return getEffectiveRelationSchema(relationID); }
+    protected String getRelationSchema(RelationID relationID) { return getEffectiveRelationSchema(relationID).getName(); }
 
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
