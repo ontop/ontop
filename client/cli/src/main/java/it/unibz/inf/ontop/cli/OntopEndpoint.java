@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 
 @Command(name = "endpoint",
-        description = "starts a SPARQL endpoint powered by Ontop")
+        description = "Start a SPARQL endpoint powered by Ontop")
 public class OntopEndpoint extends OntopMappingOntologyRelatedCommand {
 
     @Option(type = OptionType.COMMAND, name = {"--portal"}, title = "endpoint portal file",

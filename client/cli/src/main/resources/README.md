@@ -54,18 +54,19 @@ $ ./ontop
 usage: ontop <command> [ <args> ]
 
 Commands are:
-    --version     Show version of ontop
-    bootstrap     Bootstrap ontology and mapping from the database
-    endpoint      starts a SPARQL endpoint powered by Ontop
-    help          Display help information
-    materialize   Materialize the RDF graph exposed by the mapping and the OWL ontology
-    query         Query the RDF graph exposed by the mapping and the OWL ontology
-    validate      Validate Ontology and Mappings
-    mapping       Manipulate mapping files
+    --version             Show version of ontop
+    bootstrap             Bootstrap ontology and mapping from the database
+    endpoint              Start a SPARQL endpoint powered by Ontop
+    extract-db-metadata   Extract the DB metadata and serialize it into an output JSON file
+    help                  Display help information
+    materialize           Materialize the RDF graph exposed by the mapping and the OWL ontology
+    query                 Query the RDF graph exposed by the mapping and the OWL ontology
+    validate              Validate Ontology and Mappings
+    mapping               Manipulate mapping files
 
 See 'ontop help <command>' for more information on a specific command.
 ```
 
-More information is available on the wiki:
+More information is available on the documentation:
 
-https://github.com/ontop/ontop/wiki/OntopCLI
+https://ontop-vkg.org/guide/cli
