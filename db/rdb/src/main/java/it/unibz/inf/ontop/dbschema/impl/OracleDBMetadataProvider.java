@@ -13,43 +13,42 @@ import java.sql.Statement;
 
 public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
-    private final String defaultSchema;
+    private final QuotedID defaultSchema;
+    private final RelationID sysDualId;
 
     OracleDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         this.defaultSchema = retrieveDefaultSchema("SELECT user FROM dual");
+        // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
+        this.sysDualId = rawIdFactory.createRelationID(null, "DUAL");
     }
 
     @Override
-    protected String getDefaultSchema() { return defaultSchema; }
+    protected QuotedID getDefaultSchema() { return defaultSchema; }
 
-    // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
-    private static final String DUAL = "DUAL"; // DUAL is a special Oracle table
+    private boolean isDual(RelationID id) { return id.getTableID().equals(sysDualId.getTableID()); }
 
     @Override
     protected QuotedID getEffectiveRelationSchema(RelationID relationID) {
-        if (relationID.getTableID().getName().equals(DUAL))
-                return QuotedIDImpl.EMPTY_ID;
+        if (isDual(relationID))
+            return sysDualId.getSchemaID();
 
         return super.getEffectiveRelationSchema(relationID);
     }
 
     @Override
-    protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
-        if (extractedId.getTableID().getName().equals(DUAL))
-            return givenId.getTableID().getName().equals(DUAL);
+    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
+        if (isDual(extractedId) && isDual(givenId))
+            return;
 
-        return super.sameRelationID(extractedId, givenId);
+        super.checkSameRelationID(extractedId, givenId);
     }
 
 
     @Override
     public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        if (id.getTableID().getName().equals(DUAL))
-            return id.getWithSchemalessID();
-
-        if (defaultSchema.equals(id.getSchemaID().getName()))
+        if (isDual(id) || defaultSchema.equals(id.getSchemaID()))
             return id.getWithSchemalessID();
 
         return ImmutableList.of(id);
@@ -63,7 +62,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
             ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
                 RelationID id = rawIdFactory.createRelationID(
-                        defaultSchema, rs.getString("object_name"));
+                        defaultSchema.getName(), rs.getString("object_name"));
                 relationIds.add(id);
             }
             return relationIds.build();

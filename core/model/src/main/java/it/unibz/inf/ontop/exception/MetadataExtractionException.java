@@ -5,9 +5,7 @@ package it.unibz.inf.ontop.exception;
  */
 public class MetadataExtractionException extends Exception {
 
-    public MetadataExtractionException(String message) {
-        super(message);
-    }
+    public MetadataExtractionException(String message) { super(message); }
 
     public MetadataExtractionException(Exception e) {
         super(e);

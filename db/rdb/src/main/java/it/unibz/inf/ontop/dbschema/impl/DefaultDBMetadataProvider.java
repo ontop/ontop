@@ -119,50 +119,43 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
 
-
     protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        String schemaName = id.getSchemaID().getName(); // getSchemaID() always non-null
-        if (schemaName == null)
-            return ImmutableList.of(id);
-
-        // schemaName is an identifier extracted from DB, so treated as case-sensitive
-        if (schemaName.equals(getDefaultSchema()))
+        QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
+        if (schemaId.equals(getDefaultSchema()))
             return id.getWithSchemalessID();
 
         return ImmutableList.of(id);
     }
 
 
-    protected String getDefaultSchema() { return null; }
+    protected QuotedID getDefaultSchema() { return QuotedIDImpl.EMPTY_ID; }
 
     protected QuotedID getEffectiveRelationSchema(RelationID id) {
         QuotedID schemaId = id.getSchemaID(); // getSchemaID() always non-null
         if (schemaId.getName() != null)
             return schemaId;
 
-        return idFactory.createRelationID(getDefaultSchema(), "DUMMY").getSchemaID();
+        return getDefaultSchema();
     }
 
 
-    protected final String retrieveDefaultSchema(String sql) throws MetadataExtractionException {
+    protected final QuotedID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
-            return rs.getString(1);
+            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
         }
     }
 
-    protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
+    protected void checkSameRelationID(RelationID extractedId, RelationID givenId) throws MetadataExtractionException {
         // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
         QuotedID givenSchemaId = getEffectiveRelationSchema(givenId);
         QuotedID extractedSchemaId = extractedId.getSchemaID();
-        if (givenSchemaId.equals(extractedSchemaId))
-            return true;
-        System.out.println("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
-        return false;
+        if (!extractedSchemaId.equals(givenSchemaId))
+            throw new MetadataExtractionException("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
     }
 
 
@@ -175,8 +168,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs);
-                if (!sameRelationID(extractedId, id))
-                    continue;
+                checkSameRelationID(extractedId, id);
+
                 RelationDefinition.AttributeListBuilder builder = relations.computeIfAbsent(extractedId,
                         i -> DatabaseTableDefinition.attributeListBuilder());
 
@@ -221,8 +214,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             String currentName = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs);
-                if (!sameRelationID(extractedId, id))
-                    continue;
+                checkSameRelationID(extractedId, id);
+
                 currentName = rs.getString("PK_NAME"); // may be null
                 QuotedID attrId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
                 int seq = rs.getShort("KEY_SEQ");
@@ -255,8 +248,8 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             UniqueConstraint.Builder builder = null;
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs);
-                if (!sameRelationID(extractedId, id))
-                    continue;
+                checkSameRelationID(extractedId, id);
+
                 // TYPE: tableIndexStatistic - this identifies table statistics that are returned in conjunction with a table's index descriptions
                 //       tableIndexClustered - this is a clustered index
                 //       tableIndexHashed - this is a hashed index
@@ -320,8 +313,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             ForeignKeyConstraint.Builder builder = null;
             while (rs.next()) {
                 RelationID extractedId = getFKRelationID(rs);
-                if (!sameRelationID(extractedId, id))
-                    continue;
+                checkSameRelationID(extractedId, id);
 
                 try {
                     int seq = rs.getShort("KEY_SEQ");

@@ -47,8 +47,7 @@ public class OfflineOnlineMarriageTest {
     private static final String JDBC_USER = "sa";
     private static final String JDBC_PASSWORD = "";
     private static final Logger LOGGER = LoggerFactory.getLogger(OfflineOnlineMarriageTest.class);
-    private static final String PERSON_QUERY_STRING = "PREFIX : <http://example.org/marriage/voc#>\n" +
-            "\n" +
+    private static final String PERSON_QUERY_STRING = "PREFIX : <http://example.org/marriage/voc#>\n\n" +
             "SELECT DISTINCT ?x \n" +
             "WHERE {\n" +
             "  ?x a :Person .\n" +
