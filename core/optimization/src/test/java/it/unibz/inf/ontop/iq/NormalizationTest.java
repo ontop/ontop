@@ -2091,6 +2091,48 @@ public class NormalizationTest {
         normalizeAndCompare(initialIQ, expectedIQ);
     }
 
+    @Test
+    public void testSelfEquality() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictEquality(A, A)),
+                dataNode);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getDBIsNotNull(A)),
+                dataNode);
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testSelfInequality() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
+
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR2.getRelationDefinition(),
+                ImmutableMap.of(0, A));
+
+        UnaryIQTree initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getStrictNEquality(A, A)),
+                dataNode);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        IQTree expectedTree = IQ_FACTORY.createEmptyNode(projectionAtom.getVariables());
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        normalizeAndCompare(initialIQ, expectedIQ);
+    }
+
 
     private static void normalizeAndCompare(IQ initialIQ, IQ expectedIQ) {
         System.out.println("Initial IQ: " + initialIQ );
