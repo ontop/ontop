@@ -113,10 +113,10 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
 
     protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        if (id.getSchemaID() == null)
+        if (!id.hasSchema())
             return ImmutableList.of(id);
 
-        if (id.getSchemaID().equals(getDefaultSchema()))
+        if (id.getSchemaID().getName().equals(getDefaultSchema()))
             return ImmutableList.of(id.getSchemalessID(), id);
 
         return ImmutableList.of(id);

@@ -54,8 +54,7 @@ public class SQLParserTest {
 
 		ImmutableList.Builder<DatabaseRelationDefinition> relations = ImmutableList.builder();
 
-		RelationID studentId = idfac.createRelationID("\"public\"", "student");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(studentId.getSchemalessID(), studentId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("\"public\"", "student"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -85,12 +84,10 @@ public class SQLParserTest {
 			"name", varchar20DBType, false,
 			"value", varchar20DBType, false));
 
-		RelationID regionId = idfac.createRelationID("HR", "REGIONS");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(regionId.getSchemalessID(), regionId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("HR", "REGIONS"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false)));
 
-		RelationID tableId = idfac.createRelationID(null, "tableName");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(tableId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(idfac.createRelationID(null, "tableName")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -107,8 +104,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("value"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false)));
 
-		RelationID gradeId = idfac.createRelationID(null, "grade");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(gradeId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(idfac.createRelationID(null, "grade")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -153,22 +149,19 @@ public class SQLParserTest {
 		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PC",
 			"model", varchar20DBType, false));
 
-		RelationID tempId = idfac.createRelationID("\"dbo\"", "TEMPERATURE_DEVIATION");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(tempId.getSchemalessID(), tempId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false)));
 
-		RelationID suppliersId = idfac.createRelationID("northwind", "Suppliers");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(suppliersId.getSchemalessID(), suppliersId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("northwind", "Suppliers"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("Region"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("PostalCode"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Address"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false)));
 
-		RelationID maintId = idfac.createRelationID("oreda", "pm_maint_items");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(maintId.getSchemalessID(), maintId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("oreda", "pm_maint_items"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -179,8 +172,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false)));
 
-		RelationID progId = idfac.createRelationID("oreda", "pm_program");
-		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(progId.getSchemalessID(), progId), DatabaseTableDefinition.attributeListBuilder()
+		relations.add(DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(createRelationIdWithDefaultSchema("oreda", "pm_program"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -192,6 +184,11 @@ public class SQLParserTest {
 
 		MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(relations.build());
 		sqp = new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
+	}
+
+	private ImmutableList<RelationID> createRelationIdWithDefaultSchema(String schema, String table) {
+		return ImmutableList.of(DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory().createRelationID(null, table),
+				DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory().createRelationID(schema, table));
 	}
 
 	@Test
