@@ -63,25 +63,23 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
                     .collect(ImmutableCollectors.toList())) {
                 String name = getTableName(relation) + "_USER_UC_" + counter++;
                 UniqueConstraint.Builder builder = UniqueConstraint.builder(relation, name);
-                System.out.println("USER-SUPPLIED: " + name);
                 for (QuotedID a : uc.attributeIds)
                     builder.addDeterminant(a);
                 builder.build();
             }
-            
+
             for (Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor> fkc : relation.getAllIDs().stream()
                     .flatMap(id -> foreignKeys.get(id).stream())
                     .collect(ImmutableCollectors.toList())) {
                 DatabaseRelationDefinition referencedRelation;
                 try {
                     referencedRelation = metadataLookup.getRelation(fkc.getValue().tableId);
-                } catch (MetadataExtractionException e) {
-                    System.out.println("User-supplied foreign key constraint is ignored because the referenced relation is not found: " +
-                            fkc.getKey() + " -> " + fkc.getValue());
+                }
+                catch (MetadataExtractionException e) {
+                    LOGGER.warn("Cannot find table {} for user-supplied FK {} -> {}", fkc.getValue().tableId, fkc.getKey().toString(), fkc.getKey().toString());
                     continue;
                 }
                 String name = getTableName(relation) + "_USER_FK_" + getTableName(referencedRelation) + "_" + counter++;
-                System.out.println("USER-SUPPLIED: " + name);
                 ForeignKeyConstraint.Builder builder = ForeignKeyConstraint.builder(name, relation, referencedRelation);
                 for (int i = 0; i < fkc.getKey().attributeIds.size(); i++)
                     builder.add(fkc.getKey().attributeIds.get(i), fkc.getValue().attributeIds.get(i));

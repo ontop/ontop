@@ -1,21 +1,17 @@
-package it.unibz.inf.ontop.spec.mapping.impl;
+package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataProvider;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
-import javax.management.relation.Relation;
 import java.util.*;
 
-public class DynamicMetadataLookup implements MetadataLookup {
+public class CachingMetadataLookup implements MetadataLookup {
 
     private final MetadataProvider provider;
     private final Map<RelationID, DatabaseRelationDefinition> map = new HashMap<>();
 
-    public DynamicMetadataLookup(MetadataProvider provider) {
-        this.provider = provider;
-    }
+    public CachingMetadataLookup(MetadataProvider provider) { this.provider = provider; }
 
     @Override
     public DatabaseRelationDefinition getRelation(RelationID relationId) throws MetadataExtractionException {

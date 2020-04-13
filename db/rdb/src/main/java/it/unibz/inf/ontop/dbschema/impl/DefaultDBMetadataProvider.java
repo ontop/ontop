@@ -113,7 +113,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             return builder.build();
         }
         catch (SQLException e) {
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -155,7 +154,7 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         QuotedID givenSchemaId = getEffectiveRelationSchema(givenId);
         QuotedID extractedSchemaId = extractedId.getSchemaID();
         if (!extractedSchemaId.equals(givenSchemaId))
-            throw new MetadataExtractionException("MD-EXTRACTION: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
+            throw new MetadataExtractionException("Relation IDs mismatch: " + givenId + " v " + extractedId + "(" + givenSchemaId + " v " + extractedSchemaId + ")");
     }
 
 
@@ -193,7 +192,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -235,8 +233,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             }
         }
         catch (SQLException e) {
-            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -301,8 +297,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                 builder.build();
         }
         catch (SQLException e) {
-            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }
@@ -338,17 +332,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     }
                 }
                 catch (MetadataExtractionException e) {
-                    builder = null; // do not add this foreign key
-                    // because there is no table it refers to
-                    System.out.println("Cannot find table: " + getPKRelationID(rs) + " for FK " + rs.getString("FK_NAME"));
+                    LOGGER.warn("Cannot find table {} for FK {}", getPKRelationID(rs), rs.getString("FK_NAME"));
+                    builder = null; // do not add this foreign key because there is no table it refers to
                 }
             }
             if (builder != null)
                 builder.build();
         }
         catch (SQLException e) {
-            System.out.println("EXCEPTION FOR : " + relation.getAllIDs());
-            e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
     }

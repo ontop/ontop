@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
@@ -164,7 +165,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, metadataLoader);
 
-            DynamicMetadataLookup metadataLookup = new DynamicMetadataLookup(implicitConstraints);
+            CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
             ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, executorRegistry);
 
