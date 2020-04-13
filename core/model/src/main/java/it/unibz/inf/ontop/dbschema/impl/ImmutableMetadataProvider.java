@@ -75,7 +75,7 @@ public class ImmutableMetadataProvider extends ImmutableMetadataLookup implement
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) {
-        throw new IllegalStateException("immutable metadata");
+        // NO-OP
     }
 
 }

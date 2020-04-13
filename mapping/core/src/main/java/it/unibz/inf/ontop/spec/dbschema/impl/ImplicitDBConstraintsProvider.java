@@ -31,8 +31,6 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImplicitDBConstraintsProvider.class);
 
-    private final QuotedIDFactory idFactory;
-
     // List of two-element arrays: table id and a comma-separated list of columns
     private final ImmutableMultimap<RelationID, DatabaseRelationDescriptor> uniqueConstraints;
 
@@ -41,27 +39,14 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
     private final ImmutableMultimap<RelationID, Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys;
 
     ImplicitDBConstraintsProvider(MetadataProvider provider,
-                                  ImmutableList<String[]> uniqueConstraints,
-                                  ImmutableList<String[]> foreignKeys) throws MetadataExtractionException {
+                                  ImmutableList<DatabaseRelationDescriptor> uniqueConstraints,
+                                  ImmutableList<Map.Entry<DatabaseRelationDescriptor, DatabaseRelationDescriptor>> foreignKeys) throws MetadataExtractionException {
         super(provider);
-        this.idFactory = provider.getDBParameters().getQuotedIDFactory();
         this.uniqueConstraints = uniqueConstraints.stream()
-                .map(c -> new DatabaseRelationDescriptor(c[0], c[1].split(",")))
                 .collect(ImmutableCollectors.toMultimap(c -> c.tableId, Function.identity()));
 
         this.foreignKeys = foreignKeys.stream()
-                .map(c -> Maps.immutableEntry(
-                        new DatabaseRelationDescriptor(c[0], c[1].split(",")),
-                        new DatabaseRelationDescriptor(c[2], c[3].split(","))))
                 .collect(ImmutableCollectors.toMultimap(c -> c.getKey().tableId, Function.identity()));
-
-        String offenders = this.foreignKeys.values().stream()
-                .filter(c -> c.getKey().attributeIds.size() != c.getValue().attributeIds.size())
-                .map(c -> c.getKey() + " does not match " + c.getValue())
-                .collect(Collectors.joining(", "));
-
-        if (!offenders.isEmpty())
-            throw new MetadataExtractionException("Different numbers of columns for user-supplied foreign keys: " + offenders);
     }
 
     /**
@@ -70,6 +55,8 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
      */
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+
+        provider.insertIntegrityConstraints(relation, metadataLookup);
 
         int counter = 0; // id of the generated constraint
 
@@ -118,18 +105,18 @@ public class ImplicitDBConstraintsProvider extends DelegatingMetadataProvider {
         return relation.getID().getTableID().getName();
     }
 
-    private final class DatabaseRelationDescriptor {
+    static final class DatabaseRelationDescriptor {
         final RelationID tableId;
         final ImmutableList<QuotedID> attributeIds;
 
-        DatabaseRelationDescriptor(String tableName, String[] attributeNames) {
-            this.tableId = getRelationIDFromString(tableName);
+        DatabaseRelationDescriptor(QuotedIDFactory idFactory, String tableName, String[] attributeNames) {
+            this.tableId = getRelationIDFromString(idFactory, tableName);
             this.attributeIds = Stream.of(attributeNames)
                     .map(idFactory::createAttributeID)
                     .collect(ImmutableCollectors.toList());
         }
 
-        private RelationID getRelationIDFromString(String tableName) {
+        private RelationID getRelationIDFromString(QuotedIDFactory idFactory, String tableName) {
             String[] names = tableName.split("\\.");
             return (names.length == 1)
                     ? idFactory.createRelationID(null, tableName)
