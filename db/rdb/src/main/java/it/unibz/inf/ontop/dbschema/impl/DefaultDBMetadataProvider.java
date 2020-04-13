@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -9,7 +8,6 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.relation.Relation;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,14 +123,20 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
 
-    protected QuotedID getDefaultSchema() { return null; }
+    protected String getDefaultSchema() { return null; }
+
+    protected String getEffectiveRelationSchema(RelationID relationID) {
+        return relationID.hasSchema()
+                ? relationID.getSchemaID().getName()
+                : getDefaultSchema();
+    }
 
 
-    protected final QuotedID retrieveDefaultSchema(String sql) throws MetadataExtractionException {
+    protected final String retrieveDefaultSchema(String sql) throws MetadataExtractionException {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             rs.next();
-            return rawIdFactory.createRelationID(rs.getString(1), "DUMMY").getSchemaID();
+            return rs.getString(1);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -194,20 +198,17 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public QuotedIDFactory getQuotedIDFactory() {
-        return dbParameters.getQuotedIDFactory();
-    }
+    public QuotedIDFactory getQuotedIDFactory() { return dbParameters.getQuotedIDFactory(); }
+
+    @Override
+    public DBParameters getDBParameters() { return dbParameters; }
+
 
     @Override
     public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
         insertPrimaryKey(relation);
         insertUniqueAttributes(relation);
         insertForeignKeys(relation, metadataLookup);
-    }
-
-    @Override
-    public DBParameters getDBParameters() {
-        return dbParameters;
     }
 
     private void insertPrimaryKey(DatabaseRelationDefinition relation) throws MetadataExtractionException {
@@ -269,9 +270,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
                     if (builder != null)
                         builder.build();
 
-                    // TABLE_CAT is ignored for now; assume here that relation has a fully specified name
-                    // and so, no need to check whether TABLE_SCHEM and TABLE_NAME match
-
                     if (!rs.getBoolean("NON_UNIQUE")) {
                         String name = rs.getString("INDEX_NAME");
                         builder = UniqueConstraint.builder(relation, name);
@@ -315,7 +313,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     }
 
     private void insertForeignKeys(DatabaseRelationDefinition relation, MetadataLookup dbMetadata) throws MetadataExtractionException {
-
         RelationID id = relation.getID();
         try (ResultSet rs = metadata.getImportedKeys(getRelationCatalog(id), getRelationSchema(id), getRelationName(id))) {
             ForeignKeyConstraint.Builder builder = null;
@@ -360,18 +357,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             e.printStackTrace();
             throw new MetadataExtractionException(e);
         }
-    }
-
-
-    protected String getEffectiveRelationSchema(RelationID relationID) {
-        if (relationID.hasSchema())
-            return relationID.getSchemaID().getName();
-
-        QuotedID defaultSchemaId = getDefaultSchema();
-        if (defaultSchemaId != null)
-            return defaultSchemaId.getName();
-
-        return null;
     }
 
 

@@ -35,12 +35,6 @@ public class RelationIDImpl implements RelationID {
         return new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table);
     }
 
-    @JsonIgnore
-    @Override
-    public RelationID extendWithDefaultSchemaID(QuotedID defaultSchemaID) {
-        return (schema.getName() == null) ? new RelationIDImpl(defaultSchemaID, table) : this;
-    }
-
 
     /**
      *

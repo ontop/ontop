@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -12,7 +11,7 @@ import java.sql.SQLException;
 
 public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
-    private final QuotedID defaultDatabase;
+    private final String defaultDatabase;
 
     MySQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, getIDFactory(connection), dbTypeFactory);
@@ -29,7 +28,7 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
     }
 
     @Override
-    protected QuotedID getDefaultSchema() {
+    protected String getDefaultSchema() {
         return defaultDatabase;
     }
 

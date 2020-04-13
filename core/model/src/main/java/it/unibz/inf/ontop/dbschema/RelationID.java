@@ -41,13 +41,6 @@ public interface RelationID {
 
 	/**
 	 *
-	 * @return the relation ID that has the same name
-	 * and the provided default schema if it was missing
-	 */
-	RelationID extendWithDefaultSchemaID(QuotedID defaultSchemaID);
-
-	/**
-	 *
 	 * @return true if the relation ID contains schema
 	 */
 	boolean hasSchema();
