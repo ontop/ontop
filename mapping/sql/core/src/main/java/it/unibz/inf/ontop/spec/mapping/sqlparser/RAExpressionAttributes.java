@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -180,12 +179,10 @@ public class RAExpressionAttributes {
 
     private static Stream<QualifiedAttributeID> createQualifiedID(ImmutableSet<RelationID> aliases, QuotedID attributeId) {
         return Stream.concat(Stream.of(new QualifiedAttributeID(null, attributeId)),
-                Stream.concat(aliases.stream(),
                         aliases.stream()
-                                .filter(RelationID::hasSchema)
-                                .map(RelationID::getSchemalessID))
-                        .distinct()
-                        .map(a -> new QualifiedAttributeID(a, attributeId)));
+                                .flatMap(l -> l.getWithSchemalessID().stream())
+                                .distinct()
+                                .map(a -> new QualifiedAttributeID(a, attributeId)));
     }
 
 

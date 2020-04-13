@@ -22,6 +22,8 @@ package it.unibz.inf.ontop.dbschema;
  */
 
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * Database identifier used for possibly qualified table names and aliases
  * <p>
@@ -35,15 +37,9 @@ public interface RelationID {
 
 	/**
 	 *
-	 * @return the relation ID that has the same name but no schema name
+	 * @return the relation ID with the schema name, followed by the relation ID (if it has schema)
 	 */
-	RelationID getSchemalessID();
-
-	/**
-	 *
-	 * @return true if the relation ID contains schema
-	 */
-	boolean hasSchema();
+	ImmutableList<RelationID> getWithSchemalessID();
 
 	/**
 	 *

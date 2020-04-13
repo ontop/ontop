@@ -46,10 +46,10 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     @Override
     public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         if (id.getTableID().getName().equals(DUAL))
-            return ImmutableList.of(id.getSchemalessID(), id);
+            return id.getWithSchemalessID();
 
         if (defaultSchema.equals(id.getSchemaID().getName()))
-            return ImmutableList.of(id.getSchemalessID(), id);
+            return id.getWithSchemalessID();
 
         return ImmutableList.of(id);
     }

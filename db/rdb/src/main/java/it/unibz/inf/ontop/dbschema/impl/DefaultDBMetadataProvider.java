@@ -121,11 +121,13 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
 
     protected ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
-        if (!id.hasSchema())
+        String schemaName = id.getSchemaID().getName(); // getSchemaID() always non-null
+        if (schemaName == null)
             return ImmutableList.of(id);
 
-        if (id.getSchemaID().getName().equals(getDefaultSchema()))
-            return ImmutableList.of(id.getSchemalessID(), id);
+        // schemaName is an identifier extracted from DB, so treated as case-sensitive
+        if (schemaName.equals(getDefaultSchema()))
+            return id.getWithSchemalessID();
 
         return ImmutableList.of(id);
     }
@@ -133,10 +135,9 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
 
     protected String getDefaultSchema() { return null; }
 
-    protected String getEffectiveRelationSchema(RelationID relationID) {
-        return relationID.hasSchema()
-                ? relationID.getSchemaID().getName()
-                : getDefaultSchema();
+    protected String getEffectiveRelationSchema(RelationID id) {
+        String schemaName = id.getSchemaID().getName(); // getSchemaID() always non-null
+        return schemaName != null ? schemaName : getDefaultSchema();
     }
 
 

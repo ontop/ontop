@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 
@@ -31,17 +32,12 @@ public class RelationIDImpl implements RelationID {
      */
     @JsonIgnore
     @Override
-    public RelationID getSchemalessID() {
-        return new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table);
+    public ImmutableList<RelationID> getWithSchemalessID() {
+        return (schema.getName() == null)
+                ? ImmutableList.of(this)
+                : ImmutableList.of(new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table), this);
     }
 
-
-    /**
-     *
-     * @return true if the relation ID contains schema
-     */
-    @Override
-    public boolean hasSchema() { return schema.getName() != null; }
 
     @JsonProperty("name")
     @Override
