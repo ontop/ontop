@@ -12,16 +12,18 @@ import java.sql.Statement;
 
 public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
 
-    private final String defaultTableOwner;
+    private final String defaultSchema;
 
     OracleDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
         super(connection, dbTypeFactory);
-        this.defaultTableOwner = getDefaultOwner();
+        // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
+        this.defaultSchema = retrieveDefaultSchema("SELECT user FROM dual");
     }
 
     @Override
-    protected String getDefaultSchema() { return defaultTableOwner; }
+    protected String getDefaultSchema() { return defaultSchema; }
 
+    // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm
     private static final String DUAL = "DUAL"; // DUAL is a special Oracle table
 
     @Override
@@ -35,7 +37,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     @Override
     protected boolean sameRelationID(RelationID extractedId, RelationID givenId)  {
         if (extractedId.getTableID().getName().equals(DUAL))
-            return true;
+            return givenId.getTableID().getName().equals(DUAL);
 
         return super.sameRelationID(extractedId, givenId);
     }
@@ -44,9 +46,9 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     @Override
     public ImmutableList<RelationID> getRelationAllIDs(RelationID id) {
         if (id.getTableID().getName().equals(DUAL))
-            return ImmutableList.of(id.getSchemalessID());
+            return ImmutableList.of(id.getSchemalessID(), id);
 
-        if (defaultTableOwner.equals(id.getSchemaID().getName()))
+        if (defaultSchema.equals(id.getSchemaID().getName()))
             return ImmutableList.of(id.getSchemalessID(), id);
 
         return ImmutableList.of(id);
@@ -60,7 +62,7 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
             ImmutableList.Builder<RelationID> relationIds = ImmutableList.builder();
             while (rs.next()) {
                 RelationID id = rawIdFactory.createRelationID(
-                        defaultTableOwner, rs.getString("object_name"));
+                        defaultSchema, rs.getString("object_name"));
                 relationIds.add(id);
             }
             return relationIds.build();
@@ -86,17 +88,4 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
                 "   NOT view_name LIKE 'MVIEW_%' AND " +
                 "   NOT view_name LIKE 'LOGMNR_%' AND " +
                 "   NOT view_name LIKE 'AQ$_%'";
-
-    private String getDefaultOwner() throws MetadataExtractionException {
-        // Obtain the table owner (i.e., schema name)
-        try (Statement stmt = connection.createStatement();
-             ResultSet resultSet = stmt.executeQuery("SELECT user FROM dual")) {
-            return (resultSet.next())
-                    ? resultSet.getString(1).toUpperCase()
-                    : "SYSTEM"; // default value
-        }
-        catch (SQLException e) {
-            throw new MetadataExtractionException(e);
-        }
-    }
 }

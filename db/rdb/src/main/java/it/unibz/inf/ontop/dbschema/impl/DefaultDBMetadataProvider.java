@@ -87,6 +87,14 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
         return new SQLStandardQuotedIDFactory();
     }
 
+    @Override
+    public QuotedIDFactory getQuotedIDFactory() { return dbParameters.getQuotedIDFactory(); }
+
+    @Override
+    public DBParameters getDBParameters() { return dbParameters; }
+
+
+
     protected boolean isSchemaIgnored(String schema) { return false; }
 
     @Override
@@ -196,12 +204,6 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
             throw new MetadataExtractionException(e);
         }
     }
-
-    @Override
-    public QuotedIDFactory getQuotedIDFactory() { return dbParameters.getQuotedIDFactory(); }
-
-    @Override
-    public DBParameters getDBParameters() { return dbParameters; }
 
 
     @Override
@@ -371,18 +373,18 @@ public class DefaultDBMetadataProvider implements MetadataProvider {
     protected String getRelationName(RelationID relationID) { return relationID.getTableID().getName(); }
 
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"));
+        return getRelationID(rs, "TABLE_SCHEM","TABLE_NAME");
     }
 
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("PKTABLE_SCHEM"), rs.getString("PKTABLE_NAME"));
+        return getRelationID(rs, "PKTABLE_SCHEM","PKTABLE_NAME");
     }
 
     protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("FKTABLE_SCHEM"), rs.getString("FKTABLE_NAME"));
+        return getRelationID(rs, "FKTABLE_SCHEM","FKTABLE_NAME");
     }
 
+    protected final RelationID getRelationID(ResultSet rs, String schemaNameColumn, String tableNameColumn) throws SQLException {
+        return rawIdFactory.createRelationID(rs.getString(schemaNameColumn), rs.getString(tableNameColumn));
+    }
 }

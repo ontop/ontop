@@ -44,18 +44,16 @@ public class MySQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     @Override
     protected RelationID getRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("TABLE_CAT"), rs.getString("TABLE_NAME"));
+        return getRelationID(rs, "TABLE_CAT","TABLE_NAME");
     }
 
+    @Override
     protected RelationID getPKRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("PKTABLE_CAT"), rs.getString("PKTABLE_NAME"));
+        return getRelationID(rs, "PKTABLE_CAT", "PKTABLE_NAME");
     }
 
+    @Override
     protected RelationID getFKRelationID(ResultSet rs) throws SQLException {
-        return rawIdFactory.createRelationID(
-                rs.getString("FKTABLE_CAT"), rs.getString("FKTABLE_NAME"));
+        return getRelationID(rs, "FKTABLE_CAT", "FKTABLE_NAME");
     }
-
 }
