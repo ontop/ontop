@@ -88,10 +88,10 @@ public class DummyMetadataBuilderImpl implements DummyDBMetadataBuilder {
     }
 
     @Override
-    public MetadataLookup getImmutableMetadataLookup(ImmutableList<DatabaseRelationDefinition> list) {
-        return new ImmutableMetadataLookup(list.stream()
+    public MetadataProvider getImmutableMetadataProvider(ImmutableList<DatabaseRelationDefinition> list) {
+        return new ImmutableMetadataProvider(getDBParameters(), list.stream()
                 .flatMap(r -> r.getAllIDs().stream().map(i -> Maps.immutableEntry(i, r)))
-                .collect(ImmutableCollectors.toMap()), idFactory);
+                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override

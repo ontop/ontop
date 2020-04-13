@@ -13,7 +13,7 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(ImmutableList.of());
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(ImmutableList.of());
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
 
         SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);

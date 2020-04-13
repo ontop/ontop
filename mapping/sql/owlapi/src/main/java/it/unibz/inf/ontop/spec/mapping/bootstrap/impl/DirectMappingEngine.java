@@ -26,8 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -159,8 +158,8 @@ public class DirectMappingEngine {
 
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
-			MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
-			ImmutableList<DatabaseRelationDefinition> tables = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
+			MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+			ImmutableList<DatabaseRelationDefinition> tables = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
 					: baseIRI0;

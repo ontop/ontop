@@ -7,13 +7,12 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 
 public class ImmutableMetadataLookup implements MetadataLookup {
 
-    protected final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
     protected final QuotedIDFactory idFactory;
+    protected final ImmutableMap<RelationID, DatabaseRelationDefinition> map;
 
-    ImmutableMetadataLookup(ImmutableMap<RelationID, DatabaseRelationDefinition> map,
-                                   QuotedIDFactory idFactory) {
-        this.map = map;
+    ImmutableMetadataLookup(QuotedIDFactory idFactory, ImmutableMap<RelationID, DatabaseRelationDefinition> map) {
         this.idFactory = idFactory;
+        this.map = map;
     }
 
     @Override

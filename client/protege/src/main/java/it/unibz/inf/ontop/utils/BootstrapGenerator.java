@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -85,9 +85,9 @@ public class BootstrapGenerator {
             ? ppMapping.getPrefixManager().getDefaultPrefix()
             : DirectMappingEngine.fixBaseURI(baseURI0);
 
-        MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+        MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
         // this operation is EXPENSIVE
-        ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
+        ImmutableList<DatabaseRelationDefinition> relations = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader).getAllRelations();
 
         Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
         AtomicInteger currentMappingIndex = new AtomicInteger(ppMapping.getTripleMaps().size() + 1);

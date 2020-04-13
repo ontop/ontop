@@ -427,7 +427,7 @@ public class SelectQueryParserTest {
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataLookup(
+        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(
                 ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
 
         return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);

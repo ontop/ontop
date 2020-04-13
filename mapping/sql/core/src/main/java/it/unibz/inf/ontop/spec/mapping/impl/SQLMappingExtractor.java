@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
-import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -161,7 +161,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
-            MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
+            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, metadataLoader);
 

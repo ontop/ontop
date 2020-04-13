@@ -33,10 +33,13 @@ public class CachingMetadataLookup implements MetadataLookup {
         return provider.getQuotedIDFactory();
     }
 
-    public void insertIntegrityConstraints() throws MetadataExtractionException {
+
+
+    public ImmutableMetadataProvider insertIntegrityConstraints() throws MetadataExtractionException {
         ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(provider.getDBParameters(), ImmutableMap.copyOf(map));
         for (DatabaseRelationDefinition relation : metadata.getAllRelations())
             provider.insertIntegrityConstraints(relation, metadata);
+        return metadata;
     }
 
 }

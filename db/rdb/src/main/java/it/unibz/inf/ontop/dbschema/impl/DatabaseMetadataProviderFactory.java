@@ -21,21 +21,14 @@ package it.unibz.inf.ontop.dbschema.impl;
 */
 
 
-import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.sql.*;
 
-/**
- * Retrieves the database metadata (table schema and database constraints)
- *
- * @author Roman Kontchakov
- *
- */
 
-public class RDBMetadataExtractionTools {
+public class DatabaseMetadataProviderFactory {
 
 	public static MetadataProvider getMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
 		try {
@@ -60,29 +53,5 @@ public class RDBMetadataExtractionTools {
 		catch (SQLException e) {
 			throw new MetadataExtractionException(e);
 		}
-	}
-
-	/**
-	 * Retrieves the database metadata (table schema and database constraints)
-	 *
-	 * This method either uses the given list of tables or
-	 *    if it is null then it retrieves all the complete list of tables from
-	 *    the connection metadata
-	 * @return
-	 */
-	public static ImmutableMetadataProvider createImmutableMetadata(MetadataProvider metadataLoader) throws MetadataExtractionException {
-
-		ImmutableMap.Builder<RelationID, DatabaseRelationDefinition> map = ImmutableMap.builder();
-		// TODO: use cached metadata lookup instead
-		for (RelationID id : metadataLoader.getRelationIDs()) {
-			DatabaseRelationDefinition relation = metadataLoader.getRelation(id);
-			for (RelationID i : relation.getAllIDs())
-				map.put(i, relation);
-		}
-
-		ImmutableMetadataProvider metadata = new ImmutableMetadataProvider(metadataLoader.getDBParameters(), map.build());
-		for (DatabaseRelationDefinition relation : metadata.getAllRelations())
-			metadataLoader.insertIntegrityConstraints(relation, metadata);
-		return metadata;
 	}
 }

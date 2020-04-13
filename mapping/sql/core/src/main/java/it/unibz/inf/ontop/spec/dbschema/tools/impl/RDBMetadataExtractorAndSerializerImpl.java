@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataProvider;
-import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -30,8 +29,8 @@ public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtracto
     public String extractAndSerialize() throws MetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(localConnection, typeFactory.getDBTypeFactory());
-            ImmutableMetadataProvider metadata = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader);
+            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(localConnection, typeFactory.getDBTypeFactory());
+            MetadataProvider metadata = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader);
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);

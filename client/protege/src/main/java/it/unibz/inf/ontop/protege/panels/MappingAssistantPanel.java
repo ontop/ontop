@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLSer
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseViewDefinition;
-import it.unibz.inf.ontop.dbschema.impl.RDBMetadataExtractionTools;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -825,8 +825,8 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
             // this operation is EXPENSIVE -- only names are needed + a flag for table/view
-            MetadataProvider metadataLoader = RDBMetadataExtractionTools.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
-            ImmutableList<DatabaseRelationDefinition> relations = RDBMetadataExtractionTools.createImmutableMetadata(metadataLoader).getAllRelations();
+            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
+            ImmutableList<DatabaseRelationDefinition> relations = MetadataProvider.getAllRelationsWithIntegrityConstraints(metadataLoader).getAllRelations();
 			for (RelationDefinition relation : relations) {
 				relationList.addElement(relation);
 			}

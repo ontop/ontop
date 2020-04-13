@@ -49,5 +49,5 @@ public interface DummyDBMetadataBuilder {
 
     DBParameters getDBParameters();
 
-    MetadataLookup getImmutableMetadataLookup(ImmutableList<DatabaseRelationDefinition> list);
+    MetadataProvider getImmutableMetadataProvider(ImmutableList<DatabaseRelationDefinition> list);
 }

@@ -41,8 +41,7 @@ public class ImplicitDBConstraintsTest {
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = new ImmutableMetadataProvider(DEFAULT_DUMMY_DB_METADATA.getDBParameters(),
-				ImmutableMap.of(TABLENAME.getID(), TABLENAME, TABLE2.getID(), TABLE2));
+		md = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(ImmutableList.of(TABLENAME, TABLE2));
 
 		idfac = md.getQuotedIDFactory();
 	}
