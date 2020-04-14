@@ -35,13 +35,11 @@ public class MappingSaturationTest {
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTermType largeIntDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType largeIntDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
-            .addAttribute(idFactory.createAttributeID("col1"), largeIntDBType, false)
-            .addAttribute(idFactory.createAttributeID("col12"), largeIntDBType, false));
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
+            "col1", largeIntDBType, false,
+            "col12", largeIntDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";

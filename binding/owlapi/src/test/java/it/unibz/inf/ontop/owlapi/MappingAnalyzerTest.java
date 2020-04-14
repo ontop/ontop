@@ -41,14 +41,11 @@ public class MappingAnalyzerTest extends TestCase {
 
 	private Connection conn;
 
-	final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
+	private static final String owlfile = "src/test/resources/test/mappinganalyzer/ontology.owl";
 
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
-
-    public MappingAnalyzerTest() {
-    }
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Override
 	public void setUp() throws Exception {
@@ -79,10 +76,9 @@ public class MappingAnalyzerTest extends TestCase {
 				.build();
 
 		factory.createReasoner(configuration);
-
 	}
 
-	public void testMapping_1() throws IOException, InvalidMappingException {
+	public void testMapping_1() {
 		try {
 			runTests("src/test/resources/test/mappinganalyzer/case_1.obda");
 		} catch (Exception e) {
@@ -90,7 +86,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_2() throws IOException, InvalidMappingException {
+	public void testMapping_2() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_2.obda");
 		} catch (Exception e) {
@@ -98,7 +94,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_3() throws IOException, InvalidMappingException {
+	public void testMapping_3() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_3.obda");
 		} catch (Exception e) {
@@ -106,7 +102,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_4() throws IOException, InvalidMappingException {
+	public void testMapping_4() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_4.obda");
 		} catch (Exception e) {
@@ -114,7 +110,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_5() throws IOException, InvalidMappingException {
+	public void testMapping_5() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_5.obda");
 		} catch (Exception e) {
@@ -122,7 +118,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_6() throws IOException, InvalidMappingException {
+	public void testMapping_6() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_6.obda");
 		} catch (Exception e) {
@@ -130,7 +126,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_7() throws IOException, InvalidMappingException {
+	public void testMapping_7() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_7.obda");
 		} catch (Exception e) {
@@ -138,7 +134,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_8() throws IOException, InvalidMappingException {
+	public void testMapping_8() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_8.obda");
 		} catch (Exception e) {
@@ -146,7 +142,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_9() throws IOException, InvalidMappingException {
+	public void testMapping_9()  {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_9.obda");
 		} catch (Exception e) {
@@ -154,7 +150,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_10() throws IOException, InvalidMappingException {
+	public void testMapping_10() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_10.obda");
 		} catch (Exception e) {
@@ -162,7 +158,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_11() throws IOException, InvalidMappingException {
+	public void testMapping_11() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_11.obda");
 		} catch (Exception e) {
@@ -170,7 +166,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_12() throws IOException, InvalidMappingException {
+	public void testMapping_12() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_12.obda");
 		} catch (Exception e) {
@@ -178,7 +174,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_13() throws IOException, InvalidMappingException {
+	public void testMapping_13() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_13.obda");
 		} catch (Exception e) {
@@ -186,7 +182,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_14() throws IOException, InvalidMappingException {
+	public void testMapping_14() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_14.obda");
 		} catch (Exception e) {
@@ -194,8 +190,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_15() throws IOException, 
-            InvalidMappingException {
+	public void testMapping_15() {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_15.obda");
 		} catch (Exception e) {
@@ -203,8 +198,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_16() throws IOException, 
-            InvalidMappingException {
+	public void testMapping_16()  {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_16.obda");
 		} catch (Exception e) {
@@ -212,8 +206,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_17() throws IOException, 
-            InvalidMappingException {
+	public void testMapping_17()  {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_17.obda");
 		} catch (Exception e) {
@@ -221,8 +214,7 @@ public class MappingAnalyzerTest extends TestCase {
 		}
 	}
 	
-	public void testMapping_18() throws IOException, 
-            InvalidMappingException {
+	public void testMapping_18()  {
 		try {
             runTests("src/test/resources/test/mappinganalyzer/case_18.obda");
 		} catch (Exception e) {

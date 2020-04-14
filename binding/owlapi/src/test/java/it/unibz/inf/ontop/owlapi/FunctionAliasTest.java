@@ -33,7 +33,6 @@ public class FunctionAliasTest {
 
     private Connection conn;
 
-
     @Before
     public void setUp() throws Exception {
         String url = "jdbc:h2:mem:movie";

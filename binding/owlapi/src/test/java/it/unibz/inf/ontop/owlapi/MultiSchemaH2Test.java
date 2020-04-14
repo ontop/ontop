@@ -29,12 +29,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertTrue;
 
 /***
@@ -47,35 +45,24 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class MultiSchemaH2Test  {
 
-
-    static final String owlFile =
-            "src/test/resources/multischema/multischemah2.owl";
-    static final String obdaFile =
-            "src/test/resources/multischema/multischemah2.obda";
+    private static final String owlFile = "src/test/resources/multischema/multischemah2.owl";
+    private static final String obdaFile = "src/test/resources/multischema/multischemah2.obda";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	private String url = "jdbc:h2:mem:questrepository";
-	private String username =  "fish";
-	private String password = "fish";
+	private Connection sqlConnection;
 
-	Connection sqlConnection;
+	private static final String url = "jdbc:h2:mem:questrepository";
+	private static final String username =  "fish";
+	private static final String password = "fish";
+
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(url,username, password);
-		java.sql.Statement s = sqlConnection.createStatement();
 
-		try {
-			String text = new Scanner( new File("src/test/resources/multischema/stockexchange-h2Schema.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-		}
-		catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
-		}
-
-		s.close();
+		executeFromFile(sqlConnection, "src/test/resources/multischema/stockexchange-h2Schema.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -93,33 +80,17 @@ public class MultiSchemaH2Test  {
 
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-
-
-
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private void dropTables() throws Exception {
-
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -159,20 +130,11 @@ public class MultiSchemaH2Test  {
 	}
 
 	private void checkThereIsAtLeastOneResult(String query) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			assertTrue(rs.hasNext());
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}

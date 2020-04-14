@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.protege.core;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
@@ -16,10 +15,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.protege.core.impl.OBDADataSourceFactoryImpl;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.parser.TargetQueryParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
@@ -67,13 +63,11 @@ import java.util.stream.Collectors;
 public class OBDAModel {
 
     private final SQLPPMappingFactory ppMappingFactory;
-    private final SpecificationFactory specificationFactory;
     private Map<String, SQLPPTriplesMap> triplesMapMap;
     // Mutable
     private final OBDADataSource source;
     // Mutable and replaced after reset
     private MutablePrefixManager prefixManager;
-    private final PrefixDocumentFormat owlPrefixManager;
     // Mutable and replaced after reset
     private MutableOntologyVocabulary currentMutableVocabulary;
     // Mutable and replaced after reset: contains the namespace associated with the prefix ":" if explicitly declared in the ontology
@@ -90,25 +84,25 @@ public class OBDAModel {
     private final TypeFactory typeFactory;
     private final RDF rdfFactory;
     private final TargetQueryParserFactory targetQueryParserFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
-    public OBDAModel(SpecificationFactory specificationFactory,
-                     SQLPPMappingFactory ppMappingFactory,
+    public OBDAModel(SQLPPMappingFactory ppMappingFactory,
                      PrefixDocumentFormat owlPrefixManager,
                      AtomFactory atomFactory, TermFactory termFactory,
                      TypeFactory typeFactory,
                      TargetAtomFactory targetAtomFactory, SubstitutionFactory substitutionFactory,
-                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory) {
-        this.specificationFactory = specificationFactory;
+                     RDF rdfFactory, TargetQueryParserFactory targetQueryParserFactory,
+                     SQLPPSourceQueryFactory sourceQueryFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.atomFactory = atomFactory;
         this.prefixManager = new MutablePrefixManager(owlPrefixManager);
-        this.owlPrefixManager = owlPrefixManager;
         this.termFactory = termFactory;
         this.typeFactory = typeFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.substitutionFactory = substitutionFactory;
         this.rdfFactory = rdfFactory;
         this.targetQueryParserFactory = targetQueryParserFactory;
+        this.sourceQueryFactory = sourceQueryFactory;
         this.triplesMapMap = new LinkedHashMap<>();
 
         this.sourceListeners = new ArrayList<>();
@@ -124,17 +118,9 @@ public class OBDAModel {
     public SQLPPMapping generatePPMapping() {
         ImmutableList<SQLPPTriplesMap> triplesMaps = ImmutableList.copyOf(triplesMapMap.values());
 
-        try {
-            return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
-                    // TODO: give an immutable prefix manager!!
-                    prefixManager);
-            /**
-             * No mapping so should never happen
-             */
-        } catch(DuplicateMappingException e) {
-            throw new RuntimeException("A DuplicateMappingException has been thrown while no mapping has been given." +
-                    "What is going on? Message: " + e.getMessage());
-        }
+        return ppMappingFactory.createSQLPreProcessedMapping(triplesMaps,
+                // TODO: give an immutable prefix manager!!
+                prefixManager);
     }
 
 
@@ -386,7 +372,7 @@ public class OBDAModel {
             fireMappingDeleted(dataSourceURI);
     }
 
-    public void updateMappingsSourceQuery(String triplesMapId, OBDASQLQuery sourceQuery) {
+    public void updateMappingsSourceQuery(String triplesMapId, SQLPPSourceQuery sourceQuery) {
         SQLPPTriplesMap formerTriplesMap = getTriplesMap(triplesMapId);
 
         if (formerTriplesMap != null) {
@@ -491,6 +477,9 @@ public class OBDAModel {
         return rdfFactory;
     }
 
+    public SQLPPSourceQueryFactory getSourceQueryFactory() { return sourceQueryFactory; }
+
+
     public TargetQueryParser createTargetQueryParser() {
         return targetQueryParserFactory.createParser(getMutablePrefixManager().getPrefixMap());
     }
@@ -511,4 +500,5 @@ public class OBDAModel {
         this.explicitDefaultPrefixNamespace = Optional.of(ns);
         addPrefix(PrefixManager.DEFAULT_PREFIX, ns);
     }
+
 }

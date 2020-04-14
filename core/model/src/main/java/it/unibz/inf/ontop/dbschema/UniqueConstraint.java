@@ -20,14 +20,8 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-
-import java.util.stream.Collectors;
+import it.unibz.inf.ontop.dbschema.impl.UniqueConstraintImpl;
 
 /**
  * Primary key or a unique constraint
@@ -41,54 +35,32 @@ import java.util.stream.Collectors;
  *
  */
 
-public class UniqueConstraint implements FunctionalDependency {
+public interface UniqueConstraint extends FunctionalDependency {
 
-	public static final class BuilderImpl implements FunctionalDependency.Builder {
-		private final ImmutableList.Builder<Attribute> builder = new ImmutableList.Builder<>();
-		private final DatabaseRelationDefinition relation;
-		private final String name;
-		private boolean isPK;
+	/**
+	 * return the name of the constraint
+	 *
+	 * @return name
+	 */
 
-		private BuilderImpl(DatabaseRelationDefinition relation, String name, boolean isPK) {
-			this.relation = relation;
-			this.name = name;
-			this.isPK = isPK;
-		}
+	String getName();
 
-		@Override
-		public BuilderImpl addDeterminant(Attribute attribute) {
-			if (relation != attribute.getRelation())
-				throw new IllegalArgumentException("UC requires the same table in all attributes: " + relation + " " + attribute);
+	/**
+	 * return true if it is a primary key and false otherwise
+	 *
+	 * @return true if it is a primary key constraint (false otherwise)
+	 */
 
-			builder.add(attribute);
-			return this;
-		}
+	boolean isPrimaryKey();
 
-		@Override
-		public BuilderImpl addDependent(Attribute dependent) {
-			throw new IllegalArgumentException("No dependents");
-		}
+	/**
+	 * return the list of attributes in the unique constraint
+	 *
+	 * @return list of attributes
+	 */
 
-		@Override
-		public UniqueConstraint build() {
-			ImmutableList<Attribute> attributes = builder.build();
-			if (attributes.isEmpty())
-				throw new IllegalArgumentException("UC cannot have no attributes");
-			return new UniqueConstraint(name, isPK, attributes);
-		}
-	}
+	ImmutableList<Attribute> getAttributes();
 
-	public static UniqueConstraint primaryKeyOf(Attribute att) {
-		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att.getRelation(),
-				"PK_" + att.getRelation().getID().getTableName());
-		return builder.addDeterminant(att).build();
-	}
-
-	public static UniqueConstraint primaryKeyOf(Attribute att1, Attribute att2) {
-		BuilderImpl builder = primaryKeyBuilder((DatabaseRelationDefinition)att1.getRelation(),
-				"PK_" + att1.getRelation().getID().getTableName());
-		return builder.addDeterminant(att1).addDeterminant(att2).build();
-	}
 
 	/**
 	 * creates a UNIQUE constraint builder
@@ -98,8 +70,8 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static BuilderImpl builder(DatabaseRelationDefinition relation, String name) {
-		return new BuilderImpl(relation, name, false);
+	static Builder builder(DatabaseRelationDefinition relation, String name) {
+		return UniqueConstraintImpl.builder(relation, name);
 	}
 
 	/**
@@ -110,90 +82,25 @@ public class UniqueConstraint implements FunctionalDependency {
 	 * @return
 	 */
 
-	public static BuilderImpl primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
-		return new BuilderImpl(relation, name, true);
+	static Builder primaryKeyBuilder(DatabaseRelationDefinition relation, String name) {
+		return UniqueConstraintImpl.primaryKeyBuilder(relation, name);
 	}
 
-	private final String name;
-	private final ImmutableList<Attribute> attributes;
-	private final boolean isPK; // primary key
 
-	/**
-	 * private constructor (use Builder instead)
-	 *
-	 * @param name
-	 * @param attributes
-	 */
-
-	private UniqueConstraint(String name, boolean isPK, ImmutableList<Attribute> attributes) {
-		this.name = name;
-		this.isPK = isPK;
-		this.attributes = attributes;
+	static void primaryKeyOf(Attribute attribute) {
+		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute.getRelation();
+		primaryKeyBuilder(relation, "PK")
+				.addDeterminant(attribute.getIndex()).build();
 	}
 
-	/**
-	 * return the name of the constraint
-	 *
-	 * @return name
-	 */
-	public String getName() {
-		return name;
-	}
+	static void primaryKeyOf(Attribute attribute1, Attribute attribute2) {
+		if (attribute1.getRelation() != attribute2.getRelation())
+			throw new IllegalArgumentException();
 
-	/**
-	 * return the database relation for the unique constraint
-	 *
-	 * @return
-	 */
-	@JsonIgnore
-	public DatabaseRelationDefinition getRelation() {
-		return (DatabaseRelationDefinition)attributes.get(0).getRelation();
-	}
+		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute1.getRelation();
 
-	/**
-	 * return true if it is a primary key and false otherwise
-	 *
-	 * @return true if it is a primary key constraint (false otherwise)
-	 */
-	@JsonProperty("isPrimaryKey")
-	public boolean isPrimaryKey() {
-		return isPK;
-	}
-
-	/**
-	 * return the list of attributes in the unique constraint
-	 *
-	 * @return list of attributes
-	 */
-	@JsonProperty("determinants")
-	@JsonSerialize(contentUsing = Attribute.AttributeSerializer.class)
-	public ImmutableList<Attribute> getAttributes() {
-		return attributes;
-	}
-
-	@JsonIgnore
-	@Override
-	public ImmutableSet<Attribute> getDeterminants() {
-		return ImmutableSet.copyOf(attributes);
-	}
-
-	@JsonIgnore
-	@Override
-	public ImmutableSet<Attribute> getDependents() {
-		return getRelation().getAttributes().stream()
-				.filter(a -> !attributes.contains(a))
-				.collect(ImmutableCollectors.toSet());
-	}
-
-	@Override
-	public String toString() {
-		return "ALTER TABLE " + attributes.get(0).getRelation().getID() +
-				" ADD CONSTRAINT " + name + (isPK ? " PRIMARY KEY " : " UNIQUE ") +
-				"(" +
-				attributes.stream()
-						.map(Attribute::getID)
-						.map(QuotedID::toString)
-						.collect(Collectors.joining(", ")) +
-				")";
+		primaryKeyBuilder(relation, "PK")
+				.addDeterminant(attribute1.getIndex())
+				.addDeterminant(attribute1.getIndex()).build();
 	}
 }

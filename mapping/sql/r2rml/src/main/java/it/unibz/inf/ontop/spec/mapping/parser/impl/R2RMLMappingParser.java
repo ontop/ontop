@@ -12,23 +12,19 @@ import eu.optique.r2rml.api.model.impl.InvalidR2RMLMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.model.term.IRIConstant;
-import it.unibz.inf.ontop.model.term.RDFConstant;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.NonVariableTerm;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.R2RMLSQLPPtriplesMap;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.*;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -40,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -48,25 +46,32 @@ import java.util.stream.Stream;
 public class R2RMLMappingParser implements SQLMappingParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(R2RMLMappingParser.class);
-    private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+
     private final SQLPPMappingFactory ppMappingFactory;
     private final SpecificationFactory specificationFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final R2RMLParser r2rmlParser;
-
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private R2RMLMappingParser(SQLPPMappingFactory ppMappingFactory, SpecificationFactory specificationFactory,
-                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser) {
+                               TargetAtomFactory targetAtomFactory, R2RMLParser r2rmlParser,
+                               SQLPPSourceQueryFactory sourceQueryFactory,
+                               TermFactory termFactory, SubstitutionFactory substitutionFactory) {
         this.ppMappingFactory = ppMappingFactory;
         this.specificationFactory = specificationFactory;
         this.targetAtomFactory = targetAtomFactory;
         this.r2rmlParser = r2rmlParser;
+        this.sourceQueryFactory = sourceQueryFactory;
+        this.termFactory = termFactory;
+        this.substitutionFactory = substitutionFactory;
     }
 
 
     @Override
-    public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
+    public SQLPPMapping parse(File mappingFile) throws InvalidMappingException, MappingIOException {
         try {
             LinkedHashModel rdf4jGraph = new LinkedHashModel();
             RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
@@ -76,23 +81,25 @@ public class R2RMLMappingParser implements SQLMappingParser {
             parser.setRDFHandler(collector);
             parser.parse(in, documentUrl.toString());
             return parse(new RDF4J().asGraph(rdf4jGraph));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new MappingIOException(e);
-        } catch (RDFParseException | RDFHandlerException e) {
+        }
+        catch (RDFParseException | RDFHandlerException e) {
             throw new InvalidMappingException(e.getMessage());
         }
     }
 
 
     @Override
-    public SQLPPMapping parse(Reader reader) throws InvalidMappingException, MappingIOException, DuplicateMappingException {
+    public SQLPPMapping parse(Reader reader) {
         // TODO: support this
         throw new UnsupportedOperationException("The R2RMLMappingParser does not support" +
                 "yet the Reader interface.");
     }
 
     @Override
-    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException, DuplicateMappingException {
+    public SQLPPMapping parse(Graph mappingGraph) throws InvalidMappingException {
         try {
             ImmutableList<SQLPPTriplesMap> sourceMappings = extractPPTriplesMaps(mappingGraph);
 
@@ -100,7 +107,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
             PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
 
             return ppMappingFactory.createSQLPreProcessedMapping(sourceMappings, prefixManager);
-        } catch (InvalidR2RMLMappingException e) {
+        }
+        catch (InvalidR2RMLMappingException e) {
             throw new InvalidMappingException(e.getMessage());
         }
     }
@@ -138,7 +146,6 @@ public class R2RMLMappingParser implements SQLMappingParser {
             ppTriplesMaps.addAll(extractJoinPPTriplesMaps(tm, subjectTermMap));
         }
 
-
         return ImmutableList.copyOf(ppTriplesMaps);
     }
 
@@ -159,18 +166,17 @@ public class R2RMLMappingParser implements SQLMappingParser {
         }
         return Optional.of(targetAtoms)
                 .filter(as -> !as.isEmpty())
-                // TODO: consider a R2RML-specific type of triples map
-                .map(as -> new OntopNativeSQLPPTriplesMap("mapping-"+tm.hashCode(),
-                        MAPPING_FACTORY.getSQLQuery(sourceQuery),  as));
+                .map(as -> new R2RMLSQLPPtriplesMap("mapping-" + tm.hashCode(),
+                        sourceQueryFactory.createSourceQuery(sourceQuery),  as));
     }
 
-    private ImmutableList<TargetAtom> extractMappingTargetAtoms(TriplesMap tm) throws InvalidR2RMLMappingException {
+    private ImmutableList<TargetAtom> extractMappingTargetAtoms(TriplesMap tm)  {
         ImmutableList.Builder<TargetAtom> targetAtoms = ImmutableList.builder();
 
         SubjectMap subjectMap = tm.getSubjectMap();
         ImmutableTerm subjectTerm = r2rmlParser.extractSubjectTerm(subjectMap);
 
-        ImmutableList<NonVariableTerm> graphTerms = r2rmlParser.extractGraphTerms(subjectMap);
+        ImmutableList<NonVariableTerm> graphTerms = r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps());
         boolean includeDefaultGraph = graphTerms.isEmpty() ||
                 graphTerms.stream().anyMatch(R2RMLMappingParser::isDefaultGraph);
 
@@ -214,7 +220,8 @@ public class R2RMLMappingParser implements SQLMappingParser {
     }
 
     private List<SQLPPTriplesMap> extractJoinPPTriplesMaps(TriplesMap tm,
-                                                           ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap) throws InvalidR2RMLMappingException {
+                                                           ImmutableMap<TriplesMap, ImmutableTerm> subjectTermMap)  {
+
         ImmutableList.Builder<SQLPPTriplesMap> joinPPTriplesMapsBuilder = ImmutableList.builder();
         for (PredicateObjectMap pobm: tm.getPredicateObjectMaps()) {
 
@@ -224,32 +231,83 @@ public class R2RMLMappingParser implements SQLMappingParser {
 
             List<NonVariableTerm> predicateTerms = r2rmlParser.extractPredicateTerms(pobm);
 
-            for(RefObjectMap robm : refObjectMaps) {
-                // TODO: why is deprecated?
-                String sourceQuery = robm.getJointQuery();
-                if (sourceQuery.isEmpty()) {
-                    throw new InvalidR2RMLMappingException("Could not create source query for join in " + tm);
-                }
+            SubjectMap subjectMap = tm.getSubjectMap();
+
+            ImmutableList<NonVariableTerm> graphTerms = Stream.concat(
+                    r2rmlParser.extractGraphTerms(pobm.getGraphMaps()).stream(),
+                    r2rmlParser.extractGraphTerms(subjectMap.getGraphMaps()).stream())
+                    .distinct()
+                    .collect(ImmutableCollectors.toList());
+
+            boolean includeDefaultGraph = graphTerms.isEmpty() ||
+                    graphTerms.stream().anyMatch(R2RMLMappingParser::isDefaultGraph);
+
+            ImmutableList<NonVariableTerm> namedGraphTerms = graphTerms.stream()
+                    .filter(t -> !isDefaultGraph(t))
+                    .collect(ImmutableCollectors.toList());
+
+            for (RefObjectMap robm : refObjectMaps) {
+
+                TriplesMap parent = robm.getParentMap();
+                if (robm.getJoinConditions().isEmpty() &&
+                        !parent.getLogicalTable().getSQLQuery().equals(tm.getLogicalTable().getSQLQuery()))
+                    throw new IllegalArgumentException("No rr:joinCondition, but the two SQL queries are disitnct: " +
+                            tm.getLogicalTable().getSQLQuery() + " and " + parent.getLogicalTable().getSQLQuery());
 
                 ImmutableTerm childSubject = Optional.ofNullable(subjectTermMap.get(tm))
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(tm.getSubjectMap()));
 
-                TriplesMap parent = robm.getParentMap();
+                String childPrefix = robm.getJoinConditions().isEmpty() ? "TMP" : "CHILD";
+                ImmutableMap<Variable, Variable> childMap = childSubject.getVariableStream()
+                        .collect(ImmutableCollectors.toMap(Function.identity(),
+                                v -> prefixAttributeName(childPrefix + "_", v)));
+
+                ImmutableTerm childSubject2 = substitutionFactory
+                        .getVar2VarSubstitution(childMap).apply(childSubject);
+
                 /*
                  * Re-uses the already created subject term. Important when dealing with blank nodes.
                  */
                 ImmutableTerm parentSubject = Optional.ofNullable(subjectTermMap.get(parent))
                         .orElseGet(() -> r2rmlParser.extractSubjectTerm(parent.getSubjectMap()));
 
-                ImmutableList<TargetAtom> targetAtoms = predicateTerms.stream()
-                        .map(p -> targetAtomFactory.getTripleTargetAtom(childSubject, p, parentSubject))
-                        .collect(ImmutableCollectors.toList());
+                String parentPrefix =  robm.getJoinConditions().isEmpty() ? "TMP" : "PARENT";
+                ImmutableMap<Variable, Variable> parentMap = parentSubject.getVariableStream()
+                        .collect(ImmutableCollectors.toMap(Function.identity(),
+                                v -> prefixAttributeName(parentPrefix + "_", v)));
 
-                //finally, create mapping and add it to the list
-                //use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
-                // TODO: use a R2RML-specific class	instead
-                SQLPPTriplesMap ppTriplesMap = new OntopNativeSQLPPTriplesMap("tm-join-"+robm.hashCode(),
-                        MAPPING_FACTORY.getSQLQuery(sourceQuery), targetAtoms);
+                ImmutableTerm parentSubject2 = substitutionFactory
+                        .getVar2VarSubstitution(parentMap).apply(parentSubject);
+
+                ImmutableList.Builder<TargetAtom> targetAtoms = ImmutableList.builder();
+                for (NonVariableTerm predicateTerm : predicateTerms) {
+                    if (includeDefaultGraph)
+                        targetAtoms.add(targetAtomFactory.getTripleTargetAtom(childSubject2, predicateTerm, parentSubject2));
+                    for (NonVariableTerm graphTerm : namedGraphTerms) {
+                        targetAtoms.add(targetAtomFactory.getQuadTargetAtom(childSubject2, predicateTerm, parentSubject2, graphTerm));
+                    }
+                }
+
+                String sourceQuery =
+                        "SELECT " + Stream.concat(
+                                childMap.entrySet().stream()
+                                    .map(e -> childPrefix + "." + e.getKey() + " AS " + e.getValue()),
+                                parentMap.entrySet().stream()
+                                    .map(e -> parentPrefix + "." + e.getKey() + " AS " + e.getValue()))
+                                .collect(Collectors.joining(", ")) +
+                        " FROM (" + tm.getLogicalTable().getSQLQuery() + ") " + childPrefix +
+                        (robm.getJoinConditions().isEmpty()
+                                ? ""
+                                :
+                        ", (" + parent.getLogicalTable().getSQLQuery() + ") " + parentPrefix +
+                        " WHERE " + robm.getJoinConditions().stream()
+                                .map(j -> childPrefix + "." + j.getChild() +
+                                        " = " + parentPrefix + "." + j.getParent())
+                                .collect(Collectors.joining(",")));
+
+                // use referenceObjectMap robm as id, because there could be multiple joinCondition in the same triple map
+                SQLPPTriplesMap ppTriplesMap = new R2RMLSQLPPtriplesMap("tm-join-" + robm.hashCode(),
+                        sourceQueryFactory.createSourceQuery(sourceQuery), targetAtoms.build());
                 LOGGER.info("Join \"triples map\" introduced: " + ppTriplesMap);
                 joinPPTriplesMapsBuilder.add(ppTriplesMap);
             }
@@ -258,5 +316,18 @@ public class R2RMLMappingParser implements SQLMappingParser {
         return joinPPTriplesMapsBuilder.build();
     }
 
+
+    private Variable prefixAttributeName(String prefix, Variable var) {
+        String attributeName = var.getName();
+
+        String newAttributeName;
+        if (attributeName.startsWith("\"") && attributeName.endsWith("\"")
+                || attributeName.startsWith("`") && attributeName.endsWith("`"))
+            newAttributeName = attributeName.substring(0,1) + prefix + attributeName.substring(1);
+        else
+            newAttributeName = prefix + attributeName;
+
+        return termFactory.getVariable(newAttributeName);
+    }
 
 }

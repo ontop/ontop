@@ -102,21 +102,19 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_negative() {
-        BasicDBMetadata metadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = metadata.getDBParameters().getQuotedIDFactory();
-        DBTermType stringDBType = metadata.getDBParameters().getDBTypeFactory().getDBStringType();
+        DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
 
-        DatabaseRelationDefinition A = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "ADDRESS"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address"), stringDBType, false));
-        DatabaseRelationDefinition S = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STAFF"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("store_id"), stringDBType, false));
-        DatabaseRelationDefinition T = metadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "STORE"))
-            .addAttribute(idFactory.createAttributeID("id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("staff_id"), stringDBType, false)
-            .addAttribute(idFactory.createAttributeID("address_id"), stringDBType, false));
+        DatabaseRelationDefinition A = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("ADDRESS",
+            "id", stringDBType, false,
+            "address", stringDBType, false);
+        DatabaseRelationDefinition S = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("STAFF",
+            "id", stringDBType, false,
+            "address_id", stringDBType, false,
+            "store_id", stringDBType, false);
+        DatabaseRelationDefinition T = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "STORE",
+            "id", stringDBType, false,
+            "staff_id", stringDBType, false,
+            "address_id", stringDBType, false);
 
         ImmutableHomomorphism h = ImmutableHomomorphism.builder().build();
         // ADDRESS(ADDRESS_ID0,ADDRESS3)

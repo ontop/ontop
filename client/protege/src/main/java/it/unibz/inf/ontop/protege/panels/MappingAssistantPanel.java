@@ -25,7 +25,12 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl.SQLServerSQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseViewDefinition;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
@@ -36,8 +41,7 @@ import it.unibz.inf.ontop.spec.mapping.PrefixManager;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
 import it.unibz.inf.ontop.protege.core.OntopConfigurationManager;
 import it.unibz.inf.ontop.protege.gui.IconLoader;
@@ -50,6 +54,7 @@ import it.unibz.inf.ontop.protege.gui.component.SQLResultTable;
 import it.unibz.inf.ontop.protege.gui.treemodels.IncrementalResultSetTableModel;
 import it.unibz.inf.ontop.protege.utils.*;
 import it.unibz.inf.ontop.spec.mapping.serializer.TargetQueryRenderer;
+import it.unibz.inf.ontop.utils.IDGenerator;
 import org.apache.commons.rdf.api.IRI;
 import org.protege.editor.owl.model.OWLModelManager;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -64,10 +69,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,14 +93,14 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 
 	private boolean isSubjectClassValid = true;
 
-	private static final SQLMappingFactory MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
-
 	private static final String EMPTY_TEXT = "";
 
 	private static final Color DEFAULT_TEXTFIELD_BACKGROUND = UIManager.getDefaults().getColor("TextField.background");
 	private static final Color ERROR_TEXTFIELD_BACKGROUND = new Color(255, 143, 143);
+
     private final TermFactory termFactory;
 	private final TargetAtomFactory targetAtomFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
 	public MappingAssistantPanel(OBDAModel model, OntopConfigurationManager configurationManager,
 								 OWLModelManager owlModelManager) {
@@ -107,6 +110,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		prefixManager = obdaModel.getMutablePrefixManager();
         termFactory = obdaModel.getTermFactory();
         targetAtomFactory = obdaModel.getTargetAtomFactory();
+        sourceQueryFactory = obdaModel.getSourceQueryFactory();
 		initComponents();
 
 		if (obdaModel.getSources().size() > 0) {
@@ -404,7 +408,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		txtQueryEditor.setText(EMPTY_TEXT); // clear the text editor
 		JComboBox cb = (JComboBox) evt.getSource();
 		if (cb.getSelectedIndex() != -1) {
-			RelationDefinition dd = (RelationDefinition) cb.getSelectedItem();
+			DatabaseRelationDefinition dd = (DatabaseRelationDefinition) cb.getSelectedItem();
 			if (dd != null) {
 				String sql = generateSQLString(dd);
 				txtQueryEditor.setText(sql);
@@ -534,7 +538,6 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		try {
 			// Prepare the mapping source
 			String source = txtQueryEditor.getText();
-
 			if (source.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The SQL source cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
@@ -547,13 +550,13 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			// Prepare the mapping target
 			List<MapItem> predicateObjectMapsList = pnlPropertyEditorList.getPredicateObjectMapsList();
 			ImmutableList<TargetAtom> target = prepareTargetQuery(predicateSubjectMap, predicateObjectMapsList);
-
 			if (target.isEmpty()) {
 				JOptionPane.showMessageDialog(this, "ERROR: The target cannot be empty. Add a class or a property", "Error", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			// Create the mapping axiom
-			SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(MAPPING_FACTORY.getSQLQuery(source), target);
+			SQLPPTriplesMap mappingAxiom = new OntopNativeSQLPPTriplesMap(
+                    IDGenerator.getNextUniqueID("MAPID-"), sourceQueryFactory.createSourceQuery(source), target);
 			obdaModel.addTriplesMap(mappingAxiom, false);
 
 			final String targetString = TargetQueryRenderer.encode(target, prefixManager);
@@ -565,6 +568,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 			// Clear the form afterwards
 			clearForm();
 		} catch (DuplicateMappingException e) {
+		    // TODO: how can we have duplicates if the IDs are generated?
 			DialogUtils.showQuickErrorDialog(null, e, "Duplicate mapping identification.");
 			return;
 		} catch (NullPointerException e) {
@@ -753,7 +757,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		predicateSubjectMap = null;
 	}
 
-	private String generateSQLString(RelationDefinition table) {
+	private String generateSQLString(DatabaseRelationDefinition table) {
 		StringBuilder sb = new StringBuilder("select");
 		boolean needComma = false;
 		for (Attribute attr : table.getAttributes()) {
@@ -821,14 +825,20 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		DefaultComboBoxModel<RelationDefinition> relationList = new DefaultComboBoxModel<>();
 		try {
 			Connection conn = ConnectionTools.getConnection(selectedSource);
-            BasicDBMetadata md = RDBMetadataExtractionTools.createMetadata(conn, obdaModel.getTypeFactory().getDBTypeFactory());
-			// this operation is EXPENSIVE -- only names are needed + a flag for table/view
-			RDBMetadataExtractionTools.loadMetadata(md, conn, null);
-			for (DatabaseRelationDefinition relation : md.getDatabaseRelations()) {
+            MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, obdaModel.getTypeFactory().getDBTypeFactory());
+            // this operation is less EXPENSIVE -- only attributes are retrieved
+            MetadataProvider metadataProviderWithoutIntegrityConstraints = new DelegatingMetadataProvider(metadataProvider) {
+                @Override
+                public void insertIntegrityConstraints(DatabaseRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+                    // NO-OP
+                }
+            };
+            ImmutableList<DatabaseRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProviderWithoutIntegrityConstraints).getAllRelations();
+			for (RelationDefinition relation : relations) {
 				relationList.addElement(relation);
 			}
 		}
-		catch (SQLException e) {
+		catch (SQLException | MetadataExtractionException e) {
 			// NO-OP
 		}
 		cboDataSet.setModel(relationList);
@@ -929,8 +939,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Renderer class to present the table list.
 	 */
-	private class DataSetItemRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = 1L;
+	private static class DataSetItemRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -943,19 +952,18 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 					label.setText("<Select database table>");
 					return label;
 				} else {
-					if (value instanceof DatabaseRelationDefinition) {
-						DatabaseRelationDefinition td = (DatabaseRelationDefinition) value;
-						ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
-						label.setIcon(icon);
-						label.setText(td.getID().getSQLRendering());
-					} else if (value instanceof ParserViewDefinition) {
-						// ROMAN (7 Oct 2015): I'm not sure we need "views" -- they are
-						// created by SQLQueryParser for complex queries that cannot be parsed
-						ParserViewDefinition vd = (ParserViewDefinition) value;
-						ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
-						label.setIcon(icon);
-						label.setText(vd.getID().getSQLRendering());
-					}
+                    if (value instanceof DatabaseTableDefinition) {
+                        DatabaseTableDefinition td = (DatabaseTableDefinition) value;
+                        ImageIcon icon = IconLoader.getImageIcon("images/db_table.png");
+                        label.setIcon(icon);
+                        label.setText(td.getID().getSQLRendering());
+                    }
+                    else if (value instanceof DatabaseViewDefinition) {
+                        DatabaseViewDefinition vd = (DatabaseViewDefinition) value;
+                    	ImageIcon icon = IconLoader.getImageIcon("images/db_view.png");
+                    	label.setIcon(icon);
+                    	label.setText(vd.getID().getSQLRendering());
+                     }
 					return label;
 				}
 			}
@@ -965,8 +973,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	/**
 	 * Renderer class to present the table list.
 	 */
-	private class ClassListCellRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = 1L;
+	private static class ClassListCellRenderer extends DefaultListCellRenderer {
 		@Override
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

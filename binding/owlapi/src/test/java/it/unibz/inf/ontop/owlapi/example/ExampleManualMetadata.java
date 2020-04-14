@@ -20,88 +20,78 @@ import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
  *
  */
 public class ExampleManualMetadata {
-	final String owlfile = "src/test/resources/example/exampleSensor.owl";
-	final String obdafile = "src/test/resources/example/UseCaseExampleMini.obda";
-	final String propertyfile = "src/test/resources/example/UseCaseExampleMini.properties";
-	private OWLStatement qst = null;
+
+	private static final String owlfile = "src/test/resources/example/exampleSensor.owl";
+	private static final String obdafile = "src/test/resources/example/UseCaseExampleMini.obda";
+	private static final String propertyfile = "src/test/resources/example/UseCaseExampleMini.properties";
+
+	private OWLStatement qst;
 	private OntopQueryEngine queryEngine;
 
 	/*
      * 	prepare ontop for rewriting and unfolding steps
      */
-private void setup()  throws Exception {
+	private void setup()  throws Exception {
 
-	OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
-			.nativeOntopMappingFile(obdafile)
-			.ontologyFile(owlfile)
-			.propertyFile(propertyfile)
-			.dbMetadata(getMeta())
-			.enableTestMode()
-			.build();
-	Injector injector = configuration.getInjector();
-	OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
+		OntopSQLOWLAPIConfiguration configuration = OntopSQLOWLAPIConfiguration.defaultBuilder()
+				.nativeOntopMappingFile(obdafile)
+				.ontologyFile(owlfile)
+				.propertyFile(propertyfile)
+				.enableTestMode()
+				.build();
+		Injector injector = configuration.getInjector();
+		OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
-	queryEngine = engineFactory.create(configuration.loadSpecification(),
-			configuration.getExecutorRegistry());
-	queryEngine.connect();
-	
-	/*
-	 * Prepare the data connection for querying.
-	 */
-	
-	OntopConnection conn = queryEngine.getConnection();
-	OWLConnection connOWL = new DefaultOntopOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
-	qst = connOWL.createStatement();
-}
+		queryEngine = engineFactory.create(configuration.loadSpecification(),
+				configuration.getExecutorRegistry());
+		queryEngine.connect();
 
-private static void defMeasTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
-		.addAttribute(idfac.createAttributeID("value"), dbTypeFactory.getDBDoubleType(), false)
-		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false)
-		.addAttribute(idfac.createAttributeID("sensor"), dbTypeFactory.getDBDoubleType(), false));
-}
+		/*
+		 * Prepare the data connection for querying.
+		 */
 
-private static void defMessTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-		.addAttribute(idfac.createAttributeID("timestamp"), dbTypeFactory.getDBDateTimestampType(), false)
-		.addAttribute(idfac.createAttributeID("eventtext"), dbTypeFactory.getDBDoubleType(), false)
-		.addAttribute(idfac.createAttributeID("assembly"), dbTypeFactory.getDBDoubleType(), false));
-}
-
-private static void defStaticTable(BasicDBMetadata dbMetadata, DBTypeFactory dbTypeFactory, String name) {
-	QuotedIDFactory idfac = dbMetadata.getDBParameters().getQuotedIDFactory();
-	DatabaseRelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idfac.createRelationID(null, name))
-		.addAttribute(idfac.createAttributeID("domain"), dbTypeFactory.getDBDoubleType(), false)
-		.addAttribute(idfac.createAttributeID("range"), dbTypeFactory.getDBDoubleType(), false));
-}
-private static BasicDBMetadata getMeta(){
-	OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-	Injector defaultInjector = defaultConfiguration.getInjector();
-
-	BasicDBMetadata dbMetadata = defaultInjector.getInstance(BasicDBMetadata.class);
-	DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
-
-	defMeasTable(dbMetadata, dbTypeFactory,"burner");
-	defMessTable(dbMetadata, dbTypeFactory,"events");
-	defStaticTable(dbMetadata, dbTypeFactory,"a_static");
-	return dbMetadata;
-}
-
-public void runQuery() throws Exception {
-	setup();
-	System.out.println("Good");
-	queryEngine.close();
-}
-
-public static void main(String[] args) {
-	try {
-		ExampleManualMetadata example = new ExampleManualMetadata();
-		example.runQuery();
-	} catch (Exception e) {
-		e.printStackTrace();
+		OntopConnection conn = queryEngine.getConnection();
+		OWLConnection connOWL = new DefaultOntopOWLConnection(conn, injector.getInstance(InputQueryFactory.class));
+		qst = connOWL.createStatement();
 	}
-}
+
+	private static void defMeasTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
+				"value", dbTypeFactory.getDBDoubleType(), false,
+				"assembly", dbTypeFactory.getDBDoubleType(), false,
+				"sensor", dbTypeFactory.getDBDoubleType(), false);
+	}
+
+	private static void defMessTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
+				"eventtext", dbTypeFactory.getDBDoubleType(), false,
+				"assembly", dbTypeFactory.getDBDoubleType(), false);
+	}
+
+	private static void defStaticTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
+				"domain", dbTypeFactory.getDBDoubleType(), false,
+				"range", dbTypeFactory.getDBDoubleType(), false);
+	}
+
+	private static DummyDBMetadataBuilder getMeta(){
+		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+		Injector defaultInjector = defaultConfiguration.getInjector();
+
+		DummyDBMetadataBuilder dbMetadata = defaultInjector.getInstance(DummyDBMetadataBuilder.class);
+		DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
+
+		defMeasTable(dbMetadata, dbTypeFactory,"burner");
+		defMessTable(dbMetadata, dbTypeFactory,"events");
+		defStaticTable(dbMetadata, dbTypeFactory,"a_static");
+		return dbMetadata;
+	}
+
+	public void runQuery() throws Exception {
+		setup();
+		System.out.println("Good");
+		queryEngine.close();
+	}
 }

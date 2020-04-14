@@ -12,35 +12,26 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private static final BasicDBMetadata dbMetadata;
 
     static {
-        dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
+        DBTypeFactory dbTypeFactory = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
 
-        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(
-                idFactory.createRelationID(null, "PERSON"))
-            .addAttribute(idFactory.createAttributeID("ID"), dbTypeFactory.getDBLargeIntegerType(), false)
-            .addAttribute(idFactory.createAttributeID("FNAME"), dbTypeFactory.getDBStringType(), false));
-        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personTable.getAttribute(1)));
-
-        dbMetadata.freeze();
+        DatabaseRelationDefinition personTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PERSON",
+            "ID", dbTypeFactory.getDBLargeIntegerType(), false,
+            "FNAME", dbTypeFactory.getDBStringType(), false);
+        UniqueConstraint.primaryKeyOf(personTable.getAttribute(1));
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {
         try {
             OntopMappingSQLAllConfiguration configuration = createConfiguration(mappingFile);
             configuration.loadSpecification();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.info(e.toString());
             throw e;
         }
     }
 
     protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
-
-    protected DBMetadata getDBMetadata() {
-        return dbMetadata;
-    }
 }

@@ -35,7 +35,7 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
 
         ImmutableMap<Attribute, VariableOrGroundTerm> inversion = fk.getComponents().stream()
                 .collect(ImmutableCollectors.toMap(
-                        ForeignKeyConstraint.Component::getReference,
+                        ForeignKeyConstraint.Component::getReferencedAttribute,
                         c -> atom.getArguments().get(c.getAttribute().getIndex() - 1)));
 
         ImmutableList<VariableOrGroundTerm> newArguments = fk.getReferencedRelation().getAttributes().stream()

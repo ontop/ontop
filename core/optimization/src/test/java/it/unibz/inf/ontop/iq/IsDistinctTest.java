@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
-
-import java.util.Objects;
 
 import static it.unibz.inf.ontop.DependencyTestDBMetadata.PK_TABLE1_AR1;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -22,34 +19,10 @@ public class IsDistinctTest {
     public static final RelationDefinition NULLABLE_UC_TABLE1_AR1;
     public static final RelationDefinition NULLABLE_UC_TABLE2_AR2;
 
-    private static RelationDefinition createUCRelation(BasicDBMetadata dbMetadata, QuotedIDFactory idFactory,
-                                                      int tableNumber, int arity, boolean canNull) {
-        if (arity < 1)
-            throw new IllegalArgumentException();
-
-        RelationDefinition.AttributeListBuilder builder = new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
-                "UC_TABLE" + tableNumber + "AR" + arity));
-
-        DBTermType dbStringTermType = TYPE_FACTORY.getDBTypeFactory().getDBStringType();
-
-        for (int i=1 ; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), dbStringTermType, canNull);
-        }
-
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(builder);
-
-        tableDef.addUniqueConstraint(Objects.requireNonNull(UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
-                .addDeterminant(tableDef.getAttribute(1))
-                .build()));
-        return tableDef;
-    }
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-
-        NULLABLE_UC_TABLE1_AR1 = createUCRelation(dbMetadata, idFactory, 1, 1, true);
-        NULLABLE_UC_TABLE2_AR2 = createUCRelation(dbMetadata, idFactory, 2, 2, true);
+        NULLABLE_UC_TABLE1_AR1 = createUCRelation( 1, 1, true);
+        NULLABLE_UC_TABLE2_AR2 = createUCRelation( 2, 2, true);
     }
 
     @Test

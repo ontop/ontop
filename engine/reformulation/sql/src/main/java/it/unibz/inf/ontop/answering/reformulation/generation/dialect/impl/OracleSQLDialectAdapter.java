@@ -90,7 +90,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
-		return nameViewOrVariable("", signatureVariableName, "", sqlVariableNames, true);
+		return nameViewOrVariable("", signatureVariableName, "", sqlVariableNames);
 	}
 
 	@Override
@@ -113,8 +113,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	private String nameViewOrVariable(final String prefix,
 									  final String intermediateName,
 									  final String suffix,
-									  final Collection<String> alreadyDefinedNames,
-									  boolean putQuote) {
+									  final Collection<String> alreadyDefinedNames) {
 		int borderLength = prefix.length() + suffix.length();
 		int signatureVarLength = intermediateName.length();
 
@@ -128,8 +127,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 */
 		if (signatureVarLength + borderLength <= NAME_MAX_LENGTH) {
 			String unquotedName = buildDefaultName(prefix, intermediateName, suffix);
-			String name = putQuote ? sqlQuote(unquotedName) : unquotedName;
-			return name;
+			return unquotedName;
 		}
 
 		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - borderLength
@@ -140,7 +138,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		 */
 		for (int i = 0; i < Math.pow(10, NAME_NUMBER_LENGTH); i++) {
 			String unquotedVarName = buildDefaultName(prefix, shortenIntermediateNamePrefix + i, suffix);
-			String mainVarName = putQuote ? sqlQuote(unquotedVarName) : unquotedVarName;
+			String mainVarName =unquotedVarName;
 			if (!alreadyDefinedNames.contains(mainVarName)) {
 				return mainVarName;
 			}

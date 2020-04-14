@@ -54,7 +54,7 @@ public class CompanyTest  {
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	Connection sqlConnection;
+	private Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {

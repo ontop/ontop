@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.dbschema;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.dbschema.impl.ForeignKeyConstraintImpl;
 
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * Foreign Key constraints<br>
@@ -21,92 +17,49 @@ import java.util.stream.Collectors;
  * @author Roman Kontchakov
  */
 
-public class ForeignKeyConstraint {
+public interface ForeignKeyConstraint {
 
-    public static final class Component {
-        private final Attribute attribute, reference;
-
-        private Component(Attribute attribute, Attribute reference) {
-            this.attribute = attribute;
-            this.reference = reference;
-        }
-
-        public Attribute getAttribute() {
-            return attribute;
-        }
-
-        public Attribute getReference() {
-            return reference;
-        }
+    interface Component {
+        Attribute getAttribute();
+        Attribute getReferencedAttribute();
     }
 
-    public static final class Builder {
-        private final ImmutableList.Builder<Component> builder = new ImmutableList.Builder<>();
-        private final DatabaseRelationDefinition relation, referencedRelation;
 
-        /**
-         * creates a FOREIGN KEY builder
-         *
-         * @param relation
-         * @param referencedRelation
-         */
-
-        public Builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
-            this.relation = relation;
-            this.referencedRelation = referencedRelation;
-        }
+    interface Builder {
 
         /**
          * adds a pair (attribute, referenced attribute) to the FK constraint
          *
-         * @param attribute
-         * @param referencedAttribute
+         * @param attributeIndex
+         * @param referencedAttributeIndex
          * @return
          */
 
-        public Builder add(Attribute attribute, Attribute referencedAttribute) {
-            if (attribute == null) {
-                throw new IllegalArgumentException("Missing Foreign Key column for table " + relation.getID() + " referring to primary key " + attribute + "  in table " + referencedRelation.getID());
-            }
-            if (referencedAttribute == null) {
-                throw new IllegalArgumentException("Missing Primary Key column for table " + referencedRelation.getID() + " referring to foreign key " + attribute + " in table " + relation.getID());
-            }
-            if (relation != attribute.getRelation())
-                throw new IllegalArgumentException("Foreign Key requires the same table in all attributes: " + relation + " -> " + referencedRelation + " (attribute " + attribute.getRelation().getID() + "." + attribute + ")");
+        Builder add(int attributeIndex, int referencedAttributeIndex);
 
-            if (referencedRelation != referencedAttribute.getRelation())
-                throw new IllegalArgumentException("Foreign Key requires the same table in all referenced attributes: " + relation + " -> " + referencedRelation + " (attribute " + referencedAttribute.getRelation().getID() + "." + referencedAttribute + ")");
-
-            builder.add(new Component(attribute, referencedAttribute));
-            return this;
-        }
+        Builder add(QuotedID attributeId, QuotedID referencedAttributeId) throws AttributeNotFoundException;
 
         /**
          * builds a FOREIGN KEY constraint
          *
-         * @param name
-         * @return null if the list of components is empty
+         * @throws IllegalArgumentException if the list of components is empty
          */
 
-        public ForeignKeyConstraint build(String name) {
-            ImmutableList<Component> components = builder.build();
-            if (components.isEmpty())
-                return null;
-
-            return new ForeignKeyConstraint(name, components);
-        }
+        void build();
     }
+
 
     /**
      * creates a FOREIGN KEY builder
      *
+     * @param name
      * @param relation
      * @param referencedRelation
      * @return
      */
 
-    public static Builder builder(DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
-        return new Builder(relation, referencedRelation);
+    static Builder builder(String name, DatabaseRelationDefinition relation, DatabaseRelationDefinition referencedRelation) {
+        return ForeignKeyConstraintImpl.builder(name, relation, referencedRelation);
     }
 
     /**
@@ -114,31 +67,13 @@ public class ForeignKeyConstraint {
      *
      * @param name
      * @param attribute
-     * @param reference
+     * @param referencedAttribute
      * @return
      */
-    public static ForeignKeyConstraint of(String name, Attribute attribute, Attribute reference) {
-        return new Builder((DatabaseRelationDefinition) attribute.getRelation(),
-                (DatabaseRelationDefinition) reference.getRelation())
-                .add(attribute, reference).build(name);
-    }
 
-    private final String name;
-    private final ImmutableList<Component> components;
-    private final DatabaseRelationDefinition relation, referencedRelation;
-
-    /**
-     * private constructor (use Builder instead)
-     *
-     * @param name
-     * @param components
-     */
-
-    private ForeignKeyConstraint(String name, ImmutableList<Component> components) {
-        this.name = name;
-        this.components = components;
-        this.relation = (DatabaseRelationDefinition) components.get(0).getAttribute().getRelation();
-        this.referencedRelation = (DatabaseRelationDefinition) components.get(0).getReference().getRelation();
+    static void of(String name, Attribute attribute, Attribute referencedAttribute) {
+        builder(name, (DatabaseRelationDefinition)attribute.getRelation(), (DatabaseRelationDefinition)referencedAttribute.getRelation())
+                .add(attribute.getIndex(), referencedAttribute.getIndex()).build();
     }
 
     /**
@@ -146,9 +81,8 @@ public class ForeignKeyConstraint {
      *
      * @return name
      */
-    public String getName() {
-        return name;
-    }
+
+    String getName();
 
     /**
      * returns the components of the foreign key constraint
@@ -157,18 +91,16 @@ public class ForeignKeyConstraint {
      *
      * @return
      */
-    public ImmutableList<Component> getComponents() {
-        return components;
-    }
+
+    ImmutableList<Component> getComponents();
 
     /**
      * returns referenced database relation
      *
      * @return referenced relation
      */
-    public DatabaseRelationDefinition getReferencedRelation() {
-        return referencedRelation;
-    }
+
+    DatabaseRelationDefinition getReferencedRelation();
 
     /**
      * returns the relation with the foreign key
@@ -176,60 +108,7 @@ public class ForeignKeyConstraint {
      * @return relation
      */
 
-    public DatabaseRelationDefinition getRelation() {
-        return relation;
-    }
+    DatabaseRelationDefinition getRelation();
 
-    @Override
-    public String toString() {
-        return "ALTER TABLE " + relation.getID().getSQLRendering() +
-                " ADD CONSTRAINT " + name + " FOREIGN KEY (" +
-                components.stream()
-                        .map(c -> c.getAttribute().getID().toString())
-                        .collect(Collectors.joining(", ")) +
-                ") REFERENCES " + referencedRelation.getID().getSQLRendering() +
-                " (" +
-                components.stream()
-                        .map(c -> c.getReference().getID().toString())
-                        .collect(Collectors.joining(", ")) +
-                ")";
-    }
-
-    public static class ForeignKeyConstraintSerializer extends JsonSerializer<ForeignKeyConstraint> {
-        @Override
-        public void serialize(ForeignKeyConstraint value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-
-            gen.writeStartObject();
-            {
-                gen.writeStringField("name", value.getName());
-                {
-                    gen.writeFieldName("from");
-                    gen.writeStartObject();
-                    gen.writeStringField("relation", value.relation.getID().getSQLRendering());
-                    {
-                        gen.writeArrayFieldStart("columns");
-                        for (Component component : value.getComponents()) {
-                            gen.writeString(component.getAttribute().getID().getSQLRendering());
-                        }
-                        gen.writeEndArray();
-                    }
-                    gen.writeEndObject();
-                }
-                {
-                    gen.writeFieldName("to");
-                    gen.writeStartObject();
-                    gen.writeStringField("relation", value.referencedRelation.getID().getSQLRendering());
-                    {
-                        gen.writeArrayFieldStart("columns");
-                        for (Component component : value.getComponents()) {
-                            gen.writeString(component.getReference().getID().getSQLRendering());
-                        }
-                        gen.writeEndArray();
-                    }
-                    gen.writeEndObject();
-                }
-            }
-            gen.writeEndObject();
-        }
-    }
 }
+

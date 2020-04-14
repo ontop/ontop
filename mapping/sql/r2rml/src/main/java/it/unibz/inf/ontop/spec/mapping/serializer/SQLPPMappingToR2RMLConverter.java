@@ -58,8 +58,8 @@ import java.util.stream.Collectors;
 
 public class SQLPPMappingToR2RMLConverter {
 
-    private List<SQLPPTriplesMap> ppMappingAxioms;
-    private PrefixManager prefixManager;
+    private final List<SQLPPTriplesMap> ppMappingAxioms;
+    private final PrefixManager prefixManager;
     private final RDF rdfFactory;
     private final TermFactory termFactory;
 

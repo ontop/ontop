@@ -1,12 +1,8 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.Attribute;
-import it.unibz.inf.ontop.dbschema.FunctionalDependency;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.*;
 
-import java.util.HashSet;
-import java.util.Set;
 
 public class FunctionalDependencyImpl implements FunctionalDependency {
 
@@ -28,38 +24,50 @@ public class FunctionalDependencyImpl implements FunctionalDependency {
         return dependents;
     }
 
+    public static Builder builder(DatabaseRelationDefinition relation) {
+        return new BuilderImpl(relation);
+    }
 
-    public static class BuilderImpl implements Builder {
+
+    private static class BuilderImpl implements Builder {
 
         private final ImmutableSet.Builder<Attribute>
                 determinants = ImmutableSet.builder(),
                 dependents = ImmutableSet.builder();
 
-        private final RelationDefinition relation;
+        private final DatabaseRelationDefinition relation;
 
-        public BuilderImpl(RelationDefinition relation) {
+        private BuilderImpl(DatabaseRelationDefinition relation) {
             this.relation = relation;
         }
 
         @Override
-        public Builder addDeterminant(Attribute determinant) {
-            if (determinant.getRelation() != relation)
-                throw new IllegalArgumentException("Relation does not match");
-            determinants.add(determinant);
+        public Builder addDeterminant(int determinantIndex) {
+            determinants.add(relation.getAttribute(determinantIndex));
             return this;
         }
 
         @Override
-        public Builder addDependent(Attribute dependent) {
-            if (dependent.getRelation() != relation)
-                throw new IllegalArgumentException("Relation does not match");
-            dependents.add(dependent);
+        public Builder addDeterminant(QuotedID determinantId) throws AttributeNotFoundException {
+            determinants.add(relation.getAttribute(determinantId));
             return this;
         }
 
         @Override
-        public FunctionalDependency build() {
-            return new FunctionalDependencyImpl(determinants.build(), dependents.build());
+        public Builder addDependent(int dependentIndex) {
+            dependents.add(relation.getAttribute(dependentIndex));
+            return this;
+        }
+
+        @Override
+        public Builder addDependent(QuotedID dependentId) throws AttributeNotFoundException {
+            dependents.add(relation.getAttribute(dependentId));
+            return this;
+        }
+
+        @Override
+        public void build() {
+            relation.addFunctionalDependency(new FunctionalDependencyImpl(determinants.build(), dependents.build()));
         }
     }
 }

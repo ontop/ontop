@@ -22,32 +22,30 @@ package it.unibz.inf.ontop.spec.mapping.bootstrap.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.SpecificationFactory;
-import it.unibz.inf.ontop.spec.mapping.TargetAtom;
-import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
+import it.unibz.inf.ontop.spec.mapping.*;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.BnodeStringTemplateFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.spec.mapping.PrefixManager;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
-import it.unibz.inf.ontop.spec.mapping.SQLMappingFactory;
 import it.unibz.inf.ontop.spec.mapping.bootstrap.DirectMappingBootstrapper.BootstrappingResults;
-import it.unibz.inf.ontop.spec.mapping.impl.SQLMappingFactoryImpl;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.util.MappingOntologyUtils;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.RDF;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -55,13 +53,12 @@ import org.semanticweb.owlapi.model.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 
 /***
@@ -73,27 +70,7 @@ import java.util.Set;
  */
 public class DirectMappingEngine {
 
-	public static class DefaultBootstrappingResults implements BootstrappingResults {
-		private final SQLPPMapping ppMapping;
-		private final OWLOntology ontology;
-
-		public DefaultBootstrappingResults(SQLPPMapping ppMapping, OWLOntology ontology) {
-			this.ppMapping = ppMapping;
-			this.ontology = ontology;
-		}
-
-		@Override
-		public SQLPPMapping getPPMapping() {
-			return ppMapping;
-		}
-
-		@Override
-		public OWLOntology getOntology() {
-			return ontology;
-		}
-	}
-
-	private static final SQLMappingFactory SQL_MAPPING_FACTORY = SQLMappingFactoryImpl.getInstance();
+	private final SQLPPSourceQueryFactory sourceQueryFactory;
 	private final SpecificationFactory specificationFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
 	private final TypeFactory typeFactory;
@@ -102,9 +79,6 @@ public class DirectMappingEngine {
 	private final OntopSQLCredentialSettings settings;
 	private final TargetAtomFactory targetAtomFactory;
 	private final DBFunctionSymbolFactory dbFunctionSymbolFactory;
-
-    private String baseIRI;
-	private int currentMappingIndex = 1;
 
 	/**
 	 * Entry point.
@@ -122,7 +96,8 @@ public class DirectMappingEngine {
 								SpecificationFactory specificationFactory,
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
 								RDF rdfFactory, TargetAtomFactory targetAtomFactory,
-								DBFunctionSymbolFactory dbFunctionSymbolFactory) {
+								DBFunctionSymbolFactory dbFunctionSymbolFactory,
+								SQLPPSourceQueryFactory sourceQueryFactory) {
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -131,6 +106,7 @@ public class DirectMappingEngine {
 		this.rdfFactory = rdfFactory;
 		this.targetAtomFactory = targetAtomFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
+		this.sourceQueryFactory = sourceQueryFactory;
 	}
 
 	/**
@@ -140,14 +116,12 @@ public class DirectMappingEngine {
 															 Optional<OWLOntology> inputOntology)
 			throws MappingBootstrappingException {
 
-		this.baseIRI = fixBaseURI(baseIRI);
-
 		try {
-			SQLPPMapping newPPMapping = extractPPMapping(inputPPMapping);
+			SQLPPMapping newPPMapping = extractPPMapping(inputPPMapping, fixBaseURI(baseIRI));
 
-			OWLOntology ontology = inputOntology.isPresent()
-                    ? inputOntology.get()
-                    : OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI));
+			// TODO: fixURI for the ontology too?
+			OWLOntology ontology = inputOntology
+					.orElse(OWLManager.createOWLOntologyManager().createOntology(IRI.create(baseIRI)));
 
             // update ontology
             OWLOntologyManager manager = ontology.getOWLOntologyManager();
@@ -160,10 +134,46 @@ public class DirectMappingEngine {
 			);
             manager.addAxioms(ontology, declarationAxioms);
 
-            return new DefaultBootstrappingResults(newPPMapping, ontology);
+            return new 	BootstrappingResults() {
+				@Override
+				public SQLPPMapping getPPMapping() { return newPPMapping; }
+				@Override
+				public OWLOntology getOntology() { return ontology; }
+			};
 		}
-		catch (SQLException | MappingException | OWLOntologyCreationException e) {
+		catch (SQLException | OWLOntologyCreationException | MetadataExtractionException e) {
 			throw new MappingBootstrappingException(e);
+		}
+	}
+
+	/***
+	 * extract all the mappings from a datasource
+	 *
+	 * @return a new OBDA Model containing all the extracted mappings
+	 */
+	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> optionalMapping, String baseIRI0) throws SQLException, MetadataExtractionException {
+
+        SQLPPMapping mapping = optionalMapping
+				.orElse(ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(),
+						specificationFactory.createPrefixManager(ImmutableMap.of())));
+
+		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
+			// this operation is EXPENSIVE
+			MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+			ImmutableList<DatabaseRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
+			String baseIRI = baseIRI0.isEmpty()
+					? mapping.getPrefixManager().getDefaultPrefix()
+					: baseIRI0;
+
+			Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
+			AtomicInteger currentMappingIndex = new AtomicInteger(mapping.getTripleMaps().size() + 1);
+
+			ImmutableList<SQLPPTriplesMap> mappings = Stream.concat(
+					mapping.getTripleMaps().stream(),
+					tables.stream().flatMap(td -> getMapping(td, baseIRI, bnodeTemplateMap, currentMappingIndex).stream()))
+					.collect(ImmutableCollectors.toList());
+
+			return ppMappingFactory.createSQLPreProcessedMapping(mappings, mapping.getPrefixManager());
 		}
 	}
 
@@ -179,89 +189,28 @@ public class DirectMappingEngine {
 
 
 	/***
-	 * extract all the mappings from a datasource
-	 *
-	 * @return a new OBDA Model containing all the extracted mappings
-	 */
-	private SQLPPMapping extractPPMapping(Optional<SQLPPMapping> ppMapping) throws MappingException, SQLException {
-
-        SQLPPMapping mapping;
-	    if (!ppMapping.isPresent()) {
-            PrefixManager prefixManager = specificationFactory.createPrefixManager(ImmutableMap.of());
-            mapping = ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.of(), prefixManager);
-        }
-        else
-            mapping = ppMapping.get();
-
-		currentMappingIndex = mapping.getTripleMaps().size() + 1;
-		return bootstrapMappings(mapping);
-	}
-
-	/***
-	 * extract mappings from given datasource, and insert them into the pre-processed mapping
-	 *
-	 * Duplicate Exception may happen,
-	 * since mapping id is generated randomly and same id may occur
-	 */
-	private SQLPPMapping bootstrapMappings(SQLPPMapping ppMapping)
-			throws SQLException, DuplicateMappingException {
-		if (ppMapping == null) {
-			throw new IllegalArgumentException("Model should not be null");
-		}
-		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
-			BasicDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(conn, typeFactory.getDBTypeFactory());
-			// this operation is EXPENSIVE
-			RDBMetadataExtractionTools.loadMetadata(metadata, conn, null);
-			return bootstrapMappings(metadata, ppMapping);
-		}
-	}
-
-	private SQLPPMapping bootstrapMappings(BasicDBMetadata metadata, SQLPPMapping ppMapping) throws DuplicateMappingException {
-		if (baseIRI == null || baseIRI.isEmpty())
-			this.baseIRI = ppMapping.getPrefixManager().getDefaultPrefix();
-		Collection<DatabaseRelationDefinition> tables = metadata.getDatabaseRelations();
-		List<SQLPPTriplesMap> mappingAxioms = new ArrayList<>();
-		Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap = new HashMap<>();
-		for (DatabaseRelationDefinition td : tables) {
-			mappingAxioms.addAll(getMapping(td, baseIRI, bnodeTemplateMap));
-		}
-
-		List<SQLPPTriplesMap> mappings = new ArrayList<>();
-		mappings.addAll(ppMapping.getTripleMaps());
-		mappings.addAll(mappingAxioms);
-
-		return ppMappingFactory.createSQLPreProcessedMapping(ImmutableList.copyOf(mappings), ppMapping.getPrefixManager());
-	}
-
-
-	/***
 	 * generate a mapping axiom from a table of a database
 	 *
 	 * @param table : the data definition from which mappings are extraced
-	 * @param baseUri : the base uri needed for direct mapping axiom
+	 * @param baseIRI : the base uri needed for direct mapping axiom
 	 *
 	 *  @param bnodeTemplateMap
 	 * @return a List of OBDAMappingAxiom-s
 	 */
-	private List<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table, String baseUri,
-											 Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap) {
+	public ImmutableList<SQLPPTriplesMap> getMapping(DatabaseRelationDefinition table,
+											String baseIRI,
+											Map<DatabaseRelationDefinition, BnodeStringTemplateFunctionSymbol> bnodeTemplateMap,
+											AtomicInteger mappingIndex) {
 
-		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseUri, termFactory, targetAtomFactory,
+		DirectMappingAxiomProducer dmap = new DirectMappingAxiomProducer(baseIRI, termFactory, targetAtomFactory,
 				rdfFactory, dbFunctionSymbolFactory, typeFactory);
 
-		List<SQLPPTriplesMap> axioms = new ArrayList<>();
-		axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex,
-				SQL_MAPPING_FACTORY.getSQLQuery(dmap.getSQL(table)), dmap.getCQ(table, bnodeTemplateMap)));
-		currentMappingIndex++;
-
-		Map<String, ImmutableList<TargetAtom>> refAxioms = dmap.getRefAxioms(table, bnodeTemplateMap);
-		for (Map.Entry<String, ImmutableList<TargetAtom>> e : refAxioms.entrySet()) {
-            OBDASQLQuery sqlQuery = SQL_MAPPING_FACTORY.getSQLQuery(e.getKey());
-			ImmutableList<TargetAtom> targetQuery = e.getValue();
-            axioms.add(new OntopNativeSQLPPTriplesMap("MAPPING-ID"+ currentMappingIndex, sqlQuery, targetQuery));
-			currentMappingIndex++;
-		}
-
-		return axioms;
+		return Stream.concat(
+				Stream.of(Maps.immutableEntry(dmap.getSQL(table), dmap.getCQ(table, bnodeTemplateMap))),
+				table.getForeignKeys().stream()
+						.map(fk -> Maps.immutableEntry(dmap.getRefSQL(fk), dmap.getRefCQ(fk, bnodeTemplateMap))))
+					.map(e -> new OntopNativeSQLPPTriplesMap("MAPPING-ID" + mappingIndex.getAndIncrement(),
+						sourceQueryFactory.createSourceQuery(e.getKey()), e.getValue()))
+				.collect(ImmutableCollectors.toList());
 	}
 }

@@ -22,15 +22,9 @@ package it.unibz.inf.ontop.spec.mapping.validation;
 
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-//import it.unibz.inf.ontop.spec.ontology.MutableOntologyVocabulary;
-//import it.unibz.inf.ontop.spec.ontology.impl.MutableOntologyVocabularyImpl;
-//import it.unibz.inf.ontop.spec.ontology.impl.TargetQueryValidator;
 import junit.framework.TestCase;
 
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -48,13 +42,11 @@ import org.slf4j.LoggerFactory;
 
 public class MetaMappingTargetQueryValidatorTest extends TestCase {
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String obdafile = "src/test/resources/metamapping.obda";
 
-	final String obdafile = "src/test/resources/metamapping.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb;DATABASE_TO_UPPER=FALSE";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	public void testValidate() throws MappingException {
 		OntopMappingSQLAllConfiguration configuration = OntopMappingSQLAllConfiguration.defaultBuilder()

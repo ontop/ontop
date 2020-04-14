@@ -290,7 +290,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     public String toString() {
         return String.format("%s %s(%s)",
                 EXTENSIONAL_NODE_STR,
-                relationDefinition.getID().toString(),
+                relationDefinition.getAtomPredicate().getName(),
                 argumentMap.entrySet().stream()
                 .map(e -> e.getKey() + ":" + e.getValue())
                 .collect(Collectors.joining(",")));

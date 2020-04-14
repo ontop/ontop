@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
@@ -67,7 +68,7 @@ public interface IntermediateQueryFactory {
 
     NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
-                                @Assisted("columnNames") ImmutableMap<Variable, String> columnNames,
+                                @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
                                 String nativeQueryString, VariableNullability variableNullability);
 
     TrueNode createTrueNode();

@@ -20,9 +20,7 @@ import it.unibz.inf.ontop.iq.proposal.impl.NodeCentricOptimizationResultsImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -188,7 +186,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
                     Optional<? extends VariableOrGroundTerm> source = Optional.ofNullable(
                             sourceArgumentMap.get(c.getAttribute().getIndex() - 1));
                     return source.isPresent()
-                            && source.equals(Optional.ofNullable(targetArgumentMap.get(c.getReference().getIndex() - 1)));
+                            && source.equals(Optional.ofNullable(targetArgumentMap.get(c.getReferencedAttribute().getIndex() - 1)));
                 });
     }
 
@@ -201,7 +199,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArguments = targetDataNode.getArgumentMap();
 
         ImmutableSet<Integer> fkTargetIndexes = constraint.getComponents().stream()
-                .map(c -> c.getReference().getIndex() - 1)
+                .map(c -> c.getReferencedAttribute().getIndex() - 1)
                 .collect(ImmutableCollectors.toSet());
 
         /*
@@ -241,7 +239,7 @@ public class RedundantJoinFKExecutor implements InnerJoinExecutor {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> targetArgumentMap = node.getArgumentMap();
 
         return constraint.getComponents().stream()
-                .map(c -> targetArgumentMap.get(c.getReference().getIndex() - 1))
+                .map(c -> targetArgumentMap.get(c.getReferencedAttribute().getIndex() - 1))
                 .filter(t -> t instanceof Variable)
                 .map(t -> (Variable) t)
                 .collect(ImmutableCollectors.toSet());

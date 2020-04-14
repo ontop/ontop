@@ -14,7 +14,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 /***
  * A simple test that check if the system is able to handle Mappings for
  * classes/roles and attributes even if there are no URI templates. i.e., the
- * database stores URI's directly.
+ * database stores URIs directly.
  *
  */
 public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
@@ -23,9 +23,9 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 	// into OWL and repeat everything taking form OWL
 
 
-	static final String owlfile = "/db2/schema/multischemadb2.owl";
-	static final String obdafile = "/db2/schema/multischemadb2.obda";
-	static final String propertiesfile = "/db2/db2-stock.properties";
+	private static final String owlfile = "/db2/schema/multischemadb2.owl";
+	private static final String obdafile = "/db2/schema/multischemadb2.obda";
+	private static final String propertiesfile = "/db2/db2-stock.properties";
 
 	private static OntopOWLReasoner REASONER;
 	private static OntopOWLConnection CONNECTION;
@@ -80,6 +80,4 @@ public class MultiSchemaDB2Test extends AbstractVirtualModeTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT ?x WHERE { ?x :hasFile ?r }";
 		checkThereIsAtLeastOneResult(query);
 	}
-	
-		
 }

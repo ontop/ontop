@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -28,7 +29,7 @@ public interface NativeNode extends LeafIQTree {
      * Needed because certain DBs like Oracle impose constraints on the length of a column name,
      * so the column name may differ from the variable name.
      */
-    ImmutableMap<Variable, String> getColumnNames();
+    ImmutableMap<Variable, QuotedID> getColumnNames();
 
     String getNativeQueryString();
 }

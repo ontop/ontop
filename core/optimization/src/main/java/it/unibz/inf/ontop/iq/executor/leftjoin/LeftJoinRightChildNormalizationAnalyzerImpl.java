@@ -146,7 +146,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
 
                         return leftArg.isPresent()
                                 && leftArg.equals(Optional.ofNullable(
-                                        rightArgumentMap.get(c.getReference().getIndex() - 1)))
+                                        rightArgumentMap.get(c.getReferencedAttribute().getIndex() - 1)))
                         // Non-nullable term
                         &&  (!leftArg.get().isNullable(variableNullability.getNullableVariables()));
                 });
@@ -164,7 +164,7 @@ public class LeftJoinRightChildNormalizationAnalyzerImpl implements LeftJoinRigh
                 .filter(i -> (matchedFKs.stream()
                         .noneMatch(fk ->
                                 fk.getComponents().stream()
-                                        .anyMatch(c -> c.getReference().getIndex() == (i + 1)))))
+                                        .anyMatch(c -> c.getReferencedAttribute().getIndex() == (i + 1)))))
                 .boxed()
                 .collect(ImmutableCollectors.toSet());
     }

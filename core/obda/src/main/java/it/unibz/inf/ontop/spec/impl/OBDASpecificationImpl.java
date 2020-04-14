@@ -6,7 +6,6 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.ontology.ClassifiedTBox;
 import it.unibz.inf.ontop.spec.OBDASpecification;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 
 
 public class OBDASpecificationImpl implements OBDASpecification {

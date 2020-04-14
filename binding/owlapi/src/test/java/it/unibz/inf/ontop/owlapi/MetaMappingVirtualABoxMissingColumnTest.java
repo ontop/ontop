@@ -59,14 +59,12 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "src/test/resources/test/metamapping.owl";
+	private static final String obdafile = "src/test/resources/test/metamapping_broken.obda";
 
-	final String owlfile = "src/test/resources/test/metamapping.owl";
-	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Before
     public void setUp() throws Exception {
@@ -119,7 +117,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	public void testViEqSig() throws Exception {
 
         expectedEx.expect(IllegalConfigurationException.class);
-        expectedEx.expectMessage(" The placeholder(s) \"code1\" in the target do(es) not occur in the body of the mapping");
+        expectedEx.expectMessage(" The placeholder(s) code1 in the target do(es) not occur in the body of the mapping");
 
 		runTests();
 	}

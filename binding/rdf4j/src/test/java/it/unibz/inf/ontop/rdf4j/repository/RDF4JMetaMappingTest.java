@@ -26,6 +26,6 @@ public class RDF4JMetaMappingTest extends AbstractRDF4JTest {
     @Test
     public void testSPO() {
         int count = runQueryAndCount("SELECT * WHERE {?s ?p ?o .}");
-        assertEquals(2, count);
+        assertEquals(4, count); // VALi :a testClass & VALi :a VALi, for i = 1, 2
     }
 }

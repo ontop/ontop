@@ -80,13 +80,10 @@ public class H2SameAsTest {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -103,7 +100,6 @@ public class H2SameAsTest {
 				.ontologyFile(owlfile)
 				.nativeOntopMappingFile(obdafile)
 				.sameAsMappings(sameAs)
-				.enableFullMetadataExtraction(false)
 				.jdbcUrl(JDBC_URL)
 				.jdbcUser(JDBC_USER)
 				.jdbcPassword(JDBC_PASSWORD)
@@ -115,9 +111,8 @@ public class H2SameAsTest {
 		// Now we are ready for querying
 		conn = reasoner.getConnection();
 
-		OWLStatement st = conn.createStatement();
 		ArrayList<String> retVal = new ArrayList<>();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
@@ -126,19 +121,10 @@ public class H2SameAsTest {
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
-
                 }
             }
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}

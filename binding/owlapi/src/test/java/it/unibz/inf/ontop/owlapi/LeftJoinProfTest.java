@@ -1238,12 +1238,11 @@ public class LeftJoinProfTest {
 
         // Now we are ready for querying
         OntopOWLConnection conn = reasoner.getConnection();
-        OntopOWLStatement st = conn.createStatement();
         Optional<String> sql;
 
         int i = 0;
         List<String> returnedValues = new ArrayList<>();
-        try {
+        try (OntopOWLStatement st = conn.createStatement()) {
             IQ executableQuery = st.getExecutableQuery(query);
             sql = Optional.of(executableQuery.getTree())
                     .filter(t -> t instanceof UnaryIQTree)
@@ -1262,9 +1261,8 @@ public class LeftJoinProfTest {
                     i++;
                 }
             }
-        } catch (Exception e) {
-            throw e;
-        } finally {
+        }
+        finally {
             conn.close();
             reasoner.dispose();
         }

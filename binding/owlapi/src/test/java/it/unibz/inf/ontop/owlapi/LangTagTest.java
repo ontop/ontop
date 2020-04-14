@@ -94,9 +94,6 @@ public class LangTagTest {
         String query = new Scanner( new File(queryFile)).useDelimiter("\\A").next();
 
         try (OWLStatement st = conn.createStatement()) {
-
-            System.out.println(query);
-
             TupleOWLResultSet rs2 = st.executeSelectQuery(query);
             assertTrue(rs2.hasNext());
             final OWLBindingSet bindingSet = rs2.next();

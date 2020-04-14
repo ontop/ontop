@@ -44,6 +44,7 @@ public class QuestSPARQLRewriterTest extends TestCase {
 	private static final String OWL_FILE_LOCATION = ROOT_LOCATION + "stockexchange.owl";
 	private static final String OBDA_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.obda";
 	private static final String PROPERTY_FILE_LOCATION = ROOT_LOCATION + "stockexchange-mysql.properties";
+
 	private OntopOWLReasoner reasoner;
 
 	@Override

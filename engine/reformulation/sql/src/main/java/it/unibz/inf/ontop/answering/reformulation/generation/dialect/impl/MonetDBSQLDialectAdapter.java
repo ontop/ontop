@@ -8,13 +8,6 @@ import java.util.regex.Pattern;
  */
 public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
-    @Override
-    public String sqlQuote(String name) {
-        //TODO: This should depend on quotes in the sql in the mappings
-        return String.format("\"%s\"", name);
-//		return name;
-    }
-
     /**
      * There is no standard for this part.
      *
@@ -46,7 +39,7 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
     @Override
     public String nameTopVariable(String variableName, Set<String> sqlVariableNames) {
-        return sqlQuote(variableName);
+        return variableName;
     }
 
 }

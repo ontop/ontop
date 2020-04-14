@@ -90,8 +90,6 @@ public class ReverseURIH2Test {
 		
 		System.out.println("Test");
 
-		try {
-
 			sqlConnection = DriverManager
 					.getConnection(url, username, password);
 
@@ -111,18 +109,9 @@ public class ReverseURIH2Test {
 					.jdbcUrl(url)
 					.jdbcUser(username)
 					.jdbcPassword(password)
-					.enableFullMetadataExtraction(false)
 					.build();
 	        reasoner = factory.createReasoner(config);
-	        
-			// Now we are ready for querying
 			conn = reasoner.getConnection();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			log.error(e.getMessage(), e);
-			throw e;
-		}
-
 	}
 
 	@AfterClass
@@ -137,13 +126,10 @@ public class ReverseURIH2Test {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			Statement s = sqlConnection.createStatement();
-			try {
+			try (Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -151,8 +137,7 @@ public class ReverseURIH2Test {
 	}
 
 	private void runTests(String query, int numberOfResults) throws Exception {
-		OWLStatement st = conn.createStatement();
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			/*
@@ -173,15 +158,6 @@ public class ReverseURIH2Test {
 			 * ind2.toString()); assertEquals("\"value1\"", val.toString());
 			 */
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				Assert.assertTrue(false);
-			}
 		}
 	}
 

@@ -54,32 +54,29 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTermType integerDBType = dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col12"), integerDBType, false));
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
+            "col1", integerDBType, false,
+            "col12", integerDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p3"))
-            .addAttribute(idFactory.createAttributeID("col31"), integerDBType, false));
+        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p3",
+            "col31", integerDBType, false);
         P3_PREDICATE = table3Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p4"))
-            .addAttribute(idFactory.createAttributeID("col41"), integerDBType, false));
+        RelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p4",
+            "col41", integerDBType, false);
         P4_PREDICATE = table4Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null, "p5"))
-            .addAttribute(idFactory.createAttributeID("col51"), integerDBType, false));
+        RelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p5",
+            "col51", integerDBType, false);
         P5_PREDICATE = table5Def.getAtomPredicate();
 
-
-        DatabaseRelationDefinition tableBrokerDef = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID("DB2INST1", "brokerworksfor"))
-            .addAttribute(idFactory.createAttributeID("broker"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("company"), integerDBType, true)
-            .addAttribute(idFactory.createAttributeID("client"), integerDBType, true));
+        RelationDefinition tableBrokerDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("brokerworksfor",
+            "broker", integerDBType, false,
+            "company", integerDBType, true,
+            "client", integerDBType, true);
         BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";

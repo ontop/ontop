@@ -51,14 +51,12 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "src/test/resources/test/lung-cancer3.owl";
+	private static final String obdafile = "src/test/resources/test/lung-cancer3.obda";
 
-	final String owlfile = "src/test/resources/test/lung-cancer3.owl";
-	final String obdafile = "src/test/resources/test/lung-cancer3.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Override
 	public void setUp() throws Exception {
@@ -87,7 +85,6 @@ public class LungCancerH2TestVirtual extends TestCase {
 
 		// Now we are ready for querying
 		OWLConnection conn = reasoner.getConnection();
-		OWLStatement st = conn.createStatement();
 
 		String query1 = "PREFIX : <http://example.org/> SELECT * WHERE { ?x :hasNeoplasm <http://example.org/db1/neoplasm/1> }";
 		String query2 = "PREFIX : <http://example.org/> SELECT * WHERE { <http://example.org/db1/1> :hasNeoplasm ?y }";
@@ -105,7 +102,7 @@ public class LungCancerH2TestVirtual extends TestCase {
 		
 		String query = "PREFIX : <http://example.org/> SELECT * WHERE { ?y :hasStage <http://example.org/stages/limi> }";
 		
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			executeQueryAssertResults(query, st, 1);
 			
 //			executeQueryAssertResults(query3, st, 1);
@@ -122,15 +119,8 @@ public class LungCancerH2TestVirtual extends TestCase {
 			 // NOTE CHECK THE CONTENT OF THIS QUERY, it seems to return the correct number of results but incorrect content, compare to the SELECT version which is correct
 			
 
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				throw e;
-			}
+		}
+		finally {
 			conn.close();
 			reasoner.dispose();
 		}

@@ -1,13 +1,9 @@
 package it.unibz.inf.ontop;
 
-import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
-
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.DEFAULT_DUMMY_DB_METADATA;
-import static it.unibz.inf.ontop.OptimizationTestingTools.TYPE_FACTORY;
+import static it.unibz.inf.ontop.OptimizationTestingTools.createRelationPredicate;
 
 public class NoDependencyTestDBMetadata {
 
@@ -39,69 +35,50 @@ public class NoDependencyTestDBMetadata {
     public static final RelationPredicate INT_TABLE2_NULL_AR2;
     public static final RelationPredicate INT_TABLE1_NULL_AR3;
 
-    public static RelationPredicate createStringRelationPredicate(BasicDBMetadata dbMetadata,
-                                                                   int tableNumber, int arity, boolean canBeNull) {
-        return createRelationPredicate(dbMetadata, tableNumber, arity, dbMetadata.getDBParameters().getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
+    public static RelationPredicate createStringRelationPredicate(int tableNumber, int arity, boolean canBeNull) {
+        return createRelationPredicate(tableNumber, arity, DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
     }
 
-    public static RelationPredicate createStringRelationPredicate(BasicDBMetadata dbMetadata,
-                                                                  int tableNumber, int arity) {
-        return createStringRelationPredicate(dbMetadata, tableNumber, arity, false);
+    public static RelationPredicate createStringRelationPredicate(int tableNumber, int arity) {
+        return createStringRelationPredicate(tableNumber, arity, false);
     }
 
-    public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata,
-                                                               int tableNumber, int arity, boolean canBeNull) {
-        return createRelationPredicate(dbMetadata, tableNumber, arity, dbMetadata.getDBParameters().getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
+    public static RelationPredicate createIntRelationPredicate(int tableNumber, int arity, boolean canBeNull) {
+        return createRelationPredicate(tableNumber, arity, DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
     }
 
-    public static RelationPredicate createIntRelationPredicate(BasicDBMetadata dbMetadata,
-                                                                int tableNumber, int arity) {
-        return createIntRelationPredicate(dbMetadata, tableNumber, arity, false);
-    }
-
-    public static RelationPredicate createRelationPredicate(BasicDBMetadata dbMetadata,
-                                                                   int tableNumber, int arity, DBTermType termType, String prefix,
-                                                            boolean canBeNull) {
-
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        RelationDefinition.AttributeListBuilder builder =  new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,
-                prefix + "TABLE" + tableNumber + "AR" + arity));
-        for (int i = 1; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
-        }
-        DatabaseRelationDefinition tableDef = dbMetadata.createDatabaseRelation(builder);
-        return tableDef.getAtomPredicate();
+    public static RelationPredicate createIntRelationPredicate(int tableNumber, int arity) {
+        return createIntRelationPredicate(tableNumber, arity, false);
     }
 
     static {
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        TABLE1_AR1 = createStringRelationPredicate(dbMetadata, 1, 1);
-        TABLE2_AR1 = createStringRelationPredicate(dbMetadata, 2, 1);
-        TABLE3_AR1 = createStringRelationPredicate(dbMetadata, 3, 1);
-        TABLE4_AR1 = createStringRelationPredicate(dbMetadata, 4, 1);
-        TABLE5_AR1 = createStringRelationPredicate(dbMetadata, 5, 1);
+        TABLE1_AR1 = createStringRelationPredicate( 1, 1);
+        TABLE2_AR1 = createStringRelationPredicate( 2, 1);
+        TABLE3_AR1 = createStringRelationPredicate( 3, 1);
+        TABLE4_AR1 = createStringRelationPredicate( 4, 1);
+        TABLE5_AR1 = createStringRelationPredicate( 5, 1);
 
-        TABLE1_AR2 = createStringRelationPredicate(dbMetadata, 1, 2);
-        TABLE2_AR2 = createStringRelationPredicate(dbMetadata, 2, 2);
-        TABLE3_AR2 = createStringRelationPredicate(dbMetadata, 3, 2);
-        TABLE4_AR2 = createStringRelationPredicate(dbMetadata, 4, 2);
-        TABLE5_AR2 = createStringRelationPredicate(dbMetadata, 5, 2);
-        TABLE6_AR2 = createStringRelationPredicate(dbMetadata, 6, 2);
+        TABLE1_AR2 = createStringRelationPredicate( 1, 2);
+        TABLE2_AR2 = createStringRelationPredicate( 2, 2);
+        TABLE3_AR2 = createStringRelationPredicate( 3, 2);
+        TABLE4_AR2 = createStringRelationPredicate( 4, 2);
+        TABLE5_AR2 = createStringRelationPredicate( 5, 2);
+        TABLE6_AR2 = createStringRelationPredicate( 6, 2);
 
-        TABLE1_AR3 = createStringRelationPredicate(dbMetadata, 1, 3);
-        TABLE2_AR3 = createStringRelationPredicate(dbMetadata, 2, 3);
-        TABLE3_AR3 = createStringRelationPredicate(dbMetadata, 3, 3);
-        TABLE4_AR3 = createStringRelationPredicate(dbMetadata, 4, 3);
-        TABLE5_AR3 = createStringRelationPredicate(dbMetadata, 5, 3);
-        TABLE6_AR3 = createStringRelationPredicate(dbMetadata, 6, 3);
+        TABLE1_AR3 = createStringRelationPredicate( 1, 3);
+        TABLE2_AR3 = createStringRelationPredicate( 2, 3);
+        TABLE3_AR3 = createStringRelationPredicate( 3, 3);
+        TABLE4_AR3 = createStringRelationPredicate( 4, 3);
+        TABLE5_AR3 = createStringRelationPredicate( 5, 3);
+        TABLE6_AR3 = createStringRelationPredicate(6, 3);
 
-        TABLE7_AR4 = createStringRelationPredicate(dbMetadata, 7, 4);
+        TABLE7_AR4 = createStringRelationPredicate(7, 4);
 
-        INT_TABLE1_AR2 = createIntRelationPredicate(dbMetadata,1, 2);
-        INT_TABLE2_AR2 = createIntRelationPredicate(dbMetadata, 2, 2);
+        INT_TABLE1_AR2 = createIntRelationPredicate(1, 2);
+        INT_TABLE2_AR2 = createIntRelationPredicate( 2, 2);
 
-        INT_TABLE1_NULL_AR2 = createIntRelationPredicate(dbMetadata, 1, 2, true);
-        INT_TABLE2_NULL_AR2 = createIntRelationPredicate(dbMetadata, 2, 2, true);
-        INT_TABLE1_NULL_AR3 = createIntRelationPredicate(dbMetadata, 1, 3, true);
+        INT_TABLE1_NULL_AR2 = createIntRelationPredicate(1, 2, true);
+        INT_TABLE2_NULL_AR2 = createIntRelationPredicate(2, 2, true);
+        INT_TABLE1_NULL_AR3 = createIntRelationPredicate(1, 3, true);
     }
 }

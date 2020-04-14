@@ -26,7 +26,7 @@ public class OracleLongVarNameTest {
     @Test
     public void testDefaultAdapter() {
         String veryLongVarName = defaultAdapter.nameTopVariable(veryLongSignatureVarName + defaultSuffix, emptyVarSet);
-        assertEquals(veryLongVarName, defaultAdapter.sqlQuote(veryLongSignatureVarName + defaultSuffix));
+        assertEquals(veryLongVarName, veryLongSignatureVarName + defaultSuffix);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class OracleLongVarNameTest {
         assertTrue(veryLongVarName.length() <= OracleSQLDialectAdapter.NAME_MAX_LENGTH);
         //assertTrue(veryLongVarName.contains(defaultSuffix));
         assertTrue(veryLongVarName.contains("veryVery"));
-        assertEquals( "\"veryVeryVeryVeryVeryVeryVer0\"", veryLongVarName);
+        assertEquals( "veryVeryVeryVeryVeryVeryVer0", veryLongVarName);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class OracleLongVarNameTest {
     @Test
     public void testOracleMaxNonModifiedVarName() {
         String limitVarName = oracleAdapter.nameTopVariable(limitSignatureVarName + defaultSuffix, emptyVarSet);
-        assertEquals(limitVarName, oracleAdapter.sqlQuote(limitSignatureVarName + defaultSuffix));
+        assertEquals(limitSignatureVarName + defaultSuffix, limitVarName);
     }
 
 }

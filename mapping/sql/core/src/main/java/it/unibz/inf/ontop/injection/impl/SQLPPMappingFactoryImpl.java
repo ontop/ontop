@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.SQLPPMappingFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.spec.mapping.PrefixManager;
@@ -45,8 +44,7 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
      */
     @Override
     public SQLPPMapping createSQLPreProcessedMapping(ImmutableList<SQLPPTriplesMap> ppMappingAxioms,
-                                                     PrefixManager prefixManager)
-            throws DuplicateMappingException {
+                                                     PrefixManager prefixManager) {
         try {
             /**
              * Instantiation
@@ -56,20 +54,16 @@ public class SQLPPMappingFactoryImpl implements SQLPPMappingFactory {
             /**
              * Exception management
              */
-        } catch (InvocationTargetException e) {
+        }
+        catch (InvocationTargetException e) {
             Throwable targetException = e.getTargetException();
             /**
-             * Expected exception: rethrown
-             */
-            if (targetException instanceof DuplicateMappingException) {
-                throw (DuplicateMappingException) targetException;
-            }
-            /**
-             * Unexcepted: throw a unexpected RuntimeException.
+             * Unexpected: throw a unexpected RuntimeException.
              */
             throw new RuntimeException(targetException.getMessage());
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

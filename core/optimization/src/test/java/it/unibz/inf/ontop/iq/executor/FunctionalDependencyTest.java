@@ -1,11 +1,9 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
-import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -65,83 +63,80 @@ public class FunctionalDependencyTest {
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static{
-        BasicDBMetadata dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        QuotedIDFactory idFactory = dbMetadata.getDBParameters().getQuotedIDFactory();
-        DBTypeFactory dbTypeFactory = dbMetadata.getDBParameters().getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: PK + non-unique functional constraint + 2 dependent fields + 1 independent
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table1"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false));
-        table1Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1)));
-        table1Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table1Def)
-                .addDeterminant(table1Def.getAttribute(2))
-                .addDependent(table1Def.getAttribute(3))
-                .addDependent(table1Def.getAttribute(4))
-                .build());
+        DatabaseRelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table1Def)
+                .addDeterminant(2)
+                .addDependent(3)
+                .addDependent(4)
+                .build();
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table2"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false));
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2)));
+        DatabaseRelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
          */
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table3"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col6"), integerDBType, false));
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1)));
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(table3Def.getAttribute(2))
-                .addDependent(table3Def.getAttribute(3))
-                .build());
-        table3Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table3Def)
-                .addDeterminant(table3Def.getAttribute(4))
-                .addDependent(table3Def.getAttribute(5))
-                .build());
+        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false,
+            "col6", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(2)
+                .addDependent(3)
+                .build();
+        FunctionalDependency.defaultBuilder(table3Def)
+                .addDeterminant(4)
+                .addDependent(5)
+                .build();
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
          */
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(new RelationDefinition.AttributeListBuilder(idFactory.createRelationID(null,"table4"))
-            .addAttribute(idFactory.createAttributeID("col1"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col2"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col3"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col4"), integerDBType, false)
-            .addAttribute(idFactory.createAttributeID("col5"), integerDBType, false));
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1)));
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
-                .addDeterminant(table4Def.getAttribute(3))
-                .addDependent(table4Def.getAttribute(4))
-                .build());
-        table4Def.addFunctionalDependency(FunctionalDependency.defaultBuilder(table4Def)
-                .addDeterminant(table4Def.getAttribute(2))
-                .addDependent(table4Def.getAttribute(3))
-                .addDependent(table4Def.getAttribute(4))
-                .build());
+        DatabaseRelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table4",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false,
+            "col4", integerDBType, false,
+            "col5", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
+        FunctionalDependency.defaultBuilder(table4Def)
+                .addDeterminant(3)
+                .addDependent(4)
+                .build();
+        FunctionalDependency.defaultBuilder(table4Def)
+                .addDeterminant(2)
+                .addDependent(3)
+                .addDependent(4)
+                .build();
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
     }
 
     @Test
-    public void testRedundantSelfJoin1() throws EmptyQueryException {
+    public void testRedundantSelfJoin1()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -178,7 +173,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin2() throws EmptyQueryException {
+    public void testRedundantSelfJoin2()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
 
@@ -217,7 +212,7 @@ public class FunctionalDependencyTest {
 
     @Ignore("TODO: re-enable it after re-allowing binding lift above distincts")
     @Test
-    public void testRedundantSelfJoin3() throws EmptyQueryException {
+    public void testRedundantSelfJoin3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3,
                 X, Y, Z);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -259,7 +254,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin4() throws EmptyQueryException {
+    public void testRedundantSelfJoin4() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -295,7 +290,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin5() throws EmptyQueryException {
+    public void testRedundantSelfJoin5() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
         IntermediateQueryBuilder queryBuilder = createQueryBuilder();
@@ -331,7 +326,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin6() throws EmptyQueryException {
+    public void testRedundantSelfJoin6() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -372,7 +367,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin7() throws EmptyQueryException {
+    public void testRedundantSelfJoin7() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -423,7 +418,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin7_1() throws EmptyQueryException {
+    public void testRedundantSelfJoin7_1()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -474,7 +469,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin7_2() throws EmptyQueryException {
+    public void testRedundantSelfJoin7_2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -518,7 +513,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin7_3() throws EmptyQueryException {
+    public void testRedundantSelfJoin7_3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_3, X, Y, Z);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -574,7 +569,7 @@ public class FunctionalDependencyTest {
 
 
     @Test
-    public void testRedundantSelfJoin8() throws EmptyQueryException {
+    public void testRedundantSelfJoin8() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_1, X);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -612,7 +607,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin9() throws EmptyQueryException {
+    public void testRedundantSelfJoin9() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -653,7 +648,7 @@ public class FunctionalDependencyTest {
      * Y --> from an independent attribute
      */
     @Test
-    public void testNonRedundantSelfJoin1() throws EmptyQueryException {
+    public void testNonRedundantSelfJoin1()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -695,7 +690,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testNonRedundantSelfJoin2() throws EmptyQueryException {
+    public void testNonRedundantSelfJoin2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -826,7 +821,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin1_T3() throws EmptyQueryException {
+    public void testRedundantSelfJoin1_T3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -863,7 +858,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin2_T3() throws EmptyQueryException {
+    public void testRedundantSelfJoin2_T3()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -916,7 +911,7 @@ public class FunctionalDependencyTest {
 
     @Ignore("TODO: remove the redundant join")
     @Test
-    public void testRedundantSelfJoin3_T3() throws EmptyQueryException {
+    public void testRedundantSelfJoin3_T3()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -954,7 +949,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin1_T4() throws EmptyQueryException {
+    public void testRedundantSelfJoin1_T4()  {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -991,7 +986,7 @@ public class FunctionalDependencyTest {
     }
 
     @Test
-    public void testRedundantSelfJoin2_T4() throws EmptyQueryException {
+    public void testRedundantSelfJoin2_T4() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_AR_2, X, Y);
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
