@@ -198,7 +198,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = sqlSerializedQuery.getColumnNames().entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> createQualifiedAttributeId(alias, e.getValue())
+                            e -> new QualifiedAttributeID(alias, e.getValue())
                     ));
 
             String sqlSubString = String.format("(%s) %s",sqlSerializedQuery.getSQLString(), alias.getSQLRendering());

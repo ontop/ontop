@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.model.term.Variable;
 
 /**
@@ -13,10 +14,10 @@ import it.unibz.inf.ontop.model.term.Variable;
 public class SQLSerializedQueryImpl implements SQLSerializedQuery {
 
     private final String sqlQueryString;
-    private final ImmutableMap<Variable, String> columnNames;
+    private final ImmutableMap<Variable, QuotedID> columnNames;
 
     @AssistedInject
-    private SQLSerializedQueryImpl(@Assisted String sqlString, @Assisted ImmutableMap<Variable, String> columnNames) {
+    private SQLSerializedQueryImpl(@Assisted String sqlString, @Assisted ImmutableMap<Variable, QuotedID> columnNames) {
         this.sqlQueryString = sqlString;
         this.columnNames = columnNames;
     }
@@ -27,7 +28,7 @@ public class SQLSerializedQueryImpl implements SQLSerializedQuery {
     }
 
     @Override
-    public ImmutableMap<Variable, String> getColumnNames() {
+    public ImmutableMap<Variable, QuotedID> getColumnNames() {
         return columnNames;
     }
 
