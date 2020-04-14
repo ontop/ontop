@@ -7,10 +7,7 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 
-	public String sqlQuote(String name);
-
-
-	public String sqlSlice(long limit, long offset);
+	String sqlSlice(long limit, long offset);
 
 	/**
 	 * Returns the name of special system table having one tuple only if the FROM clause is always required in the dialect
@@ -21,7 +18,7 @@ public interface SQLDialectAdapter {
 	/**
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
 	 */
-	public String nameTopVariable(String signatureVariable, Set<String> sqlVariableNames);
+	String nameTopVariable(String signatureVariable, Set<String> sqlVariableNames);
 
 
     String render(DBConstant constant);

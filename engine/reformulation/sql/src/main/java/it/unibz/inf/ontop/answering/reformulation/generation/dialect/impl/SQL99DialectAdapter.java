@@ -17,12 +17,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         return "''";
     }
 
-    @Override
-    public String sqlQuote(String name) {
-        //TODO: This should depend on quotes in the sql in the mappings
-        return String.format("\"%s\"", name);
-//		return name;
-    }
 
     /**
      * There is no standard for this part.
@@ -47,7 +41,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     @Override
     public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
-        return sqlQuote(buildDefaultName("", signatureVariableName, ""));
+        return buildDefaultName("", signatureVariableName, "");
     }
 
     @Override

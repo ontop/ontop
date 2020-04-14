@@ -3,13 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.dialect.impl;
 
 public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 
-	/*Now we use the table name given by the user,
-	  and we assume that it includes the quotes if needed*/
-	@Override
-	public String sqlQuote(String name) {
-		return String.format("`%s`", name);
-	}
-
 	@Override
 	public String sqlSlice(long limit, long offset) {
 		if (limit < 0 ) {
