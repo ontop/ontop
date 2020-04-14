@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
-    private final SQLTermSerializer sqlTermSerializer;
-    private final SQLDialectAdapter dialectAdapter;
+    protected final SQLTermSerializer sqlTermSerializer;
+    protected final SQLDialectAdapter dialectAdapter;
 
     @Inject
     protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
@@ -224,10 +224,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(QuerySerialization::getString)
                     .collect(Collectors.joining(", "));
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableMap
-                    .copyOf(querySerializationList.stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = querySerializationList.stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                            .collect(ImmutableCollectors.toMap());
 
             return new QuerySerializationImpl(sqlSubString, columnIDs);
         }
@@ -290,31 +289,25 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String sqlSubString = String.format("%s\n %s \n%s ",left.getString(), operatorString, right.getString());
 
-            ImmutableList<QuerySerialization> querySerializationList = ImmutableList.of(left,right);
-
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = querySerializationList.stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left,right).stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
-
 
             String onString = binaryJoinExpression.getFilterCondition()
                     .map(e -> sqlTermSerializer.serialize(e, columnIDs))
                     .map(s -> String.format("ON %s ", s))
                     .orElse("ON 1 = 1 ");
 
-
-            sqlSubString = sqlSubString + onString;
-            return new QuerySerializationImpl(sqlSubString, columnIDs);
+            return new QuerySerializationImpl(sqlSubString + onString, columnIDs);
         }
 
         @Override
         public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
-            Optional<String> trueTable = dialectAdapter.getTrueTable();
-            String fromString ="";
-            if(trueTable.isPresent())
-                fromString = "FROM " + trueTable;
-            String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
+            String fromString = dialectAdapter.getTrueTable()
+                    .map(t -> String.format("FROM %s", t))
+                    .orElse("");
 
+            String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
 
