@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -106,20 +105,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
-        private QualifiedAttributeID createQualifiedAttributeId(RelationID relationID, String columnName) {
-            return new QualifiedAttributeID(relationID, rawIdFactory.createAttributeID(columnName));
-        }
-
-        protected String sqlQuote(String name) {
-            return rawIdFactory.createAttributeID(name).getSQLRendering();
-        }
-
         private ImmutableMap<Variable, QualifiedAttributeID> createAliasMap(RelationID alias, ImmutableSet<Variable> stream) {
             return stream.stream()
                 .collect(ImmutableCollectors.toMap(
                     Function.identity(),
-                    v -> createQualifiedAttributeId(alias, v.getName())
-            ));
+                    v -> new QualifiedAttributeID(alias, rawIdFactory.createAttributeID(v.getName()))));
         }
 
 
@@ -139,7 +129,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
                                 String newColumnName = dialectAdapter.nameTopVariable(v.getName(), quotedColumnNames);
                                 quotedColumnNames.add(newColumnName);
-                                return createQualifiedAttributeId(null, newColumnName);
+                                return new QualifiedAttributeID(null, rawIdFactory.createAttributeID(newColumnName));
                             }));
         }
 
@@ -155,8 +145,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return projectedVariables.stream()
                     .map(v -> Optional.ofNullable(substitution.get(v))
                             .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
-                            .map(s -> s + " AS " + projectedColumnMap.get(v))
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() + " AS " + sqlQuote(v.getName())))
+                            .map(s -> s + " AS " + projectedColumnMap.get(v).getSQLRendering())
+                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() +
+                                    " AS " + rawIdFactory.createAttributeID(v.getName()).getSQLRendering()))
                     .collect(Collectors.joining(", "));
         }
 
