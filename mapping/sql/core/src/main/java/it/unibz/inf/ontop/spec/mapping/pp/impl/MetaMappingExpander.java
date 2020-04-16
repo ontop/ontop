@@ -47,6 +47,7 @@ import it.unibz.inf.ontop.utils.IDGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.Templates;
 import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
@@ -66,6 +67,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderResolver;
 
@@ -181,8 +183,7 @@ public class MetaMappingExpander {
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
 			try {
-				// TODO: PRESERVE ORDER AND DUPLICATES!
-				ImmutableSet<Variable> templateVariables = m.templateTerm.getVariables();
+				ImmutableList<Variable> templateVariables = getVariableStream(m.templateTerm).collect(ImmutableCollectors.toList());
 
 				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
 
@@ -229,6 +230,8 @@ public class MetaMappingExpander {
 								sourceQueryFactory.createSourceQuery(newSourceQuery),
 								ImmutableList.of(newTarget));
 
+						System.out.println("MME: " + newMapping);
+
 						result.add(newMapping);
 						log.debug("Expanded Mapping: {}", newMapping);
 					}
@@ -246,6 +249,14 @@ public class MetaMappingExpander {
 		return result.build();
 	}
 
+	private Stream<Variable> getVariableStream(ImmutableTerm t) {
+		if (t instanceof Variable)
+			return Stream.of((Variable) t);
+		if (t instanceof ImmutableFunctionalTerm)
+			return ((ImmutableFunctionalTerm) t).getTerms().stream()
+					.flatMap(this::getVariableStream);
+		return Stream.empty();
+	}
 
 	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
 			throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -294,8 +305,15 @@ public class MetaMappingExpander {
 		Select select = (Select) CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
+		List<SelectItem> sis = new ArrayList<>();
+		for (int i = 0; i < templateColumns.size(); i++) {
+			SelectExpressionItem si = new SelectExpressionItem(templateColumns.get(i).getExpression());
+			si.setAlias(new Alias("OUT" + i));
+			sis.add(si);
+		}
+
 		plainSelect.setDistinct(new Distinct());
-		plainSelect.setSelectItems(ImmutableList.copyOf(templateColumns)); // SelectExpressionItem -> SelectItem
+		plainSelect.setSelectItems(sis);
 
 		return select.toString();
 	}
@@ -334,8 +352,7 @@ public class MetaMappingExpander {
 			ImmutableFunctionalTerm functionalLexicalTerm = (ImmutableFunctionalTerm) lexicalTerm;
 			FunctionSymbol functionSymbol = functionalLexicalTerm.getFunctionSymbol();
 			if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
-				String iriTemplate = ((ObjectStringTemplateFunctionSymbol)
-						functionalLexicalTerm.getFunctionSymbol()).getTemplate();
+				String iriTemplate = ((ObjectStringTemplateFunctionSymbol)functionSymbol).getTemplate();
 				return Templates.format(iriTemplate, values);
 			}
 			else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
