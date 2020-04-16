@@ -67,6 +67,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderResolver;
@@ -183,18 +184,15 @@ public class MetaMappingExpander {
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
 			try {
-				ImmutableList<Variable> templateVariables = getVariableStream(m.templateTerm).collect(ImmutableCollectors.toList());
-
 				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
-
 				ImmutableList<SelectExpressionItem> templateColumns;
 				try {
-					templateColumns = templateVariables.stream()
+					templateColumns = m.templateTerm.getVariableStream()
 							.map(v -> resolver.apply(queryColumns, v))
 							.collect(ImmutableCollectors.toList());
 				}
 				catch (NullPointerException e) {
-					throw new IllegalArgumentException(templateVariables.stream()
+					throw new IllegalArgumentException(m.templateTerm.getVariableStream()
 							.filter(v -> resolver.apply(queryColumns, v) == null)
 							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
@@ -206,7 +204,7 @@ public class MetaMappingExpander {
 				final int size = templateColumns.size();
 				try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(query)) {
 					while (rs.next()) {
-						List<String> values = Lists.newArrayListWithCapacity(size);
+						List<String> values = new ArrayList<>(size);
 						for (int i = 1; i <= size; i++)
 							values.add(rs.getString(i));
 
@@ -247,15 +245,6 @@ public class MetaMappingExpander {
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
 		return result.build();
-	}
-
-	private Stream<Variable> getVariableStream(ImmutableTerm t) {
-		if (t instanceof Variable)
-			return Stream.of((Variable) t);
-		if (t instanceof ImmutableFunctionalTerm)
-			return ((ImmutableFunctionalTerm) t).getTerms().stream()
-					.flatMap(this::getVariableStream);
-		return Stream.empty();
 	}
 
 	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
