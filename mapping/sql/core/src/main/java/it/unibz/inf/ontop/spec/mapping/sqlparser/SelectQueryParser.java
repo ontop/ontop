@@ -48,7 +48,7 @@ public class SelectQueryParser {
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
+            Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
