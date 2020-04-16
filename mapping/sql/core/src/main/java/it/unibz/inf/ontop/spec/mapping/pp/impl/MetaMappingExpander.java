@@ -67,7 +67,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderResolver;
@@ -187,12 +186,12 @@ public class MetaMappingExpander {
 				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
 				ImmutableList<SelectExpressionItem> templateColumns;
 				try {
-					templateColumns = m.templateTerm.getVariableStream()
+					templateColumns = getVariablePositionsStream(m.templateTerm)
 							.map(v -> resolver.apply(queryColumns, v))
 							.collect(ImmutableCollectors.toList());
 				}
 				catch (NullPointerException e) {
-					throw new IllegalArgumentException(m.templateTerm.getVariableStream()
+					throw new IllegalArgumentException(getVariablePositionsStream(m.templateTerm)
 							.filter(v -> resolver.apply(queryColumns, v) == null)
 							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
@@ -245,6 +244,18 @@ public class MetaMappingExpander {
 			throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
 
 		return result.build();
+	}
+
+	/**
+	 * 	does not remove duplicates
+ 	 */
+	private Stream<Variable> getVariablePositionsStream(ImmutableTerm t) {
+		if (t instanceof Variable)
+			return Stream.of((Variable) t);
+		if (t instanceof ImmutableFunctionalTerm)
+			return ((ImmutableFunctionalTerm) t).getTerms().stream()
+					.flatMap(this::getVariablePositionsStream);
+		return Stream.empty();
 	}
 
 	private ImmutableMap<QuotedID, SelectExpressionItem> getQueryColumns(MetadataLookup metadata, String sql)
