@@ -27,7 +27,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
-import it.unibz.inf.ontop.spec.mapping.utils.MappingTools;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -86,7 +85,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     re = createParserView(sqae.extract(sourceQuery), sourceQuery);
                 }
 
-                ImmutableMap<QuotedID, ImmutableTerm> lookupTable2 =  re.getAttributes().entrySet().stream()
+                ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
                         .filter(e -> e.getKey().getRelation() == null)
                         .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));;
 
@@ -110,7 +109,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     try {
                         ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
                                 placeholders.stream()
-                                    .map(v -> Maps.immutableEntry(v, resolver.apply(lookupTable2, v)))
+                                    .map(v -> Maps.immutableEntry(v, resolver.apply(lookupTable, v)))
                                     .filter(e -> !e.getKey().equals(e.getValue()))
                                     .collect(ImmutableCollectors.toMap()));
 

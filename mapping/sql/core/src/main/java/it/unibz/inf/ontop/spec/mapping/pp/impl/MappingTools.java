@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.utils;
+package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 
 import com.google.common.collect.ImmutableList;
@@ -23,16 +23,16 @@ import java.util.function.Function;
 public class MappingTools {
 
     @Deprecated
-    public static MappingAssertionIndex extractRDFPredicate(IQ mappingAssertion) {
-        DistinctVariableOnlyDataAtom projectionAtom = mappingAssertion.getProjectionAtom();
+    static MappingAssertionIndex extractRDFPredicate(IQ iq) {
+        DistinctVariableOnlyDataAtom projectionAtom = iq.getProjectionAtom();
         RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())
                 .filter(p -> p instanceof RDFAtomPredicate)
                 .map(p -> (RDFAtomPredicate) p)
                 .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
-                        "is not having a RDFAtomPredicate: " + mappingAssertion));
+                        "is not having a RDFAtomPredicate: " + iq));
 
         ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
-                = mappingAssertion.getTree().getPossibleVariableDefinitions().stream()
+                = iq.getTree().getPossibleVariableDefinitions().stream()
                 .map(s -> s.apply(projectionAtom.getArguments()))
                 .collect(ImmutableCollectors.toSet());
 
@@ -45,10 +45,9 @@ public class MappingTools {
 
     private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,
                                   Function<ImmutableList<? extends ImmutableTerm>, Optional<IRI>> iriExtractor) {
-        ImmutableList<Optional<IRI>> possibleIris = possibleSubstitutedArguments.stream()
+        ImmutableSet<Optional<IRI>> possibleIris = possibleSubstitutedArguments.stream()
                 .map(iriExtractor)
-                .distinct()
-                .collect(ImmutableCollectors.toList());
+                .collect(ImmutableCollectors.toSet());
 
         if (!possibleIris.stream().allMatch(Optional::isPresent))
             throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
