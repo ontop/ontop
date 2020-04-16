@@ -115,13 +115,13 @@ public class MetaMappingExpander {
 	 * @return
 	 * 		expanded normal mappings
 	 */
-	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(SQLPPMapping ppMapping, Connection connection, MetadataLookup metadata)
+	public ImmutableList<SQLPPTriplesMap> getExpandedMappings(ImmutableList<SQLPPTriplesMap> mappings, Connection connection, MetadataLookup metadata)
 			throws MetaMappingExpansionException {
 
 		ImmutableList.Builder<SQLPPTriplesMap> result = ImmutableList.builder();
 		ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
 
-		for (SQLPPTriplesMap mapping : ppMapping.getTripleMaps()) {
+		for (SQLPPTriplesMap mapping : mappings) {
 
 			// search for non-ground elements in the target atom of each mapping (in class or property positions)
 			ImmutableList<TargetAtom> nonGroundCPs = mapping.getTargetAtoms().stream()
@@ -155,10 +155,10 @@ public class MetaMappingExpander {
 		ImmutableList<Expansion> expansions = builder2.build();
 
 		if (expansions.isEmpty())
-			return ppMapping.getTripleMaps();
+			return mappings;
 
 		BiFunction<Map<QuotedID, SelectExpressionItem>, Variable, SelectExpressionItem> resolver =
-				placeholderResolver(ppMapping.getTripleMaps().iterator().next(),
+				placeholderResolver(mappings.iterator().next(),
 						metadata.getQuotedIDFactory());
 
 		List<String> errorMessages = new LinkedList<>();
@@ -286,7 +286,7 @@ public class MetaMappingExpander {
 
 	private static String getTemplateValuesQuery(String sql, List<SelectExpressionItem> templateColumns) throws JSQLParserException {
 
-		Select select = (Select)CCJSqlParserUtil.parse(sql); // TODO: throws an Error if lexer fails
+		Select select = (Select) CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
 		plainSelect.setDistinct(new Distinct());
@@ -303,7 +303,7 @@ public class MetaMappingExpander {
 											 List<SelectExpressionItem> templateColumns,
 											 List<String> values) throws JSQLParserException {
 
-		Select select = (Select) CCJSqlParserUtil.parse(sql);  // TODO: throws an Error if lexer fails
+		Select select = (Select) CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
 		PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
 
 		Expression where = plainSelect.getWhere();

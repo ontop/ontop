@@ -139,7 +139,7 @@ public class SQLMappingExtractor implements MappingExtractor {
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        MappingAndDBParameters mm = convert(ppMapping, specInput.getConstraintFile(), executorRegistry);
+        MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile(), executorRegistry);
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
@@ -155,7 +155,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
 
-    private MappingAndDBParameters convert(SQLPPMapping ppMapping,
+    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile,
                                            ExecutorRegistry executorRegistry) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
@@ -166,7 +166,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
-            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup);
+            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, executorRegistry);
 
             metadataLookup.extractImmutableMetadata();
