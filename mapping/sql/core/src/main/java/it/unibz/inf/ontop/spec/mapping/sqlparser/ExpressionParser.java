@@ -120,8 +120,7 @@ public class ExpressionParser {
         private void process(BinaryExpression expression, BiFunction<ImmutableTerm, ImmutableTerm, ImmutableExpression> op) {
             ImmutableTerm leftTerm = termVisitor.getTerm(expression.getLeftExpression());
             ImmutableTerm rightTerm = termVisitor.getTerm(expression.getRightExpression());
-            ImmutableExpression f = op.apply(leftTerm, rightTerm);
-            result = notOperation(expression.isNot()).apply(f);
+            result = ImmutableList.of(op.apply(leftTerm, rightTerm));
         }
 
         private void processOJ(OldOracleJoinBinaryExpression expression, BiFunction<ImmutableTerm, ImmutableTerm, ImmutableExpression> op) {
@@ -152,27 +151,29 @@ public class ExpressionParser {
         public void visit(AndExpression expression) {
             ImmutableList<ImmutableExpression> left = translate(expression.getLeftExpression());
             ImmutableList<ImmutableExpression> right = translate(expression.getRightExpression());
-            ImmutableList<ImmutableExpression> and = Stream.of(left, right).flatMap(Collection::stream)
+            result = Stream.of(left, right).flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toList());
-
-            result = (expression.isNot())
-                    ? ImmutableList.of(negation(getAND(and)))
-                    : and;
         }
 
         @Override
         public void visit(OrExpression expression) {
             ImmutableExpression left = getAND(translate(expression.getLeftExpression()));
             ImmutableExpression right = getAND(translate(expression.getRightExpression()));
-            result = (expression.isNot())
-                    ? ImmutableList.of(negation(left), negation(right))
-                    : ImmutableList.of(termFactory.getDisjunction(left, right));
+            result = ImmutableList.of(termFactory.getDisjunction(left, right));
         }
 
         @Override
         public void visit(Parenthesis expression) {
-            ImmutableList<ImmutableExpression> arg = translate(expression.getExpression());
-            result = (expression.isNot()) ? ImmutableList.of(negation(getAND(arg))) : arg;
+            result = translate(expression.getExpression());
+        }
+
+        @Override
+        public void visit(NotExpression expression) {
+            ImmutableList<ImmutableExpression> subTerm = translate(expression.getExpression());
+            if (subTerm.size() != 1)
+                throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression.getExpression());
+
+            result = ImmutableList.of(negation(subTerm.get(0)));
         }
 
 
@@ -184,6 +185,11 @@ public class ExpressionParser {
         public void visit(IsNullExpression expression) {
             ImmutableTerm term = termVisitor.getTerm(expression.getLeftExpression());
             result = notOperation(expression.isNot()).apply(termFactory.getDBIsNull(term));
+        }
+
+        @Override
+        public void visit(IsBooleanExpression isBooleanExpression) {
+            // TODO:
         }
 
         @Override
@@ -224,7 +230,11 @@ public class ExpressionParser {
 
         @Override
         public void visit(LikeExpression expression) {
-            process(expression, (t1, t2) -> termFactory.getImmutableExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2));
+            if (expression.isNot())
+                process(expression, (t1, t2) -> termFactory.getDBNot(
+                        termFactory.getImmutableExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2)));
+            else
+                process(expression, (t1, t2) -> termFactory.getImmutableExpression(dbFunctionSymbolFactory.getDBLike(), t1, t2));
         }
 
         @Override
@@ -376,17 +386,10 @@ public class ExpressionParser {
             result = notOperation(expression.isNot()).apply(atom);
         }
 
-        /*
-        private ImmutableList<Function> getEqLists(List<Expression> leftList, List<Expression> rightList) {
-            ImmutableList.Builder<Function> builder = ImmutableList.builder();
-            for (int i = 0; i < leftList.size(); i++) {
-                Term t1 = getTerm(leftList.get(i));
-                Term t2 = getTerm(rightList.get(i));
-                builder.add(FACTORY.getFunctionEQ(t1, t2));
-            }
-            return builder.build();
+        @Override
+        public void visit(FullTextSearch fullTextSearch) {
+            throw new UnsupportedSelectQueryRuntimeException("fullTextSearch is not supported", fullTextSearch);
         }
-        */
 
 
 
@@ -490,6 +493,11 @@ public class ExpressionParser {
         }
 
         @Override
+        public void visit(IntegerDivision expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
         public void visit(Modulo expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
         }
@@ -498,6 +506,17 @@ public class ExpressionParser {
         public void visit(SignedExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
         }
+
+        @Override
+        public void visit(BitwiseRightShift expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
+        public void visit(BitwiseLeftShift expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
 
         @Override
         public void visit(Concat expression) {
@@ -536,6 +555,11 @@ public class ExpressionParser {
         }
 
         @Override
+        public void visit(ValueListExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
+
+        @Override
         public void visit(RowConstructor expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
         }
@@ -556,17 +580,25 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(NotExpression expression) {
-            ImmutableTerm subTerm = termVisitor.getTerm(expression.getExpression());
-            if (!(subTerm instanceof ImmutableExpression))
-                throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression.getExpression());
-
-            result = ImmutableList.of(termFactory.getDBNot((ImmutableExpression) subTerm));
+        public void visit(NextValExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
         }
 
+        @Override
+        public void visit(CollateExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
 
+        @Override
+        public void visit(SimilarToExpression expression) {
+            // TODO: CHECK!
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
 
-
+        @Override
+        public void visit(ArrayExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression);
+        }
 
 
         @Override
@@ -641,11 +673,6 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Analytic expressions is not supported", expression);
         }
 
-        @Override
-        public void visit(WithinGroupExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("WithinGroup expressions is not supported", expression);
-        }
-
         // OracleHierarchicalExpression can only occur in the form of a clause after WHERE
         @Override
         public void visit(OracleHierarchicalExpression expression) {
@@ -717,7 +744,7 @@ public class ExpressionParser {
             ImmutableList<ImmutableTerm> terms = (expression.getParameters() != null)
                     ? ImmutableList.<ImmutableTerm>builder()
                     .addAll(expression.getParameters().getExpressions().stream()
-                            .map(t -> getTerm(t)).iterator())
+                            .map(this::getTerm).iterator())
                     .build()
                     : ImmutableList.of();
 
@@ -823,6 +850,11 @@ public class ExpressionParser {
         }
 
         @Override
+        public void visit(IntegerDivision expression) {
+            throw new UnsupportedSelectQueryRuntimeException("INTEGER is not supported yet", expression);
+        }
+
+        @Override
         public void visit(Modulo expression) {
             // TODO: introduce operation and implement
             throw new UnsupportedSelectQueryRuntimeException("MODULO is not supported yet", expression);
@@ -835,14 +867,22 @@ public class ExpressionParser {
         }
 
         private void process(BinaryExpression expression, BinaryOperator<ImmutableTerm> op) {
-            if (expression.isNot())
-                throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
-
             ImmutableTerm leftTerm = getTerm(expression.getLeftExpression());
             ImmutableTerm rightTerm = getTerm(expression.getRightExpression());
             result = op.apply(leftTerm, rightTerm);
         }
 
+
+
+        @Override
+        public void visit(BitwiseRightShift expression) {
+            throw new UnsupportedSelectQueryRuntimeException("BITWISE RIGHT SHIFT is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(BitwiseLeftShift expression) {
+            throw new UnsupportedSelectQueryRuntimeException("BITWISE LEFT SHIFT is not supported yet", expression);
+        }
 
 
 
@@ -856,10 +896,12 @@ public class ExpressionParser {
         }
 
         @Override
-        public void visit(Parenthesis expression) {
-            if (expression.isNot())
-                throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
+        public void visit(IsBooleanExpression isBooleanExpression) {
+            throw new UnsupportedSelectQueryRuntimeException("Not a term", isBooleanExpression);
+        }
 
+        @Override
+        public void visit(Parenthesis expression) {
             result = getTerm(expression.getExpression());
         }
 
@@ -987,6 +1029,11 @@ public class ExpressionParser {
         }
 
         @Override
+        public void visit(ValueListExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("ValueList is not supported yet", expression);
+        }
+
+        @Override
         public void visit(RowConstructor expression) {
             throw new UnsupportedSelectQueryRuntimeException("RowConstructor is not supported yet", expression);
         }
@@ -1009,6 +1056,26 @@ public class ExpressionParser {
         @Override
         public void visit(NotExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
+        }
+
+        @Override
+        public void visit(NextValExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("NextVal is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(CollateExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Collate is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(SimilarToExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("SimilarTo is not supported yet", expression);
+        }
+
+        @Override
+        public void visit(ArrayExpression expression) {
+            throw new UnsupportedSelectQueryRuntimeException("Array is not supported yet", expression);
         }
 
         @Override
@@ -1037,6 +1104,10 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
         }
 
+        @Override
+        public void visit(FullTextSearch fullTextSearch) {
+
+        }
 
 
         @Override
@@ -1120,11 +1191,6 @@ public class ExpressionParser {
         @Override
         public void visit(AnalyticExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("Analytic expressions is not supported", expression);
-        }
-
-        @Override //SELECT LISTAGG(col1, '##') WITHIN GROUP (ORDER BY col1) FROM table1
-        public void visit(WithinGroupExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("WithinGroup expressions is not supported", expression);
         }
 
         // OracleHierarchicalExpression can only occur in the form of a clause after WHERE

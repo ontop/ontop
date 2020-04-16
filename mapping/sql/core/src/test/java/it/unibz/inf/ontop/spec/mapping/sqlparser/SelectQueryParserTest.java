@@ -213,12 +213,9 @@ public class SelectQueryParserTest {
                 parser.parse(query);
                 System.out.println(query + " - Wrong!");
             }
-            catch (UnsupportedSelectQueryException ex) {
+            catch (UnsupportedSelectQueryException | InvalidSelectQueryException ex) {
                 System.out.println(query + " - OK");
                 e = ex;
-            }
-            catch (InvalidSelectQueryException e1) {
-                e1.printStackTrace();
             }
             assertNotNull(e);
         });

@@ -271,9 +271,10 @@ public class SelectQueryAttributeExtractor2 {
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
             RAExpressionAttributes left = getRelationalExpression(subjoin.getLeft());
-            RAExpressionAttributes join;
+            RAExpressionAttributes join = left;
             try {
-                join = join(left, subjoin.getJoin());
+                for (Join j : subjoin.getJoinList())
+                    join = join(join, j);
             }
             catch (IllegalJoinException e) {
                 throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);
@@ -296,7 +297,11 @@ public class SelectQueryAttributeExtractor2 {
         @Override
         public void visit(TableFunction tableFunction) {
             throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
+        }
 
+        @Override
+        public void visit(ParenthesisFromItem parenthesisFromItem) {
+            throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
         }
     }
 

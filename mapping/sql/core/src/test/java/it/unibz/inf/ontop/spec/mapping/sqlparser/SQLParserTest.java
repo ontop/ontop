@@ -922,7 +922,7 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to NOT without parenthesis
+	@Test
 	public void testRegexNotOracle() throws UnsupportedSelectQueryException, InvalidSelectQueryException {
 		RAExpression re = sqp.parse("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
 		assertEquals(1, re.getDataAtoms().size());

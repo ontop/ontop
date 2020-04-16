@@ -569,8 +569,7 @@ public class ExpressionParserTest {
                                 TERM_FACTORY.getDBConstant("3", dbLongType)))), translation.get(0));
     }
 
-    @Ignore
-    @Test
+    @Test(expected = JSQLParserException.class)
     public void in_Multi_Test() throws JSQLParserException {
         String sql = "SELECT X AS A FROM DUMMY WHERE (X, Y) IN ((1, 3), (2,4))";
 
@@ -1474,7 +1473,7 @@ public class ExpressionParserTest {
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
 
-    @Test (expected = JSQLParserException.class)
+    @Test // (expected = JSQLParserException.class)
     public void function_SQL_SUBSTRING_Test() throws JSQLParserException {
         // SQL:99 SUBSTRING cannot be supported because of JSQLParser
         String sql = "SELECT SUBSTRING(X FROM 1 FOR 2) AS A FROM DUMMY";
@@ -1650,8 +1649,8 @@ public class ExpressionParserTest {
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1), v), translation);
     }
 
-    @Ignore("TODO: shall we remove this test? Does not seem to be a common mistake")
-    @Test(expected = InvalidSelectQueryRuntimeException.class)
+    @Ignore("LENGTH2")
+    @Test
     public void function_LENGTH_2_Test() throws JSQLParserException {
         String sql = "SELECT LENGTH(X, 'A') AS A FROM DUMMY";
 
@@ -1660,6 +1659,8 @@ public class ExpressionParserTest {
         ExpressionParser parser = new ExpressionParser(IDFAC, ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v), CORE_SINGLETONS);
         ImmutableTerm translation = parser.parseTerm(getExpression(sql));
+
+        System.out.println(translation);
     }
 
     @Test
