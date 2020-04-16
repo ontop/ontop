@@ -65,8 +65,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata,
-                                         ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException {
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata) throws InvalidMappingSourceQueriesException {
 
         List<MappingAssertion> assertionsList = new ArrayList<>();
 

@@ -76,10 +76,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		SQLPPTriplesMap mapping = new OntopNativeSQLPPTriplesMap("MAPID-0",
 				SOURCE_QUERY_FACTORY.createSourceQuery(source), targetParser.parse(targetString));
 
-		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(
-				ImmutableList.of(mapping),
-				getMetadataLookup(),
-				null)
+		Set<IQ> dp = LEGACY_SQL_PP_MAPPING_CONVERTER.convert(ImmutableList.of(mapping), getMetadataLookup())
 				.stream().map(MappingAssertion::getQuery).collect(ImmutableCollectors.toSet());
 		
 		assertFalse(dp.isEmpty());

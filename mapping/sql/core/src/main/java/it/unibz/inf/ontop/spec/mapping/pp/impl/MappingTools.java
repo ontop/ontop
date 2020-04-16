@@ -62,7 +62,7 @@ public class MappingTools {
     }
 
 
-    private static class MappingPredicateIRIExtractionException extends OntopInternalBugException {
+    public static class MappingPredicateIRIExtractionException extends OntopInternalBugException {
         private MappingPredicateIRIExtractionException(String message) {
             super("Internal bug: " + message);
         }

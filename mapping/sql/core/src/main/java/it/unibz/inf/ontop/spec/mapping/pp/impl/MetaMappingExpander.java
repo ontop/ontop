@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.mapping.impl;
+package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 /*
  * #%L
@@ -40,9 +40,7 @@ import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.SelectQueryAttributeExtractor2;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.OntopNativeSQLPPTriplesMap;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.IDGenerator;
@@ -66,6 +64,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingConverterImpl.placeholderResolver;
@@ -90,11 +89,15 @@ public class MetaMappingExpander {
 		private final String id;
 		private final SQLPPSourceQuery source;
 		private final TargetAtom target;
+		private final ImmutableFunctionalTerm templateTerm;
+		private final Variable predicateVariable;
 
-		Expansion(String id, SQLPPSourceQuery source, TargetAtom target) {
+		Expansion(String id, SQLPPSourceQuery source, TargetAtom target, Function<ImmutableList<ImmutableTerm>, ImmutableTerm> getTerm) {
 			this.id = id;
 			this.source = source;
 			this.target = target;
+			this.templateTerm = (ImmutableFunctionalTerm)getTerm.apply(target.getSubstitutedTerms());
+			this.predicateVariable = (Variable)getTerm.apply((ImmutableList)target.getProjectionAtom().getArguments());
 		}
 	}
 
@@ -106,6 +109,24 @@ public class MetaMappingExpander {
 		this.substitutionFactory = substitutionFactory;
 		this.rdfFactory = rdfFactory;
 		this.sourceQueryFactory = sourceQueryFactory;
+	}
+
+	private Optional<Expansion> getExpansion(TargetAtom target, String id, SQLPPSourceQuery sourceQuery) {
+		RDFAtomPredicate predicate = Optional.of(target.getProjectionAtom().getPredicate())
+				.filter(p -> p instanceof RDFAtomPredicate)
+				.map(p -> (RDFAtomPredicate)p)
+				.orElseThrow(() -> new RuntimeException("The following mapping assertion is not having a RDFAtomPredicate: " + target));
+
+		Function<ImmutableList<ImmutableTerm>, ImmutableTerm> getTerm =
+				predicate.getPropertyIRI(target.getSubstitutedTerms())
+						.filter(p -> p.equals(RDF.TYPE))
+						.isPresent()
+				? predicate::getObject
+				: predicate::getProperty;
+
+		return (!getTerm.apply(target.getSubstitutedTerms()).isGround())
+				? Optional.of(new Expansion(id, sourceQuery, target, getTerm))
+				: Optional.empty();
 	}
 
 
@@ -124,30 +145,26 @@ public class MetaMappingExpander {
 		for (SQLPPTriplesMap mapping : mappings) {
 
 			// search for non-ground elements in the target atom of each mapping (in class or property positions)
-			ImmutableList<TargetAtom> nonGroundCPs = mapping.getTargetAtoms().stream()
-					.filter(t -> t.getProjectionAtom().getPredicate() instanceof RDFAtomPredicate)
-					.filter(t -> {
-						RDFAtomPredicate predicate = (RDFAtomPredicate)t.getProjectionAtom().getPredicate();
-						return predicate.getPropertyIRI(t.getSubstitutedTerms())
-								.map(i -> i.equals(RDF.TYPE)
-										&& !predicate.getObject(t.getSubstitutedTerms()).isGround())
-								.orElse(!predicate.getProperty(t.getSubstitutedTerms()).isGround());
-					})
+			ImmutableList<Expansion> nonGroundCPs = mapping.getTargetAtoms().stream()
+					.map(t -> getExpansion(t, mapping.getId(), mapping.getSourceQuery()))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
 					.collect(ImmutableCollectors.toList());
 
 			if (nonGroundCPs.isEmpty()) {
 				result.add(mapping);
 			}
 			else {
-				builder2.addAll(nonGroundCPs.stream()
-						.map(t -> new Expansion(mapping.getId(), mapping.getSourceQuery(), t))
-						.iterator());
+				builder2.addAll(nonGroundCPs);
 				if (nonGroundCPs.size() < mapping.getTargetAtoms().size()) {
+					ImmutableSet<TargetAtom> s = nonGroundCPs.stream()
+							.map(e -> e.target)
+							.collect(ImmutableCollectors.toSet());
 					result.add(new OntopNativeSQLPPTriplesMap(
 							mapping.getId(),
 							mapping.getSourceQuery(),
 							mapping.getTargetAtoms().stream()
-									.filter(a -> !nonGroundCPs.contains(a))
+									.filter(a -> !s.contains(a))
 									.collect(ImmutableCollectors.toList())));
 				}
 			}
@@ -164,16 +181,8 @@ public class MetaMappingExpander {
 		List<String> errorMessages = new LinkedList<>();
 		for (Expansion m : expansions) {
 			try {
-				RDFAtomPredicate predicate = (RDFAtomPredicate)m.target.getProjectionAtom().getPredicate();
-				boolean isC = predicate.getPropertyIRI(m.target.getSubstitutedTerms())
-						.map(i -> i.equals(RDF.TYPE)
-								&& !predicate.getObject(m.target.getSubstitutedTerms()).isGround()).isPresent();
-
-				ImmutableFunctionalTerm templateTerm = isC
-						? (ImmutableFunctionalTerm)predicate.getObject(m.target.getSubstitutedTerms())
-						: (ImmutableFunctionalTerm)predicate.getProperty(m.target.getSubstitutedTerms());
-
-				ImmutableSet<Variable> templateVariables = templateTerm.getVariables();
+				// TODO: PRESERVE ORDER AND DUPLICATES!
+				ImmutableSet<Variable> templateVariables = m.templateTerm.getVariables();
 
 				ImmutableMap<QuotedID, SelectExpressionItem> queryColumns = getQueryColumns(metadata, m.source.getSQL());
 
@@ -207,14 +216,10 @@ public class MetaMappingExpander {
 						String newSourceQuery = getInstantiatedSQL(m.source.getSQL(), templateColumns, values);
 
 						IRIConstant predicateTerm = termFactory.getConstantIRI(
-								rdfFactory.createIRI(getPredicateName(templateTerm.getTerm(0), values)));
-
-						Variable predicateVariable = isC
-								? predicate.getObject(m.target.getProjectionAtom().getArguments())
-								: predicate.getProperty(m.target.getProjectionAtom().getArguments());
+								rdfFactory.createIRI(getPredicateName(m.templateTerm.getTerm(0), values)));
 
 						ImmutableSubstitution<ImmutableTerm> newSubstitution = m.target.getSubstitution()
-								.composeWith(substitutionFactory.getSubstitution(predicateVariable, predicateTerm));
+								.composeWith(substitutionFactory.getSubstitution(m.predicateVariable, predicateTerm));
 
 						TargetAtom newTarget = m.target.changeSubstitution(newSubstitution);
 

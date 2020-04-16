@@ -37,8 +37,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
             throws OBDASpecificationException {
 
         try {
-            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(
-                    specInput, optionalOntology, executorRegistry);
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(specInput, optionalOntology);
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
         }
@@ -53,8 +52,7 @@ public class DefaultOBDASpecificationExtractor implements OBDASpecificationExtra
                                      ExecutorRegistry executorRegistry) throws OBDASpecificationException {
 
         try {
-            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(
-                    ppMapping, specInput, optionalOntology, executorRegistry);
+            MappingAndDBParameters mappingAndDBMetadata = mappingExtractor.extract(ppMapping, specInput, optionalOntology);
 
             return mappingTransformer.transform(
                     mappingAndDBMetadata.getMapping(), mappingAndDBMetadata.getDBParameters(), optionalOntology);
