@@ -70,13 +70,13 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
         ImmutableList<Variable> projectedVariables = mappingAssertion.getQuery().getProjectionAtom().getArguments();
 
-        MappingAssertionIndex predicateClassification = mappingAssertion.getIndex();
+        MappingAssertionIndex index = mappingAssertion.getIndex();
 
-        Optional<RDFTermType> tripleObjectType = predicateClassification.isClass()
+        Optional<RDFTermType> tripleObjectType = index.isClass()
                 ? Optional.empty()
                 : extractTripleObjectType(mappingAssertion.getQuery());
 
-        checkTripleObject(predicateClassification.getIri(), tripleObjectType, mappingAssertion.getProvenance(), ontology, datatypeMap);
+        checkTripleObject(index.getIri(), tripleObjectType, mappingAssertion.getProvenance(), ontology, datatypeMap);
     }
 
 

@@ -122,7 +122,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
                         IQ iq = noNullValueEnforcer.transform(iq0);
 
-                        builder.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq.getTree(), target.getProjectionAtom()), iq,  provenance));
+                        builder.add(new MappingAssertion(iq,  provenance));
                     }
                     catch (NullPointerException e) { // attribute not found, part of resolver
                         errorMessages.add("Error: " + e.getMessage()

@@ -66,7 +66,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         return queryMerger.mergeDefinitions(
                 mapping.stream()
                         .filter(a -> a.getIndex().getIri().equals(Ontop.CANONICAL_IRI))
-                        .map(a -> a.getQuery())
+                        .map(MappingAssertion::getQuery)
                         .collect(ImmutableCollectors.toList()));
     }
 
@@ -95,21 +95,15 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private MappingAssertion canonizeWithJoin(MappingAssertion assertion, IntensionalQueryMerger intensionalQueryMerger, Position pos) {
 
         Optional<Variable> replacedVar = getReplacedVar(assertion, pos);
-        IQ iq = assertion.getQuery();
-
         if (replacedVar.isPresent()) {
+            IQ iq = assertion.getQuery();
             Variable newVariable = createFreshVariable(iq, intensionalQueryMerger, replacedVar.get());
-            IntensionalDataNode idn = getIDN(replacedVar.get(), newVariable);
-            RDFAtomPredicate pred = getRDFAtomPredicate(iq.getProjectionAtom())
-                    .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
+            IntensionalDataNode idn = iqFactory.createIntensionalDataNode(
+                    atomFactory.getIntensionalTripleAtom(newVariable, Ontop.CANONICAL_IRI, replacedVar.get()));
 
             DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    pred,
-                    replaceProjVars(
-                            pred,
-                            iq.getProjectionAtom().getArguments(),
-                            pos,
-                            newVariable));
+                    assertion.getIndex().getPredicate(),
+                    replaceProjVars(assertion, pos, newVariable));
 
             IQ intensionalCanonizedQuery = iqFactory.createIQ(
                     projAtom,
@@ -146,54 +140,32 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
 
-    private IntensionalDataNode getIDN(Variable formerVariable, Variable newVariable) {
-        return iqFactory.createIntensionalDataNode(
-                atomFactory.getIntensionalTripleAtom(
-                        newVariable,
-                        Ontop.CANONICAL_IRI,
-                        formerVariable
-                ));
-    }
-
     private Optional<Variable> getReplacedVar(MappingAssertion assertion, Position pos) {
         DistinctVariableOnlyDataAtom atom = assertion.getQuery().getProjectionAtom();
+        RDFAtomPredicate predicate = assertion.getIndex().getPredicate();
         switch (pos) {
             case SUBJECT:
-                return Optional.of(getVarFromRDFAtom(atom, pos));
+                return Optional.of(predicate.getSubject(atom.getArguments()));
             case OBJECT:
                 return assertion.getIndex().isClass()
                         ? Optional.empty()
-                        : Optional.of(getVarFromRDFAtom(atom, pos));
+                        : Optional.of(predicate.getObject(atom.getArguments()));
             default:
                 throw new UnexpectedPositionException(pos);
         }
     }
 
-    private ImmutableList<Variable> replaceProjVars(RDFAtomPredicate pred, ImmutableList<Variable> arguments, Position pos,
-                                                    Variable replacementVar) {
+    private ImmutableList<Variable> replaceProjVars(MappingAssertion assertion, Position pos, Variable replacementVar) {
+        DistinctVariableOnlyDataAtom atom = assertion.getQuery().getProjectionAtom();
+        RDFAtomPredicate predicate = assertion.getIndex().getPredicate();
         switch (pos) {
             case SUBJECT:
-                return pred.updateSubject(arguments, replacementVar);
+                return predicate.updateSubject(atom.getArguments(), replacementVar);
             case OBJECT:
-                return pred.updateObject(arguments, replacementVar);
+                return predicate.updateObject(atom.getArguments(), replacementVar);
             case PROPERTY:
             default:
                 throw new UnexpectedPositionException(pos);
-        }
-    }
-
-    private Variable getVarFromRDFAtom(DistinctVariableOnlyDataAtom atom, Position position) {
-        RDFAtomPredicate predicate = getRDFAtomPredicate(atom)
-                .orElseThrow(() -> new CanonicalTransformerException(RDFAtomPredicate.class.getName() + " expected"));
-        switch (position) {
-            case SUBJECT:
-                return predicate.getSubject(atom.getArguments());
-            case OBJECT:
-                return predicate.getObject(atom.getArguments());
-            case PROPERTY:
-                return predicate.getProperty(atom.getArguments());
-            default:
-                throw new UnexpectedPositionException(position);
         }
     }
 

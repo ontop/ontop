@@ -20,6 +20,8 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.stream.Stream;
+
 
 public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRewriter {
 
@@ -27,19 +29,17 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
     private final IntermediateQueryFactory iqFactory;
     private final QueryTransformerFactory transformerFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final UnionBasedQueryMerger queryMerger;
     private final boolean enabled;
 
     @Inject
     private MappingSameAsInverseRewriterImpl(AtomFactory atomFactory, IntermediateQueryFactory iqFactory,
                                              QueryTransformerFactory transformerFactory,
-                                             SubstitutionFactory substitutionFactory, UnionBasedQueryMerger queryMerger,
+                                             SubstitutionFactory substitutionFactory,
                                              OntopMappingSettings settings) {
         this.atomFactory = atomFactory;
         this.iqFactory = iqFactory;
         this.transformerFactory = transformerFactory;
         this.substitutionFactory = substitutionFactory;
-        this.queryMerger = queryMerger;
         this.enabled = settings.isSameAsInMappingsEnabled();
     }
 
@@ -49,18 +49,17 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
             return mapping;
 
         return mapping.stream()
-                .map(a -> transform(a))
+                .flatMap(this::transform)
                 .collect(ImmutableCollectors.toList());
     }
 
-    private MappingAssertion transform(MappingAssertion a) {
-        if (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
-            return a;
-
-        return a.copyOf(completeSameAsDefinition(a.getQuery(), a.getIndex().getPredicate()));
+    private Stream<MappingAssertion> transform(MappingAssertion a) {
+        return (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
+            ? Stream.of(a)
+            : Stream.of(a, a.copyOf(getInverse(a.getQuery(), a.getIndex().getPredicate())));
     }
 
-    private IQ completeSameAsDefinition(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {
+    private IQ getInverse(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {
         ImmutableList<Variable> originalProjectedVariables = originalDefinition.getProjectionAtom().getArguments();
 
         Variable originalSubject = rdfAtomPredicate.getSubject(originalProjectedVariables);
@@ -84,11 +83,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
 
-        IQ inversedDefinition = iqFactory.createIQ(newProjectionAtom,
+        return iqFactory.createIQ(newProjectionAtom,
                 queryRenamer.transform(originalDefinition).getTree());
-
-        return queryMerger.mergeDefinitions(ImmutableList.of(originalDefinition, inversedDefinition))
-                .get()
-                .normalizeForOptimization();
     }
 }
