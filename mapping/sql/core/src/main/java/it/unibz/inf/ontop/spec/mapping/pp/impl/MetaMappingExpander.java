@@ -113,7 +113,7 @@ public class MetaMappingExpander {
 		this.sourceQueryFactory = sourceQueryFactory;
 	}
 
-	private Optional<Expansion> getExpansion(TargetAtom target, String id, SQLPPSourceQuery sourceQuery) {
+	private Optional<Expansion> getExpansion(String id, SQLPPSourceQuery sourceQuery, TargetAtom target) {
 		RDFAtomPredicate predicate = Optional.of(target.getProjectionAtom().getPredicate())
 				.filter(p -> p instanceof RDFAtomPredicate)
 				.map(p -> (RDFAtomPredicate)p)
@@ -148,7 +148,7 @@ public class MetaMappingExpander {
 
 			// search for non-ground elements in the target atom of each mapping (in class or property positions)
 			ImmutableList<Expansion> nonGroundCPs = mapping.getTargetAtoms().stream()
-					.map(t -> getExpansion(t, mapping.getId(), mapping.getSourceQuery()))
+					.map(t -> getExpansion(mapping.getId(), mapping.getSourceQuery(), t))
 					.filter(Optional::isPresent)
 					.map(Optional::get)
 					.collect(ImmutableCollectors.toList());

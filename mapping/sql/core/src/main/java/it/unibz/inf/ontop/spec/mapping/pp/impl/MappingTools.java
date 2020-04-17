@@ -2,19 +2,18 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * To deal with the extraction of the predicates IRI from the MappingAssertion
@@ -23,44 +22,25 @@ import java.util.function.Function;
 public class MappingTools {
 
     @Deprecated
-    static MappingAssertionIndex extractRDFPredicate(IQ iq) {
-        DistinctVariableOnlyDataAtom projectionAtom = iq.getProjectionAtom();
+    static MappingAssertionIndex extractRDFPredicate(IQTree iq, DistinctVariableOnlyDataAtom projectionAtom) {
         RDFAtomPredicate rdfAtomPredicate = Optional.of(projectionAtom.getPredicate())
                 .filter(p -> p instanceof RDFAtomPredicate)
                 .map(p -> (RDFAtomPredicate) p)
-                .orElseThrow(() -> new MappingPredicateIRIExtractionException("The following mapping assertion " +
-                        "is not having a RDFAtomPredicate: " + iq));
+                .orElseThrow(() -> new MappingPredicateIRIExtractionException("The mapping assertion does not have an RDFAtomPredicate"));
 
-        ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments
-                = iq.getTree().getPossibleVariableDefinitions().stream()
-                .map(s -> s.apply(projectionAtom.getArguments()))
-                .collect(ImmutableCollectors.toSet());
+        ConstructionNode node = (ConstructionNode)(((UnaryIQTree)iq).getRootNode());
 
-        IRI propertyIRI = extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getPropertyIRI);
+        ImmutableList<? extends ImmutableTerm> substitutedArguments =
+                node.getSubstitution().apply(projectionAtom.getArguments());
+
+        IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
+                .orElseThrow(() -> new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term"));
 
         return propertyIRI.equals(RDF.TYPE)
-                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, extractIRI(possibleSubstitutedArguments, rdfAtomPredicate::getClassIRI))
+                ? MappingAssertionIndex.ofClass(rdfAtomPredicate, rdfAtomPredicate.getClassIRI(substitutedArguments)
+                        .orElseThrow(() -> new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term")))
                 : MappingAssertionIndex.ofProperty(rdfAtomPredicate, propertyIRI);
     }
-
-    private static IRI extractIRI(ImmutableSet<ImmutableList<? extends ImmutableTerm>> possibleSubstitutedArguments,
-                                  Function<ImmutableList<? extends ImmutableTerm>, Optional<IRI>> iriExtractor) {
-        ImmutableSet<Optional<IRI>> possibleIris = possibleSubstitutedArguments.stream()
-                .map(iriExtractor)
-                .collect(ImmutableCollectors.toSet());
-
-        if (!possibleIris.stream().allMatch(Optional::isPresent))
-            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not always a ground term");
-
-        if (possibleIris.size() != 1)
-            throw new MappingPredicateIRIExtractionException("The definition of the predicate is not unique: " + possibleIris + " from " + possibleSubstitutedArguments);
-
-        return possibleIris.stream()
-                .map(Optional::get)
-                .findFirst()
-                .get();
-    }
-
 
     public static class MappingPredicateIRIExtractionException extends OntopInternalBugException {
         private MappingPredicateIRIExtractionException(String message) {

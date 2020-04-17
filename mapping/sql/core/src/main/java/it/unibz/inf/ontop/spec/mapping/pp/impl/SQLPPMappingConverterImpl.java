@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
@@ -67,7 +68,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     @Override
     public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata) throws InvalidMappingSourceQueriesException {
 
-        List<MappingAssertion> assertionsList = new ArrayList<>();
+        ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
 
         List<String> errorMessages = new ArrayList<>();
 
@@ -112,17 +113,18 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     .filter(e -> !e.getKey().equals(e.getValue()))
                                     .collect(ImmutableCollectors.toMap()));
 
-                        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), iqFactory.createUnaryIQTree(
-                                            iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
-                                                    substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
-                                                            .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
-                                                                    e -> sub.apply(e.getValue()))))), tree));
+                        ConstructionNode node =  iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
+                                substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
+                                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
+                                                e -> sub.apply(e.getValue())))));
 
-                        IQ iq = noNullValueEnforcer.transform(iq0).normalizeForOptimization();
+                        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), iqFactory.createUnaryIQTree(node, tree));
 
-                        assertionsList.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq), iq,  provenance));
+                        IQ iq = noNullValueEnforcer.transform(iq0);
+
+                        builder.add(new MappingAssertion(MappingTools.extractRDFPredicate(iq.getTree(), target.getProjectionAtom()), iq,  provenance));
                     }
-                    catch (NullPointerException e) {
+                    catch (NullPointerException e) { // attribute not found, part of resolver
                         errorMessages.add("Error: " + e.getMessage()
                                 + " \nProblem location: source query of the mapping assertion \n["
                                 + provenance.getProvenanceInfo() + "]");
@@ -139,9 +141,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         if (!errorMessages.isEmpty())
             throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
 
-        LOGGER.debug("Original mapping size: {}", assertionsList.size());
-
-        return ImmutableList.copyOf(assertionsList);
+        ImmutableList<MappingAssertion> list = builder.build();
+        LOGGER.debug("Original mapping size: {}", list.size());
+        return list;
     }
 
     public static <T> BiFunction<Map<QuotedID, T>, Variable, T> placeholderResolver(SQLPPTriplesMap triplesMap, QuotedIDFactory idFactory) {
