@@ -26,6 +26,8 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     private static final String RANDOM_STR = "RANDOM";
     private static final String NOW_STR = "NOW";
 
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Denodo";
+
     @Inject
     protected DenodoDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDenodoRegularFunctionTable(typeFactory), typeFactory);
@@ -39,19 +41,10 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
 
-        DBFunctionSymbol nowFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol(
-                NOW_STR,
-                0,
-                dbTypeFactory.getDBDateTimestampType(),
-                true,
-                abstractRootDBType
-        );
-//        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
-//                CURRENT_TIMESTAMP_STR,
-//                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
+        DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
+                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
-//        table.remove(REGEXP_LIKE_STR, 2);
-//        table.remove(REGEXP_LIKE_STR, 3);
 
         return ImmutableTable.copyOf(table);
     }
@@ -85,29 +78,72 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return builder.build();
     }
 
+//    @Override
+//    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
+//        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
+//                (terms, termConverter, termFactory) -> String.format(
+//                        "array_to_string(array_agg(%s%s),%s)",
+//                        isDistinct ? "DISTINCT " : "",
+//                        termConverter.apply(terms.get(0)),
+//                        termConverter.apply(terms.get(1))
+//                ));
+//    }
+
+//    /**
+//     * Requires sometimes to type NULLs
+//     */
+//    @Override
+//    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
+//        // Cannot CAST to SERIAL --> CAST to INTEGER instead
+//        if (termType.getCastName().equals(SERIAL_STR))
+//            return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
+//        else
+//            return new NonSimplifiableTypedNullFunctionSymbol(termType);
+//    }
+
     @Override
-    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
-        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-                (terms, termConverter, termFactory) -> String.format(
-                        "array_to_string(array_agg(%s%s),%s)",
-                        isDistinct ? "DISTINCT " : "",
-                        termConverter.apply(terms.get(0)),
-                        termConverter.apply(terms.get(1))
-                ));
+    public DBFunctionSymbol getDBRight() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
 
-    /**
-     * Requires sometimes to type NULLs
-     */
     @Override
-    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-        // Cannot CAST to SERIAL --> CAST to INTEGER instead
-        if (termType.getCastName().equals(SERIAL_STR))
-            return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
-        else
-            return new NonSimplifiableTypedNullFunctionSymbol(termType);
+    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String before = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(%s,0,POSITION(%s IN %s)-1)", str, before, str);
+    }
 
+    @Override
+    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String str = termConverter.apply(terms.get(0));
+        String after = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(%s,POSITION(%s IN %s) + LEN(%s), SIGN(POSITION(%s IN %s)) * LENGTH(%s))",
+                str, after, str, after, after, str, str);
+    }
 
+    @Override
+    protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("HASH(%s)", termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA1: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA256: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SHA512: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    @Override
+    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return null;
     }
 
     @Override
@@ -116,171 +152,179 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType,
-                Serializers.getOperatorSerializer(CONCAT_OP_STR));
+    protected DBConcatFunctionSymbol createDBConcatOperator(int arity){
+        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
     @Override
     protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
+        return new NullRejectingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
     }
 
-    @Override
-    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
-        return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
-    }
-
-    /**
-     * TODO: find a way to use the stored TZ instead of the local one
-     */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        // Enforces ISO 8601: https://stackoverflow.com/questions/38834022/turn-postgres-date-representation-into-iso-8601-string
-        // However, use the local TZ instead of the stored TZ
-//        return String.format("TO_JSON(%s)#>>'{}'", termConverter.apply(terms.get(0)));
-        return terms.get(0).toString();
-    }
-
-    @Override
-    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
-        return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
-    }
-
-    @Override
-    public DBFunctionSymbol getDBSubString2() {
-        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
-    }
-
-    @Override
-    public DBFunctionSymbol getDBSubString3() {
-        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
-    }
-    
-    @Override
-    public NonDeterministicDBFunctionSymbol getDBUUID(UUID uuid) {
-        return new DefaultNonDeterministicNullaryFunctionSymbol(UUID_STR, uuid, dbStringType,
-                (terms, termConverter, termFactory) ->
-                        "MD5(RANDOM()::text || CLOCK_TIMESTAMP()::text)::uuid");
-    }
-
-    @Override
-    protected String getRandNameInDialect() {
-        return RANDOM_STR;
+        return null;
     }
 
     @Override
     protected String getUUIDNameInDialect() {
-        throw new UnsupportedOperationException("Should not be used for PostgreSQL");
+        throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
     }
 
+//
+//    @Override
+//    protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
+//        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType,
+//                Serializers.getOperatorSerializer(CONCAT_OP_STR));
+//    }
+
+//    @Override
+//    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
+//        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
+//    }
+//
+//    @Override
+//    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
+//        return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
+//    }
+
+//    @Override
+//    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//           return termConverter.apply(terms.get(0));
+//    }
+//
+//    @Override
+//    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
+//        return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
+//    }
+//
+//    @Override
+//    public DBFunctionSymbol getDBSubString2() {
+//        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
+//    }
+//
+//    @Override
+//    public DBFunctionSymbol getDBSubString3() {
+//        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+//    }
+
+//    @Override
+//    protected String getRandNameInDialect() {
+//        return RANDOM_STR;
+//    }
+//
+//    @Override
+//    protected String getUUIDNameInDialect() {
+//        throw new UnsupportedOperationException("Should not be used for PostgreSQL");
+//    }
+//
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(POSITION(%s IN %s) > 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
     }
-
-    @Override
-    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String str = termConverter.apply(terms.get(0));
-        String before = termConverter.apply(terms.get(1));
-        return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
-    }
-
-    @Override
-    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String str = termConverter.apply(terms.get(0));
-        String after = termConverter.apply(terms.get(1));
-        return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
-                str, after, str , after , after, str, str);
-    }
-
-    @Override
-    protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
-    }
-
-    /**
-     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
-     */
-    @Override
-    protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("encode(digest(%s, 'sha1'), 'hex')", termConverter.apply(terms.get(0)));
-    }
-
-    /**
-     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
-     */
-    @Override
-    protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("encode(digest(%s, 'sha256'), 'hex')", termConverter.apply(terms.get(0)));
-    }
-
-    /**
-     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
-     */
-    @Override
-    protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("encode(digest(%s, 'sha512'), 'hex')", termConverter.apply(terms.get(0)));
-    }
-
-    @Override
-    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        String str = termConverter.apply(terms.get(0));
-        return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "2",
-                ImmutableList.of(abstractRootDBType, abstractRootDBType), dbBooleanType, false,
-                Serializers.getOperatorSerializer("~"));
-    }
-
-    @Override
-    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "3",
-                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootType), dbBooleanType, false,
-                /*
-                 * TODO: is it safe to assume the flags are not empty?
-                 */
-                ((terms, termConverter, termFactory) -> {
-                    /*
-                     * Normalizes the flag
-                     *   - DOT_ALL: s -> n
-                     */
-                    ImmutableTerm flagTerm = termFactory.getDBReplace(terms.get(2),
-                            termFactory.getDBStringConstant("s"),
-                            termFactory.getDBStringConstant("n"));
-
-                    ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
-                            termFactory.getDBStringConstant("(?"),
-                            flagTerm,
-                            termFactory.getDBStringConstant(")"),
-                            terms.get(1)))
-                            .simplify();
-
-
-                    return String.format("%s ~ %s",
-                            termConverter.apply(terms.get(0)),
-                            termConverter.apply(extendedPatternTerm));
-                }));
-    }
-
-    /**
-     * Cast made explicit when the input type is char
-     */
-    @Override
-    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
-                                                                                    DBTermType targetType) {
-        switch (inputType.getName()) {
-            case CHAR_STR:
-                return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
-                        Serializers.getCastSerializer(targetType));
-            default:
-                // Implicit cast
-                return super.createStringToStringCastFunctionSymbol(inputType, targetType);
-        }
-    }
+//
+//    @Override
+//    protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        String str = termConverter.apply(terms.get(0));
+//        String before = termConverter.apply(terms.get(1));
+//        return String.format("LEFT(%s,CAST (SIGN(POSITION(%s IN %s))*(POSITION(%s IN %s)-1) AS INTEGER))", str, before, str, before, str);
+//    }
+//
+//    @Override
+//    protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        String str = termConverter.apply(terms.get(0));
+//        String after = termConverter.apply(terms.get(1));
+//        return String.format("SUBSTRING(%s,POSITION(%s IN %s) + LENGTH(%s), CAST( SIGN(POSITION(%s IN %s)) * LENGTH(%s) AS INTEGER))",
+//                str, after, str , after , after, str, str);
+//    }
+//
+//    @Override
+//    protected String serializeMD5(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        return String.format("MD5(%s)", termConverter.apply(terms.get(0)));
+//    }
+//
+//    /**
+//     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
+//     */
+//    @Override
+//    protected String serializeSHA1(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        return String.format("encode(digest(%s, 'sha1'), 'hex')", termConverter.apply(terms.get(0)));
+//    }
+//
+//    /**
+//     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
+//     */
+//    @Override
+//    protected String serializeSHA256(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        return String.format("encode(digest(%s, 'sha256'), 'hex')", termConverter.apply(terms.get(0)));
+//    }
+//
+//    /**
+//     * Requires pgcrypto to be enabled (CREATE EXTENSION pgcrypto)
+//     */
+//    @Override
+//    protected String serializeSHA512(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        return String.format("encode(digest(%s, 'sha512'), 'hex')", termConverter.apply(terms.get(0)));
+//    }
+//
+//    @Override
+//    protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+//        String str = termConverter.apply(terms.get(0));
+//        return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
+//    }
+//
+//    @Override
+//    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+//        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "2",
+//                ImmutableList.of(abstractRootDBType, abstractRootDBType), dbBooleanType, false,
+//                Serializers.getOperatorSerializer("~"));
+//    }
+//
+//    @Override
+//    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+//        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "3",
+//                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootType), dbBooleanType, false,
+//                /*
+//                 * TODO: is it safe to assume the flags are not empty?
+//                 */
+//                ((terms, termConverter, termFactory) -> {
+//                    /*
+//                     * Normalizes the flag
+//                     *   - DOT_ALL: s -> n
+//                     */
+//                    ImmutableTerm flagTerm = termFactory.getDBReplace(terms.get(2),
+//                            termFactory.getDBStringConstant("s"),
+//                            termFactory.getDBStringConstant("n"));
+//
+//                    ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
+//                            termFactory.getDBStringConstant("(?"),
+//                            flagTerm,
+//                            termFactory.getDBStringConstant(")"),
+//                            terms.get(1)))
+//                            .simplify();
+//
+//
+//                    return String.format("%s ~ %s",
+//                            termConverter.apply(terms.get(0)),
+//                            termConverter.apply(extendedPatternTerm));
+//                }));
+//    }
+//
+//    /**
+//     * Cast made explicit when the input type is char
+//     */
+//    @Override
+//    protected DBTypeConversionFunctionSymbol createStringToStringCastFunctionSymbol(DBTermType inputType,
+//                                                                                    DBTermType targetType) {
+//        switch (inputType.getName()) {
+//            case CHAR_STR:
+//                return new DefaultSimpleDBCastFunctionSymbol(inputType, targetType,
+//                        Serializers.getCastSerializer(targetType));
+//            default:
+//                // Implicit cast
+//                return super.createStringToStringCastFunctionSymbol(inputType, targetType);
+//        }
+//    }
 }
