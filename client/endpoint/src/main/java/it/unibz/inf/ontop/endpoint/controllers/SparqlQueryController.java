@@ -132,19 +132,19 @@ public class SparqlQueryController {
 
                 if ("*/*".equals(accept) || accept.contains("json")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanJSONWriter(bao);
                     writer.handleBoolean(b);
-                    addCacheHeaders(response);
                 } else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanXMLWriter(bao);
                     writer.handleBoolean(b);
-                    addCacheHeaders(response);
                 } else if (accept.contains("text")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/boolean");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new BooleanTextWriter(bao);
                     writer.handleBoolean(b);
-                    addCacheHeaders(response);
                 } else {
                     response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
                 }
@@ -177,13 +177,13 @@ public class SparqlQueryController {
     }
 
     private void evaluateSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, HttpServletResponse response) {
+        addCacheHeaders(response);
         selectQuery.evaluate(writer);
-        addCacheHeaders(response);
-    }
 
+    }
     private void evaluateGraphQuery(GraphQuery graphQuery, RDFWriter turtleWriter, HttpServletResponse response) {
-        graphQuery.evaluate(turtleWriter);
         addCacheHeaders(response);
+        graphQuery.evaluate(turtleWriter);
     }
 
     /**
@@ -191,7 +191,7 @@ public class SparqlQueryController {
      * (e.g. not including non-deterministic functions like NOW())
      */
     private void addCacheHeaders(HttpServletResponse response) {
-        repository.getCacheHeaderManager().getMap()
+        repository.getHttpCacheHeaders().getMap()
                 .forEach(response::setHeader);
     }
 

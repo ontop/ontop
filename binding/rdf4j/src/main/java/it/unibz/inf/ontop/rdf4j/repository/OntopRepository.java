@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
  */
 public interface OntopRepository extends org.eclipse.rdf4j.repository.Repository, AutoCloseable {
 
-    HTTPCacheHeaders getCacheHeaderManager();
+    HTTPCacheHeaders getHttpCacheHeaders();
 
     static OntopVirtualRepository defaultRepository(OntopSystemConfiguration configuration) {
         return new OntopVirtualRepository(configuration);

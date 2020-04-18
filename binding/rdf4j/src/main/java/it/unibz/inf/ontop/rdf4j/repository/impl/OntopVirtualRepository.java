@@ -30,13 +30,13 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
     @Nullable
     private OntopQueryEngine queryEngine;
     private final RDF4JInputQueryFactory inputQueryFactory;
-    private final HTTPCacheHeaders cacheHeaderManager;
+    private final HTTPCacheHeaders cacheHeaders;
 
     public OntopVirtualRepository(OntopSystemConfiguration configuration) {
         this.configuration = configuration;
         Injector injector = configuration.getInjector();
         inputQueryFactory = injector.getInstance(RDF4JInputQueryFactory.class);
-        cacheHeaderManager = injector.getInstance(HTTPCacheHeaders.class);
+        cacheHeaders = injector.getInstance(HTTPCacheHeaders.class);
         settings = configuration.getSettings();
     }
 
@@ -124,7 +124,7 @@ public class OntopVirtualRepository extends AbstractRepository implements OntopR
     }
 
     @Override
-    public HTTPCacheHeaders getCacheHeaderManager() {
-        return cacheHeaderManager;
+    public HTTPCacheHeaders getHttpCacheHeaders() {
+        return cacheHeaders;
     }
 }
