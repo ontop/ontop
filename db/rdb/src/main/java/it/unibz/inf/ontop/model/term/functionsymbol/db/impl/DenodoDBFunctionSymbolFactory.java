@@ -28,6 +28,10 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Denodo";
 
+    // Created in init()
+    private DBFunctionSymbol dbRightFunctionSymbol;
+    private DBFunctionSymbol dbLeftFunctionSymbol;
+
     @Inject
     protected DenodoDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDenodoRegularFunctionTable(typeFactory), typeFactory);
@@ -78,32 +82,17 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return builder.build();
     }
 
-//    @Override
-//    protected DBFunctionSymbol createDBGroupConcat(DBTermType dbStringType, boolean isDistinct) {
-//        return new NullIgnoringDBGroupConcatFunctionSymbol(dbStringType, isDistinct,
-//                (terms, termConverter, termFactory) -> String.format(
-//                        "array_to_string(array_agg(%s%s),%s)",
-//                        isDistinct ? "DISTINCT " : "",
-//                        termConverter.apply(terms.get(0)),
-//                        termConverter.apply(terms.get(1))
-//                ));
-//    }
-
-//    /**
-//     * Requires sometimes to type NULLs
-//     */
-//    @Override
-//    protected DBFunctionSymbol createTypeNullFunctionSymbol(DBTermType termType) {
-//        // Cannot CAST to SERIAL --> CAST to INTEGER instead
-//        if (termType.getCastName().equals(SERIAL_STR))
-//            return new NonSimplifiableTypedNullFunctionSymbol(termType, dbTypeFactory.getDBTermType(INTEGER_STR));
-//        else
-//            return new NonSimplifiableTypedNullFunctionSymbol(termType);
-//    }
-
     @Override
     public DBFunctionSymbol getDBRight() {
-        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
+        return new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2, dbStringType, false,
+                        abstractRootDBType,
+                        (terms, converter, factory) -> serializeDBRight(terms, converter));
+    }
+
+    private String serializeDBRight(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
+        String str = termConverter.apply(terms.get(0));
+        String index = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(%s,LEN(%s)-%s+1,LEN(%s))", str, str, index, str);
     }
 
     @Override
