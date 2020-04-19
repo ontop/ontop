@@ -24,7 +24,7 @@ public class DenodoSelectFromWhereSerializer implements SelectFromWhereSerialize
 
     @Inject
     private DenodoSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                           SQLDialectAdapter dialectAdapter) {
+                                            SQLDialectAdapter dialectAdapter) {
         this.sqlTermSerializer = sqlTermSerializer;
         this.dialectAdapter = dialectAdapter;
     }
@@ -38,8 +38,10 @@ public class DenodoSelectFromWhereSerializer implements SelectFromWhereSerialize
 
     protected static class DenodoRelationVisitingSerializer extends DefaultSelectFromWhereSerializer.DefaultSQLRelationVisitingSerializer {
 
+        private final String CONTEXT = " CONTEXT('i18n'='us_utc_iso')";
+
         protected DenodoRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer,
-                                                  SQLDialectAdapter dialectAdapter, QuotedIDFactory idFactory) {
+                                                   SQLDialectAdapter dialectAdapter, QuotedIDFactory idFactory) {
             super(sqlTermSerializer, dialectAdapter, idFactory);
         }
 
@@ -57,10 +59,24 @@ public class DenodoSelectFromWhereSerializer implements SelectFromWhereSerialize
 
             String conditionString = sortConditions.stream()
                     .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap) +
-                            (c.isAscending() ? "ASC NULLS FIRST" : " DESC NULLS LAST"))
+                            (c.isAscending() ? " ASC NULLS FIRST" : " DESC NULLS LAST"))
                     .collect(Collectors.joining(", "));
 
             return String.format("ORDER BY %s\n", conditionString);
         }
+
+        /**
+         * Adds a CONTEXT clause, so that the local time zone is set to uct
+         * see https://community.denodo.com/docs/html/browse/6.0/vdp/vql/queries_select_statement/context_clause/context_clause
+         */
+        @Override
+        public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
+            QuerySerialization qs = super.visit(selectFromWhere);
+            return new DefaultSelectFromWhereSerializer.QuerySerializationImpl(
+                    qs.getString() + CONTEXT,
+                    qs.getColumnIDs()
+            );
+        }
     }
+
 }

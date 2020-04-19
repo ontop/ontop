@@ -94,12 +94,6 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return new DenodoDBStrStartsWithFunctionSymbol(abstractRootDBType, dbBooleanType);
     }
 
-
-//    @Override
-//    public DBBooleanFunctionSymbol getDBEndsWith() {
-//        return dbEndsWithFunctionSymbol;
-//    }
-
     private String serializeDBRight(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
         String str = termConverter.apply(terms.get(0));
         String index = termConverter.apply(terms.get(1));
@@ -116,7 +110,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,0,POSITION(%s IN %s)-1)", str, before, str);
+        return String.format("SUBSTR(%s,1,POSITION(%s IN %s))", str, before, str);
     }
 
     @Override
@@ -168,11 +162,6 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
-    }
-
-    @Override
     protected String getUUIDNameInDialect() {
         throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
     }
@@ -188,6 +177,15 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
+
+    /**
+     * TODO: find a way to use the stored TZ instead of the local one
+     */
+    @Override
+    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("CAST(%s AS TIMESTAMPTZ)", termConverter.apply(terms.get(0)));
+    }
+
 
 //
 //    @Override
