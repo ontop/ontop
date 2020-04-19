@@ -8,21 +8,16 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDFS;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
-import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 
@@ -33,12 +28,11 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private static final String OBJECT_PROPERTY_STR = "an object property";
     private static final String ANNOTATION_PROPERTY_STR = "an annotation property";
     private static final String CLASS_STR = "a class";
-    private final TermFactory termFactory;
+
     private final TypeFactory typeFactory;
 
     @Inject
-    private MappingOntologyComplianceValidatorImpl(TermFactory termFactory, TypeFactory typeFactory) {
-        this.termFactory = termFactory;
+    private MappingOntologyComplianceValidatorImpl(TypeFactory typeFactory) {
         this.typeFactory = typeFactory;
     }
 
@@ -63,20 +57,21 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             validateAssertion(a, ontology, datatypeMap);
     }
 
-    private void validateAssertion(MappingAssertion mappingAssertion,
+    private void validateAssertion(MappingAssertion assertion,
                                    Ontology ontology,
                                    ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
 
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getQuery().getProjectionAtom().getArguments();
-
-        MappingAssertionIndex index = mappingAssertion.getIndex();
-
-        Optional<RDFTermType> tripleObjectType = index.isClass()
+        Optional<RDFTermType> tripleObjectType = assertion.getIndex().isClass()
                 ? Optional.empty()
-                : extractTripleObjectType(mappingAssertion.getQuery());
+                : extractTripleObjectType(assertion);
 
-        checkTripleObject(index.getIri(), tripleObjectType, mappingAssertion.getProvenance(), ontology, datatypeMap);
+        try {
+            checkTripleObject(assertion.getIndex().getIri(), tripleObjectType, ontology, datatypeMap);
+        }
+        catch (MappingOntologyMismatchException e) {
+            throw new MappingOntologyMismatchException(e, "\n[\n" + assertion.getProvenance().getProvenanceInfo() + "\n]");
+        }
     }
 
 
@@ -88,19 +83,12 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * Note that this assumption does not hold for intermediate query in general.
      *
      */
-    private Optional<RDFTermType> extractTripleObjectType(IQ mappingAssertion)
+    private Optional<RDFTermType> extractTripleObjectType(MappingAssertion assertion)
             throws TripleObjectTypeInferenceException {
 
-        ImmutableList<Variable> projectedVariables = mappingAssertion.getProjectionAtom().getArguments();
-        Variable objectVariable = projectedVariables.get(2);
+        Variable objectVariable = assertion.getObject();
 
-        ImmutableTerm constructionTerm = Optional.of(mappingAssertion.getTree().getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map((n) -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .flatMap(s -> Optional.ofNullable(s.get(objectVariable)))
-                .orElseThrow(() -> new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
-                        "Not defined in the root node (expected for a mapping assertion)"));
+        ImmutableTerm constructionTerm = assertion.getTopNode().getSubstitution().get(objectVariable);
 
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);
@@ -111,7 +99,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
                     .map(t -> (RDFTermType) t);
 
             if (!optionalType.isPresent())
-                throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+                throw new TripleObjectTypeInferenceException(assertion.getQuery(), objectVariable,
                         "Not defined in the root node (expected for a mapping assertion)");
             return optionalType;
         }
@@ -123,7 +111,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
              * TODO: consider variables (NB: could be relevant for SPARQL->SPARQL
               * but not much for SPARQL->SQL where RDF terms have to built)
              */
-            throw new TripleObjectTypeInferenceException(mappingAssertion, objectVariable,
+            throw new TripleObjectTypeInferenceException(assertion.getQuery(), objectVariable,
                     "Was expecting a functional or constant term (variables are not yet supported). \n"
                             + "Term definition: " + constructionTerm);
         }
@@ -133,7 +121,6 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private void checkTripleObject(IRI predicateIRI, Optional<RDFTermType> optionalTripleObjectType,
-                                   PPMappingAssertionProvenance provenance,
                                    Ontology ontology,
                                    ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -148,12 +135,10 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
              * TODO: avoid instanceof tests!
              */
             if (tripleObjectType instanceof ObjectRDFType) {
-                checkObjectOrAnnotationProperty(predicateIRI, provenance, ontology);
-                return;
+                checkObjectOrAnnotationProperty(predicateIRI, ontology);
             }
             else if (tripleObjectType instanceof RDFDatatype) {
-                checkDataOrAnnotationProperty((RDFDatatype)tripleObjectType, predicateIRI, provenance, ontology,
-                        datatypeMap);
+                checkDataOrAnnotationProperty((RDFDatatype)tripleObjectType, predicateIRI, ontology, datatypeMap);
             }
             else {
                 // E.g. Unbound
@@ -161,29 +146,25 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             }
         }
         else {
-            checkClass(predicateIRI, provenance, ontology);
+            checkClass(predicateIRI, ontology);
         }
     }
 
-    private void checkObjectOrAnnotationProperty(IRI predicateIRI, PPMappingAssertionProvenance provenance,
-                                                 Ontology ontology)
+    private void checkObjectOrAnnotationProperty(IRI predicateIRI, Ontology ontology)
             throws MappingOntologyMismatchException {
         /*
          * Cannot be a data property (should be either an object or an annotation property)
          */
         if (ontology.tbox().dataProperties().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    DATA_PROPERTY_STR, OBJECT_PROPERTY_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, DATA_PROPERTY_STR, OBJECT_PROPERTY_STR);
         /*
          * Cannot be a class
          */
         if (ontology.tbox().classes().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    CLASS_STR, OBJECT_PROPERTY_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, CLASS_STR, OBJECT_PROPERTY_STR);
     }
 
     private void checkDataOrAnnotationProperty(RDFDatatype tripleObjectType, IRI predicateIRI,
-                                               PPMappingAssertionProvenance provenance,
                                                Ontology ontology,
                                                ImmutableMultimap<IRI, Datatype> datatypeMap)
             throws MappingOntologyMismatchException {
@@ -191,78 +172,49 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
          * Cannot be an object property
          */
         if (ontology.tbox().objectProperties().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    OBJECT_PROPERTY_STR, DATA_PROPERTY_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, OBJECT_PROPERTY_STR, DATA_PROPERTY_STR);
         /*
          * Cannot be a class
          */
         if (ontology.tbox().classes().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    CLASS_STR, DATA_PROPERTY_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, CLASS_STR, DATA_PROPERTY_STR);
 
         /*
          * Checks the datatypes
          */
         for (Datatype declaredDatatype : datatypeMap.get(predicateIRI)) {
 
-            if(declaredDatatype.getIRI().equals(RDFS.LITERAL)){
+            if (declaredDatatype.getIRI().equals(RDFS.LITERAL)) {
                 break;
             }
 
             RDFDatatype declaredTermType = typeFactory.getDatatype(declaredDatatype.getIRI());
 
             if (!tripleObjectType.isA(declaredTermType)) {
-
-                throw new MappingOntologyMismatchException(
-                        predicateIRI +
-                                " is declared with datatype " +
-                                declaredDatatype +
-                                " in the ontology, but has datatype " +
-                                tripleObjectType.getIRI() +
-                                " according to the following triplesMap (either declared in the triplesMap, or " +
-                                "inferred from its source):\n[\n" +
-                                provenance.getProvenanceInfo() +
-                                "\n]\n"
-                );
+                throw new MappingOntologyMismatchException(predicateIRI, declaredDatatype.toString(), tripleObjectType.getIRI().toString());
             }
         }
     }
 
-    private void checkClass(IRI predicateIRI, PPMappingAssertionProvenance provenance,
-                            Ontology ontology) throws MappingOntologyMismatchException {
+    private void checkClass(IRI predicateIRI, Ontology ontology) throws MappingOntologyMismatchException {
         /*
          * Cannot be an object property
          */
         if (ontology.tbox().objectProperties().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    OBJECT_PROPERTY_STR, CLASS_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, OBJECT_PROPERTY_STR, CLASS_STR);
         /*
          * Cannot be a data property
          */
-        else if (ontology.tbox().dataProperties().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    DATA_PROPERTY_STR, CLASS_STR));
+        if (ontology.tbox().dataProperties().contains(predicateIRI))
+            throw new MappingOntologyMismatchException(predicateIRI, DATA_PROPERTY_STR, CLASS_STR);
 
         /*
          * Cannot be an annotation property
          */
         if (ontology.annotationProperties().contains(predicateIRI))
-            throw new MappingOntologyMismatchException(generatePropertyOrClassConflictMessage(predicateIRI, provenance,
-                    ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR));
+            throw new MappingOntologyMismatchException(predicateIRI, ANNOTATION_PROPERTY_STR, DATA_PROPERTY_STR);
     }
 
-    private static String generatePropertyOrClassConflictMessage(IRI predicateIRI, PPMappingAssertionProvenance provenance,
-                                                                 String declaredTypeString, String usedTypeString) {
-
-        return predicateIRI +
-                " is declared as " +
-                declaredTypeString +
-                " in the ontology, but is used as " +
-                usedTypeString +
-                " in the triplesMap: \n[\n" +
-                provenance.getProvenanceInfo() +
-                "\n]";
-    }
 
     /**
      * Produces a map from datatypeProperty to corresponding datatype according to the ontology (the datatype may
@@ -274,27 +226,25 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private ImmutableMultimap<IRI, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
         // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
         return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
-                .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner).entrySet().stream())
-                .collect(ImmutableCollectors.toMultimap(
-                        e -> e.getKey(),
-                        Map.Entry::getValue));
+                .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner.dataRangesDAG()).entrySet().stream())
+                .collect(ImmutableCollectors.toMultimap());
     }
 
 
     private ImmutableMap<IRI, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
-                                                                               ClassifiedTBox reasoner) {
+                                                                         EquivalencesDAG<DataRangeExpression> dag) {
         DataRangeExpression node = nodeSet.getRepresentative();
 
         return ImmutableMap.<IRI, Datatype>builder()
-                .putAll(getDescendentNodesPartialMap(reasoner, node, nodeSet))
+                .putAll(getDescendentNodesPartialMap(dag, node, nodeSet))
                 .putAll(getEquivalentNodesPartialMap(node, nodeSet))
                 .build();
     }
 
-    private ImmutableMap<IRI, Datatype> getDescendentNodesPartialMap(ClassifiedTBox reasoner, DataRangeExpression node,
+    private ImmutableMap<IRI, Datatype> getDescendentNodesPartialMap(EquivalencesDAG<DataRangeExpression> dag, DataRangeExpression node,
                                                                            Equivalences<DataRangeExpression> nodeSet) {
         if (node instanceof Datatype) {
-            return reasoner.dataRangesDAG().getSub(nodeSet).stream()
+            return dag.getSub(nodeSet).stream()
                     .map(Equivalences::getRepresentative)
                     .filter(d -> d != node)
                     .map(this::getPredicateIRI)
@@ -344,14 +294,7 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             super("Internal bug: cannot infer the type of " + tripleObjectVariable + " in: \n" + mappingAssertion
                     + "\n Reason: " + reason);
         }
-
-        TripleObjectTypeInferenceException(IQ mappingAssertion, String reason) {
-            super("Internal bug: cannot infer the type of the object term " + " in: \n" + mappingAssertion
-                    + "\n Reason: " + reason);
-        }
     }
-
-
 
     private static class UndeterminedTripleObjectTypeException extends OntopInternalBugException {
         UndeterminedTripleObjectTypeException(IRI iri, TermType tripleObjectType) {
@@ -364,9 +307,5 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
             super("Internal bug: abstract type (" + tripleObjectType + ") for " + iri
                     + ". Should have been detected earlier.");
         }
-    }
-
-    private Variable generateFreshVariable() {
-        return termFactory.getVariable("fresh-" + UUID.randomUUID());
     }
 }
