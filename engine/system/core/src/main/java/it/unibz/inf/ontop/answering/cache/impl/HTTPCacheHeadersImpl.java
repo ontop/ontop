@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 public class HTTPCacheHeadersImpl implements HTTPCacheHeaders {
 
     private static final String CACHE_CONTROL_KEY =  "Cache-Control";
+    private static final String VARY_KEY = "Vary";
+    private static final String ACCEPT_KEY = "Accept";
     private final ImmutableMap<String, String> map;
 
     @Inject
@@ -29,7 +31,9 @@ public class HTTPCacheHeadersImpl implements HTTPCacheHeaders {
 
         map = cacheControlValue.isEmpty()
                 ? ImmutableMap.of()
-                : ImmutableMap.of(CACHE_CONTROL_KEY, cacheControlValue);
+                : ImmutableMap.of(
+                        CACHE_CONTROL_KEY, cacheControlValue,
+                        VARY_KEY, ACCEPT_KEY);
     }
 
     @Override
