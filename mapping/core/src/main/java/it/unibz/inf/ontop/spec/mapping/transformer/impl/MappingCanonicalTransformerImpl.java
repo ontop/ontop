@@ -102,7 +102,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                     atomFactory.getIntensionalTripleAtom(newVariable, Ontop.CANONICAL_IRI, replacedVar.get()));
 
             DistinctVariableOnlyDataAtom projAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                    assertion.getIndex().getPredicate(),
+                    assertion.getRDFAtomPredicate(),
                     replaceProjVars(assertion, pos, newVariable));
 
             IQ intensionalCanonizedQuery = iqFactory.createIQ(
@@ -131,49 +131,39 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
                         )));
     }
 
-    private Variable createFreshVariable(IQ assertion, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
+    private Variable createFreshVariable(IQ iq, IntensionalQueryMerger intensionalQueryMerger, Variable formerVariable) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(
-                        assertion.getTree().getKnownVariables(),
+                        iq.getTree().getKnownVariables(),
                         intensionalQueryMerger.getKnownVariables()).immutableCopy());
 
         return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
 
     private Optional<Variable> getReplacedVar(MappingAssertion assertion, Position pos) {
-        DistinctVariableOnlyDataAtom atom = assertion.getQuery().getProjectionAtom();
-        RDFAtomPredicate predicate = assertion.getIndex().getPredicate();
         switch (pos) {
             case SUBJECT:
-                return Optional.of(predicate.getSubject(atom.getArguments()));
+                return Optional.of(assertion.getSubject());
             case OBJECT:
                 return assertion.getIndex().isClass()
                         ? Optional.empty()
-                        : Optional.of(predicate.getObject(atom.getArguments()));
+                        : Optional.of(assertion.getObject());
             default:
                 throw new UnexpectedPositionException(pos);
         }
     }
 
     private ImmutableList<Variable> replaceProjVars(MappingAssertion assertion, Position pos, Variable replacementVar) {
-        DistinctVariableOnlyDataAtom atom = assertion.getQuery().getProjectionAtom();
-        RDFAtomPredicate predicate = assertion.getIndex().getPredicate();
         switch (pos) {
             case SUBJECT:
-                return predicate.updateSubject(atom.getArguments(), replacementVar);
+                return assertion.updateSubject(replacementVar);
             case OBJECT:
-                return predicate.updateObject(atom.getArguments(), replacementVar);
-            case PROPERTY:
+                return assertion.updateObject(replacementVar);
             default:
                 throw new UnexpectedPositionException(pos);
         }
     }
 
-    private <P extends AtomPredicate> Optional<RDFAtomPredicate> getRDFAtomPredicate(DataAtom<P> atom){
-        return Optional.of(atom.getPredicate())
-                .filter(p -> p instanceof RDFAtomPredicate)
-                .map(p -> (RDFAtomPredicate) p);
-    }
 
     private static class CanonicalTransformerException extends OntopInternalBugException {
         CanonicalTransformerException(String text) {
@@ -215,13 +205,15 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
             @Override
             protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
                 DataAtom<AtomPredicate> atom =  dataNode.getProjectionAtom();
-                if (getRDFAtomPredicate(atom)
+                if (Optional.of(atom.getPredicate())
+                        .filter(p -> p instanceof RDFAtomPredicate)
+                        .map(p -> (RDFAtomPredicate) p)
                         .flatMap(p -> p.getPropertyIRI(atom.getArguments()))
                         .filter(i -> i.equals(Ontop.CANONICAL_IRI))
                         .isPresent()) {
                     return Optional.of(definition);
                 }
-                throw new UnexpectedPredicateException(dataNode.getProjectionAtom().getPredicate());
+                throw new UnexpectedPredicateException(atom.getPredicate());
             }
 
             @Override

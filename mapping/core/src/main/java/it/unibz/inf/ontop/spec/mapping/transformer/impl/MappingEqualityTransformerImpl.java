@@ -41,16 +41,16 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
     @Override
     public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
         return mapping.stream()
-                .map(a -> a.copyOf(transformMappingAssertion(a.getQuery())))
+                .map(this::transformMappingAssertion)
                 .collect(ImmutableCollectors.toList());
     }
 
-    private IQ transformMappingAssertion(IQ mappingAssertion) {
-        IQTree initialTree = mappingAssertion.getTree();
-        IQTree newTree = expressionTransformer.transform(initialTree);
-        return (newTree.equals(initialTree))
+    private MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
+        IQ iq = mappingAssertion.getQuery();
+        IQTree newTree = expressionTransformer.transform(iq.getTree());
+        return (newTree.equals(iq.getTree()))
                 ? mappingAssertion
-                : iqFactory.createIQ(mappingAssertion.getProjectionAtom(), newTree);
+                : mappingAssertion.copyOf(iqFactory.createIQ(iq.getProjectionAtom(), newTree));
     }
 
 

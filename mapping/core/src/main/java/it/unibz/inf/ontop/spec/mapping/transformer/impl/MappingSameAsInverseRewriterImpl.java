@@ -6,11 +6,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSettings;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -53,29 +51,26 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
                 .collect(ImmutableCollectors.toList());
     }
 
-    private Stream<MappingAssertion> transform(MappingAssertion a) {
-        return (a.getIndex().isClass() || !a.getIndex().getIri().equals(OWL.SAME_AS))
-            ? Stream.of(a)
-            : Stream.of(a, a.copyOf(getInverse(a.getQuery(), a.getIndex().getPredicate())));
+    private Stream<MappingAssertion> transform(MappingAssertion assertion) {
+        return (assertion.getIndex().isClass() || !assertion.getIndex().getIri().equals(OWL.SAME_AS))
+            ? Stream.of(assertion)
+            : Stream.of(assertion, getInverse(assertion));
     }
 
-    private IQ getInverse(IQ originalDefinition, RDFAtomPredicate rdfAtomPredicate) {
-        ImmutableList<Variable> originalProjectedVariables = originalDefinition.getProjectionAtom().getArguments();
+    private MappingAssertion getInverse(MappingAssertion assertion) {
 
-        Variable originalSubject = rdfAtomPredicate.getSubject(originalProjectedVariables);
-        Variable originalObject = rdfAtomPredicate.getObject(originalProjectedVariables);
+        Variable originalSubject = assertion.getSubject();
+        Variable originalObject = assertion.getObject();
 
-        VariableGenerator originalVariableGenerator = originalDefinition.getVariableGenerator();
+        VariableGenerator generator = assertion.getQuery().getVariableGenerator();
+        Variable newSubject = generator.generateNewVariableFromVar(originalSubject);
+        Variable newObject = generator.generateNewVariableFromVar(originalObject);
 
-        Variable newSubject = originalVariableGenerator.generateNewVariableFromVar(originalSubject);
-        Variable newObject = originalVariableGenerator.generateNewVariableFromVar(originalObject);
+        DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
+                assertion.getRDFAtomPredicate(),
+                assertion.updateSO(newSubject, newObject));
 
-        DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(rdfAtomPredicate,
-                rdfAtomPredicate.updateSO(originalProjectedVariables, newSubject, newObject));
-
-        /*
-         * We shift subjects and objects
-         */
+        // swap subjects and objects
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(
                 ImmutableMap.of(
                         originalSubject, newObject,
@@ -83,7 +78,7 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
         QueryRenamer queryRenamer = transformerFactory.createRenamer(renamingSubstitution);
 
-        return iqFactory.createIQ(newProjectionAtom,
-                queryRenamer.transform(originalDefinition).getTree());
+        return assertion.copyOf(iqFactory.createIQ(newProjectionAtom,
+                queryRenamer.transform(assertion.getQuery()).getTree()));
     }
 }
