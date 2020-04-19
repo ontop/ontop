@@ -14,17 +14,12 @@ import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
 
-import java.util.UUID;
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.MySQLDBFunctionSymbolFactory.UUID_STR;
 import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
 import static it.unibz.inf.ontop.model.type.impl.DenodoDBTypeFactory.*;
 
 public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
-
-    private static final String RANDOM_STR = "RANDOM";
-    private static final String NOW_STR = "NOW";
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Denodo";
 
@@ -39,11 +34,16 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     protected static ImmutableTable<String, Integer, DBFunctionSymbol> createDenodoRegularFunctionTable(
             TypeFactory typeFactory) {
+
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         Table<String, Integer, DBFunctionSymbol> table = HashBasedTable.create(
                 createDefaultRegularFunctionTable(typeFactory));
+
+        DBFunctionSymbol strlenFunctionSymbol = new DefaultSQLSimpleTypedDBFunctionSymbol("LEN", 1, dbTypeFactory.getDBLargeIntegerType(),
+                false, abstractRootDBType);
+        table.put(CHAR_LENGTH_STR, 1, strlenFunctionSymbol);
 
         DBFunctionSymbol nowFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
                 CURRENT_TIMESTAMP_STR,
@@ -89,10 +89,27 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                         (terms, converter, factory) -> serializeDBRight(terms, converter));
     }
 
+    @Override
+    public DBBooleanFunctionSymbol getDBStartsWith() {
+        return new DenodoDBStrStartsWithFunctionSymbol(abstractRootDBType, dbBooleanType);
+    }
+
+
+//    @Override
+//    public DBBooleanFunctionSymbol getDBEndsWith() {
+//        return dbEndsWithFunctionSymbol;
+//    }
+
     private String serializeDBRight(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
         String str = termConverter.apply(terms.get(0));
         String index = termConverter.apply(terms.get(1));
         return String.format("SUBSTR(%s,LEN(%s)-%s+1,LEN(%s))", str, str, index, str);
+    }
+
+    private String serializeDBStartsWith(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
+        String str = termConverter.apply(terms.get(0));
+        String sbstr = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(%s,0,LEN(%s) = %s)", str, sbstr, sbstr);
     }
 
     @Override
@@ -158,6 +175,18 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String getUUIDNameInDialect() {
         throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+    /* Use "SUBSTR" rather than SUBSTRING to have indices start at 1 */
+    @Override
+    public DBFunctionSymbol getDBSubString2() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
+    }
+
+    /* Use "SUBSTR" rather than SUBSTRING to have indices start at 1 */
+    @Override
+    public DBFunctionSymbol getDBSubString3() {
+        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
 
 //
