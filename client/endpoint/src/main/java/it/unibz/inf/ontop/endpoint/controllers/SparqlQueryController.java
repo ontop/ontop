@@ -119,7 +119,7 @@ public class SparqlQueryController {
                 } else if (accept.contains("csv")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+csv;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsCSVWriter(bao), response);
-                } else if (accept.contains("tsv")) {
+                } else if (accept.contains("tsv") || accept.contains("text/tab-separated-values")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+tsv;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsTSVWriter(bao), response);
                 } else {
