@@ -50,12 +50,14 @@ public class ExpressionParserTest {
         dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void null_Test() throws JSQLParserException {
         String sql = "SELECT NULL AS A FROM DUMMY";
 
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
         ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of());
+
+        assertEquals(TERM_FACTORY.getNullConstant(), translation);
     }
 
     @Test
@@ -1179,8 +1181,50 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void case_When_Test_4_null() throws JSQLParserException {
+        String sql = "SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE NULL END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getNullConstant(), false),
+                translation);
+    }
+
+    @Test
     public void case_When_Test_4b() throws JSQLParserException {
         String sql = "SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getNullConstant(), false),
+                translation);
+    }
+
+    @Test
+    public void case_When_Test_4b_null() throws JSQLParserException {
+        String sql = "SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE NULL END FROM DUMMY;";
 
         Variable v = TERM_FACTORY.getVariable("x0");
 

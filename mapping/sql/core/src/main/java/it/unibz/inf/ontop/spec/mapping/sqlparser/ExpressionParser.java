@@ -760,7 +760,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(NullValue expression) {
-            throw new UnsupportedSelectQueryRuntimeException("NULL is not supported", expression);
+            result = termFactory.getNullConstant();
         }
 
         @Override
@@ -984,16 +984,6 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
         }
 
-        @Override //SELECT @col FROM table1
-        public void visit(UserVariable expression) {
-            throw new InvalidSelectQueryRuntimeException("User variables are not allowed", expression);
-        }
-
-        @Override //SELECT a FROM b WHERE c = :1
-        public void visit(NumericBind expression) {
-            throw new InvalidSelectQueryRuntimeException("Numeric Binds are not allowed", expression);
-        }
-
         @Override //KEEP (DENSE_RANK FIRST ORDER BY col1)
         public void visit(KeepExpression expression) {
             throw new UnsupportedSelectQueryRuntimeException("KeepExpression is not supported yet", expression);
@@ -1037,7 +1027,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(SimilarToExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("SimilarTo is not supported yet", expression);
+            throw new UnsupportedSelectQueryRuntimeException("Not a term", expression);
         }
 
         @Override
@@ -1112,7 +1102,7 @@ public class ExpressionParser {
 
         @Override
         public void visit(WhenClause expression) { // handled in CaseExpression
-            throw new RuntimeException("Unexpected WHEN:" + expression);
+            throw new UnsupportedOperationException("Unexpected WHEN: " + expression);
         }
 
 
@@ -1215,10 +1205,19 @@ public class ExpressionParser {
             throw new UnsupportedSelectQueryRuntimeException("Collate is not supported yet", expression);
         }
 
-
         @Override
         public void visit(JsonOperator expression) { // expression1 @> expression2
             throw new UnsupportedSelectQueryRuntimeException("JSON operators are not supported", expression);
+        }
+
+        @Override //SELECT @col FROM table1
+        public void visit(UserVariable expression) {
+            throw new InvalidSelectQueryRuntimeException("User variables are not allowed", expression);
+        }
+
+        @Override //SELECT a FROM b WHERE c = :1
+        public void visit(NumericBind expression) {
+            throw new InvalidSelectQueryRuntimeException("Numeric Binds are not allowed", expression);
         }
 
         @Override
