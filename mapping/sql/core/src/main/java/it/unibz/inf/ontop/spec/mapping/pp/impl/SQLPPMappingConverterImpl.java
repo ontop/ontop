@@ -74,8 +74,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     re.getDataAtoms().stream()
                             .map(iqFactory::createExtensionalDataNode)
                             .collect(ImmutableCollectors.toList()),
-                    re.getFilterAtoms().reverse().stream()
-                            .reduce((a, b) -> termFactory.getConjunction(b, a)),
+                    re.getFilterAtoms().isEmpty()
+                            ? Optional.empty()
+                            : Optional.of(termFactory.getConjunction(re.getFilterAtoms())),
                     iqFactory);
 
             ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
