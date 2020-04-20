@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.LeafIQTree;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -10,7 +11,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 /**
  * Represents a serialized query that can be executed by the DB engine
  *
- * See IntermediateQueryFactory for creating a new instance.
+ * See {@link IntermediateQueryFactory#createNativeNode} for creating a new instance.
  */
 public interface NativeNode extends LeafIQTree {
 
