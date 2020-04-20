@@ -23,10 +23,6 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for Denodo";
 
-    // Created in init()
-    private DBFunctionSymbol dbRightFunctionSymbol;
-    private DBFunctionSymbol dbLeftFunctionSymbol;
-
     @Inject
     protected DenodoDBFunctionSymbolFactory(TypeFactory typeFactory) {
         super(createDenodoRegularFunctionTable(typeFactory), typeFactory);
@@ -50,43 +46,37 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
-        DBFunctionSymbol regexLikeFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
-                CURRENT_TIMESTAMP_STR,
-                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
-        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
-
-
         return ImmutableTable.copyOf(table);
     }
 
-    @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
-
-        // BOOL
-        DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
-        builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
-
-        //TIMESTAMP
-        DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
-        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
-        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
-        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
-
-        //TIMETZ
-        DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
-        // Takes care of putting
-        DefaultTimeTzNormalizationFunctionSymbol timeTZNormFunctionSymbol = new DefaultTimeTzNormalizationFunctionSymbol(
-                timeTZType, dbStringType,
-                (terms, termConverter, termFactory) -> String.format(
-                        "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
-        builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
-
-        return builder.build();
-    }
+//    @Override
+//    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
+//        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
+//        builder.putAll(super.createNormalizationTable());
+//
+//        // BOOL
+//        DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
+//        builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
+//
+//        //TIMESTAMP
+//        DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
+//        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
+//        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
+//        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
+//        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
+//        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
+//
+//        //TIMETZ
+//        DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
+//        // Takes care of putting
+//        DefaultTimeTzNormalizationFunctionSymbol timeTZNormFunctionSymbol = new DefaultTimeTzNormalizationFunctionSymbol(
+//                timeTZType, dbStringType,
+//                (terms, termConverter, termFactory) -> String.format(
+//                        "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
+//        builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
+//
+//        return builder.build();
+//    }
 
     @Override
     public DBFunctionSymbol getDBRight() {
