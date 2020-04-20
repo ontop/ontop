@@ -1,9 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -14,7 +12,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
@@ -36,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 /**
@@ -66,80 +64,30 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup dbMetadata) throws InvalidMappingSourceQueriesException {
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
 
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
 
-        List<String> errorMessages = new ArrayList<>();
+        for (SQLPPTriplesMap mappingAssertion : mappingAssertions) {
+            RAExpression re = getRAExpression(mappingAssertion, metadataLookup);
+            IQTree tree = IQ2CQ.toIQTree(
+                    re.getDataAtoms().stream()
+                            .map(iqFactory::createExtensionalDataNode)
+                            .collect(ImmutableCollectors.toList()),
+                    re.getFilterAtoms().reverse().stream()
+                            .reduce((a, b) -> termFactory.getConjunction(b, a)),
+                    iqFactory);
 
-        for (SQLPPTriplesMap mappingAxiom : mappingAssertions) {
-            try {
-                String sourceQuery = mappingAxiom.getSourceQuery().getSQL();
-                RAExpression re;
-                try {
-                    SelectQueryParser sqp = new SelectQueryParser(dbMetadata, coreSingletons);
-                    re = sqp.parse(sourceQuery);
-                }
-                catch (UnsupportedSelectQueryException e) {
-                    SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(dbMetadata, termFactory);
-                    re = createParserView(sqae.extract(sourceQuery), sourceQuery);
-                }
+            ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
+                    .filter(e -> e.getKey().getRelation() == null)
+                    .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
+            Function<Variable, ImmutableTerm> lookup = placeholderLookup(mappingAssertion, metadataLookup.getQuotedIDFactory(), lookupTable);
 
-                ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
-                        .filter(e -> e.getKey().getRelation() == null)
-                        .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));;
-
-                IQTree tree = IQ2CQ.toIQTree(
-                        re.getDataAtoms().stream()
-                                .map(iqFactory::createExtensionalDataNode)
-                                .collect(ImmutableCollectors.toList()),
-                        re.getFilterAtoms().reverse().stream()
-                                .reduce((a, b) -> termFactory.getConjunction(b, a)),
-                        iqFactory);
-
-                BiFunction<Map<QuotedID, ImmutableTerm>, Variable, ImmutableTerm> resolver = placeholderResolver(mappingAxiom, dbMetadata.getQuotedIDFactory());
-
-                for (TargetAtom target : mappingAxiom.getTargetAtoms()) {
-
-                    ImmutableSet<Variable> placeholders = target.getSubstitutedTerms().stream()
-                            .flatMap(ImmutableTerm::getVariableStream)
-                            .collect(ImmutableCollectors.toSet());
-
-                    PPMappingAssertionProvenance provenance = mappingAxiom.getMappingAssertionProvenance(target);
-                    try {
-                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
-                                placeholders.stream()
-                                    .map(v -> Maps.immutableEntry(v, resolver.apply(lookupTable, v)))
-                                    .filter(e -> !e.getKey().equals(e.getValue()))
-                                    .collect(ImmutableCollectors.toMap()));
-
-                        ConstructionNode node =  iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
-                                substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
-                                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
-                                                e -> sub.apply(e.getValue())))));
-
-                        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), iqFactory.createUnaryIQTree(node, tree));
-
-                        IQ iq = noNullValueEnforcer.transform(iq0);
-
-                        builder.add(new MappingAssertion(iq,  provenance));
-                    }
-                    catch (NullPointerException e) { // attribute not found, part of resolver
-                        errorMessages.add("Error: " + e.getMessage()
-                                + " \nProblem location: source query of the mapping assertion \n["
-                                + provenance.getProvenanceInfo() + "]");
-                    }
-                }
-            }
-            catch (InvalidSelectQueryException e) {
-                errorMessages.add("Error: " + e.getMessage()
-                        + " \nProblem location: source query of triplesMap \n["
-                        +  mappingAxiom.getTriplesMapProvenance().getProvenanceInfo() + "]");
+            for (TargetAtom target : mappingAssertion.getTargetAtoms()) {
+                PPMappingAssertionProvenance provenance = mappingAssertion.getMappingAssertionProvenance(target);
+                builder.add(convert(target, lookup, provenance, tree));
             }
         }
-
-        if (!errorMessages.isEmpty())
-            throw new InvalidMappingSourceQueriesException(Joiner.on("\n\n").join(errorMessages));
 
         ImmutableList<MappingAssertion> list = builder.build();
         LOGGER.debug("Original mapping size: {}", list.size());
@@ -162,6 +110,62 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         }
         else
             return (map, placeholder) -> map.get(idFactory.createAttributeID(placeholder.getName()));
+    }
+
+    public static <T> Function<Variable, T> placeholderLookup(SQLPPTriplesMap mappingAssertion, QuotedIDFactory idFactory, ImmutableMap<QuotedID, T> lookup) {
+        BiFunction<Map<QuotedID, T>, Variable, T> resolver = placeholderResolver(mappingAssertion, idFactory);
+        return v -> resolver.apply(lookup, v);
+    }
+
+
+    private MappingAssertion convert(TargetAtom target, Function<Variable, ImmutableTerm> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
+
+        ImmutableSubstitution<ImmutableTerm> sub;
+        try {
+            sub = substitutionFactory.getSubstitution(
+                    target.getSubstitutedTerms().stream()
+                            .flatMap(ImmutableTerm::getVariableStream)
+                            .distinct()
+                            .map(v -> Maps.immutableEntry(v, lookup.apply(v)))
+                            .filter(e -> !e.getKey().equals(e.getValue()))
+                            .collect(ImmutableCollectors.toMap()));
+        }
+        catch (NullPointerException e) { // attribute not found, part of resolver
+            throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
+                    + " \nProblem location: source query of the mapping assertion \n["
+                    + provenance.getProvenanceInfo() + "]");
+        }
+
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
+                substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
+                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
+                                e -> sub.apply(e.getValue())))));
+
+        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(),
+                iqFactory.createUnaryIQTree(constructionNode, tree));
+
+        IQ iq = noNullValueEnforcer.transform(iq0);
+
+        return new MappingAssertion(iq, provenance);
+    }
+
+    private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+        String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
+        try {
+            try {
+                SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
+                return sqp.parse(sourceQuery);
+            }
+            catch (UnsupportedSelectQueryException e) {
+                SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(metadataLookup, termFactory);
+                return createParserView(sqae.extract(sourceQuery), sourceQuery);
+            }
+        }
+        catch (InvalidSelectQueryException e) {
+            throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
+                    + " \nProblem location: source query of triplesMap \n["
+                    +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");
+        }
     }
 
     private RAExpression createParserView(ImmutableList<QuotedID> attributes,  String sql) {
