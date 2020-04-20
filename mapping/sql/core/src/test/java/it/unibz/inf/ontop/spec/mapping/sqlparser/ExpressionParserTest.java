@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -23,6 +24,8 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
@@ -954,6 +957,53 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void not_and_Test_brackets() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT (X >= 1 AND X <= 3)";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(ImmutableList.of(TERM_FACTORY.getDBNot(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getDBDefaultInequality(GTE),
+                        v,
+                        TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getDBDefaultInequality(LTE),
+                        v,
+                        TERM_FACTORY.getDBConstant("3", dbLongType))))), translation);
+    }
+
+    @Test
+    public void not_not_and_Test_brackets() throws JSQLParserException {
+        String sql = "SELECT X AS A FROM DUMMY WHERE NOT (NOT (X >= 1 AND X <= 3))";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(getWhereExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        System.out.println(translation);
+
+        assertEquals(ImmutableList.of(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getDBDefaultInequality(GTE),
+                        v,
+                        TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                TERM_FACTORY.getImmutableExpression(
+                        DB_FS_FACTORY.getDBDefaultInequality(LTE),
+                        v,
+                        TERM_FACTORY.getDBConstant("3", dbLongType)))), translation);
+    }
+
+
+    @Test
     public void or_Test() throws JSQLParserException {
         String sql = "SELECT X AS A FROM DUMMY WHERE X < 1 OR X > 3";
 
@@ -1046,7 +1096,7 @@ public class ExpressionParserTest {
                 v), translation);
     }
 
-    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    @Test
     public void case_When_Test() throws JSQLParserException {
         String sql = "SELECT CASE A WHEN 1 THEN 3 ELSE 4 END FROM DUMMY;";
 
@@ -1054,8 +1104,101 @@ public class ExpressionParserTest {
 
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
         ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getIfThenElse(
+                TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType()),
+                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                translation);
     }
+
+    @Test
+    public void case_When_Test_3() throws JSQLParserException {
+        String sql = "SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE 5 END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getDBConstant("5", DB_TYPE_FACTORY.getDBLargeIntegerType()), false),
+                translation);
+    }
+
+    @Test
+    public void case_When_Test_3b() throws JSQLParserException {
+        String sql = "SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE 5 END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getDBConstant("5", DB_TYPE_FACTORY.getDBLargeIntegerType()), false),
+                translation);
+    }
+
+    @Test
+    public void case_When_Test_4() throws JSQLParserException {
+        String sql = "SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getNullConstant(), false),
+                translation);
+    }
+
+    @Test
+    public void case_When_Test_4b() throws JSQLParserException {
+        String sql = "SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 END FROM DUMMY;";
+
+        Variable v = TERM_FACTORY.getVariable("x0");
+
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        ImmutableTerm translation = parser.parseTerm(getExpression(sql), ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+
+        System.out.println(translation);
+
+        assertEquals(TERM_FACTORY.getDBCase(
+                Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                        Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
+                                TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType()))),
+                TERM_FACTORY.getNullConstant(), false),
+                translation);
+    }
+
 
     @Test(expected = UnsupportedSelectQueryRuntimeException.class)
     public void subSelect_Test() throws JSQLParserException {

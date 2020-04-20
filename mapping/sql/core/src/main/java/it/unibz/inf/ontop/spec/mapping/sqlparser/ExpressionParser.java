@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
@@ -30,6 +31,8 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -157,19 +160,14 @@ public class ExpressionParser {
         @Override
         public void visit(NotExpression expression) { // NOT/! expression
             ImmutableList<ImmutableExpression> subExp = translate(expression.getExpression());
-            if (subExp.size() != 1)
-                throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression.getExpression());
-
-            result = ImmutableList.of(negation(subExp.get(0)));
+            result = ImmutableList.of(negation(termFactory.getConjunction(subExp)));
         }
 
         @Override
         public void visit(IsBooleanExpression expression) { // expression IS [NOT] TRUE|FALSE
             ImmutableList<ImmutableExpression> subExp = translate(expression.getLeftExpression());
-            if (subExp.size() != 1)
-                throw new UnsupportedSelectQueryRuntimeException("Not a Boolean expression", expression.getLeftExpression());
-
-            result = notOperation(expression.isNot() == expression.isTrue()).apply(subExp.get(0));
+            result = notOperation(expression.isNot() == expression.isTrue())
+                    .apply(termFactory.getConjunction(subExp));
         }
 
 
@@ -1088,15 +1086,33 @@ public class ExpressionParser {
         //      * END
 
         public void visit(CaseExpression expression) {
-            throw new UnsupportedSelectQueryRuntimeException("CASE is not supported yet", expression);
-            // expression.getSwitchExpression();
-            // expression.getWhenClauses();
-            // expression.getElseExpression();
+            java.util.function.Function<WhenClause, ImmutableExpression> whenTranslation;
+            if (expression.getSwitchExpression() != null) {
+                ImmutableTerm switchTerm = getTerm(expression.getSwitchExpression());
+                whenTranslation = w -> termFactory.getNotYetTypedEquality(
+                        switchTerm, getTerm(w.getWhenExpression()));
+            }
+            else {
+                BooleanExpressionVisitor bev = new BooleanExpressionVisitor(attributes);
+                whenTranslation = w -> termFactory.getConjunction(
+                        bev.translate(w.getWhenExpression()));
+            }
+            ImmutableList<Map.Entry<ImmutableExpression, ImmutableTerm>> whenPairs = expression.getWhenClauses().stream()
+                    .map(w -> Maps.immutableEntry(
+                            whenTranslation.apply(w),
+                            getTerm(w.getThenExpression())))
+                    .collect(ImmutableCollectors.toList());
+
+            ImmutableTerm defaultTerm = Optional.ofNullable(expression.getElseExpression())
+                    .map(this::getTerm)
+                    .orElse(termFactory.getNullConstant());
+
+            result = termFactory.getDBCase(whenPairs.stream(), defaultTerm, false);
         }
 
         @Override
-        public void visit(WhenClause expression) {
-            throw new UnsupportedSelectQueryRuntimeException("CASE/WHEN is not supported yet", expression);
+        public void visit(WhenClause expression) { // handled in CaseExpression
+            throw new RuntimeException("Unexpected WHEN:" + expression);
         }
 
 
