@@ -35,6 +35,7 @@ public class SelectQueryParser {
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
+    private final ExpressionParser expressionParser;
 
     private int relationIndex = 0;
 
@@ -44,6 +45,7 @@ public class SelectQueryParser {
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
+        this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
@@ -110,8 +112,8 @@ public class SelectQueryParser {
                 ? current.getFilterAtoms()
                 : ImmutableList.<ImmutableExpression>builder()
                 .addAll(current.getFilterAtoms())
-                .addAll(new ExpressionParser(idfac, current.getAttributes(), coreSingletons)
-                        .parseBooleanExpression(plainSelect.getWhere()))
+                .addAll(expressionParser.parseBooleanExpression(
+                            plainSelect.getWhere(), current.getAttributes()))
                 .build();
 
         ImmutableMap.Builder<QualifiedAttributeID, ImmutableTerm> attributesBuilder = ImmutableMap.builder();
@@ -182,8 +184,8 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 return RAExpression.joinOn(left, right,
-                        (attributes ->  new ExpressionParser(idfac, attributes, coreSingletons)
-                                .parseBooleanExpression(join.getOnExpression())));
+                        (attributes -> expressionParser.parseBooleanExpression(
+                                join.getOnExpression(), attributes)));
             }
             else if (join.getUsingColumns() != null) {
                 return RAExpression.joinUsing(left, right,
@@ -363,7 +365,7 @@ public class SelectQueryParser {
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
                 //Variable var = termFactory.getVariable(name.getName() + relationIndex);
 
-                ImmutableTerm term =  new ExpressionParser(idfac, attributes, coreSingletons).parseTerm(expr);
+                ImmutableTerm term =  expressionParser.parseTerm(expr, attributes);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
             }
         }
