@@ -18,12 +18,23 @@ public interface OntopSystemSettings extends OntopReformulationSettings {
      */
     boolean isPermanentDBConnectionEnabled();
 
+    // HTTP Caching
+
+    Optional<Integer> getHttpMaxAge();
+    Optional<Integer> getHttpStaleWhileRevalidate();
+    Optional<Integer> getHttpStaleIfError();
+
     //--------------------------
     // Keys
     //--------------------------
 
     String DEFAULT_QUERY_TIMEOUT = "ontop.query.defaultTimeout";
     String PERMANENT_DB_CONNECTION = "ontop.permanentConnection";
+
+    // HTTP caching
+    String HTTP_CACHE_MAX_AGE = "ontop.http.cache.maxAge";
+    String HTTP_CACHE_STALE_WHILE_REVALIDATE = "ontop.http.cache.staleWhileRevalidate";
+    String HTTP_CACHE_STALE_IF_ERROR = "ontop.http.cache.staleIfError";
 
 
 }
