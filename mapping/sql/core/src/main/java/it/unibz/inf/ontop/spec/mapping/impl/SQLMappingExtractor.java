@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
@@ -15,6 +14,7 @@ import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -89,21 +89,19 @@ public class SQLMappingExtractor implements MappingExtractor {
 
     @Override
     public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
-                                          @Nonnull Optional<Ontology> ontology,
-                                          @Nonnull ExecutorRegistry executorRegistry)
+                                          @Nonnull Optional<Ontology> ontology)
             throws MappingException, MetadataExtractionException {
 
-        return convertPPMapping(extractPPMapping(specInput), specInput, ontology, executorRegistry);
+        return convertPPMapping(extractPPMapping(specInput), specInput, ontology);
     }
 
     @Override
     public MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
                                           @Nonnull OBDASpecInput specInput,
-                                          @Nonnull Optional<Ontology> ontology,
-                                          @Nonnull ExecutorRegistry executorRegistry)
+                                          @Nonnull Optional<Ontology> ontology)
             throws MappingException, MetadataExtractionException {
 
-        return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology, executorRegistry);
+        return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology);
     }
 
 
@@ -134,12 +132,11 @@ public class SQLMappingExtractor implements MappingExtractor {
      */
     protected MappingAndDBParameters convertPPMapping(SQLPPMapping ppMapping,
                                                       OBDASpecInput specInput,
-                                                      Optional<Ontology> optionalOntology,
-                                                      ExecutorRegistry executorRegistry)
+                                                      Optional<Ontology> optionalOntology)
             throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
-        MappingAndDBParameters mm = convert(ppMapping, specInput.getConstraintFile(), executorRegistry);
+        MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
@@ -155,9 +152,8 @@ public class SQLMappingExtractor implements MappingExtractor {
     }
 
 
-    private MappingAndDBParameters convert(SQLPPMapping ppMapping,
-                                           Optional<File> constraintFile,
-                                           ExecutorRegistry executorRegistry) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
+                                           Optional<File> constraintFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
@@ -166,8 +162,8 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
-            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(ppMapping, connection, metadataLookup);
-            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup, executorRegistry);
+            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup);
 
             metadataLookup.extractImmutableMetadata();
 

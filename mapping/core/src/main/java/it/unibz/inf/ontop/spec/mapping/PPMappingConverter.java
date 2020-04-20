@@ -11,6 +11,6 @@ import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedTriplesMap;
  */
 public interface PPMappingConverter<T extends PreProcessedTriplesMap> {
 
-    ImmutableList<MappingAssertion> convert(ImmutableList<T> ppMapping, MetadataLookup dbMetadata, ExecutorRegistry executorRegistry) throws InvalidMappingSourceQueriesException;
+    ImmutableList<MappingAssertion> convert(ImmutableList<T> ppMapping, MetadataLookup dbMetadata) throws InvalidMappingSourceQueriesException;
 
 }

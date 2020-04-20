@@ -146,7 +146,7 @@ public class MappingTest {
                 .map(e -> new MappingAssertion(e.getKey(), e.getValue(), null))
                 .collect(ImmutableCollectors.toList());
         ImmutableMap<MappingAssertionIndex, IQ> normalizedMapping = MAPPING_NORMALIZER.normalize(nonNormalizedMapping).stream()
-                .collect(ImmutableCollectors.toMap(a -> a.getIndex(), a -> a.getQuery()));
+                .collect(ImmutableCollectors.toMap(MappingAssertion::getIndex, MappingAssertion::getQuery));
 
         /*
          * Test whether two mapping assertions share a variable

@@ -33,4 +33,19 @@ public class OntopSystemSettingsImpl extends OntopReformulationSettingsImpl impl
     public boolean isPermanentDBConnectionEnabled() {
         return getRequiredBoolean(PERMANENT_DB_CONNECTION);
     }
+
+    @Override
+    public Optional<Integer> getHttpMaxAge() {
+        return getInteger(HTTP_CACHE_MAX_AGE);
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleWhileRevalidate() {
+        return getInteger(HTTP_CACHE_STALE_WHILE_REVALIDATE);
+    }
+
+    @Override
+    public Optional<Integer> getHttpStaleIfError() {
+        return getInteger(HTTP_CACHE_STALE_IF_ERROR);
+    }
 }

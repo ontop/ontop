@@ -16,9 +16,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
  */
 public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
 
-        final static String owlFile = "/pgsql/EPNet.owl";
-        final static String obdaFile = "/pgsql/EPNet.obda";
-        final static String propertyFile = "/pgsql/EPNet.properties";
+    private final static String owlFile = "/pgsql/EPNet.owl";
+    private final static String obdaFile = "/pgsql/EPNet.obda";
+    private final static String propertyFile = "/pgsql/EPNet.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;
@@ -64,7 +64,7 @@ public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
                 "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
                 "select ?x\n" +
                 "where {\n" +
-                "?x rdf:type :AmphoraSection2026 .\n" +
+                "?x rdf:type :AmphoraSection2026-2026 .\n" +
                 "}\n" +
                 "limit 5\n";
 
