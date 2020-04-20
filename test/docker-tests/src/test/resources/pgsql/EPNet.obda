@@ -15,7 +15,7 @@ pleiades:	http://pleiades.stoa.org/places/
 
 [MappingDeclaration] @collection [[
 mappingId	M_0
-target		:Inscription-{i_id} a :AmphoraSection{rp_id} . 
+target		:Inscription-{i_id} a :AmphoraSection{rp_id}-{rp_id} .
 source		select i.id as i_id, rp.id as rp_id
 			from 
 			   Inscription i 

@@ -123,8 +123,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	private IQ generateExecutableQuery(IQ iq)
-			throws OntopReformulationException {
+	private IQ generateExecutableQuery(IQ iq) {
 
 		log.debug("Producing the native query string...");
 

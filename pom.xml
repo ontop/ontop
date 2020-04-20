@@ -137,7 +137,7 @@
         <hikari-cp.version>2.6.3</hikari-cp.version>
         <commons-rdf.version>0.5.0</commons-rdf.version>
         <guava.version>18.0</guava.version>
-        <jsqlparser.version>1.0</jsqlparser.version>
+        <jsqlparser.version>3.1</jsqlparser.version>
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <jackson.version>2.9.7</jackson.version>
         <jena.version>3.9.0</jena.version>

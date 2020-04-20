@@ -58,20 +58,14 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     @Override
     public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
         return mapping.stream()
-                .map(a -> a.copyOf(transformMappingAssertion(a.getQuery())))
+                .map(this::transformMappingAssertion)
                 .collect(ImmutableCollectors.toList());
     }
 
-    private IQ transformMappingAssertion(IQ mappingAssertion) {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = Optional.of(mappingAssertion.getTree())
-                .filter(t -> t.getRootNode() instanceof ConstructionNode)
-                .map(IQTree::getRootNode)
-                .map(n -> (ConstructionNode) n)
-                .map(ConstructionNode::getSubstitution)
-                .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "The mapping assertion was expecting to start with a construction node\n" + mappingAssertion));
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
 
-        ImmutableSet<Variable> projectedVariables = mappingAssertion.getTree().getVariables();
+        ImmutableSet<Variable> projectedVariables = assertion.getQuery().getTree().getVariables();
 
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();
 
@@ -82,17 +76,18 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                         || (t instanceof RDFConstant))) {
             throw new MinorOntopInternalBugException(
                     "The root construction node is not defining all the variables with a RDF functional or constant term\n"
-                            + mappingAssertion);
+                            + assertion);
         }
-        IQTree childTree = ((UnaryIQTree)mappingAssertion.getTree()).getChild();
+        IQTree childTree = assertion.getTopChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
                 topSubstitution.getImmutableMap(), childTree);
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
-        return iqFactory.createIQ(mappingAssertion.getProjectionAtom(),
-                iqFactory.createUnaryIQTree(newRootNode, childTree));
+        return assertion.copyOf(iqFactory.createIQ(
+                assertion.getProjectionAtom(),
+                iqFactory.createUnaryIQTree(newRootNode, childTree)));
     }
 
     /**
@@ -216,6 +211,4 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         else
             return term;
     }
-
-
 }

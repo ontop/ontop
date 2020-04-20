@@ -16,16 +16,14 @@ public class FakeMappingExtractor implements MappingExtractor {
 
     @Override
     public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
-                                          @Nonnull Optional<Ontology> ontology,
-                                          @Nonnull ExecutorRegistry executorRegistry) {
+                                          @Nonnull Optional<Ontology> ontology) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 
     @Override
     public MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
                                           @Nonnull OBDASpecInput specInput,
-                                          @Nonnull Optional<Ontology> ontology,
-                                          @Nonnull ExecutorRegistry executorRegistry) {
+                                          @Nonnull Optional<Ontology> ontology) {
         throw new UnsupportedOperationException(MESSAGE);
     }
 }

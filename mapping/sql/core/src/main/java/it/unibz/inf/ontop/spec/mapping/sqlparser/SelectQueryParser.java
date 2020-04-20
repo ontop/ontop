@@ -16,7 +16,6 @@ import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.parser.TokenMgrError;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -36,6 +35,7 @@ public class SelectQueryParser {
     private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
     private final AtomFactory atomFactory;
+    private final ExpressionParser expressionParser;
 
     private int relationIndex = 0;
 
@@ -45,11 +45,12 @@ public class SelectQueryParser {
         this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
+        this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
+            Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
             if (!(statement instanceof Select))
                 throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
@@ -57,16 +58,13 @@ public class SelectQueryParser {
             return re;
         }
         catch (JSQLParserException e) {
-            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
+            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
         }
         catch (UnsupportedSelectQueryRuntimeException e) {
             throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
-        }
-        catch (TokenMgrError e) {
-            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
         }
     }
 
@@ -81,7 +79,7 @@ public class SelectQueryParser {
         if (plainSelect.getDistinct() != null)
             throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", selectBody);
 
-        if (plainSelect.getGroupByColumnReferences() != null || plainSelect.getHaving() != null)
+        if (plainSelect.getGroupBy() != null || plainSelect.getHaving() != null)
             throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", selectBody);
 
         if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset()!= null)
@@ -114,8 +112,8 @@ public class SelectQueryParser {
                 ? current.getFilterAtoms()
                 : ImmutableList.<ImmutableExpression>builder()
                 .addAll(current.getFilterAtoms())
-                .addAll(new ExpressionParser(idfac, current.getAttributes(), coreSingletons)
-                        .parseBooleanExpression(plainSelect.getWhere()))
+                .addAll(expressionParser.parseBooleanExpression(
+                            plainSelect.getWhere(), current.getAttributes()))
                 .build();
 
         ImmutableMap.Builder<QualifiedAttributeID, ImmutableTerm> attributesBuilder = ImmutableMap.builder();
@@ -186,8 +184,8 @@ public class SelectQueryParser {
                     throw new InvalidSelectQueryRuntimeException("JOIN cannot have both USING and ON", join);
 
                 return RAExpression.joinOn(left, right,
-                        (attributes ->  new ExpressionParser(idfac, attributes, coreSingletons)
-                                .parseBooleanExpression(join.getOnExpression())));
+                        (attributes -> expressionParser.parseBooleanExpression(
+                                join.getOnExpression(), attributes)));
             }
             else if (join.getUsingColumns() != null) {
                 return RAExpression.joinUsing(left, right,
@@ -269,10 +267,10 @@ public class SelectQueryParser {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
-            RAExpression left = getRelationalExpression(subjoin.getLeft());
-            RAExpression join;
+            RAExpression join = getRelationalExpression(subjoin.getLeft());
             try {
-                join = join(left, subjoin.getJoin());
+                for (Join j : subjoin.getJoinList())
+                    join = join(join, j);
             }
             catch (IllegalJoinException e) {
                 throw new InvalidSelectQueryRuntimeException(e.toString(), subjoin);
@@ -295,6 +293,11 @@ public class SelectQueryParser {
         @Override
         public void visit(TableFunction tableFunction) {
             throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
+        }
+
+        @Override
+        public void visit(ParenthesisFromItem parenthesisFromItem) {
+            throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
         }
     }
 
@@ -362,7 +365,7 @@ public class SelectQueryParser {
                 QuotedID name = idfac.createAttributeID(columnAlias.getName());
                 //Variable var = termFactory.getVariable(name.getName() + relationIndex);
 
-                ImmutableTerm term =  new ExpressionParser(idfac, attributes, coreSingletons).parseTerm(expr);
+                ImmutableTerm term =  expressionParser.parseTerm(expr, attributes);
                 map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
             }
         }
