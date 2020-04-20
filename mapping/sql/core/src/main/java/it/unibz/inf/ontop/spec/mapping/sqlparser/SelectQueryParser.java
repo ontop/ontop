@@ -265,8 +265,7 @@ public class SelectQueryParser {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
-            RAExpression left = getRelationalExpression(subjoin.getLeft());
-            RAExpression join = left;
+            RAExpression join = getRelationalExpression(subjoin.getLeft());
             try {
                 for (Join j : subjoin.getJoinList())
                     join = join(join, j);
