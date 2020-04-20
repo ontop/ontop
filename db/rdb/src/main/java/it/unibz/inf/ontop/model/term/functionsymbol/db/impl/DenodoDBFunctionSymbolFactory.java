@@ -7,17 +7,15 @@ import com.google.common.collect.Table;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIsTrueFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
-import it.unibz.inf.ontop.model.vocabulary.XSD;
 
 import java.util.function.Function;
-
-import static it.unibz.inf.ontop.model.type.impl.DefaultSQLDBTypeFactory.*;
-import static it.unibz.inf.ontop.model.type.impl.DenodoDBTypeFactory.*;
 
 public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
@@ -48,35 +46,6 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
         return ImmutableTable.copyOf(table);
     }
-
-//    @Override
-//    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-//        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-//        builder.putAll(super.createNormalizationTable());
-//
-//        // BOOL
-//        DBTermType boolType = dbTypeFactory.getDBTermType(BOOL_STR);
-//        builder.put(boolType, typeFactory.getXsdBooleanDatatype(), createBooleanNormFunctionSymbol(boolType));
-//
-//        //TIMESTAMP
-//        DBTermType timeStamp = dbTypeFactory.getDBTermType(TIMESTAMP_STR);
-//        RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
-//        RDFDatatype xsdDatetimeStamp = typeFactory.getXsdDatetimeStampDatatype();
-//        DBTypeConversionFunctionSymbol datetimeNormFunctionSymbol = createDateTimeNormFunctionSymbol(timeStamp);
-//        builder.put(timeStamp, xsdDatetime, datetimeNormFunctionSymbol);
-//        builder.put(timeStamp, xsdDatetimeStamp, datetimeNormFunctionSymbol);
-//
-//        //TIMETZ
-//        DBTermType timeTZType = dbTypeFactory.getDBTermType(TIMETZ_STR);
-//        // Takes care of putting
-//        DefaultTimeTzNormalizationFunctionSymbol timeTZNormFunctionSymbol = new DefaultTimeTzNormalizationFunctionSymbol(
-//                timeTZType, dbStringType,
-//                (terms, termConverter, termFactory) -> String.format(
-//                        "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
-//        builder.put(timeTZType, typeFactory.getDatatype(XSD.TIME), timeTZNormFunctionSymbol);
-//
-//        return builder.build();
-//    }
 
     @Override
     public DBFunctionSymbol getDBRight() {
@@ -200,74 +169,21 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new UnsupportedOperationException("UUID: " + NOT_YET_SUPPORTED_MSG);
     }
 
-    /* Use "SUBSTR" rather than SUBSTRING to have indices start at 1 */
     @Override
     public DBFunctionSymbol getDBSubString2() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
     }
 
-    /* Use "SUBSTR" rather than SUBSTRING to have indices start at 1 */
     @Override
     public DBFunctionSymbol getDBSubString3() {
         return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
     }
 
-    /**
-     * TODO: find a way to use the stored TZ instead of the local one
-     */
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("CAST(%s AS TIMESTAMPTZ)", termConverter.apply(terms.get(0)));
     }
 
-
-//
-//    @Override
-//    protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
-//        return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType,
-//                Serializers.getOperatorSerializer(CONCAT_OP_STR));
-//    }
-
-//    @Override
-//    protected DBConcatFunctionSymbol createRegularDBConcat(int arity) {
-//        return new NullToleratingDBConcatFunctionSymbol("CONCAT", arity, dbStringType, abstractRootDBType, false);
-//    }
-//
-//    @Override
-//    protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
-//        return new OneLetterDBIsTrueFunctionSymbolImpl(dbBooleanType);
-//    }
-
-//    @Override
-//    protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-//           return termConverter.apply(terms.get(0));
-//    }
-//
-//    @Override
-//    protected DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType) {
-//        return new OneLetterBooleanNormFunctionSymbolImpl(booleanType, dbStringType);
-//    }
-//
-//    @Override
-//    public DBFunctionSymbol getDBSubString2() {
-//        return getRegularDBFunctionSymbol(SUBSTR_STR, 2);
-//    }
-//
-//    @Override
-//    public DBFunctionSymbol getDBSubString3() {
-//        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
-//    }
-
-    //    @Override
-//    protected String getRandNameInDialect() {
-//        return RANDOM_STR;
-//    }
-//
-//    @Override
-//    protected String getUUIDNameInDialect() {
-//        throw new UnsupportedOperationException("Should not be used for PostgreSQL");
-//    }
-//
     @Override
     protected String serializeContains(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         return String.format("(POSITION(%s IN %s) > 0)",
@@ -282,7 +198,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     /**
      * Supported in the WHERE clause.
-     * Fails in the SELECT clause (e.g. fals for unit test AbstractBindTestWithFunctions.testREGEX())
+     * Fails in the SELECT clause (e.g. fails for unit test AbstractBindTestWithFunctions.testREGEX())
      */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
@@ -304,21 +220,10 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + NOT_YET_SUPPORTED_MSG);
     }
 
-
     @Override
     public DBFunctionSymbol getDBRegexpReplace3() {
-        return new DBFunctionSymbolWithSerializerImpl(
-                REGEXP_REPLACE_STR,
-                ImmutableList.of(dbStringType, dbStringType, dbStringType),
-                dbStringType,
-                false,
-                (terms, converter, factory) ->
-                        String.format(
-                                "REGEXP(%s, %s, %s)",
-                                converter.apply(terms.get(0)),
-                                converter.apply(terms.get(1)),
-                                converter.apply(terms.get(2))
-                        ));
+        return new DefaultSQLSimpleTypedDBFunctionSymbol("REGEXP", 3, dbStringType,
+                false, abstractRootDBType);
     }
 
     @Override
