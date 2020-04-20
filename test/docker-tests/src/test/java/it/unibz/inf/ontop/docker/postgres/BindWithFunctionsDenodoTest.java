@@ -204,4 +204,31 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
      */
     public void testYear() {
     }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * Denodo cannot parse a logical AND in the ORDER BY clause
+     */
+    public void testAndBind() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testAndBind() for an explanation
+     */
+    public void testAndBindDistinct() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testAndBind() for an explanation
+     */
+    public void testOrBind() {
+    }
 }

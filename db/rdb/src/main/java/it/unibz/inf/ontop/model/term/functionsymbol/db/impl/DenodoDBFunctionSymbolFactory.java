@@ -157,9 +157,12 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
-        String after = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,POSITION(%s IN %s) + LEN(%s))",
-                str, after, str, after);
+        String sbstr = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(" +
+                        "%s," +
+                        "POSITION(%s IN %s) + LEN(%s)," +
+                        "LEN(%s)  * CAST(SIGN(POSITION(%s IN %s)) AS INTEGER))",
+                str, sbstr, str, sbstr, str, sbstr, str);
     }
 
     @Override
