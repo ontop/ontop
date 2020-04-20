@@ -140,7 +140,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         return variableGenerator.generateNewVariableFromVar(formerVariable);
     }
 
-    private Optional<Variable> getReplacedVar(MappingAssertion assertion, Position pos) {
+    private static Optional<Variable> getReplacedVar(MappingAssertion assertion, Position pos) {
         switch (pos) {
             case SUBJECT:
                 return Optional.of(assertion.getSubject());
@@ -153,7 +153,7 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         }
     }
 
-    private ImmutableList<Variable> replaceProjVars(MappingAssertion assertion, Position pos, Variable replacementVar) {
+    private static ImmutableList<Variable> replaceProjVars(MappingAssertion assertion, Position pos, Variable replacementVar) {
         switch (pos) {
             case SUBJECT:
                 return assertion.updateSubject(replacementVar);

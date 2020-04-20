@@ -45,12 +45,12 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
                 .collect(ImmutableCollectors.toList());
     }
 
-    private MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
-        IQ iq = mappingAssertion.getQuery();
-        IQTree newTree = expressionTransformer.transform(iq.getTree());
-        return (newTree.equals(iq.getTree()))
-                ? mappingAssertion
-                : mappingAssertion.copyOf(iqFactory.createIQ(iq.getProjectionAtom(), newTree));
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
+        IQTree tree = assertion.getQuery().getTree();
+        IQTree newTree = expressionTransformer.transform(tree);
+        return newTree.equals(tree)
+                ? assertion
+                : assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
     }
 
 
@@ -217,7 +217,7 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         /**
          * NB: It tries to reduce equalities into strict equalities.
          * 
-         * Essential for integers and strings as these kinds types are often used to build IRIs.
+         * Essential for integers and strings as these kinds of types are often used to build IRIs.
          */
         protected ImmutableExpression transformEquality(ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (newTerms.size() != 2)

@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.validation.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MappingOntologyMismatchException;
@@ -17,8 +17,9 @@ import it.unibz.inf.ontop.spec.ontology.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 
 @Singleton
@@ -223,62 +224,50 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
      * it.unibz.inf.ontop.owlrefplatform.core.mappingprocessing.MappingDataTypeRepair#getDataTypeFromOntology
      * from Ontop v 1.18.1
      */
-    private ImmutableMultimap<IRI, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
-        // TODO: switch to guava > 2.1, and replace by Streams.stream(iterable)
-        return StreamSupport.stream(reasoner.dataRangesDAG().spliterator(), false)
-                .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner.dataRangesDAG()).entrySet().stream())
+    private static ImmutableMultimap<IRI, Datatype> computeDataTypeMap(ClassifiedTBox reasoner) {
+        return reasoner.dataRangesDAG().stream()
+                .flatMap(n -> getPartialPredicateToDatatypeMap(n, reasoner.dataRangesDAG()))
                 .collect(ImmutableCollectors.toMultimap());
     }
 
 
-    private ImmutableMap<IRI, Datatype> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
-                                                                         EquivalencesDAG<DataRangeExpression> dag) {
+    private static Stream<Map.Entry<IRI, Datatype>> getPartialPredicateToDatatypeMap(Equivalences<DataRangeExpression> nodeSet,
+                                                                              EquivalencesDAG<DataRangeExpression> dag) {
+        return Stream.concat(
+                getSub(dag.getSub(nodeSet).stream()
+                        .map(Equivalences::getRepresentative), nodeSet.getRepresentative()),
+                getEquivalentNodesPartialMap(nodeSet));
+    }
+
+    private static Stream<Map.Entry<IRI, Datatype>> getEquivalentNodesPartialMap(Equivalences<DataRangeExpression> nodeSet) {
         DataRangeExpression node = nodeSet.getRepresentative();
-
-        return ImmutableMap.<IRI, Datatype>builder()
-                .putAll(getDescendentNodesPartialMap(dag, node, nodeSet))
-                .putAll(getEquivalentNodesPartialMap(node, nodeSet))
-                .build();
+        return Stream.concat(
+                getPredicateIRI(node)
+                        .map(i -> nodeSet.stream()
+                                .filter(e -> e != node)
+                                .filter(e -> e instanceof Datatype)
+                                .map(e -> (Datatype)e)
+                                .map(e -> Maps.immutableEntry(i, e)))
+                        .orElse(Stream.of()),
+                getSub(nodeSet.stream(), node));
     }
 
-    private ImmutableMap<IRI, Datatype> getDescendentNodesPartialMap(EquivalencesDAG<DataRangeExpression> dag, DataRangeExpression node,
-                                                                           Equivalences<DataRangeExpression> nodeSet) {
-        if (node instanceof Datatype) {
-            return dag.getSub(nodeSet).stream()
-                    .map(Equivalences::getRepresentative)
-                    .filter(d -> d != node)
-                    .map(this::getPredicateIRI)
-                    .filter(Optional::isPresent)
-                    .collect(ImmutableCollectors.toMap(
-                            Optional::get,
-                            d -> (Datatype) node
-                    ));
-        }
-        return ImmutableMap.of();
+    private static Stream<Map.Entry<IRI, Datatype>> getSub(Stream<DataRangeExpression> stream, DataRangeExpression node) {
+        return  Optional.of(node)
+                .filter(n -> n instanceof Datatype)
+                .map(n -> (Datatype)n)
+                .map(n -> stream
+                        .filter(e -> e != n)
+                        .map(MappingOntologyComplianceValidatorImpl::getPredicateIRI)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(i -> Maps.immutableEntry(i, n)))
+                .orElse(Stream.of());
     }
-
-    private ImmutableMap<IRI, Datatype> getEquivalentNodesPartialMap(DataRangeExpression node,
-                                                                           Equivalences<DataRangeExpression> nodeSet) {
-        ImmutableMap.Builder<IRI, Datatype> builder = ImmutableMap.builder();
-        for (DataRangeExpression equivalent : nodeSet) {
-            if (equivalent != node) {
-                if (equivalent instanceof Datatype) {
-                    getPredicateIRI(node)
-                            .ifPresent(p -> builder.put(p, (Datatype) equivalent));
-                }
-                if (node instanceof Datatype) {
-                    getPredicateIRI(equivalent)
-                            .ifPresent(p -> builder.put(p, (Datatype) node));
-                }
-            }
-        }
-        return builder.build();
-    }
-
 
     //TODO: check whether the DataRange expression can be neither a Datatype nor a DataPropertyRangeExpression:
     // if the answer is no, drop the Optional and throw an exception instead
-    private Optional<IRI> getPredicateIRI(DataRangeExpression expression) {
+    private static Optional<IRI> getPredicateIRI(DataRangeExpression expression) {
         if (expression instanceof Datatype) {
             return Optional.of(((Datatype) expression).getIRI());
         }

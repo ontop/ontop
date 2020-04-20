@@ -62,10 +62,10 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                 .collect(ImmutableCollectors.toList());
     }
 
-    private MappingAssertion transformMappingAssertion(MappingAssertion mappingAssertion) {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = mappingAssertion.getTopNode().getSubstitution();
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
 
-        ImmutableSet<Variable> projectedVariables = mappingAssertion.getQuery().getTree().getVariables();
+        ImmutableSet<Variable> projectedVariables = assertion.getQuery().getTree().getVariables();
 
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();
 
@@ -76,17 +76,17 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
                         || (t instanceof RDFConstant))) {
             throw new MinorOntopInternalBugException(
                     "The root construction node is not defining all the variables with a RDF functional or constant term\n"
-                            + mappingAssertion);
+                            + assertion);
         }
-        IQTree childTree = mappingAssertion.getTopChild();
+        IQTree childTree = assertion.getTopChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
                 topSubstitution.getImmutableMap(), childTree);
 
         ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
 
-        return mappingAssertion.copyOf(iqFactory.createIQ(
-                mappingAssertion.getQuery().getProjectionAtom(),
+        return assertion.copyOf(iqFactory.createIQ(
+                assertion.getProjectionAtom(),
                 iqFactory.createUnaryIQTree(newRootNode, childTree)));
     }
 
@@ -211,6 +211,4 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         else
             return term;
     }
-
-
 }
