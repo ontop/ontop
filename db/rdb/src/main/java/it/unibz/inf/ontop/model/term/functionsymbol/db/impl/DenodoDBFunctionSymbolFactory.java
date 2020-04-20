@@ -91,8 +91,8 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     public DBFunctionSymbol getDBRight() {
         return new SimpleTypedDBFunctionSymbolImpl(RIGHT_STR, 2, dbStringType, false,
-                        abstractRootDBType,
-                        (terms, converter, factory) -> serializeDBRight(terms, converter));
+                abstractRootDBType,
+                (terms, converter, factory) -> serializeDBRight(terms, converter));
     }
 
     @Override
@@ -102,29 +102,64 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     private String serializeDBRight(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
         String str = termConverter.apply(terms.get(0));
-        String index = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,LEN(%s)-%s+1,LEN(%s))", str, str, index, str);
+        String length = termConverter.apply(terms.get(1));
+        return String.format("SUBSTR(%s,LEN(%s)-%s+1)", str, str, length);
     }
 
     private String serializeDBStartsWith(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
         String str = termConverter.apply(terms.get(0));
         String sbstr = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,0,LEN(%s) = %s)", str, sbstr, sbstr);
+        return String.format("SUBSTR(%s,1,LEN(%s)) = %s)", str, sbstr, sbstr);
     }
 
+    /**
+     * The documentation of Denodo does not correspond to the implementation
+     * In particular:
+     * SUBSTR(<string> 1, 2)
+     * returns the first character of <string>, whereas:
+     * SUBSTR(<string> 0, 2)
+     * returns the two first character of <string>.
+     * Instead, the documentation says that the third parameter ("2" here) should be the length of the returned value.
+     * It also says that indices start at 1 for SUBSTR and for POSITION.
+     * So:
+     * SUBSTR(<string> 1, POSITION(<substring> IN <string>))
+     * should be the correct translation.
+     * But it returns one more (trailing) character than it should.
+     * And if instead we use:
+     * SUBSTR(<string> 1, POSITION(<substring> IN <string>) - 1)
+     * then Denodo throws the exception:
+     * 'ERROR: negative substring length not allowed'
+     * <p>
+     * There is also another function:
+     * SUBSTRING (<string>, <start>, <end>)
+     * whose indices start at 0, and whose third parameter is the end index of the returned substring (excluded).
+     * So according to the documentation, the following should do the trick:
+     * SUBSTRING(<string>, 0, POSITION(<substring> IN <string>) - 1)
+     * But again, Denodo throws the exception:
+     * 'ERROR: negative substring length not allowed'
+     * <p>
+     * Instead, we get the desired output with:
+     * SUBSTR(<string> 0, POSITION(<substring> IN <string>))
+     * which does not make much sense.
+     */
     @Override
     protected String serializeStrBefore(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String before = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,1,POSITION(%s IN %s))", str, before, str);
+        return String.format(
+                "SUBSTR(%s, 0, POSITION(%s IN %s))",
+                str, before, str);
     }
 
+    /**
+     * See serializeStrBefore() for the inconsistencies of the SUBSTRING functions
+     */
     @Override
     protected String serializeStrAfter(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         String str = termConverter.apply(terms.get(0));
         String after = termConverter.apply(terms.get(1));
-        return String.format("SUBSTR(%s,POSITION(%s IN %s) + LEN(%s), SIGN(POSITION(%s IN %s)) * LENGTH(%s))",
-                str, after, str, after, after, str, str);
+        return String.format("SUBSTR(%s,POSITION(%s IN %s) + LEN(%s))",
+                str, after, str, after);
     }
 
     @Override
@@ -158,7 +193,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     @Override
-    protected DBConcatFunctionSymbol createDBConcatOperator(int arity){
+    protected DBConcatFunctionSymbol createDBConcatOperator(int arity) {
         return new NullRejectingDBConcatFunctionSymbol(CONCAT_OP_STR, arity, dbStringType, abstractRootDBType, true);
     }
 
@@ -230,7 +265,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 //        return getRegularDBFunctionSymbol(SUBSTR_STR, 3);
 //    }
 
-//    @Override
+    //    @Override
 //    protected String getRandNameInDialect() {
 //        return RANDOM_STR;
 //    }
@@ -273,7 +308,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        throw new UnsupportedOperationException(REGEXP_LIKE_STR+"3: " + NOT_YET_SUPPORTED_MSG);
+        throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + NOT_YET_SUPPORTED_MSG);
     }
 
 
@@ -281,7 +316,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     public DBFunctionSymbol getDBRegexpReplace3() {
         return new DBFunctionSymbolWithSerializerImpl(
                 REGEXP_REPLACE_STR,
-                ImmutableList.of(dbStringType,dbStringType,dbStringType),
+                ImmutableList.of(dbStringType, dbStringType, dbStringType),
                 dbStringType,
                 false,
                 (terms, converter, factory) ->
@@ -295,7 +330,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     public DBFunctionSymbol getDBRegexpReplace4() {
-        throw new UnsupportedOperationException(REGEXP_REPLACE_STR+"4: " + NOT_YET_SUPPORTED_MSG);
+        throw new UnsupportedOperationException(REGEXP_REPLACE_STR + "4: " + NOT_YET_SUPPORTED_MSG);
     }
 
 }

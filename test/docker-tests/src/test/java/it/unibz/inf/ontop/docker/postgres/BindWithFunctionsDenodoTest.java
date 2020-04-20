@@ -155,6 +155,12 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
     @Ignore("Not yet supported")
     @Test
     @Override
+    public void testStrUuid() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
     /**
      * Denodo exposes dates relative to the local timezone (which can be set in the query).
      * So the original format of the date is lost.
