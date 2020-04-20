@@ -137,4 +137,65 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
         return expectedValues;
     }
 
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * Regex in SELECT clause not supported
+     */
+    public void testREGEX() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    public void testUuid() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * Denodo exposes dates relative to the local timezone (which can be set in the query).
+     * So the original format of the date is lost.
+     */
+    public void testTZ() {
+    }
+
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testTZ() for an explanation
+     */
+    public void testHours() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testTZ() for an explanation
+     */
+    public void testDay() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testTZ() for an explanation
+     */
+    public void testMonth() {
+    }
+
+    @Ignore("Not yet supported")
+    @Test
+    @Override
+    /**
+     * See testTZ() for an explanation
+     */
+    public void testYear() {
+    }
 }

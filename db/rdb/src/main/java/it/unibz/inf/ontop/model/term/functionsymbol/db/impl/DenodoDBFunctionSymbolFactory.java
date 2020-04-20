@@ -50,6 +50,12 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
                 dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
         table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
 
+        DBFunctionSymbol regexLikeFunctionSymbol = new WithoutParenthesesSimpleTypedDBFunctionSymbolImpl(
+                CURRENT_TIMESTAMP_STR,
+                dbTypeFactory.getDBDateTimestampType(), abstractRootDBType);
+        table.put(CURRENT_TIMESTAMP_STR, 0, nowFunctionSymbol);
+
+
         return ImmutableTable.copyOf(table);
     }
 
@@ -143,7 +149,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
     @Override
     protected String serializeTz(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return null;
+        throw new UnsupportedOperationException("TZ: " + NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
@@ -245,4 +251,51 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     protected DBIsTrueFunctionSymbol createDBIsTrue(DBTermType dbBooleanType) {
         return new LowerCaseDBIsTrueFunctionSymbolImpl(dbBooleanType);
     }
+
+    /**
+     * Supported in the WHERE clause.
+     * Fails in the SELECT clause (e.g. fals for unit test AbstractBindTestWithFunctions.testREGEX())
+     */
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches2() {
+        return new DBBooleanFunctionSymbolWithSerializerImpl(
+                REGEXP_LIKE_STR + "2",
+                ImmutableList.of(dbStringType, dbStringType),
+                dbBooleanType,
+                false,
+                (terms, converter, factory) ->
+                        String.format(
+                                "%s REGEXP_LIKE %s",
+                                converter.apply(terms.get(0)),
+                                converter.apply(terms.get(1))
+                        ));
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException(REGEXP_LIKE_STR+"3: " + NOT_YET_SUPPORTED_MSG);
+    }
+
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace3() {
+        return new DBFunctionSymbolWithSerializerImpl(
+                REGEXP_REPLACE_STR,
+                ImmutableList.of(dbStringType,dbStringType,dbStringType),
+                dbStringType,
+                false,
+                (terms, converter, factory) ->
+                        String.format(
+                                "REGEXP(%s, %s, %s)",
+                                converter.apply(terms.get(0)),
+                                converter.apply(terms.get(1)),
+                                converter.apply(terms.get(2))
+                        ));
+    }
+
+    @Override
+    public DBFunctionSymbol getDBRegexpReplace4() {
+        throw new UnsupportedOperationException(REGEXP_REPLACE_STR+"4: " + NOT_YET_SUPPORTED_MSG);
+    }
+
 }
