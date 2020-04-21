@@ -31,6 +31,13 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
         }
     }
 
+    // default
+    // public String getTopNSQL(String sqlString, int top) {
+    //    String slice = String.format("LIMIT %d", top);
+    //    return String.format("%s %s", sqlString, slice);
+    // }
+
+
     @Override
     public String getSQLLexicalFormString(String constant) {
         return "'" + constant + "'";

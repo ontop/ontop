@@ -24,5 +24,10 @@ public class DenodoSQLDialectAdapter extends SQL99DialectAdapter {
             }
         }
     }
+    @Override
+    public String getTopNSQL(String sqlString, int top) {
+        String slice = String.format("OFFSET 0 ROWS\nFETCH NEXT %d ROWS ONLY", top);
+        return String.format("%s %s", sqlString, slice);
+    }
 
 }

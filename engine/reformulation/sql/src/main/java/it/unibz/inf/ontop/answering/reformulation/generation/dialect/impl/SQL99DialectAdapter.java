@@ -41,7 +41,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     @Override
     public String getTopNSQL(String sqlString, int top) {
-        return String.format("%s %s", sqlString, sqlSlice(top, 0));
+        String slice = String.format("LIMIT %d", top);
+        return String.format("%s %s", sqlString, slice);
     }
 
     @Override

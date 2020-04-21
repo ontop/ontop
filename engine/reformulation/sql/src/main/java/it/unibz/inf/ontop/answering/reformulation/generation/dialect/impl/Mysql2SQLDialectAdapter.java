@@ -26,7 +26,14 @@ public class Mysql2SQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
-	 @Override public String escapedSingleQuote(){
+	// default
+	// public String getTopNSQL(String sqlString, int top) {
+	//	String slice = String.format("LIMIT %d", top);
+	//	return String.format("%s %s", sqlString, slice);
+	// }
+
+
+	@Override public String escapedSingleQuote(){
 		return "\\'";
 	 }
 

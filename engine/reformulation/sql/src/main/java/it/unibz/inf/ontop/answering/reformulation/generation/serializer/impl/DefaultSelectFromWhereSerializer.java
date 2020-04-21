@@ -129,6 +129,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected String serializeDummyTable() {
+            System.out.println("BINGO?");
             return "";
         }
 

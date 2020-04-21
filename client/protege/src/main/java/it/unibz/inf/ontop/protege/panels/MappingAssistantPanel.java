@@ -991,7 +991,7 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 	 * Utility class to listen to the plugin progress bar
 	 */
 	private class ExecuteSQLQueryAction implements OBDAProgressListener {
-		CountDownLatch latch = null;
+		private final CountDownLatch latch;
 		Thread thread = null;
 		ResultSet result = null;
 		Statement statement = null;
@@ -1020,38 +1020,34 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 		}
 
 		public void run() {
+			thread = new Thread(() -> {
+                // Execute the sql query
+                try {
+                    // Construct the sql query
+                    OWLOntology activeOntology = owlModelManager.getActiveOntology();
+                    OntopSQLOWLAPIConfiguration configuration = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology);
 
-			thread = new Thread() {
-				@Override
-				public void run() {
-					// Execute the sql query
-					try {
-						// Construct the sql query
-						OWLOntology activeOntology = owlModelManager.getActiveOntology();
-						OntopSQLOWLAPIConfiguration configuration = configurationManager.buildOntopSQLOWLAPIConfiguration(activeOntology);
+                    SQLDialectAdapter sqlDialect = configuration.getInjector().getInstance(SQLDialectAdapter.class);
+                    String sqlString = txtQueryEditor.getText();
 
-						SQLDialectAdapter sqlDialect = configuration.getInjector().getInstance(SQLDialectAdapter.class);
-						String sqlString = txtQueryEditor.getText();
+                    int rowCount = fetchSize();
+                    if (rowCount <= 0)
+                        throw new RuntimeException("Invalid limit number.");
 
-						int rowCount = fetchSize();
-						if (rowCount <= 0)
-                            throw new RuntimeException("Invalid limit number.");
+                    // add the limit filter
+                    sqlString = sqlDialect.getTopNSQL(sqlString, rowCount);
 
-						// add the limit filter
-						sqlString = sqlDialect.getTopNSQL(sqlString, rowCount);
-
-						Connection c = ConnectionTools.getConnection(selectedSource);
-						Statement s = c.createStatement();
-						result = s.executeQuery(sqlString);
-						latch.countDown();
-					}
-					catch (Exception e) {
-						latch.countDown();
-						errorShown = true;
-						DialogUtils.showQuickErrorDialog(null, e);
-					}
-				}
-			};
+                    Connection c = ConnectionTools.getConnection(selectedSource);
+                    Statement s = c.createStatement();
+                    result = s.executeQuery(sqlString);
+                    latch.countDown();
+                }
+                catch (Exception e) {
+                    latch.countDown();
+                    errorShown = true;
+                    DialogUtils.showQuickErrorDialog(null, e);
+                }
+            });
 			thread.start();
 		}
 

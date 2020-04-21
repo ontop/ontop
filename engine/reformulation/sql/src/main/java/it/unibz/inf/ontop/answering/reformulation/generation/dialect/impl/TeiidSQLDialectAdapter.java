@@ -21,5 +21,10 @@ public class TeiidSQLDialectAdapter extends SQL99DialectAdapter {
 			return String.format("OFFSET %d ROWS", offset);
 		}
 	}
-	
+
+	//standard
+	//public String getTopNSQL(String sqlString, int top) {
+	//	String slice = String.format("LIMIT %d", top);
+	//	return String.format("%s %s", sqlString, slice);
+	//}
 }

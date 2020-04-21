@@ -28,4 +28,10 @@ public class AdpSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
+	@Override
+	public String getTopNSQL(String sqlString, int top) {
+		String slice = String.format("LIMIT %d\nOFFSET 0", top);
+		return String.format("%s %s", sqlString, slice);
+	}
+
 }

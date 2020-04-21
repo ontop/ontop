@@ -22,4 +22,11 @@ public class PostgreSQLDialectAdapter extends SQL99DialectAdapter {
 			}
 		}
 	}
+
+	// standard
+	// public String getTopNSQL(String sqlString, int top) {
+	//	String slice = String.format("LIMIT %d", top);
+	//	return String.format("%s %s", sqlString, slice);
+	//}
+
 }

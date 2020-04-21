@@ -84,6 +84,14 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
+	public String getTopNSQL(String sqlString, int top) {
+		// AND ROWNUM <= 10?
+		String slice = String.format("FETCH NEXT %d ROWS ONLY", top);
+		return String.format("%s %s", sqlString, slice);
+	}
+
+
+	@Override
 	public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
 		return nameViewOrVariable("", signatureVariableName, "", sqlVariableNames);
 	}
