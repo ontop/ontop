@@ -9,11 +9,6 @@ import java.util.Set;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
-    protected String escapedSingleQuote() {
-        return "''";
-    }
-
-
 
     @Override
     public String getTopNSQL(String sqlString, int top) {
@@ -24,6 +19,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
         return signatureVariableName;
     }
+
+
 
     @Override
     public String render(DBConstant constant) {
@@ -42,11 +39,8 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
 
-    /**
-     * By default, quotes and escapes isolated single quotes
-     */
     protected String getSQLLexicalFormString(String constant) {
-
-        return "'" + constant.replaceAll("(?<!')'(?!')", escapedSingleQuote()) + "'";
+        // quotes and duplicates isolated single quotes
+        return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
     }
 }

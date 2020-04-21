@@ -11,5 +11,4 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 
-
 }
