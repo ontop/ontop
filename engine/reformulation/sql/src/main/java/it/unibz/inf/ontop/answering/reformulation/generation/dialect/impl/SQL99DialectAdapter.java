@@ -15,26 +15,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
 
-    /**
-     * There is no standard for this part.
-     * <p>
-     * Arbitrary default implementation proposed
-     * (may not work with many DB engines).
-     */
-    @Override
-    public String sqlLimitOffset(long limit, long offset) {
-        return String.format("LIMIT %d, %d", offset, limit);
-    }
-
-    @Override
-    public String sqlLimit(long limit) {
-        return String.format("LIMIT %d", limit);
-    }
-
-    @Override
-    public String sqlOffset(long offset) {
-        return String.format("OFFSET %d", offset);
-    }
 
     @Override
     public String getTopNSQL(String sqlString, int top) {

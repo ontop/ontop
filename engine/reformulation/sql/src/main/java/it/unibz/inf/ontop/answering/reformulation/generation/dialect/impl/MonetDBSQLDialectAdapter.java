@@ -8,18 +8,6 @@ import java.util.regex.Pattern;
  */
 public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
-    /**
-     * https://www.monetdb.org/Documentation/SQLreference/TableExpressions
-     *  [ LIMIT posint ]
-     *  [ OFFSET posint ]
-     */
-
-    // sqlLimit, sqlOffset, sqlTopNSQL are standard
-
-    @Override
-    public String sqlLimitOffset(long limit, long offset) {
-        return String.format("LIMIT %d\nOFFSET %d", offset, limit);
-    }
 
 
     @Override

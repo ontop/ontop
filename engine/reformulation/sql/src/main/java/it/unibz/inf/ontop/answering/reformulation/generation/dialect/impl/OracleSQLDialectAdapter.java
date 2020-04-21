@@ -14,50 +14,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 	public static final int NAME_NUMBER_LENGTH = 3;
 
-	private final int version;
-
-	public OracleSQLDialectAdapter() {
-		version = 100;
-
-	}
-
-	public OracleSQLDialectAdapter(String databaseVersion) {
-		version = Integer.parseInt(databaseVersion.split("\\.")[0]);
-	}
-
-	/**
-	 * Versions < 12.1 are not supported
-	 *
-	 * Reason: In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
-	 */
-	@Override
-	public String sqlLimitOffset(long limit, long offset) {
-		if (version < 12)
-			throw new UnsupportedOperationException("LIMIT and OFFSET are not supported " +
-					"for Oracle DBs prior to 12.1");
-
-		return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
-	}
-
-	@Override
-	public String sqlLimit(long limit) {
-		if (version < 12)
-			throw new UnsupportedOperationException("LIMIT and OFFSET are not supported " +
-					"for Oracle DBs prior to 12.1");
-
-		// ROWNUM <= limit could also be used
-		return String.format("FETCH NEXT %d ROWS ONLY", limit);
-	}
-
-	@Override
-	public String sqlOffset(long offset) {
-		if (version < 12)
-			throw new UnsupportedOperationException("LIMIT and OFFSET are not supported " +
-					"for Oracle DBs prior to 12.1");
-
-		return String.format("OFFSET %d ROWS\nFETCH NEXT 99999999 ROWS ONLY", offset);
-	}
-
 
 	@Override
 	public String getTopNSQL(String sqlString, int top) {

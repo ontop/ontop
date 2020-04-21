@@ -21,6 +21,27 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             protected String serializeDummyTable() {
                 return "FROM dual";
             }
+
+            /**
+             * Versions < 12.1 are not supported
+             * Reason: In 12.1 and later, you can use the OFFSET and/or FETCH [FIRST | NEXT] operators
+             */
+            @Override
+            protected String serializeLimitOffset(long limit, long offset) {
+                return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
+            }
+
+            @Override
+            protected String serializeLimit(long limit) {
+                // ROWNUM <= limit could also be used
+                return String.format("FETCH NEXT %d ROWS ONLY", limit);
+            }
+
+            @Override
+            protected String serializeOffset(long offset) {
+                return String.format("OFFSET %d ROWS\nFETCH NEXT 99999999 ROWS ONLY", offset);
+            }
+
         });
     }
 }

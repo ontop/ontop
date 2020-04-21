@@ -23,6 +23,18 @@ public class DB2SelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhere
             protected String serializeDummyTable() {
                 return "FROM sysibm.sysdummy1";
             }
+
+            // serializeLimit
+
+            @Override
+            protected String serializeLimitOffset(long limit, long offset) {
+                return String.format("LIMIT %d\nOFFSET %d", limit, offset);
+            }
+
+            @Override
+            protected String serializeOffset(long offset) {
+                return serializeLimitOffset(8000, offset);
+            }
         });
     }
 }

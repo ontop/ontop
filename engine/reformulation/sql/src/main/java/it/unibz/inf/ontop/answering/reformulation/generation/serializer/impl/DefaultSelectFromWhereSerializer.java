@@ -176,18 +176,35 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return String.format("ORDER BY %s\n", conditionString);
         }
 
+        /**
+         * There is no standard for these three methods.
+         * (may not work with many DB engines).
+         */
+        protected String serializeLimitOffset(long limit, long offset) {
+            return String.format("LIMIT %d, %d", offset, limit);
+        }
+
+        protected String serializeLimit(long limit) {
+            return String.format("LIMIT %d", limit);
+        }
+
+        protected String serializeOffset(long offset) {
+            return String.format("OFFSET %d", offset);
+        }
+
+
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
             if (!limit.isPresent() && !offset.isPresent())
                 return "";
 
             if (limit.isPresent() && offset.isPresent())
-                return dialectAdapter.sqlLimitOffset(limit.get(), offset.get());
+                return serializeLimitOffset(limit.get(), offset.get());
 
             if (limit.isPresent())
-                return dialectAdapter.sqlLimit(limit.get());
+                return serializeLimit(limit.get());
 
-            return dialectAdapter.sqlOffset(offset.get());
+            return serializeOffset(offset.get());
         }
 
 
