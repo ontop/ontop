@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
@@ -19,6 +16,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -77,15 +75,14 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             // System.out.println("MP: " + fromColumnIDs);
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnsInProjectionIds = extractProjectionColumnMap(
-                    selectFromWhere.getProjectedVariables(), fromColumnIDs);
+            ImmutableMap<Variable, QuotedID> columnsInProjectionIds = extractProjectionColumnMap(
+                    selectFromWhere.getProjectedVariables());
 
             // System.out.println("CP: " + columnsInProjectionIds);
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
-            String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
-                    columnsInProjectionIds, selectFromWhere.getSubstitution(), fromColumnIDs);
+            String projectionString = serializeProjection(columnsInProjectionIds, selectFromWhere.getSubstitution(), fromColumnIDs);
 
             // CP: for each projected variable V,
             //        if FC has a a column for V, then FC[V]
@@ -118,7 +115,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
-            return new QuerySerializationImpl(sql, createAliasMap(alias, selectFromWhere.getProjectedVariables()));
+            return new QuerySerializationImpl(sql, columnsInProjectionIds.entrySet().stream()
+                            .map(e -> Maps.immutableEntry(e.getKey(), new QualifiedAttributeID(alias, e.getValue())))
+                            .collect(ImmutableCollectors.toMap()));
         }
 
         protected RelationID generateFreshViewAlias() {
@@ -133,44 +132,33 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
 
-        private ImmutableMap<Variable, QualifiedAttributeID> extractProjectionColumnMap(
-                ImmutableSortedSet<Variable> projectedVariables, ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            // Mutable, initialized with the column names projected by the "from" relations
-            Set<String> quotedColumnNames = fromColumnMap.values().stream()
-                    .map(QualifiedAttributeID::getSQLRendering)
-                    .collect(Collectors.toSet());
+        private ImmutableMap<Variable, QuotedID> extractProjectionColumnMap(ImmutableSortedSet<Variable> projectedVariables) {
+
+            Set<String> columnNames = new HashSet<>();
 
             return projectedVariables.stream()
                     .collect(ImmutableCollectors.toMap(
                             Function.identity(),
-                            v -> {
-                                if (fromColumnMap.containsKey(v))
-                                    return fromColumnMap.get(v);
-
-                                String newColumnName = dialectAdapter.nameTopVariable(v.getName(), quotedColumnNames);
-                                quotedColumnNames.add(newColumnName);
-                                return new QualifiedAttributeID(null, rawIdFactory.createAttributeID(newColumnName));
-                            }));
+                            v -> rawIdFactory.createAttributeID(
+                                    dialectAdapter.nameTopVariable(v.getName(), columnNames))));
         }
 
         protected String serializeDummyTable() {
             return "";
         }
 
-        protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables,
-                                             ImmutableMap<Variable, QualifiedAttributeID> projectedColumnMap,
+        protected String serializeProjection(ImmutableMap<Variable, QuotedID> columnsInProjectionIds,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
             // Mainly for ASK queries
-            if (projectedVariables.isEmpty())
+            if (columnsInProjectionIds.keySet().isEmpty())
                 return "1 AS uselessVariable";
 
-            return projectedVariables.stream()
-                    .map(v -> Optional.ofNullable(substitution.get(v))
-                            .map(d -> sqlTermSerializer.serialize(d, fromColumnMap))
-                            .map(s -> s + " AS " + projectedColumnMap.get(v).getSQLRendering())
-                            .orElseGet(() -> projectedColumnMap.get(v).getSQLRendering() +
-                                    " AS " + rawIdFactory.createAttributeID(v.getName()).getSQLRendering()))
+             return columnsInProjectionIds.entrySet().stream()
+                     .map(e -> sqlTermSerializer.serialize(
+                             Optional.ofNullable((ImmutableTerm)substitution.get(e.getKey()))
+                             .orElse(e.getKey()), fromColumnMap)
+                     + " AS " + e.getValue().getSQLRendering())
                     .collect(Collectors.joining(", "));
         }
 
