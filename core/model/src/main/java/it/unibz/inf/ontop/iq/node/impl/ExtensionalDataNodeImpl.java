@@ -62,6 +62,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     private final CoreUtilsFactory coreUtilsFactory;
 
+    /**
+     * See {@link IntermediateQueryFactory#createExtensionalDataNode(DataAtom)}
+     */
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
@@ -72,6 +75,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         this.argumentMap = extractArgumentMap(atom);
     }
 
+    /**
+     * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
+     */
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
@@ -83,6 +89,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         this.argumentMap = argumentMap;
     }
 
+    /**
+     * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap, VariableNullability)}
+     */
     @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,

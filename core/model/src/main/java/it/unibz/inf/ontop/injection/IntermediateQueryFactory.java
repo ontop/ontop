@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.inject.Guice;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
@@ -25,7 +26,7 @@ import java.util.Optional;
  *
  * See https://github.com/google/guice/wiki/AssistedInject.
  *
- * Accessible through Guice (recommended) or through CoreSingletons.
+ * Accessible through {@link Guice} (recommended) or through {@link CoreSingletons#getIQFactory()}.
  *
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
