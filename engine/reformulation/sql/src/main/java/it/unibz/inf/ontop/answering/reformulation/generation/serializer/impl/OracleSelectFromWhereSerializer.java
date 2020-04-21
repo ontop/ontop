@@ -29,9 +29,18 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
         }, dialectAdapter);
     }
 
+    public static final int NAME_MAX_LENGTH = 30;
+    public static final int NAME_NUMBER_LENGTH = 3;
+
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
+
+            @Override
+            protected AttributeAliasFactory createAtttibuteAliasFactory() {
+                return new LimitLengthAttributeAliasFactory(idFactory, NAME_MAX_LENGTH, NAME_NUMBER_LENGTH);
+            }
+
             @Override
             protected String serializeDummyTable() {
                 return "FROM dual";
