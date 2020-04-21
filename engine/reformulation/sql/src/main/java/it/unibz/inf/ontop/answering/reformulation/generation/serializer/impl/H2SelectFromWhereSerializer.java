@@ -39,9 +39,6 @@ public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerialize
 
                     @Override
                     protected String serializeLimitOffset(long limit, long offset) {
-                        if (limit == 0)
-                            return "LIMIT 0";
-
                         return String.format("OFFSET %d ROWS\nFETCH NEXT %d ROWS ONLY", offset, limit);
                     }
 
