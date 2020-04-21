@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -108,6 +109,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
                             e -> new QualifiedAttributeID(alias, e.getValue())));
+        }
+
+        private ImmutableMap<Variable, QualifiedAttributeID> replaceRelationAlias(RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+            return columnIDs.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            e -> e.getKey(),
+                            e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
         private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
@@ -250,8 +258,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationID alias = generateFreshViewAlias();
             sqlSubString = String.format("(%s) %s",sqlSubString, alias.getSQLRendering());
 
-            return new QuerySerializationImpl(sqlSubString, attachRelationAlias(alias,
-                    createVariableAliases(sqlUnionExpression.getProjectedVariables())));
+            return new QuerySerializationImpl(sqlSubString,
+                    replaceRelationAlias(alias, querySerializationList.get(0).getColumnIDs()));
         }
 
         //this function is required in case at least one of the children is
@@ -263,8 +271,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 RelationID alias = generateFreshViewAlias();
                 String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
 
-                return new QuerySerializationImpl(sql, attachRelationAlias(alias,
-                        createVariableAliases(serialization.getColumnIDs().keySet())));
+                return new QuerySerializationImpl(sql,
+                        replaceRelationAlias(alias, serialization.getColumnIDs()));
             }
             return expression.acceptVisitor(this);
         }
