@@ -20,6 +20,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 * introduced.
 	 */
 	public static final int NAME_NUMBER_LENGTH = 3;
+	public static final int NAME_MAX_NUMBER = (int)Math.pow(10, NAME_NUMBER_LENGTH);
 
 
 	/**
@@ -30,28 +31,23 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	 */
 
 	@Override
-	public String nameTopVariable(String intermediateName, Set<String> alreadyDefinedNames) {
+	public String nameTopVariable(String identifier, Set<String> used) {
 
-		int signatureVarLength = intermediateName.length();
+		int length = identifier.length();
+		if (length <= NAME_MAX_LENGTH)
+			return identifier;
 
-		if (signatureVarLength <= NAME_MAX_LENGTH) {
-			return intermediateName;
-		}
+		String shortened = identifier.substring(0, NAME_MAX_LENGTH - NAME_NUMBER_LENGTH);
 
-		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - NAME_NUMBER_LENGTH);
-
-		/*
-		 * Naive implementation
-		 */
-		for (int i = 0; i < Math.pow(10, NAME_NUMBER_LENGTH); i++) {
-			String unquotedVarName = shortenIntermediateNamePrefix + i;
-			if (!alreadyDefinedNames.contains(unquotedVarName)) {
-				return unquotedVarName;
-			}
+		// Naive implementation
+		for (int i = 0; i < NAME_MAX_NUMBER; i++) {
+			String replacement = shortened + i;
+			if (!used.contains(replacement))
+				return replacement;
 		}
 
 		// TODO: find a better exception
-		throw new RuntimeException("Impossible to create a new variable/view " + shortenIntermediateNamePrefix
-				+ "???" + " : already " + Math.pow(10, NAME_NUMBER_LENGTH) + " of them.");
+		throw new RuntimeException("Impossible to create a new variable/view " + shortened
+				+ "???" + " : already " + NAME_MAX_NUMBER + " of them.");
 	}
 }

@@ -75,13 +75,27 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             // Assumes that from expressions all use different variables
             ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();
 
+            // System.out.println("MP: " + fromColumnIDs);
+
             ImmutableMap<Variable, QualifiedAttributeID> columnsInProjectionIds = extractProjectionColumnMap(
                     selectFromWhere.getProjectedVariables(), fromColumnIDs);
+
+            // System.out.println("CP: " + columnsInProjectionIds);
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
             String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(),
                     columnsInProjectionIds, selectFromWhere.getSubstitution(), fromColumnIDs);
+
+            // CP: for each projected variable V,
+            //        if FC has a a column for V, then FC[V]
+            //           else V
+
+            // PS: for each projected variable V,
+            //       if substitution has a term T for V, then "T on FC as CP[V]"
+            //           else "CP[V] as V"
+
+            // System.out.println("PS: " + projectionString);
 
             String fromString = fromQuerySerialization.getString();
 
@@ -100,10 +114,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, groupByString, orderByString, sliceString);
 
+            // System.out.println("SQ: " + sql);
+
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
-
-            return new QuerySerializationImpl(sql, createAliasMap(alias, columnsInProjectionIds.keySet()));
+            return new QuerySerializationImpl(sql, createAliasMap(alias, selectFromWhere.getProjectedVariables()));
         }
 
         protected RelationID generateFreshViewAlias() {
@@ -288,7 +303,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 QuerySerialization serialization = expression.acceptVisitor(this);
 
                 RelationID alias = generateFreshViewAlias();
-                String sql = String.format("(%s) %s",serialization.getString(), alias.getSQLRendering());
+                String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
 
                 return new QuerySerializationImpl(sql, createAliasMap(alias, serialization.getColumnIDs().keySet()));
             }
