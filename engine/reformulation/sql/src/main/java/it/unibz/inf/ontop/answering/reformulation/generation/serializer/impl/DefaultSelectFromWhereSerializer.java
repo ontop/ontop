@@ -39,26 +39,21 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer, dialectAdapter, dbParameters.getQuotedIDFactory()));
+                new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()));
     }
 
     /**
      * Mutable: one instance per SQL query to generate
      */
-    protected static class DefaultSQLRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
+    protected class DefaultRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
         protected static final String VIEW_PREFIX = "v";
         private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s%s";
         private final AtomicInteger viewCounter;
-        protected final SQLTermSerializer sqlTermSerializer;
-        protected final SQLDialectAdapter dialectAdapter;
         protected final QuotedIDFactory idFactory;
         private final QuotedIDFactory rawIdFactory;
 
-        protected DefaultSQLRelationVisitingSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter,
-                                                       QuotedIDFactory idFactory) {
-            this.sqlTermSerializer = sqlTermSerializer;
-            this.dialectAdapter = dialectAdapter;
+        protected DefaultRelationVisitingSerializer(QuotedIDFactory idFactory) {
             this.idFactory = idFactory;
             this.rawIdFactory = new RawQuotedIDFactory(idFactory);
             this.viewCounter = new AtomicInteger(0);
@@ -133,6 +128,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             }));
         }
 
+        protected String serializeDummyTable() {
+            return "";
+        }
 
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables,
                                              ImmutableMap<Variable, QualifiedAttributeID> projectedColumnMap,
@@ -303,10 +301,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
-            String fromString = dialectAdapter.getTrueTable()
-                    .map(t -> String.format("FROM %s", t))
-                    .orElse("");
-
+            String fromString = serializeDummyTable();
             String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }

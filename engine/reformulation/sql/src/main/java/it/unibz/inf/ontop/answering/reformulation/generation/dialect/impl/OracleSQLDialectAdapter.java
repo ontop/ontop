@@ -84,11 +84,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 	@Override
-	public Optional<String> getTrueTable() {
-		return Optional.of("dual");
-	}
-
-	@Override
 	public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
 		return nameViewOrVariable("", signatureVariableName, "", sqlVariableNames);
 	}

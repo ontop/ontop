@@ -70,11 +70,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         return prefix + intermediateName + suffix;
     }
 
-    @Override
-    public Optional<String> getTrueTable() {
-        return Optional.empty();
-    }
-
     /**
      * By default, quotes and escapes isolated single quotes
      */

@@ -25,9 +25,4 @@ public class DB2SQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 
-	@Override
-	public Optional<String> getTrueTable() {
-		return Optional.of("sysibm.sysdummy1");
-	}
-	
 }

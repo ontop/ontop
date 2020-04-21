@@ -27,7 +27,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     @Override
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSQLRelationVisitingSerializer(sqlTermSerializer, dialectAdapter, dbParameters.getQuotedIDFactory()) {
+                new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
 
                     /**
                      * MySQL seems to already treat NULLs as the lowest values

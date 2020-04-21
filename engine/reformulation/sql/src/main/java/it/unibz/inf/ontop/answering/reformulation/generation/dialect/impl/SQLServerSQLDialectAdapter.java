@@ -35,11 +35,6 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		return sb.toString();
 	}
 
-	@Override
-	public Optional<String> getTrueTable() {
-		return Optional.of("\"example\"");
-	}
-
 
 
 }
