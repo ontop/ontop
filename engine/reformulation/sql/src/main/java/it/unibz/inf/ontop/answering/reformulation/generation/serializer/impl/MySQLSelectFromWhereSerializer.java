@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -19,8 +18,7 @@ import java.util.stream.Collectors;
 public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private MySQLSelectFromWhereSerializer(TermFactory termFactory,
-                                           SQLDialectAdapter dialectAdapter) {
+    private MySQLSelectFromWhereSerializer(TermFactory termFactory) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
@@ -28,7 +26,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                 return "'" + constant.replace("\\", "\\\\")
                         .replaceAll("(?<!')'(?!')", "\\'") + "'";
             }
-        }, dialectAdapter);
+        });
     }
 
     @Override

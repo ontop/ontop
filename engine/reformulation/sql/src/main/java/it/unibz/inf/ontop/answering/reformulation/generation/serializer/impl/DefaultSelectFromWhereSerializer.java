@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;
@@ -24,16 +23,14 @@ import java.util.stream.Collectors;
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     protected final SQLTermSerializer sqlTermSerializer;
-    protected final SQLDialectAdapter dialectAdapter;
 
     @Inject
-    private DefaultSelectFromWhereSerializer(TermFactory termFactory, SQLDialectAdapter dialectAdapter) {
-        this(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
+    private DefaultSelectFromWhereSerializer(TermFactory termFactory) {
+        this(new DefaultSQLTermSerializer(termFactory));
     }
 
-    protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
+    protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
         this.sqlTermSerializer = sqlTermSerializer;
-        this.dialectAdapter = dialectAdapter;
     }
 
     @Override

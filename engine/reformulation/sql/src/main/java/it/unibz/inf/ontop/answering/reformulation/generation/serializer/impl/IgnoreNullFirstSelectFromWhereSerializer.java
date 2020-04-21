@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -23,9 +22,8 @@ import java.util.stream.Collectors;
 public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                                     SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
+        super(sqlTermSerializer);
     }
 
     @Override

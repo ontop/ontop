@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
@@ -11,9 +10,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 public class DB2SelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhereSerializer {
 
     @Inject
-    private DB2SelectFromWhereSerializer(TermFactory termFactory,
-                                         SQLDialectAdapter dialectAdapter) {
-        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
+    private DB2SelectFromWhereSerializer(TermFactory termFactory) {
+        super(new DefaultSQLTermSerializer(termFactory));
     }
 
     @Override
@@ -24,7 +22,7 @@ public class DB2SelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhere
                 return "FROM sysibm.sysdummy1";
             }
 
-            // serializeLimit
+            // serializeLimit is standard
 
             @Override
             protected String serializeLimitOffset(long limit, long offset) {

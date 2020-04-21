@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
@@ -12,9 +11,8 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhereSerializer {
 
     @Inject
-    private SQLServerSelectFromWhereSerializer(TermFactory termFactory,
-                                               SQLDialectAdapter dialectAdapter) {
-        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
+    private SQLServerSelectFromWhereSerializer(TermFactory termFactory) {
+        super(new DefaultSQLTermSerializer(termFactory));
     }
 
     @Override
@@ -53,7 +51,6 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             protected String serializeOffset(long offset) {
                 return String.format("OFFSET %d ROWS", offset);
             }
-
         });
     }
 }

@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -12,14 +11,12 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private H2SelectFromWhereSerializer(TermFactory termFactory,
-                                        SQLDialectAdapter dialectAdapter) {
-        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
+    private H2SelectFromWhereSerializer(TermFactory termFactory) {
+        super(new DefaultSQLTermSerializer(termFactory));
     }
 
     @Override
-    public SelectFromWhereSerializer.QuerySerialization serialize(SelectFromWhereWithModifiers
-                                                                          selectFromWhere, DBParameters dbParameters) {
+    public SelectFromWhereSerializer.QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
                 new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
                     /**
