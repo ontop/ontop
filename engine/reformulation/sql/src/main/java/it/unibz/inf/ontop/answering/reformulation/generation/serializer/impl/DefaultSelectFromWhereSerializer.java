@@ -70,29 +70,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             QuerySerialization fromQuerySerialization = getSQLSerializationForChild(selectFromWhere.getFromSQLExpression());
 
-            // Assumes that from expressions all use different variables
-            ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();
-
-            // System.out.println("MP: " + fromColumnIDs);
-
-            ImmutableMap<Variable, QuotedID> columnsInProjectionIds = extractProjectionColumnMap(
-                    selectFromWhere.getProjectedVariables());
-
-            // System.out.println("CP: " + columnsInProjectionIds);
+            ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(selectFromWhere.getProjectedVariables());
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
-            String projectionString = serializeProjection(columnsInProjectionIds, selectFromWhere.getSubstitution(), fromColumnIDs);
-
-            // CP: for each projected variable V,
-            //        if FC has a a column for V, then FC[V]
-            //           else V
-
-            // PS: for each projected variable V,
-            //       if substitution has a term T for V, then "T on FC as CP[V]"
-            //           else "CP[V] as V"
-
-            // System.out.println("PS: " + projectionString);
+            ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();
+            String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(), variableAliases, selectFromWhere.getSubstitution(), fromColumnIDs);
 
             String fromString = fromQuerySerialization.getString();
 
@@ -111,32 +94,25 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
                     fromString, whereString, groupByString, orderByString, sliceString);
 
-            // System.out.println("SQ: " + sql);
-
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
-            return new QuerySerializationImpl(sql, columnsInProjectionIds.entrySet().stream()
-                            .map(e -> Maps.immutableEntry(e.getKey(), new QualifiedAttributeID(alias, e.getValue())))
-                            .collect(ImmutableCollectors.toMap()));
+            return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
         }
 
         protected RelationID generateFreshViewAlias() {
             return idFactory.createRelationID(null, VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
-        private ImmutableMap<Variable, QualifiedAttributeID> createAliasMap(RelationID alias, ImmutableSet<Variable> stream) {
-            return stream.stream()
-                .collect(ImmutableCollectors.toMap(
-                    Function.identity(),
-                    v -> new QualifiedAttributeID(alias, rawIdFactory.createAttributeID(v.getName()))));
+        private ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
+            return variableAliases.entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            Map.Entry::getKey,
+                            e -> new QualifiedAttributeID(alias, e.getValue())));
         }
 
-
-        private ImmutableMap<Variable, QuotedID> extractProjectionColumnMap(ImmutableSortedSet<Variable> projectedVariables) {
-
+        private ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
             Set<String> columnNames = new HashSet<>();
-
-            return projectedVariables.stream()
+            return variables.stream()
                     .collect(ImmutableCollectors.toMap(
                             Function.identity(),
                             v -> rawIdFactory.createAttributeID(
@@ -147,18 +123,19 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return "";
         }
 
-        protected String serializeProjection(ImmutableMap<Variable, QuotedID> columnsInProjectionIds,
+        protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
+                                             ImmutableMap<Variable, QuotedID> variableAliases,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            // Mainly for ASK queries
-            if (columnsInProjectionIds.keySet().isEmpty())
+
+            if (variableAliases.keySet().isEmpty())
                 return "1 AS uselessVariable";
 
-             return columnsInProjectionIds.entrySet().stream()
-                     .map(e -> sqlTermSerializer.serialize(
-                             Optional.ofNullable((ImmutableTerm)substitution.get(e.getKey()))
-                             .orElse(e.getKey()), fromColumnMap)
-                     + " AS " + e.getValue().getSQLRendering())
+            return projectedVariables.stream()
+                    .map(v -> sqlTermSerializer.serialize(
+                            Optional.ofNullable((ImmutableTerm)substitution.get(v))
+                                    .orElse(v), fromColumnMap)
+                            + " AS " + variableAliases.get(v).getSQLRendering())
                     .collect(Collectors.joining(", "));
         }
 
@@ -221,33 +198,25 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
-
             RelationID alias = generateFreshViewAlias();
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = sqlSerializedQuery.getColumnNames().entrySet().stream()
-                    .collect(ImmutableCollectors.toMap(
-                            Map.Entry::getKey,
-                            e -> new QualifiedAttributeID(alias, e.getValue())
-                    ));
-
             String sqlSubString = String.format("(%s) %s",sqlSerializedQuery.getSQLString(), alias.getSQLRendering());
 
-            return new QuerySerializationImpl(sqlSubString, columnIDs);
+            return new QuerySerializationImpl(sqlSubString, attachRelationAlias(alias, sqlSerializedQuery.getColumnNames()));
         }
 
         @Override
         public QuerySerialization visit(SQLTable sqlTable) {
 
-            RelationID aliasId = generateFreshViewAlias();
+            RelationID alias = generateFreshViewAlias();
             RelationDefinition relationDefinition = sqlTable.getRelationDefinition();
             String relationRendering = relationDefinition.getAtomPredicate().getName();
-            String sqlSubString = String.format("%s %s", relationRendering, aliasId.getSQLRendering());
+            String sqlSubString = String.format("%s %s", relationRendering, alias.getSQLRendering());
 
-            return new QuerySerializationImpl(sqlSubString,
-                    sqlTable.getArgumentMap().entrySet().stream()
+            return new QuerySerializationImpl(sqlSubString, attachRelationAlias(alias, sqlTable.getArgumentMap().entrySet().stream()
                             .collect(ImmutableCollectors.toMap(
                                     // Ground terms must have been already removed from atoms
                                     e -> (Variable) e.getValue(),
-                                    e -> new QualifiedAttributeID(aliasId, relationDefinition.getAttribute(e.getKey() + 1).getID())
+                                    e -> relationDefinition.getAttribute(e.getKey() + 1).getID())
                             )));
         }
 
@@ -281,19 +250,21 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationID alias = generateFreshViewAlias();
             sqlSubString = String.format("(%s) %s",sqlSubString, alias.getSQLRendering());
 
-            return new QuerySerializationImpl(sqlSubString, createAliasMap(alias, sqlUnionExpression.getProjectedVariables()));
+            return new QuerySerializationImpl(sqlSubString, attachRelationAlias(alias,
+                    createVariableAliases(sqlUnionExpression.getProjectedVariables())));
         }
 
         //this function is required in case at least one of the children is
         // SelectFromWhereWithModifiers expression
-        private QuerySerialization getSQLSerializationForChild(SQLExpression expression){
-            if (expression instanceof SelectFromWhereWithModifiers){
+        private QuerySerialization getSQLSerializationForChild(SQLExpression expression) {
+            if (expression instanceof SelectFromWhereWithModifiers) {
                 QuerySerialization serialization = expression.acceptVisitor(this);
 
                 RelationID alias = generateFreshViewAlias();
                 String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
 
-                return new QuerySerializationImpl(sql, createAliasMap(alias, serialization.getColumnIDs().keySet()));
+                return new QuerySerializationImpl(sql, attachRelationAlias(alias,
+                        createVariableAliases(serialization.getColumnIDs().keySet())));
             }
             return expression.acceptVisitor(this);
         }
@@ -437,6 +408,4 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
         }
     }
-
-
 }
