@@ -61,9 +61,7 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
 	@Override
 	public String getTopNSQL(String sqlString, int top) {
-		// AND ROWNUM <= 10?
-		String slice = String.format("FETCH NEXT %d ROWS ONLY", top);
-		return String.format("%s %s", sqlString, slice);
+		return String.format("SELECT * FROM (%s) WHERE ROWNUM <= %d", sqlString, top);
 	}
 
 

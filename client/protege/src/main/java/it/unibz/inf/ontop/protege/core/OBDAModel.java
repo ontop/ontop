@@ -32,6 +32,7 @@ import java.io.Reader;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -245,9 +246,7 @@ public class OBDAModel {
                // .map(m -> deletePredicateIRI(m, removedPredicate, counter))
                 //.filter(Optional::isPresent)
                 //.map(Optional::get)
-                .collect(collectTriplesMaps(
-                        SQLPPTriplesMap::getId,
-                        m -> m));
+                .collect(collectTriplesMaps(SQLPPTriplesMap::getId, Function.identity()));
 
         fireMappingUpdated();
 

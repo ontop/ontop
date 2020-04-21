@@ -37,7 +37,7 @@ public class SQLAdapterFactory {
 				return new PostgreSQLDialectAdapter();
 			case "com.mysql.jdbc.Driver":
 			case "com.mysql.cj.jdbc.Driver":
-				return new Mysql2SQLDialectAdapter();
+				return new MySQLDialectAdapter();
 			case "org.h2.Driver":
 				return new H2SQLDialectAdapter();
 			case "org.hsqldb.jdbc.JDBCDriver":

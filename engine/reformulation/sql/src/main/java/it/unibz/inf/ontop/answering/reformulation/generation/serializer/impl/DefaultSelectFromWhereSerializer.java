@@ -77,6 +77,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String fromString = fromQuerySerialization.getString();
 
+            // TODO: is selectFromWhere.getLimit is 0, then add 0 = 1
+
             String whereString = selectFromWhere.getWhereExpression()
                     .map(e -> sqlTermSerializer.serialize(e, fromColumnIDs))
                     .map(s -> String.format("WHERE %s\n", s))
@@ -129,7 +131,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected String serializeDummyTable() {
-            System.out.println("BINGO?");
             return "";
         }
 
