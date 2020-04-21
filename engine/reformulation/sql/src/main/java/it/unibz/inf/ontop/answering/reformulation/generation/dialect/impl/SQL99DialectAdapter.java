@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectA
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
-import java.util.Optional;
 import java.util.Set;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
@@ -23,7 +22,7 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
 
     @Override
     public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
-        return buildDefaultName("", signatureVariableName, "");
+        return signatureVariableName;
     }
 
     @Override
@@ -42,15 +41,6 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
         }
     }
 
-    /**
-     * Concatenates the strings.
-     * Default way to name a variable or a view.
-     * <p>
-     * Returns an UNQUOTED string.
-     */
-    protected final String buildDefaultName(String prefix, String intermediateName, String suffix) {
-        return prefix + intermediateName + suffix;
-    }
 
     /**
      * By default, quotes and escapes isolated single quotes

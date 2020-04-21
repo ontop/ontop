@@ -7,24 +7,11 @@ import java.util.*;
 
 public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 
-	public static final int NAME_MAX_LENGTH = 30;
-	/**
-	 * If the name (of a variable/view) needs to be shortcut, length of the number
-	 * introduced.
-	 */
-	public static final int NAME_NUMBER_LENGTH = 3;
-
-
 	@Override
 	public String getTopNSQL(String sqlString, int top) {
 		return String.format("SELECT * FROM (%s) WHERE ROWNUM <= %d", sqlString, top);
 	}
 
-
-	@Override
-	public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
-		return nameViewOrVariable("", signatureVariableName, "", sqlVariableNames);
-	}
 
 	@Override
 	public String render(DBConstant constant) {
@@ -37,48 +24,45 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
+
+	public static final int NAME_MAX_LENGTH = 30;
+	/**
+	 * If the name (of a variable/view) needs to be shortcut, length of the number
+	 * introduced.
+	 */
+	public static final int NAME_NUMBER_LENGTH = 3;
+
+
 	/**
 	 * Makes sure the view or variable name never exceeds the max length supported by Oracle.
 	 *
 	 * Strategy: shortens the intermediateName and introduces a number to avoid conflict with
 	 * similar names.
 	 */
-	private String nameViewOrVariable(final String prefix,
-									  final String intermediateName,
-									  final String suffix,
-									  final Collection<String> alreadyDefinedNames) {
-		int borderLength = prefix.length() + suffix.length();
+
+	@Override
+	public String nameTopVariable(String intermediateName, Set<String> alreadyDefinedNames) {
+
 		int signatureVarLength = intermediateName.length();
 
-		if (borderLength >= (NAME_MAX_LENGTH - NAME_NUMBER_LENGTH))  {
-			throw new IllegalArgumentException("The prefix and the suffix are too long (their accumulated length must " +
-					"be less than " + (NAME_MAX_LENGTH - NAME_NUMBER_LENGTH) + ")");
+		if (signatureVarLength <= NAME_MAX_LENGTH) {
+			return intermediateName;
 		}
 
-		/*
-		 * If the length limit is not reached, processes as usual.
-		 */
-		if (signatureVarLength + borderLength <= NAME_MAX_LENGTH) {
-			String unquotedName = buildDefaultName(prefix, intermediateName, suffix);
-			return unquotedName;
-		}
-
-		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - borderLength
-				- NAME_NUMBER_LENGTH);
+		String shortenIntermediateNamePrefix = intermediateName.substring(0, NAME_MAX_LENGTH - NAME_NUMBER_LENGTH);
 
 		/*
 		 * Naive implementation
 		 */
 		for (int i = 0; i < Math.pow(10, NAME_NUMBER_LENGTH); i++) {
-			String unquotedVarName = buildDefaultName(prefix, shortenIntermediateNamePrefix + i, suffix);
-			String mainVarName =unquotedVarName;
-			if (!alreadyDefinedNames.contains(mainVarName)) {
-				return mainVarName;
+			String unquotedVarName = shortenIntermediateNamePrefix + i;
+			if (!alreadyDefinedNames.contains(unquotedVarName)) {
+				return unquotedVarName;
 			}
 		}
 
 		// TODO: find a better exception
-		throw new RuntimeException("Impossible to create a new variable/view " + prefix + shortenIntermediateNamePrefix
-				+ "???" + suffix + " : already " + Math.pow(10, NAME_NUMBER_LENGTH) + " of them.");
+		throw new RuntimeException("Impossible to create a new variable/view " + shortenIntermediateNamePrefix
+				+ "???" + " : already " + Math.pow(10, NAME_NUMBER_LENGTH) + " of them.");
 	}
 }
