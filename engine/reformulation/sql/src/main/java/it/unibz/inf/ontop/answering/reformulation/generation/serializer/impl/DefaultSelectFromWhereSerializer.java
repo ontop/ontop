@@ -75,7 +75,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = fromQuerySerialization.getColumnIDs();
-            String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(), variableAliases, selectFromWhere.getSubstitution(), fromColumnIDs);
+            String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(), variableAliases, selectFromWhere.getSubstitution(), columnIDs);
 
             String fromString = fromQuerySerialization.getString();
 
