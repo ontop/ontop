@@ -21,7 +21,8 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             @Override
             protected String serializeDummyTable() {
                 // "\"example\"" from SQLAdapter
-                return "FROM \"example\"";
+                System.out.println("BINGO!");
+                return "";
             }
         });
     }

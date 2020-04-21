@@ -27,7 +27,8 @@ public class SQLServerSQLDialectAdapter extends SQL99DialectAdapter {
 		}
 	}
 
-	public String sqlLimit(String originalString, long limit) {
+	@Override
+	public String getTopNSQL(String originalString, int limit) {
 		final String limitStmt = String.format("TOP %d ", limit);
 		StringBuilder sb = new StringBuilder(originalString);
 		int insertPosition = originalString.indexOf(" ") + 1;

@@ -40,6 +40,11 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
     @Override
+    public String getTopNSQL(String sqlString, int top) {
+        return String.format("%s %s", sqlString, sqlSlice(top, 0));
+    }
+
+    @Override
     public String nameTopVariable(String signatureVariableName, Set<String> sqlVariableNames) {
         return buildDefaultName("", signatureVariableName, "");
     }

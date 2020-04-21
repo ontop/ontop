@@ -1034,31 +1034,25 @@ public class MappingAssistantPanel extends javax.swing.JPanel implements Datasou
 						String sqlString = txtQueryEditor.getText();
 
 						int rowCount = fetchSize();
-						if (rowCount >= 0) { // add the limit filter
-							if (sqlDialect instanceof SQLServerSQLDialectAdapter) {
-								SQLServerSQLDialectAdapter sqlServerDialect = (SQLServerSQLDialectAdapter) sqlDialect;
-								sqlString = sqlServerDialect.sqlLimit(sqlString, rowCount);
-							} else {
-								sqlString = String.format("%s %s", sqlString, sqlDialect.sqlSlice(rowCount, 0));
-							}
-						} else {
-							throw new RuntimeException("Invalid limit number.");
-						}
+						if (rowCount <= 0)
+                            throw new RuntimeException("Invalid limit number.");
+
+						// add the limit filter
+						sqlString = sqlDialect.getTopNSQL(sqlString, rowCount);
+
 						Connection c = ConnectionTools.getConnection(selectedSource);
 						Statement s = c.createStatement();
 						result = s.executeQuery(sqlString);
 						latch.countDown();
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						latch.countDown();
 						errorShown = true;
 						DialogUtils.showQuickErrorDialog(null, e);
 					}
 				}
 			};
-
 			thread.start();
-
-
 		}
 
 		@Override
