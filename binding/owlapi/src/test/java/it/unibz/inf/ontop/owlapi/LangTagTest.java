@@ -56,7 +56,7 @@ public class LangTagTest {
 
     private OntopOWLReasoner reasoner;
     private OWLConnection conn;
-    Connection sqlConnection;
+    private Connection sqlConnection;
 
 
     @Before

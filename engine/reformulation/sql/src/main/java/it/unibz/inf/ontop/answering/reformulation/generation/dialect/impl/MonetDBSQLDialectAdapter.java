@@ -8,28 +8,21 @@ import java.util.regex.Pattern;
  */
 public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
-    /**
-     * There is no standard for this part.
-     *
-     * Arbitrary default implementation proposed
-     * (may not work with many DB engines).
-     */
     @Override
-    public String sqlSlice(long limit, long offset) {
-        if ((limit < 0) && (offset < 0)) {
-            return "";
-        }
-        else if ((limit >= 0) && (offset >= 0)) {
-            return String.format("LIMIT %d OFFSET %d", offset, limit);
-        }
-        else if (offset < 0) {
-            return String.format("LIMIT %d", limit);
-        }
-        // Else -> (limit < 0)
-        else {
-            return String.format("OFFSET %d", offset);
-        }
+    public String sqlLimitOffset(long limit, long offset) {
+        return String.format("LIMIT %d OFFSET %d", offset, limit);
     }
+
+    @Override
+    public String sqlLimit(long limit) {
+        return String.format("LIMIT %d", limit);
+    }
+
+    @Override
+    public String sqlOffset(long offset) {
+        return String.format("OFFSET %d", offset);
+    }
+
 
     // default
     // public String getTopNSQL(String sqlString, int top) {

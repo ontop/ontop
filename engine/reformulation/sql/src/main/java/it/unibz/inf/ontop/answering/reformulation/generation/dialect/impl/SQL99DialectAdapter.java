@@ -10,9 +10,6 @@ import java.util.Set;
 
 public class SQL99DialectAdapter implements SQLDialectAdapter {
 
-    public SQL99DialectAdapter() {
-    }
-
     protected String escapedSingleQuote() {
         return "''";
     }
@@ -25,18 +22,18 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
      * (may not work with many DB engines).
      */
     @Override
-    public String sqlSlice(long limit, long offset) {
-        if ((limit < 0) && (offset < 0)) {
-            return "";
-        } else if ((limit >= 0) && (offset >= 0)) {
-            return String.format("LIMIT %d, %d", offset, limit);
-        } else if (offset < 0) {
-            return String.format("LIMIT %d", limit);
-        }
-        // Else -> (limit < 0)
-        else {
-            return String.format("OFFSET %d", offset);
-        }
+    public String sqlLimitOffset(long limit, long offset) {
+        return String.format("LIMIT %d, %d", offset, limit);
+    }
+
+    @Override
+    public String sqlLimit(long limit) {
+        return String.format("LIMIT %d", limit);
+    }
+
+    @Override
+    public String sqlOffset(long offset) {
+        return String.format("OFFSET %d", offset);
     }
 
     @Override

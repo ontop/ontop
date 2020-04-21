@@ -177,7 +177,16 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private String serializeSlice(Optional<Long> limit, Optional<Long> offset) {
-            return dialectAdapter.sqlSlice(limit.orElse(-1L), offset.orElse(-1L));
+            if (!limit.isPresent() && !offset.isPresent())
+                return "";
+
+            if (limit.isPresent() && offset.isPresent())
+                return dialectAdapter.sqlLimitOffset(limit.get(), offset.get());
+
+            if (limit.isPresent())
+                return dialectAdapter.sqlLimit(limit.get());
+
+            return dialectAdapter.sqlOffset(offset.get());
         }
 
 

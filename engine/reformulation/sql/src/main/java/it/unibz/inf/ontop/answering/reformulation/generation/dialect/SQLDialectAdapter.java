@@ -6,7 +6,9 @@ import java.util.Set;
 
 public interface SQLDialectAdapter {
 
-	String sqlSlice(long limit, long offset);
+	String sqlLimit(long limit);
+	String sqlOffset(long offset);
+	String sqlLimitOffset(long limit, long offset);
 
 	/**
 	 * Allows the SQL dialect adapter to put restrict on the name (e.g. name length).
