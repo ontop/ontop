@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -75,7 +74,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             String distinctString = selectFromWhere.isDistinct() ? "DISTINCT " : "";
 
-            ImmutableMap<Variable, QualifiedAttributeID> fromColumnIDs = fromQuerySerialization.getColumnIDs();
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = fromQuerySerialization.getColumnIDs();
             String projectionString = serializeProjection(selectFromWhere.getProjectedVariables(), variableAliases, selectFromWhere.getSubstitution(), fromColumnIDs);
 
             String fromString = fromQuerySerialization.getString();
@@ -83,13 +82,13 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             // TODO: is selectFromWhere.getLimit is 0, then add 0 = 1
 
             String whereString = selectFromWhere.getWhereExpression()
-                    .map(e -> sqlTermSerializer.serialize(e, fromColumnIDs))
+                    .map(e -> sqlTermSerializer.serialize(e, columnIDs))
                     .map(s -> String.format("WHERE %s\n", s))
                     .orElse("");
 
-            String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), fromColumnIDs);
+            String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs);
 
-            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), fromColumnIDs);
+            String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
             String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
 
             String sql = String.format(SELECT_FROM_WHERE_MODIFIERS_TEMPLATE, distinctString, projectionString,
@@ -114,7 +113,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         private ImmutableMap<Variable, QualifiedAttributeID> replaceRelationAlias(RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
             return columnIDs.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
-                            e -> e.getKey(),
+                            Map.Entry::getKey,
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
@@ -134,38 +133,38 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
                                              ImmutableMap<Variable, QuotedID> variableAliases,
                                              ImmutableSubstitution<? extends ImmutableTerm> substitution,
-                                             ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+                                             ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
 
-            if (variableAliases.keySet().isEmpty())
+            if (projectedVariables.isEmpty())
                 return "1 AS uselessVariable";
 
             return projectedVariables.stream()
                     .map(v -> sqlTermSerializer.serialize(
-                            Optional.ofNullable((ImmutableTerm)substitution.get(v))
-                                    .orElse(v), fromColumnMap)
+                            Optional.ofNullable((ImmutableTerm)substitution.get(v)).orElse(v),
+                            columnIDs)
                             + " AS " + variableAliases.get(v).getSQLRendering())
                     .collect(Collectors.joining(", "));
         }
 
         protected String serializeGroupBy(ImmutableSet<Variable> groupByVariables,
-                                          ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+                                          ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
             if (groupByVariables.isEmpty())
                 return "";
 
             String variableString = groupByVariables.stream()
-                    .map(v -> sqlTermSerializer.serialize(v, fromColumnMap))
+                    .map(v -> sqlTermSerializer.serialize(v, columnIDs))
                     .collect(Collectors.joining(", "));
 
             return String.format("GROUP BY %s\n", variableString);
         }
 
         protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
-                                        ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
+                                        ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
             if (sortConditions.isEmpty())
                 return "";
 
             String conditionString = sortConditions.stream()
-                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap)
+                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), columnIDs)
                             + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST"))
                     .collect(Collectors.joining(", "));
 
@@ -303,8 +302,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
 
-            String sqlSubString = String.format("%s\n %s \n%s ",left.getString(), operatorString, right.getString());
-
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left,right).stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
@@ -314,7 +311,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(s -> String.format("ON %s ", s))
                     .orElse("ON 1 = 1 ");
 
-            return new QuerySerializationImpl(sqlSubString + onString, columnIDs);
+            String sql = String.format("%s\n %s \n%s %s", left.getString(), operatorString, right.getString(), onString);
+
+            return new QuerySerializationImpl(sql, columnIDs);
         }
 
         @Override
