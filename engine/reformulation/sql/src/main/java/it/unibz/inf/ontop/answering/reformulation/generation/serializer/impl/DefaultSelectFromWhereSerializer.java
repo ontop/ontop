@@ -33,6 +33,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
     protected final SQLDialectAdapter dialectAdapter;
 
     @Inject
+    private DefaultSelectFromWhereSerializer(TermFactory termFactory, SQLDialectAdapter dialectAdapter) {
+        this(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
+    }
+
     protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, SQLDialectAdapter dialectAdapter) {
         this.sqlTermSerializer = sqlTermSerializer;
         this.dialectAdapter = dialectAdapter;
