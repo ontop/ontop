@@ -1,18 +1,20 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.TermFactory;
 
 
+@Singleton
 public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhereSerializer {
 
     @Inject
-    private SQLServerSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
+    private SQLServerSelectFromWhereSerializer(TermFactory termFactory,
                                                SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
     }
 
     @Override

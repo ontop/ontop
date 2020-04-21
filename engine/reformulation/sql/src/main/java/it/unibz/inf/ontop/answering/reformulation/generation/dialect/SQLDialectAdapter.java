@@ -1,7 +1,5 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.dialect;
 
-import it.unibz.inf.ontop.model.term.DBConstant;
-
 import java.util.Set;
 
 public interface SQLDialectAdapter {
@@ -12,7 +10,6 @@ public interface SQLDialectAdapter {
 	String nameTopVariable(String signatureVariable, Set<String> sqlVariableNames);
 
 
-    String render(DBConstant constant);
 
 	String getTopNSQL(String sqlQuery, int top);
 }

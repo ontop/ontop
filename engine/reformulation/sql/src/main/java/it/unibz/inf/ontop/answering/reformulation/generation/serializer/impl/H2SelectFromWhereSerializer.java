@@ -1,25 +1,27 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.TermFactory;
 
+@Singleton
 public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private H2SelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                             SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+    private H2SelectFromWhereSerializer(TermFactory termFactory,
+                                        SQLDialectAdapter dialectAdapter) {
+        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
     }
 
     @Override
     public SelectFromWhereSerializer.QuerySerialization serialize(SelectFromWhereWithModifiers
                                                                           selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSelectFromWhereSerializer.DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
+                new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
                     /**
                      * Number of rows in output can be limited either with standard OFFSET / FETCH,
                      * with non-standard LIMIT / OFFSET, or with non-standard TOP clauses.

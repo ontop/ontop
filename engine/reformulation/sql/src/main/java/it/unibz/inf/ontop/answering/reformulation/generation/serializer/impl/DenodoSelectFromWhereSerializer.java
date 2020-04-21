@@ -1,18 +1,21 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.TermFactory;
 
+@Singleton
 public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private DenodoSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                        SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+    private DenodoSelectFromWhereSerializer(TermFactory termFactory,
+                                            SQLDialectAdapter dialectAdapter) {
+        super(new DefaultSQLTermSerializer(termFactory), dialectAdapter);
     }
 
     @Override

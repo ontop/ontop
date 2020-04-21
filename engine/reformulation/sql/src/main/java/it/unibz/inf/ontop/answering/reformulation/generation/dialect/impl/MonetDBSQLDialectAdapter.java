@@ -7,10 +7,5 @@ public class MonetDBSQLDialectAdapter extends SQL99DialectAdapter {
 
 
 
-    @Override
-    public String getSQLLexicalFormString(String constant) {
-        return "'" + constant + "'";
-    }
-
 
 }

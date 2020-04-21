@@ -21,26 +21,4 @@ public class SQL99DialectAdapter implements SQLDialectAdapter {
     }
 
 
-
-    @Override
-    public String render(DBConstant constant) {
-        DBTermType dbType = constant.getType();
-
-        switch (dbType.getCategory()) {
-            case INTEGER:
-            case DECIMAL:
-            case FLOAT_DOUBLE:
-                // TODO: handle the special case of not-a-number!
-            case BOOLEAN:
-                return constant.getValue();
-            default:
-                return getSQLLexicalFormString(constant.getValue());
-        }
-    }
-
-
-    protected String getSQLLexicalFormString(String constant) {
-        // quotes and duplicates isolated single quotes
-        return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
-    }
 }

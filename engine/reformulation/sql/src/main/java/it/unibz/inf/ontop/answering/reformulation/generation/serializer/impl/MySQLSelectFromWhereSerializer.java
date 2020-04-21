@@ -7,10 +7,10 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.stream.Collectors;
@@ -19,9 +19,16 @@ import java.util.stream.Collectors;
 public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private MySQLSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
+    private MySQLSelectFromWhereSerializer(TermFactory termFactory,
                                            SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+        super(new DefaultSQLTermSerializer(termFactory) {
+            @Override
+            protected String serializeStringConstant(String constant) {
+                // quotes, doubles backslashes and escapes single quotes
+                return "'" + constant.replace("\\", "\\\\")
+                        .replaceAll("(?<!')'(?!')", "\\'") + "'";
+            }
+        }, dialectAdapter);
     }
 
     @Override

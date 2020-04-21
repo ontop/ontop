@@ -8,12 +8,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
+import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
@@ -47,9 +49,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
      */
     protected class DefaultRelationVisitingSerializer implements SQLRelationVisitor<QuerySerialization> {
 
-        protected static final String VIEW_PREFIX = "v";
+        private static final String VIEW_PREFIX = "v";
         private static final String SELECT_FROM_WHERE_MODIFIERS_TEMPLATE = "SELECT %s%s\nFROM %s\n%s%s%s%s";
+
         private final AtomicInteger viewCounter;
+
         protected final QuotedIDFactory idFactory;
         private final QuotedIDFactory rawIdFactory;
 
@@ -357,5 +361,75 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return columnIDs;
         }
     }
+
+
+    protected static class DefaultSQLTermSerializer implements SQLTermSerializer {
+
+        private final TermFactory termFactory;
+
+        protected DefaultSQLTermSerializer(TermFactory termFactory) {
+            this.termFactory = termFactory;
+        }
+
+        @Override
+        public String serialize(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> var2ColumnMap)
+                throws SQLSerializationException {
+            if (term instanceof Constant) {
+                return serializeConstant((Constant)term);
+            }
+            else if (term instanceof Variable) {
+                return Optional.ofNullable(var2ColumnMap.get(term))
+                        .map(QualifiedAttributeID::getSQLRendering)
+                        .orElseThrow(() -> new SQLSerializationException(String.format(
+                                "The variable %s does not appear in the var2ColumnMap", term)));
+            }
+            /*
+             * ImmutableFunctionalTerm with a DBFunctionSymbol
+             */
+            else {
+                return Optional.of(term)
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t)
+                        .filter(t -> t.getFunctionSymbol() instanceof DBFunctionSymbol)
+                        .map(t -> ((DBFunctionSymbol) t.getFunctionSymbol()).getNativeDBString(
+                                t.getTerms(),
+                                t2 -> serialize(t2, var2ColumnMap),
+                                termFactory))
+                        .orElseThrow(() -> new SQLSerializationException("Only DBFunctionSymbols must be provided " +
+                                "to a SQLTermSerializer"));
+            }
+        }
+
+        private String serializeConstant(Constant constant) {
+            if (constant.isNull())
+                return constant.getValue();
+            if (!(constant instanceof DBConstant)) {
+                throw new SQLSerializationException(
+                        "Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
+            }
+            return serializeDBConstant((DBConstant) constant);
+        }
+
+        protected String serializeDBConstant(DBConstant constant) {
+            DBTermType dbType = constant.getType();
+
+            switch (dbType.getCategory()) {
+                case INTEGER:
+                case DECIMAL:
+                case FLOAT_DOUBLE:
+                    // TODO: handle the special case of not-a-number!
+                case BOOLEAN:
+                    return constant.getValue();
+                default:
+                    return serializeStringConstant(constant.getValue());
+            }
+        }
+
+        protected String serializeStringConstant(String constant) {
+            // quotes and duplicates isolated single quotes
+            return "'" + constant.replaceAll("(?<!')'(?!')", "''") + "'";
+        }
+    }
+
 
 }

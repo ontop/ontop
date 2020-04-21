@@ -9,11 +9,11 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 @Singleton
-public class MonetDBSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
+public class HSQLDBSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private MonetDBSelectFromWhereSerializer(TermFactory termFactory,
-                                             SQLDialectAdapter dialectAdapter) {
+    private HSQLDBSelectFromWhereSerializer(TermFactory termFactory,
+                                            SQLDialectAdapter dialectAdapter) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
@@ -26,21 +26,6 @@ public class MonetDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeri
     public SelectFromWhereSerializer.QuerySerialization serialize(SelectFromWhereWithModifiers
                                                                           selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
-                new DefaultSelectFromWhereSerializer.DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
-                    /**
-                     * https://www.monetdb.org/Documentation/SQLreference/TableExpressions
-                     *  [ LIMIT posint ]
-                     *  [ OFFSET posint ]
-                     */
-
-                    // sqlLimit, sqlOffset, sqlTopNSQL are standard
-
-                    @Override
-                    protected String serializeLimitOffset(long limit, long offset) {
-                        return String.format("LIMIT %d\nOFFSET %d", offset, limit);
-                    }
-                });
+                new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()));
     }
-
 }
-

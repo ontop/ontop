@@ -13,17 +13,6 @@ public class OracleSQLDialectAdapter extends SQL99DialectAdapter {
 	}
 
 
-	@Override
-	public String render(DBConstant constant) {
-		DBTermType dbType = constant.getType();
-		switch (dbType.getCategory()) {
-			case DATETIME:
-				return String.format("TIMESTAMP '%s'", constant.getValue());
-			default:
-				return super.render(constant);
-		}
-	}
-
 
 	public static final int NAME_MAX_LENGTH = 30;
 	/**

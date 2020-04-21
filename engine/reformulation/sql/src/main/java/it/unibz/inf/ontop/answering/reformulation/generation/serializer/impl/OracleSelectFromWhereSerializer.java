@@ -1,17 +1,32 @@
 package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
-import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLTermSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.model.term.DBConstant;
+import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
+@Singleton
 public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer {
 
     @Inject
-    private OracleSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer,
-                                         SQLDialectAdapter dialectAdapter) {
-        super(sqlTermSerializer, dialectAdapter);
+    private OracleSelectFromWhereSerializer(TermFactory termFactory,
+                                            SQLDialectAdapter dialectAdapter) {
+        super(new DefaultSQLTermSerializer(termFactory) {
+            @Override
+            protected String serializeDBConstant(DBConstant constant) {
+                DBTermType dbType = constant.getType();
+                switch (dbType.getCategory()) {
+                    case DATETIME:
+                        return String.format("TIMESTAMP '%s'", constant.getValue());
+                    default:
+                        return super.serializeDBConstant(constant);
+                }
+            }
+        }, dialectAdapter);
     }
 
     @Override
