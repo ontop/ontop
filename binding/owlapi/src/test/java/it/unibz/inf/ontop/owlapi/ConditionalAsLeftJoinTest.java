@@ -37,7 +37,7 @@ public class ConditionalAsLeftJoinTest {
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "sa";
 
-    final static Logger log = LoggerFactory.getLogger(ConditionalAsLeftJoinTest.class);
+    private final static Logger log = LoggerFactory.getLogger(ConditionalAsLeftJoinTest.class);
 
     @Before
     public void setUp() throws Exception {

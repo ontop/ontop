@@ -64,7 +64,7 @@ public class SQLStandardQuotedIDFactory implements QuotedIDFactory {
 	public static final String QUOTATION_STRING = "\"";
 	public static final String NO_QUOTATION = "";
 
-	SQLStandardQuotedIDFactory() { }
+	public SQLStandardQuotedIDFactory() { }
 
 	@Override
 	public QuotedID createAttributeID(String s) {
