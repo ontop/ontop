@@ -1,12 +1,12 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLUnionExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
+import it.unibz.inf.ontop.generation.algebra.SQLUnionExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 
 public class SQLUnionExpressionImpl implements SQLUnionExpression {

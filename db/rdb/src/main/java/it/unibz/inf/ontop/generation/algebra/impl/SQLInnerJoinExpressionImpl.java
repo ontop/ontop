@@ -1,25 +1,29 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLLeftJoinExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
+import it.unibz.inf.ontop.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLInnerJoinExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;
 
-public class SQLLeftJoinExpressionImpl implements SQLLeftJoinExpression {
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public class SQLInnerJoinExpressionImpl implements SQLInnerJoinExpression {
+
     private final SQLExpression leftExpression;
     private final SQLExpression rightExpression;
-    private final Optional<ImmutableExpression> joinCondition;
+    private final Optional<ImmutableExpression> optionalFilter;
 
     @AssistedInject
-    private SQLLeftJoinExpressionImpl(@Assisted("leftExpression") SQLExpression leftExpression, @Assisted("rightExpression") SQLExpression rightExpression,  @Assisted Optional<ImmutableExpression> joinCondition) {
+    private SQLInnerJoinExpressionImpl(@Assisted("leftExpression") SQLExpression leftExpression,
+                                       @Assisted("rightExpression") SQLExpression rightExpression,
+                                       @Assisted Optional<ImmutableExpression> optionalFilter) {
         this.leftExpression = leftExpression;
         this.rightExpression = rightExpression;
-        this.joinCondition = joinCondition;
+        this.optionalFilter = optionalFilter;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class SQLLeftJoinExpressionImpl implements SQLLeftJoinExpression {
 
     @Override
     public Optional<ImmutableExpression> getFilterCondition() {
-        return this.joinCondition;
+        return optionalFilter;
     }
 
     @Override

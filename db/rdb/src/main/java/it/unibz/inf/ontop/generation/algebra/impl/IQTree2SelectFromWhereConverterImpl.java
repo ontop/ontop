@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
+import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;

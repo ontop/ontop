@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.serializer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.*;
+import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;

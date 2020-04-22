@@ -1,11 +1,11 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLNaryJoinExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
+import it.unibz.inf.ontop.generation.algebra.SQLNaryJoinExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 
 import java.util.Optional;

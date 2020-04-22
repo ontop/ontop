@@ -1,9 +1,8 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
+package it.unibz.inf.ontop.generation.algebra;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;

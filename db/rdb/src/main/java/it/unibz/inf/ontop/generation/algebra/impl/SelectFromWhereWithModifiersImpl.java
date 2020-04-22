@@ -1,14 +1,14 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLExpression;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLOrderComparator;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SelectFromWhereWithModifiers;
+import it.unibz.inf.ontop.generation.algebra.SQLExpression;
+import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
+import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
+import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;

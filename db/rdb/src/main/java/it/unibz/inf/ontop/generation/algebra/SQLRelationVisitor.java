@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra;
+package it.unibz.inf.ontop.generation.algebra;
 
 
 public interface SQLRelationVisitor<T> {

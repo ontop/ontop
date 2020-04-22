@@ -1,10 +1,10 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.algebra.impl;
+package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLRelationVisitor;
-import it.unibz.inf.ontop.answering.reformulation.generation.algebra.SQLSerializedQuery;
+import it.unibz.inf.ontop.generation.algebra.SQLRelationVisitor;
+import it.unibz.inf.ontop.generation.algebra.SQLSerializedQuery;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.model.term.Variable;
 
