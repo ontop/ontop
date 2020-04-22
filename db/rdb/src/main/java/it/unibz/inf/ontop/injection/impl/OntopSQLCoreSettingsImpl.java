@@ -49,18 +49,8 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     }
 
     static Properties loadSQLCoreProperties(Properties userProperties) {
-        String jdbcUrl = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_URL))
-                .orElseThrow(() -> new InvalidOntopConfigurationException(OntopSQLCoreSettings.JDBC_URL + " is required"));
 
-        String jdbcDriver = Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_DRIVER))
-                .orElseGet(() -> {
-                    try {
-                        return DriverManager.getDriver(jdbcUrl).getClass().getCanonicalName();
-                    } catch (SQLException e) {
-                        throw new InvalidOntopConfigurationException("Impossible to get the JDBC driver. Reason: "
-                                + e.getMessage());
-                    }
-                });
+        String jdbcDriver = extractJdbcDriver(userProperties);
 
         Properties properties = loadDefaultPropertiesFromFile(OntopSQLCoreSettings.class, DEFAULT_FILE);
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
@@ -106,6 +96,26 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
         return properties;
     }
+
+
+    public static String extractJdbcUrl(Properties userProperties) {
+        return Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_URL))
+                .orElseThrow(() -> new InvalidOntopConfigurationException(OntopSQLCoreSettings.JDBC_URL + " is required"));
+    }
+
+    public static String extractJdbcDriver(Properties userProperties) {
+        return Optional.ofNullable(userProperties.getProperty(OntopSQLCoreSettings.JDBC_DRIVER))
+                .orElseGet(() -> {
+                    try {
+                        return DriverManager.getDriver(extractJdbcUrl(userProperties)).getClass().getCanonicalName();
+                    }
+                    catch (SQLException e) {
+                        throw new InvalidOntopConfigurationException("Impossible to get the JDBC driver. Reason: "
+                                + e.getMessage());
+                    }
+                });
+    }
+
 
     @Override
     public String getJdbcUrl() {
