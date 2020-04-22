@@ -53,6 +53,10 @@ public class MappingAssertion {
             return index.getPredicate();
     }
 
+    public ImmutableList<ImmutableTerm> getTerms() {
+        return getTopNode().getSubstitution().apply(getProjectionAtom().getArguments());
+    }
+
     public Variable getSubject() {
         return getRDFAtomPredicate().getSubject(query.getProjectionAtom().getArguments());
     }

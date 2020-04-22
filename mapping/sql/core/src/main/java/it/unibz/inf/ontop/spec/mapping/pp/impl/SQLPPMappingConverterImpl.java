@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -132,9 +134,15 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                             .collect(ImmutableCollectors.toMap()));
         }
         catch (NullPointerException e) { // attribute not found, part of resolver
-            throw new InvalidMappingSourceQueriesException("Error: " + e.getMessage()
-                    + " \nProblem location: source query of the mapping assertion \n["
-                    + provenance.getProvenanceInfo() + "]");
+            throw new InvalidMappingSourceQueriesException(target.getSubstitutedTerms().stream()
+                    .flatMap(ImmutableTerm::getVariableStream)
+                    .distinct()
+                    .filter(v ->lookup.apply(v) == null)
+                    .map(Variable::getName)
+                    .collect(Collectors.joining(", ",
+                            "The placeholder(s) ",
+                            " in the target do(es) not occur in source query of the mapping assertion\n["
+                    + provenance.getProvenanceInfo() + "]")));
         }
 
         ConstructionNode constructionNode = iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),

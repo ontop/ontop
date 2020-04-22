@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.PreMetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -28,6 +29,7 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import net.sf.jsqlparser.expression.JdbcParameter;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
 
@@ -49,10 +51,12 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
-    private final MetaMappingExpander expander;
+    private final PreMetaMappingExpander expander;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
+
+    private final MetaMappingExpander metamappingExpander;
 
     /**
      * This represents user-supplied constraints, i.e. primary
@@ -71,7 +75,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 SubstitutionFactory substitutionFactory, RDF rdfFactory,
                                 MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
                                 SQLPPSourceQueryFactory sourceQueryFactory,
-                                ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
+                                MetaMappingExpander metamappingExpander, ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 TypeFactory typeFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -82,7 +86,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
-        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
+        this.metamappingExpander = metamappingExpander;
+        this.expander = new PreMetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
         this.typeFactory = typeFactory;
     }
@@ -139,7 +144,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
         ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
-        ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
+        ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(eqMapping, settings, mm.getDBParameters());
+        ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(expMapping);
         ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
 
@@ -162,8 +168,8 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
-            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
-            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup);
+            //ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
             metadataLookup.extractImmutableMetadata();
 

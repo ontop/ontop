@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
 
 public class OntopMappingSQLModule extends OntopAbstractModule {
 
@@ -28,6 +29,7 @@ public class OntopMappingSQLModule extends OntopAbstractModule {
         bindFromSettings(SQLPPMappingConverter.class);
         bindFromSettings(ImplicitDBConstraintsProviderFactory.class);
         bindFromSettings(MappingExtractor.class);
+        bindFromSettings(MetaMappingExpander.class);
         bindFromSettings(SQLPPSourceQueryFactory.class);
     }
 }
