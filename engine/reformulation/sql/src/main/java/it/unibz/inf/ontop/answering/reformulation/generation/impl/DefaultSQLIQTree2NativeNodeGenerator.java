@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.generation.algebra.IQTree2SelectFromWhereConverter;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -16,8 +17,11 @@ import java.util.Properties;
 public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements OntopSQLCoreSettings {
 
     private static final String DB_PREFIX = "DB-";
+
     private static final String DB_TYPE_FACTORY_SUFFIX = "-typeFactory";
     private static final String DB_FS_FACTORY_SUFFIX = "-symbolFactory";
+    private static final String DIALECT_SERIALIZER_SUFFIX = "-serializer";
+
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
     private final String jdbcDriver;
@@ -79,6 +83,16 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                 // Must NOT override user properties
                 .filter(v -> !userProperties.containsKey(dbFSFactoryName))
                 .ifPresent(v -> properties.setProperty(dbFSFactoryName, v));
+
+        /*
+         * Dialect serializer
+         */
+        String serializerKey = jdbcDriver + DIALECT_SERIALIZER_SUFFIX;
+        String serializerName = SelectFromWhereSerializer.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(serializerKey))
+                .filter(v -> !userProperties.containsKey(serializerName))
+                .ifPresent(v -> properties.setProperty(serializerName, v));
+
 
         return properties;
     }
