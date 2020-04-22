@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.normalization;
+package it.unibz.inf.ontop.generation.normalization;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.utils.VariableGenerator;

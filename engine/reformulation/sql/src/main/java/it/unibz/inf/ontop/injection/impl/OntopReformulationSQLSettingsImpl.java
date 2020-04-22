@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
@@ -14,7 +13,6 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
         implements OntopReformulationSQLSettings {
 
     private static final String DEFAULT_FILE = "reformulation-sql-default.properties";
-    private static final String DIALECT_NORMALIZER_SUFFIX = "-normalizer";
 
     private final OntopSQLCoreSettings sqlSettings;
 
@@ -43,21 +41,6 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultQASQLProperties();
         properties.putAll(userProperties);
-
-        String jdbcDriver = extractJdbcDriver(userProperties);
-
-        properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
-        properties.putAll(userProperties);
-
-        /*
-         * Dialect normalizer
-         */
-        String normalizerKey = jdbcDriver + DIALECT_NORMALIZER_SUFFIX;
-        String normalizerName = DialectExtraNormalizer.class.getCanonicalName();
-        Optional.ofNullable(properties.getProperty(normalizerKey))
-                .filter(v -> !userProperties.containsKey(normalizerName))
-                .ifPresent(v -> properties.setProperty(normalizerName, v));
-
         return OntopSQLCoreSettingsImpl.loadSQLCoreProperties(properties);
     }
 

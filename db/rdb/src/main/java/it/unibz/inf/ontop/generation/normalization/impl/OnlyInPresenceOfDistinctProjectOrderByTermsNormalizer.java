@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.normalization.impl;
+package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;

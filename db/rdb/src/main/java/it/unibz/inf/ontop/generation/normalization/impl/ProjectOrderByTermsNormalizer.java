@@ -1,10 +1,9 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.normalization.impl;
+package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;

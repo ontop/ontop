@@ -1,8 +1,8 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.normalization.impl;
+package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static it.unibz.inf.ontop.model.term.ImmutableExpression.Evaluation.BooleanValue.TRUE;
 
 public class EnforceNullOrderNormalizer implements DialectExtraNormalizer {
 

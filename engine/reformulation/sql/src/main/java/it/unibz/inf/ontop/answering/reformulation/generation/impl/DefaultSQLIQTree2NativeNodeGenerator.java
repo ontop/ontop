@@ -69,7 +69,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
                 .filter(t -> t instanceof DBTermType)
                 .map(t -> (DBTermType) t)
                 .orElseThrow(() -> new MinorOntopInternalBugException(
-                        "Was expecting an unique and known DB term type to be extracted " +
+                        "Was expecting a unique and known DB term type to be extracted " +
                                 "for the SQL variable " + v));
     }
 }

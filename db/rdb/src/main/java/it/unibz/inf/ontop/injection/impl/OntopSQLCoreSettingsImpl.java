@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.injection.impl;
 
 
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
@@ -21,6 +22,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     private static final String DB_TYPE_FACTORY_SUFFIX = "-typeFactory";
     private static final String DB_FS_FACTORY_SUFFIX = "-symbolFactory";
     private static final String DIALECT_SERIALIZER_SUFFIX = "-serializer";
+    private static final String DIALECT_NORMALIZER_SUFFIX = "-normalizer";
 
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
@@ -93,6 +95,14 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                 .filter(v -> !userProperties.containsKey(serializerName))
                 .ifPresent(v -> properties.setProperty(serializerName, v));
 
+        /*
+         * Dialect normalizer
+         */
+        String normalizerKey = jdbcDriver + DIALECT_NORMALIZER_SUFFIX;
+        String normalizerName = DialectExtraNormalizer.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(normalizerKey))
+                .filter(v -> !userProperties.containsKey(normalizerName))
+                .ifPresent(v -> properties.setProperty(normalizerName, v));
 
         return properties;
     }

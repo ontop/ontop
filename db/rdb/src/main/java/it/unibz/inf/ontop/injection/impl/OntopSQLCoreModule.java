@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.generation.algebra.*;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
@@ -22,6 +23,7 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
 
         bindFromSettings(SelectFromWhereSerializer.class);
         bindFromSettings(IQTree2SelectFromWhereConverter.class);
+        bindFromSettings(DialectExtraNormalizer.class);
 
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(
