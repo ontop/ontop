@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.dbschema.DBMetadataProvider;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
@@ -18,6 +19,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     private static final String DB_PREFIX = "DB-";
     private static final String DB_TYPE_FACTORY_SUFFIX = "-typeFactory";
     private static final String DB_FS_FACTORY_SUFFIX = "-symbolFactory";
+    private static final String DB_MP_FACTORY_SUFFIX = "-metadataProvider";
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
     private final String jdbcDriver;
@@ -79,6 +81,16 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
                 // Must NOT override user properties
                 .filter(v -> !userProperties.containsKey(dbFSFactoryName))
                 .ifPresent(v -> properties.setProperty(dbFSFactoryName, v));
+
+        /*
+         * DB metadata provider
+         */
+        String dbMPFactoryKey = jdbcDriver + DB_MP_FACTORY_SUFFIX;
+        String dbMPFactoryName = DBMetadataProvider.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(dbMPFactoryKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(dbMPFactoryKey))
+                .ifPresent(v -> properties.setProperty(dbMPFactoryName, v));
 
         return properties;
     }

@@ -25,8 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataProvider;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -73,8 +72,9 @@ public abstract class AbstractConstraintTest extends TestCase {
 		Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+		JDBCMetadataProviderFactory metadataProviderFactory = defaultConfiguration.getInjector().getInstance(JDBCMetadataProviderFactory.class);
 
-		MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(conn, defaultConfiguration.getTypeFactory().getDBTypeFactory());
+		MetadataProvider metadataLoader = metadataProviderFactory.getMetadataProvider(conn);
 
 		MetadataProvider filteredMetadataLoader = new DelegatingMetadataProvider(metadataLoader) {
 			@Override

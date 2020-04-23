@@ -1,8 +1,10 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 
@@ -10,8 +12,9 @@ public class PostgreSQLDBMetadataProvider extends DefaultDBMetadataProvider {
 
     private final QuotedID defaultSchema;
 
-    PostgreSQLDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, dbTypeFactory);
+    @AssistedInject
+    PostgreSQLDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
+        super(connection, typeFactory);
         // default schema name
         // https://www.postgresql.org/docs/9.3/functions-info.html
         this.defaultSchema = retrieveDefaultSchema("SELECT current_schema");
