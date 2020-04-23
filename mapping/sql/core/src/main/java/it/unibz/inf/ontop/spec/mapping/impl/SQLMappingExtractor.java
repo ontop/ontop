@@ -4,11 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -49,6 +48,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final JDBCMetadataProviderFactory metadataProviderFactory;
     private final MetaMappingExpander expander;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
@@ -61,7 +61,6 @@ public class SQLMappingExtractor implements MappingExtractor {
      * Can be useful for eliminating self-joins
      */
     private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
-    private final TypeFactory typeFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
@@ -72,7 +71,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
                                 SQLPPSourceQueryFactory sourceQueryFactory,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
-                                TypeFactory typeFactory) {
+                                JDBCMetadataProviderFactory metadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
@@ -82,9 +81,9 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.canonicalTransformer = canonicalTransformer;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.metadataProviderFactory = metadataProviderFactory;
         this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
-        this.typeFactory = typeFactory;
     }
 
     @Override
@@ -157,7 +156,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
-            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
+            MetadataProvider metadataLoader = metadataProviderFactory.getMetadataProvider(connection);
             MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
                     constraintFile, metadataLoader);
 

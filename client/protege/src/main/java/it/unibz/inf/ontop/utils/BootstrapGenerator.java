@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.utils;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
@@ -26,6 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
+/**
+ * TODO: fully refactor this class. Protégé should not be exposed to these internal classes of Ontop.
+ */
 public class BootstrapGenerator {
 
     private final JDBCConnectionManager connManager;
@@ -34,6 +37,7 @@ public class BootstrapGenerator {
     private final OWLModelManager owlManager;
     private final TypeFactory typeFactory;
     private final DirectMappingEngine directMappingEngine;
+    private final JDBCMetadataProviderFactory metadataProviderFactory;
 
     public BootstrapGenerator(OBDAModelManager obdaModelManager, String baseUri,
                               OWLModelManager owlManager) throws DuplicateMappingException, MetadataExtractionException {
@@ -45,6 +49,7 @@ public class BootstrapGenerator {
         typeFactory = obdaModelManager.getTypeFactory();
         Injector injector = configuration.getInjector();
         directMappingEngine = injector.getInstance(DirectMappingEngine.class);
+        metadataProviderFactory = injector.getInstance(JDBCMetadataProviderFactory.class);
 
         bootstrapMappingAndOntologyProtege(baseUri);
     }
@@ -85,7 +90,7 @@ public class BootstrapGenerator {
             ? ppMapping.getPrefixManager().getDefaultPrefix()
             : DirectMappingEngine.fixBaseURI(baseURI0);
 
-        MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+        MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
         // this operation is EXPENSIVE
         ImmutableList<DatabaseRelationDefinition> relations = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 

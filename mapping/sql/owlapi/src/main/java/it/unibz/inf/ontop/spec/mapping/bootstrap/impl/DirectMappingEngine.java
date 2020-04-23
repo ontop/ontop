@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DatabaseRelationDefinition;
 import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
 import it.unibz.inf.ontop.dbschema.MetadataProvider;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MappingBootstrappingException;
 import it.unibz.inf.ontop.exception.MappingException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
@@ -71,6 +71,7 @@ import java.util.stream.Stream;
 public class DirectMappingEngine {
 
 	private final SQLPPSourceQueryFactory sourceQueryFactory;
+	private final JDBCMetadataProviderFactory metadataProviderFactory;
 	private final SpecificationFactory specificationFactory;
 	private final SQLPPMappingFactory ppMappingFactory;
 	private final TypeFactory typeFactory;
@@ -97,7 +98,8 @@ public class DirectMappingEngine {
 								SQLPPMappingFactory ppMappingFactory, TypeFactory typeFactory, TermFactory termFactory,
 								RDF rdfFactory, TargetAtomFactory targetAtomFactory,
 								DBFunctionSymbolFactory dbFunctionSymbolFactory,
-								SQLPPSourceQueryFactory sourceQueryFactory) {
+								SQLPPSourceQueryFactory sourceQueryFactory,
+								JDBCMetadataProviderFactory metadataProviderFactory){
 		this.specificationFactory = specificationFactory;
 		this.ppMappingFactory = ppMappingFactory;
 		this.settings = settings;
@@ -107,6 +109,7 @@ public class DirectMappingEngine {
 		this.targetAtomFactory = targetAtomFactory;
 		this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
 		this.sourceQueryFactory = sourceQueryFactory;
+		this.metadataProviderFactory = metadataProviderFactory;
 	}
 
 	/**
@@ -159,7 +162,7 @@ public class DirectMappingEngine {
 
 		try (Connection conn = LocalJDBCConnectionUtils.createConnection(settings)) {
 			// this operation is EXPENSIVE
-			MetadataProvider metadataProvider = DatabaseMetadataProviderFactory.getMetadataProvider(conn, typeFactory.getDBTypeFactory());
+			MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(conn);
 			ImmutableList<DatabaseRelationDefinition> tables = ImmutableMetadata.extractImmutableMetadata(metadataProvider).getAllRelations();
 			String baseIRI = baseIRI0.isEmpty()
 					? mapping.getPrefixManager().getDefaultPrefix()
