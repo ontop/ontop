@@ -264,6 +264,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
         IQTree tree = optimizerFactory.createEETransformer(variableGenerator).transform(pushedDownSubTree);
 
+        tree = query.getTree();
         System.out.println("TREEEE: " + tree);
 
         NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
