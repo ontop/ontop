@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
@@ -56,7 +54,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     @Inject
     private SQLPPMappingConverterImpl(NoNullValueEnforcer noNullValueEnforcer,
-                                      CoreSingletons coreSingletons, MappingEqualityTransformer mappingEqualityTransformer) {
+                                      CoreSingletons coreSingletons,
+                                      MappingEqualityTransformer mappingEqualityTransformer) {
         this.termFactory = coreSingletons.getTermFactory();
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = coreSingletons.getIQFactory();
@@ -68,35 +67,32 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mappingAssertions, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
+    public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
 
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
-
-        for (SQLPPTriplesMap mappingAssertion : mappingAssertions) {
-            RAExpression re = getRAExpression(mappingAssertion, metadataLookup);
+        for (SQLPPTriplesMap assertion : mapping) {
+            RAExpression re = getRAExpression(assertion, metadataLookup);
             IQTree tree = IQ2CQ.toIQTree(
                     re.getDataAtoms().stream()
                             .map(iqFactory::createExtensionalDataNode)
                             .collect(ImmutableCollectors.toList()),
-                    re.getFilterAtoms().isEmpty()
-                            ? Optional.empty()
-                            : Optional.of(termFactory.getConjunction(re.getFilterAtoms())),
+                    termFactory.getConjunction(re.getFilterAtoms().stream()),
                     iqFactory);
 
             ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
                     .filter(e -> e.getKey().getRelation() == null)
                     .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
-            Function<Variable, ImmutableTerm> lookup = placeholderLookup(mappingAssertion, metadataLookup.getQuotedIDFactory(), lookupTable);
+            Function<Variable, ImmutableTerm> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), lookupTable);
 
-            for (TargetAtom target : mappingAssertion.getTargetAtoms()) {
-                PPMappingAssertionProvenance provenance = mappingAssertion.getMappingAssertionProvenance(target);
+            for (TargetAtom target : assertion.getTargetAtoms()) {
+                PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
                 builder.add(convert(target, lookup, provenance, tree));
             }
         }
 
-        ImmutableList<MappingAssertion> list = builder.build();
-        LOGGER.debug("Original mapping size: {}", list.size());
-        return list;
+        ImmutableList<MappingAssertion> result = builder.build();
+        LOGGER.debug("Original mapping size: {}", result.size());
+        return result;
     }
 
     public static <T> BiFunction<Map<QuotedID, T>, Variable, T> placeholderResolver(SQLPPTriplesMap triplesMap, QuotedIDFactory idFactory) {
@@ -125,34 +121,32 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, ImmutableTerm> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
-        ImmutableSubstitution<ImmutableTerm> sub;
-        try {
-            sub = substitutionFactory.getSubstitution(
-                    target.getSubstitutedTerms().stream()
-                            .flatMap(ImmutableTerm::getVariableStream)
-                            .distinct()
-                            .map(v -> Maps.immutableEntry(v, lookup.apply(v)))
-                            .filter(e -> !e.getKey().equals(e.getValue()))
-                            .collect(ImmutableCollectors.toMap()));
-        }
-        catch (NullPointerException e) { // attribute not found, part of resolver
-            throw new InvalidMappingSourceQueriesException(target.getSubstitutedTerms().stream()
-                    .flatMap(ImmutableTerm::getVariableStream)
-                    .distinct()
-                    .filter(v ->lookup.apply(v) == null)
+        ImmutableMap<Variable, ImmutableTerm> map =  target.getProjectionAtom().getArguments().stream()
+                .map(v -> target.getSubstitution().apply(v))
+                .flatMap(ImmutableTerm::getVariableStream)
+                .distinct()
+                .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
+
+        if (map.containsValue(null))
+            throw new InvalidMappingSourceQueriesException(map.entrySet().stream()
+                    .filter(e -> e.getValue() == null)
+                    .map(Map.Entry::getKey)
                     .map(Variable::getName)
                     .collect(Collectors.joining(", ",
                             "The placeholder(s) ",
                             " in the target do(es) not occur in source query of the mapping assertion\n["
-                    + provenance.getProvenanceInfo() + "]")));
-        }
+                                    + provenance.getProvenanceInfo() + "]")));
+
+        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(map.entrySet().stream()
+                            .filter(e -> !e.getKey().equals(e.getValue()))
+                            .collect(ImmutableCollectors.toMap()));
 
         ImmutableSubstitution<ImmutableTerm> constructionSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
                                 e -> sub.apply(e.getValue()))));
 
-        IQTree mappingTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(), constructionSubstitution), tree);
+        IQTree mappingTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                target.getProjectionAtom().getVariables(), constructionSubstitution), tree);
         IQTree noNullsTree = noNullValueEnforcer.transform(mappingTree);
         IQTree transformedTree = mappingEqualityTransformer.transform(noNullsTree);
 
@@ -196,5 +190,4 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return new RAExpression(ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments)),
                 ImmutableList.of(), new RAExpressionAttributes(lookupTable, null));
     }
-
 }

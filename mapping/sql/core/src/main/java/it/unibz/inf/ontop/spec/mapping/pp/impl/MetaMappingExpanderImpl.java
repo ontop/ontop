@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -12,7 +11,6 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -31,7 +29,6 @@ import it.unibz.inf.ontop.utils.Templates;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 import java.util.function.Function;
@@ -44,7 +41,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final org.apache.commons.rdf.api.RDF rdfFactory;
-    private final AtomFactory atomFactory;
     private final MappingEqualityTransformer mappingEqualityTransformer;
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
 
@@ -53,156 +49,143 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory,
                                     org.apache.commons.rdf.api.RDF rdfFactory,
-                                    AtomFactory atomFactory,
                                     MappingEqualityTransformer mappingEqualityTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator) {
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
-        this.atomFactory = atomFactory;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.nativeNodeGenerator = nativeNodeGenerator;
     }
 
+    @Override
+    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping, OntopSQLCredentialSettings settings, DBParameters dbParameters) throws MetaMappingExpansionException {
+        ImmutableList.Builder<MappingAssertion> resultBuilder = ImmutableList.builder();
+        ImmutableList.Builder<ExpansionPosition> positionsBuilder = ImmutableList.builder();
 
-    private static final class Expansion {
-        private final MappingAssertion assertion;
-        private final Variable templateVariable;
-        private final ImmutableFunctionalTerm templateTerm;
-
-        Expansion(MappingAssertion assertion, Function<ImmutableList<ImmutableTerm>, ImmutableTerm> getTerm) {
-            this.assertion = assertion;
-            this.templateTerm = (ImmutableFunctionalTerm)getTerm.apply(assertion.getTerms());
-            this.templateVariable = (Variable) getTerm.apply((ImmutableList)assertion.getProjectionAtom().getArguments());
+        for (MappingAssertion assertion : mapping) {
+            Optional<ExpansionPosition> position = getExpansionPosition(assertion);
+            if (!position.isPresent())
+                resultBuilder.add(assertion);
+            else
+                positionsBuilder.add(position.get());
         }
+
+        ImmutableList<ExpansionPosition> positions = positionsBuilder.build();
+        if (positions.isEmpty())
+            return mapping;
+
+        try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+            for (ExpansionPosition position : positions) {
+                NativeNode nativeNode = position.getDatabaseQuery(dbParameters);
+                try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
+                    while (rs.next()) {
+                        ImmutableMap.Builder<Variable, DBConstant> builder = ImmutableMap.builder();
+                        for (Variable variable : nativeNode.getVariables()) { // exceptions, no streams
+                            String column = nativeNode.getColumnNames().get(variable).getName();
+                            builder.put(variable,
+                                    termFactory.getDBConstant(rs.getString(column),
+                                            nativeNode.getTypeMap().get(variable)));
+                        }
+                        resultBuilder.add(position.createExpansion(builder.build()));
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new MetaMappingExpansionException(e);
+        }
+
+        return resultBuilder.build();
     }
 
-    private Optional<Expansion> getExpansion(MappingAssertion assertion) {
+
+    private final class ExpansionPosition {
+        private final MappingAssertion assertion;
+        private final Variable topVariable;
+        private final ImmutableTerm template;
+
+        ExpansionPosition(MappingAssertion assertion, Function<ImmutableList<ImmutableTerm>, ImmutableTerm> termExtractor) {
+            this.assertion = assertion;
+            this.template = termExtractor.apply(assertion.getTerms());
+            this.topVariable = (Variable) termExtractor.apply((ImmutableList)assertion.getProjectionAtom().getArguments());
+        }
+
+        NativeNode getDatabaseQuery(DBParameters dbParameters) {
+            System.out.println("START WITH " + assertion.getQuery());
+            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                            template.getVariableStream()
+                                    .collect(ImmutableCollectors.toSet()),
+                            substitutionFactory.getSubstitution()),
+                            assertion.getTopChild()));
+
+            System.out.println("QQQQ: " + tree);
+            NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
+            System.out.println("MMMP: " + nativeNode.getNativeQueryString());
+            return nativeNode;
+        }
+
+        MappingAssertion createExpansion(ImmutableMap<Variable, DBConstant> values) {
+            System.out.println("VALUES: " + values);
+            String stringIri = instantiateTemplate(template, values);
+            ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopNode().getSubstitution()
+                    .composeWith(substitutionFactory.getSubstitution(
+                            topVariable,
+                            termFactory.getConstantIRI(rdfFactory.createIRI(stringIri))));
+
+            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
+                    termFactory.getConjunction(values.entrySet().stream()
+                            .map(e -> termFactory.getNotYetTypedEquality(
+                                    e.getKey(),
+                                    e.getValue()))).get()),
+                    assertion.getTopChild());
+
+            IQTree transformedFilterTree = mappingEqualityTransformer.transform(filterTree);
+
+            IQ iq = iqFactory.createIQ(assertion.getProjectionAtom(),
+                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                            instantiatedSub.getDomain(), instantiatedSub),
+                            transformedFilterTree));
+
+            System.out.println("MME: " + iq);
+            return assertion.copyOf(iq);
+        }
+
+    }
+
+    private Optional<ExpansionPosition> getExpansionPosition(MappingAssertion assertion) {
         RDFAtomPredicate predicate = assertion.getRDFAtomPredicate();
 
-        Function<ImmutableList<ImmutableTerm>, ImmutableTerm> getTerm =
+        Function<ImmutableList<ImmutableTerm>, ImmutableTerm> termExtractor =
                 predicate.getPropertyIRI(assertion.getTerms())
                         .filter(p -> p.equals(RDF.TYPE))
                         .isPresent()
                         ? predicate::getObject
                         : predicate::getProperty;
 
-        return (!getTerm.apply(assertion.getTerms()).isGround())
-                ? Optional.of(new Expansion(assertion, getTerm))
+        return (!termExtractor.apply(assertion.getTerms()).isGround())
+                ? Optional.of(new ExpansionPosition(assertion, termExtractor))
                 : Optional.empty();
     }
 
 
-    @Override
-    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mappings, OntopSQLCredentialSettings settings, DBParameters dbParameters) throws MetaMappingExpansionException {
-        ImmutableList.Builder<MappingAssertion> result = ImmutableList.builder();
-        ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
-
-        for (MappingAssertion mapping : mappings) {
-            Optional<Expansion> nonGroundCPs = getExpansion(mapping);
-            if (!nonGroundCPs.isPresent()) {
-                result.add(mapping);
-            }
-            else {
-                builder2.add(nonGroundCPs.get());
-            }
-        }
-        ImmutableList<Expansion> expansions = builder2.build();
-
-        if (expansions.isEmpty())
-            return mappings;
-
-        List<String> errorMessages = new LinkedList<>();
-        try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            for (Expansion m : expansions) {
-                try {
-                    System.out.println("START WITH " + m.assertion.getQuery());
-                    ImmutableList<Variable> templateVariables = m.templateTerm.getVariableStream()
-                            .distinct()
-                            .collect(ImmutableCollectors.toList());
-
-                    IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                                            ImmutableSet.copyOf(templateVariables), substitutionFactory.getSubstitution()),
-                                            m.assertion.getTopChild()));
-
-                    System.out.println("QQQQ: " + tree);
-                    NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
-                    System.out.println("MMMP: " + nativeNode.getNativeQueryString());
-
-                    final int size = templateVariables.size();
-                    try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
-                        while (rs.next()) {
-                            ImmutableMap.Builder<Variable, DBConstant> builder = ImmutableMap.builder();
-                            for (int i = 0; i < size; i++) { // exceptions, no streams
-                                Variable variable = templateVariables.get(i);
-                                String column = nativeNode.getColumnNames().get(variable).getName();
-                                builder.put(variable, termFactory.getDBConstant(rs.getString(column), nativeNode.getTypeMap().get(variable)));
-                            }
-                            ImmutableMap<Variable, DBConstant> values = builder.build();
-
-                            System.out.println("VALUES: " + values);
-
-                            IRIConstant predicateTerm = termFactory.getConstantIRI(rdfFactory.createIRI(
-                                    getPredicateName(m.templateTerm, values)));
-
-                            ImmutableSubstitution<ImmutableTerm> newSubstitution = m.assertion.getTopNode().getSubstitution()
-                                    .composeWith(substitutionFactory.getSubstitution(m.templateVariable, predicateTerm));
-
-                            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                                    termFactory.getConjunction(values.entrySet().stream()
-                                            .map(e -> termFactory.getNotYetTypedEquality(
-                                                    e.getKey(),
-                                                    e.getValue()))).get()),
-                                    m.assertion.getTopChild());
-
-                            IQTree transformedFilterTree = mappingEqualityTransformer.transform(filterTree);
-
-                            IQ newIq = iqFactory.createIQ(m.assertion.getProjectionAtom(),
-                                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                                            m.assertion.getTopNode().getVariables(), newSubstitution),
-                                            transformedFilterTree));
-
-                            MappingAssertion expandedAssertion = m.assertion.copyOf(newIq);
-
-                            System.out.println("MME: " + expandedAssertion.getQuery());
-
-                            result.add(expandedAssertion);
-                        }
-                    }
-                }
-                catch (Exception e) {
-                    errorMessages.add(e.getMessage());
-                }
-            }
-        }
-        catch (SQLException e) {
-            errorMessages.add(e.getMessage());
-        }
-
-        if (!errorMessages.isEmpty())
-            throw new MetaMappingExpansionException(Joiner.on("\n").join(errorMessages));
-
-        return result.build();
-    }
-
 
     /**
-     * 	does not remove duplicates
+     * 	preserves order and duplicates
      */
-    private static Stream<Variable> getVariablePositionsStream(ImmutableTerm t) {
-        if (t instanceof Variable)
-            return Stream.of((Variable) t);
-        if (t instanceof ImmutableFunctionalTerm)
-            return ((ImmutableFunctionalTerm) t).getTerms().stream()
+    private static Stream<Variable> getVariablePositionsStream(ImmutableTerm term) {
+        if (term instanceof Variable)
+            return Stream.of((Variable) term);
+        if (term instanceof ImmutableFunctionalTerm)
+            return ((ImmutableFunctionalTerm) term).getTerms().stream()
                     .flatMap(MetaMappingExpanderImpl::getVariablePositionsStream);
         return Stream.empty();
     }
 
 
-    private static String getPredicateName(ImmutableTerm term, ImmutableMap<Variable, DBConstant> values) {
-        System.out.println("TTT " + term + " " + term.getClass().getName());
+    private static String instantiateTemplate(ImmutableTerm term, ImmutableMap<Variable, DBConstant> values) {
         if (term instanceof Variable) {
             return values.get(term).getValue();
         }
@@ -212,7 +195,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         else if (term instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm function = (ImmutableFunctionalTerm) term;
             FunctionSymbol functionSymbol = function.getFunctionSymbol();
-            System.out.println("FFF " + functionSymbol + " " + functionSymbol.getClass().getName());
             if (functionSymbol instanceof ObjectStringTemplateFunctionSymbol) {
                 String iriTemplate = ((ObjectStringTemplateFunctionSymbol)functionSymbol).getTemplate();
                 return Templates.format(iriTemplate,
@@ -223,18 +205,17 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
             }
             else if ((functionSymbol instanceof DBTypeConversionFunctionSymbol)
                     && ((DBTypeConversionFunctionSymbol) functionSymbol).isTemporary()) {
-                return getPredicateName(function.getTerm(0), values);
+                return instantiateTemplate(function.getTerm(0), values);
             }
             else if (functionSymbol instanceof RDFTermFunctionSymbol) {
-                return getPredicateName(function.getTerm(0), values);
+                return instantiateTemplate(function.getTerm(0), values);
             }
             else if (functionSymbol instanceof DBConcatFunctionSymbol) {
                 return function.getTerms().stream()
-                        .map(t -> getPredicateName(t, values))
+                        .map(t -> instantiateTemplate(t, values))
                         .collect(Collectors.joining());
             }
         }
         throw new MinorOntopInternalBugException("Unexpected lexical template term: " + term);
     }
-
 }
