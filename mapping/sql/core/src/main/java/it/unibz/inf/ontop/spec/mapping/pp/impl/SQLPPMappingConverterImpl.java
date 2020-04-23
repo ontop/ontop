@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
-import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
@@ -25,6 +24,7 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQuer
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -52,10 +52,11 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final SubstitutionFactory substitutionFactory;
     private final CoreSingletons coreSingletons;
     private final DBTypeFactory dbTypeFactory;
+    private final MappingEqualityTransformer mappingEqualityTransformer;
 
     @Inject
     private SQLPPMappingConverterImpl(NoNullValueEnforcer noNullValueEnforcer,
-                                      CoreSingletons coreSingletons) {
+                                      CoreSingletons coreSingletons, MappingEqualityTransformer mappingEqualityTransformer) {
         this.termFactory = coreSingletons.getTermFactory();
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = coreSingletons.getIQFactory();
@@ -63,6 +64,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.coreSingletons = coreSingletons;
         this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
+        this.mappingEqualityTransformer = mappingEqualityTransformer;
     }
 
     @Override
@@ -150,12 +152,15 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                         .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
                                 e -> sub.apply(e.getValue())))));
 
-        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(),
-                iqFactory.createUnaryIQTree(constructionNode, tree));
+        IQTree tree0 = iqFactory.createUnaryIQTree(constructionNode, tree);
 
-        IQ iq = noNullValueEnforcer.transform(iq0);
+        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), tree0);
 
-        return new MappingAssertion(iq, provenance);
+        IQTree tree1 = noNullValueEnforcer.transform(tree0, iq0.getVariableGenerator());
+
+        IQTree tree2 = mappingEqualityTransformer.transform(tree1);
+
+        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), tree2), provenance);
     }
 
     private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {

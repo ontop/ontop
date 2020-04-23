@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -151,21 +152,25 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             ImmutableSubstitution<ImmutableTerm> newSubstitution = m.assertion.getTopNode().getSubstitution()
                                     .composeWith(substitutionFactory.getSubstitution(m.templateVariable, predicateTerm));
 
+                            IQTree tree0 = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
+                                    termFactory.getConjunction(values.entrySet().stream()
+                                            .map(e -> termFactory.getNotYetTypedEquality(
+                                                    e.getKey(),
+                                                    e.getValue()))).get()),
+                                    m.assertion.getTopChild());
+
+                            IQTree tree1 = mappingEqualityTransformer.transform(tree0);
+
                             IQ newIq = iqFactory.createIQ(m.assertion.getProjectionAtom(),
                                     iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                                             m.assertion.getTopNode().getVariables(), newSubstitution),
-                                            iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                                                    termFactory.getConjunction(values.entrySet().stream()
-                                                            .map(e -> termFactory.getNotYetTypedEquality(
-                                                                    e.getKey(),
-                                                                    e.getValue()))).get()),
-                                            m.assertion.getTopChild())));
+                                            tree1));
 
                             MappingAssertion expandedAssertion = m.assertion.copyOf(newIq);
 
                             System.out.println("MME: " + expandedAssertion.getQuery());
 
-                            result.addAll(mappingEqualityTransformer.transform(ImmutableList.of(expandedAssertion)));
+                            result.add(expandedAssertion);
                         }
                     }
                 }

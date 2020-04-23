@@ -143,8 +143,7 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
-        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
-        ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(eqMapping, settings, mm.getDBParameters());
+        ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), settings, mm.getDBParameters());
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(expMapping);
         ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);

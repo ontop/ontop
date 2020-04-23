@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
@@ -37,21 +38,24 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     @Override
     public IQ transform(IQ originalQuery) {
         IQTree tree = originalQuery.getTree();
+        IQTree newTree = transform(tree, originalQuery.getVariableGenerator());
+        return newTree.equals(tree)
+                ? originalQuery
+                : iQFactory.createIQ(originalQuery.getProjectionAtom(), newTree);
+    }
 
+    @Override
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         Optional<ImmutableExpression> condition = termFactory.getConjunction(
                 tree.getVariables().stream()
                         .map(termFactory::getDBIsNotNull));
 
-        IQTree newTree = condition
+        return condition
                 .map(iQFactory::createFilterNode)
                 .map(n -> iQFactory.createUnaryIQTree(n, tree))
-                .map(t -> t.normalizeForOptimization(originalQuery.getVariableGenerator()))
+                .map(t -> t.normalizeForOptimization(variableGenerator))
                 .map(this::declareTopVariablesNotNull)
                 .orElse(tree);
-
-        return newTree.equals(tree)
-                ? originalQuery
-                : iQFactory.createIQ(originalQuery.getProjectionAtom(), newTree);
     }
 
     /**

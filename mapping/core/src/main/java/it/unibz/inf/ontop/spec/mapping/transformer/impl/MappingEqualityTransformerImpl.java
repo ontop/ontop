@@ -29,30 +29,17 @@ import java.util.stream.Stream;
 public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
 
     private final IQTreeTransformer expressionTransformer;
-    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
                                              CoreSingletons coreSingletons) {
         this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
-        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
-        return mapping.stream()
-                .map(this::transformMappingAssertion)
-                .collect(ImmutableCollectors.toList());
+    public IQTree transform(IQTree tree) {
+        return expressionTransformer.transform(tree);
     }
-
-    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
-        IQTree tree = assertion.getQuery().getTree();
-        IQTree newTree = expressionTransformer.transform(tree);
-        return newTree.equals(tree)
-                ? assertion
-                : assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
-    }
-
 
     protected static class ExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
