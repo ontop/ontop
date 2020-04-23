@@ -37,7 +37,6 @@ public class OntopReformulationPostModule extends OntopAbstractModule {
         }
 
         bindFromSettings(QueryCache.class);
-        bindFromSettings(IQTree2NativeNodeGenerator.class);
         bindFromSettings(InputQueryTranslator.class);
 
         Module reformulationFactoryModule = buildFactory(
