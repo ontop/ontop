@@ -195,7 +195,7 @@ public class PreMetaMappingExpander {
 							.map(Variable::getName)
 							.collect(Collectors.joining(", ",
 									"The placeholder(s) ",
-									" in the target do(es) not occur in the body of the mapping: " + m.source.getSQL())));
+									" in the target do(es) not occur in source query of the mapping assertion: " + m.source.getSQL())));
 				}
 
 				String query = getTemplateValuesQuery(m.source.getSQL(), templateColumns);
