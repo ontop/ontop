@@ -1,9 +1,9 @@
-package it.unibz.inf.ontop.answering.reformulation.generation.impl;
+package it.unibz.inf.ontop.generation;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.answering.reformulation.generation.IQTree2NativeNodeGenerator;
+import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.generation.algebra.IQTree2SelectFromWhereConverter;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;

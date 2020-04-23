@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.answering.reformulation.generation;
+package it.unibz.inf.ontop.iq.transform;
 
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.iq.IQTree;

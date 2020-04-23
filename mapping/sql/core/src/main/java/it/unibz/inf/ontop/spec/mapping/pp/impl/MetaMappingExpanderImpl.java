@@ -6,18 +6,16 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.generation.algebra.IQTree2SelectFromWhereConverter;
-import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.NativeNode;
 import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
+import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
-import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -26,9 +24,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullRejectingDBConcatFunctionSymbol;
-import it.unibz.inf.ontop.model.term.impl.RDFTermTypeConstantImpl;
-import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
@@ -46,14 +41,11 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
     private final OptimizerFactory optimizerFactory;
-    private final SelectFromWhereSerializer serializer;
-    private final IQTree2SelectFromWhereConverter converter;
     private final BooleanExpressionPushDownTransformer pushDownTransformer;
     private final TermTypeTermLifter rdfTypeLifter;
     private final PostProcessableFunctionLifter functionLifter;
@@ -63,13 +55,21 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final org.apache.commons.rdf.api.RDF rdfFactory;
     private final AtomFactory atomFactory;
     private final MappingEqualityTransformer mappingEqualityTransformer;
-    private final UniqueTermTypeExtractor uniqueTermTypeExtractor;
+    private final IQTree2NativeNodeGenerator nativeNodeGenerator;
 
     @Inject
-    private MetaMappingExpanderImpl(OptimizerFactory optimizerFactory, SelectFromWhereSerializer serializer, IQTree2SelectFromWhereConverter converter, BooleanExpressionPushDownTransformer pushDownTransformer, TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter, MappingEqualityTransformer mappingEqualityTransformer, SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory, TermFactory termFactory, org.apache.commons.rdf.api.RDF rdfFactory, AtomFactory atomFactory, MappingEqualityTransformer mappingEqualityTransformer1, UniqueTermTypeExtractor uniqueTermTypeExtractor) {
+    private MetaMappingExpanderImpl(OptimizerFactory optimizerFactory,
+                                    BooleanExpressionPushDownTransformer pushDownTransformer,
+                                    TermTypeTermLifter rdfTypeLifter,
+                                    PostProcessableFunctionLifter functionLifter,
+                                    SubstitutionFactory substitutionFactory,
+                                    IntermediateQueryFactory iqFactory,
+                                    TermFactory termFactory,
+                                    org.apache.commons.rdf.api.RDF rdfFactory,
+                                    AtomFactory atomFactory,
+                                    MappingEqualityTransformer mappingEqualityTransformer,
+                                    IQTree2NativeNodeGenerator nativeNodeGenerator) {
         this.optimizerFactory = optimizerFactory;
-        this.serializer = serializer;
-        this.converter = converter;
         this.pushDownTransformer = pushDownTransformer;
         this.rdfTypeLifter = rdfTypeLifter;
         this.functionLifter = functionLifter;
@@ -78,8 +78,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         this.termFactory = termFactory;
         this.rdfFactory = rdfFactory;
         this.atomFactory = atomFactory;
-        this.mappingEqualityTransformer = mappingEqualityTransformer1;
-        this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
+        this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.nativeNodeGenerator = nativeNodeGenerator;
     }
 
 
@@ -118,8 +118,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         ImmutableList.Builder<Expansion> builder2 = ImmutableList.builder();
 
         for (MappingAssertion mapping : mappings) {
-
-            // search for non-ground elements in the target atom of each mapping (in class or property positions)
             Optional<Expansion> nonGroundCPs = getExpansion(mapping);
             if (!nonGroundCPs.isPresent()) {
                 result.add(mapping);
@@ -144,15 +142,15 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
                     IQ query = getTemplateValuesQuery(m.assertion, templateVariables);
                     System.out.println("QUERY " + query);
-                    SelectFromWhereSerializer.QuerySerialization sqlQuery = translateToSQL(query, dbParameters);
+                    NativeNode nativeNode = translateToSQL(query, dbParameters);
                     final int size = templateVariables.size();
-                    try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sqlQuery.getString())) {
+                    try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                         while (rs.next()) {
                             ImmutableMap.Builder<Variable, DBConstant> builder = ImmutableMap.builder();
                             for (int i = 0; i < size; i++) { // exceptions, no streams
                                 Variable variable = templateVariables.get(i);
-                                String column = sqlQuery.getColumnIDs().get(variable).getAttribute().getName();
-                                builder.put(variable, termFactory.getDBStringConstant(rs.getString(column)));
+                                String column = nativeNode.getColumnNames().get(variable).getName();
+                                builder.put(variable, termFactory.getDBConstant(rs.getString(column), nativeNode.getTypeMap().get(variable)));
                             }
                             ImmutableMap<Variable, DBConstant> values = builder.build();
 
@@ -257,7 +255,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                         assertion.getTopChild())));
     }
 
-    private SelectFromWhereSerializer.QuerySerialization translateToSQL(IQ query, DBParameters dbParameters)
+    private NativeNode translateToSQL(IQ query, DBParameters dbParameters)
     {
         VariableGenerator variableGenerator = query.getVariableGenerator();
         IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
@@ -268,11 +266,10 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         System.out.println("TREEEE: " + tree);
 
-        ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
-        SelectFromWhereWithModifiers selectFromWhere = converter.convert(tree, signature);
-        SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere, dbParameters);
-        System.out.println("MMMP: " + serializedQuery.getString());
-        return serializedQuery;
+        NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
+
+        System.out.println("MMMP: " + nativeNode.getNativeQueryString());
+        return nativeNode;
     }
 
 
