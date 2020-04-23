@@ -27,7 +27,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DelegatingMetadataProvider;
 import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.injection.OntopModelConfiguration;
+import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
@@ -71,7 +71,9 @@ public abstract class AbstractConstraintTest extends TestCase {
 		log.info(getConnectionString() + "\n");
 		Connection conn = DriverManager.getConnection(getConnectionString(), getConnectionUsername(), getConnectionPassword());
 
-		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
+		OntopSQLCoreConfiguration defaultConfiguration = OntopSQLCoreConfiguration.defaultBuilder()
+				.properties(properties)
+				.build();
 		JDBCMetadataProviderFactory metadataProviderFactory = defaultConfiguration.getInjector().getInstance(JDBCMetadataProviderFactory.class);
 
 		MetadataProvider metadataLoader = metadataProviderFactory.getMetadataProvider(conn);
