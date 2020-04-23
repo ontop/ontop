@@ -9,9 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
@@ -63,8 +61,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     }
 
     private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
-
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopSubstitution();
         ImmutableSet<Variable> projectedVariables = assertion.getQuery().getTree().getVariables();
 
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();

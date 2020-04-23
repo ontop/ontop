@@ -31,7 +31,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,16 +99,15 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         return resultBuilder.build();
     }
 
-
     private final class ExpansionPosition {
         private final MappingAssertion assertion;
         private final Variable topVariable;
         private final ImmutableTerm template;
 
-        ExpansionPosition(MappingAssertion assertion, Function<ImmutableList<ImmutableTerm>, ImmutableTerm> termExtractor) {
+        ExpansionPosition(MappingAssertion assertion, RDFAtomPredicate.ComponentGetter componentGetter) {
             this.assertion = assertion;
-            this.template = termExtractor.apply(assertion.getTerms());
-            this.topVariable = (Variable) termExtractor.apply((ImmutableList)assertion.getProjectionAtom().getArguments());
+            this.template = componentGetter.get(assertion.getTerms());
+            this.topVariable = componentGetter.get(assertion.getProjectionAtom().getArguments());
         }
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
@@ -130,7 +128,7 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         MappingAssertion createExpansion(ImmutableMap<Variable, DBConstant> values) {
             System.out.println("VALUES: " + values);
             String stringIri = instantiateTemplate(template, values);
-            ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopNode().getSubstitution()
+            ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
                     .composeWith(substitutionFactory.getSubstitution(
                             topVariable,
                             termFactory.getConstantIRI(rdfFactory.createIRI(stringIri))));
@@ -158,15 +156,14 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private Optional<ExpansionPosition> getExpansionPosition(MappingAssertion assertion) {
         RDFAtomPredicate predicate = assertion.getRDFAtomPredicate();
 
-        Function<ImmutableList<ImmutableTerm>, ImmutableTerm> termExtractor =
-                predicate.getPropertyIRI(assertion.getTerms())
+        RDFAtomPredicate.ComponentGetter componentGetter = predicate.getPropertyIRI(assertion.getTerms())
                         .filter(p -> p.equals(RDF.TYPE))
                         .isPresent()
                         ? predicate::getObject
                         : predicate::getProperty;
 
-        return (!termExtractor.apply(assertion.getTerms()).isGround())
-                ? Optional.of(new ExpansionPosition(assertion, termExtractor))
+        return (!componentGetter.get(assertion.getTerms()).isGround())
+                ? Optional.of(new ExpansionPosition(assertion, componentGetter))
                 : Optional.empty();
     }
 

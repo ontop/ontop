@@ -67,7 +67,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
 
     private MappingAssertion transformMappingAssertion(MappingAssertion assertion)
             throws UnknownDatatypeException {
-        Variable objectVariable = assertion.getObject();
+        Variable objectVariable = assertion.getRDFAtomPredicate().getObject(assertion.getProjectionAtom().getArguments());
         ImmutableSet<ImmutableTerm> objectDefinitions = extractDefinitions(objectVariable, assertion.getQuery());
 
         ImmutableSet<Optional<TermTypeInference>> typeInferences = objectDefinitions.stream()
@@ -111,7 +111,7 @@ public class MappingDatatypeFillerImpl implements MappingDatatypeFiller {
     }
 
     private IQ fillMissingDatatype(Variable objectVariable, MappingAssertion assertion) throws UnknownDatatypeException {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
+        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopSubstitution();
 
         ImmutableTerm objectLexicalTerm = Optional.ofNullable(topSubstitution.get(objectVariable))
                 .filter(t -> (t instanceof ImmutableFunctionalTerm) || (t instanceof RDFConstant))

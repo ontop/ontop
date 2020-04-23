@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
+import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -90,21 +91,19 @@ public class DefaultMappingTransformer implements MappingTransformer {
     private Mapping getMapping(ImmutableList<MappingAssertion> assertions) {
         ImmutableTable<RDFAtomPredicate, IRI, IQ> propertyDefinitions = assertions.stream()
                 .filter(e -> !e.getIndex().isClass())
-                .map(e -> Tables.immutableCell(
-                        e.getIndex().getPredicate(),
-                        e.getIndex().getIri(),
-                        e.getQuery()))
+                .map(DefaultMappingTransformer::asCell)
                 .collect(ImmutableCollectors.toTable());
 
         ImmutableTable<RDFAtomPredicate, IRI, IQ> classDefinitions = assertions.stream()
                 .filter(e -> e.getIndex().isClass())
-                .map(e -> Tables.immutableCell(
-                        e.getIndex().getPredicate(),
-                        e.getIndex().getIri(),
-                        e.getQuery()))
+                .map(DefaultMappingTransformer::asCell)
                 .collect(ImmutableCollectors.toTable());
 
         return new MappingImpl(propertyDefinitions, classDefinitions);
     }
 
+    private static Table.Cell<RDFAtomPredicate, IRI, IQ> asCell(MappingAssertion assertion) {
+        MappingAssertionIndex index = assertion.getIndex();
+        return Tables.immutableCell(index.getPredicate(), index.getIri(), assertion.getQuery());
+    }
 }
