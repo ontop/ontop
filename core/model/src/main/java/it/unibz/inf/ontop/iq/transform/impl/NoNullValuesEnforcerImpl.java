@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -22,17 +23,18 @@ import java.util.Optional;
 
 public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
 
-
     private final IntermediateQueryFactory iQFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final CoreUtilsFactory coreUtilsFactory;
 
     @Inject
     private NoNullValuesEnforcerImpl(IntermediateQueryFactory iQFactory, TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory) {
+                                     SubstitutionFactory substitutionFactory, CoreUtilsFactory coreUtilsFactory) {
         this.iQFactory = iQFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.coreUtilsFactory = coreUtilsFactory;
     }
 
     @Override
@@ -45,7 +47,11 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+    public IQTree transform(IQTree tree) {
+        return transform(tree, coreUtilsFactory.createVariableGenerator(tree.getKnownVariables()));
+    }
+
+    private IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
         Optional<ImmutableExpression> condition = termFactory.getConjunction(
                 tree.getVariables().stream()
                         .map(termFactory::getDBIsNotNull));

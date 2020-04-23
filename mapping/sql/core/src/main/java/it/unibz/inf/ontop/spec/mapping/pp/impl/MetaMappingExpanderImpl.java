@@ -122,15 +122,13 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             .distinct()
                             .collect(ImmutableCollectors.toList());
 
-                    IQ query = iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(
-                            atomFactory.getRDFAnswerPredicate(templateVariables.size()), templateVariables),
-                            iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                    IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
                                     iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                                             ImmutableSet.copyOf(templateVariables), substitutionFactory.getSubstitution()),
-                                            m.assertion.getTopChild())));
+                                            m.assertion.getTopChild()));
 
-                    System.out.println("QQQQ: " + query);
-                    NativeNode nativeNode = nativeNodeGenerator.generate(query.getTree(), dbParameters);
+                    System.out.println("QQQQ: " + tree);
+                    NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
                     System.out.println("MMMP: " + nativeNode.getNativeQueryString());
 
                     final int size = templateVariables.size();
@@ -152,19 +150,19 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             ImmutableSubstitution<ImmutableTerm> newSubstitution = m.assertion.getTopNode().getSubstitution()
                                     .composeWith(substitutionFactory.getSubstitution(m.templateVariable, predicateTerm));
 
-                            IQTree tree0 = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
+                            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
                                     termFactory.getConjunction(values.entrySet().stream()
                                             .map(e -> termFactory.getNotYetTypedEquality(
                                                     e.getKey(),
                                                     e.getValue()))).get()),
                                     m.assertion.getTopChild());
 
-                            IQTree tree1 = mappingEqualityTransformer.transform(tree0);
+                            IQTree transformedFilterTree = mappingEqualityTransformer.transform(filterTree);
 
                             IQ newIq = iqFactory.createIQ(m.assertion.getProjectionAtom(),
                                     iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                                             m.assertion.getTopNode().getVariables(), newSubstitution),
-                                            tree1));
+                                            transformedFilterTree));
 
                             MappingAssertion expandedAssertion = m.assertion.copyOf(newIq);
 

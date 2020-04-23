@@ -147,20 +147,16 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     + provenance.getProvenanceInfo() + "]")));
         }
 
-        ConstructionNode constructionNode = iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(),
-                substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
+        ImmutableSubstitution<ImmutableTerm> constructionSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
-                                e -> sub.apply(e.getValue())))));
+                                e -> sub.apply(e.getValue()))));
 
-        IQTree tree0 = iqFactory.createUnaryIQTree(constructionNode, tree);
+        IQTree mappingTree = iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(target.getProjectionAtom().getVariables(), constructionSubstitution), tree);
+        IQTree noNullsTree = noNullValueEnforcer.transform(mappingTree);
+        IQTree transformedTree = mappingEqualityTransformer.transform(noNullsTree);
 
-        IQ iq0 = iqFactory.createIQ(target.getProjectionAtom(), tree0);
-
-        IQTree tree1 = noNullValueEnforcer.transform(tree0, iq0.getVariableGenerator());
-
-        IQTree tree2 = mappingEqualityTransformer.transform(tree1);
-
-        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), tree2), provenance);
+        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), transformedTree), provenance);
     }
 
     private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
