@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.iq;
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.QueryTransformationException;
@@ -11,10 +13,10 @@ import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,8 @@ public class NoNullValuesEnforcerTest {
     private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
     private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
+    private final static Variable A = TERM_FACTORY.getVariable("a");
+    private final static Variable B = TERM_FACTORY.getVariable("b");
     private final static Variable X = TERM_FACTORY.getVariable("x");
     private final static Variable Y = TERM_FACTORY.getVariable("y");
     private final static Variable Z = TERM_FACTORY.getVariable("z");
@@ -45,14 +49,15 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
+    private static final DatabaseRelationDefinition TABLE2 ;
 
     static {
         DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+        TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
             "A", integerDBType, true,
             "B", integerDBType, true);
-        TABLE2_PREDICATE = table2Def.getAtomPredicate();
+        TABLE2_PREDICATE = TABLE2.getAtomPredicate();
 
         DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, W));
@@ -162,6 +167,82 @@ public class NoNullValuesEnforcerTest {
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
         assertEquals(expectedQuery, transformedQuery);
+    }
+
+    @Test
+    public void testCoalesce() throws QueryTransformationException {
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, A, 1, B));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1),
+                ImmutableList.of(X));
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                                ImmutableList.of(TERM_FACTORY.getDBCoalesce(A, B)))));
+
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(constructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createFilterNode(TERM_FACTORY.getDisjunction(
+                            TERM_FACTORY.getDBIsNotNull(A),
+                            TERM_FACTORY.getDBIsNotNull(B))),
+                dataNode));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(initialIQ)
+                .normalizeForOptimization();
+        LOGGER.info("Expected IQ:\n" + expectedIQ);
+        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        assertEquals(expectedIQ, transformedQuery);
+    }
+
+    @Test
+    public void testNullIf() throws QueryTransformationException {
+        ExtensionalDataNode dataNode = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, A));
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1),
+                ImmutableList.of(X));
+
+        DBConstant one = TERM_FACTORY.getDBIntegerConstant(1);
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}",
+                                ImmutableList.of(TERM_FACTORY.getImmutableFunctionalTerm(
+                                        TERM_FACTORY.getDBFunctionSymbolFactory()
+                                                .getRegularDBFunctionSymbol("NULLIF", 2),
+                                        A, one
+                                )))));
+
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, IQ_FACTORY.createUnaryIQTree(constructionNode, dataNode));
+
+        ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
+                projectionAtom.getVariables(),
+                SUBSTITUTION_FACTORY.getSubstitution(X,
+                        TERM_FACTORY.getIRIFunctionalTerm("http://example.org/{}", ImmutableList.of(A))));
+
+        UnaryIQTree expectedTree = IQ_FACTORY.createUnaryIQTree(newConstructionNode,
+                IQ_FACTORY.createUnaryIQTree(
+                        IQ_FACTORY.createFilterNode(
+                                TERM_FACTORY.getConjunction(
+                                        TERM_FACTORY.getDBIsNotNull(A),
+                                        TERM_FACTORY.getDBNot(TERM_FACTORY.getDBNonStrictDefaultEquality(A, one)))),
+                        dataNode));
+        IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
+
+        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(initialIQ)
+                .normalizeForOptimization();
+        LOGGER.info("Expected IQ:\n" + expectedIQ);
+        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        assertEquals(expectedIQ, transformedQuery);
     }
 
 }
