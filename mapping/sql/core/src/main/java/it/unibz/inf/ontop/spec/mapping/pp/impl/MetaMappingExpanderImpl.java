@@ -8,14 +8,9 @@ import it.unibz.inf.ontop.exception.MetaMappingExpansionException;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.optimizer.PostProcessableFunctionLifter;
-import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
-import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -32,7 +27,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import it.unibz.inf.ontop.utils.Templates;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -45,10 +39,6 @@ import java.util.stream.Stream;
 
 public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
-    private final OptimizerFactory optimizerFactory;
-    private final BooleanExpressionPushDownTransformer pushDownTransformer;
-    private final TermTypeTermLifter rdfTypeLifter;
-    private final PostProcessableFunctionLifter functionLifter;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
@@ -58,21 +48,13 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final IQTree2NativeNodeGenerator nativeNodeGenerator;
 
     @Inject
-    private MetaMappingExpanderImpl(OptimizerFactory optimizerFactory,
-                                    BooleanExpressionPushDownTransformer pushDownTransformer,
-                                    TermTypeTermLifter rdfTypeLifter,
-                                    PostProcessableFunctionLifter functionLifter,
-                                    SubstitutionFactory substitutionFactory,
+    private MetaMappingExpanderImpl(SubstitutionFactory substitutionFactory,
                                     IntermediateQueryFactory iqFactory,
                                     TermFactory termFactory,
                                     org.apache.commons.rdf.api.RDF rdfFactory,
                                     AtomFactory atomFactory,
                                     MappingEqualityTransformer mappingEqualityTransformer,
                                     IQTree2NativeNodeGenerator nativeNodeGenerator) {
-        this.optimizerFactory = optimizerFactory;
-        this.pushDownTransformer = pushDownTransformer;
-        this.rdfTypeLifter = rdfTypeLifter;
-        this.functionLifter = functionLifter;
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
@@ -90,7 +72,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         Expansion(MappingAssertion assertion, Function<ImmutableList<ImmutableTerm>, ImmutableTerm> getTerm) {
             this.assertion = assertion;
-            //DistinctVariableOnlyDataAtom target = assertion.getQuery().getProjectionAtom();
             this.templateTerm = (ImmutableFunctionalTerm)getTerm.apply(assertion.getTerms());
             this.templateVariable = (Variable) getTerm.apply((ImmutableList)assertion.getProjectionAtom().getArguments());
         }
@@ -140,9 +121,17 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             .distinct()
                             .collect(ImmutableCollectors.toList());
 
-                    IQ query = getTemplateValuesQuery(m.assertion, templateVariables);
-                    System.out.println("QUERY " + query);
-                    NativeNode nativeNode = translateToSQL(query, dbParameters);
+                    IQ query = iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(
+                            atomFactory.getRDFAnswerPredicate(templateVariables.size()), templateVariables),
+                            iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
+                                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                                            ImmutableSet.copyOf(templateVariables), substitutionFactory.getSubstitution()),
+                                            m.assertion.getTopChild())));
+
+                    System.out.println("QQQQ: " + query);
+                    NativeNode nativeNode = nativeNodeGenerator.generate(query.getTree(), dbParameters);
+                    System.out.println("MMMP: " + nativeNode.getNativeQueryString());
+
                     final int size = templateVariables.size();
                     try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(nativeNode.getNativeQueryString())) {
                         while (rs.next()) {
@@ -172,7 +161,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                                                                     e.getValue()))).get()),
                                             m.assertion.getTopChild())));
 
-                            // TODO: see how to keep the provenance
                             MappingAssertion expandedAssertion = m.assertion.copyOf(newIq);
 
                             System.out.println("MME: " + expandedAssertion.getQuery());
@@ -245,34 +233,5 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         }
         throw new MinorOntopInternalBugException("Unexpected lexical template term: " + term);
     }
-
-    private IQ getTemplateValuesQuery(MappingAssertion assertion, ImmutableList<Variable> templateVariables) {
-        return iqFactory.createIQ(atomFactory.getDistinctVariableOnlyDataAtom(
-                atomFactory.getRDFAnswerPredicate(templateVariables.size()), templateVariables),
-                iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                        ImmutableSet.copyOf(templateVariables), substitutionFactory.getSubstitution()),
-                        assertion.getTopChild())));
-    }
-
-    private NativeNode translateToSQL(IQ query, DBParameters dbParameters)
-    {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQ rdfTypeLiftedIQ = rdfTypeLifter.optimize(query);
-        IQ liftedIQ = functionLifter.optimize(rdfTypeLiftedIQ);
-        IQTree flattenSubTree = liftedIQ.getTree(); //.getChildren().get(0);
-        IQTree pushedDownSubTree = pushDownTransformer.transform(flattenSubTree);
-        IQTree tree = optimizerFactory.createEETransformer(variableGenerator).transform(pushedDownSubTree);
-
-        tree = query.getTree();
-        System.out.println("TREEEE: " + tree);
-
-        NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
-
-        System.out.println("MMMP: " + nativeNode.getNativeQueryString());
-        return nativeNode;
-    }
-
-
 
 }
