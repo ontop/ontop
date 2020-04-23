@@ -89,7 +89,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
         String dbMPFactoryName = DBMetadataProvider.class.getCanonicalName();
         Optional.ofNullable(properties.getProperty(dbMPFactoryKey))
                 // Must NOT override user properties
-                .filter(v -> !userProperties.containsKey(dbMPFactoryKey))
+                .filter(v -> !userProperties.containsKey(dbMPFactoryName))
                 .ifPresent(v -> properties.setProperty(dbMPFactoryName, v));
 
         return properties;
