@@ -206,6 +206,8 @@ public class PreMetaMappingExpander {
 						for (int i = 1; i <= size; i++)
 							values.add(rs.getString(i));
 
+						System.out.println("PREVVV: " + values);
+
 						// Cannot build an IRI out of nulls
 						if (values.contains(null))
 							continue;
@@ -313,6 +315,8 @@ public class PreMetaMappingExpander {
 
 		plainSelect.setDistinct(new Distinct());
 		plainSelect.setSelectItems(sis);
+
+		System.out.println("PREQQQ: " + select.toString());
 
 		return select.toString();
 	}

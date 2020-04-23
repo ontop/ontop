@@ -168,7 +168,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
-            //ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
+            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
             metadataLookup.extractImmutableMetadata();
