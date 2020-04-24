@@ -147,12 +147,11 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));
 
-            IQ iq = iqFactory.createIQ(assertion.getProjectionAtom(),
-                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                             instantiatedSub.getDomain(), instantiatedSub),
-                            filterTree));
+                            filterTree);
 
-            return assertion.copyOf(iq);
+            return assertion.copyOf(tree, iqFactory);
         }
 
     }
