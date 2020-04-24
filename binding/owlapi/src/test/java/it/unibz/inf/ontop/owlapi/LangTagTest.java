@@ -28,17 +28,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObject;
 
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.*;
 
 
@@ -59,17 +56,14 @@ public class LangTagTest {
 
     private OntopOWLReasoner reasoner;
     private OWLConnection conn;
-    Connection sqlConnection;
+    private Connection sqlConnection;
 
 
     @Before
     public void setUp() throws Exception {
 
         sqlConnection = DriverManager.getConnection("jdbc:h2:mem:langTag","sa", "sa");
-        java.sql.Statement s = sqlConnection.createStatement();
-        String text = new Scanner( new File(createTablesFile)).useDelimiter("\\A").next();
-        s.execute(text);
-        s.close();
+        executeFromFile(sqlConnection, createTablesFile);
 
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .ontologyFile(owlFile)
@@ -89,21 +83,9 @@ public class LangTagTest {
 
     @After
     public void tearDown() throws Exception {
-        try {
-            dropTables();
-            conn.close();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = sqlConnection.createStatement();
-        String command = new Scanner( new File(dropTablesFile)).useDelimiter("\\A").next();
-        st.executeUpdate(command);
-        st.close();
-        sqlConnection.commit();
+        executeFromFile(sqlConnection, dropTablesFile);
+        sqlConnection.close();
+        conn.close();
     }
 
     @Test
@@ -111,12 +93,7 @@ public class LangTagTest {
 
         String query = new Scanner( new File(queryFile)).useDelimiter("\\A").next();
 
-        OWLStatement st = conn.createStatement();
-
-        try {
-
-            System.out.println(query);
-
+        try (OWLStatement st = conn.createStatement()) {
             TupleOWLResultSet rs2 = st.executeSelectQuery(query);
             assertTrue(rs2.hasNext());
             final OWLBindingSet bindingSet = rs2.next();
@@ -128,15 +105,6 @@ public class LangTagTest {
             assertEquals("es", lit.getLang());
 
             assertFalse(rs2.hasNext());
-
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-
-            } catch (Exception e) {
-                st.close();
-            }
         }
     }
 }

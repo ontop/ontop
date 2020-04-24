@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -41,16 +40,16 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
     @Override
     public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
         return mapping.stream()
-                .map(a -> a.copyOf(transformMappingAssertion(a.getQuery())))
+                .map(this::transformMappingAssertion)
                 .collect(ImmutableCollectors.toList());
     }
 
-    private IQ transformMappingAssertion(IQ mappingAssertion) {
-        IQTree initialTree = mappingAssertion.getTree();
-        IQTree newTree = expressionTransformer.transform(initialTree);
-        return (newTree.equals(initialTree))
-                ? mappingAssertion
-                : iqFactory.createIQ(mappingAssertion.getProjectionAtom(), newTree);
+    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
+        IQTree tree = assertion.getQuery().getTree();
+        IQTree newTree = expressionTransformer.transform(tree);
+        return newTree.equals(tree)
+                ? assertion
+                : assertion.copyOf(iqFactory.createIQ(assertion.getProjectionAtom(), newTree));
     }
 
 
@@ -217,7 +216,7 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         /**
          * NB: It tries to reduce equalities into strict equalities.
          * 
-         * Essential for integers and strings as these kinds types are often used to build IRIs.
+         * Essential for integers and strings as these kinds of types are often used to build IRIs.
          */
         protected ImmutableExpression transformEquality(ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
             if (newTerms.size() != 2)

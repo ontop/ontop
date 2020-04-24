@@ -21,7 +21,7 @@ package it.unibz.inf.ontop.protege.gui.action;
  */
 
 import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
+import it.unibz.inf.ontop.protege.core.DuplicateMappingException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.protege.core.OBDADataSource;
 import it.unibz.inf.ontop.protege.core.OBDAModel;
@@ -60,7 +60,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	private Logger log = LoggerFactory.getLogger(R2RMLImportAction.class);
 
 	@Override
-	public void initialise() throws Exception {
+	public void initialise() {
 		editorKit = (OWLEditorKit) getEditorKit();
 		obdaModelController = ((OBDAModelManager) editorKit.get(SQLPPMappingImpl.class
 				.getName())).getActiveOBDAModel();
@@ -68,7 +68,7 @@ public class R2RMLImportAction extends ProtegeAction {
 	}
 
 	@Override
-	public void dispose() throws Exception {
+	public void dispose()  {
 		// Does nothing!
 	}
 
@@ -180,7 +180,8 @@ public class R2RMLImportAction extends ProtegeAction {
 		private void registerTripleMap(SQLPPTriplesMap tm) {
 			try{
 				obdaModelController.addTriplesMap(tm, false);
-			} catch (DuplicateMappingException dm) {
+			}
+			catch (DuplicateMappingException dm) {
 				JOptionPane.showMessageDialog(getWorkspace(), "Duplicate mapping id found. Please correct the Resource node name: " + dm.getLocalizedMessage());
 				throw new RuntimeException("Duplicate mapping found: " + dm.getMessage());
 			}

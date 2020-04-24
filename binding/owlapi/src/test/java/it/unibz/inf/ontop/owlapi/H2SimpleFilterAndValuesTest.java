@@ -31,12 +31,11 @@ import org.junit.Test;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLLiteral;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
@@ -45,33 +44,22 @@ import static junit.framework.TestCase.assertTrue;
  * and  use of FILTER (?sx = <http://www.safepec.org#Ship> )
  */
 public class H2SimpleFilterAndValuesTest {
-	final String owlFile = "src/test/resources/filter/datatypes.owl";
-	final String obdaFile = "src/test/resources/filter/filter-h2.obda";
+
+	private static final String owlFile = "src/test/resources/filter/datatypes.owl";
+	private static final String obdaFile = "src/test/resources/filter/filter-h2.obda";
 	private static final String JDBC_URL =  "jdbc:h2:mem:datatype";
 	private static final String JDBC_USER =  "sa";
 	private static final String JDBC_PASSWORD =  "";
 
 	private OntopOWLReasoner reasoner;
 	private OWLConnection conn;
-	Connection sqlConnection;
-
+	private Connection sqlConnection;
 
 	@Before
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-		java.sql.Statement s = sqlConnection.createStatement();
-
-		try {
-			String text = new Scanner( new File("src/test/resources/filter/h2-datatypes.sql") ).useDelimiter("\\A").next();
-			s.execute(text);
-			//Server.startWebServer(sqlConnection);
-
-		} catch(SQLException sqle) {
-			System.out.println("Exception in creating db from script");
-		}
-
-		s.close();
+		executeFromFile(sqlConnection, "src/test/resources/filter/h2-datatypes.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlFile)
@@ -82,40 +70,20 @@ public class H2SimpleFilterAndValuesTest {
 				.enableTestMode()
 				.build();
 
-		/*
-		 * Create the instance of Quest OWL reasoner.
-		 */
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
-
 		reasoner = factory.createReasoner(config);
 		conn = reasoner.getConnection();
-
-
-
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			dropTables();
-			conn.close();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	private void dropTables() throws Exception {
-
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -123,23 +91,14 @@ public class H2SimpleFilterAndValuesTest {
 
 
 	private String runQueryReturnLiteral(String query) throws OWLException, SQLException {
-		OWLStatement st = conn.createStatement();
-		String retval;
-		try {
+		try (OWLStatement st = conn.createStatement()) {
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
-
 			assertTrue(rs.hasNext());
             final OWLBindingSet bindingSet = rs.next();
             OWLLiteral ind1 = bindingSet.getOWLLiteral("y");
-			retval = ind1.toString();
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			conn.close();
-			reasoner.dispose();
+			String retval = ind1.toString();
+			return retval;
 		}
-		return retval;
 	}
 
 

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -26,7 +27,7 @@ public interface SQLAlgebraFactory {
                                                        @Assisted("offset") Optional<Long> offset,
                                                        @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions);
 
-    SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, String> columnNames);
+    SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, QuotedID> columnNames);
 
     SQLTable createSQLTable(RelationDefinition relationDefinition, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
 

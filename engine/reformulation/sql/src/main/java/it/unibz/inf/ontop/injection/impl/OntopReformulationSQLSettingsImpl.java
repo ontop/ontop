@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.injection.impl;
 
-import it.unibz.inf.ontop.answering.reformulation.generation.dialect.SQLDialectAdapter;
 import it.unibz.inf.ontop.answering.reformulation.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.answering.reformulation.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
@@ -52,16 +51,6 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
 
         properties.setProperty(OntopSQLCoreSettings.JDBC_DRIVER, jdbcDriver);
         properties.putAll(userProperties);
-
-        /*
-         * Dialect adapter
-         */
-        String adapterKey = jdbcDriver + DIALECT_ADAPTER_SUFFIX;
-        String adapterName = SQLDialectAdapter.class.getCanonicalName();
-        Optional.ofNullable(properties.getProperty(adapterKey))
-                // Must NOT override user properties
-                .filter(v -> !userProperties.containsKey(adapterName))
-                .ifPresent(v -> properties.setProperty(adapterName, v));
 
         /*
          * Dialect normalizer

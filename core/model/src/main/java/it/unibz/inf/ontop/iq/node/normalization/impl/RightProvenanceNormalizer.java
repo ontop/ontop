@@ -128,7 +128,7 @@ public class RightProvenanceNormalizer {
             ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap = dataNode.getArgumentMap();
             Optional<Integer> optionalIndex = IntStream.range(0, attributes.size())
                     .filter(i -> !argumentMap.containsKey(i))
-                    .filter(i -> !attributes.get(i).canNull())
+                    .filter(i -> !attributes.get(i).isNullable())
                     .boxed()
                     .findFirst();
 

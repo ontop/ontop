@@ -44,6 +44,7 @@ public class OntopMappingSQLSettingsImpl extends OntopMappingSettingsImpl implem
         return sqlSettings.getJdbcUser();
     }
 
+    @Override
     public String getJdbcPassword() {
         return sqlSettings.getJdbcPassword();
     }

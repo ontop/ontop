@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.si.impl;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
@@ -24,6 +25,7 @@ public class LoadingConfiguration {
     private final TypeFactory typeFactory;
     private final TargetAtomFactory targetAtomFactory;
     private final RDF rdfFactory;
+    private final SQLPPSourceQueryFactory sourceQueryFactory;
 
     public LoadingConfiguration() {
         this.jdbcUrl = "jdbc:h2:mem:questrepository:" + UUID.randomUUID() + ";LOG=0;CACHE_SIZE=65536;LOCK_MODE=0;UNDO_LOG=0";
@@ -41,6 +43,7 @@ public class LoadingConfiguration {
         translatorOWL2QL = injector.getInstance(OWLAPITranslatorOWL2QL.class);
         targetAtomFactory = injector.getInstance(TargetAtomFactory.class);
         rdfFactory = injector.getInstance(RDF.class);
+        sourceQueryFactory = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
     public OWLAPITranslatorOWL2QL getTranslatorOWL2QL() {
@@ -56,6 +59,8 @@ public class LoadingConfiguration {
     }
 
     public TargetAtomFactory getTargetAtomFactory() { return targetAtomFactory; }
+
+    public SQLPPSourceQueryFactory getSourceQueryFactory() { return sourceQueryFactory; }
 
     public String getJdbcUrl() {
         return jdbcUrl;

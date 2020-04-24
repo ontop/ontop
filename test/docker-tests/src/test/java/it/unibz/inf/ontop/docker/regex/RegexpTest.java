@@ -60,7 +60,6 @@ public class RegexpTest extends TestCase {
 
 	private OWLConnection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
 	private OWLOntology ontology;
 
 	private static final String ROOT_LOCATION = "/testcases-docker/virtual-mode/stockexchange/simplecq/";
@@ -142,7 +141,6 @@ public class RegexpTest extends TestCase {
 				.nativeOntopMappingFile(obdaFileUrl.toString())
 				.propertyFile(propertyFileUrl.toString())
 				.ontologyFile(owlFileUrl)
-				.enableFullMetadataExtraction(false)
 				.build();
         reasoner = factory.createReasoner(config);
 
@@ -162,13 +160,10 @@ public class RegexpTest extends TestCase {
 	
 	private void deleteH2Database() throws Exception {
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -197,10 +192,7 @@ public class RegexpTest extends TestCase {
 	 */
 	@Test
 	public void testSparql2sqlRegex() throws Exception {
-		OWLStatement st = null;
-		try {
-			st = conn.createStatement();
-
+		try (OWLStatement st = conn.createStatement()) {
 			List<String> queries = Lists.newArrayList(
 					"'J[ano]*'",
 					"'^J[ano]*$'",
@@ -224,14 +216,7 @@ public class RegexpTest extends TestCase {
 				String res = runTest(st, query, false);
 				assertEquals(res, "");
 			}
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (st != null)
-				st.close();
 		}
 	}
-	
-
 
 }

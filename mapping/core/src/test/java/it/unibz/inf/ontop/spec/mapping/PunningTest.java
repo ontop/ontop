@@ -2,9 +2,6 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
-import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
@@ -39,19 +36,13 @@ public class PunningTest {
     private static final IRI PROP_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
     private static final IRI CLASS_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
 
-
     static {
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-        DBTermType integerType = TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table24Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "company"));
-        table24Def.addAttribute(idFactory.createAttributeID("cmpNpdidCompany"), integerType.getName(), integerType, false);
-        table24Def.addAttribute(idFactory.createAttributeID("cmpShortName"), integerType.getName(), integerType, false);
+        RelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "company",
+            "cmpNpdidCompany", integerDBType, false,
+            "cmpShortName", integerDBType, false);
         company = table24Def.getAtomPredicate();
-
-        dbMetadata.freeze();
     }
 
     @Test

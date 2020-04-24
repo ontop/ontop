@@ -28,16 +28,6 @@ class OntopMappingSettingsImpl extends OntopOBDASettingsImpl implements OntopMap
     }
 
     @Override
-    public boolean isFullMetadataExtractionEnabled() {
-        return getRequiredBoolean(OBTAIN_FULL_METADATA);
-    }
-
-    @Override
-    public boolean isProvidedDBMetadataCompletionEnabled() {
-        return getRequiredBoolean(COMPLETE_PROVIDED_METADATA);
-    }
-
-    @Override
     public boolean isDefaultDatatypeInferred() {
         return getRequiredBoolean(INFER_DEFAULT_DATATYPE);
     }

@@ -33,13 +33,11 @@ import org.semanticweb.owlapi.model.OWLObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -48,15 +46,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class H2NoDuplicatesCanonicalIRITest {
 
-	private OWLConnection conn;
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
-
-	final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
-	final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
+	private static final String owlfile = "src/test/resources/sameAs/wellbores-same-as-can.owl";
+	private static final String obdafile = "src/test/resources/sameAs/wellbores-same-as-can.obda";
 
 	private OntopOWLReasoner reasoner;
 	private Connection sqlConnection;
+	private OWLConnection conn;
 
 	private static final String JDBC_URL =  "jdbc:h2:mem:wellboresNoDuplicates";
 	private static final String JDBC_USER =  "sa";
@@ -66,10 +63,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 	public void setUp() throws Exception {
 
 		sqlConnection = DriverManager.getConnection(JDBC_URL,JDBC_USER, JDBC_PASSWORD);
-		java.sql.Statement s = sqlConnection.createStatement();
-		String text = new Scanner( new File("src/test/resources/sameAs/wellbores-same-as-can.sql") ).useDelimiter("\\A").next();
-		s.execute(text);
-		s.close();
+		executeFromFile(sqlConnection,"src/test/resources/sameAs/wellbores-same-as-can.sql");
 
 		OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
 				.ontologyFile(owlfile)
@@ -80,11 +74,8 @@ public class H2NoDuplicatesCanonicalIRITest {
 				.enableTestMode()
 				.build();
 
-		// Creating a new instance of the reasoner
 		OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
 		reasoner = factory.createReasoner(config);
-
-		// Now we are ready for querying
 		conn = reasoner.getConnection();
 	}
 
@@ -94,48 +85,30 @@ public class H2NoDuplicatesCanonicalIRITest {
 		conn.close();
 		reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
 	}
 
-	private ArrayList runTests(String query) throws Exception {
-		OWLStatement st = conn.createStatement();
-		ArrayList<String> retVal = new ArrayList<>();
-		try {
+	private ArrayList<String> runTests(String query) throws Exception {
+		try (OWLStatement st = conn.createStatement()) {
+			ArrayList<String> retVal = new ArrayList<>();
 			TupleOWLResultSet rs = st.executeSelectQuery(query);
 			while(rs.hasNext()) {
                 final OWLBindingSet bindingSet = rs.next();
                 for (String s : rs.getSignature()) {
 					OWLObject binding = bindingSet.getOWLObject(s);
-
 					String rendering = ToStringRenderer.getInstance().getRendering(binding);
 					retVal.add(rendering);
 					log.debug((s + ":  " + rendering));
 				}
 			}
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			try {
-
-			} catch (Exception e) {
-				st.close();
-				assertTrue(false);
-			}
-			conn.close();
-			reasoner.dispose();
+			return retVal;
 		}
-		return retVal;
-
 	}
 
 
@@ -151,8 +124,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 		ArrayList<String> results = runTests(query);
 		ArrayList<String> expectedResults = new ArrayList<>();
 
-		assertEquals(20, results.size() );
-
+		assertEquals(20, results.size());
     }
 
 	@Test
@@ -163,8 +135,7 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 		ArrayList<String> results = runTests(query);
 
-
-		assertEquals(5, results.size() );
+		assertEquals(5, results.size());
 	}
 
 	@Test
@@ -176,7 +147,6 @@ public class H2NoDuplicatesCanonicalIRITest {
 				"}\n";
 
 		ArrayList<String> results = runTests(query);
-
 
 		assertEquals(72, results.size() );
 	}
@@ -225,7 +195,6 @@ public class H2NoDuplicatesCanonicalIRITest {
 
 		assertEquals(8, results.size() );
 	}
-
 
 }
 

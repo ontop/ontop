@@ -27,15 +27,15 @@ import static org.junit.Assert.assertTrue;
 public class QuestImplicitDBConstraintsTest {
 
 	private static final String RESOURCE_DIR = "src/test/resources/userconstraints/";
-	static String uc_owlfile = RESOURCE_DIR + "uc.owl";
-	static String uc_obdafile = RESOURCE_DIR + "uc.obda";
-	static String uc_keyfile = RESOURCE_DIR + "keys.lst";
-	static String uc_create = RESOURCE_DIR + "create.sql";
+	private static final String uc_owlfile = RESOURCE_DIR + "uc.owl";
+	private static final String uc_obdafile = RESOURCE_DIR + "uc.obda";
+	private static final String uc_keyfile = RESOURCE_DIR + "keys.lst";
+	private static final String uc_create = RESOURCE_DIR + "create.sql";
 	
-	static String fk_owlfile = RESOURCE_DIR + "uc.owl";
-	static String fk_obdafile = RESOURCE_DIR + "fk.obda";
-	static String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
-	static String fk_create = RESOURCE_DIR + "fk-create.sql";
+	private static final String fk_owlfile = RESOURCE_DIR + "uc.owl";
+	private static final String fk_obdafile = RESOURCE_DIR + "fk.obda";
+	private static final String fk_keyfile = RESOURCE_DIR + "fk-keys.lst";
+	private static final String fk_create = RESOURCE_DIR + "fk-create.sql";
 
 	private static final String URL = "jdbc:h2:mem:countries";
 	private static final String USER = "sa";
@@ -48,29 +48,11 @@ public class QuestImplicitDBConstraintsTest {
 
 	
 	public void prepareDB(String sqlfile) throws Exception {
-		try {
-			sqlConnection= DriverManager.getConnection(URL, USER, PASSWORD);
-			java.sql.Statement s = sqlConnection.createStatement();
-
-			try {
-				String text = new Scanner( new File(sqlfile) ).useDelimiter("\\A").next();
-				s.execute(text);
-				//Server.startWebServer(sqlConnection);
-
-			} catch(SQLException sqle) {
-				System.out.println("Exception in creating db from script");
-			}
-
-			s.close();
-
-		} catch (Exception exc) {
-			try {
-				tearDown();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		}	
-
+		sqlConnection = DriverManager.getConnection(URL, USER, PASSWORD);
+		try (java.sql.Statement s = sqlConnection.createStatement()) {
+			String text = new Scanner( new File(sqlfile) ).useDelimiter("\\A").next();
+			s.execute(text);
+		}
 	}
 
 
@@ -81,13 +63,10 @@ public class QuestImplicitDBConstraintsTest {
 		if (reasoner != null)
 			reasoner.dispose();
 		if (!sqlConnection.isClosed()) {
-			java.sql.Statement s = sqlConnection.createStatement();
-			try {
+			try (java.sql.Statement s = sqlConnection.createStatement()) {
 				s.execute("DROP ALL OBJECTS DELETE FILES");
-			} catch (SQLException sqle) {
-				System.out.println("Table not found, not dropping");
-			} finally {
-				s.close();
+			}
+			finally {
 				sqlConnection.close();
 			}
 		}
@@ -118,8 +97,6 @@ public class QuestImplicitDBConstraintsTest {
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
-		
-		
 	}
 
 	@Test
@@ -146,12 +123,9 @@ public class QuestImplicitDBConstraintsTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
 		OntopOWLStatement st = conn.createStatement();
 
-
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
-		
-		
 	}
 	
 	@Test
@@ -180,8 +154,6 @@ public class QuestImplicitDBConstraintsTest {
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE1\"(.*),(.*)\"TABLE1\"(.*)");
 		assertFalse(m);
-		
-		
 	}
 	
 	@Test
@@ -205,12 +177,9 @@ public class QuestImplicitDBConstraintsTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :hasVal3 ?v1; :hasVal4 ?v4.}";
 		OntopOWLStatement st = conn.createStatement();
 
-
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
-		
-		
 	}
 	
 	
@@ -235,18 +204,14 @@ public class QuestImplicitDBConstraintsTest {
         
 		//this.reasoner = factory.createReasoner(new SimpleConfiguration());
 
-
 		// Now we are ready for querying
 		this.conn = reasoner.getConnection();
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
 		OntopOWLStatement st = conn.createStatement();
 
-
 		String queryString = st.getExecutableQuery(query).toString();
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertTrue(m);
-		
-		
 	}
 	
 
@@ -275,12 +240,10 @@ public class QuestImplicitDBConstraintsTest {
 		String query = "PREFIX : <http://www.semanticweb.org/ontologies/2013/7/untitled-ontology-150#> SELECT * WHERE {?x :relatedTo ?y; :hasVal1 ?v1. ?y :hasVal2 ?v2.}";
 		OntopOWLStatement st = conn.createStatement();
 
-
 		String queryString = st.getExecutableQuery(query).toString();
+		System.out.println(queryString);
 		boolean m = queryString.matches("(?ms)(.*)\"TABLE2\"(.*),(.*)\"TABLE2\"(.*)");
 		assertFalse(m);
-		
-		
 	}
 
 

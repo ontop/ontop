@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.dbschema;
 
+import it.unibz.inf.ontop.model.type.DBTypeFactory;
+
 /**
  * Metadata about the configuration of the data source.
  *
@@ -13,4 +15,13 @@ public interface DBParameters {
 
     QuotedIDFactory getQuotedIDFactory();
 
+    DBTypeFactory getDBTypeFactory();
+
+    String getDriverName();
+
+    String getDriverVersion();
+
+    String getDbmsProductName();
+
+    String getDbmsVersion();
 }

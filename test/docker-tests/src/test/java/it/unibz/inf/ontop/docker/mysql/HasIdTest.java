@@ -21,9 +21,9 @@ import static org.junit.Assert.*;
  */
 public class HasIdTest extends AbstractVirtualModeTest {
 
-    static final String owlFileName = "/mysql/pullOutEq/pullOutEq.ttl";
-    static final String obdaFileName = "/mysql/pullOutEq/pullOutEq.obda";
-    static final String propertyFileName = "/mysql/pullOutEq/pullOutEq.properties";
+    private static final String owlFileName = "/mysql/pullOutEq/pullOutEq.ttl";
+    private static final String obdaFileName = "/mysql/pullOutEq/pullOutEq.obda";
+    private static final String propertyFileName = "/mysql/pullOutEq/pullOutEq.properties";
 
     private static OntopOWLReasoner REASONER;
     private static OntopOWLConnection CONNECTION;

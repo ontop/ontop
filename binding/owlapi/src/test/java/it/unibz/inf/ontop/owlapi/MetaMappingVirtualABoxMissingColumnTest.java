@@ -37,14 +37,10 @@ import org.semanticweb.owlapi.reasoner.IllegalConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -63,64 +59,23 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 
 	private Connection conn;
 
-	Logger log = LoggerFactory.getLogger(this.getClass());
+	private static final String owlfile = "src/test/resources/test/metamapping.owl";
+	private static final String obdafile = "src/test/resources/test/metamapping_broken.obda";
 
-	final String owlfile = "src/test/resources/test/metamapping.owl";
-	final String obdafile = "src/test/resources/test/metamapping_broken.obda";
-
-	String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
-	String username = "sa";
-	String password = "";
+	private static final String url = "jdbc:h2:mem:questjunitdb2_broken;DATABASE_TO_UPPER=FALSE";
+	private static final String username = "sa";
+	private static final String password = "";
 
 	@Before
     public void setUp() throws Exception {
-
-		
-		/*
-		 * Initializing and H2 database with the stock exchange data
-		 */
-		// String driver = "org.h2.Driver";
-		// Roman: changed the database name to avoid conflict with other tests (in .obda as well)
-
-
 		conn = DriverManager.getConnection(url, username, password);
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/metamapping-create-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		st.executeUpdate(bf.toString());
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/metamapping-create-h2.sql");
 	}
 
 	@After
     public void tearDown() throws Exception {
-			dropTables();
-			conn.close();
-	}
-
-	private void dropTables() throws SQLException, IOException {
-
-		Statement st = conn.createStatement();
-
-		FileReader reader = new FileReader("src/test/resources/test/metamapping-drop-h2.sql");
-		BufferedReader in = new BufferedReader(reader);
-		StringBuilder bf = new StringBuilder();
-		String line = in.readLine();
-		while (line != null) {
-			bf.append(line);
-			line = in.readLine();
-		}
-		in.close();
-		st.executeUpdate(bf.toString());
-		st.close();
-		conn.commit();
+		executeFromFile(conn, "src/test/resources/test/metamapping-drop-h2.sql");
+		conn.close();
 	}
 
 	private void runTests() throws Exception {
@@ -162,7 +117,7 @@ public class MetaMappingVirtualABoxMissingColumnTest {
 	public void testViEqSig() throws Exception {
 
         expectedEx.expect(IllegalConfigurationException.class);
-        expectedEx.expectMessage(" The placeholder(s) \"code1\" in the target do(es) not occur in the body of the mapping");
+        expectedEx.expectMessage(" The placeholder(s) code1 in the target do(es) not occur in the body of the mapping");
 
 		runTests();
 	}

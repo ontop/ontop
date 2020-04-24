@@ -12,6 +12,8 @@ import it.unibz.inf.ontop.model.type.*;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.db.impl.NullIfDBFunctionSymbolImpl.NULLIF_STR;
+
 /**
  * Mockup: for DB-independent tests only
  */
@@ -48,6 +50,8 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         DBTermType abstractRootDBType = dbTypeFactory.getAbstractRootDBType();
 
         ImmutableTable.Builder<String, Integer, DBFunctionSymbol> builder = ImmutableTable.builder();
+        DBFunctionSymbol nullIfFunctionSymbol = new NullIfDBFunctionSymbolImpl(abstractRootDBType);
+        builder.put(NULLIF_STR, 2, nullIfFunctionSymbol);
         return builder.build();
     }
 
@@ -147,7 +151,10 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBFunctionSymbol createCoalesceFunctionSymbol(int arity) {
-        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+        return new DefaultDBCoalesceFunctionSymbol("COALESCE", arity, abstractRootDBType,
+                (terms, termConverter, termFactory) -> {
+            throw new UnsupportedOperationException("Not serialization for a mockup coalesce");
+        });
     }
 
     @Override

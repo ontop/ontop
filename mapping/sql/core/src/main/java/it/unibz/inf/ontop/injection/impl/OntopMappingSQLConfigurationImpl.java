@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Module;
-import it.unibz.inf.ontop.exception.DuplicateMappingException;
 import it.unibz.inf.ontop.exception.InvalidMappingException;
 import it.unibz.inf.ontop.exception.MappingIOException;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
@@ -94,7 +93,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
 
 
     @Override
-    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+    public Optional<SQLPPMapping> loadPPMapping() throws MappingIOException, InvalidMappingException {
         return loadPPMapping(Optional::empty, Optional::empty, Optional::empty);
     }
 
@@ -104,7 +103,7 @@ public class OntopMappingSQLConfigurationImpl extends OntopMappingConfigurationI
     Optional<SQLPPMapping> loadPPMapping(Supplier<Optional<File>> mappingFileSupplier,
                                          Supplier<Optional<Reader>> mappingReaderSupplier,
                                          Supplier<Optional<Graph>> mappingGraphSupplier)
-            throws MappingIOException, InvalidMappingException, DuplicateMappingException {
+            throws MappingIOException, InvalidMappingException {
 
         if (options.ppMapping.isPresent()) {
             return options.ppMapping;

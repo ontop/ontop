@@ -40,13 +40,10 @@ public class UriTemplateTest {
 
     private final static AtomPredicate ANS1_PREDICATE_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
 
-    public UriTemplateTest() {
-    }
-
     @Ignore
     @Test
     public void testCompatibleUriTemplates1() throws EmptyQueryException {
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());

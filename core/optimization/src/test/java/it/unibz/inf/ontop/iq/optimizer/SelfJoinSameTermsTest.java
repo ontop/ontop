@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
-import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -13,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -26,12 +23,7 @@ public class SelfJoinSameTermsTest {
     public static RelationPredicate T1_AR3;
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-
-        T1_AR3 = createStringRelationPredicate(dbMetadata, dbTypeFactory, idFactory, 1, 3, true);
+        T1_AR3 = createStringRelationPredicate(1, 3, true);
     }
 
     @Test

@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.BasicDBMetadata;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -30,7 +29,7 @@ import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.LEFT;
 import static it.unibz.inf.ontop.iq.node.BinaryOrderedOperatorNode.ArgumentPosition.RIGHT;
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.LT;
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 /**
@@ -41,8 +40,8 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class RedundantSelfJoinTest {
 
+    private final static DatabaseRelationDefinition TABLE_1;
     private final static RelationPredicate TABLE1_PREDICATE;
-    private static final DatabaseRelationDefinition TABLE_1;
     private final static RelationPredicate TABLE2_PREDICATE;
     private final static RelationPredicate TABLE3_PREDICATE;
     private final static RelationPredicate TABLE4_PREDICATE;
@@ -76,83 +75,74 @@ public class RedundantSelfJoinTest {
 
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
 
-    private static final DBMetadata METADATA;
-
     static{
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        TABLE_1 = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table1"));
-        Attribute col1T1 = TABLE_1.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        TABLE_1.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        TABLE_1.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        TABLE_1.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T1));
+        TABLE_1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(TABLE_1.getAttribute(1));
         TABLE1_PREDICATE = TABLE_1.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T2 = table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table2Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T2));
+        DatabaseRelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
         /*
          * Table 3: composite unique constraint over the first TWO columns
          */
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table3"));
-        Attribute col1T3 = table3Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T3 = table3Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table3Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T3, col2T3));
+        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1), table3Def.getAttribute(2));
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: unique constraint over the first column
          */
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table4"));
-        Attribute col1T4 = table4Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table4Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table4Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T4));
+        DatabaseRelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table4",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
         TABLE4_PREDICATE = table4Def.getAtomPredicate();
 
         /*
          * Table 5: unique constraint over the second column
          */
-        DatabaseRelationDefinition table5Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table5"));
-        table5Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        Attribute col2T5 = table5Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        table5Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col2T5));
+        DatabaseRelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table5",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table5Def.getAttribute(2));
         TABLE5_PREDICATE = table5Def.getAtomPredicate();
 
         /*
          * Table 6: two atomic unique constraints over the first and third columns
          */
-        DatabaseRelationDefinition table6Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null,"table6"));
-        Attribute col1T6 = table6Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, false);
-        table6Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, false);
-        Attribute col3T6 = table6Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, false);
-        table6Def.addUniqueConstraint(UniqueConstraint.primaryKeyOf(col1T6));
-        table6Def.addUniqueConstraint(new UniqueConstraint.Builder(table6Def)
-                .add(col3T6)
-                .build("table6-uc3", false));
+        DatabaseRelationDefinition table6Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table6",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
+        UniqueConstraint.primaryKeyOf(table6Def.getAttribute(1));
+        UniqueConstraint.builder(table6Def, "table6-uc3")
+                .addDeterminant(3)
+                .build();
         TABLE6_PREDICATE = table6Def.getAtomPredicate();
-
-        dbMetadata.freeze();
-        METADATA = dbMetadata;
     }
 
     @Test
-    public void testJoiningConditionTest() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testJoiningConditionTest()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -166,7 +156,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, M));
         expectedQueryBuilder.init(projectionAtom, constructionNode1);
@@ -180,9 +170,9 @@ public class RedundantSelfJoinTest {
      *  TODO: explain
      */
     @Test
-    public void testSelfJoinElimination1() throws EmptyQueryException {
+    public void testSelfJoinElimination1()  {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -200,7 +190,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -219,9 +209,9 @@ public class RedundantSelfJoinTest {
      */
     @Test
     public void testSelfJoinElimination2() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException, EmptyQueryException {
+            InvalidQueryOptimizationProposalException {
 
-        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1(METADATA);
+        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
         InnerJoinNode joinNode = initPair._2();
 
@@ -234,7 +224,7 @@ public class RedundantSelfJoinTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         queryBuilder1.init(projectionAtom, constructionNode);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Y, TWO));
         queryBuilder1.addChild(constructionNode, extensionalDataNode);
@@ -244,9 +234,9 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testNonEliminationTable1() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException, EmptyQueryException {
+            InvalidQueryOptimizationProposalException {
 
-        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1(METADATA);
+        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
         InnerJoinNode joinNode = initPair._2();
 
@@ -259,7 +249,7 @@ public class RedundantSelfJoinTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode);
         queryBuilder1.addChild(joinNode, dataNode1);
@@ -270,9 +260,9 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testSelfJoinElimination3() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException, EmptyQueryException {
+            InvalidQueryOptimizationProposalException {
 
-        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1(METADATA);
+        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
         InnerJoinNode joinNode = initPair._2();
 
@@ -285,7 +275,7 @@ public class RedundantSelfJoinTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         queryBuilder1.init(projectionAtom, constructionNode);
         ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, Y, TWO));
         queryBuilder1.addChild(constructionNode, extensionalDataNode);
@@ -295,9 +285,9 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testNonEliminationTable3() throws IntermediateQueryBuilderException,
-            InvalidQueryOptimizationProposalException, EmptyQueryException {
+            InvalidQueryOptimizationProposalException {
 
-        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1(METADATA);
+        P2<IntermediateQueryBuilder, InnerJoinNode> initPair = initAns1();
         IntermediateQueryBuilder queryBuilder = initPair._1();
         InnerJoinNode joinNode = initPair._2();
 
@@ -310,7 +300,7 @@ public class RedundantSelfJoinTest {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, Y);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode);
         queryBuilder1.addChild(joinNode, dataNode1);
@@ -320,9 +310,9 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testSelfJoinElimination4() throws EmptyQueryException {
+    public void testSelfJoinElimination4() {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -341,7 +331,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         queryBuilder1.init(projectionAtom1, constructionNode1);
@@ -358,9 +348,9 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testSelfJoinElimination5() throws EmptyQueryException {
+    public void testSelfJoinElimination5()  {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -379,7 +369,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
         queryBuilder1.init(projectionAtom1, joinNode1);
@@ -391,9 +381,9 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testPropagation1() throws EmptyQueryException {
+    public void testPropagation1() {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -409,7 +399,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
@@ -424,9 +414,9 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testPropagation2() throws EmptyQueryException {
+    public void testPropagation2()  {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -445,8 +435,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         queryBuilder1.init(projectionAtom1, leftJoinNode);
         ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, M, N, O));
@@ -462,9 +451,9 @@ public class RedundantSelfJoinTest {
      * Ignored for the moment because the looping mechanism is not implemented
      */
     @Test
-    public void testLoop1() throws EmptyQueryException {
+    public void testLoop1()  {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -482,7 +471,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
 
 
@@ -500,8 +489,8 @@ public class RedundantSelfJoinTest {
 
     @Ignore("TODO: enable it after refactoring the self-join elimination")
     @Test
-    public void testTopJoinUpdateOptimal() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testTopJoinUpdateOptimal() {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -519,7 +508,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
         queryBuilder1.init(projectionAtom1, constructionNode1);
@@ -536,8 +525,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testTopJoinUpdateSubOptimal() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testTopJoinUpdateSubOptimal()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -555,7 +544,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getDBDefaultInequality(LT, O, N));
@@ -570,8 +559,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testDoubleUniqueConstraints1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testDoubleUniqueConstraints1()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -586,7 +575,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
@@ -598,8 +587,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testDoubleUniqueConstraints2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testDoubleUniqueConstraints2()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -616,7 +605,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M, TWO));
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
@@ -628,8 +617,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testDoubleUniqueConstraints3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testDoubleUniqueConstraints3()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -646,7 +635,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
         expectedQueryBuilder.addChild(constructionNode, joinNode);
 
@@ -660,7 +649,7 @@ public class RedundantSelfJoinTest {
 
     @Test(expected = EmptyQueryException.class)
     public void testNonUnification1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -684,7 +673,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testNonUnification2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -711,7 +700,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(N, NULL, O, NULL));
         expectedQueryBuilder.init(projectionAtom, newRootNode);
@@ -735,9 +724,9 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testJoiningConditionRemoval() throws EmptyQueryException {
+    public void testJoiningConditionRemoval() {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -756,7 +745,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O, ONE));
@@ -785,7 +774,7 @@ public class RedundantSelfJoinTest {
     @Test(expected = EmptyQueryException.class)
     public void testInsatisfiedJoiningCondition() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -811,7 +800,7 @@ public class RedundantSelfJoinTest {
     @Test
     public void testNoModification1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -846,7 +835,7 @@ public class RedundantSelfJoinTest {
     @Test
     public void testNoModification2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE, M, N, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -877,7 +866,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testOptimizationOnRightPartOfLJ1EqualityInJoiningCondition() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -905,7 +894,6 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-
         IntermediateQueryBuilder expectedQueryBuilder = query.newBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
@@ -922,7 +910,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testOptimizationOnRightPartOfLJ1() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -966,7 +954,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testOptimizationOnRightPartOfLJ2() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -993,7 +981,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(O,
@@ -1022,7 +1010,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testOptimizationOnRightPartOfLJ3() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -1050,7 +1038,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode();
@@ -1065,8 +1053,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testOptimizationOnRightPartOfLJ4() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testOptimizationOnRightPartOfLJ4() {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -1094,7 +1082,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode();
@@ -1106,8 +1094,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testOptimizationOnRightPartOfLJ5() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testOptimizationOnRightPartOfLJ5() {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -1135,7 +1123,7 @@ public class RedundantSelfJoinTest {
         IntermediateQuery query = queryBuilder.build();
 
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, constructionNode);
 
         LeftJoinNode newLJNode = IQ_FACTORY.createLeftJoinNode();
@@ -1150,8 +1138,8 @@ public class RedundantSelfJoinTest {
     }
 
     @Test
-    public void testOptimizationOnRightPartOfLJ6() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+    public void testOptimizationOnRightPartOfLJ6()  {
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -1178,7 +1166,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(
                 projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(M,
@@ -1206,7 +1194,7 @@ public class RedundantSelfJoinTest {
 
     @Test
     public void testOptimizationOnRightPartOfLJ7() throws EmptyQueryException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, M, O);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         queryBuilder.init(projectionAtom, constructionNode);
@@ -1233,7 +1221,7 @@ public class RedundantSelfJoinTest {
 
         IntermediateQuery query = queryBuilder.build();
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         expectedQueryBuilder.init(projectionAtom, newConstructionNode);
 
@@ -1256,7 +1244,7 @@ public class RedundantSelfJoinTest {
     @Test
     public void testSubstitutionPropagationWithBlockingUnion1() throws EmptyQueryException {
         Constant constant = TERM_FACTORY.getDBStringConstant("constant");
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_1, X);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -1283,7 +1271,7 @@ public class RedundantSelfJoinTest {
          * namely the one expected based on the current state of the implementation of self join elimination
          * and substitution propagation.
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
                 ATOM_FACTORY.getDataAtom (TABLE1_PREDICATE, A, X, constant));
         expectedQueryBuilder.init(projectionAtom, unionNode);
@@ -1297,7 +1285,7 @@ public class RedundantSelfJoinTest {
     @Test
     public void testSubstitutionPropagationWithBlockingUnion2() throws EmptyQueryException {
         Constant constant = TERM_FACTORY.getDBStringConstant("constant");
-        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder(METADATA);
+        IntermediateQueryBuilder initialQueryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE_2, X, Y);
 
         ConstructionNode initialRootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -1323,7 +1311,7 @@ public class RedundantSelfJoinTest {
          * namely the one expected based on the current state of the implementation of self join elimination
          * and substitution propagation.
          */
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(EMPTY_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(
                 ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, Y)
@@ -1460,9 +1448,9 @@ public class RedundantSelfJoinTest {
         return IQ_CONVERTER.convert(optimizedIQ, EXECUTOR_REGISTRY);
     }
 
-    private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1(DBMetadata metadata)
+    private static P2<IntermediateQueryBuilder, InnerJoinNode> initAns1()
             throws IntermediateQueryBuilderException {
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(metadata);
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
 
         DistinctVariableOnlyDataAtom ans1Atom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
                 ATOM_FACTORY.getRDFAnswerPredicate(1), Y);

@@ -16,7 +16,6 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
@@ -26,50 +25,41 @@ public class NullableUniqueConstraintTest {
 
     private static final RelationPredicate TABLE1_PREDICATE;
     private static final RelationPredicate TABLE2_PREDICATE;
-    private static final RelationDefinition TABLE1;
-    private static final RelationDefinition TABLE2;
+    private static final DatabaseRelationDefinition TABLE1;
+    private static final DatabaseRelationDefinition TABLE2;
     private final static AtomPredicate ANS1_ARITY_2_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 2);
     private final static AtomPredicate ANS1_ARITY_3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 3);
-    private final static AtomPredicate ANS1_ARITY_4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate( 4);
 
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
-
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        Attribute table1Col1 = table1Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
-        table1Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
-        table1Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
-        table1Def.addUniqueConstraint(UniqueConstraint.builder(table1Def)
-                .add(table1Col1)
-                .build("uc1", false));
-        TABLE1 = table1Def;
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
+        TABLE1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
+                "col1", integerDBType, true,
+                "col2", integerDBType, true,
+                "col3", integerDBType, true);
+        UniqueConstraint.builder(TABLE1, "uc1")
+                .addDeterminant(1)
+                .build();
+        TABLE1_PREDICATE = TABLE1.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        Attribute table2Col1 = table2Def.addAttribute(idFactory.createAttributeID("col1"), integerDBType.getName(), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), integerDBType.getName(), integerDBType, true);
-        table2Def.addAttribute(idFactory.createAttributeID("col3"), integerDBType.getName(), integerDBType, true);
-        table2Def.addUniqueConstraint(UniqueConstraint.builder(table2Def)
-                .add(table2Col1)
-                .build("uc2", false));
-        TABLE2 = table2Def;
-        TABLE2_PREDICATE = table2Def.getAtomPredicate();
-
-        dbMetadata.freeze();
+        TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+            "col1", integerDBType, true,
+            "col2", integerDBType, true,
+            "col3", integerDBType, true);
+        UniqueConstraint.builder(TABLE2, "uc2")
+                .addDeterminant(1)
+                .build();
+        TABLE2_PREDICATE = TABLE2.getAtomPredicate();
     }
 
     @Test
-    public void testJoinOnLeft1() throws EmptyQueryException {
+    public void testJoinOnLeft1()  {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
         ExtensionalDataNode leftNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D, E));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, TWO, G));
@@ -108,7 +98,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testJoinOnLeft2() throws EmptyQueryException {
+    public void testJoinOnLeft2() {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
         ExtensionalDataNode leftNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, A, D, E));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, TWO, G));
@@ -161,7 +151,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testNotSimplified1() throws EmptyQueryException {
+    public void testNotSimplified1() {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1_PREDICATE.getRelationDefinition(), ImmutableMap.of(0, A));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, TWO, G));
 
@@ -178,7 +168,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testFilterAbove1() throws EmptyQueryException {
+    public void testFilterAbove1() {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, B, C));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, TWO, G));
 
@@ -216,7 +206,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testFilterAboveSparse1() throws EmptyQueryException {
+    public void testFilterAboveSparse1() {
         ExtensionalDataNode leftNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_PREDICATE.getRelationDefinition(),
                 ImmutableMap.of(0, A));
@@ -260,7 +250,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testSimpleJoin1() throws EmptyQueryException {
+    public void testSimpleJoin1()  {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B, 2, C));;
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, D, 2, E));
 
@@ -289,7 +279,7 @@ public class NullableUniqueConstraintTest {
     }
 
     @Test
-    public void testSimpleJoin2() throws EmptyQueryException {
+    public void testSimpleJoin2() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B));
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE1, ImmutableMap.of(0, A, 1, B, 2, E));
 

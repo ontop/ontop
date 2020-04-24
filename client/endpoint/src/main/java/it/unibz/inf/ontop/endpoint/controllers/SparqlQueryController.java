@@ -11,6 +11,7 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLBooleanJSONWriter;
 import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLBooleanXMLWriter;
@@ -21,22 +22,20 @@ import org.eclipse.rdf4j.query.resultio.text.tsv.SPARQLResultsTSVWriter;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.rdfjson.RDFJSONWriter;
 import org.eclipse.rdf4j.rio.rdfxml.RDFXMLWriter;
 import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -113,18 +112,18 @@ public class SparqlQueryController {
 
                 if ("*/*".equals(accept) || accept.contains("json")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json;charset=UTF-8");
-                    selectQuery.evaluate(new SPARQLResultsJSONWriter(bao));
+                    evaluateSelectQuery(selectQuery, new SPARQLResultsJSONWriter(bao), response);
                 } else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml;charset=UTF-8");
-                    selectQuery.evaluate(new SPARQLResultsXMLWriter(bao));
+                    evaluateSelectQuery(selectQuery, new SPARQLResultsXMLWriter(bao), response);
                 } else if (accept.contains("csv")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+csv;charset=UTF-8");
-                    selectQuery.evaluate(new SPARQLResultsCSVWriter(bao));
-                } else if (accept.contains("tsv")) {
+                    evaluateSelectQuery(selectQuery, new SPARQLResultsCSVWriter(bao), response);
+                } else if (accept.contains("tsv") || accept.contains("text/tab-separated-values")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/sparql-results+tsv;charset=UTF-8");
-                    selectQuery.evaluate(new SPARQLResultsTSVWriter(bao));
+                    evaluateSelectQuery(selectQuery, new SPARQLResultsTSVWriter(bao), response);
                 } else {
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
                 }
 
             } else if (q instanceof BooleanQuery) {
@@ -133,18 +132,21 @@ public class SparqlQueryController {
 
                 if ("*/*".equals(accept) || accept.contains("json")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanJSONWriter(bao);
                     writer.handleBoolean(b);
                 } else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new SPARQLBooleanXMLWriter(bao);
                     writer.handleBoolean(b);
                 } else if (accept.contains("text")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/boolean");
+                    addCacheHeaders(response);
                     BooleanQueryResultWriter writer = new BooleanTextWriter(bao);
                     writer.handleBoolean(b);
                 } else {
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
                 }
             } else if (q instanceof GraphQuery) {
                 GraphQuery graphQuery = (GraphQuery) q;
@@ -152,15 +154,15 @@ public class SparqlQueryController {
 
                 if ("*/*".equals(accept) || accept.contains("turtle")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "text/turtle;charset=UTF-8");
-                    graphQuery.evaluate(new TurtleWriter(bao));
+                    evaluateGraphQuery(graphQuery, new TurtleWriter(bao), response);
                 } else if (accept.contains("json")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
-                    graphQuery.evaluate(new RDFJSONWriter(bao, RDFFormat.JSONLD));
+                    evaluateGraphQuery(graphQuery, new RDFJSONWriter(bao, RDFFormat.JSONLD), response);
                 } else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/rdf+xml;charset=UTF-8");
-                    graphQuery.evaluate(new RDFXMLWriter(bao));
+                    evaluateGraphQuery(graphQuery, new RDFXMLWriter(bao), response);
                 } else {
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
                 }
             } else if (q instanceof Update) {
                 response.setStatus(HttpStatus.NOT_IMPLEMENTED.value());
@@ -172,6 +174,25 @@ public class SparqlQueryController {
         catch (IOException ex) {
             throw new Error(ex);
         }
+    }
+
+    private void evaluateSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, HttpServletResponse response) {
+        addCacheHeaders(response);
+        selectQuery.evaluate(writer);
+
+    }
+    private void evaluateGraphQuery(GraphQuery graphQuery, RDFWriter turtleWriter, HttpServletResponse response) {
+        addCacheHeaders(response);
+        graphQuery.evaluate(turtleWriter);
+    }
+
+    /**
+     * TODO: try to find a way to detect if the query is cacheable or not
+     * (e.g. not including non-deterministic functions like NOW())
+     */
+    private void addCacheHeaders(HttpServletResponse response) {
+        repository.getHttpCacheHeaders().getMap()
+                .forEach(response::setHeader);
     }
 
     @ExceptionHandler({MalformedQueryException.class})

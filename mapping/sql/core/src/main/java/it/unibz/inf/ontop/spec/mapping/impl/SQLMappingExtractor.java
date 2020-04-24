@@ -2,25 +2,24 @@ package it.unibz.inf.ontop.spec.mapping.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
+import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.spec.dbschema.RDBMetadataExtractor;
-import it.unibz.inf.ontop.spec.impl.MappingAndDBMetadataImpl;
+import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
+import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMapping;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
-import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.SQLPPMappingImpl;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCanonicalTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
@@ -28,164 +27,172 @@ import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValid
 import it.unibz.inf.ontop.spec.ontology.Ontology;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
 
+
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SQLMappingExtractor extends AbstractMappingExtractor<SQLPPMapping, RDBMetadata, SQLMappingParser, OntopMappingSQLSettings> implements MappingExtractor {
+public class SQLMappingExtractor implements MappingExtractor {
 
     private final SQLPPMappingConverter ppMappingConverter;
-    private final RDBMetadataExtractor dbMetadataExtractor;
     private final OntopMappingSQLSettings settings;
     private final MappingDatatypeFiller mappingDatatypeFiller;
     private final MappingCanonicalTransformer canonicalTransformer;
-    private static final Logger log = LoggerFactory.getLogger(SQLMappingExtractor.class);
-    private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
-    private final TypeFactory typeFactory;
-    private final RDF rdfFactory;
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
+    private final JDBCMetadataProviderFactory metadataProviderFactory;
+    private final MetaMappingExpander expander;
+
+    private final MappingOntologyComplianceValidator ontologyComplianceValidator;
+    private final SQLMappingParser mappingParser;
+
+    /**
+     * This represents user-supplied constraints, i.e. primary
+     * and foreign keys not present in the database metadata
+     *
+     * Can be useful for eliminating self-joins
+     */
+    private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
                                 SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
-                                RDBMetadataExtractor dbMetadataExtractor, OntopMappingSQLSettings settings,
+                                OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
-                                SubstitutionFactory substitutionFactory, TypeFactory typeFactory, RDF rdfFactory,
-                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer) {
+                                SubstitutionFactory substitutionFactory, RDF rdfFactory,
+                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
+                                SQLPPSourceQueryFactory sourceQueryFactory,
+                                ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
+                                JDBCMetadataProviderFactory metadataProviderFactory) {
 
-        super(ontologyComplianceValidator, mappingParser);
+        this.ontologyComplianceValidator = ontologyComplianceValidator;
+        this.mappingParser = mappingParser;
         this.ppMappingConverter = ppMappingConverter;
-        this.dbMetadataExtractor = dbMetadataExtractor;
         this.mappingDatatypeFiller = mappingDatatypeFiller;
         this.settings = settings;
         this.canonicalTransformer = canonicalTransformer;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.typeFactory = typeFactory;
-        this.rdfFactory = rdfFactory;
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
+        this.metadataProviderFactory = metadataProviderFactory;
+        this.expander = new MetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
+        this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
     }
+
+    @Override
+    public MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology)
+            throws MappingException, MetadataExtractionException {
+
+        return convertPPMapping(extractPPMapping(specInput), specInput, ontology);
+    }
+
+    @Override
+    public MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
+                                          @Nonnull OBDASpecInput specInput,
+                                          @Nonnull Optional<Ontology> ontology)
+            throws MappingException, MetadataExtractionException {
+
+        return convertPPMapping((SQLPPMapping) ppMapping, specInput, ontology);
+    }
+
+
+    protected SQLPPMapping extractPPMapping(OBDASpecInput specInput)
+            throws MappingIOException, InvalidMappingException {
+
+        Optional<File> optionalMappingFile = specInput.getMappingFile();
+        if (optionalMappingFile.isPresent())
+            return mappingParser.parse(optionalMappingFile.get());
+
+        Optional<Reader> optionalMappingReader = specInput.getMappingReader();
+        if (optionalMappingReader.isPresent())
+            return mappingParser.parse(optionalMappingReader.get());
+
+        Optional<Graph> optionalMappingGraph = specInput.getMappingGraph();
+        if (optionalMappingGraph.isPresent())
+            return mappingParser.parse(optionalMappingGraph.get());
+
+        throw new IllegalArgumentException("Bad internal configuration: no mapping input provided in the OBDASpecInput!\n" +
+                " Should have been detected earlier (in case of an user mistake)");
+    }
+
 
     /**
      * Converts the PPMapping into a Mapping.
      * <p>
      * During the conversion, data types are inferred and mapping assertions are validated
-     * TODO: move this method to AbstractMappingExtractor
      */
-    protected MappingAndDBMetadata convertPPMapping(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                                  OBDASpecInput specInput,
-                                                  Optional<Ontology> optionalOntology,
-                                                  ExecutorRegistry executorRegistry)
-            throws MetaMappingExpansionException, DBMetadataExtractionException, MappingOntologyMismatchException,
+    protected MappingAndDBParameters convertPPMapping(SQLPPMapping ppMapping,
+                                                      OBDASpecInput specInput,
+                                                      Optional<Ontology> optionalOntology)
+            throws MetaMappingExpansionException, MetadataExtractionException, MappingOntologyMismatchException,
             InvalidMappingSourceQueriesException, UnknownDatatypeException {
 
+        MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
-        RDBMetadata dbMetadata = extractDBMetadata(ppMapping, optionalDBMetadata, specInput);
-
-        log.debug("DB Metadata: \n{}", dbMetadata);
-
-        log.debug(dbMetadata.printKeys());
-
-        SQLPPMapping expandedPPMapping = expandPPMapping(ppMapping, settings, dbMetadata);
-
-        // NB: may also add views in the DBMetadata (for non-understood SQL queries)
-        ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, dbMetadata, executorRegistry);
-        dbMetadata.freeze();
-
-        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(provMapping);
+        ImmutableList<MappingAssertion> eqMapping = mappingEqualityTransformer.transform(mm.getMapping());
         ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(eqMapping);
         ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
 
-        validateMapping(optionalOntology, canonizedMapping);
+        // Validation: Mismatch between the ontology and the mapping
+        if (optionalOntology.isPresent()) {
+            ontologyComplianceValidator.validate(canonizedMapping, optionalOntology.get());
+        }
 
-        return new MappingAndDBMetadataImpl(canonizedMapping, dbMetadata.getDBParameters());
-        // dbMetadata GOES NO FURTHER - no need to freeze it
+        return new MappingAndDBParametersImpl(canonizedMapping, mm.getDBParameters());
     }
 
-    protected SQLPPMapping expandPPMapping(SQLPPMapping ppMapping, OntopMappingSQLSettings settings, RDBMetadata dbMetadata)
-            throws MetaMappingExpansionException {
 
-        MetaMappingExpander expander = new MetaMappingExpander(ppMapping.getTripleMaps(), termFactory,
-                substitutionFactory, typeFactory, rdfFactory);
-        final ImmutableList<SQLPPTriplesMap> expandedMappingAxioms;
-        if (expander.hasMappingsToBeExpanded()) {
-            try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
-                expandedMappingAxioms = expander.getExpandedMappings(connection, dbMetadata);
-            }
-            // Problem while creating the connection
-            catch (SQLException e) {
-                throw new MetaMappingExpansionException(e.getMessage());
-            }
+    private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
+                                           Optional<File> constraintFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {
+
+        try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
+
+            MetadataProvider metadataLoader = metadataProviderFactory.getMetadataProvider(connection);
+            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
+                    constraintFile, metadataLoader);
+
+            CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
+            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
+            ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(expandedPPMapping, metadataLookup);
+
+            metadataLookup.extractImmutableMetadata();
+
+            return new MappingAndDBParametersImpl(provMapping, implicitConstraints.getDBParameters());
         }
-        else
-            expandedMappingAxioms = expander.getNonExpandableMappings();
-
-        try {
-            return new SQLPPMappingImpl(expandedMappingAxioms, ppMapping.getPrefixManager());
-        }
-        catch (DuplicateMappingException e) {
-            // Internal bug
-            throw new IllegalStateException(e);
-        }
-    }
-
-    /**
-     * Makes use of the DB connection
-     */
-    private RDBMetadata extractDBMetadata(SQLPPMapping ppMapping, Optional<RDBMetadata> optionalDBMetadata,
-                                          OBDASpecInput specInput)
-            throws DBMetadataExtractionException {
-
-        boolean isDBMetadataProvided = optionalDBMetadata.isPresent();
-
-        /*
-         * Metadata extraction can be disabled when DBMetadata is already provided
-         */
-        if (isDBMetadataProvided && (!settings.isProvidedDBMetadataCompletionEnabled()))
-            return optionalDBMetadata.get();
-
-        try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            return isDBMetadataProvided
-                    ? dbMetadataExtractor.extract(ppMapping, localConnection, optionalDBMetadata.get(),
-                    specInput.getConstraintFile())
-                    : dbMetadataExtractor.extract(ppMapping, localConnection, specInput.getConstraintFile());
-        }
-        /*
-         * Problem while creating the connection
-         */
         catch (SQLException e) {
-            throw new DBMetadataExtractionException(e.getMessage());
+            throw new MetadataExtractionException(e.getMessage());
         }
     }
 
-    protected SQLPPMapping castPPMapping(PreProcessedMapping ppMapping) {
-        if (ppMapping instanceof SQLPPMapping) {
-            return (SQLPPMapping) ppMapping;
+
+
+    private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
+        private final ImmutableList<MappingAssertion> mapping;
+        private final DBParameters dbParameters;
+
+        public MappingAndDBParametersImpl(ImmutableList<MappingAssertion> mapping, DBParameters dbParameters) {
+            this.mapping = mapping;
+            this.dbParameters = dbParameters;
         }
-        throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
-                SQLPPMapping.class.getSimpleName());
+
+        @Override
+        public ImmutableList<MappingAssertion> getMapping() {
+            return mapping;
+        }
+
+        @Override
+        public DBParameters getDBParameters() {
+            return dbParameters;
+        }
     }
 
-    protected Optional<RDBMetadata> castDBMetadata(@Nonnull Optional<DBMetadata> optionalDBMetadata) {
-        if (optionalDBMetadata.isPresent()) {
-            DBMetadata md = optionalDBMetadata.get();
-            if (md instanceof RDBMetadata) {
-                return Optional.of((RDBMetadata) md);
-            }
-            throw new IllegalArgumentException(SQLMappingExtractor.class.getSimpleName() + " only supports instances of " +
-                    RDBMetadata.class.getSimpleName());
-        }
-        return Optional.empty();
-    }
 }

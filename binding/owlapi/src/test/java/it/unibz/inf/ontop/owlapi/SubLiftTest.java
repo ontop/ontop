@@ -14,16 +14,12 @@ import org.junit.Test;
 import org.semanticweb.owlapi.io.ToStringRenderer;
 import org.semanticweb.owlapi.model.OWLObject;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Iterator;
-import java.util.stream.Collectors;
 
+import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
@@ -46,28 +42,14 @@ public class SubLiftTest {
 
     @Before
     public void setUp() throws Exception {
-
         conn = DriverManager.getConnection(URL, USER, PASSWORD);
-        Statement st = conn.createStatement();
-
-        String script = Files.lines(Paths.get(CREATE_SCRIPT)).collect(Collectors.joining());
-        st.executeUpdate(script);
-        conn.commit();
+        executeFromFile(conn, CREATE_SCRIPT);
     }
 
     @After
     public void tearDown() throws Exception {
-        dropTables();
+        executeFromFile(conn, DROP_SCRIPT);
         conn.close();
-    }
-
-    private void dropTables() throws SQLException, IOException {
-
-        Statement st = conn.createStatement();
-        String script = Files.lines(Paths.get(DROP_SCRIPT)).collect(Collectors.joining());
-        st.executeUpdate(script);
-        st.close();
-        conn.commit();
     }
 
     @Test
@@ -137,7 +119,7 @@ public class SubLiftTest {
                 );
                 i++;
             }
-            assertTrue(i == expectedCardinality);
+            assertEquals(expectedCardinality, i);
         } catch (Exception e) {
             throw e;
         } finally {

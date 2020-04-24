@@ -42,7 +42,6 @@ public abstract class AbstractVirtualModeTest {
 
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-                .enableFullMetadataExtraction(false)
                 .nativeOntopMappingFile(obdaFile)
                 .ontologyFile(owlFile)
                 .propertyFile(propertiesFile)

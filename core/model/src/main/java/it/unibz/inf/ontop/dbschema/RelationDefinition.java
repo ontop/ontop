@@ -20,14 +20,9 @@ package it.unibz.inf.ontop.dbschema;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
-
-import javax.annotation.Nullable;
-import java.util.List;
+import it.unibz.inf.ontop.model.type.DBTermType;
 
 
 /**
@@ -35,50 +30,52 @@ import java.util.List;
  *   (a) relational tables and views<br>
  *   (b) and views created by the SQL parser for complex sub-queries
  *
- *
  * @author Roman Kontchakov
- *
  */
 
-public abstract class RelationDefinition {
+public interface RelationDefinition {
 
-	private final RelationID id;
-
-	/**
-	 * Lazy
-	 */
-	@Nullable
-	private RelationPredicate predicate;
-
-	protected RelationDefinition(RelationID id) {
-		this.id = id;
-	}
-
-	@JsonProperty("name")
-	@JsonSerialize(using = RelationID.RelationIDSerializer.class)
-	public RelationID getID() {
-		return id;
-	}
-
-	public abstract Attribute getAttribute(int index);
-
-	public abstract List<Attribute> getAttributes();
 
 	/**
-	 * Call it only after having completely assigned the attributes!
+	 * gets the attribute with the specified position
+	 *
+	 * @param index is position <em>starting at 1</em>
+	 * @return attribute at the position
 	 */
-	@JsonIgnore
-	public RelationPredicate getAtomPredicate() {
-		if (predicate == null)
-			predicate = new RelationPredicateImpl(this);
-		return predicate;
+
+	Attribute getAttribute(int index);
+
+	/**
+	 * gets the attribute with the specified ID
+	 *
+	 * @param id
+	 * @return
+	 */
+
+	Attribute getAttribute(QuotedID id) throws AttributeNotFoundException;
+
+	/**
+	 * the list of attributes
+	 *
+	 * @return list of attributes
+	 */
+	ImmutableList<Attribute> getAttributes();
+
+	RelationPredicate getAtomPredicate();
+
+	ImmutableList<UniqueConstraint> getUniqueConstraints();
+
+	ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
+
+	ImmutableList<ForeignKeyConstraint> getForeignKeys();
+
+
+	interface AttributeListBuilder {
+
+		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable);
+
+		AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable);
+
+		ImmutableList<Attribute> build(RelationDefinition relation);
 	}
-
-	public abstract ImmutableList<UniqueConstraint> getUniqueConstraints();
-
-	public abstract ImmutableList<FunctionalDependency> getOtherFunctionalDependencies();
-
-	public abstract UniqueConstraint getPrimaryKey();
-
-	public abstract ImmutableList<ForeignKeyConstraint> getForeignKeys();
 }

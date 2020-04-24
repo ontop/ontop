@@ -20,9 +20,9 @@ package it.unibz.inf.ontop.protege.gui.treemodels;
  * #L%
  */
 
+import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQuery;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.OBDASQLQuery;
 
 /**
  * This filter receives a string in the constructor and returns true if accepts
@@ -54,7 +54,7 @@ public class MappingStringTreeModelFilter extends TreeModelFilter<SQLPPTriplesMa
 			}
 
 			// Check in the Mapping Source Query
-			final OBDASQLQuery query = object.getSourceQuery();
+			final SQLPPSourceQuery query = object.getSourceQuery();
 			isMatch = MappingSQLStringTreeModelFilter.match(keyword.trim(), query.toString());
 			if (isMatch) {
 				break; // end loop if a match is found!

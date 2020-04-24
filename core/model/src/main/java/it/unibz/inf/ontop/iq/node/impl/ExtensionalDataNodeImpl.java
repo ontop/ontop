@@ -150,7 +150,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                 .filter(e -> e.getValue().equals(variable))
                 .map(e -> e.getKey() + 1)
                 .map(relationDefinition::getAttribute)
-                .allMatch(Attribute::canNull);
+                .allMatch(Attribute::isNullable);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
             // NB: DB column indexes start at 1.
             ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
                     .filter(e -> e.getValue() instanceof Variable)
-                    .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).canNull())
+                    .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
                     .map(Map.Entry::getValue)
                     .map(a -> (Variable) a)
                     // An implicit filter condition makes them non-nullable
@@ -290,7 +290,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     public String toString() {
         return String.format("%s %s(%s)",
                 EXTENSIONAL_NODE_STR,
-                relationDefinition.getID().toString(),
+                relationDefinition.getAtomPredicate().getName(),
                 argumentMap.entrySet().stream()
                 .map(e -> e.getKey() + ":" + e.getValue())
                 .collect(Collectors.joining(",")));

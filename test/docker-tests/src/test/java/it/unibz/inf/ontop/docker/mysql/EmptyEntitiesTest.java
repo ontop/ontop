@@ -81,7 +81,6 @@ public class EmptyEntitiesTest {
         // Creating a new instance of the reasoner
         OntopOWLFactory factory = OntopOWLFactory.defaultFactory();
         OntopSQLOWLAPIConfiguration config = OntopSQLOWLAPIConfiguration.defaultBuilder()
-				.enableFullMetadataExtraction(false)
 				.ontologyFile(owlFileName)
 				.nativeOntopMappingFile(obdaFileName)
 				.propertyFile(propertyFileName)

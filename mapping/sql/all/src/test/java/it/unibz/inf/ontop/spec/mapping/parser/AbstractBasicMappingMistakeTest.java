@@ -12,39 +12,26 @@ import static it.unibz.inf.ontop.utils.SQLAllMappingTestingTools.*;
 public abstract class AbstractBasicMappingMistakeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
-    private final DBMetadata dbMetadata;
 
-    AbstractBasicMappingMistakeTest() {
-        RDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+    static {
+        DBTypeFactory dbTypeFactory = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
 
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-
-        DatabaseRelationDefinition personTable = dbMetadata.createDatabaseRelation(
-                idFactory.createRelationID(null, "PERSON"));
-        Attribute personId = personTable.addAttribute(idFactory.createAttributeID("ID"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBLargeIntegerType(), false);
-        personTable.addAttribute(idFactory.createAttributeID("FNAME"),
-                dbTypeFactory.getDBLargeIntegerType().getName(), dbTypeFactory.getDBStringType(), false);
-        personTable.addUniqueConstraint(UniqueConstraint.primaryKeyOf(personId));
-
-        dbMetadata.freeze();
-        this.dbMetadata = dbMetadata;
+        DatabaseRelationDefinition personTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PERSON",
+            "ID", dbTypeFactory.getDBLargeIntegerType(), false,
+            "FNAME", dbTypeFactory.getDBStringType(), false);
+        UniqueConstraint.primaryKeyOf(personTable.getAttribute(1));
     }
 
     protected void execute(String mappingFile) throws OBDASpecificationException {
         try {
             OntopMappingSQLAllConfiguration configuration = createConfiguration(mappingFile);
             configuration.loadSpecification();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.info(e.toString());
             throw e;
         }
     }
 
     protected abstract OntopMappingSQLAllConfiguration createConfiguration(String mappingFile);
-
-    protected DBMetadata getDBMetadata() {
-        return dbMetadata;
-    }
 }

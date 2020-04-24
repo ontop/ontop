@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.impl.FunctionalDependencyImpl;
 /**
  * A functional dependency
  */
+
 public interface FunctionalDependency {
 
     ImmutableSet<Attribute> getDeterminants();
@@ -13,13 +14,16 @@ public interface FunctionalDependency {
     ImmutableSet<Attribute> getDependents();
 
     interface Builder {
-        Builder addDeterminant(Attribute determinant);
-        Builder addDependent(Attribute dependent);
+        Builder addDeterminant(int determinantIndex);
+        Builder addDeterminant(QuotedID determinantId) throws AttributeNotFoundException;
 
-        FunctionalDependency build();
+        Builder addDependent(int dependentIndex);
+        Builder addDependent(QuotedID dependentId) throws AttributeNotFoundException;
+
+        void build();
     }
 
-    static Builder defaultBuilder() {
-        return new FunctionalDependencyImpl.BuilderImpl();
+    static Builder defaultBuilder(DatabaseRelationDefinition relation) {
+        return FunctionalDependencyImpl.builder(relation);
     }
 }

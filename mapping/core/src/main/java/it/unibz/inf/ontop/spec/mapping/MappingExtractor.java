@@ -3,10 +3,9 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.DBParameters;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
 import it.unibz.inf.ontop.exception.MappingException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
-import it.unibz.inf.ontop.dbschema.DBMetadata;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.spec.mapping.pp.PreProcessedMapping;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
@@ -17,23 +16,19 @@ import java.util.Optional;
 public interface MappingExtractor {
 
     /**
-     * TODO: in a near future, drop DBMetadata and use Mapping instead of this interface
+     * TODO: in a near future, drop DummyDBMetadataBuilder and use Mapping instead of this interface
      */
-    interface MappingAndDBMetadata {
+    interface MappingAndDBParameters {
         ImmutableList<MappingAssertion> getMapping();
         DBParameters getDBParameters();
     }
 
-    MappingAndDBMetadata extract(@Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> saturatedTBox,
-                                 @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+    MappingAndDBParameters extract(@Nonnull OBDASpecInput specInput,
+                                   @Nonnull Optional<Ontology> saturatedTBox)
+            throws MappingException, MetadataExtractionException;
 
-    MappingAndDBMetadata extract(@Nonnull PreProcessedMapping ppMapping,
-                                 @Nonnull OBDASpecInput specInput,
-                                 @Nonnull Optional<DBMetadata> dbMetadata,
-                                 @Nonnull Optional<Ontology> saturatedTBox,
-                                 @Nonnull ExecutorRegistry executorRegistry)
-            throws MappingException, DBMetadataExtractionException;
+    MappingAndDBParameters extract(@Nonnull PreProcessedMapping ppMapping,
+                                   @Nonnull OBDASpecInput specInput,
+                                   @Nonnull Optional<Ontology> saturatedTBox)
+            throws MappingException, MetadataExtractionException;
 }

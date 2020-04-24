@@ -31,7 +31,7 @@ public class FlattenUnionOptimizerTest {
     @Test
     public void flattenUnionTest1() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
@@ -63,7 +63,7 @@ public class FlattenUnionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
@@ -94,7 +94,7 @@ public class FlattenUnionOptimizerTest {
     @Test
     public void flattenUnionTest2() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
 
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
@@ -130,7 +130,7 @@ public class FlattenUnionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
@@ -157,7 +157,7 @@ public class FlattenUnionOptimizerTest {
     @Test
     public void flattenUnionTest3() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
 
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
@@ -198,7 +198,7 @@ public class FlattenUnionOptimizerTest {
     @Test
     public void flattenUnionTest4() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
@@ -235,7 +235,7 @@ public class FlattenUnionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
@@ -263,7 +263,7 @@ public class FlattenUnionOptimizerTest {
     @Test
     public void flattenUnionTest5() throws EmptyQueryException {
 
-        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom1 = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE1, X);
 
         UnionNode unionNode1 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
@@ -297,7 +297,7 @@ public class FlattenUnionOptimizerTest {
 
         System.out.println("\nAfter optimization: \n" + optimizedQuery);
 
-        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder queryBuilder2 = createQueryBuilder();
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);

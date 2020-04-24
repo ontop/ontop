@@ -39,34 +39,23 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
 
-    private static final DBMetadata DB_METADATA;
-
-    private static final String INT_STRING = "INTEGER";
-
     static {
-        BasicDBMetadata dbMetadata = createDummyMetadata();
-        QuotedIDFactory idFactory = dbMetadata.getQuotedIDFactory();
+        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTypeFactory dbTypeFactory = TYPE_FACTORY.getDBTypeFactory();
-        DBTermType integerDBType = dbTypeFactory.getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE1"));
-        table1Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
+        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
+                "col1", integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE2"));
-        table2Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
-        table2Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
+        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+                "col1", integerDBType, false,
+                "col2", integerDBType, false);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation(idFactory.createRelationID(null, "TABLE3"));
-        table3Def.addAttribute(idFactory.createAttributeID("col1"), INT_STRING, integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col2"), INT_STRING, integerDBType, false);
-        table3Def.addAttribute(idFactory.createAttributeID("col3"), INT_STRING, integerDBType, false);
+        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
+            "col1", integerDBType, false,
+            "col2", integerDBType, false,
+            "col3", integerDBType, false);
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
-
-        dbMetadata.freeze();
-        DB_METADATA = dbMetadata;
 
         DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
         DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));

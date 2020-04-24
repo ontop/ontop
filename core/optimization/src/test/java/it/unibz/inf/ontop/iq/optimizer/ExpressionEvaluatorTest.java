@@ -65,7 +65,7 @@ public class ExpressionEvaluatorTest {
     private IntermediateQuery getExpectedQuery() {
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
@@ -99,7 +99,7 @@ public class ExpressionEvaluatorTest {
     public void testLangLeftNodeFunction() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -149,7 +149,7 @@ public class ExpressionEvaluatorTest {
     public void testLangRightNode() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y,W);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -187,8 +187,7 @@ public class ExpressionEvaluatorTest {
 
         //----------------------------------------------------------------------
         // Construct expected query
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);;
-
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
 
         DistinctVariableOnlyDataAtom expectedProjectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_ARITY_3_PREDICATE, X, Y, W);
         ConstructionNode expectedRootNode = IQ_FACTORY.createConstructionNode(expectedProjectionAtom.getVariables(),
@@ -223,7 +222,7 @@ public class ExpressionEvaluatorTest {
     public void testNonEqualOperatorDistribution() throws EmptyQueryException {
 
         //Construct unoptimized query
-        IntermediateQueryBuilder queryBuilder = createQueryBuilder(DB_METADATA);;
+        IntermediateQueryBuilder queryBuilder = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom
                 (ANS1_ARITY_2_PREDICATE, X ,Y);
         ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -262,7 +261,7 @@ public class ExpressionEvaluatorTest {
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(
                 TERM_FACTORY.getDisjunction(subExpression1, subExpression2));
 
-        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder(DB_METADATA);
+        IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, expectedRootNode);
         expectedQueryBuilder.addChild(expectedRootNode, joinNode2);
         expectedQueryBuilder.addChild(joinNode2, DATA_NODE_1);

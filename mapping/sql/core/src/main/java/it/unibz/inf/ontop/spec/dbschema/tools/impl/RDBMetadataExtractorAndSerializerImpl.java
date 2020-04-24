@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.spec.dbschema.tools.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.dbschema.RDBMetadata;
-import it.unibz.inf.ontop.dbschema.RDBMetadataExtractionTools;
-import it.unibz.inf.ontop.exception.DBMetadataExtractionException;
+import it.unibz.inf.ontop.dbschema.ImmutableMetadata;
+import it.unibz.inf.ontop.dbschema.MetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.dbschema.tools.DBMetadataExtractorAndSerializer;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 
@@ -17,29 +17,31 @@ import java.sql.SQLException;
 public class RDBMetadataExtractorAndSerializerImpl implements DBMetadataExtractorAndSerializer {
 
     private final OntopSQLCredentialSettings settings;
-    private final TypeFactory typeFactory;
+    private final JDBCMetadataProviderFactory metadataProviderFactory;
 
     @Inject
-    private RDBMetadataExtractorAndSerializerImpl(OntopSQLCredentialSettings settings, TypeFactory typeFactory) {
+    private RDBMetadataExtractorAndSerializerImpl(OntopSQLCredentialSettings settings,
+                                                  JDBCMetadataProviderFactory metadataProviderFactory) {
         this.settings = settings;
-        this.typeFactory = typeFactory;
+        this.metadataProviderFactory = metadataProviderFactory;
     }
 
     @Override
-    public String extractAndSerialize() throws DBMetadataExtractionException {
+    public String extractAndSerialize() throws MetadataExtractionException {
 
         try (Connection localConnection = LocalJDBCConnectionUtils.createConnection(settings)) {
-            RDBMetadata metadata = RDBMetadataExtractionTools.createMetadata(localConnection, typeFactory);
-            RDBMetadataExtractionTools.loadMetadata(metadata, localConnection, null);
+            MetadataProvider metadataProvider = metadataProviderFactory.getMetadataProvider(localConnection);
+            ImmutableMetadata metadata = ImmutableMetadata.extractImmutableMetadata(metadataProvider);
 
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(metadata);
             return jsonString;
-
-        } catch (SQLException e) {
-            throw new DBMetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
-        } catch (JsonProcessingException e) {
-            throw new DBMetadataExtractionException("problem with JSON processing.\n" + e);
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException("Connection problem while extracting the metadata.\n" + e);
+        }
+        catch (JsonProcessingException e) {
+            throw new MetadataExtractionException("problem with JSON processing.\n" + e);
         }
     }
 }
