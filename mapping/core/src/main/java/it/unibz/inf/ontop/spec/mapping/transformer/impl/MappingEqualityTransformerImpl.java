@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -14,7 +13,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
-import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -28,13 +26,10 @@ import java.util.stream.Stream;
 public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
 
     private final IQTreeTransformer expressionTransformer;
-    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
-                                             CoreSingletons coreSingletons,
-                                             IntermediateQueryFactory iqFactory) {
-        this.iqFactory = iqFactory;
+                                             CoreSingletons coreSingletons) {
         this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
     }
 
@@ -43,11 +38,6 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         return expressionTransformer.transform(tree);
     }
 
-    @Override
-    public MappingAssertion transform(MappingAssertion assertion) {
-        IQTree tree = expressionTransformer.transform(assertion.getQuery().getTree());
-        return assertion.copyOf(transform(tree), iqFactory);
-    }
 
     protected static class ExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 

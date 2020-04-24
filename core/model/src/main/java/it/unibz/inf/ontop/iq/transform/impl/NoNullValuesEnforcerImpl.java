@@ -38,15 +38,6 @@ public class NoNullValuesEnforcerImpl implements NoNullValueEnforcer {
     }
 
     @Override
-    public IQ transform(IQ originalQuery) {
-        IQTree tree = originalQuery.getTree();
-        IQTree newTree = transform(tree, originalQuery.getVariableGenerator());
-        return newTree.equals(tree)
-                ? originalQuery
-                : iQFactory.createIQ(originalQuery.getProjectionAtom(), newTree);
-    }
-
-    @Override
     public IQTree transform(IQTree tree) {
         return transform(tree, coreUtilsFactory.createVariableGenerator(tree.getKnownVariables()));
     }

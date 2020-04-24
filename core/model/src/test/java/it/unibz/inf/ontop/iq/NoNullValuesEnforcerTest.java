@@ -73,8 +73,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_Z);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -86,7 +86,7 @@ public class NoNullValuesEnforcerTest {
         IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
     @Test
@@ -103,10 +103,10 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build()).normalizeForOptimization();
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
-        assertEquals(query, transformedQuery);
+        assertEquals(query.getTree(), transformedTree);
     }
 
     @Test
@@ -121,8 +121,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -134,7 +134,7 @@ public class NoNullValuesEnforcerTest {
                 .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
     @Test
@@ -149,8 +149,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X_AND_NOT_NULL_W);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -161,7 +161,7 @@ public class NoNullValuesEnforcerTest {
         IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
 }

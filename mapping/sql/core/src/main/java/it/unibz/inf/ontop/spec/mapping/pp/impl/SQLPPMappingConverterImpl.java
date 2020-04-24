@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -23,7 +22,6 @@ import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQuer
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPMappingConverter;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.transformer.impl.IQ2CQ;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -49,18 +47,15 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final SubstitutionFactory substitutionFactory;
     private final CoreSingletons coreSingletons;
     private final DBTypeFactory dbTypeFactory;
-    private final MappingEqualityTransformer mappingEqualityTransformer;
 
     @Inject
-    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons,
-                                      MappingEqualityTransformer mappingEqualityTransformer) {
+    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons) {
         this.termFactory = coreSingletons.getTermFactory();
         this.iqFactory = coreSingletons.getIQFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.coreSingletons = coreSingletons;
         this.dbTypeFactory = coreSingletons.getTypeFactory().getDBTypeFactory();
-        this.mappingEqualityTransformer = mappingEqualityTransformer;
     }
 
     @Override
