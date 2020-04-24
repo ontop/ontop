@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBConcatFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.model.vocabulary.Ontop;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
@@ -102,19 +103,21 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
     private final class ExpansionPosition {
         private final MappingAssertion assertion;
         private final Variable topVariable;
-        private final ImmutableTerm template;
 
-        ExpansionPosition(MappingAssertion assertion, RDFAtomPredicate.ComponentGetter componentGetter) {
+        ExpansionPosition(MappingAssertion assertion, Variable topVariable) {
             this.assertion = assertion;
-            this.template = componentGetter.get(assertion.getTerms());
-            this.topVariable = componentGetter.get(assertion.getProjectionAtom().getArguments());
+            this.topVariable = topVariable;
+        }
+
+        ImmutableTerm getTemplate() {
+            return assertion.getTopSubstitution().get(topVariable);
         }
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
             System.out.println("START WITH " + assertion.getQuery());
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
                     iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                            template.getVariableStream()
+                            getTemplate().getVariableStream()
                                     .collect(ImmutableCollectors.toSet()),
                             substitutionFactory.getSubstitution()),
                             assertion.getTopChild()));
@@ -127,18 +130,19 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         MappingAssertion createExpansion(ImmutableMap<Variable, DBConstant> values) {
             System.out.println("VALUES: " + values);
-            String stringIri = instantiateTemplate(template, values);
+            String stringIri = instantiateTemplate(getTemplate(), values);
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
                     .composeWith(substitutionFactory.getSubstitution(
                             topVariable,
                             termFactory.getConstantIRI(rdfFactory.createIRI(stringIri))));
 
-            IQTree filterTree = iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
-                    termFactory.getConjunction(values.entrySet().stream()
-                            .map(e -> termFactory.getNotYetTypedEquality(
-                                    e.getKey(),
-                                    e.getValue()))).get()),
-                    assertion.getTopChild());
+            IQTree filterTree = termFactory.getConjunction(values.entrySet().stream()
+                    .map(e -> termFactory.getNotYetTypedEquality(
+                            e.getKey(),
+                            e.getValue())))
+                    .map(iqFactory::createFilterNode)
+                    .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
+                    .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));
 
             IQTree transformedFilterTree = mappingEqualityTransformer.transform(filterTree);
 
@@ -162,9 +166,10 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                         ? predicate::getObject
                         : predicate::getProperty;
 
-        return (!componentGetter.get(assertion.getTerms()).isGround())
-                ? Optional.of(new ExpansionPosition(assertion, componentGetter))
-                : Optional.empty();
+        return (componentGetter.get(assertion.getTerms()).isGround())
+                ? Optional.empty()
+                : Optional.of(new ExpansionPosition(assertion,
+                        componentGetter.get(assertion.getProjectionAtom().getArguments())));
     }
 
 
