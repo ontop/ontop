@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.impl.LazyRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -25,44 +26,31 @@ import java.util.stream.Stream;
 public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final TermFactory termFactory;
     private final CoreSingletons coreSingletons;
 
     @Inject
-    public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory, TermFactory termFactory,
+    public MappingCQCOptimizerImpl(IntermediateQueryFactory iqFactory,
                                    CoreSingletons coreSingletons) {
         this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
         this.coreSingletons = coreSingletons;
     }
 
     @Override
     public IQ optimize(ImmutableCQContainmentCheck<RelationPredicate> cqContainmentCheck, IQ query) {
 
-        IQTree tree0 = new FilterAbsorber(iqFactory, termFactory).apply(query.getTree());
-        IQTree tree = new InnerJoinFlattener(iqFactory, termFactory).apply(tree0);
+        IQTree tree = query.getTree();
+        ConstructionNode constructionNode = (ConstructionNode) tree.getRootNode();
 
-        //IQTree tree = query.getTree().normalizeForOptimization(query.getVariableGenerator());
+        return iqFactory.createIQ(query.getProjectionAtom(), tree.acceptTransformer(new LazyRecursiveIQTreeVisitingTransformer(iqFactory) {
+            @Override
+            public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children0) {
 
-        //System.out.println(tree);
-        ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();
-        IQTree joinTree;
-        if (tree.getRootNode() instanceof ConstructionNode) {
-            joinTree = tree.getChildren().get(0);
-        }
-        else if (tree.getRootNode() instanceof InnerJoinNode) {
-            joinTree = tree;
-        }
-        else
-            throw new MinorOntopInternalBugException("unexpected tree");
+                Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(tree);
 
-            Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(joinTree);
-            if (c.isPresent() && c.get().size() > 1) {
-                InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
                 ImmutableList<Variable> answerVariables = Stream.concat(
                         constructionNode.getSubstitution().getImmutableMap().values().stream()
                                 .flatMap(ImmutableTerm::getVariableStream),
-                        joinNode.getOptionalFilterCondition()
+                        rootNode.getOptionalFilterCondition()
                                 .map(ImmutableTerm::getVariableStream).orElse(Stream.of()))
                         .distinct()
                         .collect(ImmutableCollectors.toList());
@@ -82,8 +70,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                             .containsAll(answerVariables)) {
 
                         if (cqContainmentCheck.isContainedIn(new ImmutableCQ<>(answerVariables,
-                                IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
+                                        IQ2CQ.toDataAtoms(subChildren, coreSingletons)),
                                 new ImmutableCQ<>(answerVariables, IQ2CQ.toDataAtoms(children, coreSingletons)))) {
+                            System.out.println("CQC-REMOVED: " + children.get(currentIndex) + " FROM " + children);
                             children = subChildren;
                             if (children.size() < 2)
                                 break;
@@ -96,13 +85,9 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                         currentIndex++;
                 }
 
-                return iqFactory.createIQ(
-                        query.getProjectionAtom(),
-                        iqFactory.createUnaryIQTree(
-                                constructionNode,
-                                IQ2CQ.toIQTree(children, joinNode.getOptionalFilterCondition(), iqFactory)));
+                return IQ2CQ.toIQTree(children, rootNode.getOptionalFilterCondition(), iqFactory);
             }
+        }));
 
-        return iqFactory.createIQ(query.getProjectionAtom(), tree);
     }
 }
