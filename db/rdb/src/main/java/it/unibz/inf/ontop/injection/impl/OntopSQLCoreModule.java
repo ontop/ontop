@@ -5,6 +5,8 @@ import com.google.inject.Module;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.dbschema.DBMetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
@@ -41,5 +43,8 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
                 ),
                 SQLAlgebraFactory.class);
         install(sqlAlgebraFactory);
+
+        Module mdProvider = buildFactory(ImmutableList.of(DBMetadataProvider.class), JDBCMetadataProviderFactory.class);
+        install(mdProvider);
     }
 }

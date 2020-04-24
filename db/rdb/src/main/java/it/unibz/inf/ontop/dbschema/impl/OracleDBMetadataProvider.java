@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -16,8 +18,9 @@ public class OracleDBMetadataProvider extends DefaultDBMetadataProvider {
     private final QuotedID defaultSchema;
     private final RelationID sysDualId;
 
-    OracleDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, dbTypeFactory);
+    @AssistedInject
+    protected OracleDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
+        super(connection, typeFactory);
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions207.htm#i79833
         this.defaultSchema = retrieveDefaultSchema("SELECT user FROM dual");
         // https://docs.oracle.com/cd/B19306_01/server.102/b14200/queries009.htm

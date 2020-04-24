@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.injection.impl;
 
 
+import it.unibz.inf.ontop.dbschema.DBMetadataProvider;
 import it.unibz.inf.ontop.exception.InvalidOntopConfigurationException;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
@@ -23,6 +24,7 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     private static final String DB_FS_FACTORY_SUFFIX = "-symbolFactory";
     private static final String DIALECT_SERIALIZER_SUFFIX = "-serializer";
     private static final String DIALECT_NORMALIZER_SUFFIX = "-normalizer";
+    private static final String DB_MP_FACTORY_SUFFIX = "-metadataProvider";
 
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
@@ -93,6 +95,16 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
         Optional.ofNullable(properties.getProperty(normalizerKey))
                 .filter(v -> !userProperties.containsKey(normalizerName))
                 .ifPresent(v -> properties.setProperty(normalizerName, v));
+
+        /*
+         * DB metadata provider
+         */
+        String dbMPFactoryKey = jdbcDriver + DB_MP_FACTORY_SUFFIX;
+        String dbMPFactoryName = DBMetadataProvider.class.getCanonicalName();
+        Optional.ofNullable(properties.getProperty(dbMPFactoryKey))
+                // Must NOT override user properties
+                .filter(v -> !userProperties.containsKey(dbMPFactoryName))
+                .ifPresent(v -> properties.setProperty(dbMPFactoryName, v));
 
         return properties;
     }

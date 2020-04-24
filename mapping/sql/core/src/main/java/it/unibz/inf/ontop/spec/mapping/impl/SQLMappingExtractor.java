@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.CachingMetadataLookup;
-import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
+import it.unibz.inf.ontop.dbschema.impl.JDBCMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -50,6 +49,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingEqualityTransformer mappingEqualityTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
+    private final JDBCMetadataProviderFactory metadataProviderFactory;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
     private final SQLMappingParser mappingParser;
@@ -63,7 +63,6 @@ public class SQLMappingExtractor implements MappingExtractor {
      * Can be useful for eliminating self-joins
      */
     private final ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor;
-    private final TypeFactory typeFactory;
 
     @Inject
     private SQLMappingExtractor(SQLMappingParser mappingParser,
@@ -78,7 +77,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
-                                TypeFactory typeFactory) {
+                                JDBCMetadataProviderFactory metadataProviderFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
         this.mappingParser = mappingParser;
@@ -91,8 +90,8 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = iqFactory;
         this.metamappingExpander = metamappingExpander;
+        this.metadataProviderFactory = metadataProviderFactory;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
-        this.typeFactory = typeFactory;
     }
 
     @Override
@@ -178,23 +177,21 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         try (Connection connection = LocalJDBCConnectionUtils.createConnection(settings)) {
 
-            MetadataProvider metadataLoader = DatabaseMetadataProviderFactory.getMetadataProvider(connection, typeFactory.getDBTypeFactory());
-            MetadataProvider implicitConstraints = implicitDBConstraintExtractor.extract(
-                    constraintFile, metadataLoader);
+            MetadataProvider dbMetadataProvider = metadataProviderFactory.getMetadataProvider(connection);
+            MetadataProvider withImplicitConstraintsMetadataProvider =
+                    implicitDBConstraintExtractor.extract(constraintFile, dbMetadataProvider);
 
-            CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
+            CachingMetadataLookup metadataLookup = new CachingMetadataLookup(withImplicitConstraintsMetadataProvider);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
             metadataLookup.extractImmutableMetadata();
 
-            return new MappingAndDBParametersImpl(provMapping, implicitConstraints.getDBParameters());
+            return new MappingAndDBParametersImpl(provMapping, withImplicitConstraintsMetadataProvider.getDBParameters());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e.getMessage());
         }
     }
-
-
 
     private static class MappingAndDBParametersImpl implements MappingAndDBParameters {
         private final ImmutableList<MappingAssertion> mapping;
@@ -215,5 +212,4 @@ public class SQLMappingExtractor implements MappingExtractor {
             return dbParameters;
         }
     }
-
 }

@@ -1,9 +1,11 @@
 package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.sql.Connection;
 
@@ -12,8 +14,9 @@ public class SQLServerDBMetadataProvider extends DefaultDBMetadataProvider {
     private final ImmutableSet<String> ignoredSchemas = ImmutableSet.of("sys", "INFORMATION_SCHEMA");
     private final QuotedID defaultSchema;
 
-    SQLServerDBMetadataProvider(Connection connection, DBTypeFactory dbTypeFactory) throws MetadataExtractionException {
-        super(connection, dbTypeFactory);
+    @AssistedInject
+    SQLServerDBMetadataProvider(@Assisted Connection connection, TypeFactory typeFactory) throws MetadataExtractionException {
+        super(connection, typeFactory);
         // https://msdn.microsoft.com/en-us/library/ms175068.aspx
         this.defaultSchema = retrieveDefaultSchema("SELECT SCHEMA_NAME()");
     }
