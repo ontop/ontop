@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -29,10 +28,13 @@ import java.util.stream.Stream;
 public class MappingEqualityTransformerImpl implements MappingEqualityTransformer {
 
     private final IQTreeTransformer expressionTransformer;
+    private final IntermediateQueryFactory iqFactory;
 
     @Inject
     protected MappingEqualityTransformerImpl(UniqueTermTypeExtractor typeExtractor,
-                                             CoreSingletons coreSingletons) {
+                                             CoreSingletons coreSingletons,
+                                             IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
         this.expressionTransformer = new ExpressionTransformer(typeExtractor, coreSingletons);
     }
 
@@ -41,10 +43,16 @@ public class MappingEqualityTransformerImpl implements MappingEqualityTransforme
         return expressionTransformer.transform(tree);
     }
 
+    @Override
+    public MappingAssertion transform(MappingAssertion assertion) {
+        IQTree tree = expressionTransformer.transform(assertion.getQuery().getTree());
+        return assertion.copyOf(transform(tree), iqFactory);
+    }
+
     protected static class ExpressionTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected final UniqueTermTypeExtractor typeExtractor;
-        protected final TermFactory termFactory;
+        private final UniqueTermTypeExtractor typeExtractor;
+        private final TermFactory termFactory;
         private final SubstitutionFactory substitutionFactory;
 
         protected ExpressionTransformer(UniqueTermTypeExtractor typeExtractor, CoreSingletons coreSingletons) {

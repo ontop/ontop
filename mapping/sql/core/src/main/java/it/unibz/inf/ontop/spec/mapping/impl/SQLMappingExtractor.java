@@ -8,19 +8,15 @@ import it.unibz.inf.ontop.dbschema.impl.DatabaseMetadataProviderFactory;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopMappingSQLSettings;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
+import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
-import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
+import it.unibz.inf.ontop.spec.mapping.pp.impl.ConstructionNodeFlattener;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
@@ -33,19 +29,16 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -60,7 +53,7 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
-    private final SubstitutionFactory substitutionFactory;
+    private final ConstructionNodeFlattener constructionNodeFlattener;
     private final IntermediateQueryFactory iqFactory;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
@@ -88,7 +81,7 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MappingCaster mappingCaster,
                                 MappingEqualityTransformer mappingEqualityTransformer,
                                 NoNullValueEnforcer noNullValueEnforcer,
-                                IntermediateQueryFactory iqFactory,
+                                ConstructionNodeFlattener constructionNodeFlattener, IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 TypeFactory typeFactory) {
@@ -102,7 +95,7 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.substitutionFactory = substitutionFactory;
+        this.constructionNodeFlattener = constructionNodeFlattener;
         this.iqFactory = iqFactory;
         this.metamappingExpander = metamappingExpander;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
@@ -161,28 +154,19 @@ public class SQLMappingExtractor implements MappingExtractor {
         MappingAndDBParameters mm = convert(ppMapping.getTripleMaps(), specInput.getConstraintFile());
 
         ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), settings, mm.getDBParameters());
-        ImmutableList<MappingAssertion> noNullMapping = expMapping.stream()
-                .map(a -> a.copyOf(iqFactory.createIQ(a.getProjectionAtom(),
-                        mappingEqualityTransformer.transform(a.getQuery().getTree()))))
-                .map(a -> {
-                    IQTree topChild = a.getTopChild();
-                    if (topChild.getRootNode() instanceof ConstructionNode) {
-                        ImmutableSubstitution<ImmutableTerm> s = ((ConstructionNode) topChild.getRootNode()).getSubstitution();
-                        ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(
-                                a.getTopSubstitution().getImmutableMap().entrySet().stream()
-                                        .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> s.apply(e.getValue()))));
-                        IQ iq = iqFactory.createIQ(a.getProjectionAtom(), iqFactory.createUnaryIQTree(
-                                iqFactory.createConstructionNode(a.getProjectionAtom().getVariables(), sub),
-                                ((UnaryIQTree)topChild).getChild()));
-                        return a.copyOf(iq);
-                    }
-                    else
-                        return a;
-                })
-                .map(a -> a.copyOf(noNullValueEnforcer.transform(a.getQuery())))
-                .collect(ImmutableCollectors.toList());
-        ImmutableList<MappingAssertion> filledProvMapping = mappingDatatypeFiller.transform(noNullMapping);
-        ImmutableList<MappingAssertion> castMapping = mappingCaster.transform(filledProvMapping);
+
+        ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
+        // no streams because of exception handling
+        for (MappingAssertion assertion : expMapping) {
+            MappingAssertion equalityTransformed = mappingEqualityTransformer.transform(assertion);
+            MappingAssertion constructionNodeFlat = constructionNodeFlattener.transform(equalityTransformed);
+            MappingAssertion noNullAssertion = constructionNodeFlat.copyOf(noNullValueEnforcer.transform(constructionNodeFlat.getQuery()));
+            MappingAssertion filledProvAssertion = mappingDatatypeFiller.transform(noNullAssertion);
+            MappingAssertion castAssertion = mappingCaster.transform(filledProvAssertion);
+            builder.add(castAssertion);
+        }
+
+        ImmutableList<MappingAssertion> castMapping = builder.build();
         ImmutableList<MappingAssertion> canonizedMapping = canonicalTransformer.transform(castMapping);
 
         // Validation: Mismatch between the ontology and the mapping
@@ -192,7 +176,6 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         return new MappingAndDBParametersImpl(canonizedMapping, mm.getDBParameters());
     }
-
 
     private MappingAndDBParameters convert(ImmutableList<SQLPPTriplesMap> mapping,
                                            Optional<File> constraintFile) throws MetadataExtractionException, InvalidMappingSourceQueriesException, MetaMappingExpansionException {

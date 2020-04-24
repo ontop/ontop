@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -9,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -42,6 +45,14 @@ public class MappingAssertion {
         return (query.getProjectionAtom() == this.query.getProjectionAtom())
                 ? new MappingAssertion(index, query, provenance)
                 : new MappingAssertion(query, provenance);
+    }
+
+    public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
+        return new MappingAssertion(index, iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
+    }
+
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return query.getTree().getVariables();
     }
 
     public RDFAtomPredicate getRDFAtomPredicate() {
