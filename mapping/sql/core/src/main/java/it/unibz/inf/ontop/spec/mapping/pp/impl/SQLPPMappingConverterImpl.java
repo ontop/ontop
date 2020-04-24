@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidMappingSourceQueriesException;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -31,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,7 +44,6 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMappingConverterImpl.class);
 
     private final TermFactory termFactory;
-    private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -53,11 +52,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private final MappingEqualityTransformer mappingEqualityTransformer;
 
     @Inject
-    private SQLPPMappingConverterImpl(NoNullValueEnforcer noNullValueEnforcer,
-                                      CoreSingletons coreSingletons,
+    private SQLPPMappingConverterImpl(CoreSingletons coreSingletons,
                                       MappingEqualityTransformer mappingEqualityTransformer) {
         this.termFactory = coreSingletons.getTermFactory();
-        this.noNullValueEnforcer = noNullValueEnforcer;
         this.iqFactory = coreSingletons.getIQFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
@@ -82,7 +79,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
             ImmutableMap<QuotedID, ImmutableTerm> lookupTable =  re.getAttributes().entrySet().stream()
                     .filter(e -> e.getKey().getRelation() == null)
                     .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
-            Function<Variable, ImmutableTerm> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), lookupTable);
+            Function<Variable, Optional<ImmutableTerm>> lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), lookupTable);
 
             for (TargetAtom target : assertion.getTargetAtoms()) {
                 PPMappingAssertionProvenance provenance = assertion.getMappingAssertionProvenance(target);
@@ -95,52 +92,41 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return result;
     }
 
-    public static <T> BiFunction<Map<QuotedID, T>, Variable, T> placeholderResolver(SQLPPTriplesMap triplesMap, QuotedIDFactory idFactory) {
-        if (triplesMap instanceof OntopNativeSQLPPTriplesMap) {
-            QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
-            return (map, placeholder) -> {
-                String name = placeholder.getName();
-                QuotedID attribute1 = idFactory.createAttributeID(name);
-                T item1 = map.get(attribute1);
-                if (item1 != null)
-                    return item1;
 
-                QuotedID attribute2 = rawIdFactory.createAttributeID(name);
-                return map.get(attribute2);
-            };
+    private static <T> Function<Variable, Optional<T>> placeholderLookup(SQLPPTriplesMap mappingAssertion, QuotedIDFactory idFactory, ImmutableMap<QuotedID, T> lookup) {
+        Function<Variable, Optional<T>> standard =
+                v -> Optional.ofNullable(lookup.get(idFactory.createAttributeID(v.getName())));
+
+        if (mappingAssertion instanceof OntopNativeSQLPPTriplesMap) {
+            QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
+            return v -> Optional.ofNullable(standard.apply(v)
+                            .orElse(lookup.get(rawIdFactory.createAttributeID(v.getName()))));
         }
         else
-            return (map, placeholder) -> map.get(idFactory.createAttributeID(placeholder.getName()));
-    }
-
-    public static <T> Function<Variable, T> placeholderLookup(SQLPPTriplesMap mappingAssertion, QuotedIDFactory idFactory, ImmutableMap<QuotedID, T> lookup) {
-        BiFunction<Map<QuotedID, T>, Variable, T> resolver = placeholderResolver(mappingAssertion, idFactory);
-        return v -> resolver.apply(lookup, v);
+            return standard;
     }
 
 
-    private MappingAssertion convert(TargetAtom target, Function<Variable, ImmutableTerm> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
+    private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
-        ImmutableMap<Variable, ImmutableTerm> targetMap;
-        try {
-            targetMap = target.getProjectionAtom().getArguments().stream()
+        ImmutableMap<Variable, Optional<ImmutableTerm>> targetPreMap = target.getProjectionAtom().getArguments().stream()
                     .map(v -> target.getSubstitution().apply(v))
                     .flatMap(ImmutableTerm::getVariableStream)
                     .distinct()
                     .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
-        }
-        catch (NullPointerException e) { // in lookup
-            throw new InvalidMappingSourceQueriesException(target.getProjectionAtom().getArguments().stream()
-                    .map(v -> target.getSubstitution().apply(v))
-                    .flatMap(ImmutableTerm::getVariableStream)
-                    .distinct()
-                    .filter(v -> lookup.apply(v) == null)
+
+        if (targetPreMap.values().stream().anyMatch(t -> !t.isPresent()))
+            throw new InvalidMappingSourceQueriesException(targetPreMap.entrySet().stream()
+                    .filter(e -> !e.getValue().isPresent())
+                    .map(Map.Entry::getKey)
                     .map(Variable::getName)
                     .collect(Collectors.joining(", ",
                             "The placeholder(s) ",
                             " in the target do(es) not occur in source query of the mapping assertion\n["
                                     + provenance.getProvenanceInfo() + "]")));
-        }
+
+        ImmutableMap<Variable, ImmutableTerm> targetMap = targetPreMap.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> e.getValue().orElseThrow(() -> new MinorOntopInternalBugException("Impossible"))));
 
         ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
                 .filter(e -> e.getValue() instanceof Variable)
@@ -163,9 +149,8 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
         IQTree mappingTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                 target.getProjectionAtom().getVariables(), spoSubstitution), selectTree);
-        IQTree transformedTree = mappingEqualityTransformer.transform(mappingTree);
 
-        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), transformedTree), provenance);
+        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
     }
 
     private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {

@@ -78,14 +78,19 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final TypeFactory typeFactory;
 
     @Inject
-    private SQLMappingExtractor(SQLMappingParser mappingParser, MappingOntologyComplianceValidator ontologyComplianceValidator,
-                                SQLPPMappingConverter ppMappingConverter, MappingDatatypeFiller mappingDatatypeFiller,
+    private SQLMappingExtractor(SQLMappingParser mappingParser,
+                                MappingOntologyComplianceValidator ontologyComplianceValidator,
+                                SQLPPMappingConverter ppMappingConverter,
+                                MappingDatatypeFiller mappingDatatypeFiller,
                                 OntopMappingSQLSettings settings,
-                                MappingCanonicalTransformer canonicalTransformer, TermFactory termFactory,
-                                SubstitutionFactory substitutionFactory, RDF rdfFactory,
-                                MappingCaster mappingCaster, MappingEqualityTransformer mappingEqualityTransformer,
-                                SQLPPSourceQueryFactory sourceQueryFactory,
-                                NoNullValueEnforcer noNullValueEnforcer, IntermediateQueryFactory iqFactory, MetaMappingExpander metamappingExpander, ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
+                                MappingCanonicalTransformer canonicalTransformer,
+                                SubstitutionFactory substitutionFactory,
+                                MappingCaster mappingCaster,
+                                MappingEqualityTransformer mappingEqualityTransformer,
+                                NoNullValueEnforcer noNullValueEnforcer,
+                                IntermediateQueryFactory iqFactory,
+                                MetaMappingExpander metamappingExpander,
+                                ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 TypeFactory typeFactory) {
 
         this.ontologyComplianceValidator = ontologyComplianceValidator;
@@ -157,6 +162,8 @@ public class SQLMappingExtractor implements MappingExtractor {
 
         ImmutableList<MappingAssertion> expMapping = metamappingExpander.transform(mm.getMapping(), settings, mm.getDBParameters());
         ImmutableList<MappingAssertion> noNullMapping = expMapping.stream()
+                .map(a -> a.copyOf(iqFactory.createIQ(a.getProjectionAtom(),
+                        mappingEqualityTransformer.transform(a.getQuery().getTree()))))
                 .map(a -> {
                     IQTree topChild = a.getTopChild();
                     if (topChild.getRootNode() instanceof ConstructionNode) {

@@ -128,7 +128,8 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
 
-            return nativeNodeGenerator.generate(tree, dbParameters);
+            IQTree transformedTree = mappingEqualityTransformer.transform(tree);
+            return nativeNodeGenerator.generate(transformedTree, dbParameters);
         }
 
         MappingAssertion createExpansion(ImmutableMap<Variable, DBConstant> values) {
@@ -146,12 +147,10 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                     .map(n -> iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
                     .orElseThrow(() -> new MinorOntopInternalBugException("The generated filter condition is empty for " + assertion + " with " + values));
 
-            IQTree transformedFilterTree = mappingEqualityTransformer.transform(filterTree);
-
             IQ iq = iqFactory.createIQ(assertion.getProjectionAtom(),
                     iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
                             instantiatedSub.getDomain(), instantiatedSub),
-                            transformedFilterTree));
+                            filterTree));
 
             return assertion.copyOf(iq);
         }
