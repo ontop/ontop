@@ -36,12 +36,12 @@ public class MappingCQCOptimizerTest {
         RelationPredicate company = table24Def.getAtomPredicate();
 
         DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company_reserves",
-            "cmpShare", integerType, false,
+            //"cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
         RelationPredicate companyReserves = table3Def.getAtomPredicate();
         ForeignKeyConstraint.builder("FK", table3Def, table24Def)
-                .add(3, 1)
+                .add(2, 1)
                 .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
@@ -49,7 +49,7 @@ public class MappingCQCOptimizerTest {
         final Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
         final Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
 
-        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1, fldNpdidField1, cmpNpdidCompany2));
+        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(companyReserves, fldNpdidField1, cmpNpdidCompany2));//cmpShare1,
         ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(company, cmpShortName2, cmpNpdidCompany2));
 
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
@@ -70,7 +70,7 @@ public class MappingCQCOptimizerTest {
         final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
         b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+                ATOM_FACTORY.getDataAtom(companyReserves, fldNpdidField1M, cmpNpdidCompany2M)); //cmpShare1M,
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
 

@@ -13,10 +13,8 @@ import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.spec.OBDASpecInput;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
-import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.ConstructionNodeFlattener;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
@@ -29,8 +27,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDatatypeFiller;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingEqualityTransformer;
 import it.unibz.inf.ontop.spec.mapping.validation.MappingOntologyComplianceValidator;
 import it.unibz.inf.ontop.spec.ontology.Ontology;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.LocalJDBCConnectionUtils;
 import org.apache.commons.rdf.api.Graph;
 
@@ -53,7 +49,6 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
     private final NoNullValueEnforcer noNullValueEnforcer;
-    private final ConstructionNodeFlattener constructionNodeFlattener;
     private final IntermediateQueryFactory iqFactory;
 
     private final MappingOntologyComplianceValidator ontologyComplianceValidator;
@@ -77,11 +72,10 @@ public class SQLMappingExtractor implements MappingExtractor {
                                 MappingDatatypeFiller mappingDatatypeFiller,
                                 OntopMappingSQLSettings settings,
                                 MappingCanonicalTransformer canonicalTransformer,
-                                SubstitutionFactory substitutionFactory,
                                 MappingCaster mappingCaster,
                                 MappingEqualityTransformer mappingEqualityTransformer,
                                 NoNullValueEnforcer noNullValueEnforcer,
-                                ConstructionNodeFlattener constructionNodeFlattener, IntermediateQueryFactory iqFactory,
+                                IntermediateQueryFactory iqFactory,
                                 MetaMappingExpander metamappingExpander,
                                 ImplicitDBConstraintsProviderFactory implicitDBConstraintExtractor,
                                 TypeFactory typeFactory) {
@@ -95,7 +89,6 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.mappingCaster = mappingCaster;
         this.mappingEqualityTransformer = mappingEqualityTransformer;
         this.noNullValueEnforcer = noNullValueEnforcer;
-        this.constructionNodeFlattener = constructionNodeFlattener;
         this.iqFactory = iqFactory;
         this.metamappingExpander = metamappingExpander;
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
@@ -158,9 +151,12 @@ public class SQLMappingExtractor implements MappingExtractor {
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         // no streams because of exception handling
         for (MappingAssertion assertion : expMapping) {
-            MappingAssertion equalityTransformed = mappingEqualityTransformer.transform(assertion);
-            MappingAssertion constructionNodeFlat = constructionNodeFlattener.transform(equalityTransformed);
-            MappingAssertion noNullAssertion = constructionNodeFlat.copyOf(noNullValueEnforcer.transform(constructionNodeFlat.getQuery()));
+            IQTree tree = assertion.getQuery().getTree();
+            IQTree equalityTransformedTree = mappingEqualityTransformer.transform(tree);
+            IQTree normalizedTree = equalityTransformedTree.normalizeForOptimization(assertion.getQuery().getVariableGenerator());
+            IQTree noNullTree = noNullValueEnforcer.transform(normalizedTree);
+            MappingAssertion noNullAssertion = assertion.copyOf(noNullTree, iqFactory);
+
             MappingAssertion filledProvAssertion = mappingDatatypeFiller.transform(noNullAssertion);
             MappingAssertion castAssertion = mappingCaster.transform(filledProvAssertion);
             builder.add(castAssertion);

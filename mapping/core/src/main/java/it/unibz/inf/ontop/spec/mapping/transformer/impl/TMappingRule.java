@@ -86,10 +86,8 @@ public class TMappingRule {
 	public IQ asIQ(IntermediateQueryFactory iqFactory, TermFactory termFactory, SubstitutionFactory substitutionFactory) {
 
 		// assumes that filterAtoms is a possibly empty list of non-empty lists
-		Optional<ImmutableExpression> mergedConditions = filter.stream()
-				.map(list -> list.stream()
-						.reduce((r, e) -> termFactory.getConjunction(e, r)).get())
-				.reduce((r, e) -> termFactory.getDisjunction(e, r));
+		Optional<ImmutableExpression> mergedConditions = termFactory.getDisjunction(
+				filter.stream().map(termFactory::getConjunction));
 
 		if (projectionAtom.getArity() != headTerms.size())
 			throw new MinorOntopInternalBugException("size mismatch");

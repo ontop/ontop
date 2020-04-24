@@ -156,11 +156,9 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     }
 
     private IQ toIQ(Collection<TMappingRule> rules) {
-        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-        return noNullValueEnforcer.transform(
-                queryMerger.mergeDefinitions(rules.stream()
+        return queryMerger.mergeDefinitions(rules.stream()
                         .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
-                        .collect(ImmutableCollectors.toList())).get())
+                        .collect(ImmutableCollectors.toList())).get()
                 .normalizeForOptimization();
     }
 

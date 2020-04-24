@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.constraints.ImmutableCQ;
 import it.unibz.inf.ontop.constraints.ImmutableCQContainmentCheck;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -37,13 +39,23 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     @Override
     public IQ optimize(ImmutableCQContainmentCheck<RelationPredicate> cqContainmentCheck, IQ query) {
 
-        IQTree tree0 = new FilterAbsorber(iqFactory, termFactory).apply(query.getTree());
+        //IQTree tree0 = new FilterAbsorber(iqFactory, termFactory).apply(query.getTree());
+        //IQTree tree = new InnerJoinFlattener(iqFactory, termFactory).apply(tree0);
 
-        IQTree tree = new InnerJoinFlattener(iqFactory, termFactory).apply(tree0);
+        IQTree tree = query.getTree().normalizeForOptimization(query.getVariableGenerator());
 
-        if (tree.getRootNode() instanceof ConstructionNode && tree.getChildren().size() == 1) {
-            ConstructionNode constructionNode = (ConstructionNode)tree.getRootNode();
-            IQTree joinTree = tree.getChildren().get(0);
+        //System.out.println(tree);
+        ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();
+        IQTree joinTree;
+        if (tree.getRootNode() instanceof ConstructionNode) {
+            joinTree = tree.getChildren().get(0);
+        }
+        else if (tree.getRootNode() instanceof InnerJoinNode) {
+            joinTree = tree;
+        }
+        else
+            throw new MinorOntopInternalBugException("unexpected tree");
+
             Optional<ImmutableList<ExtensionalDataNode>> c = IQ2CQ.getExtensionalDataNodes(joinTree);
             if (c.isPresent() && c.get().size() > 1) {
                 InnerJoinNode joinNode = (InnerJoinNode) joinTree.getRootNode();
@@ -87,10 +99,10 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
                 return iqFactory.createIQ(
                         query.getProjectionAtom(),
                         iqFactory.createUnaryIQTree(
-                                (ConstructionNode)tree.getRootNode(),
+                                constructionNode,
                                 IQ2CQ.toIQTree(children, joinNode.getOptionalFilterCondition(), iqFactory)));
             }
-        }
+
         return iqFactory.createIQ(query.getProjectionAtom(), tree);
     }
 }
