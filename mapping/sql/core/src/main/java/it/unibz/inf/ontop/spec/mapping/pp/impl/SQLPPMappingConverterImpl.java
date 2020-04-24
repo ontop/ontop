@@ -138,17 +138,27 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                                     + provenance.getProvenanceInfo() + "]")));
 
         ImmutableSubstitution<ImmutableTerm> sub = substitutionFactory.getSubstitution(map.entrySet().stream()
-                            .filter(e -> !e.getKey().equals(e.getValue()))
-                            .collect(ImmutableCollectors.toMap()));
+                .filter(e -> e.getValue() instanceof Variable)
+                .filter(e -> !e.getValue().equals(e.getKey()))
+                .collect(ImmutableCollectors.toMap()));
 
-        ImmutableSubstitution<ImmutableTerm> constructionSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
+        ImmutableSubstitution<ImmutableTerm> spoSubstitution = substitutionFactory.getSubstitution(target.getSubstitution().getImmutableMap().entrySet().stream()
                         .collect(ImmutableCollectors.toMap(Map.Entry::getKey,
                                 e -> sub.apply(e.getValue()))));
 
+        ImmutableSubstitution<ImmutableTerm> selectSubstitution = substitutionFactory.getSubstitution(
+                map.entrySet().stream()
+                        .filter(e -> !(e.getValue() instanceof Variable))
+                        .collect(ImmutableCollectors.toMap()));
+
+        IQTree selectTree = iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(spoSubstitution.getImmutableMap().values().stream()
+                        .flatMap(ImmutableTerm::getVariableStream).collect(ImmutableCollectors.toSet()), selectSubstitution),
+                tree);
+
         IQTree mappingTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                target.getProjectionAtom().getVariables(), constructionSubstitution), tree);
-        IQTree noNullsTree = noNullValueEnforcer.transform(mappingTree);
-        IQTree transformedTree = mappingEqualityTransformer.transform(noNullsTree);
+                target.getProjectionAtom().getVariables(), spoSubstitution), selectTree);
+        IQTree transformedTree = mappingEqualityTransformer.transform(mappingTree);
 
         return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), transformedTree), provenance);
     }

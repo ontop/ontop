@@ -115,12 +115,19 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
             System.out.println("START WITH " + assertion.getQuery());
-            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(),
-                    iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                            getTemplate().getVariableStream()
-                                    .collect(ImmutableCollectors.toSet()),
-                            substitutionFactory.getSubstitution()),
-                            assertion.getTopChild()));
+
+            IQTree topChildNotNull = termFactory.getConjunction(assertion.getTopChild().getVariables().stream()
+                    .map(termFactory::getDBIsNotNull))
+                    .map(iqFactory::createFilterNode)
+                    .map(n -> (IQTree)iqFactory.createUnaryIQTree(n, assertion.getTopChild()))
+                    .orElse(assertion.getTopChild());
+
+            IQTree constructionTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
+                    getTemplate().getVariableStream().collect(ImmutableCollectors.toSet()),
+                    substitutionFactory.getSubstitution()),
+                    topChildNotNull);
+
+            IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
 
             System.out.println("QQQQ: " + tree);
             NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
