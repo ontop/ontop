@@ -17,6 +17,7 @@ import java.util.List;
  * The Docker image and data for the Postgresql DB can be found at:
  * https://github.com/ontop/ontop-dockertests/tree/master/pgsql
  */
+@Ignore
 public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
 
     private static final String owlfile = "/denodo/bind/sparqlBind.owl";
