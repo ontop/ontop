@@ -69,14 +69,14 @@ public class DenodoSelectFromWhereSerializer implements SelectFromWhereSerialize
          * Adds a CONTEXT clause, so that the local time zone is set to uct
          * see https://community.denodo.com/docs/html/browse/6.0/vdp/vql/queries_select_statement/context_clause/context_clause
          */
-        @Override
-        public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
-            QuerySerialization qs = super.visit(selectFromWhere);
-            return new DefaultSelectFromWhereSerializer.QuerySerializationImpl(
-                    qs.getString() + CONTEXT,
-                    qs.getColumnIDs()
-            );
-        }
+//        @Override
+//        public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
+//            QuerySerialization qs = super.visit(selectFromWhere);
+//            return new DefaultSelectFromWhereSerializer.QuerySerializationImpl(
+//                    qs.getString() + CONTEXT,
+//                    qs.getColumnIDs()
+//            );
+//        }
     }
 
 }
