@@ -39,7 +39,9 @@ public class MappingAssertion {
     public PPMappingAssertionProvenance getProvenance() { return provenance; }
 
     public MappingAssertion copyOf(IQ query) {
-        return new MappingAssertion(index, query, provenance);
+        return (query.getProjectionAtom() == this.query.getProjectionAtom())
+                ? new MappingAssertion(index, query, provenance)
+                : new MappingAssertion(query, provenance);
     }
 
     public RDFAtomPredicate getRDFAtomPredicate() {

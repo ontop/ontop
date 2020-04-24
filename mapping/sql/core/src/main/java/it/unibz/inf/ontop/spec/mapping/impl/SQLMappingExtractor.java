@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.SQLPPSourceQueryFactory;
 import it.unibz.inf.ontop.spec.mapping.pp.SQLPPTriplesMap;
 import it.unibz.inf.ontop.spec.mapping.pp.impl.MetaMappingExpander;
-import it.unibz.inf.ontop.spec.mapping.pp.impl.PreMetaMappingExpander;
 import it.unibz.inf.ontop.spec.mapping.transformer.MappingCaster;
 import it.unibz.inf.ontop.spec.mapping.MappingExtractor;
 import it.unibz.inf.ontop.spec.mapping.parser.SQLMappingParser;
@@ -60,7 +59,6 @@ public class SQLMappingExtractor implements MappingExtractor {
     private final MappingCanonicalTransformer canonicalTransformer;
     private final MappingCaster mappingCaster;
     private final MappingEqualityTransformer mappingEqualityTransformer;
-    private final PreMetaMappingExpander expander;
     private final NoNullValueEnforcer noNullValueEnforcer;
     private final SubstitutionFactory substitutionFactory;
     private final IntermediateQueryFactory iqFactory;
@@ -102,7 +100,6 @@ public class SQLMappingExtractor implements MappingExtractor {
         this.substitutionFactory = substitutionFactory;
         this.iqFactory = iqFactory;
         this.metamappingExpander = metamappingExpander;
-        this.expander = new PreMetaMappingExpander(termFactory, substitutionFactory, rdfFactory, sourceQueryFactory);
         this.implicitDBConstraintExtractor = implicitDBConstraintExtractor;
         this.typeFactory = typeFactory;
     }
@@ -200,7 +197,6 @@ public class SQLMappingExtractor implements MappingExtractor {
                     constraintFile, metadataLoader);
 
             CachingMetadataLookup metadataLookup = new CachingMetadataLookup(implicitConstraints);
-            ImmutableList<SQLPPTriplesMap> expandedPPMapping = expander.getExpandedMappings(mapping, connection, metadataLookup);
             ImmutableList<MappingAssertion> provMapping = ppMappingConverter.convert(mapping, metadataLookup);
 
             metadataLookup.extractImmutableMetadata();

@@ -114,7 +114,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
         }
 
         NativeNode getDatabaseQuery(DBParameters dbParameters) {
-            System.out.println("START WITH " + assertion.getQuery());
 
             IQTree topChildNotNull = termFactory.getConjunction(assertion.getTopChild().getVariables().stream()
                     .map(termFactory::getDBIsNotNull))
@@ -129,14 +128,10 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
 
             IQTree tree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), constructionTree);
 
-            System.out.println("QQQQ: " + tree);
-            NativeNode nativeNode = nativeNodeGenerator.generate(tree, dbParameters);
-            System.out.println("MMMP: " + nativeNode.getNativeQueryString());
-            return nativeNode;
+            return nativeNodeGenerator.generate(tree, dbParameters);
         }
 
         MappingAssertion createExpansion(ImmutableMap<Variable, DBConstant> values) {
-            System.out.println("VALUES: " + values);
             String stringIri = instantiateTemplate(getTemplate(), values);
             ImmutableSubstitution<ImmutableTerm> instantiatedSub = assertion.getTopSubstitution()
                     .composeWith(substitutionFactory.getSubstitution(
@@ -158,7 +153,6 @@ public class MetaMappingExpanderImpl implements MetaMappingExpander {
                             instantiatedSub.getDomain(), instantiatedSub),
                             transformedFilterTree));
 
-            System.out.println("MME: " + iq);
             return assertion.copyOf(iq);
         }
 
