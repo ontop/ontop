@@ -72,7 +72,7 @@ public class DenodoDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     }
 
     /**
-     * The documentation of Denodo does not correspond to the implementation
+     * The documentation of Denodo does not correspond to the implementation.
      * In particular:
      * SUBSTR(<string> 1, 2)
      * returns the first character of <string>, whereas:
