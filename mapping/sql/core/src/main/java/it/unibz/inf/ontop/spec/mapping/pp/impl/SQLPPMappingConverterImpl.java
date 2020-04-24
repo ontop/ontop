@@ -121,21 +121,26 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, ImmutableTerm> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 
-        ImmutableMap<Variable, ImmutableTerm> targetMap =  target.getProjectionAtom().getArguments().stream()
-                .map(v -> target.getSubstitution().apply(v))
-                .flatMap(ImmutableTerm::getVariableStream)
-                .distinct()
-                .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
-
-        if (targetMap.containsValue(null))
-            throw new InvalidMappingSourceQueriesException(targetMap.entrySet().stream()
-                    .filter(e -> e.getValue() == null)
-                    .map(Map.Entry::getKey)
+        ImmutableMap<Variable, ImmutableTerm> targetMap;
+        try {
+            targetMap = target.getProjectionAtom().getArguments().stream()
+                    .map(v -> target.getSubstitution().apply(v))
+                    .flatMap(ImmutableTerm::getVariableStream)
+                    .distinct()
+                    .collect(ImmutableCollectors.toMap(Function.identity(), lookup));
+        }
+        catch (NullPointerException e) { // in lookup
+            throw new InvalidMappingSourceQueriesException(target.getProjectionAtom().getArguments().stream()
+                    .map(v -> target.getSubstitution().apply(v))
+                    .flatMap(ImmutableTerm::getVariableStream)
+                    .distinct()
+                    .filter(v -> lookup.apply(v) == null)
                     .map(Variable::getName)
                     .collect(Collectors.joining(", ",
                             "The placeholder(s) ",
                             " in the target do(es) not occur in source query of the mapping assertion\n["
                                     + provenance.getProvenanceInfo() + "]")));
+        }
 
         ImmutableSubstitution<ImmutableTerm> targetRenamingPart = substitutionFactory.getSubstitution(targetMap.entrySet().stream()
                 .filter(e -> e.getValue() instanceof Variable)
