@@ -40,6 +40,7 @@ public class InnerJoinFlattener {
                         .collect(ImmutableCollectors.toList());
 
                 if (!joinChildren.isEmpty()) {
+                    System.out.println("JOINCHILDREN" + joinChildren);
                     ImmutableList<ImmutableExpression> filters = joinChildren.stream()
                             .map(c -> ((InnerJoinNode) c.getRootNode()).getOptionalFilterCondition())
                             .filter(Optional::isPresent)

@@ -39,10 +39,10 @@ public class MappingCQCOptimizerImpl implements MappingCQCOptimizer {
     @Override
     public IQ optimize(ImmutableCQContainmentCheck<RelationPredicate> cqContainmentCheck, IQ query) {
 
-        //IQTree tree0 = new FilterAbsorber(iqFactory, termFactory).apply(query.getTree());
-        //IQTree tree = new InnerJoinFlattener(iqFactory, termFactory).apply(tree0);
+        IQTree tree0 = new FilterAbsorber(iqFactory, termFactory).apply(query.getTree());
+        IQTree tree = new InnerJoinFlattener(iqFactory, termFactory).apply(tree0);
 
-        IQTree tree = query.getTree().normalizeForOptimization(query.getVariableGenerator());
+        //IQTree tree = query.getTree().normalizeForOptimization(query.getVariableGenerator());
 
         //System.out.println(tree);
         ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();

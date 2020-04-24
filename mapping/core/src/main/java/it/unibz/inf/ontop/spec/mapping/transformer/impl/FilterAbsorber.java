@@ -69,6 +69,7 @@ public class FilterAbsorber {
                         .collect(ImmutableCollectors.toList());
 
                 if (!filterChildExpressions.isEmpty()) {
+                    System.out.println("FILTERFLAT");
                     return iqFactory.createNaryIQTree(
                             iqFactory.createInnerJoinNode(IQ2CQ.getConjunction(
                                     rootNode.getOptionalFilterCondition(),
