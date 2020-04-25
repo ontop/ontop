@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.iq;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -43,45 +44,46 @@ public class IQValidationTest {
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getStrictEquality(X, Y);
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
+        RelationDefinition table1Def = builder.createDatabaseRelation("TABLE1",
             "col1", integerDBType, false);
         TABLE1 = table1Def.getAtomPredicate();
 
-        RelationDefinition table11Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE11",
+        RelationDefinition table11Def = builder.createDatabaseRelation("TABLE11",
             "col1", integerDBType, false);
         TABLE1_1 = table11Def.getAtomPredicate();
 
-        RelationDefinition table12Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE12",
+        RelationDefinition table12Def = builder.createDatabaseRelation("TABLE12",
             "col1", integerDBType, false);
         TABLE1_2 = table12Def.getAtomPredicate();
 
-        RelationDefinition table13Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE13",
+        RelationDefinition table13Def = builder.createDatabaseRelation("TABLE13",
             "col1", integerDBType, false);
         TABLE1_3 = table13Def.getAtomPredicate();
 
-        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+        RelationDefinition table2Def = builder.createDatabaseRelation("TABLE2",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2 = table2Def.getAtomPredicate();
 
-        RelationDefinition table22Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
+        RelationDefinition table22Def = builder.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_2 = table22Def.getAtomPredicate();
 
-        RelationDefinition table23Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
+        RelationDefinition table23Def = builder.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_3 = table23Def.getAtomPredicate();
 
-        RelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE22",
+        RelationDefinition table24Def = builder.createDatabaseRelation("TABLE22",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE2_4 = table24Def.getAtomPredicate();
 
-        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
+        RelationDefinition table3Def = builder.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);

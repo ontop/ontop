@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -40,18 +41,19 @@ public class IQSyntacticEquivalenceCheckerTest {
     private final static ExtensionalDataNode DATA_NODE_2;
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1",
+        RelationDefinition table1Def = builder.createDatabaseRelation("TABLE1",
                 "col1", integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        RelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+        RelationDefinition table2Def = builder.createDatabaseRelation("TABLE2",
                 "col1", integerDBType, false,
                 "col2", integerDBType, false);
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
+        RelationDefinition table3Def = builder.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);

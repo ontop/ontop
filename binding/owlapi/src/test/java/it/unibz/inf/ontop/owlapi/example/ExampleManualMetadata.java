@@ -4,11 +4,11 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.reformulation.input.InputQueryFactory;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.OntopSystemFactory;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
 import it.unibz.inf.ontop.owlapi.connection.impl.DefaultOntopOWLConnection;
@@ -55,37 +55,34 @@ public class ExampleManualMetadata {
 		qst = connOWL.createStatement();
 	}
 
-	private static void defMeasTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	private static void defMeasTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
 		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
-				"value", dbTypeFactory.getDBDoubleType(), false,
-				"assembly", dbTypeFactory.getDBDoubleType(), false,
-				"sensor", dbTypeFactory.getDBDoubleType(), false);
+				"timestamp", dbMetadata.getDBTypeFactory().getDBDateTimestampType(), false,
+				"value", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
+				"assembly", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
+				"sensor", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static void defMessTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	private static void defMessTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
 		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"timestamp", dbTypeFactory.getDBDateTimestampType(), false,
-				"eventtext", dbTypeFactory.getDBDoubleType(), false,
-				"assembly", dbTypeFactory.getDBDoubleType(), false);
+				"timestamp", dbMetadata.getDBTypeFactory().getDBDateTimestampType(), false,
+				"eventtext", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
+				"assembly", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static void defStaticTable(DummyDBMetadataBuilder dbMetadata, DBTypeFactory dbTypeFactory, String name) {
+	private static void defStaticTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
 		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"domain", dbTypeFactory.getDBDoubleType(), false,
-				"range", dbTypeFactory.getDBDoubleType(), false);
+				"domain", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
+				"range", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static DummyDBMetadataBuilder getMeta(){
+	private static OfflineMetadataProviderBuilder getMeta(){
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		Injector defaultInjector = defaultConfiguration.getInjector();
+		OfflineMetadataProviderBuilder dbMetadata = new OfflineMetadataProviderBuilder(defaultConfiguration.getTypeFactory());
 
-		DummyDBMetadataBuilder dbMetadata = defaultInjector.getInstance(DummyDBMetadataBuilder.class);
-		DBTypeFactory dbTypeFactory = defaultConfiguration.getTypeFactory().getDBTypeFactory();
-
-		defMeasTable(dbMetadata, dbTypeFactory,"burner");
-		defMessTable(dbMetadata, dbTypeFactory,"events");
-		defStaticTable(dbMetadata, dbTypeFactory,"a_static");
+		defMeasTable(dbMetadata, "burner");
+		defMessTable(dbMetadata, "events");
+		defStaticTable(dbMetadata, "a_static");
 		return dbMetadata;
 	}
 

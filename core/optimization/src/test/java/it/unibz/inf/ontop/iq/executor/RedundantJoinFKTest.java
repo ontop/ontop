@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -14,7 +15,6 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
@@ -50,27 +50,27 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        DummyDBMetadataBuilder dbMetadata = DEFAULT_DUMMY_DB_METADATA;
-        DBTermType integerDBType =  dbMetadata.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType =  builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table1Def = dbMetadata.createDatabaseRelation("TABLE1",
+        DatabaseRelationDefinition table1Def = builder.createDatabaseRelation("TABLE1",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table2Def = dbMetadata.createDatabaseRelation("TABLE2",
+        DatabaseRelationDefinition table2Def = builder.createDatabaseRelation("TABLE2",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         ForeignKeyConstraint.of("fk2-1", table2Def.getAttribute(2), table1Def.getAttribute(1));
         TABLE2_PREDICATE = table2Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = dbMetadata.createDatabaseRelation("TABLE3",
+        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
         TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table4Def = dbMetadata.createDatabaseRelation("TABLE4",
+        DatabaseRelationDefinition table4Def = builder.createDatabaseRelation("TABLE4",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);

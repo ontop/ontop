@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.mapping.parser;
 
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
@@ -14,9 +15,10 @@ public abstract class AbstractBasicMappingMistakeTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
 
     static {
-        DBTypeFactory dbTypeFactory = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTypeFactory dbTypeFactory = builder.getDBTypeFactory();
 
-        DatabaseRelationDefinition personTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("PERSON",
+        DatabaseRelationDefinition personTable = builder.createDatabaseRelation("PERSON",
             "ID", dbTypeFactory.getDBLargeIntegerType(), false,
             "FNAME", dbTypeFactory.getDBStringType(), false);
         UniqueConstraint.primaryKeyOf(personTable.getAttribute(1));

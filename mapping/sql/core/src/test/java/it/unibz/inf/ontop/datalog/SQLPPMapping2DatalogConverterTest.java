@@ -23,6 +23,7 @@ package it.unibz.inf.ontop.datalog;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -39,11 +40,12 @@ import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private MetadataLookup getMetadataLookup() {
-		DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
-		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
+		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
+		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
 		// Database schema
-		DatabaseRelationDefinition table1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Student",
+		DatabaseRelationDefinition table1 = builder.createDatabaseRelation("Student",
 			"id", integerDBType, false,
 			"first_name", stringDBType, false,
 			"last_name", stringDBType, false,
@@ -51,20 +53,20 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 			"nationality", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table1.getAttribute(1));
 
-		DatabaseRelationDefinition table2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "Course",
+		DatabaseRelationDefinition table2 = builder.createDatabaseRelation( "Course",
 			"cid", stringDBType, false,
 			"title", stringDBType, false,
 			"credits", integerDBType, false,
 			"description", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table2.getAttribute(1));
 
-		DatabaseRelationDefinition table3 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Enrollment",
+		DatabaseRelationDefinition table3 = builder.createDatabaseRelation("Enrollment",
 			"student_id", integerDBType, false,
 			"course_id", stringDBType, false);
 		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2));
 
-		return DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(
+		return builder.getImmutableMetadataProvider(
 				ImmutableList.of(table1, table2, table3));
 	}
 

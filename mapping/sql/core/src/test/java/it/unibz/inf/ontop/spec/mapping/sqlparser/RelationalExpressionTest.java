@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -41,16 +42,17 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        MDFAC = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        MDFAC = builder.getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
 
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
-           "A", integerDBType, true,
-            "B", integerDBType, true);
+        P = builder.createDatabaseRelation("P",
+                "A", integerDBType, true,
+                "B", integerDBType, true);
 
         attX = P.getAttribute(1).getID();
         attY = P.getAttribute(2).getID();
@@ -71,7 +73,7 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        DatabaseRelationDefinition Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+        DatabaseRelationDefinition Q = builder.createDatabaseRelation("Q",
             "A", integerDBType, true,
             "C", integerDBType, true);
 

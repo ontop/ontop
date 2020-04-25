@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.executor;
 
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
@@ -63,12 +64,13 @@ public class FunctionalDependencyTest {
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static{
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: PK + non-unique functional constraint + 2 dependent fields + 1 independent
          */
-        DatabaseRelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+        DatabaseRelationDefinition table1Def = builder.createDatabaseRelation("table1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -85,7 +87,7 @@ public class FunctionalDependencyTest {
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
+        DatabaseRelationDefinition table2Def = builder.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -95,7 +97,7 @@ public class FunctionalDependencyTest {
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
          */
-        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
+        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("table3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -116,7 +118,7 @@ public class FunctionalDependencyTest {
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
          */
-        DatabaseRelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table4",
+        DatabaseRelationDefinition table4Def = builder.createDatabaseRelation("table4",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,

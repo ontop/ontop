@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -21,26 +22,26 @@ import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 import static junit.framework.TestCase.*;
 
 public class MappingSaturationTest {
-    private static final RelationPredicate P1_PREDICATE;
+    private static final RelationDefinition P1;
 
-    private static Variable A = TERM_FACTORY.getVariable("a");
-    private static Variable B = TERM_FACTORY.getVariable("b");
+    private static final Variable A = TERM_FACTORY.getVariable("a");
+    private static final Variable B = TERM_FACTORY.getVariable("b");
 
-    private static Variable S = TERM_FACTORY.getVariable("s");
-    private static Variable P = TERM_FACTORY.getVariable("p");
-    private static Variable O = TERM_FACTORY.getVariable("o");
+    private static final Variable S = TERM_FACTORY.getVariable("s");
+    private static final Variable P = TERM_FACTORY.getVariable("p");
+    private static final Variable O = TERM_FACTORY.getVariable("o");
 
     private static final String URI_TEMPLATE_PERSON, URI_TEMPLATE_COURSE1, URI_TEMPLATE_COURSE2;
 
     private static final IRI PROP_GIVES_LECTURE, PROP_TEACHES, PROP_GIVES_LAB, PROP_IS_TAUGHT_BY;
 
     static {
-        DBTermType largeIntDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType largeIntDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
+        P1 = builder.createDatabaseRelation("p1",
             "col1", largeIntDBType, false,
             "col12", largeIntDBType, false);
-        P1_PREDICATE = table1Def.getAtomPredicate();
 
         URI_TEMPLATE_PERSON =  "http://example.org/person/{}";
         URI_TEMPLATE_COURSE1 =  "http://example.org/uni1/course/{}";
@@ -80,7 +81,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE1, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B)));
+                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
 
             maTeaches = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }
@@ -95,7 +96,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE2, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B)));
+                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
 
             maGivesLab = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }
@@ -110,7 +111,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE2, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B)));
+                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
 
             maGivesLecture = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }

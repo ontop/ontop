@@ -11,7 +11,6 @@ public class DatabaseViewDefinition extends AbstractDatabaseRelationDefinition {
     private final String body;
 
     /**
-     * used only in DummyDBMetadataBuilder
      *
      * @param allIds
      * @param builder

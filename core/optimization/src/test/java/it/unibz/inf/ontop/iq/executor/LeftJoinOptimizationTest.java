@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.iq.executor;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -64,12 +65,13 @@ public class LeftJoinOptimizationTest {
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "TABLE1",
+        DatabaseRelationDefinition table1Def = builder.createDatabaseRelation( "TABLE1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, true);
@@ -79,7 +81,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+        DatabaseRelationDefinition table2Def = builder.createDatabaseRelation("TABLE2",
            "col1", integerDBType, false,
            "col2", integerDBType, false,
            "col3", integerDBType, false);
@@ -90,7 +92,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 3: composite unique constraint over the first TWO columns
          */
-        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE3",
+        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("TABLE3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -100,7 +102,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 1a: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table1aDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE1A",
+        DatabaseRelationDefinition table1aDef = builder.createDatabaseRelation("TABLE1A",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
@@ -111,7 +113,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 2a: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2aDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2A",
+        DatabaseRelationDefinition table2aDef = builder.createDatabaseRelation("TABLE2A",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -125,7 +127,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 4: non-composite unique constraint and nullable fk
          */
-        DatabaseRelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE4",
+        DatabaseRelationDefinition table4Def = builder.createDatabaseRelation("TABLE4",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, true);
@@ -136,7 +138,7 @@ public class LeftJoinOptimizationTest {
         /*
          * Table 5: nullable unique constraint
          */
-        DatabaseRelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE5",
+        DatabaseRelationDefinition table5Def = builder.createDatabaseRelation("TABLE5",
             "col1", integerDBType, true,
             "col2", integerDBType, false);
         UniqueConstraint.builder(table5Def, "uc5")

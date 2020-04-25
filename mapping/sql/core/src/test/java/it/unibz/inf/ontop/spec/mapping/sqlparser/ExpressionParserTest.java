@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
@@ -39,14 +40,14 @@ public class ExpressionParserTest {
     private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
     private static final DBBooleanFunctionSymbol IS_NULL = DB_FS_FACTORY.getDBIsNull();
 
-    private QuotedIDFactory IDFAC;
-    private DBTypeFactory DB_TYPE_FACTORY;
-    private DBTermType dbLongType;
+    private static final QuotedIDFactory IDFAC;
+    private static final DBTypeFactory DB_TYPE_FACTORY;
+    private static final DBTermType dbLongType;
 
-    @Before
-    public void beforeEachTest() {
-        IDFAC = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DB_TYPE_FACTORY = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
+    static {
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        IDFAC = builder.getQuotedIDFactory();
+        DB_TYPE_FACTORY = builder.getDBTypeFactory();
         dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();
     }
 

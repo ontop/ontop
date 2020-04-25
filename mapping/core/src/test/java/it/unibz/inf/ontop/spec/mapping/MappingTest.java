@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
@@ -54,26 +55,27 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
+        RelationDefinition table1Def = builder.createDatabaseRelation("p1",
             "col1", integerDBType, false,
             "col12", integerDBType, false);
         P1_PREDICATE = table1Def.getAtomPredicate();
 
-        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p3",
+        RelationDefinition table3Def = builder.createDatabaseRelation("p3",
             "col31", integerDBType, false);
         P3_PREDICATE = table3Def.getAtomPredicate();
 
-        RelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p4",
+        RelationDefinition table4Def = builder.createDatabaseRelation("p4",
             "col41", integerDBType, false);
         P4_PREDICATE = table4Def.getAtomPredicate();
 
-        RelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p5",
+        RelationDefinition table5Def = builder.createDatabaseRelation("p5",
             "col51", integerDBType, false);
         P5_PREDICATE = table5Def.getAtomPredicate();
 
-        RelationDefinition tableBrokerDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("brokerworksfor",
+        RelationDefinition tableBrokerDef = builder.createDatabaseRelation("brokerworksfor",
             "broker", integerDBType, false,
             "company", integerDBType, true,
             "client", integerDBType, true);
@@ -161,7 +163,7 @@ public class MappingTest {
 
             LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-            if(Stream.of(mappingAssertionVariables)
+            if (Stream.of(mappingAssertionVariables)
                     .anyMatch(variableUnion::contains)){
                 fail();
                 break;

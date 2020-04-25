@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -9,30 +10,27 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.*;
 import static it.unibz.inf.ontop.OptimizationTestingTools.*;
 import static org.junit.Assert.assertEquals;
 
 public class SelfJoinSameTermsTest {
 
-    public static RelationPredicate T1_AR3;
+    public static RelationDefinition T1_AR3;
 
     static {
-        T1_AR3 = createStringRelationPredicate(1, 3, true);
+        OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        T1_AR3 = builder.createStringRelationPredicate(1, 3, true);
     }
 
     @Test
     public void testSelfJoinElimination1() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, B, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -50,7 +48,7 @@ public class SelfJoinSameTermsTest {
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, B, 2, C));
+                T1_AR3, ImmutableMap.of(1, B, 2, C));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -69,17 +67,11 @@ public class SelfJoinSameTermsTest {
     @Ignore("TODO: try to support this quite complex case")
     @Test
     public void testSelfJoinElimination2() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, B, C));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, E, F));
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, C));
-
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, E, F));
-
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, G, H));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, G, H));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -115,14 +107,9 @@ public class SelfJoinSameTermsTest {
 
     @Test
     public void testSelfJoinElimination3() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, C));
-
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, E, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, B, C));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(T1_AR3, ImmutableList.of(E, B, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -140,7 +127,7 @@ public class SelfJoinSameTermsTest {
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
         ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, B, 2, C));
+                T1_AR3, ImmutableMap.of(1, B, 2, C));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -161,14 +148,9 @@ public class SelfJoinSameTermsTest {
 
         DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, constant, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, constant, C));
-
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, E, constant, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, constant, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, constant, C));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(T1_AR3, ImmutableList.of(E, constant, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -186,7 +168,7 @@ public class SelfJoinSameTermsTest {
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
         ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, constant, 2, C));
+                T1_AR3, ImmutableMap.of(1, constant, 2, C));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -204,14 +186,9 @@ public class SelfJoinSameTermsTest {
 
         DBConstant constant = TERM_FACTORY.getDBStringConstant("plop");
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, constant, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, constant, C));
-
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, E, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, constant, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, constant, C));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(T1_AR3, ImmutableList.of(E, B, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -229,7 +206,7 @@ public class SelfJoinSameTermsTest {
                 IQ_FACTORY.createUnaryIQTree(distinctNode, constructionTree));
 
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1, constant, 2, C));
+                T1_AR3, ImmutableMap.of(1, constant, 2, C));
 
         IQ expectedQuery = IQ_FACTORY.createIQ(
                 projectionAtom,
@@ -244,11 +221,8 @@ public class SelfJoinSameTermsTest {
 
     @Test
     public void testSelfJoinElimination6() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, B, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -284,17 +258,10 @@ public class SelfJoinSameTermsTest {
     @Ignore("TODO: try to support this quite complex case")
     @Test
     public void testSelfJoinElimination7() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, B, I));
-
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, E, F));
-
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, D, G, H));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, B, I));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, E, F));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(T1_AR3, ImmutableList.of(D, G, H));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -333,7 +300,7 @@ public class SelfJoinSameTermsTest {
     @Test
     public void testSelfJoinNonElimination1() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of( 1, B, 2, C));
+                T1_AR3, ImmutableMap.of( 1, B, 2, C));
         ExtensionalDataNode dataNode2 = dataNode1;
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
@@ -351,11 +318,8 @@ public class SelfJoinSameTermsTest {
 
     @Test
     public void testSelfJoinNonElimination2() {
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, A, B, D));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, E, F, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(A, B, D));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(E, F, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -373,10 +337,10 @@ public class SelfJoinSameTermsTest {
                 distinctTree);
 
         ExtensionalDataNode newDataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1,B));
+                T1_AR3, ImmutableMap.of(1,B));
 
         ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(2,C));
+                T1_AR3, ImmutableMap.of(2,C));
 
         NaryIQTree newJoinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -395,10 +359,10 @@ public class SelfJoinSameTermsTest {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, B, C);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(1,B));
+                T1_AR3, ImmutableMap.of(1,B));
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(2,C));
+                T1_AR3, ImmutableMap.of(2,C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -415,10 +379,10 @@ public class SelfJoinSameTermsTest {
     @Test
     public void testSelfJoinNonElimination3() {
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(0, A, 1,B));
+                T1_AR3, ImmutableMap.of(0, A, 1,B));
 
         ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                T1_AR3.getRelationDefinition(), ImmutableMap.of(0, A, 2,C));
+                T1_AR3, ImmutableMap.of(0, A, 2,C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -445,11 +409,8 @@ public class SelfJoinSameTermsTest {
         DBConstant constant1 = TERM_FACTORY.getDBStringConstant("cst1");
         DBConstant constant2 = TERM_FACTORY.getDBStringConstant("cst2");
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, constant1, B, C));
-
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(T1_AR3, constant2, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(T1_AR3, ImmutableList.of(constant1, B, C));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(T1_AR3, ImmutableList.of(constant2, B, C));
 
         NaryIQTree joinTree = IQ_FACTORY.createNaryIQTree(
                 IQ_FACTORY.createInnerJoinNode(),
@@ -471,6 +432,4 @@ public class SelfJoinSameTermsTest {
         IQ optimizedQuery = JOIN_LIKE_OPTIMIZER.optimize(initialQuery, EXECUTOR_REGISTRY);
         assertEquals(expectedQuery, optimizedQuery);
     }
-
-
 }

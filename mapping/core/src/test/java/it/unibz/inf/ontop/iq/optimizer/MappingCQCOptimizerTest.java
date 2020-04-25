@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -27,15 +28,15 @@ public class MappingCQCOptimizerTest {
 
     @Test
     public void test() {
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company",
+        DatabaseRelationDefinition table24Def = builder.createDatabaseRelation("company",
             "cmpNpdidCompany", integerType, false,
             "cmpShortName", integerType, false);
         RelationPredicate company = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company_reserves",
+        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("company_reserves",
             //"cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
@@ -91,21 +92,21 @@ public class MappingCQCOptimizerTest {
     public void test_foreign_keys() {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition addressTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("address",
+        DatabaseRelationDefinition addressTable = builder.createDatabaseRelation("address",
             "address_id", integerType, false,
             "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("store",
+        DatabaseRelationDefinition storeTable = builder.createDatabaseRelation("store",
             "store_id", integerType, false,
             "address_id", integerType, false,
             "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("staff",
+        DatabaseRelationDefinition staffTable = builder.createDatabaseRelation("staff",
             "staff_id", integerType, false,
             "address_id", integerType, false,
             "store_id", integerType, false);

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import fj.P;
 import fj.P2;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.exception.IntermediateQueryBuilderException;
 import it.unibz.inf.ontop.iq.node.*;
@@ -76,12 +77,13 @@ public class RedundantSelfJoinTest {
     private final static ImmutableExpression EXPRESSION1 = TERM_FACTORY.getStrictEquality(M, N);
 
     static{
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: non-composite unique constraint and regular field
          */
-        TABLE_1 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table1",
+        TABLE_1 = builder.createDatabaseRelation("table1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -91,7 +93,7 @@ public class RedundantSelfJoinTest {
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table2",
+        DatabaseRelationDefinition table2Def = builder.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -101,7 +103,7 @@ public class RedundantSelfJoinTest {
         /*
          * Table 3: composite unique constraint over the first TWO columns
          */
-        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table3",
+        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("table3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
@@ -111,7 +113,7 @@ public class RedundantSelfJoinTest {
         /*
          * Table 4: unique constraint over the first column
          */
-        DatabaseRelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table4",
+        DatabaseRelationDefinition table4Def = builder.createDatabaseRelation("table4",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
@@ -120,7 +122,7 @@ public class RedundantSelfJoinTest {
         /*
          * Table 5: unique constraint over the second column
          */
-        DatabaseRelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table5",
+        DatabaseRelationDefinition table5Def = builder.createDatabaseRelation("table5",
             "col1", integerDBType, false,
             "col2", integerDBType, false);
         UniqueConstraint.primaryKeyOf(table5Def.getAttribute(2));
@@ -129,7 +131,7 @@ public class RedundantSelfJoinTest {
         /*
          * Table 6: two atomic unique constraints over the first and third columns
          */
-        DatabaseRelationDefinition table6Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("table6",
+        DatabaseRelationDefinition table6Def = builder.createDatabaseRelation("table6",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);

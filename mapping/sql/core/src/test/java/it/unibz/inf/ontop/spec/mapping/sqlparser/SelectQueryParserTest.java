@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -408,23 +409,24 @@ public class SelectQueryParserTest {
     }
 
     private SelectQueryParser createParser() {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        TABLE_P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
+        TABLE_P = builder.createDatabaseRelation("P",
             "A", integerDBType, false,
             "B", integerDBType, false);
 
-        TABLE_Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+        TABLE_Q = builder.createDatabaseRelation("Q",
             "A", integerDBType, false,
             "C", integerDBType, false);
 
-        TABLE_R = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("R",
+        TABLE_R = builder.createDatabaseRelation("R",
             "A", integerDBType, false,
             "B", integerDBType, false,
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(
+        MetadataLookup metadataLookup = builder.getImmutableMetadataProvider(
                 ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
 
         return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);

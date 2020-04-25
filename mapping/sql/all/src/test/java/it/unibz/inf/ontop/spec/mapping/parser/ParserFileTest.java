@@ -28,7 +28,7 @@ import java.net.URISyntaxException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.DummyDBMetadataBuilder;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopMappingSQLAllConfiguration;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import junit.framework.TestCase;
@@ -129,8 +129,7 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
-
-		QuotedIDFactory idfac = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
 
         /**
          * Problems found in the mapping file.
@@ -150,7 +149,7 @@ public class ParserFileTest extends TestCase {
 		log.debug("=========== " + identifier + " ===========");
 		for (SQLPPTriplesMap axiom : mappings) {
 			String query = axiom.getSourceQuery().toString();
-			boolean result = parse(query, idfac);
+			boolean result = parse(query, builder.getQuotedIDFactory());
 
 			if (!result) {
 				log.error("Cannot parse query: " + query);
@@ -161,7 +160,7 @@ public class ParserFileTest extends TestCase {
 		}
 	}
 
-	private SQLPPMapping load(String file) throws InvalidMappingException, IOException {
+	private SQLPPMapping load(String file)  {
 		final String obdafile = file.substring(0, file.length() - 3) + "obda";
         try {
             return mappingParser.parse(new File(obdafile));
