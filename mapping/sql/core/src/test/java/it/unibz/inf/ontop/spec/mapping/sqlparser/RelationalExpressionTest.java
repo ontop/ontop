@@ -42,7 +42,7 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         MDFAC = builder.getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");

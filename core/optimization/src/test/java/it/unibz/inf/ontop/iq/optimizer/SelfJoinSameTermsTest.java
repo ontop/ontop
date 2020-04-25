@@ -22,7 +22,7 @@ public class SelfJoinSameTermsTest {
     public static RelationDefinition T1_AR3;
 
     static {
-        OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         T1_AR3 = builder.createStringRelationPredicate(1, 3, true);
     }
 

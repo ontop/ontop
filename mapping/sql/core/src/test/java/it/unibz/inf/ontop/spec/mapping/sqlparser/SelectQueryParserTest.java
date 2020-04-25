@@ -409,7 +409,7 @@ public class SelectQueryParserTest {
     }
 
     private SelectQueryParser createParser() {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE_P = builder.createDatabaseRelation("P",
@@ -426,8 +426,7 @@ public class SelectQueryParserTest {
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = builder.getImmutableMetadataProvider(
-                ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
+        MetadataLookup metadataLookup = builder.build();
 
         return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
     }

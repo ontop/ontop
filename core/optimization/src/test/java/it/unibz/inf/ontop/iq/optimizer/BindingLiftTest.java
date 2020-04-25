@@ -2361,7 +2361,7 @@ public class BindingLiftTest {
 
     @Test
     public void testProvenanceVariableAndProjection1() {
-        OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         RelationDefinition table1Ar2 = builder.createStringRelationPredicate(1, 2, true);
         RelationDefinition table2Ar2 = builder.createStringRelationPredicate(2, 2, true);
 

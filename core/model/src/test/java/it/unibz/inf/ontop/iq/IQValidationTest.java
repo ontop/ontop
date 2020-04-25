@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Test;
 
 import static it.unibz.inf.ontop.OntopModelTestingTools.*;
@@ -44,7 +43,7 @@ public class IQValidationTest {
     private final static ImmutableExpression EXPRESSION = TERM_FACTORY.getStrictEquality(X, Y);
 
     static {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         RelationDefinition table1Def = builder.createDatabaseRelation("TABLE1",

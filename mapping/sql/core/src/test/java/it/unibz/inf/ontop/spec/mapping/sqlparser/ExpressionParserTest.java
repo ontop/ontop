@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
@@ -22,7 +21,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -45,7 +43,7 @@ public class ExpressionParserTest {
     private static final DBTermType dbLongType;
 
     static {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         IDFAC = builder.getQuotedIDFactory();
         DB_TYPE_FACTORY = builder.getDBTypeFactory();
         dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();

@@ -94,7 +94,7 @@ public class MappingTestingTools {
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
-        OfflineMetadataProviderBuilder2 builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder2 builder = createMetadataProviderBuilder();
         TABLE1_AR2 = builder.createRelationPredicate(1, 2);
         TABLE2_AR2 = builder.createRelationPredicate(2, 2);
         TABLE1_AR3 = builder.createRelationPredicate(4, 3);
@@ -107,7 +107,7 @@ public class MappingTestingTools {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    public static OfflineMetadataProviderBuilder2 createMetadataBuilder() {
+    public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {
         return new OfflineMetadataProviderBuilder2(TYPE_FACTORY);
     }
 

@@ -44,7 +44,7 @@ public class SQLAllMappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
     }
 
-    public static OfflineMetadataProviderBuilder createMetadataBuilder() {
+    public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
         return new OfflineMetadataProviderBuilder(TYPE_FACTORY);
     }
 

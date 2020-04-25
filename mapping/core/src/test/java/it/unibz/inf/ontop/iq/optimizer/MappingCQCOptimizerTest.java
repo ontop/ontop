@@ -28,7 +28,7 @@ public class MappingCQCOptimizerTest {
 
     @Test
     public void test() {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition table24Def = builder.createDatabaseRelation("company",
@@ -92,7 +92,7 @@ public class MappingCQCOptimizerTest {
     public void test_foreign_keys() {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         DatabaseRelationDefinition addressTable = builder.createDatabaseRelation("address",

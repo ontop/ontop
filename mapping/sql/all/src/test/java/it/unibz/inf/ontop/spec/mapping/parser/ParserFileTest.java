@@ -129,7 +129,7 @@ public class ParserFileTest extends TestCase {
 	// ------- Utility methods
 
 	private void execute(SQLPPMapping ppMapping, URI identifier) {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 
         /**
          * Problems found in the mapping file.

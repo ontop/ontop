@@ -3,15 +3,12 @@ package it.unibz.inf.ontop.spec.dbschema;
 import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 import static org.junit.Assert.*;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.dbschema.impl.QuotedIDImpl;
 import it.unibz.inf.ontop.dbschema.impl.RawQuotedIDFactory;
-import it.unibz.inf.ontop.dbschema.impl.RelationIDImpl;
 import org.junit.Test;
 
 public class QuotedIdentifierTest {
@@ -19,7 +16,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1() {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		QuotedIDFactory fac = builder.getQuotedIDFactory();
 		QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(fac);
 
@@ -54,7 +51,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1b() {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		QuotedIDFactory fac = builder.getQuotedIDFactory();
 
 		Set<QuotedID> s = ImmutableSet.of(
@@ -66,7 +63,7 @@ public class QuotedIdentifierTest {
 
 	@Test
 	public void test1c() {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		QuotedIDFactory fac = builder.getQuotedIDFactory();
 
 		QualifiedAttributeID a1 = new QualifiedAttributeID(null, fac.createAttributeID("aaa"));

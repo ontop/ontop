@@ -1,9 +1,8 @@
 package it.unibz.inf.ontop;
 
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataBuilder;
+import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataProviderBuilder;
 
 public class DependencyTestDBMetadata {
 
@@ -30,7 +29,7 @@ public class DependencyTestDBMetadata {
     public static final RelationDefinition PK_TABLE7_AR4;
 
     static {
-        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         PK_TABLE1_AR1 = builder.createRelationWithPK(1, 1);
         PK_TABLE2_AR1 = builder.createRelationWithPK(2, 1);
         PK_TABLE3_AR1 = builder.createRelationWithPK(3, 1);

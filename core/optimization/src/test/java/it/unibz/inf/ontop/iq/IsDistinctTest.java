@@ -21,7 +21,7 @@ public class IsDistinctTest {
 
 
     static {
-        OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         NULLABLE_UC_TABLE1_AR1 = builder.createRelationWithUC( 1, 1, true);
         NULLABLE_UC_TABLE2_AR2 = builder.createRelationWithUC( 2, 2, true);
     }

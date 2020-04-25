@@ -55,7 +55,7 @@ public class OntopModelTestingTools {
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
     }
 
-    public static OfflineMetadataProviderBuilder createMetadataBuilder() {
+    public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
         return new OfflineMetadataProviderBuilder(TYPE_FACTORY);
     }
 }

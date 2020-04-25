@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.proposal.impl.InnerJoinOptimizationProposalImpl;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class RedundantJoinFKTest {
         /**
          * build the FKs
          */
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType =  builder.getDBTypeFactory().getDBLargeIntegerType();
 
         TABLE1 = builder.createDatabaseRelation("TABLE1",

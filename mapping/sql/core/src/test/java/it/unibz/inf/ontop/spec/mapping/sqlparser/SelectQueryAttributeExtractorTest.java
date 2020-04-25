@@ -14,8 +14,8 @@ public class SelectQueryAttributeExtractorTest {
 
     @Test
     public void test_1() throws InvalidSelectQueryException {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
-        MetadataLookup metadataLookup = builder.getImmutableMetadataProvider(ImmutableList.of());
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
 
         SelectQueryAttributeExtractor aex = new SelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);

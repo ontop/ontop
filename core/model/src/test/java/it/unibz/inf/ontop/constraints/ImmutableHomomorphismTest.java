@@ -103,7 +103,7 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_negative() {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
         DatabaseRelationDefinition A = builder.createDatabaseRelation("ADDRESS",

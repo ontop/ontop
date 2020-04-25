@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.executor;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -7,11 +8,9 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,10 +24,10 @@ import static junit.framework.TestCase.assertTrue;
  */
 public class FunctionalDependencyTest {
 
-    private final static RelationPredicate TABLE1_PREDICATE;
-    private final static RelationPredicate TABLE2_PREDICATE;
-    private final static RelationPredicate TABLE3_PREDICATE;
-    private final static RelationPredicate TABLE4_PREDICATE;
+    private final static DatabaseRelationDefinition TABLE1;
+    private final static DatabaseRelationDefinition TABLE2;
+    private final static DatabaseRelationDefinition TABLE3;
+    private final static DatabaseRelationDefinition TABLE4;
 
     private final static AtomPredicate ANS1_PREDICATE_AR_1 = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS1_PREDICATE_AR_2 = ATOM_FACTORY.getRDFAnswerPredicate(2);
@@ -64,77 +63,73 @@ public class FunctionalDependencyTest {
     private final static DBConstant THREE = TERM_FACTORY.getDBConstant("3", TYPE_FACTORY.getDBTypeFactory().getDBLargeIntegerType());
 
     static{
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
          * Table 1: PK + non-unique functional constraint + 2 dependent fields + 1 independent
          */
-        DatabaseRelationDefinition table1Def = builder.createDatabaseRelation("table1",
+        TABLE1 = builder.createDatabaseRelation("table1",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false);
-        UniqueConstraint.primaryKeyOf(table1Def.getAttribute(1));
-        FunctionalDependency.defaultBuilder(table1Def)
+        UniqueConstraint.primaryKeyOf(TABLE1.getAttribute(1));
+        FunctionalDependency.defaultBuilder(TABLE1)
                 .addDeterminant(2)
                 .addDependent(3)
                 .addDependent(4)
                 .build();
-        TABLE1_PREDICATE = table1Def.getAtomPredicate();
 
         /*
          * Table 2: non-composite unique constraint and regular field
          */
-        DatabaseRelationDefinition table2Def = builder.createDatabaseRelation("table2",
+        TABLE2 = builder.createDatabaseRelation("table2",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false);
-        UniqueConstraint.primaryKeyOf(table2Def.getAttribute(2));
-        TABLE2_PREDICATE = table2Def.getAtomPredicate();
+        UniqueConstraint.primaryKeyOf(TABLE2.getAttribute(2));
 
         /*
          * Table 3: PK + 2 independent non-unique functional constraints + 1 independent
          */
-        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("table3",
+        TABLE3 = builder.createDatabaseRelation("table3",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false,
             "col6", integerDBType, false);
-        UniqueConstraint.primaryKeyOf(table3Def.getAttribute(1));
-        FunctionalDependency.defaultBuilder(table3Def)
+        UniqueConstraint.primaryKeyOf(TABLE3.getAttribute(1));
+        FunctionalDependency.defaultBuilder(TABLE3)
                 .addDeterminant(2)
                 .addDependent(3)
                 .build();
-        FunctionalDependency.defaultBuilder(table3Def)
+        FunctionalDependency.defaultBuilder(TABLE3)
                 .addDeterminant(4)
                 .addDependent(5)
                 .build();
-        TABLE3_PREDICATE = table3Def.getAtomPredicate();
 
         /*
          * Table 4: PK + 2 non-unique functional constraints (one is nested) + 1 independent attribute
          */
-        DatabaseRelationDefinition table4Def = builder.createDatabaseRelation("table4",
+        TABLE4 = builder.createDatabaseRelation("table4",
             "col1", integerDBType, false,
             "col2", integerDBType, false,
             "col3", integerDBType, false,
             "col4", integerDBType, false,
             "col5", integerDBType, false);
-        UniqueConstraint.primaryKeyOf(table4Def.getAttribute(1));
-        FunctionalDependency.defaultBuilder(table4Def)
+        UniqueConstraint.primaryKeyOf(TABLE4.getAttribute(1));
+        FunctionalDependency.defaultBuilder(TABLE4)
                 .addDeterminant(3)
                 .addDependent(4)
                 .build();
-        FunctionalDependency.defaultBuilder(table4Def)
+        FunctionalDependency.defaultBuilder(TABLE4)
                 .addDeterminant(2)
                 .addDependent(3)
                 .addDependent(4)
                 .build();
-        TABLE4_PREDICATE = table4Def.getAtomPredicate();
     }
 
     @Test
@@ -151,12 +146,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -164,8 +157,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, C, D));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -189,12 +181,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, F, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -202,8 +192,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, Z, C));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, Z, C));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -227,12 +216,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, Z, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, Z, B, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, F, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -246,8 +233,7 @@ public class FunctionalDependencyTest {
         ConstructionNode otherConstructionNode = IQ_FACTORY.createConstructionNode(newRootNode.getChildVariables());
         expectedQueryBuilder.addChild(distinctNode, otherConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, B, G));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, B, G));
         expectedQueryBuilder.addChild(otherConstructionNode, dataNode3);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -268,12 +254,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, Y, X, F));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, Y, X, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -281,8 +265,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, X, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, X, D));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -304,12 +287,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -317,8 +298,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -341,16 +321,13 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3= IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, A, I, J, K));
+        ExtensionalDataNode dataNode3= createExtensionalDataNode(TABLE1, ImmutableList.of(H, A, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
         IntermediateQuery query = queryBuilder.build();
@@ -358,8 +335,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode4);
 
@@ -382,20 +358,16 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, M, N, O));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -406,12 +378,10 @@ public class FunctionalDependencyTest {
 
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, O));
+        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, I, J, O));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -433,20 +403,16 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, Z));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, M, N, Z));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -457,12 +423,10 @@ public class FunctionalDependencyTest {
 
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, Z));
+        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, I, J, Z));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -484,20 +448,16 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, G));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, M, N, G));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -505,8 +465,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
         expectedQueryBuilder.addChild(topConstructionNode, dataNode5);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -528,20 +487,16 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, E, Z, TWO));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, E, Z, TWO));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, H, F, I, J, K));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(H, F, I, J, K));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, M, N, O));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, M, N, O));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -552,16 +507,13 @@ public class FunctionalDependencyTest {
 
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, B, Z, TWO));
+        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, B, Z, TWO));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
-        ExtensionalDataNode dataNode7 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, L, F, I, J, O));
+        ExtensionalDataNode dataNode7 = createExtensionalDataNode(TABLE1, ImmutableList.of(L, F, I, J, O));
         expectedQueryBuilder.addChild(joinNode, dataNode7);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -584,12 +536,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, X, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, F, G, H));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, X, F, G, H));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -598,8 +548,7 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, B, C, H));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, X, B, C, H));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -622,12 +571,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, A, X, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, X, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, Y, F, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, X, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -636,8 +583,7 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, X, Y, C, G));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, X, Y, C, G));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -663,12 +609,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, F, G, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, F, G, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -678,12 +622,10 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, D));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, B, C, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, B, C, Y));
         expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -705,12 +647,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, E, F));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(Y, A, Y, E, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -719,12 +659,10 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, Y, C, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, Y, C, D));
         expectedQueryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, Y, A, Y, C, F));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(Y, A, Y, C, F));
         expectedQueryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -746,12 +684,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, ONE, B, C));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, ONE, B, C));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, D, A, TWO, E, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(D, A, TWO, E, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -776,12 +712,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictNEquality(B, TWO));
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, TWO, F, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -806,12 +740,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getStrictNEquality(F, TWO));
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, B, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, B, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, E, A, TWO, F, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(E, A, TWO, F, Y));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -836,12 +768,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE3, ImmutableList.of(F, A, Y, G, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -849,8 +779,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -873,20 +802,16 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, G, H, I));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE3, ImmutableList.of(F, A, Y, G, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, J, K, L, M, O, P));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3, ImmutableList.of(J, K, L, M, O, P));
         queryBuilder.addChild(joinNode, dataNode3);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, Q, R, S, M, T, U));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE3, ImmutableList.of(Q, R, S, M, T, U));
         queryBuilder.addChild(joinNode, dataNode4);
 
         IntermediateQuery query = queryBuilder.build();
@@ -897,13 +822,11 @@ public class FunctionalDependencyTest {
 
         expectedQueryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(joinNode, dataNode5);
 
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, Q, R, S, M, O, U));
+        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE3, ImmutableList.of(Q, R, S, M, O, U));
         expectedQueryBuilder.addChild(joinNode, dataNode6);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -926,12 +849,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, B, C, D, E));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, B, C, D, E));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, F, A, Y, C, H, I));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE3, ImmutableList.of(F, A, Y, C, H, I));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -940,8 +861,7 @@ public class FunctionalDependencyTest {
         expectedQueryBuilder.init(projectionAtom, distinctNode);
         expectedQueryBuilder.addChild(distinctNode, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE3_PREDICATE, X, A, Y, C, D, E));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3, ImmutableList.of(X, A, Y, C, D, E));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -964,12 +884,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, Y, F, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4, ImmutableList.of(E, A, Y, F, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -977,8 +895,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, Y, C, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, A, Y, C, D));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -1001,12 +918,10 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(topConstructionNode, joinNode);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, C, D));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, A, B, C, D));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, E, A, B, Y, G));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4, ImmutableList.of(E, A, B, Y, G));
         queryBuilder.addChild(joinNode, dataNode2);
 
         IntermediateQuery query = queryBuilder.build();
@@ -1014,8 +929,7 @@ public class FunctionalDependencyTest {
         IntermediateQueryBuilder expectedQueryBuilder = createQueryBuilder();
         expectedQueryBuilder.init(projectionAtom, topConstructionNode);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_PREDICATE, X, A, B, Y, D));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4, ImmutableList.of(X, A, B, Y, D));
 
         expectedQueryBuilder.addChild(topConstructionNode, dataNode3);
 
@@ -1041,16 +955,13 @@ public class FunctionalDependencyTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         queryBuilder.addChild(leftJoinNode, joinNode, LEFT);
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
         queryBuilder.addChild(joinNode, dataNode1);
 
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, C, A, D, E, F));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE1, ImmutableList.of(C, A, D, E, F));
         queryBuilder.addChild(joinNode, dataNode2);
 
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, F, H, I, J, K));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE1, ImmutableList.of(F, H, I, J, K));
         queryBuilder.addChild(leftJoinNode, dataNode3, RIGHT);
 
         IntermediateQuery query = queryBuilder.build();
@@ -1060,8 +971,7 @@ public class FunctionalDependencyTest {
         expectedBuilder.addChild(distinctNode, topConstructionNode);
         expectedBuilder.addChild(topConstructionNode, leftJoinNode);
 
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_PREDICATE, X, A, B, Z, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1, ImmutableList.of(X, A, B, Z, Y));
 
         expectedBuilder.addChild(leftJoinNode, dataNode4, LEFT);
 

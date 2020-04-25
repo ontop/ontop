@@ -40,7 +40,7 @@ import static it.unibz.inf.ontop.utils.SQLMappingTestingTools.*;
 public class SQLPPMapping2DatalogConverterTest extends TestCase {
 
 	private MetadataLookup getMetadataLookup() {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
@@ -66,8 +66,7 @@ public class SQLPPMapping2DatalogConverterTest extends TestCase {
 		UniqueConstraint.primaryKeyOf(table3.getAttribute(1),
 				table3.getAttribute(2));
 
-		return builder.getImmutableMetadataProvider(
-				ImmutableList.of(table1, table2, table3));
+		return builder.build();
 	}
 
 	private void runAnalysis(String source, String targetString) throws Exception {

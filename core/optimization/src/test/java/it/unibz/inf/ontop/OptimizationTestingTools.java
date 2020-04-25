@@ -175,7 +175,7 @@ public class OptimizationTestingTools {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    public static OfflineMetadataProviderBuilder3 createMetadataBuilder() {
+    public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {
         return new OfflineMetadataProviderBuilder3(TYPE_FACTORY);
     }
 

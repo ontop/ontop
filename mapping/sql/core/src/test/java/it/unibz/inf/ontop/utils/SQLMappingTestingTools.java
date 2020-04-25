@@ -58,7 +58,7 @@ public class SQLMappingTestingTools {
         SOURCE_QUERY_FACTORY = injector.getInstance(SQLPPSourceQueryFactory.class);
     }
 
-    public static OfflineMetadataProviderBuilder createMetadataBuilder() {
+    public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
         return new OfflineMetadataProviderBuilder(CORE_SINGLETONS.getTypeFactory());
     }
 }

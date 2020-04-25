@@ -2,7 +2,7 @@ package it.unibz.inf.ontop;
 
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 
-import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataBuilder;
+import static it.unibz.inf.ontop.OptimizationTestingTools.createMetadataProviderBuilder;
 
 public class NoDependencyTestDBMetadata {
 
@@ -36,7 +36,7 @@ public class NoDependencyTestDBMetadata {
 
 
     static {
-        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataBuilder();
+        OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
         TABLE1_AR1 = builder.createStringRelationPredicate(1, 1, false);
         TABLE2_AR1 = builder.createStringRelationPredicate(2, 1, false);
         TABLE3_AR1 = builder.createStringRelationPredicate(3, 1, false);

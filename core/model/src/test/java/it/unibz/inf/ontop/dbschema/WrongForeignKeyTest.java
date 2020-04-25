@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import org.junit.Test;
 
-import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataBuilder;
+import static it.unibz.inf.ontop.OntopModelTestingTools.createMetadataProviderBuilder;
 
 
 /**
@@ -16,7 +16,7 @@ public class WrongForeignKeyTest {
     private static final DatabaseRelationDefinition table1Def, table2Def, table3Def;
 
     static {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         ID_FACTORY = builder.getQuotedIDFactory();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 

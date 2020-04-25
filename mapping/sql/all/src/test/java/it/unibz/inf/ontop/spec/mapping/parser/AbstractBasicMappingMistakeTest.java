@@ -15,7 +15,7 @@ public abstract class AbstractBasicMappingMistakeTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicMappingMistakeTest.class);
 
     static {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTypeFactory dbTypeFactory = builder.getDBTypeFactory();
 
         DatabaseRelationDefinition personTable = builder.createDatabaseRelation("PERSON",

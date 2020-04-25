@@ -29,7 +29,7 @@ public class ImplicitDBConstraintsTest {
 	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
 
 	static {
-		OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
 		TABLENAME = builder.createDatabaseRelation("TABLENAME",
@@ -39,7 +39,7 @@ public class ImplicitDBConstraintsTest {
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = builder.getImmutableMetadataProvider(ImmutableList.of(TABLENAME, TABLE2));
+		md = builder.build();
 	}
 	
 	@Test

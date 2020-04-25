@@ -55,35 +55,35 @@ public class ExampleManualMetadata {
 		qst = connOWL.createStatement();
 	}
 
-	private static void defMeasTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"timestamp", dbMetadata.getDBTypeFactory().getDBDateTimestampType(), false,
-				"value", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
-				"assembly", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
-				"sensor", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
+	private static void defMeasTable(OfflineMetadataProviderBuilder builder) {
+		builder.createDatabaseRelation("burner",
+				"timestamp", builder.getDBTypeFactory().getDBDateTimestampType(), false,
+				"value", builder.getDBTypeFactory().getDBDoubleType(), false,
+				"assembly", builder.getDBTypeFactory().getDBDoubleType(), false,
+				"sensor", builder.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static void defMessTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"timestamp", dbMetadata.getDBTypeFactory().getDBDateTimestampType(), false,
-				"eventtext", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
-				"assembly", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
+	private static void defMessTable(OfflineMetadataProviderBuilder builder) {
+		builder.createDatabaseRelation("events",
+				"timestamp", builder.getDBTypeFactory().getDBDateTimestampType(), false,
+				"eventtext", builder.getDBTypeFactory().getDBDoubleType(), false,
+				"assembly", builder.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static void defStaticTable(OfflineMetadataProviderBuilder dbMetadata, String name) {
-		RelationDefinition tableDefinition = dbMetadata.createDatabaseRelation(name,
-				"domain", dbMetadata.getDBTypeFactory().getDBDoubleType(), false,
-				"range", dbMetadata.getDBTypeFactory().getDBDoubleType(), false);
+	private static void defStaticTable(OfflineMetadataProviderBuilder builder) {
+		builder.createDatabaseRelation("a_static",
+				"domain", builder.getDBTypeFactory().getDBDoubleType(), false,
+				"range", builder.getDBTypeFactory().getDBDoubleType(), false);
 	}
 
-	private static OfflineMetadataProviderBuilder getMeta(){
+	private static MetadataProvider getMeta(){
 		OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder().build();
-		OfflineMetadataProviderBuilder dbMetadata = new OfflineMetadataProviderBuilder(defaultConfiguration.getTypeFactory());
+		OfflineMetadataProviderBuilder builder = new OfflineMetadataProviderBuilder(defaultConfiguration.getTypeFactory());
 
-		defMeasTable(dbMetadata, "burner");
-		defMessTable(dbMetadata, "events");
-		defStaticTable(dbMetadata, "a_static");
-		return dbMetadata;
+		defMeasTable(builder);
+		defMessTable(builder);
+		defStaticTable(builder);
+		return builder.build();
 	}
 
 	public void runQuery() throws Exception {

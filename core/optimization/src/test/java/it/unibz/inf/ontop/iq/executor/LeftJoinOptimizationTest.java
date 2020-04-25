@@ -65,7 +65,7 @@ public class LeftJoinOptimizationTest {
     private final static Variable F0 = TERM_FACTORY.getVariable("f0");
 
     static {
-        OfflineMetadataProviderBuilder builder = createMetadataBuilder();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
         /*
