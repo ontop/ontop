@@ -31,7 +31,7 @@ public class NormalizationTest {
 
     @Test
     public void testDistinct1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
         UnaryIQTree iqTree = IQ_FACTORY.createUnaryIQTree(distinctNode, extensionalDataNode);
@@ -61,7 +61,7 @@ public class NormalizationTest {
     }
 
     private static void testDistinctInjective(ImmutableTerm injectiveTerm) {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -82,7 +82,7 @@ public class NormalizationTest {
 
     @Test
     public void testDistinct2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
@@ -100,7 +100,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionUseless1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -114,7 +114,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionUseless2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         ConstructionNode topConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
@@ -130,7 +130,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionUseless3() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C),
                 SUBSTITUTION_FACTORY.getSubstitution(C, createInjectiveFunctionalTerm1(A)));
@@ -165,7 +165,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionMerge2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B));
@@ -231,7 +231,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionMerge5() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(C, D),
                 SUBSTITUTION_FACTORY.getSubstitution(C, createInjectiveFunctionalTerm1(A),
                         D, createInjectiveFunctionalTerm1(B)));
@@ -259,7 +259,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionMerge6() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ConstructionNode downConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B, C),
                 SUBSTITUTION_FACTORY.getSubstitution(C, createInjectiveFunctionalTerm1(A)));
 
@@ -283,7 +283,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionDistinct1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
@@ -302,7 +302,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionDistinct2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
@@ -341,7 +341,7 @@ public class NormalizationTest {
 
     @Test
     public void testConstructionFilter2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
@@ -365,7 +365,7 @@ public class NormalizationTest {
 
     @Test
     public void testFilter1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = createExpression(A);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
@@ -379,7 +379,7 @@ public class NormalizationTest {
 
     @Test
     public void testFilter2() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = TERM_FACTORY.getStrictEquality( A, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
@@ -388,7 +388,7 @@ public class NormalizationTest {
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode newExtensionalDataNode = createExtensionalDataNode(TABLE1_AR2, B, B);
+        ExtensionalDataNode newExtensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B, B));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(A, B));
 
@@ -400,7 +400,7 @@ public class NormalizationTest {
 
     @Test
     public void testFilterUseless1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = TERM_FACTORY.getStrictEquality(A, A);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
@@ -415,7 +415,7 @@ public class NormalizationTest {
 
     @Test
     public void testFilterSubstituable1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = TERM_FACTORY.getStrictEquality(A, B);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
@@ -424,7 +424,7 @@ public class NormalizationTest {
         UnaryIQTree tree = IQ_FACTORY.createUnaryIQTree(filterNode, extensionalDataNode);
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode newExtensionalDataNode = createExtensionalDataNode(TABLE1_AR2, B, B);
+        ExtensionalDataNode newExtensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B, B));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(A, B));
 
@@ -435,7 +435,7 @@ public class NormalizationTest {
 
     @Test
     public void testFilterUnsatisfiable1() {
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ImmutableExpression expression = TERM_FACTORY.getStrictEquality(ONE, TWO);
         FilterNode filterNode = IQ_FACTORY.createFilterNode(expression);
 
@@ -482,7 +482,7 @@ public class NormalizationTest {
     public void testFilterBindings2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, X);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         ImmutableFunctionalTerm xDefinition = createInjectiveFunctionalTerm1(A);
 
@@ -515,7 +515,7 @@ public class NormalizationTest {
     public void testFilterDistinct1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -537,7 +537,7 @@ public class NormalizationTest {
     public void testFilterDistinct2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -564,7 +564,7 @@ public class NormalizationTest {
     public void testFilterDistinct3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
@@ -588,7 +588,7 @@ public class NormalizationTest {
     public void testFilterMerge1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
@@ -613,7 +613,7 @@ public class NormalizationTest {
     public void testFilterMerge2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -642,7 +642,7 @@ public class NormalizationTest {
     public void testFilterMerge3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -671,7 +671,7 @@ public class NormalizationTest {
     public void testFilterMerge4() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
-        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -704,8 +704,8 @@ public class NormalizationTest {
     public void testFilterMergeJoin1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
 
         ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
@@ -729,8 +729,8 @@ public class NormalizationTest {
     public void testFilterMergeJoin2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
 
         ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
@@ -756,8 +756,8 @@ public class NormalizationTest {
     public void testFilterMergeJoin3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR1_PREDICATE, A);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
 
         ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
@@ -786,8 +786,8 @@ public class NormalizationTest {
     public void testFilterMergeJoin4() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, A);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
 
         ImmutableExpression expression1 = TERM_FACTORY.getDBDefaultInequality(LT, A, TWO);
         FilterNode topFilterNode = IQ_FACTORY.createFilterNode(expression1);
@@ -819,7 +819,7 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, A));
 
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
@@ -836,7 +836,7 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, A));
 
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -847,7 +847,7 @@ public class NormalizationTest {
 
         IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
 
-        ExtensionalDataNode newExtensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, D);
+        ExtensionalDataNode newExtensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D));
         LeftJoinNode newLeftJoin = IQ_FACTORY.createLeftJoinNode();
         ConstructionNode newConstructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(C, createIfIsNotNullElseNull(D, A)));
@@ -864,8 +864,8 @@ public class NormalizationTest {
     public void testLJBindings1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         ConstructionNode leftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createNonInjectiveFunctionalTerm(A, B)));
@@ -905,9 +905,9 @@ public class NormalizationTest {
     public void testLJBindings2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE3_AR1, E);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(E));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         UnionNode leftUnionNode = IQ_FACTORY.createUnionNode(ImmutableSet.of(X));
 
@@ -953,8 +953,8 @@ public class NormalizationTest {
     public void testLJDistinct1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -982,8 +982,8 @@ public class NormalizationTest {
     public void testLJDistinct2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(PK_TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(PK_TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1011,8 +1011,8 @@ public class NormalizationTest {
     public void testLJDistinct3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(A, C));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1042,7 +1042,7 @@ public class NormalizationTest {
 
         ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, A));
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1066,8 +1066,8 @@ public class NormalizationTest {
     public void testLJDistinct5() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1090,7 +1090,7 @@ public class NormalizationTest {
 
         ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR2, ImmutableMap.of(0, A));
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(A, C));
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
@@ -1108,8 +1108,8 @@ public class NormalizationTest {
     public void testLJDistinctAndBindings1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1152,8 +1152,8 @@ public class NormalizationTest {
     public void testLJDistinctAndBindings2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, X, Y);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
@@ -1202,8 +1202,8 @@ public class NormalizationTest {
 
         FilterNode leftFilterNode = IQ_FACTORY.createFilterNode(createExpression(B));
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
@@ -1235,8 +1235,8 @@ public class NormalizationTest {
 
         FilterNode rightFilterNode = IQ_FACTORY.createFilterNode(createExpression(rightVariableToTest));
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
@@ -1260,9 +1260,9 @@ public class NormalizationTest {
 
         InnerJoinNode leftInnerJoinNode = IQ_FACTORY.createInnerJoinNode(createExpression(B));
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE1_AR2, B, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, A, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D));
 
         LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode();
 
@@ -1288,9 +1288,9 @@ public class NormalizationTest {
     public void testLJInnerJoin2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, D);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, C, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
 
         InnerJoinNode rightInnerJoinNode = IQ_FACTORY.createInnerJoinNode(createExpression(C));
 
@@ -1317,8 +1317,8 @@ public class NormalizationTest {
     public void testJoin1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -1353,8 +1353,8 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -1380,8 +1380,8 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(A, C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -1407,8 +1407,8 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
 
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
 
@@ -1428,8 +1428,8 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, A, B, C);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, D, E);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(D, E));
 
         ConstructionNode topLeftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                     SUBSTITUTION_FACTORY.getSubstitution(X, createNonInjectiveFunctionalTerm(A, B)));
@@ -1473,8 +1473,8 @@ public class NormalizationTest {
 
         DistinctNode distinctNode = IQ_FACTORY.createDistinctNode();
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, A, B, C);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, D, E);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(D, E));
 
         ConstructionNode topLeftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Y),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createNonInjectiveFunctionalTerm(A, B)));
@@ -1526,7 +1526,7 @@ public class NormalizationTest {
         ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE1_AR3,
                 ImmutableMap.of(1, B, 2, C));
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, D, E);
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(PK_TABLE2_AR2, ImmutableList.of(D, E));
 
         ConstructionNode lowerLeftConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(Y),
                 SUBSTITUTION_FACTORY.getSubstitution(Y, createNonInjectiveFunctionalTerm(B, C)));
@@ -1575,10 +1575,10 @@ public class NormalizationTest {
     private void testJoinSimpleMerge(Optional<ImmutableExpression> leftExpression) {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR5_PREDICATE, A, B, C, D, E);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
-        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, A, E);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, D));
+        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(A, E));
 
         InnerJoinNode lowerJoinNode = IQ_FACTORY.createInnerJoinNode(leftExpression);
 
@@ -1609,10 +1609,10 @@ public class NormalizationTest {
     private void testJoinSimpleMerge2(Optional<ImmutableExpression> topExpression) {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR5_PREDICATE, A, B, C, D, E);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
-        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, A, E);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, D));
+        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(A, E));
 
         ImmutableExpression leftExpression = TERM_FACTORY.getStrictNEquality( B, C);
         ImmutableExpression rightExpression = TERM_FACTORY.getStrictNEquality( A, D);
@@ -1641,10 +1641,10 @@ public class NormalizationTest {
     public void testJoinMerge5() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR5_PREDICATE, A, B, C, D, E);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
-        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, A, E);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, D));
+        ExtensionalDataNode extensionalDataNode4 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(A, E));
 
         ImmutableExpression leftExpression = TERM_FACTORY.getStrictNEquality( B, C);
         ImmutableExpression rightExpression = TERM_FACTORY.getStrictNEquality( D, E);
@@ -1671,9 +1671,9 @@ public class NormalizationTest {
     public void testJoinConstraintPropagation1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, X, D);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, A, C);
-        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, A, D);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, C));
+        ExtensionalDataNode extensionalDataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, D));
 
         ConstructionNode leftConstruction = IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, createInjectiveFunctionalTerm1(B)));
@@ -1709,8 +1709,8 @@ public class NormalizationTest {
     public void testJoinConstraintPropagation2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
 
-        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(INT_TABLE1_AR2, A, B);
-        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(INT_TABLE2_AR2, A, B);
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(INT_TABLE1_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(INT_TABLE2_AR2, ImmutableList.of(A, B));
 
         ImmutableExpression expression = TERM_FACTORY.getDBDefaultInequality(LT, A, B);
 
@@ -1730,7 +1730,7 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJDistinct1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(
                 INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(1, B));
@@ -1785,7 +1785,7 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJDistinct2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(
                 INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(1, B));
@@ -1834,8 +1834,8 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJDistinct3() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode rightNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(D, B));
 
         ImmutableSubstitution<ImmutableTerm> provenanceSubstitution = SUBSTITUTION_FACTORY.getSubstitution(E, TERM_FACTORY.getProvenanceSpecialConstant());
 
@@ -1887,7 +1887,7 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJFilter1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, A, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(A, B));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3,
                 ImmutableMap.of(0, D, 1,B));
 
@@ -1933,7 +1933,7 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJFilter2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, A, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(A, B));
         ExtensionalDataNode rightNode = IQ_FACTORY.createExtensionalDataNode(INT_TABLE1_NULL_AR3,
                 ImmutableMap.of(0, D, 1,B));
 
@@ -1982,8 +1982,8 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJInnerJoin1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(D, B));
         ExtensionalDataNode rightNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(0, D));
 
@@ -2033,8 +2033,8 @@ public class NormalizationTest {
     public void testProvenanceVariableOnLJInnerJoin2() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR3_PREDICATE, A, B, C);
 
-        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, A, B);
-        ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, D, B);
+        ExtensionalDataNode leftNode = createExtensionalDataNode(INT_TABLE1_NULL_AR2, ImmutableList.of(A, B));
+        ExtensionalDataNode rightNode1 = createExtensionalDataNode(INT_TABLE2_NULL_AR2, ImmutableList.of(D, B));
         ExtensionalDataNode rightNode2 = IQ_FACTORY.createExtensionalDataNode(INT_TABLE2_NULL_AR2,
                 ImmutableMap.of(0, D));
 
@@ -2132,12 +2132,6 @@ public class NormalizationTest {
         System.out.println("Normalized IQ: " + normalizedIQ);
 
         assertEquals(expectedIQ, normalizedIQ);
-    }
-
-    private static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation,
-                                                                 VariableOrGroundTerm... terms) {
-        return IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(relation.getAtomPredicate(), terms));
     }
 
     private ImmutableFunctionalTerm createNonInjectiveFunctionalTerm(Variable stringV1, Variable stringV2) {

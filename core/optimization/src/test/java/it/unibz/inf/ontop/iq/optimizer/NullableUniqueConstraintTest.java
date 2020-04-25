@@ -77,7 +77,7 @@ public class NullableUniqueConstraintTest {
                 SUBSTITUTION_FACTORY.getSubstitution(G, TERM_FACTORY.getIfElseNull(
                         TERM_FACTORY.getStrictEquality(F0, TWO), GF1)));
 
-        ExtensionalDataNode newLeftNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1.getAtomPredicate(), A, F0, GF1));
+        ExtensionalDataNode newLeftNode1 = createExtensionalDataNode(TABLE1, ImmutableList.of(A, F0, GF1));
 
         ExtensionalDataNode newLeftNode2 = IQ_FACTORY.createExtensionalDataNode(
                 TABLE2, ImmutableMap.of(0, A));

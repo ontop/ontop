@@ -654,7 +654,7 @@ public class EmptyNodeRemovalTest {
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2.getAtomPredicate(), B1, C)), RIGHT);
+        queryBuilder.addChild(lj1, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B1, C)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
