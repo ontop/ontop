@@ -213,11 +213,11 @@ public class OptimizationTestingTools {
             return tableDef;
         }
 
-        public RelationDefinition createStringRelationPredicate(int tableNumber, int arity, boolean canBeNull) {
+        public RelationDefinition createRelationWithStringAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
         }
 
-        public RelationDefinition createIntRelationPredicate(int tableNumber, int arity, boolean canBeNull) {
+        public RelationDefinition createRelationWithIntAttributes(int tableNumber, int arity, boolean canBeNull) {
             return createRelation(tableNumber, arity, getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
         }
     }

@@ -19,11 +19,11 @@ import static org.junit.Assert.assertEquals;
 
 public class SelfJoinSameTermsTest {
 
-    public static RelationDefinition T1_AR3;
+    public final static RelationDefinition T1_AR3;
 
     static {
         OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
-        T1_AR3 = builder.createStringRelationPredicate(1, 3, true);
+        T1_AR3 = builder.createRelationWithStringAttributes(1, 3, true);
     }
 
     @Test

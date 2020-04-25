@@ -42,15 +42,15 @@ public class BindingLiftTest {
     private String URI_TEMPLATE_STR_2 =  "http://example.org/ds2/{}";
     private String URI_TEMPLATE_STR_2_2 = "http://example.org/ds2/{}/{}";
 
-    private ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, E));
-    private ExtensionalDataNode DATA_NODE_3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D));
-    private ExtensionalDataNode DATA_NODE_4 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
-    private ExtensionalDataNode DATA_NODE_5 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
-    private ExtensionalDataNode DATA_NODE_6 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F));
-    private ExtensionalDataNode DATA_NODE_7 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(G, H));
-    private ExtensionalDataNode DATA_NODE_8 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(A));
-    private ExtensionalDataNode DATA_NODE_9 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(B));
+    private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, E));
+    private final ExtensionalDataNode DATA_NODE_3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(C, D));
+    private final ExtensionalDataNode DATA_NODE_4 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private final ExtensionalDataNode DATA_NODE_5 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
+    private final ExtensionalDataNode DATA_NODE_6 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(E, F));
+    private final ExtensionalDataNode DATA_NODE_7 = createExtensionalDataNode(TABLE4_AR2, ImmutableList.of(G, H));
+    private final ExtensionalDataNode DATA_NODE_8 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(A));
+    private final ExtensionalDataNode DATA_NODE_9 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(B));
 
     private final ImmutableExpression EXPRESSIONGT = TERM_FACTORY.getDBDefaultInequality(
             GT, Z, Y);
@@ -2362,8 +2362,8 @@ public class BindingLiftTest {
     @Test
     public void testProvenanceVariableAndProjection1() {
         OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
-        RelationDefinition table1Ar2 = builder.createStringRelationPredicate(1, 2, true);
-        RelationDefinition table2Ar2 = builder.createStringRelationPredicate(2, 2, true);
+        RelationDefinition table1Ar2 = builder.createRelationWithStringAttributes(1, 2, true);
+        RelationDefinition table2Ar2 = builder.createRelationWithStringAttributes(2, 2, true);
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(table1Ar2,
                 ImmutableMap.of(0, A));

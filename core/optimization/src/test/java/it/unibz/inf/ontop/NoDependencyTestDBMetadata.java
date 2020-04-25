@@ -37,33 +37,33 @@ public class NoDependencyTestDBMetadata {
 
     static {
         OptimizationTestingTools.OfflineMetadataProviderBuilder3 builder = createMetadataProviderBuilder();
-        TABLE1_AR1 = builder.createStringRelationPredicate(1, 1, false);
-        TABLE2_AR1 = builder.createStringRelationPredicate(2, 1, false);
-        TABLE3_AR1 = builder.createStringRelationPredicate(3, 1, false);
-        TABLE4_AR1 = builder.createStringRelationPredicate(4, 1, false);
-        TABLE5_AR1 = builder.createStringRelationPredicate(5, 1, false);
+        TABLE1_AR1 = builder.createRelationWithStringAttributes(1, 1, false);
+        TABLE2_AR1 = builder.createRelationWithStringAttributes(2, 1, false);
+        TABLE3_AR1 = builder.createRelationWithStringAttributes(3, 1, false);
+        TABLE4_AR1 = builder.createRelationWithStringAttributes(4, 1, false);
+        TABLE5_AR1 = builder.createRelationWithStringAttributes(5, 1, false);
 
-        TABLE1_AR2 = builder.createStringRelationPredicate(1, 2, false);
-        TABLE2_AR2 = builder.createStringRelationPredicate(2, 2, false);
-        TABLE3_AR2 = builder.createStringRelationPredicate(3, 2, false);
-        TABLE4_AR2 = builder.createStringRelationPredicate(4, 2, false);
-        TABLE5_AR2 = builder.createStringRelationPredicate(5, 2, false);
-        TABLE6_AR2 = builder.createStringRelationPredicate(6, 2, false);
+        TABLE1_AR2 = builder.createRelationWithStringAttributes(1, 2, false);
+        TABLE2_AR2 = builder.createRelationWithStringAttributes(2, 2, false);
+        TABLE3_AR2 = builder.createRelationWithStringAttributes(3, 2, false);
+        TABLE4_AR2 = builder.createRelationWithStringAttributes(4, 2, false);
+        TABLE5_AR2 = builder.createRelationWithStringAttributes(5, 2, false);
+        TABLE6_AR2 = builder.createRelationWithStringAttributes(6, 2, false);
 
-        TABLE1_AR3 = builder.createStringRelationPredicate(1, 3, false);
-        TABLE2_AR3 = builder.createStringRelationPredicate(2, 3, false);
-        TABLE3_AR3 = builder.createStringRelationPredicate(3, 3, false);
-        TABLE4_AR3 = builder.createStringRelationPredicate(4, 3, false);
-        TABLE5_AR3 = builder.createStringRelationPredicate(5, 3, false);
-        TABLE6_AR3 = builder.createStringRelationPredicate(6, 3, false);
+        TABLE1_AR3 = builder.createRelationWithStringAttributes(1, 3, false);
+        TABLE2_AR3 = builder.createRelationWithStringAttributes(2, 3, false);
+        TABLE3_AR3 = builder.createRelationWithStringAttributes(3, 3, false);
+        TABLE4_AR3 = builder.createRelationWithStringAttributes(4, 3, false);
+        TABLE5_AR3 = builder.createRelationWithStringAttributes(5, 3, false);
+        TABLE6_AR3 = builder.createRelationWithStringAttributes(6, 3, false);
 
-        TABLE7_AR4 = builder.createStringRelationPredicate(7, 4, false);
+        TABLE7_AR4 = builder.createRelationWithStringAttributes(7, 4, false);
 
-        INT_TABLE1_AR2 = builder.createIntRelationPredicate(1, 2, false);
-        INT_TABLE2_AR2 = builder.createIntRelationPredicate(2, 2, false);
+        INT_TABLE1_AR2 = builder.createRelationWithIntAttributes(1, 2, false);
+        INT_TABLE2_AR2 = builder.createRelationWithIntAttributes(2, 2, false);
 
-        INT_TABLE1_NULL_AR2 = builder.createIntRelationPredicate(1, 2, true);
-        INT_TABLE2_NULL_AR2 = builder.createIntRelationPredicate(2, 2, true);
-        INT_TABLE1_NULL_AR3 = builder.createIntRelationPredicate(1, 3, true);
+        INT_TABLE1_NULL_AR2 = builder.createRelationWithIntAttributes(1, 2, true);
+        INT_TABLE2_NULL_AR2 = builder.createRelationWithIntAttributes(2, 2, true);
+        INT_TABLE1_NULL_AR3 = builder.createRelationWithIntAttributes(1, 3, true);
     }
 }
