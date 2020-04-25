@@ -23,6 +23,8 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
 
+import javax.xml.crypto.Data;
+
 
 public class MappingTestingTools {
 
@@ -55,12 +57,12 @@ public class MappingTestingTools {
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
-    public static final RelationPredicate TABLE1_AR2;
-    public static final RelationPredicate TABLE2_AR2;
-    public static final RelationPredicate TABLE1_AR3;
-    public static final RelationPredicate TABLE2_AR3;
-    public static final RelationPredicate TABLE3_AR3;
-    public static final RelationPredicate TABLE4_AR3;
+    public static final DatabaseRelationDefinition TABLE1_AR2;
+    public static final DatabaseRelationDefinition TABLE2_AR2;
+    public static final DatabaseRelationDefinition TABLE1_AR3;
+    public static final DatabaseRelationDefinition TABLE2_AR3;
+    public static final DatabaseRelationDefinition TABLE3_AR3;
+    public static final DatabaseRelationDefinition TABLE4_AR3;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -115,7 +117,7 @@ public class MappingTestingTools {
 
         public OfflineMetadataProviderBuilder2(TypeFactory typeFactory) { super(typeFactory); }
 
-        private RelationPredicate createRelationPredicate(int tableNumber, int arity) {
+        private DatabaseRelationDefinition createRelationPredicate(int tableNumber, int arity) {
             QuotedIDFactory idFactory = getQuotedIDFactory();
             DBTermType stringDBType = getDBTypeFactory().getDBStringType();
 
@@ -124,7 +126,7 @@ public class MappingTestingTools {
                 builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
             }
             RelationID id = idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity);
-            return createDatabaseRelation(ImmutableList.of(id), builder).getAtomPredicate();
+            return createDatabaseRelation(ImmutableList.of(id), builder);
         }
     }
 }

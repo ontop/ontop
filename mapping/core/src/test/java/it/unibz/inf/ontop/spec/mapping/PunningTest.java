@@ -55,8 +55,6 @@ public class PunningTest {
         Injector injector = defaultConfiguration.getInjector();
         TMappingSaturatorImpl tmap = injector.getInstance(TMappingSaturatorImpl.class);
 
-        DataAtom<RelationPredicate> extensionalAtom = ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), ImmutableList.of(A, B));
-
         // Class
         IQ classMappingAssertion = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S, P, O),
@@ -64,7 +62,7 @@ public class PunningTest {
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                 O, TERM_FACTORY.getConstantIRI(CLASS_IRI))),
-                        IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
+                        IQ_FACTORY.createExtensionalDataNode(company, ImmutableMap.of(0, A, 1, B))));
 
         // Property
         IQ propertyMappingAssertion = IQ_FACTORY.createIQ(
@@ -72,7 +70,7 @@ public class PunningTest {
                 IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, B),
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(PROP_IRI))),
-                        IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
+                        IQ_FACTORY.createExtensionalDataNode(company, ImmutableMap.of(0, A, 1, B))));
 
         RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
 

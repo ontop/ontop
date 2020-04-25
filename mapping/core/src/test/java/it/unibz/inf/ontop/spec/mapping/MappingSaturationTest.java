@@ -80,7 +80,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE1, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
+                    P1, ImmutableMap.of(0, A, 1, B));
 
             maTeaches = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }
@@ -95,7 +95,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE2, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
+                    P1, ImmutableMap.of(0, A, 1, B));
 
             maGivesLab = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }
@@ -110,7 +110,7 @@ public class MappingSaturationTest {
                             O, TERM_FACTORY.getIRIFunctionalTerm(URI_TEMPLATE_COURSE2, ImmutableList.of(B))));
 
             ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(
-                    ATOM_FACTORY.getDataAtom(P1.getAtomPredicate(), ImmutableList.of(A, B)));
+                    P1, ImmutableMap.of(0, A, 1, B));
 
             maGivesLecture = IQ_FACTORY.createIQ(spoAtom, IQ_FACTORY.createUnaryIQTree(mappingRootNode, extensionalDataNode));
         }

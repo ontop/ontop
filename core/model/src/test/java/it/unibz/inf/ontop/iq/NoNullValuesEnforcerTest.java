@@ -57,9 +57,9 @@ public class NoNullValuesEnforcerTest {
             "A", integerDBType, true,
             "B", integerDBType, true);
 
-        DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), X, Z));
-        DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), Y, W));
-        DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2.getAtomPredicate(), Y, Z));
+        DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, X, 1, Z));
+        DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, Y, 1, W));
+        DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, Y, 1, Z));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
@@ -31,17 +32,15 @@ public class MappingCQCOptimizerTest {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DatabaseRelationDefinition table24Def = builder.createDatabaseRelation("company",
+        DatabaseRelationDefinition company = builder.createDatabaseRelation("company",
             "cmpNpdidCompany", integerType, false,
             "cmpShortName", integerType, false);
-        RelationPredicate company = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = builder.createDatabaseRelation("company_reserves",
-            //"cmpShare", integerType, false,
+        DatabaseRelationDefinition companyReserves = builder.createDatabaseRelation("company_reserves",
+            "cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
-        RelationPredicate companyReserves = table3Def.getAtomPredicate();
-        ForeignKeyConstraint.builder("FK", table3Def, table24Def)
+        ForeignKeyConstraint.builder("FK", companyReserves, company)
                 .add(2, 1)
                 .build();
 
@@ -50,8 +49,10 @@ public class MappingCQCOptimizerTest {
         final Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
         final Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
 
-        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(companyReserves, fldNpdidField1, cmpNpdidCompany2));//cmpShare1,
-        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(company, cmpShortName2, cmpNpdidCompany2));
+        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(
+                companyReserves, ImmutableMap.of(1, fldNpdidField1, 2, cmpNpdidCompany2));//cmpShare1,
+        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(
+                company, ImmutableMap.of(0, cmpShortName2, 1, cmpNpdidCompany2));
 
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(companyReservesNode, companyNode));
@@ -70,8 +71,8 @@ public class MappingCQCOptimizerTest {
         final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
         final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
-        b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves, fldNpdidField1M, cmpNpdidCompany2M)); //cmpShare1M,
+        b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
+                ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
 
