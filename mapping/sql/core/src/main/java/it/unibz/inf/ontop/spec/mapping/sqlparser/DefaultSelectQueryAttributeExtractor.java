@@ -26,20 +26,20 @@ import java.util.stream.Collectors;
  * Created by Roman Kontchakov on 25/01/2017.
  */
 
-public class SelectQueryAttributeExtractor2 {
+public class DefaultSelectQueryAttributeExtractor {
     private final MetadataLookup metadata;
     private final QuotedIDFactory idfac;
 
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public SelectQueryAttributeExtractor2(MetadataLookup metadata, TermFactory termFactory) {
+    public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, TermFactory termFactory) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
         this.termFactory = termFactory;
     }
 
-    public RAExpressionAttributes parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    public RAExpressionAttributes getRAExpressionAttributes(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
             SelectBody selectBody = JSqlParserTools.parse(sql);
             PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);

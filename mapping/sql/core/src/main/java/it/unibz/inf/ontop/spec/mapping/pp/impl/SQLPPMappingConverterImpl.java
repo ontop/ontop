@@ -156,8 +156,19 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 return sqp.parse(sourceQuery);
             }
             catch (UnsupportedSelectQueryException e) {
-                SelectQueryAttributeExtractor sqae = new SelectQueryAttributeExtractor(metadataLookup, termFactory);
-                return createParserView(sqae.extract(sourceQuery), sourceQuery);
+                try {
+                    DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(metadataLookup, termFactory);
+                    ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(sourceQuery).getAttributes();
+
+                    return createParserView(attrs.keySet().stream()
+                            .filter(id -> id.getRelation() == null)
+                            .map(QualifiedAttributeID::getAttribute)
+                            .collect(ImmutableCollectors.toList()), sourceQuery);
+                }
+                catch (Exception e2) {
+                    ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
+                    return createParserView(sqae.getAttributes(sourceQuery), sourceQuery);
+                }
             }
         }
         catch (InvalidSelectQueryException e) {
