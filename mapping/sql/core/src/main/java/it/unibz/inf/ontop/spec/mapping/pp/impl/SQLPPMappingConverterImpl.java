@@ -194,6 +194,6 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 .collect(ImmutableCollectors.toList());
 
         return new RAExpression(ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments)),
-                ImmutableList.of(), new RAExpressionAttributes(lookupTable, null));
+                ImmutableList.of(), new RAExpressionAttributes(lookupTable));
     }
 }

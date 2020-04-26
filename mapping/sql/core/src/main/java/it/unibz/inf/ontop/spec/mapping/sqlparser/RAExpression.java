@@ -173,7 +173,8 @@ public class RAExpression {
 
     public static RAExpression alias(RAExpression re, RelationID alias) {
         return new RAExpression(re.dataAtoms, re.filterAtoms,
-                RAExpressionAttributes.alias(re.attributes, alias));
+                RAExpressionAttributes.create(re.attributes.getUnqualifiedAttributes(),
+                        ImmutableSet.of(alias)));
     }
 
 

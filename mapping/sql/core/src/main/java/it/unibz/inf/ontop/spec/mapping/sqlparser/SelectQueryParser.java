@@ -135,7 +135,7 @@ public class SelectQueryParser {
 
         return new RAExpression(current.getDataAtoms(),
                 ImmutableList.<ImmutableExpression>builder().addAll(filterAtoms).build(),
-                new RAExpressionAttributes(attributes, null));
+                new RAExpressionAttributes(attributes));
     }
 
     private RAExpression join(RAExpression left, Join join) throws IllegalJoinException {

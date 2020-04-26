@@ -129,7 +129,7 @@ public class DefaultSelectQueryAttributeExtractor {
                             " in the SELECT clause: ")),  plainSelect);
         }
 
-        return new RAExpressionAttributes(attributes, null);
+        return new RAExpressionAttributes(attributes);
     }
 
     private RAExpressionAttributes join(RAExpressionAttributes left, Join join) throws IllegalJoinException {
@@ -231,7 +231,7 @@ public class DefaultSelectQueryAttributeExtractor {
             RAExpressionAttributes current = select((PlainSelect) selectBody);
 
             RelationID aliasId = idfac.createRelationID(null, subSelect.getAlias().getName());
-            result = RAExpressionAttributes.alias(current, aliasId);
+            result = RAExpressionAttributes.create(current.getUnqualifiedAttributes(), ImmutableSet.of(aliasId));
         }
 
         @Override
@@ -249,7 +249,7 @@ public class DefaultSelectQueryAttributeExtractor {
             }
 
             RelationID aliasId = idfac.createRelationID(null, subjoin.getAlias().getName());
-            result = RAExpressionAttributes.alias(join, aliasId);
+            result = RAExpressionAttributes.create(join.getUnqualifiedAttributes(), ImmutableSet.of(aliasId));
         }
 
         @Override
