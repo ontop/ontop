@@ -931,7 +931,7 @@ public class ExpressionParser {
                 else if (column.equals(idfac.createAttributeID("false")))
                     result = termFactory.getDBBooleanConstant(false);
                 else
-                    throw new UnsupportedSelectQueryRuntimeException("Unable to find attribute name ", expression);
+                    throw new InvalidSelectQueryRuntimeException("Unable to find attribute name ", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)

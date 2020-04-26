@@ -20,10 +20,10 @@ public class RAExpressionAttributeOccurrences {
     }
 
     /**
-     * checks if the attributeOccurrences contains the attribute
+     * checks if there is an occurrence of the non-qualified attribute
      *
      * @param attribute a  {@link QuotedID}
-     * @return true if attributeOccurrences contains the attribute otherwise false
+     * @return true if contains the attribute; otherwise false
      */
 
     public boolean isAbsent(QuotedID attribute) {
@@ -31,10 +31,26 @@ public class RAExpressionAttributeOccurrences {
         return (occurrences == null) || occurrences.isEmpty();
     }
 
+    /**
+     * checks if occurrence of the non-qualified attribute are ambiguous
+     *     (at least two relations contain the attribute)
+     *
+     * @param attribute a  {@link QuotedID}
+     * @return true if the attribute is ambiguous; otherwise false
+     */
+
     public boolean isAmbiguous(QuotedID attribute) {
         ImmutableSet<RelationID> occurrences = map.get(attribute);
         return (occurrences != null) && occurrences.size() > 1;
     }
+
+    /**
+     * checks if occurrence of the non-qualified attribute is unique
+     *     (exactly one relation contains the attribute)
+     *
+     * @param attribute a  {@link QuotedID}
+     * @return true if the attribute is unique; otherwise false
+     */
 
     public boolean isUnique(QuotedID attribute) {
         ImmutableSet<RelationID> occurrences = map.get(attribute);
@@ -44,30 +60,42 @@ public class RAExpressionAttributeOccurrences {
     /**
      * NATURAL JOIN
      *
-     * @param o1 a {@link RAExpressionAttributeOccurrences}
-     * @param o2 a {@link RAExpressionAttributeOccurrences}
-     * @return a {@link ImmutableSet}<{@link QuotedID}>
+     * @param o1 an {@link RAExpressionAttributeOccurrences}
+     * @param o2 an {@link RAExpressionAttributeOccurrences}
+     * @return an {@link ImmutableSet}<{@link QuotedID}>
      */
 
     public static ImmutableSet<QuotedID> getShared(RAExpressionAttributeOccurrences o1,
                                                    RAExpressionAttributeOccurrences o2) {
-        return o1.map.keySet().stream()
-                .filter(id -> !o2.isAbsent(id))
-                .collect(ImmutableCollectors.toSet());
+
+        return Sets.intersection(o1.map.keySet(), o2.map.keySet()).immutableCopy();
     }
 
     /**
-     * treats null values as empty sets
+     * non-qualified attribute occurrences for CROSS JOIN
      *
-     * @param o1 a {@link RAExpressionAttributeOccurrences}
-     * @param o2 a {@link RAExpressionAttributeOccurrences}
-     * @return the union of occurrences of id in e1 and e2
+     * @param o1 an {@link RAExpressionAttributeOccurrences}
+     * @param o2 an {@link RAExpressionAttributeOccurrences}
+     * @return an {@link RAExpressionAttributeOccurrences}
+     *      R.X, R.Y and S.X, S.Y -> R.X, RS.Y, S.Y
      */
 
     public static RAExpressionAttributeOccurrences crossJoin(RAExpressionAttributeOccurrences o1,
                                                              RAExpressionAttributeOccurrences o2) {
         return combine(o1, o2,  id -> unionOf(o1.map.get(id), o2.map.get(id)));
     }
+
+    /**
+     * non-qualified attribute occurrences for JOIN USING
+     *
+     * @param o1 an {@link RAExpressionAttributeOccurrences}
+     * @param o2 an {@link RAExpressionAttributeOccurrences}
+     * @return an {@link RAExpressionAttributeOccurrences}
+     *      R.X, R.Y, R.U and S.Y, S.Z using U ->  empty
+     *      R.X, R.Y and S.Y, S.Z, S.U using U ->  empty
+     *      R.X, R.Y, R.U and S.Y, S.Z, S.U using U -> R.X, RS.Y, S.Y, R.U
+     *            (the choice or R/S is arbitrary, but we keep it unambiguous)
+     */
 
     public static Optional<RAExpressionAttributeOccurrences> joinUsing(RAExpressionAttributeOccurrences o1,
                                                                        RAExpressionAttributeOccurrences o2,
@@ -94,11 +122,8 @@ public class RAExpressionAttributeOccurrences {
     }
 
     /**
-     * treats null values as empty sets
-     *
-     * @param s1 a {@link ImmutableSet}<{@link RelationID}>
-     * @param s2 a {@link ImmutableSet}<{@link RelationID}>
-     * @return the union of occurrences of id in e1 and e2
+     * union of two sets
+     * treats null set references as empty sets
      */
 
     private static ImmutableSet<RelationID> unionOf(ImmutableSet<RelationID> s1, ImmutableSet<RelationID> s2) {

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,18 +21,17 @@ import java.util.stream.Stream;
  */
 public class RAExpressionAttributes {
 
-
     private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
     private final RAExpressionAttributeOccurrences occurrences;
 
     /**
      * constructs a relation expression
      *
-     * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
      * @param occurrences an {@link RAExpressionAttributeOccurrences}>>
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                           RAExpressionAttributeOccurrences occurrences) {
+                                  RAExpressionAttributeOccurrences occurrences) {
         this.attributes = attributes;
         this.occurrences = occurrences;
     }
@@ -39,19 +39,18 @@ public class RAExpressionAttributes {
     /**
      * constructs a relation expression
      *
-     * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param attributes     an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
      * @param occurrencesMap an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link Variable}>>
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                           ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap) {
-        this.attributes = attributes;
-        this.occurrences = new RAExpressionAttributeOccurrences(occurrencesMap);
+                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap) {
+        this(attributes, new RAExpressionAttributeOccurrences(occurrencesMap));
     }
 
     /**
      * constructs a relation expression
      *
-     * @param attributes           an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link Variable}>
+     * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
         this.attributes = attributes;
@@ -66,10 +65,10 @@ public class RAExpressionAttributes {
     /**
      * CROSS JOIN (also denoted by , in SQL)
      *
-     * @param re1 a {@link RAExpressionAttributes}
-     * @param re2 a {@link RAExpressionAttributes}
-     * @return a {@link RAExpressionAttributes}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
+     * @param re1 an {@link RAExpressionAttributes}
+     * @param re2 an {@link RAExpressionAttributes}
+     * @return an {@link RAExpressionAttributes}
+     * @throws IllegalJoinException if the same relation alias occurs in both arguments
      */
     public static RAExpressionAttributes crossJoin(RAExpressionAttributes re1, RAExpressionAttributes re2) throws IllegalJoinException {
 
@@ -92,11 +91,11 @@ public class RAExpressionAttributes {
     /**
      * JOIN USING
      *
-     * @param re1 a {@link RAExpressionAttributes}
-     * @param re2 a {@link RAExpressionAttributes}
-     * @param using a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@link RAExpressionAttributes}
-     * @throws IllegalJoinException if the same alias occurs in both arguments
+     * @param re1 an {@link RAExpressionAttributes}
+     * @param re2 an {@link RAExpressionAttributes}
+     * @param using an {@link ImmutableSet}<{@link QuotedID}>
+     * @return an {@link RAExpressionAttributes}
+     * @throws IllegalJoinException if the same relatio alias occurs in both arguments
      *          or one of the `using' attributes is ambiguous or absent
      */
 
@@ -184,7 +183,7 @@ public class RAExpressionAttributes {
     }
 
 
-    private Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
+    private Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()));
     }

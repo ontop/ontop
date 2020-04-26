@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -42,9 +43,24 @@ public class SelectQueryParser {
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
-    public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    public RAExpression parseForTest(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
             return select(JSqlParserTools.parse(sql));
+        }
+        catch (JSQLParserException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), sql);
+        }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
+    }
+
+    public RAExpression parse(SelectBody selectBody) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+        try {
+            return select(selectBody);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
@@ -99,7 +115,7 @@ public class SelectQueryParser {
                 .build();
 
         ImmutableMap.Builder<QualifiedAttributeID, ImmutableTerm> attributesBuilder = ImmutableMap.builder();
-        SelectItemProcessor sip = new SelectItemProcessor(current.getAttributes());
+        SelectItemParser sip = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
 
         plainSelect.getSelectItems().forEach(si -> {
             ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip.getAttributes(si);
@@ -113,7 +129,7 @@ public class SelectQueryParser {
             attributes = attributesBuilder.build();
         }
         catch (IllegalArgumentException e) {
-            SelectItemProcessor sip2 = new SelectItemProcessor(current.getAttributes());
+            SelectItemParser sip2 = new SelectItemParser(current.getAttributes(), expressionParser::parseTerm, idfac);
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().forEach(si -> {
                 ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip2.getAttributes(si);
@@ -281,73 +297,4 @@ public class SelectQueryParser {
         }
     }
 
-    private class SelectItemProcessor implements SelectItemVisitor {
-        final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> map;
-
-        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
-            this.attributes = attributes;
-        }
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes(SelectItem si) {
-            si.accept(this);
-            return map;
-        }
-
-        @Override
-        public void visit(AllColumns allColumns) {
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .collect(ImmutableCollectors.toMap());
-        }
-
-        @Override
-        public void visit(AllTableColumns allTableColumns) {
-            Table table = allTableColumns.getTable();
-            RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
-
-            map = attributes.entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
-                    .collect(ImmutableCollectors.toMap(
-                            e -> new QualifiedAttributeID(null, e.getKey().getAttribute()),
-                            Map.Entry::getValue));
-        }
-
-        @Override
-        public void visit(SelectExpressionItem selectExpressionItem) {
-            Expression expr = selectExpressionItem.getExpression();
-            if (expr instanceof Column) {
-                Column column = (Column) expr;
-                QuotedID id = idfac.createAttributeID(column.getColumnName());
-                Table table = column.getTable();
-                QualifiedAttributeID attr = (table == null || table.getName() == null)
-                        ? new QualifiedAttributeID(null, id)
-                        : new QualifiedAttributeID(idfac.createRelationID(table.getSchemaName(), table.getName()), id);
-
-                ImmutableTerm var = attributes.get(attr);
-                if (var != null) {
-                    Alias columnAlias = selectExpressionItem.getAlias();
-                    QuotedID name = (columnAlias == null || columnAlias.getName() == null)
-                            ? id
-                            : idfac.createAttributeID(columnAlias.getName());
-
-                    map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
-                }
-                else
-                    throw new InvalidSelectQueryRuntimeException("Column not found", selectExpressionItem);
-            }
-            else {
-                Alias columnAlias = selectExpressionItem.getAlias();
-                if (columnAlias == null || columnAlias.getName() == null)
-                    throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", selectExpressionItem);
-
-                QuotedID name = idfac.createAttributeID(columnAlias.getName());
-                //Variable var = termFactory.getVariable(name.getName() + relationIndex);
-
-                ImmutableTerm term =  expressionParser.parseTerm(expr, attributes);
-                map = ImmutableMap.of(new QualifiedAttributeID(null, name), term);
-            }
-        }
-    }
 }

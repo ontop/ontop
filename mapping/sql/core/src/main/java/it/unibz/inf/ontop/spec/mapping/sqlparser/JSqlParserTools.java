@@ -13,17 +13,12 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 
 public class JSqlParserTools {
 
-    public static SelectBody parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
-        try {
-            Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
+    public static SelectBody parse(String sql) throws InvalidSelectQueryException, JSQLParserException {
+        Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
+        if (!(statement instanceof Select))
+            throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
 
-            return ((Select) statement).getSelectBody();
-        }
-        catch (JSQLParserException e) {
-            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
-        }
+        return ((Select) statement).getSelectBody();
     }
 
     /**

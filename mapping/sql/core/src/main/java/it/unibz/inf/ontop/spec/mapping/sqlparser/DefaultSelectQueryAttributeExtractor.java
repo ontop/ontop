@@ -4,17 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.Collection;
@@ -29,19 +28,20 @@ import java.util.stream.Collectors;
 public class DefaultSelectQueryAttributeExtractor {
     private final MetadataLookup metadata;
     private final QuotedIDFactory idfac;
+    private final CoreSingletons coreSingletons;
 
     private int relationIndex = 0;
     private final TermFactory termFactory;
 
-    public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, TermFactory termFactory) {
+    public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
-        this.termFactory = termFactory;
+        this.termFactory = coreSingletons.getTermFactory();
+        this.coreSingletons = coreSingletons;
     }
 
-    public RAExpressionAttributes getRAExpressionAttributes(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    public RAExpressionAttributes getRAExpressionAttributes(SelectBody selectBody) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            SelectBody selectBody = JSqlParserTools.parse(sql);
             PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
             return select(plainSelect);
         }
@@ -87,36 +87,29 @@ public class DefaultSelectQueryAttributeExtractor {
                         Map.Entry::getValue));
     }
 
-    private QuotedID getSelectItemAliasedId(SelectExpressionItem si) {
-
-        if (si.getAlias() != null && si.getAlias().getName() != null) {
-            return idfac.createAttributeID(si.getAlias().getName());
-        }
-        else if (si.getExpression() instanceof Column) {
-            return idfac.createAttributeID(((Column)si.getExpression()).getColumnName());
-        }
-        else
-            throw new InvalidSelectQueryRuntimeException("Complex expression in SELECT must have an alias", si);
-    }
-
-
 
 
     private RAExpressionAttributes select(PlainSelect plainSelect) {
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> currentAttributes = getQueryBodyAttributes(plainSelect);
 
+        ExpressionParser ep = new ExpressionParser(idfac, coreSingletons);
+        SelectItemParser sip = new SelectItemParser(currentAttributes,
+                (e, a) -> (e instanceof Column)
+                        ? ep.parseTerm(e, a)
+                        : createVariable(idfac.createAttributeID("something")), idfac);
+
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
         try {
             attributes = plainSelect.getSelectItems().stream()
-                    .map(si -> new SelectItemProcessor(currentAttributes).getAttributes(si).entrySet())
+                    .map(si -> sip.getAttributes(si).entrySet())
                     .flatMap(Collection::stream)
                     .collect(ImmutableCollectors.toMap());
         }
         catch (IllegalArgumentException e) {
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
             plainSelect.getSelectItems().stream()
-                    .map(si -> new SelectItemProcessor(currentAttributes).getAttributes(si).entrySet())
+                    .map(si -> sip.getAttributes(si).entrySet())
                     .flatMap(Collection::stream)
                     .forEach(a -> duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1));
 
@@ -134,8 +127,9 @@ public class DefaultSelectQueryAttributeExtractor {
 
     private RAExpressionAttributes join(RAExpressionAttributes left, Join join) throws IllegalJoinException {
 
-        if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
-            throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
+        // TODO: check
+        //if (join.isFull() || join.isRight() || join.isLeft() || join.isOuter())
+        //    throw new UnsupportedSelectQueryRuntimeException("LEFT/RIGHT/FULL OUTER JOINs are not supported", join);
 
         RAExpressionAttributes right = getRelationalExpression(join.getRightItem());
         if (join.isSimple()) {
@@ -271,55 +265,6 @@ public class DefaultSelectQueryAttributeExtractor {
         }
     }
 
-    private class SelectItemProcessor implements SelectItemVisitor {
-        final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> map;
-
-        SelectItemProcessor(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
-            this.attributes = attributes;
-        }
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes(SelectItem si) {
-            si.accept(this);
-            return map;
-        }
-
-        @Override
-        public void visit(AllColumns allColumns) {
-            map = expandStar(attributes);
-        }
-
-        @Override
-        public void visit(AllTableColumns allTableColumns) {
-            map = expandStar(attributes, allTableColumns.getTable());
-        }
-
-        @Override
-        public void visit(SelectExpressionItem selectExpressionItem) {
-            Expression expr = selectExpressionItem.getExpression();
-            QuotedID name = getSelectItemAliasedId(selectExpressionItem);
-            final ImmutableTerm var;
-            if (expr instanceof Column) {
-                Column column = (Column) expr;
-                QuotedID columnId = idfac.createAttributeID(column.getColumnName());
-
-                Table table = column.getTable();
-                RelationID tableId =  (table == null || table.getName() == null)
-                        ? null : idfac.createRelationID(table.getSchemaName(), table.getName());
-
-                QualifiedAttributeID attr = new QualifiedAttributeID(tableId, columnId);
-                var = attributes.get(attr);
-                if (var == null)
-                    throw new InvalidSelectQueryRuntimeException("Column not found", selectExpressionItem);
-            }
-            else {
-                // whether the complex expression has an alias already been checked
-                var = createVariable(name);
-            }
-            map = ImmutableMap.of(new QualifiedAttributeID(null, name), var);
-        }
-    }
 
     private Variable createVariable(QuotedID id) {
         return termFactory.getVariable(id.getName() + relationIndex);
