@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -22,8 +21,6 @@ import it.unibz.inf.ontop.spec.mapping.transformer.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import org.apache.commons.rdf.api.RDF;
-
-import javax.xml.crypto.Data;
 
 
 public class MappingTestingTools {

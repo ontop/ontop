@@ -8,27 +8,18 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
-import javax.management.relation.Relation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.

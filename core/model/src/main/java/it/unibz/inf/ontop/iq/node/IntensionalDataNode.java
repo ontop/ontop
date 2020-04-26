@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 
 /**
  * TODO: explain

@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;

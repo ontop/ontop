@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -27,7 +25,7 @@ public class RAExpression {
 
     /**
      * constructs a relation expression
-     * @param atoms           an {@link ImmutableList}<{@link DataAtom<RelationPredicate>}>
+     * @param atoms           an {@link ImmutableList}<{@link ExtensionalDataNode}>
      * @param filters         an {@link ImmutableList}<{@link ImmutableExpression}>
      * @param attributes      an {@link RAExpressionAttributes}
      */

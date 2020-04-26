@@ -9,7 +9,6 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
