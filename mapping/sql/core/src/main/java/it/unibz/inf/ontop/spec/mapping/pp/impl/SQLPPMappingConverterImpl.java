@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.mapping.pp.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.dbschema.*;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -66,7 +68,6 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
             RAExpression re = getRAExpression(assertion, metadataLookup);
             IQTree tree = IQ2CQ.toIQTree(
                     re.getDataAtoms().stream()
-                            .map(iqFactory::createExtensionalDataNode)
                             .collect(ImmutableCollectors.toList()),
                     termFactory.getConjunction(re.getFilterAtoms().stream()),
                     iqFactory);
@@ -150,25 +151,24 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
     private RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException {
         String sourceQuery = mappingAssertion.getSourceQuery().getSQL();
+        SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
         try {
             try {
-                SelectQueryParser sqp = new SelectQueryParser(metadataLookup, coreSingletons);
                 return sqp.parse(sourceQuery);
             }
             catch (UnsupportedSelectQueryException e) {
+                ImmutableList<QuotedID> attributes;
                 try {
                     DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(metadataLookup, termFactory);
-                    ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(sourceQuery).getAttributes();
-
-                    return createParserView(attrs.keySet().stream()
-                            .filter(id -> id.getRelation() == null)
-                            .map(QualifiedAttributeID::getAttribute)
-                            .collect(ImmutableCollectors.toList()), sourceQuery);
+                    ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(sourceQuery).getUnqualifiedAttributes();
+                    attributes = ImmutableList.copyOf(attrs.keySet());
                 }
-                catch (Exception e2) {
+                catch (InvalidSelectQueryException | UnsupportedSelectQueryException e2) {
                     ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(metadataLookup.getQuotedIDFactory());
-                    return createParserView(sqae.getAttributes(sourceQuery), sourceQuery);
+                    attributes = sqae.getAttributes(sourceQuery);
                 }
+                ParserViewDefinition view = new ParserViewDefinition(attributes, sourceQuery, dbTypeFactory);
+                return sqp.createAtom(view, ImmutableSet.of());
             }
         }
         catch (InvalidSelectQueryException e) {
@@ -176,24 +176,5 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                     + " \nProblem location: source query of triplesMap \n["
                     +  mappingAssertion.getTriplesMapProvenance().getProvenanceInfo() + "]");
         }
-    }
-
-    private RAExpression createParserView(ImmutableList<QuotedID> attributes,  String sql) {
-        ParserViewDefinition view = new ParserViewDefinition(attributes, sql, dbTypeFactory);
-
-        // this is required to preserve the order of the variables
-        ImmutableList<Map.Entry<QualifiedAttributeID, Variable>> list = view.getAttributes().stream()
-                .map(att -> Maps.immutableEntry(new QualifiedAttributeID(null, att.getID()), termFactory.getVariable(att.getID().getName())))
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> lookupTable = list.stream()
-                .collect(ImmutableCollectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        ImmutableList<Variable> arguments = list.stream()
-                .map(Map.Entry::getValue)
-                .collect(ImmutableCollectors.toList());
-
-        return new RAExpression(ImmutableList.of(atomFactory.getDataAtom(view.getAtomPredicate(), arguments)),
-                ImmutableList.of(), new RAExpressionAttributes(lookupTable));
     }
 }

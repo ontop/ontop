@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
@@ -34,7 +31,7 @@ public class RAExpressionAttributes {
      * @param occurrences an {@link RAExpressionAttributeOccurrences}>>
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                                  RAExpressionAttributeOccurrences occurrences) {
+                           RAExpressionAttributeOccurrences occurrences) {
         this.attributes = attributes;
         this.occurrences = occurrences;
     }
@@ -46,7 +43,7 @@ public class RAExpressionAttributes {
      * @param occurrencesMap an {@link ImmutableMap}<{@link QuotedID}, {@link ImmutableSet}<{@link Variable}>>
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap) {
+                           ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrencesMap) {
         this.attributes = attributes;
         this.occurrences = new RAExpressionAttributeOccurrences(occurrencesMap);
     }
@@ -78,12 +75,14 @@ public class RAExpressionAttributes {
 
         checkRelationAliasesConsistency(re1, re2);
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
                 re1.selectAttributes(id ->
                         (id.getRelation() != null) || re2.occurrences.isAbsent(id.getAttribute())),
 
                 re2.selectAttributes(id ->
-                        (id.getRelation() != null) || re1.occurrences.isAbsent(id.getAttribute())));
+                        (id.getRelation() != null) || re1.occurrences.isAbsent(id.getAttribute())))
+
+                .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(attributes,
                 RAExpressionAttributeOccurrences.crossJoin(re1.occurrences, re2.occurrences));
@@ -107,7 +106,8 @@ public class RAExpressionAttributes {
 
         checkRelationAliasesConsistency(re1, re2);
 
-        Optional<RAExpressionAttributeOccurrences> occurrences = RAExpressionAttributeOccurrences.joinUsing(re1.occurrences, re2.occurrences, using);
+        Optional<RAExpressionAttributeOccurrences> occurrences = RAExpressionAttributeOccurrences.joinUsing(
+                re1.occurrences, re2.occurrences, using);
         if (!occurrences.isPresent()) {
 
             ImmutableList<QuotedID> notFound = using.stream()
@@ -124,7 +124,7 @@ public class RAExpressionAttributes {
                             (!ambiguous.isEmpty() ? "Attribute(s) " + ambiguous + " are ambiguous" : ""));
         }
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = merge(
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
                 re1.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
                                 || (id.getRelation() == null && re2.occurrences.isAbsent(id.getAttribute()))
@@ -132,8 +132,9 @@ public class RAExpressionAttributes {
 
                 re2.selectAttributes(id ->
                         (id.getRelation() != null && !using.contains(id.getAttribute()))
-                                || (id.getRelation() == null && re1.occurrences.isAbsent(id.getAttribute()))));
+                                || (id.getRelation() == null && re1.occurrences.isAbsent(id.getAttribute()))))
 
+                .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(attributes, occurrences.get());
     }
@@ -176,23 +177,11 @@ public class RAExpressionAttributes {
     }
 
 
-    /**
-     * @return a {@link RAExpressionAttributes}
-     */
 
     public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
-        return attributes.entrySet().stream()
-                        .filter(e -> e.getKey().getRelation() == null)
-                        .collect(ImmutableCollectors.toMap(
-                                e -> e.getKey().getAttribute(), Map.Entry::getValue));
+        return selectAttributes(id -> id.getRelation() == null)
+                .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
     }
-
-
-    private static ImmutableMap<QualifiedAttributeID, ImmutableTerm> merge(Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> attrs1,
-                                                                           Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> attrs2) {
-        return Stream.concat(attrs1, attrs2).collect(ImmutableCollectors.toMap());
-    }
-
 
 
     private Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(java.util.function.Predicate<QualifiedAttributeID> condition) {
@@ -221,12 +210,11 @@ public class RAExpressionAttributes {
                 .filter(id -> id.getRelation() != null)
                 .map(QualifiedAttributeID::getRelation).collect(ImmutableCollectors.toSet());
 
-        if (alias1.stream().anyMatch(alias2::contains))
-            throw new IllegalJoinException(re1, re2,
-                    alias1.stream()
-                            .filter(alias2::contains)
-                            .map(RelationID::getSQLRendering)
-                            .collect(Collectors.joining(", ", "Relation alias ", " occurs in both arguments of the JOIN")));
+        Sets.SetView<RelationID> intersection = Sets.intersection(alias1, alias2);
+        if (!intersection.isEmpty())
+            throw new IllegalJoinException(re1, re2, intersection.stream()
+                    .map(RelationID::getSQLRendering)
+                    .collect(Collectors.joining(", ", "Relation alias ", " occurs in both arguments of the JOIN")));
     }
 
 

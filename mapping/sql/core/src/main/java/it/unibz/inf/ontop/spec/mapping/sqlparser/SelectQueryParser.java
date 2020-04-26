@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
@@ -21,9 +23,12 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.*;
 
+import javax.management.relation.Relation;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -32,9 +37,8 @@ import java.util.stream.Collectors;
 public class SelectQueryParser {
     private final MetadataLookup metadata;
     private final QuotedIDFactory idfac;
-    private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
-    private final AtomFactory atomFactory;
+    private final IntermediateQueryFactory iqFactory;
     private final ExpressionParser expressionParser;
 
     private int relationIndex = 0;
@@ -42,9 +46,8 @@ public class SelectQueryParser {
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         this.metadata = metadata;
         this.idfac = metadata.getQuotedIDFactory();
-        this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
-        this.atomFactory = coreSingletons.getAtomFactory();
+        this.iqFactory = coreSingletons.getIQFactory();
         this.expressionParser = new ExpressionParser(idfac, coreSingletons);
     }
 
@@ -190,6 +193,23 @@ public class SelectQueryParser {
         return new FromItemProcessor(fromItem).result;
     }
 
+    public RAExpression createAtom(RelationDefinition relation, ImmutableSet<RelationID> relationIDs) {
+        ImmutableMap<Integer, Variable> terms = relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(a -> a.getIndex() - 1,
+                        a -> termFactory.getVariable(a.getID().getName() + relationIndex)));
+
+        ExtensionalDataNode atom = iqFactory.createExtensionalDataNode(relation, terms);
+
+        ImmutableMap<QuotedID, ImmutableTerm> attributes = relation.getAttributes().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Attribute::getID,
+                        a -> terms.get(a.getIndex() - 1)));
+
+        RAExpressionAttributes attrs = RAExpressionAttributes.create(attributes, relationIDs);
+
+        return new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
+    }
+
 
     private class FromItemProcessor implements FromItemVisitor {
 
@@ -204,37 +224,19 @@ public class SelectQueryParser {
 
             RelationID id = idfac.createRelationID(tableName.getSchemaName(), tableName.getName());
             // construct the predicate using the table name
-            DatabaseRelationDefinition relation;
             try {
-                relation = metadata.getRelation(id);
+                DatabaseRelationDefinition relation = metadata.getRelation(id);
+                relationIndex++;
+
+                ImmutableSet<RelationID> relationIDs = (tableName.getAlias() == null)
+                        ? relation.getAllIDs()
+                        : ImmutableSet.of(idfac.createRelationID(null, tableName.getAlias().getName()));
+
+                result = createAtom(relation, relationIDs);
             }
             catch (MetadataExtractionException e) {
                 throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
             }
-            relationIndex++;
-
-            ImmutableList.Builder<Variable> terms = ImmutableList.builder();
-            ImmutableMap.Builder<QuotedID, ImmutableTerm> attributes = ImmutableMap.builder();
-            // the order in the loop is important
-            relation.getAttributes().forEach(attribute -> {
-                QuotedID attributeId = attribute.getID();
-                Variable var = termFactory.getVariable(attributeId.getName() + relationIndex);
-                terms.add(var);
-                attributes.put(attributeId, var);
-            });
-            // create an atom for a particular table
-            DataAtom<RelationPredicate> atom = atomFactory.getDataAtom(relation.getAtomPredicate(), terms.build());
-
-            RAExpressionAttributes attrs;
-            if (tableName.getAlias() == null) {
-                attrs = RAExpressionAttributes.create(attributes.build(), relation.getAllIDs());
-            }
-            else {
-                RelationID alias = idfac.createRelationID(null, tableName.getAlias().getName());
-                attrs = RAExpressionAttributes.create(attributes.build(), ImmutableSet.of(alias));
-            }
-
-            result = new RAExpression(ImmutableList.of(atom), ImmutableList.of(), attrs);
         }
 
 

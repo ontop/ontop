@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -12,37 +13,39 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.stream.Stream;
+
 /**
  * Created by Roman Kontchakov on 01/11/2016.
  *
  */
 public class RAExpression {
 
-    private ImmutableList<DataAtom<RelationPredicate>> dataAtoms;
-    private ImmutableList<ImmutableExpression> filterAtoms;
+    private ImmutableList<ExtensionalDataNode> atoms;
+    private ImmutableList<ImmutableExpression> filters;
     private RAExpressionAttributes attributes;
 
     /**
      * constructs a relation expression
-     *  @param dataAtoms            an {@link ImmutableList}<{@link DataAtom<RelationPredicate>}>
-     * @param filterAtoms          an {@link ImmutableList}<{@link ImmutableExpression}>
-     * @param attributes           an {@link RAExpressionAttributes}
+     * @param atoms           an {@link ImmutableList}<{@link DataAtom<RelationPredicate>}>
+     * @param filters         an {@link ImmutableList}<{@link ImmutableExpression}>
+     * @param attributes      an {@link RAExpressionAttributes}
      */
-    public RAExpression(ImmutableList<DataAtom<RelationPredicate>> dataAtoms,
-                        ImmutableList<ImmutableExpression> filterAtoms,
+    public RAExpression(ImmutableList<ExtensionalDataNode> atoms,
+                        ImmutableList<ImmutableExpression> filters,
                         RAExpressionAttributes attributes) {
-        this.dataAtoms = dataAtoms;
-        this.filterAtoms = filterAtoms;
+        this.atoms = atoms;
+        this.filters = filters;
         this.attributes = attributes;
     }
 
 
-    public ImmutableList<DataAtom<RelationPredicate>> getDataAtoms() {
-        return dataAtoms;
+    public ImmutableList<ExtensionalDataNode> getDataAtoms() {
+        return atoms;
     }
 
     public ImmutableList<ImmutableExpression> getFilterAtoms() {
-        return filterAtoms;
+        return filters;
     }
 
     public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getAttributes() {
@@ -62,8 +65,8 @@ public class RAExpression {
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
 
-        return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms), attributes);
+        return new RAExpression(union(re1.atoms, re2.atoms),
+                union(re1.filters, re2.filters), attributes);
     }
 
 
@@ -82,8 +85,8 @@ public class RAExpression {
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.crossJoin(re1.attributes, re2.attributes);
 
-        return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms,
+        return new RAExpression(union(re1.atoms, re2.atoms),
+                union(re1.filters, re2.filters,
                         getAtomOnExpression.apply(attributes.getAttributes())), attributes);
     }
 
@@ -105,8 +108,8 @@ public class RAExpression {
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.joinUsing(re1.attributes, re2.attributes, shared);
 
-        return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms,
+        return new RAExpression(union(re1.atoms, re2.atoms),
+                union(re1.filters, re2.filters,
                         getJoinOnFilter(re1.attributes, re2.attributes, shared, termFactory)),
                 attributes);
     }
@@ -128,8 +131,8 @@ public class RAExpression {
         RAExpressionAttributes attributes =
                 RAExpressionAttributes.joinUsing(re1.attributes, re2.attributes, using);
 
-        return new RAExpression(union(re1.dataAtoms, re2.dataAtoms),
-                union(re1.filterAtoms, re2.filterAtoms,
+        return new RAExpression(union(re1.atoms, re2.atoms),
+                union(re1.filters, re2.filters,
                         getJoinOnFilter(re1.attributes, re2.attributes, using, termFactory)),
                 attributes);
     }
@@ -143,9 +146,9 @@ public class RAExpression {
      * @return a {@Link ImmutableList}<{@link ImmutableExpression}>
      */
     private static ImmutableList<ImmutableExpression> getJoinOnFilter(RAExpressionAttributes re1,
-                                                                               RAExpressionAttributes re2,
-                                                                               ImmutableSet<QuotedID> using,
-                                                                               TermFactory termFactory) {
+                                                                      RAExpressionAttributes re2,
+                                                                      ImmutableSet<QuotedID> using,
+                                                                      TermFactory termFactory) {
 
         return using.stream()
                 .map(id -> new QualifiedAttributeID(null, id))
@@ -172,7 +175,7 @@ public class RAExpression {
      */
 
     public static RAExpression alias(RAExpression re, RelationID alias) {
-        return new RAExpression(re.dataAtoms, re.filterAtoms,
+        return new RAExpression(re.atoms, re.filters,
                 RAExpressionAttributes.create(re.attributes.getUnqualifiedAttributes(),
                         ImmutableSet.of(alias)));
     }
@@ -180,17 +183,17 @@ public class RAExpression {
 
 
     private static <T> ImmutableList<T> union(ImmutableList<T> atoms1, ImmutableList<T> atoms2) {
-        return ImmutableList.<T>builder().addAll(atoms1).addAll(atoms2).build();
+        return Stream.concat(atoms1.stream(), atoms2.stream()).collect(ImmutableCollectors.toList());
     }
 
     private static <T> ImmutableList<T> union(ImmutableList<T> atoms1, ImmutableList<T> atoms2, ImmutableList<T> atoms3) {
-        return ImmutableList.<T>builder().addAll(atoms1).addAll(atoms2).addAll(atoms3).build();
+        return Stream.concat(Stream.concat(atoms1.stream(), atoms2.stream()), atoms3.stream()).collect(ImmutableCollectors.toList());
     }
 
 
     @Override
     public String toString() {
-        return "RAExpression : " + dataAtoms + " FILTER " + filterAtoms + " with " + attributes;
+        return "RAExpression : " + atoms + " FILTER " + filters + " with " + attributes;
     }
 
 

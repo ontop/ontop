@@ -208,13 +208,11 @@ public class DefaultSelectQueryAttributeExtractor {
                     .collect(ImmutableCollectors.toMap(Attribute::getID,
                             attribute -> createVariable(attribute.getID())));
 
-            if (tableName.getAlias() == null) {
-                result = RAExpressionAttributes.create(attributes, relation.getAllIDs());
-            }
-            else {
-                RelationID alias = idfac.createRelationID(null, tableName.getAlias().getName());
-                result = RAExpressionAttributes.create(attributes, ImmutableSet.of(alias));
-            }
+            ImmutableSet<RelationID> relationIDs = (tableName.getAlias() == null)
+                    ? relation.getAllIDs()
+                    : ImmutableSet.of(idfac.createRelationID(null, tableName.getAlias().getName()));
+
+            result = RAExpressionAttributes.create(attributes, relationIDs);
         }
 
 
