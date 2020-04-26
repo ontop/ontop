@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
@@ -21,6 +20,7 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Roman Kontchakov on 25/01/2017.
@@ -40,37 +40,20 @@ public class SelectQueryAttributeExtractor2 {
     }
 
     public RAExpressionAttributes parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
-        PlainSelect plainSelect = getParsedSql(sql);
-        return select(plainSelect);
-    }
-
-    public PlainSelect getParsedSql(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            Statement statement = CCJSqlParserUtil.parse(sql);
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
-
-            SelectBody selectBody = ((Select) statement).getSelectBody();
-            if (!(selectBody instanceof PlainSelect))
-                throw new UnsupportedSelectQueryException("Complex SELECT statements are not supported", selectBody);
-
-            PlainSelect plainSelect = (PlainSelect) selectBody;
-
-            if (plainSelect.getIntoTables() != null)
-                throw new InvalidSelectQueryException("SELECT INTO is not allowed in mappings", plainSelect);
-
-            return plainSelect;
-        }
-        catch (JSQLParserException e) {
-            throw new UnsupportedSelectQueryException("Cannot parse SQL: " + sql, e);
+            SelectBody selectBody = JSqlParserTools.parse(sql);
+            PlainSelect plainSelect = JSqlParserTools.getPlainSelect(selectBody);
+            return select(plainSelect);
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
         }
-
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
     }
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> getQueryBodyAttributes(PlainSelect plainSelect) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> getQueryBodyAttributes(PlainSelect plainSelect) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
 
         if (plainSelect.getFromItem() == null)
             throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", plainSelect);
@@ -93,13 +76,13 @@ public class SelectQueryAttributeExtractor2 {
     }
 
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> expandStar(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
+    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> expandStar(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes) {
         return attributes.entrySet().stream()
                 .filter(e -> e.getKey().getRelation() == null)
                 .collect(ImmutableCollectors.toMap());
     }
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> expandStar(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes, Table table) {
+    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> expandStar(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes, Table table) {
         RelationID id = idfac.createRelationID(table.getSchemaName(), table.getName());
 
         return attributes.entrySet().stream()
@@ -109,7 +92,7 @@ public class SelectQueryAttributeExtractor2 {
                         Map.Entry::getValue));
     }
 
-    public QuotedID getSelectItemAliasedId(SelectExpressionItem si) {
+    private QuotedID getSelectItemAliasedId(SelectExpressionItem si) {
 
         if (si.getAlias() != null && si.getAlias().getName() != null) {
             return idfac.createAttributeID(si.getAlias().getName());
@@ -152,12 +135,13 @@ public class SelectQueryAttributeExtractor2 {
                 for (Map.Entry<QualifiedAttributeID, ImmutableTerm> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
-            throw new InvalidSelectQueryRuntimeException(
-                    "Duplicate column names " + Joiner.on(", ").join(
-                            duplicates.entrySet().stream()
-                                    .filter(d -> d.getValue() > 1)
-                                    .map(d -> d.getKey())
-                                    .collect(ImmutableCollectors.toList())) + " in the SELECT clause: ", plainSelect);
+            throw new InvalidSelectQueryRuntimeException(duplicates.entrySet().stream()
+                    .filter(d -> d.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .map(QualifiedAttributeID::getSQLRendering)
+                    .collect(Collectors.joining(", ",
+                            "Duplicate column names ",
+                            " in the SELECT clause: ")),  plainSelect);
         }
 
         return new RAExpressionAttributes(attributes, null);
@@ -270,8 +254,7 @@ public class SelectQueryAttributeExtractor2 {
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
-            RAExpressionAttributes left = getRelationalExpression(subjoin.getLeft());
-            RAExpressionAttributes join = left;
+            RAExpressionAttributes join = getRelationalExpression(subjoin.getLeft());
             try {
                 for (Join j : subjoin.getJoinList())
                     join = join(join, j);

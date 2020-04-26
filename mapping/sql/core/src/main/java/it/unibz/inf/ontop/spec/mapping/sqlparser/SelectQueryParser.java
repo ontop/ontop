@@ -50,15 +50,7 @@ public class SelectQueryParser {
 
     public RAExpression parse(String sql) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
         try {
-            Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(true));
-            if (!(statement instanceof Select))
-                throw new InvalidSelectQueryException("The query is not a SELECT statement", statement);
-
-            RAExpression re = select(((Select) statement).getSelectBody());
-            return re;
-        }
-        catch (JSQLParserException e) {
-            throw new InvalidSelectQueryException("Cannot parse SQL: " + sql, e);
+            return select(JSqlParserTools.parse(sql));
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
@@ -70,32 +62,28 @@ public class SelectQueryParser {
 
 
     private RAExpression select(SelectBody selectBody) {
+        return plainSelect(JSqlParserTools.getPlainSelect(selectBody));
+    }
 
-        if (!(selectBody instanceof PlainSelect))
-            throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
-
-        PlainSelect plainSelect = (PlainSelect) selectBody;
+    private RAExpression plainSelect(PlainSelect plainSelect) {
 
         if (plainSelect.getDistinct() != null)
-            throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("DISTINCT is not supported", plainSelect);
 
         if (plainSelect.getGroupBy() != null || plainSelect.getHaving() != null)
-            throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("GROUP BY / HAVING are not supported", plainSelect);
 
         if (plainSelect.getLimit() != null || plainSelect.getTop() != null || plainSelect.getOffset()!= null)
-            throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / TOP are not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / TOP are not supported", plainSelect);
 
         if (plainSelect.getOrderByElements() != null)
-            throw new UnsupportedSelectQueryRuntimeException("ORDER BY is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("ORDER BY is not supported", plainSelect);
 
         if (plainSelect.getOracleHierarchical() != null || plainSelect.isOracleSiblings())
-            throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", selectBody);
-
-        if (plainSelect.getIntoTables() != null)
-            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("Oracle START WITH ... CONNECT BY / ORDER SIBLINGS BY are not supported", plainSelect);
 
         if (plainSelect.getFromItem() == null)
-            throw new UnsupportedSelectQueryRuntimeException("SELECT without FROM is not supported", selectBody);
+            throw new UnsupportedSelectQueryRuntimeException("SELECT without FROM is not supported", plainSelect);
 
         RAExpression current = getRelationalExpression(plainSelect.getFromItem());
         if (plainSelect.getJoins() != null) {
@@ -138,12 +126,11 @@ public class SelectQueryParser {
                 for (Map.Entry<QualifiedAttributeID, ImmutableTerm> a : attrs.entrySet())
                     duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
             });
-            throw new InvalidSelectQueryRuntimeException(
-                    "Duplicate column names " + duplicates.entrySet().stream()
-                            .filter(d -> d.getValue() > 1)
-                            .map(Map.Entry::getKey)
-                            .map(QualifiedAttributeID::getSQLRendering)
-                            .collect(Collectors.joining(", ")) + " in the SELECT clause: ", selectBody);
+            throw new InvalidSelectQueryRuntimeException(duplicates.entrySet().stream()
+                    .filter(d -> d.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .map(QualifiedAttributeID::getSQLRendering)
+                    .collect(Collectors.joining(", ", "Duplicate column names ", " in the SELECT clause: ")), plainSelect);
         }
 
         return new RAExpression(current.getDataAtoms(),

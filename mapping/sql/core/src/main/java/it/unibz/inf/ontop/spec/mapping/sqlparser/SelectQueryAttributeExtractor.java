@@ -60,10 +60,10 @@ public class SelectQueryAttributeExtractor {
 
             return attrs.keySet().stream()
                     .filter(id -> id.getRelation() == null)
-                    .map(id -> id.getAttribute())
+                    .map(QualifiedAttributeID::getAttribute)
                     .collect(ImmutableCollectors.toList());
         }
-        catch (Exception e) {   // TODO: throws an Error if lexer fails
+        catch (Exception e) {
 
             // COULD NOT PARSE - do a rough approximation
 
