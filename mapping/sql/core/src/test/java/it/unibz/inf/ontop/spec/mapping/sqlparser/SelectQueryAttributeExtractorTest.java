@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
@@ -11,9 +13,18 @@ import static org.junit.Assert.assertEquals;
 
 public class SelectQueryAttributeExtractorTest {
 
+    @Test
+    public void test_no_from() throws Exception {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        MetadataLookup metadataLookup = builder.build();
+        QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
+        DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, TERM_FACTORY);
+        RAExpressionAttributes r = ae.getRAExpressionAttributes("SELECT 1 AS A");
+        assertEquals(ImmutableSet.of(new QualifiedAttributeID(null, idfac.createAttributeID("A"))), r.getAttributes().keySet());
+    }
 
     @Test
-    public void test_1() throws InvalidSelectQueryException {
+    public void test_approximation() throws InvalidSelectQueryException {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         QuotedIDFactory idfac = builder.getQuotedIDFactory();
 

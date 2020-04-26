@@ -53,26 +53,21 @@ public class DefaultSelectQueryAttributeExtractor {
         }
     }
 
-    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> getQueryBodyAttributes(PlainSelect plainSelect) throws InvalidSelectQueryException, UnsupportedSelectQueryException {
+    private ImmutableMap<QualifiedAttributeID, ImmutableTerm> getQueryBodyAttributes(PlainSelect plainSelect)  {
 
         if (plainSelect.getFromItem() == null)
-            throw new UnsupportedSelectQueryException("SELECT without FROM is not supported", plainSelect);
+            return ImmutableMap.of();
 
-        try {
-            RAExpressionAttributes current = getRelationalExpression(plainSelect.getFromItem());
-            if (plainSelect.getJoins() != null)
-                for (Join join : plainSelect.getJoins())
-                    try {
-                        current = join(current, join);
-                    }
-                    catch (IllegalJoinException e) {
-                        throw new InvalidSelectQueryException(e.toString(), join);
-                    }
-            return current.getAttributes();
-        }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidSelectQueryException(e.getMessage(), e.getObject());
-        }
+        RAExpressionAttributes current = getRelationalExpression(plainSelect.getFromItem());
+        if (plainSelect.getJoins() != null)
+            for (Join join : plainSelect.getJoins())
+                try {
+                    current = join(current, join);
+                }
+                catch (IllegalJoinException e) {
+                    throw new InvalidSelectQueryRuntimeException(e.toString(), join);
+                }
+        return current.getAttributes();
     }
 
 
@@ -109,16 +104,7 @@ public class DefaultSelectQueryAttributeExtractor {
 
     private RAExpressionAttributes select(PlainSelect plainSelect) {
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> currentAttributes;
-        try {
-            currentAttributes = getQueryBodyAttributes(plainSelect);
-        }
-        catch (InvalidSelectQueryException e) {
-            throw new InvalidSelectQueryRuntimeException(e.getMessage(), null);
-        }
-        catch (UnsupportedSelectQueryException e) {
-            throw new UnsupportedSelectQueryRuntimeException(e.getMessage(), null);
-        }
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> currentAttributes = getQueryBodyAttributes(plainSelect);
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
         try {
@@ -128,13 +114,12 @@ public class DefaultSelectQueryAttributeExtractor {
                     .collect(ImmutableCollectors.toMap());
         }
         catch (IllegalArgumentException e) {
-            SelectItemProcessor sip = new SelectItemProcessor(currentAttributes);
             Map<QualifiedAttributeID, Integer> duplicates = new HashMap<>();
-            plainSelect.getSelectItems().forEach(si -> {
-                ImmutableMap<QualifiedAttributeID, ImmutableTerm> attrs = sip.getAttributes(si);
-                for (Map.Entry<QualifiedAttributeID, ImmutableTerm> a : attrs.entrySet())
-                    duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1);
-            });
+            plainSelect.getSelectItems().stream()
+                    .map(si -> new SelectItemProcessor(currentAttributes).getAttributes(si).entrySet())
+                    .flatMap(Collection::stream)
+                    .forEach(a -> duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1));
+
             throw new InvalidSelectQueryRuntimeException(duplicates.entrySet().stream()
                     .filter(d -> d.getValue() > 1)
                     .map(Map.Entry::getKey)
