@@ -2,6 +2,7 @@ package it.unibz.inf.ontop;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
@@ -17,6 +18,7 @@ import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
+import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -26,11 +28,13 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.Properties;
+import java.util.stream.IntStream;
 
 public class OptimizationTestingTools {
 
@@ -223,6 +227,11 @@ public class OptimizationTestingTools {
     }
 
     public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {
-        return IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(relation.getAtomPredicate(), arguments));
+        return IQ_FACTORY.createExtensionalDataNode(relation,
+                IntStream.range(0, arguments.size())
+                        .boxed()
+                        .collect(ImmutableCollectors.toMap(
+                                i -> i,
+                                arguments::get)));
     }
 }

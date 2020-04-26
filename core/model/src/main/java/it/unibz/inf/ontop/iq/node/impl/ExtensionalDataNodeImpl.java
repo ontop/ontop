@@ -63,16 +63,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private final CoreUtilsFactory coreUtilsFactory;
 
     @AssistedInject
-    private ExtensionalDataNodeImpl(@Assisted DataAtom<RelationPredicate> atom,
-                                    IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.relationDefinition = atom.getPredicate().getRelationDefinition();
-        this.argumentMap = extractArgumentMap(atom);
-    }
-
-    @AssistedInject
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
@@ -96,16 +86,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         this.variableNullability = variableNullability;
     }
 
-    /**
-     * TEMPORARY
-     */
-    private ImmutableMap<Integer, ? extends VariableOrGroundTerm> extractArgumentMap(DataAtom<RelationPredicate> atom) {
-        return IntStream.range(0, atom.getArity())
-                .boxed()
-                .collect(ImmutableCollectors.toMap(
-                        i -> i,
-                        atom::getTerm));
-    }
 
     @Override
     public RelationDefinition getRelationDefinition() {
