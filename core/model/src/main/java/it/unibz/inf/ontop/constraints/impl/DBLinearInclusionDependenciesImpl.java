@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDependenciesImpl<RelationPredicate> {
@@ -28,10 +29,17 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
 
     @Override
     protected Stream<DataAtom<RelationPredicate>> chase(DataAtom<RelationPredicate> atom) {
-        return atom.getPredicate().getRelationDefinition().getForeignKeys().stream().map(fk -> chase(fk, atom));
+        return atom.getPredicate().getRelationDefinition().getForeignKeys().stream()
+                .map(fk -> chase(fk, atom))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
     }
 
-    private DataAtom<RelationPredicate> chase(ForeignKeyConstraint fk, DataAtom<RelationPredicate> atom) {
+    private Optional<DataAtom<RelationPredicate>> chase(ForeignKeyConstraint fk, DataAtom<RelationPredicate> atom) {
+
+        // TODO: better handling required
+        if (fk.getComponents().stream().anyMatch(c -> c.getAttribute().isNullable()))
+            return Optional.empty();
 
         ImmutableMap<Attribute, VariableOrGroundTerm> inversion = fk.getComponents().stream()
                 .collect(ImmutableCollectors.toMap(
@@ -42,7 +50,7 @@ public class DBLinearInclusionDependenciesImpl extends BasicLinearInclusionDepen
                 .map(a -> inversion.getOrDefault(a, variableGenerator.generateNewVariable(a.getID().getName())))
                 .collect(ImmutableCollectors.toList());
 
-        return atomFactory.getDataAtom(fk.getReferencedRelation().getAtomPredicate(), newArguments);
+        return Optional.of(atomFactory.getDataAtom(fk.getReferencedRelation().getAtomPredicate(), newArguments));
     }
 
     @Override

@@ -66,9 +66,9 @@ public class QueryMergingTest {
     private static GroundTerm INT_OF_THREE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(THREE_STR, XSD.INTEGER);
     private static GroundTerm INT_OF_ONE = (GroundTerm) TERM_FACTORY.getRDFLiteralFunctionalTerm(ONE_STR, XSD.INTEGER);
     private static ImmutableFunctionalTerm INT_OF_B = TERM_FACTORY.getRDFLiteralFunctionalTerm(B, XSD.INTEGER);
-    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
-    private static ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, C));
-    private static ExtensionalDataNode DATA_NODE_4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, S, T));
+    private static ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private static ExtensionalDataNode DATA_NODE_3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(B, C));
+    private static ExtensionalDataNode DATA_NODE_4 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(S, T));
 
     @Test
     public void testPruning1() throws EmptyQueryException {
@@ -108,7 +108,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(Y, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, B, ONE_STR));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(B, ONE_STR));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
 
@@ -162,7 +162,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, THREE_STR));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, THREE_STR));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -210,7 +210,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, THREE_STR));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, THREE_STR));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -257,7 +257,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -299,7 +299,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, INT_OF_THREE));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, INT_OF_THREE));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -340,8 +340,7 @@ public class QueryMergingTest {
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(mainQuery.getProjectionAtom(), expectedRootNode);
 
-
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, X));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, X));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -369,7 +368,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, S, U));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(S, U));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -387,7 +386,7 @@ public class QueryMergingTest {
         ConstructionNode remainingConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, Y)));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2.getRelationDefinition(),
+        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(TABLE1_AR2,
                 ImmutableMap.of(0, Y));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
@@ -416,7 +415,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, S, B));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(S, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -431,7 +430,7 @@ public class QueryMergingTest {
         IntermediateQueryBuilder expectedBuilder = createQueryBuilder();
         QueryNode expectedRootNode = mainQuery.getRootNode();
         expectedBuilder.init(ANS1_X_ATOM, expectedRootNode);
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, THREE_STR));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, THREE_STR));
         expectedBuilder.addChild(expectedRootNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -460,7 +459,7 @@ public class QueryMergingTest {
          * Sub-query
          */
         DistinctVariableOnlyDataAtom p1Atom = ATOM_FACTORY.getDistinctTripleAtom(S, T, U);
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, B, C));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(A, B, C));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(p1Atom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(S, generateURI1(A), T, generateURI1(B),
@@ -478,7 +477,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, A, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(A, A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -507,7 +506,7 @@ public class QueryMergingTest {
          * Sub-query
          */
         DistinctVariableOnlyDataAtom p1Atom = P1_ST_ATOM;
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(p1Atom.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -533,7 +532,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -561,7 +560,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -587,7 +586,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -629,7 +628,7 @@ public class QueryMergingTest {
                 )));
         subQueryBuilder.addChild(subQueryRoot, constructionNode2);
 
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR3, A, B, C));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR3, ImmutableList.of(A, B, C));
         subQueryBuilder.addChild(constructionNode2, dataNodeSubquery);
 
         /*
@@ -642,7 +641,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR3, A, A, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR3, ImmutableList.of(A, A, A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -680,7 +679,7 @@ public class QueryMergingTest {
         ConstructionNode subQueryConstruction2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, B),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(S, generateURI1(A))));
         subQueryBuilder.addChild(subQueryRoot, subQueryConstruction2);
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         subQueryBuilder.addChild(subQueryConstruction2, dataNodeSubquery);
 
         /*
@@ -693,7 +692,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(B))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, B, B));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B, B));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -722,7 +721,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, A));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -742,7 +741,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, TERM_FACTORY.getRDFLiteralConstant("1", XSD.INTEGER))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, A));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -771,7 +770,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, INT_OF_ONE));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, INT_OF_ONE));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -791,7 +790,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(INT_OF_ONE))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, INT_OF_ONE, INT_OF_ONE));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(INT_OF_ONE, INT_OF_ONE));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -820,7 +819,7 @@ public class QueryMergingTest {
         /*
          * Sub-query
          */
-        ExtensionalDataNode dataNodeSubquery = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, INT_OF_ONE, B));
+        ExtensionalDataNode dataNodeSubquery = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(INT_OF_ONE, B));
         IntermediateQueryBuilder subQueryBuilder = createQueryBuilder();
         ConstructionNode subQueryRoot = IQ_FACTORY.createConstructionNode(P1_ST_ATOM.getVariables(),
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(
@@ -840,7 +839,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(INT_OF_ONE))));
         expectedBuilder.addChild(expectedRootNode, remainingConstructionNode);
 
-        ExtensionalDataNode expectedDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, INT_OF_ONE, INT_OF_ONE));
+        ExtensionalDataNode expectedDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(INT_OF_ONE, INT_OF_ONE));
         expectedBuilder.addChild(remainingConstructionNode, expectedDataNode);
 
         optimizeAndCompare(mainQuery, subQueryBuilder.build(), expectedBuilder.build(), dataNode);
@@ -881,8 +880,7 @@ public class QueryMergingTest {
                         T, generateURI1(ONE),
                         P, generateConstant(P1_IRI))));
         subQueryBuilder.init(P1_ST_ATOM, subQueryRoot);
-        ExtensionalDataNode tableNode = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_AR2, two, two));
+        ExtensionalDataNode tableNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(two, two));
         subQueryBuilder.addChild(subQueryRoot, tableNode);
 
         /*
@@ -939,7 +937,7 @@ public class QueryMergingTest {
 
         firstMappingBuilder.init(firstMappingAtom, firstMappingRootNode);
 
-        ExtensionalDataNode firstNameDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, A, B, C));
+        ExtensionalDataNode firstNameDataNode = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(A, B, C));
         firstMappingBuilder.addChild(firstMappingRootNode, firstNameDataNode);
 
         IQ firstMapping = IQ_CONVERTER.convert(firstMappingBuilder.build());
@@ -958,7 +956,7 @@ public class QueryMergingTest {
 
         lastMappingBuilder.init(lastMappingAtom, lastMappingRootNode);
 
-        ExtensionalDataNode lastNameDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, D, E, B));
+        ExtensionalDataNode lastNameDataNode = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(D, E, B));
         lastMappingBuilder.addChild(lastMappingRootNode, lastNameDataNode);
 
         IQ lastMapping = IQ_CONVERTER.convert(lastMappingBuilder.build());
@@ -981,7 +979,7 @@ public class QueryMergingTest {
                 SUBSTITUTION_FACTORY.getSubstitution(ImmutableMap.of(X, generateURI1(A), Y, generateString(B))));
         expectedQueryBuilder.addChild(joinNode, leftConstructionNode);
         ExtensionalDataNode newFirstNameDataNode = IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(), ImmutableMap.of(0, A, 1, B));
+                TABLE4_AR3, ImmutableMap.of(0, A, 1, B));
         expectedQueryBuilder.addChild(leftConstructionNode, newFirstNameDataNode);
 
         Variable b1 = BF3F7;
@@ -990,7 +988,7 @@ public class QueryMergingTest {
         expectedQueryBuilder.addChild(joinNode, rightConstructionNode);
 
         ExtensionalDataNode expectedlastNameDataNode = IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(), ImmutableMap.of(0, DF6, 2, b1));
+                TABLE4_AR3, ImmutableMap.of(0, DF6, 2, b1));
         expectedQueryBuilder.addChild(rightConstructionNode, expectedlastNameDataNode);
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -1035,11 +1033,9 @@ public class QueryMergingTest {
         mappingBuilder.addChild(mappingRootNode, unionNode);
 
 
-        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE1_AR1, X));
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(X));
         mappingBuilder.addChild(unionNode, extensionalDataNode1);
-        ExtensionalDataNode extensionalDataNode2 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE2_AR1, X));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(X));
         mappingBuilder.addChild(unionNode, extensionalDataNode2);
 
         IntermediateQuery mapping = mappingBuilder.build();
@@ -1104,8 +1100,7 @@ public class QueryMergingTest {
                         O, generateConstant(C3_IRI)
                 )));
         mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
-        ExtensionalDataNode extensionalDataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                ATOM_FACTORY.getDataAtom(TABLE4_AR1, X));
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE4_AR1, ImmutableList.of(X));
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode1);
         IntermediateQuery mapping = mappingBuilder.build();
         System.out.println("query to be merged:\n" +mapping);

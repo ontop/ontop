@@ -3,14 +3,13 @@ package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -32,11 +31,11 @@ import static junit.framework.TestCase.fail;
 
 public class MappingTest {
 
-    private static final RelationPredicate P1_PREDICATE;
-    private static final RelationPredicate P3_PREDICATE;
-    private static final RelationPredicate P4_PREDICATE;
-    private static final RelationPredicate P5_PREDICATE;
-    private static final RelationPredicate BROKER_PREDICATE;
+    private static final RelationDefinition P1;
+    private static final RelationDefinition P3;
+    private static final RelationDefinition P4;
+    private static final RelationDefinition P5;
+    private static final RelationDefinition BROKER;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingTest.class);
 
@@ -54,30 +53,26 @@ public class MappingTest {
     private static final IRI PROP_1, PROP_2, CLASS_1;
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table1Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p1",
+        P1 = builder.createDatabaseRelation("p1",
             "col1", integerDBType, false,
             "col12", integerDBType, false);
-        P1_PREDICATE = table1Def.getAtomPredicate();
 
-        RelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p3",
+        P3 = builder.createDatabaseRelation("p3",
             "col31", integerDBType, false);
-        P3_PREDICATE = table3Def.getAtomPredicate();
 
-        RelationDefinition table4Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p4",
+        P4 = builder.createDatabaseRelation("p4",
             "col41", integerDBType, false);
-        P4_PREDICATE = table4Def.getAtomPredicate();
 
-        RelationDefinition table5Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("p5",
+        P5 = builder.createDatabaseRelation("p5",
             "col51", integerDBType, false);
-        P5_PREDICATE = table5Def.getAtomPredicate();
 
-        RelationDefinition tableBrokerDef = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("brokerworksfor",
+        BROKER = builder.createDatabaseRelation("brokerworksfor",
             "broker", integerDBType, false,
             "company", integerDBType, true,
             "client", integerDBType, true);
-        BROKER_PREDICATE = tableBrokerDef.getAtomPredicate();
 
         URI_TEMPLATE_STR_1 =  "http://example.org/person/{}";
 
@@ -90,9 +85,6 @@ public class MappingTest {
     public void testOfflineMappingAssertionsRenaming() {
 
         ImmutableList<IRI> propertyIris = ImmutableList.of(PROP_1, PROP_2);
-
-        DataAtom<RelationPredicate> binaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P1_PREDICATE, ImmutableList.of(A, B));
-        DataAtom<RelationPredicate> unaryExtensionalAtom = ATOM_FACTORY.getDataAtom(P3_PREDICATE, ImmutableList.of(A));
 
         ImmutableMap.Builder<IRI, IQ> propertyMapBuilder = ImmutableMap.builder();
         RDFAtomPredicate rdfAtomPredicate = null;
@@ -109,7 +101,7 @@ public class MappingTest {
             rdfAtomPredicate = (RDFAtomPredicate) mappingProjectionAtom.getPredicate();
 
             mappingBuilder.init(mappingProjectionAtom, mappingRootNode);
-            ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(binaryExtensionalAtom);
+            ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P1, ImmutableMap.of(0, A, 1, B));
             mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
             IQ mappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
             propertyMapBuilder.put(propertyIri, mappingAssertion);
@@ -124,7 +116,7 @@ public class MappingTest {
                         O, getConstantIRI(CLASS_1)));
 
         mappingBuilder.init(ATOM_FACTORY.getDistinctTripleAtom(S, P, O), mappingRootNode);
-        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(unaryExtensionalAtom);
+        ExtensionalDataNode extensionalDataNode = IQ_FACTORY.createExtensionalDataNode(P3, ImmutableMap.of(0, A));
         mappingBuilder.addChild(mappingRootNode, extensionalDataNode);
         IQ classMappingAssertion = IQ_CONVERTER.convert(mappingBuilder.build());
         ImmutableMap<IRI, IQ> classMap = ImmutableMap.of(CLASS_1, classMappingAssertion);
@@ -161,7 +153,7 @@ public class MappingTest {
 
             LOGGER.info(mappingAssertion.toString());
             ImmutableSet<Variable> mappingAssertionVariables = mappingAssertion.getProjectionAtom().getVariables();
-            if(Stream.of(mappingAssertionVariables)
+            if (Stream.of(mappingAssertionVariables)
                     .anyMatch(variableUnion::contains)){
                 fail();
                 break;
@@ -191,8 +183,8 @@ public class MappingTest {
                         P, getConstantIRI(RDF.TYPE),
                         O, getConstantIRI(CLASS_1)));
 
-        DataAtom<RelationPredicate> dataAtom = ATOM_FACTORY.getDataAtom(BROKER_PREDICATE, ImmutableList.of(C,Y,C));
-        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(dataAtom);
+        ExtensionalDataNode table1DataNode = IQ_FACTORY.createExtensionalDataNode(
+                BROKER, ImmutableMap.of(0, C,1, Y,2, C));
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctTripleAtom(S, P, O);
 

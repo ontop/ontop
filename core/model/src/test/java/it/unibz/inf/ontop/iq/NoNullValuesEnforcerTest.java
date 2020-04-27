@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.QueryTransformationException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -12,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -27,8 +27,6 @@ import static junit.framework.TestCase.assertEquals;
 public class NoNullValuesEnforcerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoNullValuesEnforcerTest.class);
 
-
-    private final static RelationPredicate TABLE2_PREDICATE;
     private final static AtomPredicate ANS1_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(1);
     private final static AtomPredicate ANS3_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(3);
     private final static AtomPredicate ANS4_PREDICATE = ATOM_FACTORY.getRDFAnswerPredicate(4);
@@ -49,19 +47,19 @@ public class NoNullValuesEnforcerTest {
     private final static ExtensionalDataNode DATA_NODE_1;
     private final static ExtensionalDataNode DATA_NODE_2;
     private final static ExtensionalDataNode DATA_NODE_3;
-    private static final DatabaseRelationDefinition TABLE2 ;
+    private static final DatabaseRelationDefinition TABLE2;
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLE2",
+        TABLE2 = builder.createDatabaseRelation("TABLE2",
             "A", integerDBType, true,
             "B", integerDBType, true);
-        TABLE2_PREDICATE = TABLE2.getAtomPredicate();
 
-        DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, X, Z));
-        DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, W));
-        DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_PREDICATE, Y, Z));
+        DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, X, 1, Z));
+        DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, Y, 1, W));
+        DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(TABLE2, ImmutableMap.of(0, Y, 1, Z));
     }
 
     @Test
@@ -78,8 +76,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_Z);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -91,7 +89,7 @@ public class NoNullValuesEnforcerTest {
         IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
     @Test
@@ -108,10 +106,10 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build()).normalizeForOptimization();
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
-        assertEquals(query, transformedQuery);
+        assertEquals(query.getTree(), transformedTree);
     }
 
     @Test
@@ -126,8 +124,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -139,7 +137,7 @@ public class NoNullValuesEnforcerTest {
                 .normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
     @Test
@@ -154,8 +152,8 @@ public class NoNullValuesEnforcerTest {
         IQ query = IQ_CONVERTER.convert(queryBuilder.build());
         LOGGER.info("Initial IQ:\n" + query);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(query);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(query.getTree());
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
 
         FilterNode filterNode = IQ_FACTORY.createFilterNode(NOT_NULL_X_AND_NOT_NULL_W);
         IntermediateQueryBuilder queryBuilder2 = IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
@@ -166,7 +164,7 @@ public class NoNullValuesEnforcerTest {
         IQ expectedQuery = IQ_CONVERTER.convert(queryBuilder2.build()).normalizeForOptimization();
         LOGGER.info("Expected IQ:\n" + expectedQuery);
 
-        assertEquals(expectedQuery, transformedQuery);
+        assertEquals(expectedQuery.getTree(), transformedTree);
     }
 
     @Test
@@ -194,11 +192,11 @@ public class NoNullValuesEnforcerTest {
                 dataNode));
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(initialIQ)
-                .normalizeForOptimization();
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(initialIQ.getTree())
+                .normalizeForOptimization(expectedIQ.getVariableGenerator());
         LOGGER.info("Expected IQ:\n" + expectedIQ);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
-        assertEquals(expectedIQ, transformedQuery);
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
+        assertEquals(expectedIQ.getTree(), transformedTree);
     }
 
     @Test
@@ -238,11 +236,11 @@ public class NoNullValuesEnforcerTest {
                         dataNode));
         IQ expectedIQ = IQ_FACTORY.createIQ(projectionAtom, expectedTree);
 
-        IQ transformedQuery = NO_NULL_VALUE_ENFORCER.transform(initialIQ)
-                .normalizeForOptimization();
+        IQTree transformedTree = NO_NULL_VALUE_ENFORCER.transform(initialIQ.getTree())
+                .normalizeForOptimization(initialIQ.getVariableGenerator());
         LOGGER.info("Expected IQ:\n" + expectedIQ);
-        LOGGER.info("Transformed IQ:\n" + transformedQuery);
-        assertEquals(expectedIQ, transformedQuery);
+        LOGGER.info("Transformed IQ:\n" + transformedTree);
+        assertEquals(expectedIQ.getTree(), transformedTree);
     }
 
 }

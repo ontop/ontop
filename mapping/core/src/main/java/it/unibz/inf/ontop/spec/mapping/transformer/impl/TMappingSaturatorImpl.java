@@ -65,7 +65,6 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final QueryUnionSplitter unionSplitter;
     private final UnionFlattener unionNormalizer;
     private final MappingCQCOptimizer mappingCqcOptimizer;
-    private final NoNullValueEnforcer noNullValueEnforcer;
     private final IntermediateQueryFactory iqFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final SubstitutionFactory substitutionFactory;
@@ -74,27 +73,21 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
 
     @Inject
 	private TMappingSaturatorImpl(TMappingExclusionConfig tMappingExclusionConfig,
-                                  AtomFactory atomFactory,
-                                  TermFactory termFactory,
                                   QueryUnionSplitter unionSplitter,
                                   UnionFlattener unionNormalizer,
                                   MappingCQCOptimizer mappingCqcOptimizer,
-                                  NoNullValueEnforcer noNullValueEnforcer,
-                                  IntermediateQueryFactory iqFactory,
                                   UnionBasedQueryMerger queryMerger,
-                                  SubstitutionFactory substitutionFactory,
-                                  CoreUtilsFactory coreUtilsFactory, CoreSingletons coreSingletons) {
+                                  CoreSingletons coreSingletons) {
         this.tMappingExclusionConfig = tMappingExclusionConfig;
-		this.atomFactory = atomFactory;
-		this.termFactory = termFactory;
+		this.atomFactory = coreSingletons.getAtomFactory();
+		this.termFactory = coreSingletons.getTermFactory();
         this.unionSplitter = unionSplitter;
         this.unionNormalizer = unionNormalizer;
         this.mappingCqcOptimizer = mappingCqcOptimizer;
-        this.noNullValueEnforcer = noNullValueEnforcer;
-        this.iqFactory = iqFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.queryMerger = queryMerger;
-        this.substitutionFactory = substitutionFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.coreSingletons = coreSingletons;
     }
 
@@ -156,11 +149,9 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     }
 
     private IQ toIQ(Collection<TMappingRule> rules) {
-        // In case some legacy implementations do not preserve IS_NOT_NULL conditions
-        return noNullValueEnforcer.transform(
-                queryMerger.mergeDefinitions(rules.stream()
+        return queryMerger.mergeDefinitions(rules.stream()
                         .map(r -> r.asIQ(iqFactory, termFactory, substitutionFactory))
-                        .collect(ImmutableCollectors.toList())).get())
+                        .collect(ImmutableCollectors.toList())).get()
                 .normalizeForOptimization();
     }
 

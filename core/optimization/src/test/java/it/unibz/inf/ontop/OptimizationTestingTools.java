@@ -2,21 +2,22 @@ package it.unibz.inf.ontop;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
-import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOptimizationConfiguration;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.injection.OptimizerFactory;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
@@ -25,11 +26,13 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import it.unibz.inf.ontop.utils.impl.LegacyVariableGenerator;
 import org.apache.commons.rdf.api.RDF;
 
 import java.util.Properties;
+import java.util.stream.IntStream;
 
 public class OptimizationTestingTools {
 
@@ -52,8 +55,6 @@ public class OptimizationTestingTools {
     public static final UnionAndBindingLiftOptimizer UNION_AND_BINDING_LIFT_OPTIMIZER;
     public static final UnionBasedQueryMerger UNION_BASED_QUERY_MERGER;
     public static final RDF RDF_FACTORY;
-
-    public static final DummyDBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
     public static final Variable X;
     public static final Variable Y;
@@ -120,8 +121,6 @@ public class OptimizationTestingTools {
         TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
         OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
 
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
-
         UNION_BASED_QUERY_MERGER = injector.getInstance(UnionBasedQueryMerger.class);
 
         NULL = TERM_FACTORY.getNullConstant();
@@ -178,38 +177,59 @@ public class OptimizationTestingTools {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    public static DatabaseRelationDefinition createRelation(int tableNumber, int arity, DBTermType termType, String prefix,
-                                                            boolean canBeNull) {
+    public static OfflineMetadataProviderBuilder3 createMetadataProviderBuilder() {
+        return new OfflineMetadataProviderBuilder3(TYPE_FACTORY);
+    }
 
-        QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        RelationDefinition.AttributeListBuilder builder =  DatabaseTableDefinition.attributeListBuilder();
-        for (int i = 1; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
+    public static class OfflineMetadataProviderBuilder3 extends OfflineMetadataProviderBuilder {
+
+        public OfflineMetadataProviderBuilder3(TypeFactory typeFactory) { super(typeFactory); }
+
+        public DatabaseRelationDefinition createRelation(String tableName, int arity, DBTermType termType, boolean canBeNull) {
+            QuotedIDFactory idFactory = getQuotedIDFactory();
+            RelationDefinition.AttributeListBuilder builder =  DatabaseTableDefinition.attributeListBuilder();
+            for (int i = 1; i <= arity; i++) {
+                builder.addAttribute(idFactory.createAttributeID("col" + i), termType, canBeNull);
+            }
+            RelationID id = idFactory.createRelationID(null, tableName);
+            return createDatabaseRelation(ImmutableList.of(id), builder);
         }
-        RelationID id = idFactory.createRelationID(null, prefix + "TABLE" + tableNumber + "AR" + arity);
-        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(id), builder);
+
+        public DatabaseRelationDefinition createRelation(int tableNumber, int arity, DBTermType termType, String prefix, boolean canBeNull) {
+            return createRelation(prefix + "TABLE" + tableNumber + "AR" + arity, arity, termType, canBeNull);
+        }
+
+        public DatabaseRelationDefinition createRelationWithPK(int tableNumber, int arity) {
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+            DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "PK_", false);
+            UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1));
+            return tableDef;
+        }
+
+        public DatabaseRelationDefinition createRelationWithUC(int tableNumber, int arity, boolean canNull) {
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+            DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "UC_", canNull);
+            UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
+                    .addDeterminant(1)
+                    .build();
+            return tableDef;
+        }
+
+        public RelationDefinition createRelationWithStringAttributes(int tableNumber, int arity, boolean canBeNull) {
+            return createRelation(tableNumber, arity, getDBTypeFactory().getDBStringType(), "STR_", canBeNull);
+        }
+
+        public RelationDefinition createRelationWithIntAttributes(int tableNumber, int arity, boolean canBeNull) {
+            return createRelation(tableNumber, arity, getDBTypeFactory().getDBLargeIntegerType(), "INT_", canBeNull);
+        }
     }
 
-    public static RelationPredicate createRelationPredicate(int tableNumber, int arity, DBTermType termType, String prefix, boolean canBeNull) {
-        return createRelation(tableNumber, arity, termType, prefix, canBeNull).getAtomPredicate();
+    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {
+        return IQ_FACTORY.createExtensionalDataNode(relation,
+                IntStream.range(0, arguments.size())
+                        .boxed()
+                        .collect(ImmutableCollectors.toMap(
+                                i -> i,
+                                arguments::get)));
     }
-
-    public static RelationPredicate createPKRelationPredicate(int tableNumber, int arity) {
-        DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
-        DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "PK_", false);
-        UniqueConstraint.primaryKeyOf(tableDef.getAttribute(1));
-        return tableDef.getAtomPredicate();
-    }
-
-    public static RelationDefinition createUCRelation(int tableNumber, int arity, boolean canNull) {
-        if (arity < 1)
-            throw new IllegalArgumentException();
-        DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
-        DatabaseRelationDefinition tableDef = createRelation(tableNumber, arity, stringDBType, "UC_", canNull);
-        UniqueConstraint.builder(tableDef, "uc_" + tableNumber)
-                .addDeterminant(1)
-                .build();
-        return tableDef;
-    }
-
 }

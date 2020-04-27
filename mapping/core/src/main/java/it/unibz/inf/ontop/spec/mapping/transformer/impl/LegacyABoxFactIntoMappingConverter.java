@@ -64,7 +64,7 @@ public class LegacyABoxFactIntoMappingConverter implements ABoxFactIntoMappingCo
         ImmutableList<MappingAssertion> assertions = Stream.concat(Stream.concat(Stream.concat(
                 ontology.getClassAssertions().stream()
                     .map(ca -> new MappingAssertion(
-                            MappingAssertionIndex.ofClass(rdfAtomPredicate,ca.getConcept().getIRI()),
+                            MappingAssertionIndex.ofClass(rdfAtomPredicate, ca.getConcept().getIRI()),
                             createFact(ca.getIndividual(), RDF.TYPE, getIRI(ca.getConcept().getIRI())),
                             new ABoxFactProvenance(ca))),
 

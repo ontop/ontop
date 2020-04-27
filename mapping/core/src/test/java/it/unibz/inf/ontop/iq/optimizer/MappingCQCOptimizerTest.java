@@ -1,12 +1,14 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.constraints.impl.LinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphism;
 import it.unibz.inf.ontop.constraints.ImmutableHomomorphismIterator;
 import it.unibz.inf.ontop.constraints.impl.BasicLinearInclusionDependenciesImpl;
 import it.unibz.inf.ontop.constraints.impl.ImmutableCQContainmentCheckUnderLIDs;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
@@ -27,21 +29,19 @@ public class MappingCQCOptimizerTest {
 
     @Test
     public void test() {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company",
+        DatabaseRelationDefinition company = builder.createDatabaseRelation("company",
             "cmpNpdidCompany", integerType, false,
             "cmpShortName", integerType, false);
-        RelationPredicate company = table24Def.getAtomPredicate();
 
-        DatabaseRelationDefinition table3Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("company_reserves",
+        DatabaseRelationDefinition companyReserves = builder.createDatabaseRelation("company_reserves",
             "cmpShare", integerType, false,
             "fldNpdidField", integerType, false,
             "cmpNpdidCompany", integerType, false);
-        RelationPredicate companyReserves = table3Def.getAtomPredicate();
-        ForeignKeyConstraint.builder("FK", table3Def, table24Def)
-                .add(3, 1)
+        ForeignKeyConstraint.builder("FK", companyReserves, company)
+                .add(2, 1)
                 .build();
 
         final Variable cmpShare1 = TERM_FACTORY.getVariable("cmpShare1");
@@ -49,8 +49,10 @@ public class MappingCQCOptimizerTest {
         final Variable cmpNpdidCompany2 = TERM_FACTORY.getVariable("cmpNpdidCompany2");
         final Variable cmpShortName2 = TERM_FACTORY.getVariable("cmpShortName2");
 
-        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1, fldNpdidField1, cmpNpdidCompany2));
-        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(company, cmpShortName2, cmpNpdidCompany2));
+        ExtensionalDataNode companyReservesNode = IQ_FACTORY.createExtensionalDataNode(
+                companyReserves, ImmutableMap.of(1, fldNpdidField1, 2, cmpNpdidCompany2));//cmpShare1,
+        ExtensionalDataNode companyNode = IQ_FACTORY.createExtensionalDataNode(
+                company, ImmutableMap.of(0, cmpShortName2, 1, cmpNpdidCompany2));
 
         IQTree joinTree = IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(companyReservesNode, companyNode));
@@ -69,8 +71,8 @@ public class MappingCQCOptimizerTest {
         final Variable cmpNpdidCompany2M = TERM_FACTORY.getVariable("cmpNpdidCompany2M");
         final Variable cmpShortName2M = TERM_FACTORY.getVariable("cmpShortName2M");
 
-        b.add(ATOM_FACTORY.getDataAtom(company, cmpShortName2M, cmpNpdidCompany2M),
-                ATOM_FACTORY.getDataAtom(companyReserves, cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
+        b.add(ATOM_FACTORY.getDataAtom(company.getAtomPredicate(), cmpShortName2M, cmpNpdidCompany2M),
+                ATOM_FACTORY.getDataAtom(companyReserves.getAtomPredicate(), cmpShare1M, fldNpdidField1M, cmpNpdidCompany2M));
 
         ImmutableCQContainmentCheckUnderLIDs<RelationPredicate> foreignKeyCQC = new ImmutableCQContainmentCheckUnderLIDs<>(b.build());
 
@@ -91,21 +93,21 @@ public class MappingCQCOptimizerTest {
     public void test_foreign_keys() {
         // store (address_id/NN, manager_staff_id/NN) -> address (address_id/PL), staff (staff_id/PK)
         // staff (address_id/NN, store_id/NN) -> address (address_id/PK), store (store_id/PK)
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        DBTermType integerType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
-
-        DatabaseRelationDefinition addressTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("address",
+        DatabaseRelationDefinition addressTable = builder.createDatabaseRelation("address",
             "address_id", integerType, false,
             "address", integerType, false);
         RelationPredicate address = addressTable.getAtomPredicate();
 
-        DatabaseRelationDefinition storeTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("store",
+        DatabaseRelationDefinition storeTable = builder.createDatabaseRelation("store",
             "store_id", integerType, false,
             "address_id", integerType, false,
             "manager_staff_id", integerType, false);
         RelationPredicate store = storeTable.getAtomPredicate();
 
-        DatabaseRelationDefinition staffTable = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("staff",
+        DatabaseRelationDefinition staffTable = builder.createDatabaseRelation("staff",
             "staff_id", integerType, false,
             "address_id", integerType, false,
             "store_id", integerType, false);

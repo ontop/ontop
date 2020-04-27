@@ -5,12 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
-import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.datalog.UnionFlattener;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.spec.mapping.TargetAtomFactory;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.IntermediateQueryBuilder;
@@ -39,8 +38,6 @@ public class MappingTestingTools {
     public static final MappingVariableNameNormalizer MAPPING_NORMALIZER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    public static final DummyDBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
-
     public static final TargetQueryParserFactory TARGET_QUERY_PARSER_FACTORY;
 
     public static final UnifierUtilities UNIFIER_UTILITIES;
@@ -57,12 +54,12 @@ public class MappingTestingTools {
 
     public static final MappingCQCOptimizer MAPPING_CQC_OPTIMIZER;
 
-    public static final RelationPredicate TABLE1_AR2;
-    public static final RelationPredicate TABLE2_AR2;
-    public static final RelationPredicate TABLE1_AR3;
-    public static final RelationPredicate TABLE2_AR3;
-    public static final RelationPredicate TABLE3_AR3;
-    public static final RelationPredicate TABLE4_AR3;
+    public static final DatabaseRelationDefinition TABLE1_AR2;
+    public static final DatabaseRelationDefinition TABLE2_AR2;
+    public static final DatabaseRelationDefinition TABLE1_AR3;
+    public static final DatabaseRelationDefinition TABLE2_AR3;
+    public static final DatabaseRelationDefinition TABLE3_AR3;
+    public static final DatabaseRelationDefinition TABLE4_AR3;
 
     static {
         OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
@@ -79,7 +76,6 @@ public class MappingTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         TARGET_ATOM_FACTORY = injector.getInstance(TargetAtomFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
         A_BOX_FACT_INTO_MAPPING_CONVERTER = injector.getInstance(ABoxFactIntoMappingConverter.class);
         ONTOP_MAPPING_SETTINGS = injector.getInstance(OntopMappingSettings.class);
         SAME_AS_INVERSE_REWRITER = injector.getInstance(MappingSameAsInverseRewriter.class);
@@ -97,27 +93,37 @@ public class MappingTestingTools {
 
         MAPPING_CQC_OPTIMIZER = injector.getInstance(MappingCQCOptimizer.class);
 
-        TABLE1_AR2 = createRelationPredicate(1, 2);
-        TABLE2_AR2 = createRelationPredicate(2, 2);
-        TABLE1_AR3 = createRelationPredicate(4, 3);
-        TABLE2_AR3 = createRelationPredicate(5, 3);
-        TABLE3_AR3 = createRelationPredicate(6, 3);
-        TABLE4_AR3 = createRelationPredicate(7, 3);
+        OfflineMetadataProviderBuilder2 builder = createMetadataProviderBuilder();
+        TABLE1_AR2 = builder.createRelationPredicate(1, 2);
+        TABLE2_AR2 = builder.createRelationPredicate(2, 2);
+        TABLE1_AR3 = builder.createRelationPredicate(4, 3);
+        TABLE2_AR3 = builder.createRelationPredicate(5, 3);
+        TABLE3_AR3 = builder.createRelationPredicate(6, 3);
+        TABLE4_AR3 = builder.createRelationPredicate(7, 3);
     }
 
     public static IntermediateQueryBuilder createQueryBuilder() {
         return IQ_FACTORY.createIQBuilder(EXECUTOR_REGISTRY);
     }
 
-    public static RelationPredicate createRelationPredicate(int tableNumber, int arity) {
-        QuotedIDFactory idFactory = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
+    public static OfflineMetadataProviderBuilder2 createMetadataProviderBuilder() {
+        return new OfflineMetadataProviderBuilder2(TYPE_FACTORY);
+    }
 
-        RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
-        for (int i = 1 ; i <= arity; i++) {
-            builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
+    public static class OfflineMetadataProviderBuilder2 extends OfflineMetadataProviderBuilder {
+
+        public OfflineMetadataProviderBuilder2(TypeFactory typeFactory) { super(typeFactory); }
+
+        private DatabaseRelationDefinition createRelationPredicate(int tableNumber, int arity) {
+            QuotedIDFactory idFactory = getQuotedIDFactory();
+            DBTermType stringDBType = getDBTypeFactory().getDBStringType();
+
+            RelationDefinition.AttributeListBuilder builder = DatabaseTableDefinition.attributeListBuilder();
+            for (int i = 1 ; i <= arity; i++) {
+                builder.addAttribute(idFactory.createAttributeID("col" + i), stringDBType, false);
+            }
+            RelationID id = idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity);
+            return createDatabaseRelation(ImmutableList.of(id), builder);
         }
-        RelationID id = idFactory.createRelationID(null, "TABLE" + tableNumber + "AR" + arity);
-        return DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation(ImmutableList.of(id), builder).getAtomPredicate();
     }
 }

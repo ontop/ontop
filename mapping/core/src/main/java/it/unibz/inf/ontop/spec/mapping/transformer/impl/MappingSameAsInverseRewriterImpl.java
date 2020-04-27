@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
+import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.OWL;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
@@ -59,16 +60,18 @@ public class MappingSameAsInverseRewriterImpl implements MappingSameAsInverseRew
 
     private MappingAssertion getInverse(MappingAssertion assertion) {
 
-        Variable originalSubject = assertion.getSubject();
-        Variable originalObject = assertion.getObject();
+        RDFAtomPredicate rdfAtomPredicate = assertion.getRDFAtomPredicate();
+        ImmutableList<Variable> variables = assertion.getProjectionAtom().getArguments();
+        Variable originalSubject = rdfAtomPredicate.getSubject(variables);
+        Variable originalObject = rdfAtomPredicate.getObject(variables);
 
         VariableGenerator generator = assertion.getQuery().getVariableGenerator();
         Variable newSubject = generator.generateNewVariableFromVar(originalSubject);
         Variable newObject = generator.generateNewVariableFromVar(originalObject);
 
         DistinctVariableOnlyDataAtom newProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
-                assertion.getRDFAtomPredicate(),
-                assertion.updateSO(newSubject, newObject));
+                rdfAtomPredicate,
+                rdfAtomPredicate.updateSPO(variables, newSubject, rdfAtomPredicate.getProperty(variables), newObject));
 
         // swap subjects and objects
         InjectiveVar2VarSubstitution renamingSubstitution = substitutionFactory.getInjectiveVar2VarSubstitution(

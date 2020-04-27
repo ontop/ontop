@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.mapping;
 import com.google.common.collect.*;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopMappingConfiguration;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.*;
@@ -23,7 +24,7 @@ import static it.unibz.inf.ontop.utils.MappingTestingTools.*;
 public class PunningTest {
 
 
-    private final static RelationPredicate company;
+    private final static RelationDefinition company;
 
     private static Variable A = TERM_FACTORY.getVariable("a");
     private static Variable B = TERM_FACTORY.getVariable("b");
@@ -37,25 +38,22 @@ public class PunningTest {
     private static final IRI CLASS_IRI = RDF_FACTORY.createIRI("http://example.org/voc#Company");
 
     static {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        RelationDefinition table24Def = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "company",
+        company = builder.createDatabaseRelation( "company",
             "cmpNpdidCompany", integerDBType, false,
             "cmpShortName", integerDBType, false);
-        company = table24Def.getAtomPredicate();
     }
 
     @Test
     public void test() {
-                OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
+        OntopMappingConfiguration defaultConfiguration = OntopMappingConfiguration.defaultBuilder()
                 .enableTestMode()
                 .build();
 
         Injector injector = defaultConfiguration.getInjector();
         TMappingSaturatorImpl tmap = injector.getInstance(TMappingSaturatorImpl.class);
-
-
-        DataAtom<RelationPredicate> extensionalAtom = ATOM_FACTORY.getDataAtom(company, ImmutableList.of(A, B));
 
         // Class
         IQ classMappingAssertion = IQ_FACTORY.createIQ(
@@ -64,7 +62,7 @@ public class PunningTest {
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(RDF.TYPE),
                                 O, TERM_FACTORY.getConstantIRI(CLASS_IRI))),
-                        IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
+                        IQ_FACTORY.createExtensionalDataNode(company, ImmutableMap.of(0, A, 1, B))));
 
         // Property
         IQ propertyMappingAssertion = IQ_FACTORY.createIQ(
@@ -72,7 +70,7 @@ public class PunningTest {
                 IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(S, P, B),
                         SUBSTITUTION_FACTORY.getSubstitution(S, generateURI1(A),
                                 P, TERM_FACTORY.getConstantIRI(PROP_IRI))),
-                        IQ_FACTORY.createExtensionalDataNode(extensionalAtom)));
+                        IQ_FACTORY.createExtensionalDataNode(company, ImmutableMap.of(0, A, 1, B))));
 
         RDFAtomPredicate tp = (RDFAtomPredicate) ATOM_FACTORY.getDistinctTripleAtom(S, P, B).getPredicate();
 

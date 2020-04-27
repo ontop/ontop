@@ -1,12 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.transformer;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.UnknownDatatypeException;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 
-public interface MappingDatatypeFiller extends MappingWithProvenanceTransformer {
+public interface MappingDatatypeFiller  {
 
-    @Override
-    ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping)
+    MappingAssertion transform(MappingAssertion assertion)
             throws UnknownDatatypeException;
 }

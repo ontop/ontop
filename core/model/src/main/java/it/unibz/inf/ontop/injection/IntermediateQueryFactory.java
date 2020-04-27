@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
@@ -51,8 +50,6 @@ public interface IntermediateQueryFactory {
     FilterNode createFilterNode(ImmutableExpression filterCondition);
 
     IntensionalDataNode createIntensionalDataNode(DataAtom<AtomPredicate> atom);
-    @Deprecated
-    ExtensionalDataNode createExtensionalDataNode(DataAtom<RelationPredicate> atom);
 
     /**
      * NB: keys of the argumentMap are indices. They start at 0.

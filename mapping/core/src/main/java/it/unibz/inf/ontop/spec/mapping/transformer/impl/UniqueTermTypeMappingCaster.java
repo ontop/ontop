@@ -1,17 +1,13 @@
 package it.unibz.inf.ontop.spec.mapping.transformer.impl;
 
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.type.UniqueTermTypeExtractor;
 import it.unibz.inf.ontop.model.term.*;
@@ -56,21 +52,10 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
     }
 
     @Override
-    public ImmutableList<MappingAssertion> transform(ImmutableList<MappingAssertion> mapping) {
-        return mapping.stream()
-                .map(this::transformMappingAssertion)
-                .collect(ImmutableCollectors.toList());
-    }
-
-    private MappingAssertion transformMappingAssertion(MappingAssertion assertion) {
-        ImmutableSubstitution<ImmutableTerm> topSubstitution = assertion.getTopNode().getSubstitution();
-
-        ImmutableSet<Variable> projectedVariables = assertion.getQuery().getTree().getVariables();
-
+    public MappingAssertion transform(MappingAssertion assertion) {
         RDFTermFunctionSymbol rdfTermFunctionSymbol = functionSymbolFactory.getRDFTermFunctionSymbol();
 
-        if (!projectedVariables.stream()
-                .map(topSubstitution::apply)
+        if (!assertion.getTerms().stream()
                 .allMatch(t -> ((t instanceof ImmutableFunctionalTerm) &&
                         ((ImmutableFunctionalTerm) t).getFunctionSymbol().equals(rdfTermFunctionSymbol))
                         || (t instanceof RDFConstant))) {
@@ -81,13 +66,11 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
         IQTree childTree = assertion.getTopChild();
 
         ImmutableSubstitution<ImmutableTerm> newSubstitution = transformTopSubstitution(
-                topSubstitution.getImmutableMap(), childTree);
+                assertion.getTopSubstitution().getImmutableMap(), childTree);
 
-        ConstructionNode newRootNode = iqFactory.createConstructionNode(projectedVariables, newSubstitution);
+        ConstructionNode newRootNode = iqFactory.createConstructionNode(assertion.getProjectedVariables(), newSubstitution);
 
-        return assertion.copyOf(iqFactory.createIQ(
-                assertion.getProjectionAtom(),
-                iqFactory.createUnaryIQTree(newRootNode, childTree)));
+        return assertion.copyOf(iqFactory.createUnaryIQTree(newRootNode, childTree), iqFactory);
     }
 
     /**

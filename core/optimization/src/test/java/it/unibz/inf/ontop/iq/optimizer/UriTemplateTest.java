@@ -59,21 +59,21 @@ public class UriTemplateTest {
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_1, A)));
         initialQueryBuilder.addChild(joinNode, leftConstructionNode);
 
-        ExtensionalDataNode leftDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
+        ExtensionalDataNode leftDataNode = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
         initialQueryBuilder.addChild(leftConstructionNode, leftDataNode);
 
         ConstructionNode middleConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_3, C)));
         initialQueryBuilder.addChild(joinNode, middleConstructionNode);
 
-        ExtensionalDataNode middleDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
+        ExtensionalDataNode middleDataNode = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
         initialQueryBuilder.addChild(middleConstructionNode, middleDataNode);
 
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X),
                 SUBSTITUTION_FACTORY.getSubstitution(X, generateOneVarURITemplate(URI_TEMPLATE_STR_2, E)));
         initialQueryBuilder.addChild(leftJoinNode, rightConstructionNode, RIGHT);
 
-        ExtensionalDataNode rightDataNode = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR1, E));
+        ExtensionalDataNode rightDataNode = createExtensionalDataNode(TABLE3_AR1, ImmutableList.of(E));
         initialQueryBuilder.addChild(rightConstructionNode, rightDataNode);
 
         IntermediateQuery initialQuery = initialQueryBuilder.build();

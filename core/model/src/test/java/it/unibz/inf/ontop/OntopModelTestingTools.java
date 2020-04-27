@@ -1,21 +1,28 @@
 package it.unibz.inf.ontop;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import it.unibz.inf.ontop.dbschema.DummyDBMetadataBuilder;
-import it.unibz.inf.ontop.dbschema.impl.DummyMetadataBuilderImpl;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.OntopModelConfiguration;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.tools.IQConverter;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.iq.tools.ExecutorRegistry;
+import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.substitution.impl.ImmutableUnificationTools;
 import it.unibz.inf.ontop.substitution.impl.UnifierUtilities;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.RDF;
+
+import java.util.stream.IntStream;
 
 /**
  *
@@ -35,7 +42,6 @@ public class OntopModelTestingTools {
     public static final RDF RDF_FACTORY;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
 
-    public static final DummyDBMetadataBuilder DEFAULT_DUMMY_DB_METADATA;
 
     static {
         OntopModelConfiguration defaultConfiguration = OntopModelConfiguration.defaultBuilder()
@@ -48,15 +54,25 @@ public class OntopModelTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         TERM_FACTORY = injector.getInstance(TermFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
-        DEFAULT_DUMMY_DB_METADATA = injector.getInstance(DummyMetadataBuilderImpl.class);
         UNIFIER_UTILITIES = injector.getInstance(UnifierUtilities.class);
         UNIFICATION_TOOLS = injector.getInstance(ImmutableUnificationTools.class);
         IQ_CONVERTER = injector.getInstance(IQConverter.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
-
         EXECUTOR_REGISTRY = defaultConfiguration.getExecutorRegistry();
-
         NO_NULL_VALUE_ENFORCER = injector.getInstance(NoNullValueEnforcer.class);
+    }
+
+    public static OfflineMetadataProviderBuilder createMetadataProviderBuilder() {
+        return new OfflineMetadataProviderBuilder(TYPE_FACTORY);
+    }
+
+    public static ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<VariableOrGroundTerm> arguments) {
+        return IQ_FACTORY.createExtensionalDataNode(relation,
+                IntStream.range(0, arguments.size())
+                        .boxed()
+                        .collect(ImmutableCollectors.toMap(
+                                i -> i,
+                                arguments::get)));
     }
 }

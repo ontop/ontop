@@ -5,13 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBBooleanFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
-import it.unibz.inf.ontop.spec.mapping.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
@@ -21,7 +21,6 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -39,14 +38,14 @@ public class ExpressionParserTest {
     private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
     private static final DBBooleanFunctionSymbol IS_NULL = DB_FS_FACTORY.getDBIsNull();
 
-    private QuotedIDFactory IDFAC;
-    private DBTypeFactory DB_TYPE_FACTORY;
-    private DBTermType dbLongType;
+    private static final QuotedIDFactory IDFAC;
+    private static final DBTypeFactory DB_TYPE_FACTORY;
+    private static final DBTermType dbLongType;
 
-    @Before
-    public void beforeEachTest() {
-        IDFAC = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
-        DB_TYPE_FACTORY = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory();
+    static {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        IDFAC = builder.getQuotedIDFactory();
+        DB_TYPE_FACTORY = builder.getDBTypeFactory();
         dbLongType = DB_TYPE_FACTORY.getDBLargeIntegerType();
     }
 

@@ -20,15 +20,12 @@ package it.unibz.inf.ontop.owlapi;
  * #L%
  */
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import junit.framework.TestCase;
-
-import it.unibz.inf.ontop.exception.InvalidMappingException;
 
 import static it.unibz.inf.ontop.utils.OWLAPITestingTools.executeFromFile;
 
