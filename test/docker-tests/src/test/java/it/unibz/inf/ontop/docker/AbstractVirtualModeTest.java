@@ -223,12 +223,13 @@ public abstract class AbstractVirtualModeTest {
             /*
              * Print the query summary
              */
-            String sqlQuery = Optional.of(st.getExecutableQuery(query).getTree())
+            IQ iq = st.getExecutableQuery(query);
+            String sqlQuery = Optional.of(iq.getTree())
                     .filter(t -> t instanceof UnaryIQTree)
                     .map(t -> ((UnaryIQTree) t).getChild().getRootNode())
                     .filter(n -> n instanceof NativeNode)
                     .map(n -> ((NativeNode) n).getNativeQueryString())
-                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query"));
+                    .orElseThrow(() -> new RuntimeException("Cannot extract the SQL query: " + iq));
             log.info("");
             log.info("The input SPARQL query:");
             log.info("=======================");

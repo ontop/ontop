@@ -64,7 +64,7 @@ public class MetaMappingExpanderTest extends AbstractVirtualModeTest {
                 "PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
                 "select ?x\n" +
                 "where {\n" +
-                "?x rdf:type :AmphoraSection2026-2026 .\n" +
+                "?x rdf:type :AmphoraSection4-4 .\n" +
                 "}\n" +
                 "limit 5\n";
 

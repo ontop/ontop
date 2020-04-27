@@ -1,9 +1,10 @@
 package it.unibz.inf.ontop.spec.mapping.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.InvalidSelectQueryException;
@@ -46,7 +47,7 @@ public class SelectQueryParserTest {
 //        assertEquals(2, parse.getHead().getTerms().size());
 //        assertEquals(4, parse.getReferencedVariables().size());
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getDataAtoms());
     }
 
@@ -81,7 +82,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
         System.out.println(re);
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(A2, A3)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A2, A3), eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_R, A1, B1, C1, D1),
                 dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3)), re.getDataAtoms());
     }
@@ -94,7 +95,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P, Q;");
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -104,7 +105,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse("SELECT A FROM P NATURAL JOIN  Q;");
         System.out.println(re);
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -113,7 +114,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P CROSS JOIN  Q;");
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -122,7 +123,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P JOIN  Q ON P.A = Q.A;");
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -131,7 +132,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q ON P.A = Q.A;");
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -140,7 +141,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P JOIN  Q USING(A);");
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -168,7 +169,7 @@ public class SelectQueryParserTest {
         SelectQueryParser parser = createParser();
         RAExpression re = parser.parse("SELECT * FROM P INNER JOIN  Q USING(A);");
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -293,7 +294,7 @@ public class SelectQueryParserTest {
         assertEquals(2, re.getDataAtoms().size());
         // TODO: add data atoms asserts
 
-        assertMatches(ImmutableList.of(eqOf(A1, A2), eqOf(B1, B2)), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(eqOf(A1, A2), eqOf(B1, B2)), re.getFilterAtoms());
     }
 
     @Test
@@ -347,7 +348,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
     }
 
@@ -358,7 +359,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
     }
 
@@ -369,7 +370,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -381,7 +382,7 @@ public class SelectQueryParserTest {
         RAExpression re = parser.parse(query);
         System.out.print(re);
 
-        assertMatches(ImmutableList.of(), re.getFilterAtoms());
+        assertEquals(ImmutableList.of(), re.getFilterAtoms());
         assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
     }
 
@@ -392,41 +393,41 @@ public class SelectQueryParserTest {
         return TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(RelationDefinition table, String var1, String var2) {
-        return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
-                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2)));
+    private ExtensionalDataNode dataAtomOf(RelationDefinition table, String var1, String var2) {
+        return IQ_FACTORY.createExtensionalDataNode(table,
+                ImmutableMap.of(0, TERM_FACTORY.getVariable(var1), 1, TERM_FACTORY.getVariable(var2)));
     }
 
-    private DataAtom<RelationPredicate> dataAtomOf(RelationDefinition table, String var1, String var2, String var3, String var4) {
-        return ATOM_FACTORY.getDataAtom(table.getAtomPredicate(),
-                ImmutableList.of(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2), TERM_FACTORY.getVariable(var3), TERM_FACTORY.getVariable(var4)));
+    private ExtensionalDataNode dataAtomOf(RelationDefinition table, String var1, String var2, String var3, String var4) {
+        return IQ_FACTORY.createExtensionalDataNode(table,
+                ImmutableMap.of(0, TERM_FACTORY.getVariable(var1), 1, TERM_FACTORY.getVariable(var2), 2, TERM_FACTORY.getVariable(var3), 3, TERM_FACTORY.getVariable(var4)));
     }
 
-    private <T> void assertMatches(ImmutableList<T> list0, List<T> list) {
+    private static void assertMatches(ImmutableList<ExtensionalDataNode> list0, List<ExtensionalDataNode> list) {
         assertEquals(list0.size(), list.size());
-        list0.forEach(a -> assertTrue(list.contains(a)));
+        list0.forEach(a -> assertTrue(list.stream()
+                .anyMatch(b -> b.isSyntacticallyEquivalentTo(a))));
     }
 
     private SelectQueryParser createParser() {
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        TABLE_P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
+        TABLE_P = builder.createDatabaseRelation("P",
             "A", integerDBType, false,
             "B", integerDBType, false);
 
-        TABLE_Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+        TABLE_Q = builder.createDatabaseRelation("Q",
             "A", integerDBType, false,
             "C", integerDBType, false);
 
-        TABLE_R = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("R",
+        TABLE_R = builder.createDatabaseRelation("R",
             "A", integerDBType, false,
             "B", integerDBType, false,
             "C", integerDBType, false,
             "D", integerDBType, false);
 
-        MetadataLookup metadataLookup = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(
-                ImmutableList.of(TABLE_P, TABLE_Q, TABLE_R));
-
+        MetadataLookup metadataLookup = builder.build();
         return new SelectQueryParser(metadataLookup, CORE_SINGLETONS);
     }
 }

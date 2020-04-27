@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IntermediateQuery;
@@ -55,7 +56,7 @@ public class PullOutVariableOptimizerTest {
         IntermediateQueryBuilder queryBuilder1 = createQueryBuilder();
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_PREDICATE2, X, Y, Z);
 
-        ExtensionalDataNode dataNode =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z, Y));
+        ExtensionalDataNode dataNode =  createExtensionalDataNode(TABLE7_AR4, ImmutableList.of(Z, X, Z, Y));
 
         queryBuilder1.init(projectionAtom, dataNode);
 //        queryBuilder1.addChild(constructionNode, dataNode);
@@ -72,7 +73,7 @@ public class PullOutVariableOptimizerTest {
 
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
         FilterNode filterNode = IQ_FACTORY.createFilterNode(EXPRESSION_Z_Z0);
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE7_AR4, Z, X, Z0, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE7_AR4, ImmutableList.of(Z, X, Z0, Y));
 
         queryBuilder2.init(projectionAtom, constructionNode);
         queryBuilder2.addChild(constructionNode, filterNode);
@@ -93,8 +94,8 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -114,7 +115,7 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(EXPRESSION1);
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X0, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X0, Z));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
@@ -136,8 +137,8 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, leftJoinNode1);
@@ -157,7 +158,7 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X0, Y1, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X0, Y1, Z));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, leftJoinNode2);
@@ -179,11 +180,11 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Z));
-        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, R, S));
-        ExtensionalDataNode dataNode4 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, W, Y));
-        ExtensionalDataNode dataNode5 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, T, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(R, S));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(W, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(T, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -207,9 +208,9 @@ public class PullOutVariableOptimizerTest {
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(
                 EXPRESSION1, EXPRESSION2, EXPRESSION_Z_Z2));
-        ExtensionalDataNode newDataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X0, Z));
-        ExtensionalDataNode newDataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, W, Y1));
-        ExtensionalDataNode newDataNode5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, T, Z2));
+        ExtensionalDataNode newDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X0, Z));
+        ExtensionalDataNode newDataNode4 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(W, Y1));
+        ExtensionalDataNode newDataNode5 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(T, Z2));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
@@ -234,9 +235,9 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, W, Z));
-        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, T, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(W, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(T, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -257,7 +258,7 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(EXPRESSION_Z_Z0);
-        ExtensionalDataNode newDataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, T, Z0));
+        ExtensionalDataNode newDataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(T, Z0));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
@@ -280,8 +281,8 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode1 = IQ_FACTORY.createConstructionNode(projectionAtom1.getVariables());
 
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_AR3, X, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, X));
+        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, X));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, leftJoinNode1);
@@ -304,8 +305,8 @@ public class PullOutVariableOptimizerTest {
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1,
                 EXPRESSION2, EXPRESSION7));
         FilterNode filterNode1 = IQ_FACTORY.createFilterNode(EXPRESSION4);
-        ExtensionalDataNode dataNode3 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE5_AR3, X, X2, Y));
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X0, Y1, X4));
+        ExtensionalDataNode dataNode3 =  createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, X2, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X0, Y1, X4));
 
         expectedQuery.init(projectionAtom2, constructionNode2);
         expectedQuery.addChild(constructionNode2, filterNode1);
@@ -329,9 +330,9 @@ public class PullOutVariableOptimizerTest {
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
         LeftJoinNode leftJoinNode1 = IQ_FACTORY.createLeftJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Z));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, X, W));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, W));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -352,9 +353,9 @@ public class PullOutVariableOptimizerTest {
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(EXPRESSION1);
         LeftJoinNode leftJoinNode2 = IQ_FACTORY.createLeftJoinNode(EXPRESSION8);
-        ExtensionalDataNode dataNode4 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X0, Z));
-        ExtensionalDataNode dataNode6 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, X5, W));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X0, Z));
+        ExtensionalDataNode dataNode6 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X5, W));
 
         expectedQueryBuilder.init(projectionAtom, constructionNode);
         expectedQueryBuilder.addChild(constructionNode, joinNode2);
@@ -378,8 +379,8 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode1 = IQ_FACTORY.createInnerJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Z, Y));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Z, Y));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, joinNode1);
@@ -399,7 +400,7 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         InnerJoinNode joinNode2 = IQ_FACTORY.createInnerJoinNode(TERM_FACTORY.getConjunction(EXPRESSION1, EXPRESSION2));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X0, Z, Y1));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X0, Z, Y1));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, joinNode2);
@@ -421,9 +422,9 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode1 = IQ_FACTORY.createLeftJoinNode();
-        ExtensionalDataNode dataNode1 =  IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
+        ExtensionalDataNode dataNode1 =  createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
         ConstructionNode rightConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X,Z));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Z));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Z));
 
         queryBuilder1.init(projectionAtom, constructionNode);
         queryBuilder1.addChild(constructionNode, ljNode1);
@@ -440,7 +441,7 @@ public class PullOutVariableOptimizerTest {
         ConstructionNode constructionNode2 = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
 
         LeftJoinNode ljNode2 = IQ_FACTORY.createLeftJoinNode(EXPRESSION1);
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X0, Z));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X0, Z));
 
         queryBuilder2.init(projectionAtom2, constructionNode2);
         queryBuilder2.addChild(constructionNode2, ljNode2);

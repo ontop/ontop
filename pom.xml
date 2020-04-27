@@ -150,6 +150,7 @@
         <docker.mysql.password>mysql</docker.mysql.password>
         <docker.oracle.password>oracle</docker.oracle.password>
         <docker.pgsql.password>postgres2</docker.pgsql.password>
+        <docker.denodo.password>admin</docker.denodo.password>
     </properties>
 
     <build>

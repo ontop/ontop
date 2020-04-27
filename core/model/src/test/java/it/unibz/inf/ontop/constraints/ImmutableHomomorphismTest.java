@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.constraints;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -102,16 +103,17 @@ public class ImmutableHomomorphismTest {
 
     @Test
     public void test_negative() {
-        DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
-        DatabaseRelationDefinition A = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("ADDRESS",
+        DatabaseRelationDefinition A = builder.createDatabaseRelation("ADDRESS",
             "id", stringDBType, false,
             "address", stringDBType, false);
-        DatabaseRelationDefinition S = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("STAFF",
+        DatabaseRelationDefinition S = builder.createDatabaseRelation("STAFF",
             "id", stringDBType, false,
             "address_id", stringDBType, false,
             "store_id", stringDBType, false);
-        DatabaseRelationDefinition T = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "STORE",
+        DatabaseRelationDefinition T = builder.createDatabaseRelation( "STORE",
             "id", stringDBType, false,
             "staff_id", stringDBType, false,
             "address_id", stringDBType, false);

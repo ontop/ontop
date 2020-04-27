@@ -1,10 +1,9 @@
 package it.unibz.inf.ontop.spec.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.ImmutableMetadataProvider;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.dbschema.ImplicitDBConstraintsProviderFactory;
@@ -22,9 +21,7 @@ import static org.junit.Assert.*;
 public class ImplicitDBConstraintsTest {
 
 	private static final String DIR = "src/test/resources/userconstraints/";
-
 	private static final MetadataProvider md;
-	private static final QuotedIDFactory idfac;
 
 	private static final ImplicitDBConstraintsProviderFactory CONSTRAINT_EXTRACTOR = Guice.createInjector()
 			.getInstance(ImplicitDBConstraintsProviderFactoryImpl.class);
@@ -32,18 +29,17 @@ public class ImplicitDBConstraintsTest {
 	private static final DatabaseRelationDefinition TABLENAME, TABLE2;
 
 	static {
-		DBTermType stringDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBStringType();
+		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+		DBTermType stringDBType = builder.getDBTypeFactory().getDBStringType();
 
-		TABLENAME = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("TABLENAME",
+		TABLENAME = builder.createDatabaseRelation("TABLENAME",
 			"KEYNAME", stringDBType, false);
 
-		TABLE2 = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation( "TABLE2",
+		TABLE2 = builder.createDatabaseRelation( "TABLE2",
 			"KEY1", stringDBType, false,
 			"KEY2", stringDBType, false);
 
-		md = DEFAULT_DUMMY_DB_METADATA.getImmutableMetadataProvider(ImmutableList.of(TABLENAME, TABLE2));
-
-		idfac = md.getQuotedIDFactory();
+		md = builder.build();
 	}
 	
 	@Test
@@ -79,7 +75,7 @@ public class ImplicitDBConstraintsTest {
 				Optional.of(new File(DIR + "fkeys.lst")), md);
 		List<RelationID> refs = uc.getRelationIDs();
 		assertEquals(2, refs.size());
-		assertTrue(refs.contains(idfac.createRelationID(null, "TABLE2")));
+		assertTrue(refs.contains(md.getQuotedIDFactory().createRelationID(null, "TABLE2")));
 	}
 
 	@Test
@@ -90,8 +86,8 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(idfac.createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
-		assertEquals(idfac.createAttributeID("KEY1"), ref.getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 	}
 
 	@Test
@@ -102,8 +98,8 @@ public class ImplicitDBConstraintsTest {
 		ForeignKeyConstraint fk = TABLENAME.getForeignKeys().get(0);
 		assertNotNull(fk);
 		Attribute ref = fk.getComponents().get(0).getReferencedAttribute();
-		assertEquals(idfac.createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
-		assertEquals(idfac.createAttributeID("KEY1"), ref.getID());
+		assertEquals(md.getQuotedIDFactory().createRelationID(null, "TABLE2"), ((DatabaseRelationDefinition)ref.getRelation()).getID());
+		assertEquals(md.getQuotedIDFactory().createAttributeID("KEY1"), ref.getID());
 		assertEquals(ImmutableList.of(TABLENAME.getAttribute(1)),
 				TABLENAME.getUniqueConstraints().get(0).getAttributes());
 	}

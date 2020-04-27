@@ -8,6 +8,8 @@ import it.unibz.inf.ontop.injection.OntopSystemSettings;
 import java.util.Optional;
 import java.util.Properties;
 
+import static it.unibz.inf.ontop.injection.impl.OntopSQLCoreSettingsImpl.extractJdbcDriver;
+
 
 public class OntopSystemSQLSettingsImpl extends OntopReformulationSQLSettingsImpl implements OntopSystemSQLSettings {
 

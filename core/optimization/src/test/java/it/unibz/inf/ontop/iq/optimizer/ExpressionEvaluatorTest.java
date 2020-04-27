@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.equivalence.IQSyntacticEquivalenceChecker;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.model.vocabulary.XSD;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -43,9 +42,9 @@ public class ExpressionEvaluatorTest {
     private String URI_TEMPLATE_STR_2 ="http://example.org/something/{}/{}";
 
 
-    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
-    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D));
-    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D));
+    private ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D));
+    private ExtensionalDataNode EXPECTED_DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D));
 
 
     private final String languageTag =  "en-us";
@@ -80,10 +79,10 @@ public class ExpressionEvaluatorTest {
         expectedQueryBuilder.addChild(expectedRootNode, expectedJoinNode);
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B)));
+                createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B)));
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, A, D)));
+                createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(A, D)));
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -202,10 +201,10 @@ public class ExpressionEvaluatorTest {
 
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, C, D)));
+                createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(C, D)));
 
         expectedQueryBuilder.addChild(expectedJoinNode,
-                IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, C, B)));
+                createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(C, B)));
 
         //build expected query
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();

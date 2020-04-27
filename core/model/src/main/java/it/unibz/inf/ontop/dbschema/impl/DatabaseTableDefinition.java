@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 public class DatabaseTableDefinition extends AbstractDatabaseRelationDefinition {
 
     /**
-     * used only in DummyDBMetadataBuilder
      *
      * @param allIds
      * @param builder

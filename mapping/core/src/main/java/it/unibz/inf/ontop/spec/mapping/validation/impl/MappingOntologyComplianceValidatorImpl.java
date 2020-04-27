@@ -87,9 +87,8 @@ public class MappingOntologyComplianceValidatorImpl implements MappingOntologyCo
     private Optional<RDFTermType> extractTripleObjectType(MappingAssertion assertion)
             throws TripleObjectTypeInferenceException {
 
-        Variable objectVariable = assertion.getObject();
-
-        ImmutableTerm constructionTerm = assertion.getTopNode().getSubstitution().get(objectVariable);
+        Variable objectVariable = assertion.getRDFAtomPredicate().getObject(assertion.getProjectionAtom().getArguments());
+        ImmutableTerm constructionTerm = assertion.getTopSubstitution().get(objectVariable);
 
         if (constructionTerm instanceof ImmutableFunctionalTerm) {
             ImmutableFunctionalTerm constructionFunctionalTerm = ((ImmutableFunctionalTerm) constructionTerm);

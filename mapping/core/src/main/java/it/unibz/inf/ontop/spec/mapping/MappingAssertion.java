@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -12,6 +14,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.pp.PPMappingAssertionProvenance;
+import it.unibz.inf.ontop.substitution.ImmutableSubstitution;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -39,7 +42,17 @@ public class MappingAssertion {
     public PPMappingAssertionProvenance getProvenance() { return provenance; }
 
     public MappingAssertion copyOf(IQ query) {
-        return new MappingAssertion(index, query, provenance);
+        return (query.getProjectionAtom() == this.query.getProjectionAtom())
+                ? new MappingAssertion(index, query, provenance)
+                : new MappingAssertion(query, provenance);
+    }
+
+    public MappingAssertion copyOf(IQTree tree, IntermediateQueryFactory iqFactory) {
+        return new MappingAssertion(index, iqFactory.createIQ(query.getProjectionAtom(), tree), provenance);
+    }
+
+    public ImmutableSet<Variable> getProjectedVariables() {
+        return query.getTree().getVariables();
     }
 
     public RDFAtomPredicate getRDFAtomPredicate() {
@@ -53,31 +66,16 @@ public class MappingAssertion {
             return index.getPredicate();
     }
 
-    public Variable getSubject() {
-        return getRDFAtomPredicate().getSubject(query.getProjectionAtom().getArguments());
+    public ImmutableList<ImmutableTerm> getTerms() {
+        return getTopSubstitution().apply(getProjectionAtom().getArguments());
     }
 
-    public Variable getObject() {
-        return getRDFAtomPredicate().getObject(query.getProjectionAtom().getArguments());
-    }
-
-    public ImmutableList<Variable> updateSubject(Variable newSubject) {
-        return getRDFAtomPredicate().updateSubject(query.getProjectionAtom().getArguments(), newSubject);
-    }
-
-    public ImmutableList<Variable> updateObject(Variable newObject) {
-        return getRDFAtomPredicate().updateObject(query.getProjectionAtom().getArguments(), newObject);
-    }
-
-    public ImmutableList<Variable> updateSO(Variable newSubject, Variable newObject) {
-        return getRDFAtomPredicate().updateSO(query.getProjectionAtom().getArguments(), newSubject, newObject);
-    }
-
-    public ConstructionNode getTopNode() {
+    public ImmutableSubstitution<ImmutableTerm> getTopSubstitution() {
        return Optional.of(query.getTree())
                 .filter(t -> t.getRootNode() instanceof ConstructionNode)
                 .map(IQTree::getRootNode)
                 .map(n -> (ConstructionNode) n)
+                .map(ConstructionNode::getSubstitution)
                 .orElseThrow(() -> new MinorOntopInternalBugException(
                         "The mapping assertion was expecting to start with a construction node\n" + query));
     }
@@ -90,21 +88,10 @@ public class MappingAssertion {
         return query.getProjectionAtom();
     }
 
-
     public MappingAssertionIndex getIndex() {
         if (index == null) {
             RDFAtomPredicate rdfAtomPredicate = getRDFAtomPredicate();
-
-            if (!(query.getTree() instanceof UnaryIQTree))
-                throw new MinorOntopInternalBugException("Not a unary tree" + query);
-            UnaryIQTree tree = (UnaryIQTree)query.getTree();
-
-            if (!(tree.getRootNode() instanceof ConstructionNode))
-                throw new MinorOntopInternalBugException("Not a construction node" + query);
-            ConstructionNode node = (ConstructionNode)tree.getRootNode();
-
-            ImmutableList<? extends ImmutableTerm> substitutedArguments =
-                    node.getSubstitution().apply(query.getProjectionAtom().getArguments());
+            ImmutableList<? extends ImmutableTerm> substitutedArguments = getTerms();
 
             IRI propertyIRI = rdfAtomPredicate.getPropertyIRI(substitutedArguments)
                     .orElseThrow(() -> new MinorOntopInternalBugException("The definition of the predicate is not always a ground term"));

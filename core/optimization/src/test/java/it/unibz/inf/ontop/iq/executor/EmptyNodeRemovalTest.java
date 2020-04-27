@@ -34,8 +34,8 @@ public class EmptyNodeRemovalTest {
     private static DistinctVariableOnlyDataAtom PROJECTION_ATOM = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
             ANS1_PREDICATE, ImmutableList.of(X, Y));
     private static String URI_TEMPLATE_STR_1 =  "http://example.org/ds1/{}";
-    private static ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B));
-    private static ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, A));
+    private static ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B));
+    private static ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(A));
     private static final EmptyNode DB_NODE_1 = IQ_FACTORY.createEmptyNode(ImmutableSet.of(A, C));
 
     /**
@@ -444,7 +444,7 @@ public class EmptyNodeRemovalTest {
         InnerJoinNode joinNode = IQ_FACTORY.createInnerJoinNode();
         expectedQueryBuilder.addChild(newRootNode, joinNode);
         expectedQueryBuilder.addChild(joinNode, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
+                TABLE1_AR2,
                 ImmutableMap.of(0, A)));
         expectedQueryBuilder.addChild(joinNode, DATA_NODE_2);
 
@@ -585,7 +585,7 @@ public class EmptyNodeRemovalTest {
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, A, B1)), RIGHT);
+        queryBuilder.addChild(lj1, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(A, B1)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
@@ -654,7 +654,7 @@ public class EmptyNodeRemovalTest {
 
         LeftJoinNode lj1 = IQ_FACTORY.createLeftJoinNode(TERM_FACTORY.getStrictEquality(B, B1));
         queryBuilder.addChild(rootNode, lj1);
-        queryBuilder.addChild(lj1, IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, B1, C)), RIGHT);
+        queryBuilder.addChild(lj1, createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(B1, C)), RIGHT);
 
         LeftJoinNode lj2 = IQ_FACTORY.createLeftJoinNode();
         queryBuilder.addChild(lj1, lj2, LEFT);
@@ -672,7 +672,7 @@ public class EmptyNodeRemovalTest {
                         Y, TERM_FACTORY.getNullConstant())));
         expectedQueryBuilder.init(PROJECTION_ATOM, newRootNode);
         expectedQueryBuilder.addChild(newRootNode, IQ_FACTORY.createExtensionalDataNode(
-                TABLE2_AR1.getRelationDefinition(),
+                TABLE2_AR1,
                 ImmutableMap.of()));
 
         optimizeAndCompare(queryBuilder.build(), expectedQueryBuilder.build());

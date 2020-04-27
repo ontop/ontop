@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RelationPredicate;
+import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.mapping.sqlparser.exception.IllegalJoinException;
@@ -31,7 +31,7 @@ public class RelationalExpressionTest {
 
     private DatabaseRelationDefinition P;
 
-    private DataAtom<RelationPredicate> f1, f2;
+    private ExtensionalDataNode f1, f2;
     private ImmutableFunctionalTerm eq;
     private Variable x, y, u, v;
     private QualifiedAttributeID qaTx, qaTy, qaNx, qaNy, qaTu, qaTv, qaNu, qaNv;
@@ -41,21 +41,22 @@ public class RelationalExpressionTest {
 
     @Before
     public void setupTest(){
-        MDFAC = DEFAULT_DUMMY_DB_METADATA.getQuotedIDFactory();
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        MDFAC = builder.getQuotedIDFactory();
 
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
 
-        DBTermType integerDBType = DEFAULT_DUMMY_DB_METADATA.getDBTypeFactory().getDBLargeIntegerType();
+        DBTermType integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
 
-        P = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("P",
-           "A", integerDBType, true,
-            "B", integerDBType, true);
+        P = builder.createDatabaseRelation("P",
+                "A", integerDBType, true,
+                "B", integerDBType, true);
 
         attX = P.getAttribute(1).getID();
         attY = P.getAttribute(2).getID();
 
-        f1 = ATOM_FACTORY.getDataAtom(P.getAtomPredicate(), ImmutableList.of(x, y));
+        f1 = IQ_FACTORY.createExtensionalDataNode(P, ImmutableMap.of(0, x, 1, y));
 
         qaTx = new QualifiedAttributeID(P.getID(), attX);
         qaTy = new QualifiedAttributeID(P.getID(), attY);
@@ -71,14 +72,14 @@ public class RelationalExpressionTest {
         u = TERM_FACTORY.getVariable("u");
         v = TERM_FACTORY.getVariable("v");
 
-        DatabaseRelationDefinition Q = DEFAULT_DUMMY_DB_METADATA.createDatabaseRelation("Q",
+        DatabaseRelationDefinition Q = builder.createDatabaseRelation("Q",
             "A", integerDBType, true,
             "C", integerDBType, true);
 
         QuotedID attu = Q.getAttribute(1).getID();
         QuotedID attv = Q.getAttribute(2).getID();
 
-        f2 = ATOM_FACTORY.getDataAtom(Q.getAtomPredicate(), ImmutableList.of(u, v));
+        f2 = IQ_FACTORY.createExtensionalDataNode(Q, ImmutableMap.of(0, u, 1, v));
 
         qaTu = new QualifiedAttributeID(Q.getID(), attu);
         qaTv = new QualifiedAttributeID(Q.getID(), attv);
@@ -95,7 +96,7 @@ public class RelationalExpressionTest {
         Variable w = TERM_FACTORY.getVariable("u");
         Variable z = TERM_FACTORY.getVariable("v");
 
-        DataAtom<RelationPredicate> f3 = ATOM_FACTORY.getDataAtom(Q.getAtomPredicate(), ImmutableList.of(w, z));
+        ExtensionalDataNode f3 = IQ_FACTORY.createExtensionalDataNode(Q, ImmutableMap.of(0, w, 1, z));
 
         RelationID table3 = MDFAC.createRelationID(null, "R");
         QuotedID attW = MDFAC.createAttributeID("A");

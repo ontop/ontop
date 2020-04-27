@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.QueryTransformerFactory;
-import it.unibz.inf.ontop.injection.SpecificationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -21,17 +20,14 @@ import java.util.function.Function;
 @Singleton
 public class MappingVariableNameNormalizerImpl implements MappingVariableNameNormalizer {
 
-    private final SpecificationFactory specificationFactory;
     private final QueryTransformerFactory transformerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
 
     @Inject
-    private MappingVariableNameNormalizerImpl(SpecificationFactory specificationFactory,
-                                              QueryTransformerFactory transformerFactory,
+    private MappingVariableNameNormalizerImpl(QueryTransformerFactory transformerFactory,
                                               SubstitutionFactory substitutionFactory,
                                               TermFactory termFactory) {
-        this.specificationFactory = specificationFactory;
         this.transformerFactory = transformerFactory;
         this.substitutionFactory = substitutionFactory;
         this.termFactory = termFactory;

@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
@@ -33,9 +34,9 @@ public class TrueNodesRemovalOptimizerTest {
     private final Variable X = TERM_FACTORY.getVariable("x");
     private final Variable Y = TERM_FACTORY.getVariable("y");
 
-    private ExtensionalDataNode DATA_NODE_1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR1, A));
-    private ExtensionalDataNode DATA_NODE_2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR1, B));
-    private ExtensionalDataNode DATA_NODE_3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE3_AR2, A, B));
+    private final ExtensionalDataNode DATA_NODE_1 = createExtensionalDataNode(TABLE1_AR1, ImmutableList.of(A));
+    private final ExtensionalDataNode DATA_NODE_2 = createExtensionalDataNode(TABLE2_AR1, ImmutableList.of(B));
+    private final ExtensionalDataNode DATA_NODE_3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(A, B));
 
     private ImmutableFunctionalTerm generateInt(VariableOrGroundTerm argument) {
         return TERM_FACTORY.getRDFLiteralFunctionalTerm(argument, XSD.INTEGER);
@@ -238,8 +239,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, rootNode);
         expectedQueryBuilder.addChild(rootNode, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR1.getRelationDefinition(),
-                ImmutableMap.of()));
+                TABLE1_AR1, ImmutableMap.of()));
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
@@ -369,8 +369,7 @@ public class TrueNodesRemovalOptimizerTest {
         expectedQueryBuilder.init(projectionAtom, un);
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createTrueNode());
         expectedQueryBuilder.addChild(un, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR1.getRelationDefinition(),
-                ImmutableMap.of()));
+                TABLE1_AR1, ImmutableMap.of()));
 
         IntermediateQuery expectedQuery = expectedQueryBuilder.build();
 

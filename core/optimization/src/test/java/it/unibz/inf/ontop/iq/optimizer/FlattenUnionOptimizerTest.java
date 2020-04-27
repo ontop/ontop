@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
@@ -39,11 +40,10 @@ public class FlattenUnionOptimizerTest {
         UnionNode unionNode2 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y));
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE5_AR3, X, Y, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, unionNode1);
@@ -67,17 +67,13 @@ public class FlattenUnionOptimizerTest {
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE1_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE2_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE2_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE4_AR3, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE5_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE5_AR3, ImmutableMap.of(0, X)));
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" + query2);
@@ -102,15 +98,11 @@ public class FlattenUnionOptimizerTest {
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE3_AR2, X, Y));
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE5_AR3, X, Y, Z));
+                TABLE1_AR2, ImmutableMap.of(0, X));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom1, unionNode1);
         queryBuilder1.addChild(unionNode1, dataNode1);
@@ -135,17 +127,13 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, dataNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE2_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE2_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE3_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE3_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE4_AR3, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE5_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE5_AR3, ImmutableMap.of(0, X)));
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" + query2);
@@ -165,14 +153,11 @@ public class FlattenUnionOptimizerTest {
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE3_AR2, X, Y));
+                TABLE1_AR2, ImmutableMap.of(0, X));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
         ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X, 1, Y));
+                TABLE4_AR3, ImmutableMap.of(0, X, 1, Y));
 
         queryBuilder1.init(projectionAtom1, unionNode1);
         queryBuilder1.addChild(unionNode1, dataNode1);
@@ -207,14 +192,11 @@ public class FlattenUnionOptimizerTest {
         UnionNode unionNode3 = IQ_FACTORY.createUnionNode(ImmutableSet.of(X, Y, Z));
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
-        ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE1_AR2, X, Y));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE3_AR2, X, Y));
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE5_AR3, X, Y, Z));
+        ExtensionalDataNode dataNode1 = createExtensionalDataNode(TABLE1_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom1, constructionNode1);
         queryBuilder1.addChild(constructionNode1, unionNode1);
@@ -239,20 +221,16 @@ public class FlattenUnionOptimizerTest {
 
         queryBuilder2.init(projectionAtom1, unionNode1);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE1_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(unionNode1, innerJoinNode);
         queryBuilder2.addChild(innerJoinNode, dataNode2);
         queryBuilder2.addChild(innerJoinNode, unionNode2);
         queryBuilder2.addChild(unionNode2, IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X, 1, Y)));
+                TABLE4_AR3, ImmutableMap.of(0, X, 1, Y)));
         queryBuilder2.addChild(unionNode2, IQ_FACTORY.createExtensionalDataNode(
-                TABLE5_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X, 1, Y)));
+                TABLE5_AR3, ImmutableMap.of(0, X, 1, Y)));
         queryBuilder2.addChild(unionNode2, IQ_FACTORY.createExtensionalDataNode(
-                TABLE3_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X, 1, Y)));
+                TABLE3_AR2, ImmutableMap.of(0, X, 1, Y)));
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" + query2);
@@ -271,15 +249,11 @@ public class FlattenUnionOptimizerTest {
         InnerJoinNode innerJoinNode = IQ_FACTORY.createInnerJoinNode();
 
         ExtensionalDataNode dataNode1 = IQ_FACTORY.createExtensionalDataNode(
-                TABLE1_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X));
-        ExtensionalDataNode dataNode2 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom(TABLE2_AR2, X, Y));
-        ExtensionalDataNode dataNode3 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE3_AR2, X, Y));
-        ExtensionalDataNode dataNode4 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE4_AR3, X, Y, Z));
-        ExtensionalDataNode dataNode5 = IQ_FACTORY.createExtensionalDataNode(ATOM_FACTORY.getDataAtom
-                (TABLE5_AR3, X, Y, Z));
+                TABLE1_AR2, ImmutableMap.of(0, X));
+        ExtensionalDataNode dataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode3 = createExtensionalDataNode(TABLE3_AR2, ImmutableList.of(X, Y));
+        ExtensionalDataNode dataNode4 = createExtensionalDataNode(TABLE4_AR3, ImmutableList.of(X, Y, Z));
+        ExtensionalDataNode dataNode5 = createExtensionalDataNode(TABLE5_AR3, ImmutableList.of(X, Y, Z));
 
         queryBuilder1.init(projectionAtom1, unionNode1);
         queryBuilder1.addChild(unionNode1, dataNode1);
@@ -303,12 +277,10 @@ public class FlattenUnionOptimizerTest {
         queryBuilder2.addChild(unionNode1, dataNode1);
         queryBuilder2.addChild(unionNode1, innerJoinNode);
         queryBuilder2.addChild(unionNode1, IQ_FACTORY.createExtensionalDataNode(
-                TABLE2_AR2.getRelationDefinition(),
-                ImmutableMap.of(0, X)));
+                TABLE2_AR2, ImmutableMap.of(0, X)));
         queryBuilder2.addChild(innerJoinNode, dataNode3);
         queryBuilder2.addChild(innerJoinNode, IQ_FACTORY.createExtensionalDataNode(
-                TABLE4_AR3.getRelationDefinition(),
-                ImmutableMap.of(0, X, 1, Y)));
+                TABLE4_AR3, ImmutableMap.of(0, X, 1, Y)));
 
         IntermediateQuery query2 = queryBuilder2.build();
         System.out.println("\nExpected: \n" + query2);
