@@ -100,7 +100,7 @@ public class UniqueTermTypeMappingCaster implements MappingCaster {
             ImmutableTerm newLexicalTerm = transformNestedTemporaryCasts(
                     transformTopOfLexicalTerm(uncastLexicalTerm, dbType, rdfType), childTree);
 
-            return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm);
+            return termFactory.getRDFFunctionalTerm(newLexicalTerm, rdfTypeTerm).simplify();
         }
         else if (rdfTerm instanceof RDFConstant) {
             return rdfTerm;
